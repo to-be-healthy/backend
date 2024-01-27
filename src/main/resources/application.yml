@@ -1,11 +1,13 @@
 spring:
   profiles:
-    active: real
+    active: DEV
+
   datasource:
-    url: jdbc:h2:tcp://localhost/~/test
+    url: jdbc:h2:mem:test
     username: sa
     password:
     driver-class-name: org.h2.Driver
+
   jpa:
     hibernate:
       ddl-auto: create
@@ -32,6 +34,7 @@ server:
   tomcat:
     uri-encoding: UTF-8
 
+# Spring openapi
 springdoc:
   packages-to-scan: kr.szs.pjt.presentation
   default-consumes-media-type: application/json;charset=UTF-8
