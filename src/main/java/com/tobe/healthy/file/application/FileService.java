@@ -1,6 +1,11 @@
 package com.tobe.healthy.file.application;
 
 
+import static java.io.File.separator;
+import static java.nio.file.Files.probeContentType;
+import static java.nio.file.Paths.get;
+import static org.springframework.http.HttpStatus.*;
+
 import com.tobe.healthy.file.domain.Files;
 import com.tobe.healthy.file.repository.FileRepository;
 import java.io.File;
@@ -14,8 +19,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,33 +49,27 @@ public class FileService {
 			String originalFileName = uploadFile.getOriginalFilename();    							 // 오리지날 파일명
 			String extension = originalFileName.substring(originalFileName.lastIndexOf("."));    // 파일 확장자
 			String savedFileName = UUID.randomUUID().toString();    					 			 // 저장될 파일명
-			String fileDir = getFolder();
+			String fileDir = uploadDir + separator;
 
-			savedFile = Files.create(savedFileName, originalFileName, extension, fileDir + "/", uploadFile.getSize(), 0);
-			uploadFile.transferTo(new File(fileDir + "/" + savedFileName));
+			savedFile = Files.create(savedFileName, originalFileName, extension, fileDir, uploadFile.getSize(), 0);
+			uploadFile.transferTo(new File(fileDir + savedFileName + extension));
 		}
 		return fileRepository.save(savedFile).getId();
 
 	}
 
 	@Transactional
-	public Resource retrieveFile(Long fileId) throws Exception {
-		Files files = fileRepository.findById(fileId).orElse(null);
-		Path path = Paths.get(files.getFilePath()).resolve(files.getFilePath());
-		Resource resource = new UrlResource(path.toUri());
-		log.info("resource = {}", resource);
-		log.info("path = {}", path);
-		return resource;
-	}
+	public ResponseEntity<?> retrieveFile(Long fileId) throws Exception {
+		Files files = fileRepository.findById(fileId)
+			.orElseThrow(() -> new IllegalArgumentException("저장된 파일이 없습니다."));
 
-	private String getFolder() throws IOException {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-		Date date = new Date();
-		String str = uploadDir + "/" + sdf.format(date);
-		File folder = new File(str);
-		if (!folder.exists()) {
-			FileUtils.forceMkdir(folder);
-		}
-		return str;
+		String path = files.getFilePath() + files.getFileName() + files.getExtension();
+		Resource resource = new FileSystemResource(path);
+
+		HttpHeaders httpHeaders = new HttpHeaders();
+		Path filePath = get(path);
+		httpHeaders.add("Content-Type", probeContentType(filePath));
+
+		return new ResponseEntity<>(resource, httpHeaders, OK);
 	}
 }

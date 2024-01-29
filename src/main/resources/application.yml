@@ -36,7 +36,7 @@ server:
 
 file:
   upload:
-    location: /upload # 로컬 실행시 변경
+    location: /Users/seonwoo_jung/upload # 로컬 실행시 변경
 
 # Spring openapi
 springdoc:

@@ -2,8 +2,6 @@ package com.tobe.healthy.file.presentation;
 
 import com.tobe.healthy.file.application.FileService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,11 +18,8 @@ public class FileController {
 	private final FileService fileService;
 
 	@GetMapping("/display")
-	public ResponseEntity<Resource> retrieveFile(@RequestParam("fileId") Long fileId) throws Exception {
-		Resource result = fileService.retrieveFile(fileId);
-		return ResponseEntity.ok()
-			.contentType(MediaType.valueOf("image/png"))
-			.body(result);
+	public ResponseEntity<?> retrieveFile(@RequestParam("fileId") Long fileId) throws Exception {
+		return fileService.retrieveFile(fileId);
 	}
 
 	@PostMapping("/upload")
