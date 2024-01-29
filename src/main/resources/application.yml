@@ -21,7 +21,7 @@ logging.level:
   org.hibernate.type: trace
 
 jwt:
-  secret: c2Vvbndvb19qdW5nDQo=c2Vvbndvb19qdW5nDQo=c2Vvbndvb19qdW5nDQo=
+  secret: YP/7oEXp2DRFZYxUm7eYBbIlBMpApIhPcYGtDStbtDI=
   access-token-valid-seconds: 7200    # 2 hour
   refresh-token-valid-seconds: 604800 # 7 day
 
@@ -33,6 +33,10 @@ server:
       force: true
   tomcat:
     uri-encoding: UTF-8
+
+file:
+  upload:
+    location: /upload # 로컬 실행시 변경
 
 # Spring openapi
 springdoc:
