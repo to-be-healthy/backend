@@ -3,7 +3,7 @@ package com.tobe.healthy.member.domain.entity;
 import static lombok.AccessLevel.PROTECTED;
 
 import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.file.domain.Files;
+import com.tobe.healthy.file.domain.entity.Files;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
