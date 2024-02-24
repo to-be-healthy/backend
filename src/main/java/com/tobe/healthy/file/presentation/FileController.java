@@ -1,5 +1,6 @@
 package com.tobe.healthy.file.presentation;
 
+import com.tobe.healthy.file.domain.dto.in.FileRegisterCommand;
 import com.tobe.healthy.file.application.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +24,8 @@ public class FileController {
 	}
 
 	@PostMapping("/upload")
-	public ResponseEntity<Long> registerFile(@RequestParam("file") MultipartFile file) throws Exception {
-		Long result = fileService.uploadFile(file);
+	public ResponseEntity<Long> registerFile(@RequestParam("file") MultipartFile file, FileRegisterCommand request) throws Exception {
+		Long result = fileService.uploadFile(file, request);
 		return ResponseEntity.ok(result);
 	}
 }

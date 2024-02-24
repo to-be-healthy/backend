@@ -1,4 +1,4 @@
-package com.tobe.healthy.file.domain;
+package com.tobe.healthy.file.domain.entity;
 
 import static lombok.AccessLevel.PROTECTED;
 
