@@ -1,5 +1,6 @@
 package com.tobe.healthy.file.domain.entity;
 
+import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 import com.tobe.healthy.common.BaseTimeEntity;
@@ -18,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class Files extends BaseTimeEntity<Files, Long> {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = IDENTITY)
 	@Column(name = "files_id")
 	private Long id;
 
