@@ -3,10 +3,10 @@ spring:
     active: DEV
 
   datasource:
-    url: jdbc:h2:mem:test
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
@@ -21,9 +21,9 @@ logging.level:
   org.hibernate.type: trace
 
 jwt:
-  secret: YP/7oEXp2DRFZYxUm7eYBbIlBMpApIhPcYGtDStbtDI=
-  access-token-valid-seconds: 7200    # 2 hour
-  refresh-token-valid-seconds: 604800 # 7 day
+  secret: ${JWT_SECRET_TOKEN}
+  access-token-valid-seconds: ${JWT_ACCESS_TOKEN_VALID_SECONDS}
+  refresh-token-valid-seconds: ${JWT_REFRESH_TOKEN_VALID_SECONDS}
 
 server:
   servlet:
@@ -40,7 +40,7 @@ file:
 
 # Spring openapi
 springdoc:
-  packages-to-scan: kr.szs.pjt.presentation
+  packages-to-scan: com.tobe.healthy
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
   swagger-ui:

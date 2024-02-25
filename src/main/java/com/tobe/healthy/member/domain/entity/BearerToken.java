@@ -14,8 +14,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = PROTECTED)
 public class BearerToken {
-    public static final String ACCESS_TOKEN_CACHE_KEY = "access.token";
-
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "bearer_token_id")

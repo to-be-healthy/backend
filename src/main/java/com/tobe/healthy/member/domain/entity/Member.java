@@ -1,5 +1,6 @@
 package com.tobe.healthy.member.domain.entity;
 
+import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 import com.tobe.healthy.common.BaseTimeEntity;
@@ -17,7 +18,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 public class Member extends BaseTimeEntity<Member, Long> {
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
     @Column(name = "member_id")
     private Long id;
     private String email;
