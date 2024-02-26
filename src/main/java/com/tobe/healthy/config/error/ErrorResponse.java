@@ -1,12 +1,14 @@
 package com.tobe.healthy.config.error;
 
-import java.time.LocalDateTime;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
+import static lombok.AccessLevel.PROTECTED;
+
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = PROTECTED)
 public class ErrorResponse {
     private String message;
     private String code;

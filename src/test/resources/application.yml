@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: DEV
+    active: TEST
 
   datasource:
     url: jdbc:mysql://localhost:3306/study
@@ -22,9 +22,9 @@ logging.level:
   org.hibernate.type: trace
 
 jwt:
-  secret: ${JWT_SECRET_TOKEN}
-  access-token-valid-seconds: ${JWT_ACCESS_TOKEN_VALID_SECONDS}
-  refresh-token-valid-seconds: ${JWT_REFRESH_TOKEN_VALID_SECONDS}
+  secret: c2Vvbndvb19qdW5nDQo\=c2Vvbndvb19qdW5nDQo\=c2Vvbndvb19qdW5nDQo\=
+  access-token-valid-seconds: 7200
+  refresh-token-valid-seconds: 604800
 
 server:
   servlet:

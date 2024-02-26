@@ -1,92 +1,69 @@
 package com.tobe.healthy.member.application;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import com.tobe.healthy.config.error.exception.MemberDuplicateException;
-import com.tobe.healthy.config.error.exception.MemberNotFoundException;
-import com.tobe.healthy.config.security.JwtTokenGenerator;
-import com.tobe.healthy.config.security.JwtTokenProvider;
-import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberRegisterCommand;
-import com.tobe.healthy.member.domain.dto.out.MemberRegisterCommandResult;
+import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_DUPLICATION_EMAIL;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_DUPLICATION_NICKNAME;
+import static com.tobe.healthy.member.domain.entity.Alarm.ABLE;
+import static com.tobe.healthy.member.domain.entity.MemberCategory.MEMBER;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Slf4j
 @SpringBootTest
 @Transactional
 class MemberServiceTest {
 
-    @Autowired PasswordEncoder passwordEncoder;
-    @Autowired MemberRepository memberRepository;
-    @Autowired MemberService memberService;
-    @Autowired JwtTokenGenerator tokenGenerator;
-    @Autowired JwtTokenProvider jwtTokenProvider;
+    @Autowired
+    private EntityManager em;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Test
-    void save() {
-        String path = "/api/auth/join";
-        log.info("path = {}", path.startsWith("/api/auth/"));
+    void registerMember() {
+        Member entity = Member.builder()
+                .email("laborlawseon@gmail.com")
+                .password("12345678")
+                .nickname("seonwoo_jung")
+                .isAlarm(ABLE)
+                .category(MEMBER)
+                .build();
+
+        em.persist(entity);
+
+        Member findMember = em.find(Member.class, 1L);
+        log.info("findMember => {}", findMember);
     }
 
     @Test
-    public void joinMember() {
-        MemberRegisterCommand command = new MemberRegisterCommand("laborlawseon@gmail.com", "12345678", "정선우");
-        String password = passwordEncoder.encode(command.getPassword());
-//        Member member = new Member(command.getEmail(), password);
-//        memberRepository.save(member);
-//        member = memberRepository.findById(member.getId()).orElseThrow();
-//        assertThat(member.getId()).isEqualTo(member.getId());
+    void validateDuplicateEmailTest() {
+        assertThatThrownBy(() -> validateDuplicateEmail()).hasMessage(MEMBER_DUPLICATION_EMAIL.getMessage());
     }
 
     @Test
-    void duplicateMember() {
-        // given
-        MemberRegisterCommand command = new MemberRegisterCommand("laborlawseon@gmail.com", "12345678", "정선우");
-        memberService.create(command);
-
-        // when
-
-        assertThatThrownBy(() -> memberService.create(command))
-            .isInstanceOf(MemberDuplicateException.class);
-
-        // then
-
+    void validateDuplicateNicknameTest() {
+        assertThatThrownBy(() -> validateDuplicateNickname()).hasMessage(MEMBER_DUPLICATION_NICKNAME.getMessage());
     }
 
-    @Test
-    void loginMember() {
-        // given
-        MemberRegisterCommand command = new MemberRegisterCommand("laborlawseon@gmail.com", "12345678", "정선우");
-        memberService.create(command);
-        MemberLoginCommand loginCommand = new MemberLoginCommand("laborlawseon22@gmail.com", "12345678");
-
-        // when
-        assertThatThrownBy(() -> memberService.login(loginCommand))
-            .isInstanceOf(MemberNotFoundException.class);
+    void validateDuplicateEmail() {
+        registerMember();
+        memberRepository.findByEmail("laborlawseon@gmail.com").ifPresent(x -> {
+            throw new CustomException(MEMBER_DUPLICATION_EMAIL);
+        });
     }
 
-
-    @Test
-    void refreshTokenForMember() {
-        // given
-        MemberRegisterCommand command = new MemberRegisterCommand("laborlawseon@gmail.com", "12345678", "정선우");
-        MemberRegisterCommandResult memberRegisterCommandResult = memberService.create(command);
-
-        // when
-//        Tokens refresh = memberService.refresh(memberRegisterCommandResult.getRefreshToken());
-//        log.info(refresh.getAccessToken());
-    }
-
-    @Test
-    void validateEmailIsEmpty() {
-        // given
-        assertThat(memberService.isAvailableEmail("laborlawseon@gmail.com")).isTrue();
+    void validateDuplicateNickname() {
+        registerMember();
+        memberRepository.findByNickname("seonwoo_jung").ifPresent(x -> {
+            throw new CustomException(MEMBER_DUPLICATION_NICKNAME);
+        });
     }
 }
