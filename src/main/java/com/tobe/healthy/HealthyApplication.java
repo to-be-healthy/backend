@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 // Spring Security 임시 끄기
 @SpringBootApplication(exclude = SecurityAutoConfiguration.class)
 public class HealthyApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(HealthyApplication.class, args);
     }
