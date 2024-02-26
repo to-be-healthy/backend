@@ -1,0 +1,51 @@
+spring:
+  profiles:
+    active: TEST
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/study
+    username: root
+    password: tiger
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+
+logging.level:
+  org.hibernate.SQL: debug
+  org.hibernate.type: trace
+
+jwt:
+  secret: c2Vvbndvb19qdW5nDQo\=c2Vvbndvb19qdW5nDQo\=c2Vvbndvb19qdW5nDQo\=
+  access-token-valid-seconds: 7200
+  refresh-token-valid-seconds: 604800
+
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  tomcat:
+    uri-encoding: UTF-8
+
+file:
+  upload:
+    location: /Users/seonwoo_jung/upload # 로컬 실행시 변경
+
+# Spring openapi
+springdoc:
+  packages-to-scan: com.tobe.healthy
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+  swagger-ui:
+    path: /
+    disable-swagger-default-url: true
+    display-request-duration: true
+    operations-sorter: alpha

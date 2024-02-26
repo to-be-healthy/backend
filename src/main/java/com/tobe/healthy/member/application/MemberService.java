@@ -1,10 +1,12 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.member.domain.dto.out.MemberRegisterCommandResult.from;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_DUPLICATION_EMAIL;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_DUPLICATION_NICKNAME;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_EXPIRED;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 
-import com.tobe.healthy.config.error.exception.CustomIllegalArgumentException;
-import com.tobe.healthy.config.error.exception.MemberDuplicateException;
-import com.tobe.healthy.config.error.exception.MemberNotFoundException;
+import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.config.security.JwtTokenProvider;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
@@ -16,7 +18,6 @@ import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.BearerTokenRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,20 +37,14 @@ public class MemberService {
 
     @Transactional
     public MemberRegisterCommandResult create(MemberRegisterCommand request) {
-        validateMember(request);
-        String password = passwordEncoder.encode(request.getPassword());
-        Member member = Member.create(request.getEmail(), password, request.getNickname());
-        memberRepository.save(member);
-        member = memberRepository.findById(member.getId())
-            .orElseThrow(() -> new CustomIllegalArgumentException("회원가입중 오류가 발생하였습니다."));
-        return from(member);
-    }
+        validateDuplicateEmail(request);
+        validateDuplicateNickname(request);
 
-    private void validateMember(MemberRegisterCommand request) {
-        Optional<Member> member = memberRepository.findByEmail(request.getEmail());
-        if (member.isPresent()) {
-            throw new MemberDuplicateException("중복된 이메일이 존재합니다.");
-        }
+        String password = passwordEncoder.encode(request.getPassword());
+        Member member = Member.create(request, password);
+        memberRepository.save(member);
+
+        return MemberRegisterCommandResult.of(member);
     }
 
     @Transactional
@@ -57,7 +52,7 @@ public class MemberService {
         return memberRepository.findByEmail(request.getEmail())
             .filter(member -> passwordEncoder.matches(request.getPassword(), member.getPassword()))
             .map(tokenGenerator::create)
-            .orElseThrow(() -> new MemberNotFoundException("이메일 또는 비밀번호를 잘못 입력하셨습니다."));
+            .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
     }
 
     @Transactional
@@ -65,20 +60,32 @@ public class MemberService {
         try {
             tokenProvider.decode(refreshToken);
         } catch (ExpiredJwtException e) {
-            throw new ExpiredJwtException(e.getHeader(), e.getClaims(), "Refresh token was expired.", e);
+            throw new CustomException(REFRESH_TOKEN_EXPIRED);
         }
 
-        BearerToken token = bearerTokenRepository.findByRefreshToken(refreshToken)
-            .orElseThrow(() -> new IllegalArgumentException("Could not find refresh token."));
+        BearerToken token = bearerTokenRepository.findByRefreshToken(refreshToken).orElseThrow(
+            () -> new CustomException(REFRESH_TOKEN_NOT_FOUND));
 
         Long memberId = token.getMemberId();
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(()-> new IllegalArgumentException("Not Found User"));
+        Member member = memberRepository.findById(memberId).orElseThrow(
+            ()-> new CustomException(MEMBER_NOT_FOUND));
 
         return tokenGenerator.create(member);
     }
 
     public Boolean isAvailableEmail(String email) {
         return memberRepository.findByEmail(email).isEmpty();
+    }
+
+    private void validateDuplicateEmail(MemberRegisterCommand request) {
+        memberRepository.findByEmail(request.getEmail()).ifPresent(m -> {
+            throw new CustomException(MEMBER_DUPLICATION_EMAIL);
+        });
+    }
+
+    private void validateDuplicateNickname(MemberRegisterCommand request) {
+        memberRepository.findByNickname(request.getNickname()).ifPresent(m -> {
+            throw new CustomException(MEMBER_DUPLICATION_NICKNAME);
+        });
     }
 }
