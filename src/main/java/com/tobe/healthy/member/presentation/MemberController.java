@@ -28,7 +28,6 @@ public class MemberController {
 
     @GetMapping("/code/kakao")
     public ResponseEntity<?> oauth(MemberOauthCommandRequest request) {
-        log.info("request => " + request);
         return ResponseEntity.ok(memberService.getAccessToken(request.getCode()));
     }
 

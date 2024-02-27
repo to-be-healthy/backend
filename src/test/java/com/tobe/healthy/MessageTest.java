@@ -1,6 +1,7 @@
 package com.tobe.healthy;
 
-import java.util.UUID;
+import static com.tobe.healthy.member.domain.entity.Oauth.KAKAO_TOKEN_URL;
+
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
@@ -10,8 +11,7 @@ public class MessageTest {
 	@Test
 	void generateUUID() {
 	    // given
-		String number = UUID.randomUUID().toString();
-		int result = (int) (Math.random() * 899999) + 100000;
-		log.info("UUID = {}", result);
+		log.info(KAKAO_TOKEN_URL.getCode());
+		log.info(KAKAO_TOKEN_URL.getDescription());
 	}
 }

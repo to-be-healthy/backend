@@ -39,11 +39,11 @@ public class QMember extends EntityPathBase<Member> {
 
     public final EnumPath<Alarm> isAlarm = createEnum("isAlarm", Alarm.class);
 
+    public final StringPath mobileNum = createString("mobileNum");
+
     public final StringPath nickname = createString("nickname");
 
     public final StringPath password = createString("password");
-
-    public final StringPath phoneNumber = createString("phoneNumber");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;

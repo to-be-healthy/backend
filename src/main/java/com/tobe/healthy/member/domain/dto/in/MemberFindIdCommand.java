@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MemberFindIdCommand {
 	@NotEmpty(message = "휴대폰번호를 입력해 주세요.")
-	private String phoneNumber;
+	private String mobileNum;
 
 	@NotEmpty(message = "닉네임을 입력해 주세요.")
 	private String nickname;
