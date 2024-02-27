@@ -31,7 +31,7 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath email = createString("email");
 
-    public final com.tobe.healthy.file.domain.entity.QFiles files;
+    public final com.tobe.healthy.file.domain.entity.QFileInfo fileInfo;
 
     public final QGym gym;
 
@@ -66,7 +66,7 @@ public class QMember extends EntityPathBase<Member> {
 
     public QMember(Class<? extends Member> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.files = inits.isInitialized("files") ? new com.tobe.healthy.file.domain.entity.QFiles(forProperty("files"), inits.get("files")) : null;
+        this.fileInfo = inits.isInitialized("fileInfo") ? new com.tobe.healthy.file.domain.entity.QFileInfo(forProperty("fileInfo"), inits.get("fileInfo")) : null;
         this.gym = inits.isInitialized("gym") ? new QGym(forProperty("gym"), inits.get("gym")) : null;
     }
 

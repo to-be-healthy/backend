@@ -30,9 +30,6 @@ class MemberServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private MemberService2 memberService2;
-
     @Test
     @Rollback(false)
     @DisplayName("회원을 등록한다.")
@@ -96,7 +93,7 @@ class MemberServiceTest {
     @Test
     void oauthTest() {
         // given
-        memberService2.getAccessToken("");
+//        memberService2.getAccessToken("");
 
         // when
 

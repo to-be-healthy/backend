@@ -16,11 +16,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = PROTECTED)
 @Getter
-public class Files extends BaseTimeEntity<Files, Long> {
+public class FileInfo extends BaseTimeEntity<FileInfo, Long> {
 
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
-	@Column(name = "files_id")
+	@Column(name = "file_info_id")
 	private Long id;
 
 	private String fileName;
@@ -30,7 +30,7 @@ public class Files extends BaseTimeEntity<Files, Long> {
 	@Column(name = "file_ext")
 	private String extension;
 
-	@OneToOne(mappedBy = "files")
+	@OneToOne(mappedBy = "fileInfo")
 	private Member member;
 
 	private String filePath;
@@ -39,14 +39,14 @@ public class Files extends BaseTimeEntity<Files, Long> {
 
 	private Integer fileCnt;
 
-	public static Files create(String savedFileName, String originalName, String extension, String filePath, long fileSize, Integer fileCnt) {
-		Files files = new Files();
-		files.fileName = savedFileName;
-		files.originalName = originalName;
-		files.extension = extension;
-		files.filePath = filePath;
-		files.fileSize = fileSize;
-		files.fileCnt = fileCnt;
-		return files;
+	public static FileInfo create(String savedFileName, String originalName, String extension, String filePath, long fileSize, Integer fileCnt) {
+		FileInfo entity = new FileInfo();
+		entity.fileName = savedFileName;
+		entity.originalName = originalName;
+		entity.extension = extension;
+		entity.filePath = filePath;
+		entity.fileSize = fileSize;
+		entity.fileCnt = fileCnt;
+		return entity;
 	}
 }

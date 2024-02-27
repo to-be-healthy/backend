@@ -31,11 +31,13 @@ public class MemberController {
         return ResponseEntity.ok(memberService.getAccessToken(request.getCode()));
     }
 
+    // 문자 인증번호 요청
     @PostMapping("/send")
     public ResponseEntity<String> send(@RequestParam(value = "mobileNum") String mobileNum) {
         return ResponseEntity.ok(memberService.sendAuthenticationNumber(mobileNum));
     }
 
+    // 문자 인증번호 검증
     @PostMapping("/verification")
     public ResponseEntity<Boolean> checkAuthenticationNumber(@RequestParam(value = "mobileNum") String mobileNum,
                                                              @RequestParam(value = "verificationNum") String verificationNum) {
@@ -62,8 +64,13 @@ public class MemberController {
         return ResponseEntity.ok(memberService.isAvailableEmail(email));
     }
 
-    @PostMapping("/find")
+    @PostMapping("/find-id")
     public ResponseEntity<String> findMemberId(@RequestBody @Valid MemberFindIdCommand request) {
         return ResponseEntity.ok(memberService.findMemberId(request));
+    }
+
+    @PostMapping("/find-pw")
+    public ResponseEntity<String> findMemberPW(@RequestBody @Valid MemberFindPWCommand request) {
+        return ResponseEntity.ok(memberService.findMemberPW(request));
     }
 }

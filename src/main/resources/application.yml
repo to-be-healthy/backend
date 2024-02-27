@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
@@ -70,6 +70,8 @@ file:
             token-uri: https://kauth.kakao.com/oauth/token # "토큰 받기" 항목
             user-info-uri: https://kapi.kakao.com/v2/user/me # "사용자 정보 가져오기" 항목
             user-name-attribute: id # 식별자 . 카카오의 경우 "id" 사용
+      # kakao 소셜 로그인
+    # https://kauth.kakao.com/oauth/authorize?client_id=b744b34e90d30c3a0ff41ad4ade070f7&redirect_uri=http://localhost:8080/api/auth/code/kakao&response_type=code
 
 # Spring openapi
 springdoc:

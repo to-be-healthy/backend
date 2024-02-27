@@ -27,13 +27,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.httpBasic(AbstractHttpConfigurer::disable)
                     .cors(AbstractHttpConfigurer::disable)
-                    .formLogin(AbstractHttpConfigurer::disable)
                     .csrf(AbstractHttpConfigurer::disable)
-                    .sessionManagement(session -> session
-                    .sessionCreationPolicy(STATELESS))
+                    .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                     .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint))
                     .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers("/**").permitAll()
+                        authorize -> authorize.requestMatchers("file/**", "/api/**").permitAll()
                             .anyRequest().hasRole("MEMBER")
 //                        authorize -> authorize.requestMatchers("/api/auth/**", "/favicon.ico", "/file/**").permitAll()
 //                                              .anyRequest().hasRole("MEMBER")

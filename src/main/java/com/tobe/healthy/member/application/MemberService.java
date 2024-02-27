@@ -13,7 +13,6 @@ import static com.tobe.healthy.member.domain.entity.Oauth.REDIRECT_URL;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tobe.healthy.common.message.APIInit;
 import com.tobe.healthy.common.message.model.request.Message;
 import com.tobe.healthy.common.message.model.response.MessageModel;
@@ -23,17 +22,19 @@ import com.tobe.healthy.config.security.JwtTokenProvider;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberRegisterCommand;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.member.domain.dto.out.MemberRegisterCommandResult;
 import com.tobe.healthy.member.domain.entity.BearerToken;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.member.presentation.MemberFindPWCommand;
 import com.tobe.healthy.member.repository.BearerTokenRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -104,12 +105,10 @@ public class MemberService {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(APPLICATION_FORM_URLENCODED);
 
-		HttpEntity<MultiValueMap<String, String>> requestEntity = getMultiValueMapHttpEntity(
-			authCode, headers);
+		HttpEntity<MultiValueMap<String, String>> requestEntity = getMultiValueMapHttpEntity(authCode, headers);
 
 		// POST 요청 보내기
-		ResponseEntity<OAuthInfo> responseEntity = restTemplate.postForEntity(
-			KAKAO_TOKEN_URL.getDescription(), requestEntity, OAuthInfo.class);
+		ResponseEntity<OAuthInfo> responseEntity = restTemplate.postForEntity(KAKAO_TOKEN_URL.getDescription(), requestEntity, OAuthInfo.class);
 
 		if (responseEntity.getStatusCode().is2xxSuccessful()) {
 			OAuthInfo body = responseEntity.getBody();
@@ -118,8 +117,7 @@ public class MemberService {
 			HttpHeaders header = new HttpHeaders();
 			header.set("Authorization", "Bearer " + body.getAccessToken());
 			HttpEntity httpEntity = new HttpEntity(header);
-			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange(
-				"https://kapi.kakao.com/v2/user/me", GET, httpEntity, KakaoUserInfo.class);
+			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange("https://kapi.kakao.com/v2/user/me", GET, httpEntity, KakaoUserInfo.class);
 			KakaoUserInfo dto = entity.getBody();
 			log.info("dto => {}", dto);
 		}
@@ -209,77 +207,11 @@ public class MemberService {
 		return false;
 	}
 
-	@Data
-	static class OAuthInfo {
+	public String findMemberPW(MemberFindPWCommand request) {
+		Member entity = memberRepository.findByMobileNumAndEmail(request.getMobileNum(), request.getEmail())
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		sendAuthenticationNumber(entity.getMobileNum());
 
-		@JsonProperty("access_token")
-		private String accessToken;
-
-		@JsonProperty("token_type")
-		private String tokenType;
-
-		@JsonProperty("refresh_token")
-		private String refreshToken;
-
-		@JsonProperty("expires_in")
-		private int expiresIn;
-
-		private String scope;
-
-		@JsonProperty("refresh_token_expires_in")
-		private int refreshTokenExpiresIn;
-	}
-
-	@Data
-	static class KakaoUserInfo {
-
-		private Long id;
-
-		@JsonProperty("connected_at")
-		private String connectedAt;
-
-		private Properties properties;
-
-		@JsonProperty("kakao_account")
-		private KakaoAccount kakaoAccount;
-
-		@Data
-		public static class Properties {
-
-			private String nickname;
-
-			@JsonProperty("profile_image")
-			private String profileImage;
-
-			@JsonProperty("thumbnail_image")
-			private String thumbnailImage;
-		}
-
-		@Data
-		public static class KakaoAccount {
-
-			@JsonProperty("profile_nickname_needs_agreement")
-			private boolean profileNicknameNeedsAgreement;
-
-			@JsonProperty("profile_image_needs_agreement")
-			private boolean profileImageNeedsAgreement;
-
-			private Profile profile;
-		}
-
-		@Data
-		public static class Profile {
-
-			private String nickname;
-
-			@JsonProperty("thumbnail_image_url")
-			private String thumbnailImageUrl;
-
-			@JsonProperty("profile_image_url")
-			private String profileImageUrl;
-
-			@JsonProperty("is_default_image")
-			private boolean isDefaultImage;
-		}
+		return entity.getMobileNum();
 	}
 }
