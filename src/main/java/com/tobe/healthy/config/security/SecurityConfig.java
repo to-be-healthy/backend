@@ -33,9 +33,10 @@ public class SecurityConfig {
                     .sessionCreationPolicy(STATELESS))
                     .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint))
                     .authorizeHttpRequests(
-						// file 임시 추가
-                        authorize -> authorize.requestMatchers("/api/auth/**", "/favicon.ico", "/file/**").permitAll()
-                                              .anyRequest().hasRole("MEMBER")
+                        authorize -> authorize.requestMatchers("/**").permitAll()
+                            .anyRequest().hasRole("MEMBER")
+//                        authorize -> authorize.requestMatchers("/api/auth/**", "/favicon.ico", "/file/**").permitAll()
+//                                              .anyRequest().hasRole("MEMBER")
                     )
                     .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                     .build();

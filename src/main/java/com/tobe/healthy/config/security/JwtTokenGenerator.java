@@ -1,8 +1,9 @@
 package com.tobe.healthy.config.security;
 
+import static com.tobe.healthy.config.error.ErrorCode.ACCESS_TOKEN_NOT_FOUND;
 import static java.lang.String.valueOf;
 
-import com.tobe.healthy.config.error.exception.MemberTokenNotFoundException;
+import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.BearerToken;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
@@ -49,13 +50,15 @@ public class JwtTokenGenerator {
 
     public Tokens exchangeAccessToken(Member member, String accessToken) {
         BearerToken token = bearerTokenRepository.findByAccessToken(accessToken)
-                .orElseThrow(() -> new MemberTokenNotFoundException("accessToken not found. token : " + accessToken));
+                .orElseThrow(() -> new CustomException(ACCESS_TOKEN_NOT_FOUND));
+
         long nowInMilliseconds = new Date().getTime();
         String changedAccessToken = createAccessToken(
                 valueOf(member.getId()),
                 member.getEmail(),
                 "ROLE_MEMBER",
                 new Date(nowInMilliseconds + accessTokenValidSeconds * 1000));
+
         token.exchangeAccessToken(changedAccessToken);
         bearerTokenRepository.save(token);
         return new Tokens(changedAccessToken, token.getRefreshToken());

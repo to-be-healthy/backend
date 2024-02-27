@@ -1,7 +1,9 @@
 package com.tobe.healthy.member.domain.entity;
 
 import static com.tobe.healthy.member.domain.entity.Alarm.ABLE;
+import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -38,7 +40,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
     private String nickname;
 
-    @OneToOne
+    @OneToOne(fetch = LAZY, cascade = ALL)
     @JoinColumn(name = "files_id")
     private Files files;
 
@@ -48,6 +50,12 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @Enumerated(STRING)
     private MemberCategory category;
 
+    private String mobileNum;
+
+    @OneToOne(fetch = LAZY, cascade = ALL)
+    @JoinColumn(name = "gym_id")
+    private Gym gym;
+
     public static Member create(MemberRegisterCommand request, String password) {
         Member member = new Member();
         member.email = request.getEmail();
@@ -55,6 +63,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
         member.nickname = request.getNickname();
         member.isAlarm = ABLE;
         member.category = request.getCategory();
+        member.mobileNum = request.getMobileNum();
         return member;
     }
 }

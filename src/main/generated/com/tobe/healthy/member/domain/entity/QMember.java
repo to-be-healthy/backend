@@ -24,20 +24,26 @@ public class QMember extends EntityPathBase<Member> {
 
     public final com.tobe.healthy.common.QBaseTimeEntity _super = new com.tobe.healthy.common.QBaseTimeEntity(this);
 
+    public final EnumPath<MemberCategory> category = createEnum("category", MemberCategory.class);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final StringPath email = createString("email");
 
-    public final com.tobe.healthy.file.domain.QFiles files;
+    public final com.tobe.healthy.file.domain.entity.QFiles files;
+
+    public final QGym gym;
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    public final EnumPath<Alarm> isAlarm = createEnum("isAlarm", Alarm.class);
 
     public final StringPath nickname = createString("nickname");
 
     public final StringPath password = createString("password");
 
-    public final StringPath profileId = createString("profileId");
+    public final StringPath phoneNumber = createString("phoneNumber");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
@@ -60,7 +66,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public QMember(Class<? extends Member> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.files = inits.isInitialized("files") ? new com.tobe.healthy.file.domain.QFiles(forProperty("files"), inits.get("files")) : null;
+        this.files = inits.isInitialized("files") ? new com.tobe.healthy.file.domain.entity.QFiles(forProperty("files"), inits.get("files")) : null;
+        this.gym = inits.isInitialized("gym") ? new QGym(forProperty("gym"), inits.get("gym")) : null;
     }
 
 }

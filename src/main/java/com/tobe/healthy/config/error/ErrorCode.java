@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
-	MEMBER_NOT_FOUND(400, "C_000", "이메일 또는 비밀번호를 잘못 입력하셨습니다."),
+	MEMBER_NOT_FOUND(400, "C_000", "회원이 존재하지 않습니다."),
 	MEMBER_DUPLICATION_EMAIL(401, "C_001", "중복된 이메일이 존재합니다."),
 	MEMBER_DUPLICATION_NICKNAME(405, "C_005", "중복된 닉네임이 존재합니다."),
 	ACCESS_TOKEN_EXPIRED(402, "C_002", "토큰이 만료되었습니다."),

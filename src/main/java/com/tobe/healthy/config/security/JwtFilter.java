@@ -25,17 +25,13 @@ public class JwtFilter extends OncePerRequestFilter {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    // Request로 들어오는 JwtToken의 유효성을 검증(jwtTokenProvider.validateToken)하는 filter을 filter chain에 등록한다.
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
             String path = request.getServletPath();
-            log.info("path = {}", path);
-
             if (!path.startsWith("/api/auth/")) {
                 String token = jwtTokenProvider.resolveToken(request);
-                log.info("token = {}", token);
                 if (token != null && jwtTokenProvider.validateToken(token)) {
                     Authentication authentication = jwtTokenProvider.getAuthentication(token);
                     SecurityContextHolder.getContext().setAuthentication(authentication);

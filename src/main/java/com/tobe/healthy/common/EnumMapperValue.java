@@ -1,5 +1,8 @@
 package com.tobe.healthy.common;
 
+import lombok.ToString;
+
+@ToString
 public class EnumMapperValue {
 
 	private String code;
@@ -16,13 +19,5 @@ public class EnumMapperValue {
 
 	public String getDescription() {
 		return description;
-	}
-
-	@Override
-	public String toString() {
-		return "{" +
-			"code='" + code + '\'' +
-			", description='" + description + '\'' +
-			'}';
 	}
 }

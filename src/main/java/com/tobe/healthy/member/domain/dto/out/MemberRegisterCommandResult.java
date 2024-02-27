@@ -12,6 +12,7 @@ import lombok.Data;
 public class MemberRegisterCommandResult {
     private String email;
     private String nickname;
+    private String mobileNum;
     private MemberCategory category;
 
     public static MemberRegisterCommandResult of(Member member){
@@ -19,6 +20,7 @@ public class MemberRegisterCommandResult {
                 .email(member.getEmail())
                 .nickname(member.getNickname())
                 .category(member.getCategory())
+                .mobileNum(member.getMobileNum())
                 .build();
     }
 }

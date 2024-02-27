@@ -38,6 +38,39 @@ file:
   upload:
     location: /Users/seonwoo_jung/upload # 로컬 실행시 변경
 
+  mail:
+    host: smtp.naver.com
+    port: 465
+    username: s4on_woo@naver.com
+    password: 1234
+    properties:
+      debug: true
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+            trust: smtp.naver.com
+            starttls:
+              enable: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${OAUTH2-KAKAO-CLIENT-ID}
+            client-secret: ${OAUTH2-KAKAO-CLIENT-SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8080/api/auth/code/kakao
+            client-authentication-method: POST
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize # "인가 코드 받기" 항목
+            token-uri: https://kauth.kakao.com/oauth/token # "토큰 받기" 항목
+            user-info-uri: https://kapi.kakao.com/v2/user/me # "사용자 정보 가져오기" 항목
+            user-name-attribute: id # 식별자 . 카카오의 경우 "id" 사용
+
 # Spring openapi
 springdoc:
   packages-to-scan: com.tobe.healthy

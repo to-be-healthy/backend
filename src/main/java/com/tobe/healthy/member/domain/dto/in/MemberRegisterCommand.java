@@ -18,4 +18,7 @@ public class MemberRegisterCommand {
 
     @NotNull(message = "회원 구분이 필요합니다.")
     private MemberCategory category;
+
+    @NotEmpty(message = "휴대폰 번호를 입력해 주세요.")
+    private String mobileNum;
 }
