@@ -54,19 +54,6 @@ class MemberServiceTest {
     }
 
     @Test
-    void findID() {
-        // given
-
-
-        // when
-
-
-        // then
-//        assertThat();
-
-    }
-
-    @Test
     void validateDuplicateEmailTest() {
         assertThatThrownBy(() -> validateDuplicateEmail()).hasMessage(MEMBER_DUPLICATION_EMAIL.getMessage());
     }
@@ -88,15 +75,5 @@ class MemberServiceTest {
         memberRepository.findByNickname("seonwoo_jung").ifPresent(x -> {
             throw new CustomException(MEMBER_DUPLICATION_NICKNAME);
         });
-    }
-
-    @Test
-    void oauthTest() {
-        // given
-//        memberService2.getAccessToken("");
-
-        // when
-
-
     }
 }

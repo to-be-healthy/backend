@@ -47,7 +47,7 @@ public class ProfileTest {
 		log.info("copyOfLocation => {}", uploadDir + separator);
 		log.info("fileSize => " + fileSize);
 		log.info("fileName => " + fileName);
-		log.info("fileName2(확장자제외) => {}", fileName2);
+		log.info("확장자 제외 파일명 => {}", fileName2);
 		log.info("extension => {}", extension);
 	}
 }
