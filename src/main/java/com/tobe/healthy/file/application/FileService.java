@@ -4,6 +4,7 @@ package com.tobe.healthy.file.application;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_FIND_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.SERVER_ERROR;
 import static java.io.File.separator;
 import static java.nio.file.Files.probeContentType;
 import static java.nio.file.Paths.get;
@@ -18,6 +19,7 @@ import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,6 +70,28 @@ public class FileService {
 			return true;
 		}
 		return false;
+	}
+
+	public Boolean uploadFile(byte[] image, String profileImage) {
+		try {
+			String fileFullName = profileImage.substring(profileImage.lastIndexOf("/") + 1);
+
+			String extension = fileFullName.substring(fileFullName.lastIndexOf("."));
+			String savedFileName = randomUUID().toString();
+			Path copyOfLocation = Paths.get(uploadDir + separator + savedFileName + extension);
+			Files.copy(new ByteArrayInputStream(image), copyOfLocation, REPLACE_EXISTING);
+
+			// 파일의 용량 구하기
+			long fileSize = Files.size(copyOfLocation);
+
+			String fileName = fileFullName.substring(0, fileFullName.lastIndexOf("."));
+
+			Profile profile = Profile.create(savedFileName, fileName, extension, uploadDir + separator, fileSize);
+
+		} catch (IOException e) {
+			throw new CustomException(SERVER_ERROR);
+		}
+		return true;
 	}
 
 	@Transactional

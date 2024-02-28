@@ -19,7 +19,9 @@ import com.tobe.healthy.common.message.model.response.MessageModel;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.config.security.JwtTokenProvider;
+import com.tobe.healthy.file.application.FileService;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberRegisterCommand;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
@@ -28,7 +30,6 @@ import com.tobe.healthy.member.domain.dto.out.MemberRegisterCommandResult;
 import com.tobe.healthy.member.domain.entity.BearerToken;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
-import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.repository.BearerTokenRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -62,6 +63,7 @@ public class MemberService {
 	private final JwtTokenGenerator tokenGenerator;
 	private final JwtTokenProvider tokenProvider;
 	private final BearerTokenRepository bearerTokenRepository;
+	private final FileService fileService;
 	private final static Map<String, String> map = new ConcurrentHashMap<>();
 
 	public MemberRegisterCommandResult create(MemberRegisterCommand request) {
@@ -116,7 +118,9 @@ public class MemberService {
 			header.set("Authorization", "Bearer " + body.getAccessToken());
 			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange("https://kapi.kakao.com/v2/user/me", GET, new HttpEntity<>(header), KakaoUserInfo.class);
 			KakaoUserInfo dto = entity.getBody();
-			log.info("dto => {}", dto);
+
+			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(), byte[].class);
+			fileService.uploadFile(image, dto.getProperties().getProfileImage());
 		}
 
 		return null;
