@@ -1,5 +1,6 @@
 package com.tobe.healthy.member.presentation;
 
+import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
@@ -26,11 +27,6 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @GetMapping("/code/kakao")
-    public ResponseEntity<?> oauth(MemberOauthCommandRequest request) {
-        return ResponseEntity.ok(memberService.getAccessToken(request.getCode()));
-    }
-
     // 문자 인증번호 요청
     @PostMapping("/send")
     public ResponseEntity<String> send(@RequestParam(value = "mobileNum") String mobileNum) {
@@ -42,6 +38,11 @@ public class MemberController {
     public ResponseEntity<Boolean> checkAuthenticationNumber(@RequestParam(value = "mobileNum") String mobileNum,
                                                              @RequestParam(value = "verificationNum") String verificationNum) {
         return ResponseEntity.ok(memberService.checkAuthenticationNumber(mobileNum, verificationNum));
+    }
+
+    @GetMapping("/code/kakao")
+    public ResponseEntity<?> oauth(MemberOauthCommandRequest request) {
+        return ResponseEntity.ok(memberService.getAccessToken(request.getCode()));
     }
 
     @PostMapping("/join")

@@ -31,8 +31,6 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath email = createString("email");
 
-    public final com.tobe.healthy.file.domain.entity.QFileInfo fileInfo;
-
     public final QGym gym;
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
@@ -44,6 +42,8 @@ public class QMember extends EntityPathBase<Member> {
     public final StringPath nickname = createString("nickname");
 
     public final StringPath password = createString("password");
+
+    public final com.tobe.healthy.file.domain.entity.QProfile profileId;
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
@@ -66,8 +66,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public QMember(Class<? extends Member> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.fileInfo = inits.isInitialized("fileInfo") ? new com.tobe.healthy.file.domain.entity.QFileInfo(forProperty("fileInfo"), inits.get("fileInfo")) : null;
         this.gym = inits.isInitialized("gym") ? new QGym(forProperty("gym"), inits.get("gym")) : null;
+        this.profileId = inits.isInitialized("profileId") ? new com.tobe.healthy.file.domain.entity.QProfile(forProperty("profileId"), inits.get("profileId")) : null;
     }
 
 }

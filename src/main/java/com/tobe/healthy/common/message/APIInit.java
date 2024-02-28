@@ -1,23 +1,23 @@
 package com.tobe.healthy.common.message;
 
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
-import org.apache.commons.codec.binary.Hex;
-import org.ini4j.Ini;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Properties;
 import java.util.UUID;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import org.apache.commons.codec.binary.Hex;
+import org.springframework.core.io.ClassPathResource;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class APIInit {
     private static Retrofit retrofit;
@@ -25,10 +25,11 @@ public class APIInit {
     private static ImgApi imageService;
 
     public static String getHeaders() {
-        try {
-            Ini ini = new Ini(new File(APIInit.class.getResource("").getPath() + "/config.ini"));
-            String apiKey = ini.get("AUTH", "ApiKey");
-            String apiSecret = ini.get("AUTH", "ApiSecret");
+        Properties properties = new Properties();
+		try (InputStream input = new ClassPathResource("msg-api-key.properties").getInputStream()) {
+            properties.load(input);
+            String apiKey = properties.getProperty("msg-api-key");
+            String apiSecret = properties.getProperty("msg-api-secret-key");
             String salt = UUID.randomUUID().toString().replaceAll("-", "");
             String date = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toString().split("\\[")[0];
 
@@ -40,7 +41,7 @@ public class APIInit {
         } catch (InvalidKeyException | NoSuchAlgorithmException | IOException e) {
             e.printStackTrace();
         }
-        return null;
+		return null;
     }
 
     public static MsgV4 getAPI() {

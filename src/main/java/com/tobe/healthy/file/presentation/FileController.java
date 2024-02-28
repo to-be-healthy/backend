@@ -19,13 +19,13 @@ public class FileController {
 
 	private final FileService fileService;
 
-	@GetMapping("/display")
-	public ResponseEntity<Resource> retrieveFile(@RequestParam("fileId") Long fileId) throws Exception {
-		return fileService.retrieveFile(fileId);
-	}
-
 	@PostMapping("/upload")
 	public ResponseEntity<Boolean> registerFile(@RequestParam("file") MultipartFile file, FileRegisterCommand request) {
 		return ResponseEntity.ok(fileService.uploadFile(file, request));
+	}
+
+	@GetMapping("/display")
+	public ResponseEntity<Resource> retrieveFile(@RequestParam("fileId") Long fileId) {
+		return fileService.retrieveFile(fileId);
 	}
 }

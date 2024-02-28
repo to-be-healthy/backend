@@ -1,4 +1,4 @@
-package com.tobe.healthy.member.presentation;
+package com.tobe.healthy.member.domain.dto.in;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;

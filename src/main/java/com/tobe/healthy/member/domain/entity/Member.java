@@ -8,7 +8,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.file.domain.entity.FileInfo;
+import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.member.domain.dto.in.MemberRegisterCommand;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,8 +41,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
     private String nickname;
 
     @OneToOne(fetch = LAZY, cascade = ALL)
-    @JoinColumn(name = "file_info_id")
-    private FileInfo fileInfo;
+    @JoinColumn(name = "profile_id")
+    private Profile profileId;
 
     @Enumerated(STRING)
     private Alarm isAlarm;
@@ -65,5 +65,9 @@ public class Member extends BaseTimeEntity<Member, Long> {
         member.category = request.getCategory();
         member.mobileNum = request.getMobileNum();
         return member;
+    }
+
+    public void registerProfile(Profile profileId) {
+        this.profileId = profileId;
     }
 }

@@ -14,6 +14,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
     open-in-view: false
 
 logging.level:
@@ -36,23 +37,7 @@ server:
 
 file:
   upload:
-    location: /Users/seonwoo_jung/upload # 로컬 실행시 변경
-
-  mail:
-    host: smtp.naver.com
-    port: 465
-    username: s4on_woo@naver.com
-    password: 1234
-    properties:
-      debug: true
-      mail:
-        smtp:
-          auth: true
-          ssl:
-            enable: true
-            trust: smtp.naver.com
-            starttls:
-              enable: true
+    location: upload # 로컬 실행시 변경
 
   security:
     oauth2:
@@ -72,6 +57,8 @@ file:
             user-name-attribute: id # 식별자 . 카카오의 경우 "id" 사용
       # kakao 소셜 로그인
     # https://kauth.kakao.com/oauth/authorize?client_id=b744b34e90d30c3a0ff41ad4ade070f7&redirect_uri=http://localhost:8080/api/auth/code/kakao&response_type=code
+
+
 
 # Spring openapi
 springdoc:

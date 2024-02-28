@@ -1,21 +1,28 @@
 package com.tobe.healthy.file.application;
 
 
+import static com.tobe.healthy.config.error.ErrorCode.FILE_FIND_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static java.io.File.separator;
 import static java.nio.file.Files.probeContentType;
 import static java.nio.file.Paths.get;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.UUID.randomUUID;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.util.StringUtils.cleanPath;
 
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.file.domain.dto.in.FileRegisterCommand;
-import com.tobe.healthy.file.domain.entity.FileInfo;
+import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
-import java.io.File;
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.repository.MemberRepository;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +32,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -35,33 +41,27 @@ public class FileService {
 
 	private final FileRepository fileRepository;
 
+	private final MemberRepository memberRepository;
+
 	@Value("${file.upload.location}")
 	private String uploadDir;
 
 	@Transactional
 	public Boolean uploadFile(MultipartFile uploadFile, FileRegisterCommand request) {
 		if (!uploadFile.isEmpty()) {
-			fileRepository.findByMemberId(request.getMemberId()).ifPresent(f -> {
-				fileRepository.deleteAllByMemberId(request.getMemberId());
-			});
 			try {
-				Path copyOfLocation = Paths.get(uploadDir + File.separator + StringUtils.cleanPath(uploadFile.getOriginalFilename()));
+				String savedFileName = randomUUID().toString();
+				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
+
+				Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
 				Files.copy(uploadFile.getInputStream(), copyOfLocation, REPLACE_EXISTING);
-				log.info("copyOfLocation : " + copyOfLocation);
-				log.info("cleanPath : " + StringUtils.cleanPath(uploadFile.getOriginalFilename()));
-				String extension = uploadFile.getOriginalFilename()
-					.substring(uploadFile.getOriginalFilename().lastIndexOf("."));
-				log.info("extension : " + extension);
-				FileInfo entity = FileInfo.create(StringUtils.cleanPath(uploadFile.getOriginalFilename()), originalFileName, extension,"/", uploadFile.getSize(), 0);
-				//
 
+				Profile profile = Profile.create(savedFileName, cleanPath(uploadFile.getOriginalFilename()), extension, uploadDir + separator, uploadFile.getSize());
+				Member member = memberRepository.findById(request.getMemberId())
+					.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+				member.registerProfile(profile);
+				fileRepository.save(profile);
 
-//				String originalFileName = uploadFile.getOriginalFilename();                                 // 오리지날 파일명
-//				String extension = originalFileName.substring(originalFileName.lastIndexOf("."));    // 파일 확장자
-//				String savedFileName = randomUUID().toString();                                             // 저장될 파일명
-//				Files savedFile = Files.create(savedFileName, originalFileName, extension,"/", uploadFile.getSize(), 0);
-//				uploadFile.transferTo(new File(savedFileName + extension));
-//				fileRepository.save(savedFile);
 			} catch (IOException e) {
 				throw new CustomException(FILE_UPLOAD_ERROR);
 			}
@@ -71,16 +71,20 @@ public class FileService {
 	}
 
 	@Transactional
-	public ResponseEntity<Resource> retrieveFile(Long fileId) throws Exception {
-		FileInfo entity = fileRepository.findById(fileId)
+	public ResponseEntity<Resource> retrieveFile(Long memberId) {
+		Profile entity = fileRepository.findByMemberId(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("저장된 파일이 없습니다."));
 
 		String path = entity.getFilePath() + entity.getFileName() + entity.getExtension();
 		Resource resource = new FileSystemResource(path);
-
 		HttpHeaders httpHeaders = new HttpHeaders();
 		Path filePath = get(path);
-		httpHeaders.add("Content-Type", probeContentType(filePath));
+
+		try {
+			httpHeaders.add("Content-Type", probeContentType(filePath));
+		} catch (Exception e) {
+			throw new CustomException(FILE_FIND_ERROR);
+		}
 
 		return new ResponseEntity<>(resource, httpHeaders, OK);
 	}

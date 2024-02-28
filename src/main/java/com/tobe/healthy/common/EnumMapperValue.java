@@ -1,23 +1,15 @@
 package com.tobe.healthy.common;
 
-import lombok.ToString;
+import lombok.Getter;
 
-@ToString
+@Getter
 public class EnumMapperValue {
 
-	private String code;
-	private String description;
+	private final String code;
+	private final String description;
 
 	public EnumMapperValue(EnumMapperType enumMapperType) {
 		this.code = enumMapperType.getCode();
 		this.description = enumMapperType.getDescription();
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public String getDescription() {
-		return description;
 	}
 }

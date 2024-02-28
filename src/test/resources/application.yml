@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
@@ -37,7 +37,7 @@ server:
 
 file:
   upload:
-    location: /Users/seonwoo_jung/upload # 로컬 실행시 변경
+    location: upload # 로컬 실행시 변경
 
 # Spring openapi
 springdoc:

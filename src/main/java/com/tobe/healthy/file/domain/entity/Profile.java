@@ -10,43 +10,43 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
+@AllArgsConstructor
+@Builder
 @Getter
-public class FileInfo extends BaseTimeEntity<FileInfo, Long> {
+public class Profile extends BaseTimeEntity<Profile, Long> {
 
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
-	@Column(name = "file_info_id")
+	@Column(name = "profile_id")
 	private Long id;
 
 	private String fileName;
-
 	private String originalName;
 
 	@Column(name = "file_ext")
 	private String extension;
 
-	@OneToOne(mappedBy = "fileInfo")
+	@OneToOne(mappedBy = "profileId")
 	private Member member;
 
 	private String filePath;
 
-	private long fileSize;
+	private Long fileSize;
 
-	private Integer fileCnt;
-
-	public static FileInfo create(String savedFileName, String originalName, String extension, String filePath, long fileSize, Integer fileCnt) {
-		FileInfo entity = new FileInfo();
-		entity.fileName = savedFileName;
-		entity.originalName = originalName;
-		entity.extension = extension;
-		entity.filePath = filePath;
-		entity.fileSize = fileSize;
-		entity.fileCnt = fileCnt;
-		return entity;
+	public static Profile create(String savedFileName, String originalName, String extension, String filePath, Long fileSize) {
+		return Profile.builder()
+			.fileName(savedFileName)
+			.originalName(originalName)
+			.extension(extension)
+			.filePath(filePath)
+			.fileSize(fileSize)
+			.build();
 	}
 }

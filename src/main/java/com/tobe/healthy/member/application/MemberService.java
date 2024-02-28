@@ -28,7 +28,7 @@ import com.tobe.healthy.member.domain.dto.out.MemberRegisterCommandResult;
 import com.tobe.healthy.member.domain.entity.BearerToken;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
-import com.tobe.healthy.member.presentation.MemberFindPWCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.repository.BearerTokenRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -52,6 +52,7 @@ import retrofit2.Response;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 @Slf4j
 public class MemberService {
 
@@ -63,7 +64,6 @@ public class MemberService {
 	private final BearerTokenRepository bearerTokenRepository;
 	private final static Map<String, String> map = new ConcurrentHashMap<>();
 
-	@Transactional
 	public MemberRegisterCommandResult create(MemberRegisterCommand request) {
 		validateDuplicateEmail(request);
 		validateDuplicateNickname(request);
@@ -75,7 +75,6 @@ public class MemberService {
 		return MemberRegisterCommandResult.of(member);
 	}
 
-	@Transactional
 	public Tokens login(MemberLoginCommand request) {
 		return memberRepository.findByEmail(request.getEmail())
 			.filter(member -> passwordEncoder.matches(request.getPassword(), member.getPassword()))
@@ -83,7 +82,6 @@ public class MemberService {
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 	}
 
-	@Transactional
 	public Tokens refresh(String refreshToken) {
 		try {
 			tokenProvider.decode(refreshToken);
@@ -116,8 +114,7 @@ public class MemberService {
 
 			HttpHeaders header = new HttpHeaders();
 			header.set("Authorization", "Bearer " + body.getAccessToken());
-			HttpEntity httpEntity = new HttpEntity(header);
-			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange("https://kapi.kakao.com/v2/user/me", GET, httpEntity, KakaoUserInfo.class);
+			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange("https://kapi.kakao.com/v2/user/me", GET, new HttpEntity<>(header), KakaoUserInfo.class);
 			KakaoUserInfo dto = entity.getBody();
 			log.info("dto => {}", dto);
 		}
@@ -125,18 +122,14 @@ public class MemberService {
 		return null;
 	}
 
-	private HttpEntity<MultiValueMap<String, String>> getMultiValueMapHttpEntity(String authCode,
-		HttpHeaders headers) {
+	private HttpEntity<MultiValueMap<String, String>> getMultiValueMapHttpEntity(String authCode, HttpHeaders headers) {
 		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
 		requestBody.add("grant_type", GRANT_TYPE.getDescription());
 		requestBody.add("client_id", CLIENT_ID.getDescription());       // 본인이 발급받은 key
 		requestBody.add("redirect_uri", REDIRECT_URL.getDescription()); // 본인이 설정한 주소
 		requestBody.add("client_secret", CLIENT_SECRET.getDescription());
 		requestBody.add("code", authCode);
-
-		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody,
-			headers);
-		return requestEntity;
+		return new HttpEntity<>(requestBody,headers);
 	}
 
 	public Boolean isAvailableEmail(String email) {
