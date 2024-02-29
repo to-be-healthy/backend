@@ -11,6 +11,7 @@ import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.member.domain.dto.in.MemberRegisterCommand;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -65,6 +66,9 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
     @OneToMany(mappedBy = "applicantId")
     private List<Schedule> applicantSchedules = new ArrayList<>();
+
+    @OneToOne(mappedBy = "member")
+    private StandBySchedule standBySchedule;
 
     public static Member create(MemberRegisterCommand request, String password) {
         Member member = new Member();

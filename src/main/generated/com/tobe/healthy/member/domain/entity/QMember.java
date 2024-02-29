@@ -47,6 +47,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final com.tobe.healthy.file.domain.entity.QProfile profileId;
 
+    public final com.tobe.healthy.schedule.domain.entity.QStandBySchedule standBySchedule;
+
     public final ListPath<com.tobe.healthy.schedule.domain.entity.Schedule, com.tobe.healthy.schedule.domain.entity.QSchedule> trainerSchedules = this.<com.tobe.healthy.schedule.domain.entity.Schedule, com.tobe.healthy.schedule.domain.entity.QSchedule>createList("trainerSchedules", com.tobe.healthy.schedule.domain.entity.Schedule.class, com.tobe.healthy.schedule.domain.entity.QSchedule.class, PathInits.DIRECT2);
 
     //inherited
@@ -72,6 +74,7 @@ public class QMember extends EntityPathBase<Member> {
         super(type, metadata, inits);
         this.gym = inits.isInitialized("gym") ? new QGym(forProperty("gym"), inits.get("gym")) : null;
         this.profileId = inits.isInitialized("profileId") ? new com.tobe.healthy.file.domain.entity.QProfile(forProperty("profileId"), inits.get("profileId")) : null;
+        this.standBySchedule = inits.isInitialized("standBySchedule") ? new com.tobe.healthy.schedule.domain.entity.QStandBySchedule(forProperty("standBySchedule"), inits.get("standBySchedule")) : null;
     }
 
 }

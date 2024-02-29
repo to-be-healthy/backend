@@ -16,6 +16,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,6 +51,9 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@ManyToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "applicant_id")
 	private Member applicantId;
+
+	@OneToOne(mappedBy = "schedule")
+	private StandBySchedule standBySchedule;
 
 	public void cancelSchedule() {
 		this.isReserve = FALSE;
