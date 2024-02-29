@@ -27,6 +27,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
+	implementation 'org.modelmapper:modelmapper:3.1.1'
 
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 	implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
@@ -49,6 +50,8 @@ dependencies {
 	//test 롬복 사용
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'io.rest-assured:rest-assured:5.3.0'
+
 
 	//Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
