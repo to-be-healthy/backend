@@ -14,6 +14,7 @@ public enum ErrorCode {
 	ACCESS_TOKEN_NOT_FOUND(404, "C_004", "토큰을 찾을 수 없습니다."),
 	REFRESH_TOKEN_EXPIRED(405, "C005", "갱신 토큰이 만료되었습니다."),
 	REFRESH_TOKEN_NOT_FOUND(406, "C006", "갱신 토큰을 찾을 수 없습니다."),
+	SCHEDULE_NOT_FOUND(407, "C007", "해당 예약이 존재하지 않습니다."),
 	SERVER_ERROR(500, "S_001", "서버에서 오류가 발생하였습니다."),
 	FILE_FIND_ERROR(503, "S_003", "파일 조회중 에러가 발생하였습니다."),
 	FILE_UPLOAD_ERROR(501, "S_002", "파일 업로드중 에러가 발생하였습니다.");

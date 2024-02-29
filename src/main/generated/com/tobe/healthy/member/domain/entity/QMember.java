@@ -24,6 +24,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final com.tobe.healthy.common.QBaseTimeEntity _super = new com.tobe.healthy.common.QBaseTimeEntity(this);
 
+    public final ListPath<com.tobe.healthy.schedule.domain.entity.Schedule, com.tobe.healthy.schedule.domain.entity.QSchedule> applicantSchedules = this.<com.tobe.healthy.schedule.domain.entity.Schedule, com.tobe.healthy.schedule.domain.entity.QSchedule>createList("applicantSchedules", com.tobe.healthy.schedule.domain.entity.Schedule.class, com.tobe.healthy.schedule.domain.entity.QSchedule.class, PathInits.DIRECT2);
+
     public final EnumPath<MemberCategory> category = createEnum("category", MemberCategory.class);
 
     //inherited
@@ -44,6 +46,8 @@ public class QMember extends EntityPathBase<Member> {
     public final StringPath password = createString("password");
 
     public final com.tobe.healthy.file.domain.entity.QProfile profileId;
+
+    public final ListPath<com.tobe.healthy.schedule.domain.entity.Schedule, com.tobe.healthy.schedule.domain.entity.QSchedule> trainerSchedules = this.<com.tobe.healthy.schedule.domain.entity.Schedule, com.tobe.healthy.schedule.domain.entity.QSchedule>createList("trainerSchedules", com.tobe.healthy.schedule.domain.entity.Schedule.class, com.tobe.healthy.schedule.domain.entity.QSchedule.class, PathInits.DIRECT2);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
