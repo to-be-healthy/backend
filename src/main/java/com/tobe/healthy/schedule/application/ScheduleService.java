@@ -1,10 +1,12 @@
 package com.tobe.healthy.schedule.application;
 
 import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
+import static java.util.stream.Collectors.toList;
 
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommand;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.dto.ScheduleCommand;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,8 +27,11 @@ public class ScheduleService {
 		return scheduleRepository.registerSchedule(request);
 	}
 
-	public List<Schedule> findAllSchedule() {
-		return scheduleRepository.findAll();
+	public List<ScheduleCommandResult> findAllSchedule() {
+		return scheduleRepository.findAll()
+			.stream()
+			.map(ScheduleCommandResult::of)
+			.collect(toList());
 	}
 
 	public LocalDateTime modifySchedule(LocalDateTime localDateTime) {

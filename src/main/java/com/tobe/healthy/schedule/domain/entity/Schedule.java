@@ -1,6 +1,8 @@
 package com.tobe.healthy.schedule.domain.entity;
 
+import static com.tobe.healthy.schedule.domain.entity.ReserveType.FALSE;
 import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -9,6 +11,7 @@ import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -35,7 +38,8 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	private LocalDateTime startDate;
 
-	private String isReserve;
+	@Enumerated(STRING)
+	private ReserveType isReserve;
 
 	private String round;
 
@@ -48,7 +52,7 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	private Member applicantId;
 
 	public void cancelSchedule() {
-		this.isReserve = "false";
+		this.isReserve = FALSE;
 		this.applicantId = null;
 	}
 }

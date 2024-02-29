@@ -3,11 +3,13 @@ package com.tobe.healthy.schedule;
 import static com.tobe.healthy.member.domain.entity.Alarm.ABLE;
 import static com.tobe.healthy.member.domain.entity.MemberCategory.MEMBER;
 import static com.tobe.healthy.member.domain.entity.MemberCategory.TRAINER;
+import static com.tobe.healthy.schedule.domain.entity.ReserveType.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.application.ScheduleService;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.domain.entity.Schedule;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,7 +57,7 @@ public class ScheduleTest {
 		// given
 		Schedule schedule = Schedule.builder()
 			.startDate(LocalDateTime.of(2024, 2, 29, 10, 0))
-			.isReserve("true")
+			.isReserve(TRUE)
 			.round("1")
 			.trainerId(trainer)
 			.applicantId(member)
@@ -68,8 +70,8 @@ public class ScheduleTest {
 	@DisplayName("모든 일정을 확인한다.")
 	void findSchedule() {
 	    // given
-		List<Schedule> schedules = scheduleService.findAllSchedule();
-		for (Schedule schedule : schedules) {
+		List<ScheduleCommandResult> schedules = scheduleService.findAllSchedule();
+		for (ScheduleCommandResult schedule : schedules) {
 			log.info("schedule => {}", schedule);
 		}
 	}

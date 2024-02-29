@@ -1,8 +1,8 @@
 package com.tobe.healthy.schedule.presentation;
 
 import com.tobe.healthy.schedule.application.ScheduleService;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.dto.ScheduleCommand;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommand;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class ScheduleController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<Schedule>> findAllSchedule() {
+	public ResponseEntity<List<ScheduleCommandResult>> findAllSchedule() {
 		return ResponseEntity.ok(scheduleService.findAllSchedule());
 	}
 

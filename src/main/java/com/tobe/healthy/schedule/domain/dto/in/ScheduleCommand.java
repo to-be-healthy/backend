@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.domain.dto;
+package com.tobe.healthy.schedule.domain.dto.in;
 
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
