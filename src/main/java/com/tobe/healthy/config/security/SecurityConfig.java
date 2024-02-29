@@ -27,15 +27,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.httpBasic(AbstractHttpConfigurer::disable)
                     .cors(AbstractHttpConfigurer::disable)
-                    .formLogin(AbstractHttpConfigurer::disable)
                     .csrf(AbstractHttpConfigurer::disable)
-                    .sessionManagement(session -> session
-                    .sessionCreationPolicy(STATELESS))
+                    .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                     .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint))
                     .authorizeHttpRequests(
-						// file 임시 추가
-                        authorize -> authorize.requestMatchers("/api/auth/**", "/favicon.ico", "/file/**").permitAll()
-                                              .anyRequest().hasRole("MEMBER")
+                        authorize -> authorize.requestMatchers("file/**", "/api/**").permitAll()
+                            .anyRequest().hasRole("MEMBER")
+//                        authorize -> authorize.requestMatchers("/api/auth/**", "/favicon.ico", "/file/**").permitAll()
+//                                              .anyRequest().hasRole("MEMBER")
                     )
                     .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                     .build();

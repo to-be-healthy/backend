@@ -1,20 +1,30 @@
 package com.tobe.healthy.file.application;
 
 
+import static com.tobe.healthy.config.error.ErrorCode.FILE_FIND_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.SERVER_ERROR;
+import static java.io.File.separator;
 import static java.nio.file.Files.probeContentType;
 import static java.nio.file.Paths.get;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.UUID.randomUUID;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.util.StringUtils.cleanPath;
 
+import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.file.domain.dto.in.FileRegisterCommand;
-import com.tobe.healthy.file.domain.entity.Files;
+import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
-import java.io.File;
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.repository.MemberRepository;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,51 +43,73 @@ public class FileService {
 
 	private final FileRepository fileRepository;
 
+	private final MemberRepository memberRepository;
+
 	@Value("${file.upload.location}")
 	private String uploadDir;
 
 	@Transactional
-	public Long uploadFile(MultipartFile uploadFile, FileRegisterCommand request) throws Exception {
-
-		Files savedFile = null;
+	public Boolean uploadFile(MultipartFile uploadFile, FileRegisterCommand request) {
 		if (!uploadFile.isEmpty()) {
-			if (fileRepository.findByMemberId(request.getMemberId()).isPresent()) {
-				fileRepository.deleteAllByMemberId(request.getMemberId());
-			}
-			String originalFileName = uploadFile.getOriginalFilename();                                 // 오리지날 파일명
-			String extension = originalFileName.substring(originalFileName.lastIndexOf("."));    // 파일 확장자
-			String savedFileName = randomUUID().toString();                                             // 저장될 파일명
-			String fileDir = getFolder();
-			savedFile = Files.create(savedFileName, originalFileName, extension, fileDir + "/", uploadFile.getSize(), 0);
-			uploadFile.transferTo(new File(fileDir + "/" + savedFileName));
-		}
-		return fileRepository.save(savedFile).getId();
+			try {
+				String savedFileName = randomUUID().toString();
+				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
 
+				Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
+				Files.copy(uploadFile.getInputStream(), copyOfLocation, REPLACE_EXISTING);
+
+				Profile profile = Profile.create(savedFileName, cleanPath(uploadFile.getOriginalFilename()), extension, uploadDir + separator, uploadFile.getSize());
+				Member member = memberRepository.findById(request.getMemberId())
+					.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+				member.registerProfile(profile);
+				fileRepository.save(profile);
+
+			} catch (IOException e) {
+				throw new CustomException(FILE_UPLOAD_ERROR);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	public Boolean uploadFile(byte[] image, String profileImage) {
+		try {
+			String fileFullName = profileImage.substring(profileImage.lastIndexOf("/") + 1);
+
+			String extension = fileFullName.substring(fileFullName.lastIndexOf("."));
+			String savedFileName = randomUUID().toString();
+			Path copyOfLocation = Paths.get(uploadDir + separator + savedFileName + extension);
+			Files.copy(new ByteArrayInputStream(image), copyOfLocation, REPLACE_EXISTING);
+
+			// 파일의 용량 구하기
+			long fileSize = Files.size(copyOfLocation);
+
+			String fileName = fileFullName.substring(0, fileFullName.lastIndexOf("."));
+
+			Profile profile = Profile.create(savedFileName, fileName, extension, uploadDir + separator, fileSize);
+
+		} catch (IOException e) {
+			throw new CustomException(SERVER_ERROR);
+		}
+		return true;
 	}
 
 	@Transactional
-	public ResponseEntity<?> retrieveFile(Long fileId) throws Exception {
-		Files files = fileRepository.findById(fileId)
+	public ResponseEntity<Resource> retrieveFile(Long memberId) {
+		Profile entity = fileRepository.findByMemberId(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("저장된 파일이 없습니다."));
 
-		String path = files.getFilePath() + files.getFileName() + files.getExtension();
+		String path = entity.getFilePath() + entity.getFileName() + entity.getExtension();
 		Resource resource = new FileSystemResource(path);
-
 		HttpHeaders httpHeaders = new HttpHeaders();
 		Path filePath = get(path);
-		httpHeaders.add("Content-Type", probeContentType(filePath));
+
+		try {
+			httpHeaders.add("Content-Type", probeContentType(filePath));
+		} catch (Exception e) {
+			throw new CustomException(FILE_FIND_ERROR);
+		}
 
 		return new ResponseEntity<>(resource, httpHeaders, OK);
-	}
-
-	private String getFolder() throws IOException {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-		Date date = new Date();
-		String str = uploadDir + "/" + sdf.format(date);
-		Path path = Paths.get(str);
-		if (java.nio.file.Files.exists(path)) {
-			java.nio.file.Files.createDirectories(path);
-		}
-		return str;
 	}
 }

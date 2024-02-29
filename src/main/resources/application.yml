@@ -14,6 +14,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
     open-in-view: false
 
 logging.level:
@@ -36,7 +37,24 @@ server:
 
 file:
   upload:
-    location: /Users/seonwoo_jung/upload # 로컬 실행시 변경
+    location: upload # 로컬 실행시 변경
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${OAUTH2-KAKAO-CLIENT-ID}
+            client-secret: ${OAUTH2-KAKAO-CLIENT-SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8080/api/auth/code/kakao
+            client-authentication-method: POST
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize # "인가 코드 받기" 항목
+            token-uri: https://kauth.kakao.com/oauth/token # "토큰 받기" 항목
+            user-info-uri: https://kapi.kakao.com/v2/user/me # "사용자 정보 가져오기" 항목
+            user-name-attribute: id # 식별자 . 카카오의 경우 "id" 사용
 
 # Spring openapi
 springdoc:

@@ -33,10 +33,7 @@ public class JwtTokenProvider { // JWT 토큰 검증 모듈
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    // Request의 Header에서 token파싱
     public String resolveToken(HttpServletRequest request) {
-        String header = request.getHeader("Authorization");
-        log.info("header = {}", header);
         return request.getHeader("Authorization");
     }
 
