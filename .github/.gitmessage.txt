@@ -28,4 +28,4 @@
 ################
 
 # 커밋 컨벤션 설정 방법 ##
-# git config --global commit.template ./github/.gitmessage.txt
+# git config --global commit.template .github/gitmessage.txt
