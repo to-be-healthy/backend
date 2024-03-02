@@ -1,7 +1,6 @@
 package com.tobe.healthy.home.repository;
 
 
-public interface MemberHomeRepository {
-
+public interface MemberHomeRepository extends MemberHomeRepositoryCustom {
 
 }

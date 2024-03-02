@@ -16,7 +16,9 @@ import static org.springframework.util.StringUtils.cleanPath;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.file.domain.dto.in.FileRegisterCommand;
 import com.tobe.healthy.file.domain.entity.Profile;
+import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.file.repository.FileRepository;
+import com.tobe.healthy.file.repository.WorkoutFileRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import java.io.ByteArrayInputStream;
@@ -24,7 +26,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
+
+import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileService {
 
 	private final FileRepository fileRepository;
-
+	private final WorkoutFileRepository workoutFileRepository;
 	private final MemberRepository memberRepository;
 
 	@Value("${file.upload.location}")
@@ -111,5 +116,30 @@ public class FileService {
 		}
 
 		return new ResponseEntity<>(resource, httpHeaders, OK);
+	}
+
+	@Transactional
+	public void uploadWorkoutFiles(WorkoutHistory history, List<MultipartFile> files) {
+		files.forEach(f -> uploadWorkoutFile(f, history));
+	}
+
+	@Transactional
+	public void uploadWorkoutFile(MultipartFile uploadFile, WorkoutHistory history) {
+		if (!uploadFile.isEmpty()) {
+			try {
+				String savedFileName = randomUUID().toString();
+				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
+				Path copyOfLocation = get(uploadDir + separator + cleanPath(savedFileName + extension));
+				Files.createDirectories(copyOfLocation.getParent());
+				Files.copy(uploadFile.getInputStream(), copyOfLocation, REPLACE_EXISTING);
+
+				WorkoutHistoryFile historyFile = WorkoutHistoryFile.create(savedFileName,
+						cleanPath(uploadFile.getOriginalFilename()), extension, uploadDir + separator, uploadFile.getSize(), history);
+				workoutFileRepository.save(historyFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new CustomException(FILE_UPLOAD_ERROR);
+			}
+		}
 	}
 }
