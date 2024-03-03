@@ -94,6 +94,7 @@ public class MemberController {
 		return ResponseEntity.ok(memberService.findMemberId(request));
 	}
 
+	
 	@Operation(summary = "비밀번호를 찾는다.", responses = {
 		@ApiResponse(responseCode = "400", description = "등록된 회원이 아닙니다."),
 		@ApiResponse(responseCode = "200", description = "등록된 이메일에 초기화 비밀번호를 전송한다.")
