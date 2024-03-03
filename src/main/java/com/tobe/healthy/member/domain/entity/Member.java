@@ -84,4 +84,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
     public void registerProfile(Profile profileId) {
         this.profileId = profileId;
     }
+
+    public void resetPassword(String password) {
+        this.password = password;
+    }
 }
