@@ -41,6 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -66,7 +67,7 @@ public class MemberService {
 	private final JwtTokenProvider tokenProvider;
 	private final BearerTokenRepository bearerTokenRepository;
 	private final FileService fileService;
-	private Map<String, String> map = new ConcurrentHashMap<>();
+	private Map<String, String> map = new ConcurrentHashMap<>(); // todo: 서버 이중화시 동시성 이슈 발생
 	private final JavaMailSender javaMailSender;
 
 	public MemberRegisterCommandResult create(MemberRegisterCommand request) {
@@ -110,7 +111,6 @@ public class MemberService {
 
 		HttpEntity<MultiValueMap<String, String>> requestEntity = getMultiValueMapHttpEntity(authCode, headers);
 
-		// POST 요청 보내기
 		ResponseEntity<OAuthInfo> responseEntity = restTemplate.postForEntity(KAKAO_TOKEN_URL.getDescription(), requestEntity, OAuthInfo.class);
 
 		if (responseEntity.getStatusCode().is2xxSuccessful()) {
@@ -124,6 +124,8 @@ public class MemberService {
 
 			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(), byte[].class);
 			fileService.uploadFile(image, dto.getProperties().getProfileImage());
+
+			// todo: 소셜 회원가입시 email을 필수로 받는게 나을 거 같음. UUID로 하면, 복잡해짐
 		}
 
 		return null;
@@ -225,9 +227,12 @@ public class MemberService {
 
 	public Boolean verifyAuthMail(VerifyAuthMailRequest request) {
 		String authKey = map.get(request.getEmail());
-		if (request.getAuthKey().equals(authKey)) {
+		if (StringUtils.isEmpty(authKey)) {
 			throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
 		}
-		return true;
+		if (request.getAuthKey().equals(authKey)) {
+			return true;
+		}
+		throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
 	}
 }
