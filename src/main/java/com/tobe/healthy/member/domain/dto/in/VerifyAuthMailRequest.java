@@ -1,4 +1,4 @@
-package com.tobe.healthy.member.presentation;
+package com.tobe.healthy.member.domain.dto.in;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

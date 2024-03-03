@@ -3,10 +3,11 @@ spring:
     active: TEST
 
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: tobehealthy0127
-    password: awfjsyrqdgsaayvj
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+
     properties:
       mail:
         smtp:
@@ -16,14 +17,15 @@ spring:
             enable: true
 
   datasource:
-    url: jdbc:mysql://localhost:3306/study
-    username: root
-    password: tiger
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
+
     properties:
       hibernate:
         format_sql: true
@@ -35,9 +37,9 @@ logging.level:
   org.hibernate.type: trace
 
 jwt:
-  secret: c2Vvbndvb19qdW5nDQo=c2Vvbndvb19qdW5nDQo=c2Vvbndvb19qdW5nDQo=
-  access-token-valid-seconds: 7200
-  refresh-token-valid-seconds: 604800
+  secret: ${JWT_SECRET_TOKEN}
+  access-token-valid-seconds: ${JWT_ACCESS_TOKEN_VALID_SECONDS}
+  refresh-token-valid-seconds: ${JWT_REFRESH_TOKEN_VALID_SECONDS}
 
 server:
   servlet:
@@ -45,20 +47,28 @@ server:
       charset: UTF-8
       enabled: true
       force: true
+
   tomcat:
     uri-encoding: UTF-8
 
 file:
   upload:
-    location: upload # 로컬 실행시 변경
+    location: ${FILE_UPLOAD_LOCATION}
 
-# Spring openapi
-springdoc:
-  packages-to-scan: com.tobe.healthy
-  default-consumes-media-type: application/json;charset=UTF-8
-  default-produces-media-type: application/json;charset=UTF-8
-  swagger-ui:
-    path: /
-    disable-swagger-default-url: true
-    display-request-duration: true
-    operations-sorter: alpha
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${OAUTH2-KAKAO-CLIENT-ID}
+            client-secret: ${OAUTH2-KAKAO-CLIENT-SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8080/api/auth/code/kakao
+            client-authentication-method: POST
+
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize # "인가 코드 받기" 항목
+            token-uri: https://kauth.kakao.com/oauth/token # "토큰 받기" 항목
+            user-info-uri: https://kapi.kakao.com/v2/user/me # "사용자 정보 가져오기" 항목
+            user-name-attribute: id # 식별자 . 카카오의 경우 "id" 사용
