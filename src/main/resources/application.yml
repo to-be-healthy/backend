@@ -3,10 +3,10 @@ spring:
     active: DEV
 
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: tobehealthy0127
-    password: awfjsyrqdgsaayvj
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
