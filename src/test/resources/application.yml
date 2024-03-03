@@ -2,6 +2,19 @@ spring:
   profiles:
     active: TEST
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: tobehealthy0127
+    password: awfjsyrqdgsaayvj
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          starttls:
+            enable: true
+
   datasource:
     url: jdbc:mysql://localhost:3306/study
     username: root

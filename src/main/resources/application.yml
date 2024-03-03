@@ -2,6 +2,19 @@ spring:
   profiles:
     active: DEV
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: tobehealthy0127
+    password: awfjsyrqdgsaayvj
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          starttls:
+            enable: true
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -10,7 +23,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: true

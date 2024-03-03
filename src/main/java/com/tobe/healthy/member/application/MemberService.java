@@ -1,5 +1,7 @@
 package com.tobe.healthy.member.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_DUPLICATION_EMAIL;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_DUPLICATION_NICKNAME;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
@@ -13,9 +15,6 @@ import static com.tobe.healthy.member.domain.entity.Oauth.REDIRECT_URL;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 
-import com.tobe.healthy.common.message.APIInit;
-import com.tobe.healthy.common.message.model.request.Message;
-import com.tobe.healthy.common.message.model.response.MessageModel;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.config.security.JwtTokenProvider;
@@ -30,26 +29,29 @@ import com.tobe.healthy.member.domain.dto.out.MemberRegisterCommandResult;
 import com.tobe.healthy.member.domain.entity.BearerToken;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.member.presentation.VerifyAuthMailRequest;
 import com.tobe.healthy.member.repository.BearerTokenRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
 import io.jsonwebtoken.ExpiredJwtException;
-import java.io.IOException;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +66,8 @@ public class MemberService {
 	private final JwtTokenProvider tokenProvider;
 	private final BearerTokenRepository bearerTokenRepository;
 	private final FileService fileService;
-	private final static Map<String, String> map = new ConcurrentHashMap<>();
+	private Map<String, String> map = new ConcurrentHashMap<>();
+	private final JavaMailSender javaMailSender;
 
 	public MemberRegisterCommandResult create(MemberRegisterCommand request) {
 		validateDuplicateEmail(request);
@@ -136,8 +139,33 @@ public class MemberService {
 		return new HttpEntity<>(requestBody,headers);
 	}
 
-	public Boolean isAvailableEmail(String email) {
-		return memberRepository.findByEmail(email).isEmpty();
+	public Boolean sendAuthMail(String email) {
+		// 1. 이메일 중복 확인
+		memberRepository.findByEmail(email).ifPresent(e -> {
+			throw new CustomException(MEMBER_DUPLICATION_EMAIL);
+		});
+
+		String authKey = getAuthCode();
+		map.put(email, authKey);
+
+		// 2. 이메일 인증번호 전송
+		sendAuthMail(email, authKey);
+
+		return true;
+	}
+
+	private void sendAuthMail(String email, String authKey) {
+		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+		try {
+			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+			mimeMessageHelper.setTo(email);
+			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 회원가입 인증번호입니다."); // 메일 제목
+			String text = "안녕하세요. 건강해짐 인증번호는 authKey 입니다. \n확인후 입력해 주세요.".replace("authKey", authKey);
+			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
+			javaMailSender.send(mimeMessage);
+		} catch (MessagingException e) {
+			throw new CustomException(MAIL_SEND_ERROR);
+		}
 	}
 
 	private void validateDuplicateEmail(MemberRegisterCommand request) {
@@ -153,62 +181,53 @@ public class MemberService {
 	}
 
 	public String findMemberId(MemberFindIdCommand request) {
-		Member entity = memberRepository.findByMobileNumAndNickname(request.getMobileNum(),
-				request.getNickname())
+		Member entity = memberRepository.findByMobileNumAndNickname(request.getMobileNum(), request.getNickname())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		return entity.getEmail();
 	}
 
-	public String sendAuthenticationNumber(String mobileNum) {
-		int randomNum = (int) ((Math.random() * 899999) + 100000);
-		Message message = new Message(mobileNum, "010-4000-1278", "인증번호 : " + randomNum);
-		map.put(mobileNum, String.valueOf(randomNum));
-		Call<MessageModel> api = APIInit.getAPI().sendMessage(APIInit.getHeaders(), message);
-		api.enqueue(new Callback<>() {
-			@Override
-			public void onResponse(Call<MessageModel> call, Response<MessageModel> response) {
-				// 성공 시 200이 출력됩니다.
-				if (response.isSuccessful()) {
-					log.info("statusCode : " + response.code());
-					MessageModel body = response.body();
-					log.info("groupId : " + body.getGroupId());
-					log.info("messageId : " + body.getMessageId());
-					log.info("to : " + body.getTo());
-					log.info("from : " + body.getFrom());
-					log.info("type : " + body.getType());
-					log.info("statusCode : " + body.getStatusCode());
-					log.info("statusMessage : " + body.getStatusMessage());
-					log.info("customFields : " + body.getCustomFields());
-				} else {
-					try {
-						log.error(response.errorBody().string());
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-
-			@Override
-			public void onFailure(Call<MessageModel> call, Throwable throwable) {
-				throwable.printStackTrace();
-			}
-		});
-		return mobileNum;
-	}
-
-	public Boolean checkAuthenticationNumber(String mobileNum, String verificationNum) {
-		String result = map.get(mobileNum);
-		if (result.equals(verificationNum)) {
-			return true;
-		}
-		return false;
-	}
-
-	public String findMemberPW(MemberFindPWCommand request) {
-		Member entity = memberRepository.findByMobileNumAndEmail(request.getMobileNum(), request.getEmail())
+	public Boolean findMemberPW(MemberFindPWCommand request) {
+		Member member = memberRepository.findByMobileNumAndEmail(request.getMobileNum(),
+				request.getEmail())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		sendAuthenticationNumber(entity.getMobileNum());
+		sendResetPassword(request.getEmail(), member);
+		return true;
+	}
 
-		return entity.getMobileNum();
+	private void sendResetPassword(String email, Member member) {
+		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+		try {
+			String resetPW = RandomStringUtils.random(12, true, true);
+			member.resetPassword(passwordEncoder.encode(resetPW));
+			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+			mimeMessageHelper.setTo(email);
+			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 초기화 비밀번호입니다."); // 메일 제목
+			String text = "안녕하세요. 건강해짐 초기화 비밀번호는 resetPassword 입니다. \n로그인 후 반드시 비밀번호를 변경해 주세요.".replace("resetPassword", resetPW);
+			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
+			javaMailSender.send(mimeMessage);
+		} catch (MessagingException e) {
+			throw new CustomException(MAIL_SEND_ERROR);
+		}
+	}
+
+	private String getAuthCode() {
+		Random random = new Random();
+		StringBuilder buffer = new StringBuilder();
+		int num = 0;
+
+		while (buffer.length() < 6) {
+			num = random.nextInt(10);
+			buffer.append(num);
+		}
+
+		return buffer.toString();
+	}
+
+	public Boolean verifyAuthMail(VerifyAuthMailRequest request) {
+		String authKey = map.get(request.getEmail());
+		if (request.getAuthKey().equals(authKey)) {
+			throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
+		}
+		return true;
 	}
 }
