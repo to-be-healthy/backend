@@ -29,7 +29,7 @@ public class SecurityConfig {
                     .cors(AbstractHttpConfigurer::disable)
                     .csrf(AbstractHttpConfigurer::disable)
                     .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-                    .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint))
+                    .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint)) // 401 에러 예외 처리
                     .authorizeHttpRequests(
                         authorize -> authorize.requestMatchers("file/**", "/api/**", "/**").permitAll()
                             .anyRequest().hasRole("MEMBER")

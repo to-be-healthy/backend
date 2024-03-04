@@ -5,43 +5,38 @@ import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_DUPLICATION_EMAIL;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_DUPLICATION_NICKNAME;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_EXPIRED;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
 import static com.tobe.healthy.member.domain.entity.Oauth.CLIENT_ID;
 import static com.tobe.healthy.member.domain.entity.Oauth.CLIENT_SECRET;
 import static com.tobe.healthy.member.domain.entity.Oauth.GRANT_TYPE;
 import static com.tobe.healthy.member.domain.entity.Oauth.KAKAO_TOKEN_URL;
 import static com.tobe.healthy.member.domain.entity.Oauth.REDIRECT_URL;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 
+import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
-import com.tobe.healthy.config.security.JwtTokenProvider;
 import com.tobe.healthy.file.application.FileService;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberRegisterCommand;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
-import com.tobe.healthy.member.domain.dto.out.MemberRegisterCommandResult;
-import com.tobe.healthy.member.domain.entity.BearerToken;
+import com.tobe.healthy.member.domain.dto.in.VerifyAuthMailRequest;
+import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
-import com.tobe.healthy.member.domain.dto.in.VerifyAuthMailRequest;
-import com.tobe.healthy.member.repository.BearerTokenRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -64,21 +59,19 @@ public class MemberService {
 	private final RestTemplate restTemplate;
 	private final MemberRepository memberRepository;
 	private final JwtTokenGenerator tokenGenerator;
-	private final JwtTokenProvider tokenProvider;
-	private final BearerTokenRepository bearerTokenRepository;
 	private final FileService fileService;
-	private Map<String, String> map = new ConcurrentHashMap<>(); // todo: 서버 이중화시 동시성 이슈 발생
-	private final JavaMailSender javaMailSender;
+	private final JavaMailSender mailSender;
+	private final RedisService redisService;
 
-	public MemberRegisterCommandResult create(MemberRegisterCommand request) {
+	public MemberJoinCommandResult joinMember(MemberJoinCommand request) {
 		validateDuplicateEmail(request);
 		validateDuplicateNickname(request);
 
 		String password = passwordEncoder.encode(request.getPassword());
-		Member member = Member.create(request, password);
+		Member member = Member.join(request, password);
 		memberRepository.save(member);
 
-		return MemberRegisterCommandResult.of(member);
+		return MemberJoinCommandResult.of(member);
 	}
 
 	public Tokens login(MemberLoginCommand request) {
@@ -88,21 +81,25 @@ public class MemberService {
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 	}
 
-	public Tokens refresh(String refreshToken) {
-		try {
-			tokenProvider.decode(refreshToken);
-		} catch (ExpiredJwtException e) {
-			throw new CustomException(REFRESH_TOKEN_EXPIRED);
+	public Tokens refreshToken(String email, String refreshToken) {
+		// 1. Redis에서 유효한 token이 있는지 조회한다.
+		String result = redisService.getValues(email);
+
+		// 2. Refresh Token이 존재하지 않음.
+		if (isEmpty(result)) {
+			throw new CustomException(REFRESH_TOKEN_NOT_FOUND);
 		}
 
-		BearerToken token = bearerTokenRepository.findByRefreshToken(refreshToken)
-			.orElseThrow(() -> new CustomException(REFRESH_TOKEN_NOT_FOUND));
+		// 3. Refresh Token이 유효하지 않을경우
+		if (!result.equals(refreshToken)) {
+			throw new CustomException(REFRESH_TOKEN_NOT_VALID);
+		}
 
-		Long memberId = token.getMemberId();
-		Member member = memberRepository.findById(memberId)
+		Member member = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		return tokenGenerator.create(member);
+		// 4. 새로운 AccessToken과 기존의 RefreshToken을 반환한다.
+		return tokenGenerator.exchangeAccessToken(member, refreshToken);
 	}
 
 	public String getAccessToken(String authCode) {
@@ -141,42 +138,43 @@ public class MemberService {
 		return new HttpEntity<>(requestBody,headers);
 	}
 
-	public Boolean sendAuthMail(String email) {
+	public String sendAuthMail(String email) {
 		// 1. 이메일 중복 확인
 		memberRepository.findByEmail(email).ifPresent(e -> {
 			throw new CustomException(MEMBER_DUPLICATION_EMAIL);
 		});
 
+		// 2. 인증번호를 redis에 저장한다.
 		String authKey = getAuthCode();
-		map.put(email, authKey);
+		redisService.setValuesWithTimeout(email, authKey, 3 * 60 * 1000); // 3분
 
-		// 2. 이메일 인증번호 전송
+		// 3. 이메일에 인증번호 전송한다.
 		sendAuthMail(email, authKey);
 
-		return true;
+		return email;
 	}
 
 	private void sendAuthMail(String email, String authKey) {
-		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+		MimeMessage mimeMessage = mailSender.createMimeMessage();
 		try {
 			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
 			mimeMessageHelper.setTo(email);
 			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 회원가입 인증번호입니다."); // 메일 제목
 			String text = "안녕하세요. 건강해짐 인증번호는 authKey 입니다. \n확인후 입력해 주세요.".replace("authKey", authKey);
 			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
-			javaMailSender.send(mimeMessage);
+			mailSender.send(mimeMessage);
 		} catch (MessagingException e) {
 			throw new CustomException(MAIL_SEND_ERROR);
 		}
 	}
 
-	private void validateDuplicateEmail(MemberRegisterCommand request) {
+	private void validateDuplicateEmail(MemberJoinCommand request) {
 		memberRepository.findByEmail(request.getEmail()).ifPresent(m -> {
 			throw new CustomException(MEMBER_DUPLICATION_EMAIL);
 		});
 	}
 
-	private void validateDuplicateNickname(MemberRegisterCommand request) {
+	private void validateDuplicateNickname(MemberJoinCommand request) {
 		memberRepository.findByNickname(request.getNickname()).ifPresent(m -> {
 			throw new CustomException(MEMBER_DUPLICATION_NICKNAME);
 		});
@@ -188,16 +186,15 @@ public class MemberService {
 		return entity.getEmail();
 	}
 
-	public Boolean findMemberPW(MemberFindPWCommand request) {
-		Member member = memberRepository.findByMobileNumAndEmail(request.getMobileNum(),
-				request.getEmail())
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+	public String findMemberPW(MemberFindPWCommand request) {
+		Member member = memberRepository.findByMobileNumAndEmail(request.getMobileNum(), request.getEmail())
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		sendResetPassword(request.getEmail(), member);
-		return true;
+		return request.getEmail();
 	}
 
 	private void sendResetPassword(String email, Member member) {
-		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+		MimeMessage mimeMessage = mailSender.createMimeMessage();
 		try {
 			String resetPW = RandomStringUtils.random(12, true, true);
 			member.resetPassword(passwordEncoder.encode(resetPW));
@@ -206,7 +203,7 @@ public class MemberService {
 			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 초기화 비밀번호입니다."); // 메일 제목
 			String text = "안녕하세요. 건강해짐 초기화 비밀번호는 resetPassword 입니다. \n로그인 후 반드시 비밀번호를 변경해 주세요.".replace("resetPassword", resetPW);
 			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
-			javaMailSender.send(mimeMessage);
+			mailSender.send(mimeMessage);
 		} catch (MessagingException e) {
 			throw new CustomException(MAIL_SEND_ERROR);
 		}
@@ -225,14 +222,14 @@ public class MemberService {
 		return buffer.toString();
 	}
 
-	public Boolean verifyAuthMail(VerifyAuthMailRequest request) {
-		String authKey = map.get(request.getEmail());
-		if (StringUtils.isEmpty(authKey)) {
+	public String verifyAuthMail(VerifyAuthMailRequest request) {
+		String value = redisService.getValues(request.getEmail());
+
+		// 1. 일치하는 데이터가 없을경우
+		if (isEmpty(value) || !value.equals(request.getAuthKey())) {
 			throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
 		}
-		if (request.getAuthKey().equals(authKey)) {
-			return true;
-		}
-		throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
+
+		return request.getEmail();
 	}
 }

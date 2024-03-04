@@ -1,5 +1,6 @@
 package com.tobe.healthy.schedule;
 
+import com.tobe.healthy.schedule.domain.entity.Schedule;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -11,12 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @Transactional
 class StandByScheduleTest {
+
 	@Autowired
 	private EntityManager em;
 
 	@Test
 	void 예약_대기를_한다() {
-	    // given
+		Schedule schedule = em.find(Schedule.class, 1L);
+		log.info("schedule => {}", schedule);
 
 	}
 }

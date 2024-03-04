@@ -5,12 +5,11 @@ import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberOauthCommandRequest;
-import com.tobe.healthy.member.domain.dto.in.MemberRegisterCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.VerifyAuthMailRequest;
-import com.tobe.healthy.member.domain.dto.out.MemberRegisterCommandResult;
+import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -38,10 +37,8 @@ public class MemberController {
 		@ApiResponse(responseCode = "504", description = "메일 전송중 에러발생"),
 		@ApiResponse(responseCode = "200", description = "이메일 인증번호 전송 성공")
 	})
-	@GetMapping("/send-auth-mail")
-	public ResponseEntity<Boolean> sendAuthMail(
-		@Parameter(name = "이메일", description = "인증번호를 받을 이메일 입력", example = "laborlawseon@gmail.com")
-        @RequestParam String email) {
+	@GetMapping("/send-auth")
+	public ResponseEntity<String> sendAuthMail(@RequestParam String email) {
 		return ResponseEntity.ok(memberService.sendAuthMail(email));
 	}
 
@@ -49,8 +46,8 @@ public class MemberController {
 		@ApiResponse(responseCode = "410", description = "잘못된 인증번호 입력"),
 		@ApiResponse(responseCode = "200", description = "이메일 인증번호 검증 성공")
 	})
-	@PostMapping("/verify-auth-mail")
-	public ResponseEntity<Boolean> verifyAuthMail(@RequestBody VerifyAuthMailRequest request) {
+	@PostMapping("/verify-auth")
+	public ResponseEntity<String> verifyAuthMail(@RequestBody VerifyAuthMailRequest request) {
 		return ResponseEntity.ok(memberService.verifyAuthMail(request));
 	}
 
@@ -60,9 +57,8 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
 	})
 	@PostMapping("/join")
-	public ResponseEntity<MemberRegisterCommandResult> create(
-		@RequestBody @Valid MemberRegisterCommand request) {
-		return ResponseEntity.ok(memberService.create(request));
+	public ResponseEntity<MemberJoinCommandResult> join(@RequestBody @Valid MemberJoinCommand request) {
+		return ResponseEntity.ok(memberService.joinMember(request));
 	}
 
 	@Operation(summary = "로그인", responses = {
@@ -80,9 +76,9 @@ public class MemberController {
 		@ApiResponse(responseCode = "400", description = "회원을 찾을 수 없습니다."),
 		@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token을 반환한다.")
 	})
-	@PostMapping("/refresh")
-	public ResponseEntity<Tokens> refresh(String refreshToken) {
-		return ResponseEntity.ok(memberService.refresh(refreshToken));
+	@PostMapping("/refresh-token")
+	public ResponseEntity<Tokens> refreshToken(String email, String refreshToken) {
+		return ResponseEntity.ok(memberService.refreshToken(email, refreshToken));
 	}
 
 	@Operation(summary = "아이디를 찾는다.", responses = {
@@ -100,7 +96,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "등록된 이메일에 초기화 비밀번호를 전송한다.")
 	})
 	@PostMapping("/find-pw")
-	public ResponseEntity<Boolean> findMemberPW(@RequestBody @Valid MemberFindPWCommand request) {
+	public ResponseEntity<String> findMemberPW(@RequestBody @Valid MemberFindPWCommand request) {
 		return ResponseEntity.ok(memberService.findMemberPW(request));
 	}
 

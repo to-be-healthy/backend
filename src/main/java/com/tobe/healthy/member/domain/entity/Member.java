@@ -9,7 +9,7 @@ import static lombok.AccessLevel.PROTECTED;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.file.domain.entity.Profile;
-import com.tobe.healthy.member.domain.dto.in.MemberRegisterCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import jakarta.persistence.Column;
@@ -61,16 +61,16 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @JoinColumn(name = "gym_id")
     private Gym gym;
 
-    @OneToMany(mappedBy = "trainerId")
+    @OneToMany(mappedBy = "trainer")
     private List<Schedule> trainerSchedules = new ArrayList<>();
 
-    @OneToMany(mappedBy = "applicantId")
+    @OneToMany(mappedBy = "applicant")
     private List<Schedule> applicantSchedules = new ArrayList<>();
 
     @OneToOne(mappedBy = "member")
     private StandBySchedule standBySchedule;
 
-    public static Member create(MemberRegisterCommand request, String password) {
+    public static Member join(MemberJoinCommand request, String password) {
         Member member = new Member();
         member.email = request.getEmail();
         member.password = password;

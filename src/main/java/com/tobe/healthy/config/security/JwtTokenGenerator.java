@@ -1,13 +1,8 @@
 package com.tobe.healthy.config.security;
 
-import static com.tobe.healthy.config.error.ErrorCode.ACCESS_TOKEN_NOT_FOUND;
-import static java.lang.String.valueOf;
-
-import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.member.domain.entity.BearerToken;
+import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
-import com.tobe.healthy.member.repository.BearerTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -22,50 +17,46 @@ public class JwtTokenGenerator {
     private final Long refreshTokenValidSeconds;
     private final String jwtSecret;
     private final Key key;
-    private final BearerTokenRepository bearerTokenRepository;
+    private final RedisService redisService;
 
     public JwtTokenGenerator(@Value("${jwt.access-token-valid-seconds}") Long accessTokenValidSeconds,
                              @Value("${jwt.refresh-token-valid-seconds}") Long refreshTokenValidSeconds,
                              @Value("${jwt.secret}")  String jwtSecret,
-                             BearerTokenRepository bearerTokenRepository) {
+                             RedisService redisService) {
         this.accessTokenValidSeconds = accessTokenValidSeconds;
         this.refreshTokenValidSeconds = refreshTokenValidSeconds;
         this.jwtSecret = jwtSecret;
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
-        this.bearerTokenRepository = bearerTokenRepository;
+        this.redisService = redisService;
     }
 
     public Tokens create(Member member) {
         long nowInMilliseconds = new Date().getTime();
-        String accessToken = createAccessToken(
-                valueOf(member.getId()),
-                member.getEmail(),
-                "ROLE_MEMBER",
-                new Date(nowInMilliseconds + accessTokenValidSeconds * 1000));
-        String refreshToken = createRefreshToken(new Date(nowInMilliseconds + refreshTokenValidSeconds * 1000));
-        bearerTokenRepository.deleteAllByMemberId(member.getId());
-        bearerTokenRepository.save(new BearerToken(member.getId(), member.getEmail(), refreshToken, accessToken));
+        String accessToken = createAccessToken(member.getEmail(), "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
+
+        String refreshToken = createRefreshToken(getRefreshTokenValid(nowInMilliseconds));
+
+        redisService.setValuesWithTimeout(member.getEmail(), refreshToken, getRefreshTokenValid(nowInMilliseconds).getTime());
+
         return new Tokens(accessToken, refreshToken);
     }
 
-    public Tokens exchangeAccessToken(Member member, String accessToken) {
-        BearerToken token = bearerTokenRepository.findByAccessToken(accessToken)
-                .orElseThrow(() -> new CustomException(ACCESS_TOKEN_NOT_FOUND));
-
-        long nowInMilliseconds = new Date().getTime();
-        String changedAccessToken = createAccessToken(
-                valueOf(member.getId()),
-                member.getEmail(),
-                "ROLE_MEMBER",
-                new Date(nowInMilliseconds + accessTokenValidSeconds * 1000));
-
-        token.exchangeAccessToken(changedAccessToken);
-        bearerTokenRepository.save(token);
-        return new Tokens(changedAccessToken, token.getRefreshToken());
+    private Date getRefreshTokenValid(long nowInMilliseconds) {
+        return new Date(nowInMilliseconds + refreshTokenValidSeconds * 1000);
     }
 
-    private String createAccessToken(String userId, String email, String role, Date expiry) {
-        Claims claims = Jwts.claims().setSubject(userId).setExpiration(expiry).setIssuedAt(new Date());
+    private Date getAccessTokenValid(long nowInMilliseconds) {
+        return new Date(nowInMilliseconds + accessTokenValidSeconds * 1000);
+    }
+
+    public Tokens exchangeAccessToken(Member member, String refreshToken) {
+        long nowInMilliseconds = new Date().getTime();
+        String changedAccessToken = createAccessToken(member.getEmail(), "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
+        return new Tokens(changedAccessToken, refreshToken);
+    }
+
+    private String createAccessToken(String email, String role, Date expiry) {
+        Claims claims = Jwts.claims().setExpiration(expiry).setIssuedAt(new Date());
         claims.put("email", email);
         claims.put("role", role);
         return Jwts.builder()

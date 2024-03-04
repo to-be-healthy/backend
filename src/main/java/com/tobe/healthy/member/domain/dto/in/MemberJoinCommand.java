@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class MemberRegisterCommand {
+public class MemberJoinCommand {
     @NotEmpty(message = "이메일을 입력해 주세요.")
     private String email;
 
