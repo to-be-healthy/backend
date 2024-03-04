@@ -14,7 +14,6 @@ import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,42 +32,42 @@ public class ScheduleTest {
 	@Autowired
 	private ScheduleService scheduleService;
 
-	@BeforeEach
-	@Transactional
+	@Test
 	void registerSchedule() {
 		Member member = Member.builder()
-			.email("laborlawseon@gmail.com")
+			.email("member@gmail.com")
 			.password("12345678")
-			.nickname("seonwoo_jung")
+			.nickname("member")
 			.isAlarm(ABLE)
 			.category(MEMBER)
 			.mobileNum("010-1234-1234")
 			.build();
 
 		Member trainer = Member.builder()
-			.email("laborlawseon2@gmail.com")
+			.email("trainer@gmail.com")
 			.password("123456789")
-			.nickname("seonwoo_jung2")
+			.nickname("trainer")
 			.isAlarm(ABLE)
 			.category(TRAINER)
 			.mobileNum("010-4321-4321")
 			.build();
 
-		// given
+	    // given
 		Schedule schedule = Schedule.builder()
 			.startDate(LocalDateTime.of(2024, 2, 29, 10, 0))
 			.isReserve(TRUE)
 			.round("1")
 			.trainerId(trainer)
-			.applicantId(member)
+//			.applicantId(member)
 			.build();
 
 		em.persist(schedule);
 	}
 
 	@Test
-	@DisplayName("모든 일정을 확인한다.")
-	void findSchedule() {
+	@DisplayName("모든 일정을 조회한다.")
+	@Rollback(value = false)
+	void findAllSchedule() {
 	    // given
 		List<ScheduleCommandResult> schedules = scheduleService.findAllSchedule();
 		for (ScheduleCommandResult schedule : schedules) {

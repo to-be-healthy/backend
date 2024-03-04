@@ -11,13 +11,11 @@ import com.tobe.healthy.member.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -32,7 +30,6 @@ class MemberServiceTest {
     private MemberRepository memberRepository;
 
     @Test
-    @Rollback(false)
     @DisplayName("회원을 등록한다.")
     void registerMember() {
         Gym gym = Gym.builder()
@@ -56,38 +53,27 @@ class MemberServiceTest {
 
     @Test
     void validateDuplicateEmailTest() {
-        assertThatThrownBy(() -> validateDuplicateEmail()).hasMessage(MEMBER_DUPLICATION_EMAIL.getMessage());
+        assertThatThrownBy(
+            () -> validateDuplicateEmail()).hasMessage(MEMBER_DUPLICATION_EMAIL.getMessage());
     }
 
     @Test
     void validateDuplicateNicknameTest() {
-        assertThatThrownBy(() -> validateDuplicateNickname()).hasMessage(MEMBER_DUPLICATION_NICKNAME.getMessage());
+        assertThatThrownBy(
+            () -> validateDuplicateNickname()).hasMessage(MEMBER_DUPLICATION_NICKNAME.getMessage());
     }
 
-    void validateDuplicateEmail() {
+    private void validateDuplicateEmail() {
         registerMember();
         memberRepository.findByEmail("laborlawseon@gmail.com").ifPresent(x -> {
             throw new CustomException(MEMBER_DUPLICATION_EMAIL);
         });
     }
 
-    void validateDuplicateNickname() {
+    private void validateDuplicateNickname() {
         registerMember();
         memberRepository.findByNickname("seonwoo_jung").ifPresent(x -> {
             throw new CustomException(MEMBER_DUPLICATION_NICKNAME);
         });
-    }
-
-    @Test
-    void registerEmail() {
-        // given
-        String email = UUID.randomUUID().toString() + "@kakao.com";
-        log.info(email);
-        // when
-
-
-        // then
-//        assertThat();
-
     }
 }

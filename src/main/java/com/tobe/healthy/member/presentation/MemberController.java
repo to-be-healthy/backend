@@ -10,7 +10,6 @@ import com.tobe.healthy.member.domain.dto.in.VerifyAuthMailRequest;
 import com.tobe.healthy.member.domain.dto.out.MemberRegisterCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -39,9 +38,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "이메일 인증번호 전송 성공")
 	})
 	@GetMapping("/send-auth-mail")
-	public ResponseEntity<Boolean> sendAuthMail(
-		@Parameter(name = "이메일", description = "인증번호를 받을 이메일 입력", example = "laborlawseon@gmail.com")
-        @RequestParam String email) {
+	public ResponseEntity<String> sendAuthMail(@RequestParam String email) {
 		return ResponseEntity.ok(memberService.sendAuthMail(email));
 	}
 
@@ -60,9 +57,8 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
 	})
 	@PostMapping("/join")
-	public ResponseEntity<MemberRegisterCommandResult> create(
-		@RequestBody @Valid MemberRegisterCommand request) {
-		return ResponseEntity.ok(memberService.create(request));
+	public ResponseEntity<MemberRegisterCommandResult> create(@RequestBody @Valid MemberRegisterCommand request) {
+		return ResponseEntity.ok(memberService.joinMember(request));
 	}
 
 	@Operation(summary = "로그인", responses = {
@@ -81,8 +77,8 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token을 반환한다.")
 	})
 	@PostMapping("/refresh")
-	public ResponseEntity<Tokens> refresh(String refreshToken) {
-		return ResponseEntity.ok(memberService.refresh(refreshToken));
+	public ResponseEntity<Tokens> refresh(String email, String refreshToken) {
+		return ResponseEntity.ok(memberService.refresh(email, refreshToken));
 	}
 
 	@Operation(summary = "아이디를 찾는다.", responses = {
