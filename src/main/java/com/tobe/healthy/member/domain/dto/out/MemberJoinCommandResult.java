@@ -9,14 +9,14 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class MemberRegisterCommandResult {
+public class MemberJoinCommandResult {
     private String email;
     private String nickname;
     private String mobileNum;
     private MemberCategory category;
 
-    public static MemberRegisterCommandResult of(Member member){
-        return MemberRegisterCommandResult.builder()
+    public static MemberJoinCommandResult of(Member member){
+        return MemberJoinCommandResult.builder()
                 .email(member.getEmail())
                 .nickname(member.getNickname())
                 .category(member.getCategory())

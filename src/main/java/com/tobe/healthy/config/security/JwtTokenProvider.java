@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JwtTokenProvider { // JWT 토큰 검증 모듈
+public class JwtTokenProvider {
 
     private final CustomMemberDetailService customMemberDetailService;
 
