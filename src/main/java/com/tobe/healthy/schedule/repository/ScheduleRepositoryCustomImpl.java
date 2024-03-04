@@ -1,13 +1,12 @@
 package com.tobe.healthy.schedule.repository;
 
-import static com.tobe.healthy.schedule.domain.entity.ReserveType.FALSE;
+import static com.querydsl.core.types.Projections.constructor;
+import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommand;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
-import java.time.LocalDateTime;
+import com.tobe.healthy.member.domain.entity.QMember;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -16,21 +15,24 @@ import org.springframework.stereotype.Repository;
 public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
 
 	private final JPAQueryFactory queryFactory;
-	private final MemberRepository memberRepository;
 
 	@Override
-	public LocalDateTime registerSchedule(ScheduleCommand request) {
-		Schedule.builder()
-			.startDate(request.getStartDate())
-			.isReserve(FALSE)
-			.round(request.getRound())
-			.trainerId(findByEmail(request.getTrainerEmail()))
-			.applicantId(findByEmail(request.getApplicantEmail()))
-			.build();
-		return request.getStartDate();
-	}
+	public List<ScheduleCommandResult> findAllSchedule() {
+		QMember trainer = new QMember("trainer");
+		QMember applicant = new QMember("applicant");
 
-	private Member findByEmail(String email) {
-		return memberRepository.findByEmail(email).orElse(null);
+		return queryFactory
+			.select(constructor(ScheduleCommandResult.class,
+				schedule.id,
+				schedule.startDt,
+				schedule.endDt,
+				schedule.isReserve,
+				schedule.round,
+				trainer.nickname,
+				applicant.nickname))
+			.from(schedule)
+			.leftJoin(schedule.trainer, trainer)
+			.leftJoin(schedule.applicant, applicant)
+			.fetch();
 	}
 }
