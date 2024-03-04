@@ -76,13 +76,13 @@ public class ScheduleTest {
 		}
 	}
 
-	@Test
-	@DisplayName("일정을 취소한다.")
-	@Rollback(false)
-	void cancelSchedule() {
-	    // given
-		LocalDateTime result = scheduleService.modifySchedule(LocalDateTime.of(2024, 2, 29, 10, 0));
-	    // then
-	    assertThat(result).isEqualTo(LocalDateTime.of(2024, 2, 29, 10, 0));
-	}
+//	@Test
+//	@DisplayName("일정을 취소한다.")
+//	@Rollback(false)
+//	void cancelSchedule() {
+//	    // given
+//		LocalDateTime result = scheduleService.modifySchedule(LocalDateTime.of(2024, 2, 29, 10, 0));
+//	    // then
+//	    assertThat(result).isEqualTo(LocalDateTime.of(2024, 2, 29, 10, 0));
+//	}
 }

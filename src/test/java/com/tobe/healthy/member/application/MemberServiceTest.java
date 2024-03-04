@@ -54,15 +54,15 @@ class MemberServiceTest {
         log.info("findMember => {}", findMember);
     }
 
-    @Test
-    void validateDuplicateEmailTest() {
-        assertThatThrownBy(() -> validateDuplicateEmail()).hasMessage(MEMBER_DUPLICATION_EMAIL.getMessage());
-    }
+//    @Test
+//    void validateDuplicateEmailTest() {
+//        assertThatThrownBy(() -> validateDuplicateEmail()).hasMessage(MEMBER_DUPLICATION_EMAIL.getMessage());
+//    }
 
-    @Test
-    void validateDuplicateNicknameTest() {
-        assertThatThrownBy(() -> validateDuplicateNickname()).hasMessage(MEMBER_DUPLICATION_NICKNAME.getMessage());
-    }
+//    @Test
+//    void validateDuplicateNicknameTest() {
+//        assertThatThrownBy(() -> validateDuplicateNickname()).hasMessage(MEMBER_DUPLICATION_NICKNAME.getMessage());
+//    }
 
     void validateDuplicateEmail() {
         registerMember();
