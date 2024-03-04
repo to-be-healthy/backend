@@ -28,7 +28,6 @@ public class MessageTest {
 	    // given
 		String randomStr = RandomStringUtils.random(12, true, true);
 		log.info("randomStr => {}", randomStr);
-
 	}
 
 	private String getAuthCode() {
