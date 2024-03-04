@@ -1,6 +1,6 @@
 package com.tobe.healthy.schedule.presentation;
 
-import com.tobe.healthy.schedule.application.ScheduleCommandResponse;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
 import com.tobe.healthy.schedule.application.ScheduleService;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommandRequest;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest;

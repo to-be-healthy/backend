@@ -7,6 +7,7 @@ import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommandRequest;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest;
