@@ -2,6 +2,20 @@ spring:
   profiles:
     active: DEV
 
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          starttls:
+            enable: true
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -10,7 +24,8 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
+
     properties:
       hibernate:
         format_sql: true
@@ -32,12 +47,13 @@ server:
       charset: UTF-8
       enabled: true
       force: true
+
   tomcat:
     uri-encoding: UTF-8
 
 file:
   upload:
-    location: upload # 로컬 실행시 변경
+    location: ${FILE_UPLOAD_LOCATION}
 
   security:
     oauth2:
@@ -49,6 +65,7 @@ file:
             authorization-grant-type: authorization_code
             redirect-uri: http://localhost:8080/api/auth/code/kakao
             client-authentication-method: POST
+
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize # "인가 코드 받기" 항목
@@ -61,8 +78,9 @@ springdoc:
   packages-to-scan: com.tobe.healthy
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
+
   swagger-ui:
-    path: /
+    path: ${SPRINGDOC-SWAGGER-UI-PATH}
     disable-swagger-default-url: true
     display-request-duration: true
     operations-sorter: alpha

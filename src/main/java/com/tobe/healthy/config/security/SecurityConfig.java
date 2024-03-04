@@ -31,7 +31,7 @@ public class SecurityConfig {
                     .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                     .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint))
                     .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers("file/**", "/api/**").permitAll()
+                        authorize -> authorize.requestMatchers("file/**", "/api/**", "/**").permitAll()
                             .anyRequest().hasRole("MEMBER")
 //                        authorize -> authorize.requestMatchers("/api/auth/**", "/favicon.ico", "/file/**").permitAll()
 //                                              .anyRequest().hasRole("MEMBER")

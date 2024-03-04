@@ -11,6 +11,7 @@ import com.tobe.healthy.member.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -75,5 +76,18 @@ class MemberServiceTest {
         memberRepository.findByNickname("seonwoo_jung").ifPresent(x -> {
             throw new CustomException(MEMBER_DUPLICATION_NICKNAME);
         });
+    }
+
+    @Test
+    void registerEmail() {
+        // given
+        String email = UUID.randomUUID().toString() + "@kakao.com";
+        log.info(email);
+        // when
+
+
+        // then
+//        assertThat();
+
     }
 }
