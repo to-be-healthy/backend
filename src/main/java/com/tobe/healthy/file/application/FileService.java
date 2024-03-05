@@ -14,7 +14,6 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.util.StringUtils.cleanPath;
 
 import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.file.domain.dto.in.FileRegisterCommand;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
 import com.tobe.healthy.member.domain.entity.Member;
@@ -49,7 +48,7 @@ public class FileService {
 	private String uploadDir;
 
 	@Transactional
-	public Boolean uploadFile(MultipartFile uploadFile, FileRegisterCommand request) {
+	public Boolean uploadFile(MultipartFile uploadFile, Long memberId) {
 		if (!uploadFile.isEmpty()) {
 			try {
 				String savedFileName = randomUUID().toString();
@@ -59,8 +58,10 @@ public class FileService {
 				Files.copy(uploadFile.getInputStream(), copyOfLocation, REPLACE_EXISTING);
 
 				Profile profile = Profile.create(savedFileName, cleanPath(uploadFile.getOriginalFilename()), extension, uploadDir + separator, uploadFile.getSize());
-				Member member = memberRepository.findById(request.getMemberId())
+				
+				Member member = memberRepository.findById(memberId)
 					.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
 				member.registerProfile(profile);
 				fileRepository.save(profile);
 

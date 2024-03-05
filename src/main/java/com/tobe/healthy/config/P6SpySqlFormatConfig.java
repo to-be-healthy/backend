@@ -10,7 +10,7 @@ import org.hibernate.engine.jdbc.internal.FormatStyle;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class P6SpySqlFormatter implements MessageFormattingStrategy {
+public class P6SpySqlFormatConfig implements MessageFormattingStrategy {
 
 	@PostConstruct
 	public void setLogMessageFormat() {
