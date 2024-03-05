@@ -10,5 +10,6 @@ import java.util.List;
 public interface WorkoutHistoryRepositoryCustom {
 
     Page<WorkoutHistoryDto> getWorkoutHistory(Long memberId, Pageable pageable);
+    Page<WorkoutHistoryDto> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable);
     List<WorkoutHistoryFileDto> getWorkoutHistoryFile(List<Long> ids);
 }

@@ -44,6 +44,27 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     }
 
     @Override
+    public Page<WorkoutHistoryDto> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable) {
+        Long totalCnt = queryFactory
+                .select(qHistory.count())
+                .from(qHistory)
+                .where(qHistory.trainerId.eq(trainerId))
+                .fetchOne();
+        List<WorkoutHistoryDto> workoutHistories =  queryFactory
+                .select(Projections.fields(WorkoutHistoryDto.class,
+                        qHistory.workoutHistoryId,
+                        qHistory.content
+                ))
+                .from(qHistory)
+                .where(qHistory.trainerId.eq(trainerId))
+                .orderBy(qHistory.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+        return PageableExecutionUtils.getPage(workoutHistories, pageable, ()-> totalCnt );
+    }
+
+    @Override
     public List<WorkoutHistoryFileDto> getWorkoutHistoryFile(List<Long> ids) {
         return queryFactory.select(Projections.fields(WorkoutHistoryFileDto.class,
                         qHistoryFile.id,

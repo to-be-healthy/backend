@@ -25,11 +25,14 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    private Long trainerId;
+
     public static WorkoutHistory create(WorkoutHistoryDto historyDto, Member member) {
         return WorkoutHistory.builder()
                 .workoutHistoryId(historyDto.getWorkoutHistoryId())
                 .content(historyDto.getContent())
                 .member(member)
+                .trainerId(historyDto.getTrainerId())
                 .build();
     }
 }
