@@ -99,7 +99,7 @@ public class MemberService {
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 		// 4. 새로운 AccessToken과 기존의 RefreshToken을 반환한다.
-		return tokenGenerator.exchangeAccessToken(member, refreshToken);
+		return tokenGenerator.exchangeAccessToken(member.getEmail(), refreshToken);
 	}
 
 	public String getAccessToken(String authCode) {

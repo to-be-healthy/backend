@@ -28,13 +28,12 @@ spring:
 
     properties:
       hibernate:
-        format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
     open-in-view: false
-
-logging.level:
-  org.hibernate.SQL: debug
-  org.hibernate.type: trace
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 jwt:
   secret: ${JWT_SECRET_TOKEN}
@@ -72,3 +71,8 @@ file:
             token-uri: https://kauth.kakao.com/oauth/token # "토큰 받기" 항목
             user-info-uri: https://kapi.kakao.com/v2/user/me # "사용자 정보 가져오기" 항목
             user-name-attribute: id # 식별자 . 카카오의 경우 "id" 사용
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true

@@ -49,9 +49,9 @@ public class JwtTokenGenerator {
         return new Date(nowInMilliseconds + accessTokenValidSeconds * 1000);
     }
 
-    public Tokens exchangeAccessToken(Member member, String refreshToken) {
+    public Tokens exchangeAccessToken(String email, String refreshToken) {
         long nowInMilliseconds = new Date().getTime();
-        String changedAccessToken = createAccessToken(member.getEmail(), "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
+        String changedAccessToken = createAccessToken(email, "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
         return new Tokens(changedAccessToken, refreshToken);
     }
 

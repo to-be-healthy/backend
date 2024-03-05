@@ -34,8 +34,8 @@ public class ScheduleService {
 	private final ScheduleRepository scheduleRepository;
 
 	public List<ScheduleCommandResponse> autoCreateSchedule(AutoCreateScheduleCommandRequest request) {
-		int round = calculateRound(request);
 		List<ScheduleCommandResponse> list = new ArrayList<>();
+		int round = calculateRound(request);
 		LocalDateTime curDt = request.getStartDt();
 
 		// 수업 시작 시간 + 수업 종료 시간 + 수업당 시간 + 휴식 시간
