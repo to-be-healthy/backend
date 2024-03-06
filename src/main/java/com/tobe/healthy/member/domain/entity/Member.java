@@ -1,6 +1,6 @@
 package com.tobe.healthy.member.domain.entity;
 
-import static com.tobe.healthy.member.domain.entity.Alarm.ABLE;
+import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
@@ -50,10 +50,10 @@ public class Member extends BaseTimeEntity<Member, Long> {
     private Profile profileId;
 
     @Enumerated(STRING)
-    private Alarm isAlarm;
+    private AlarmStatus alarmStatus;
 
     @Enumerated(STRING)
-    private MemberCategory category;
+    private MemberType memberType;
 
     private String mobileNum;
 
@@ -75,8 +75,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
         member.email = request.getEmail();
         member.password = password;
         member.nickname = request.getNickname();
-        member.isAlarm = ABLE;
-        member.category = request.getCategory();
+        member.alarmStatus = ENABLED;
+        member.memberType = request.getMemberType();
         member.mobileNum = request.getMobileNum();
         return member;
     }

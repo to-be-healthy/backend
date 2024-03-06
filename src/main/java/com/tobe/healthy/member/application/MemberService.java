@@ -20,7 +20,7 @@ import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.application.FileService;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommandRequest;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
@@ -180,7 +180,7 @@ public class MemberService {
 		});
 	}
 
-	public String findMemberId(MemberFindIdCommand request) {
+	public String findMemberId(MemberFindIdCommandRequest request) {
 		Member entity = memberRepository.findByMobileNumAndNickname(request.getMobileNum(), request.getNickname())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		return entity.getEmail();

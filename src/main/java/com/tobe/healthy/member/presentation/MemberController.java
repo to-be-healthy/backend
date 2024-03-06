@@ -1,11 +1,11 @@
 package com.tobe.healthy.member.presentation;
 
 import com.tobe.healthy.member.application.MemberService;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommandRequest;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberOauthCommandRequest;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.VerifyAuthMailRequest;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
@@ -86,11 +86,10 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "휴대폰 번호, 닉네임에 일치하는 이메일을 반환한다.")
 	})
 	@PostMapping("/find-id")
-	public ResponseEntity<String> findMemberId(@RequestBody @Valid MemberFindIdCommand request) {
+	public ResponseEntity<String> findMemberId(@RequestBody @Valid MemberFindIdCommandRequest request) {
 		return ResponseEntity.ok(memberService.findMemberId(request));
 	}
 
-	
 	@Operation(summary = "비밀번호를 찾는다.", responses = {
 		@ApiResponse(responseCode = "400", description = "등록된 회원이 아닙니다."),
 		@ApiResponse(responseCode = "200", description = "등록된 이메일에 초기화 비밀번호를 전송한다.")

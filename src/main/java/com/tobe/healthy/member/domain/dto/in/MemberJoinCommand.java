@@ -1,6 +1,6 @@
 package com.tobe.healthy.member.domain.dto.in;
 
-import com.tobe.healthy.member.domain.entity.MemberCategory;
+import com.tobe.healthy.member.domain.entity.MemberType;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -17,7 +17,7 @@ public class MemberJoinCommand {
     private String nickname;
 
     @NotNull(message = "회원 구분이 필요합니다.")
-    private MemberCategory category;
+    private MemberType memberType;
 
     @NotEmpty(message = "휴대폰 번호를 입력해 주세요.")
     private String mobileNum;

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberFindIdCommand {
+public class MemberFindIdCommandRequest {
 	@NotEmpty(message = "휴대폰번호를 입력해 주세요.")
 	private String mobileNum;
 

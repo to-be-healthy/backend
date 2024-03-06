@@ -1,9 +1,10 @@
 package com.tobe.healthy.schedule.application;
 
-import static com.tobe.healthy.member.domain.entity.Alarm.ABLE;
-import static com.tobe.healthy.member.domain.entity.MemberCategory.MEMBER;
-import static com.tobe.healthy.member.domain.entity.MemberCategory.TRAINER;
+import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
+import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static java.time.LocalDateTime.of;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommandRequest;
@@ -48,10 +49,10 @@ class ScheduleServiceTest {
 				.lessonTime(50)
 				.breakTime(10)
 				.build();
+
 			List<ScheduleCommandResponse> lists = scheduleService.autoCreateSchedule(request);
-			for (ScheduleCommandResponse list : lists) {
-				log.info("list => {}", list);
-			}
+
+			assertThat(lists.size()).isEqualTo(12);
 		}
 
 		@Test
@@ -61,16 +62,16 @@ class ScheduleServiceTest {
 				.email("member@gmail.com")
 				.password("12345678")
 				.nickname("member")
-				.isAlarm(ABLE)
-				.category(MEMBER)
+				.alarmStatus(ENABLED)
+				.memberType(MEMBER)
 				.build();
 
 			Member trainer = Member.builder()
 				.email("trainer@gmail.com")
 				.password("12345678")
 				.nickname("trainer")
-				.isAlarm(ABLE)
-				.category(TRAINER)
+				.alarmStatus(ENABLED)
+				.memberType(TRAINER)
 				.build();
 
 			em.persist(trainer);
@@ -82,6 +83,7 @@ class ScheduleServiceTest {
 				.lessonTime(50)
 				.breakTime(10)
 				.build();
+
 			List<ScheduleCommandResponse> lists = scheduleService.autoCreateSchedule(request);
 
 			List<ScheduleRegisterInfo> requests = new ArrayList<>();
@@ -94,8 +96,9 @@ class ScheduleServiceTest {
 				.list(requests)
 				.build();
 
-			Boolean result = scheduleService.registerSchedule(param);
-			log.info("result => {}", result);
+			scheduleService.registerSchedule(param);
+
+			assertThat(lists.size()).isEqualTo(param.getList().size());
 		}
 	}
 

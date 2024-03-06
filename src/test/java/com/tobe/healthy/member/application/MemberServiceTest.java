@@ -1,12 +1,12 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.member.domain.entity.Alarm.ABLE;
-import static com.tobe.healthy.member.domain.entity.MemberCategory.MEMBER;
+import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
+import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.file.application.FileService;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommandRequest;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.VerifyAuthMailRequest;
@@ -72,8 +72,8 @@ class MemberServiceTest {
                 .email("laborlawseon@gmail.com")
                 .password("12345678")
                 .nickname("seonwoo_jung")
-                .isAlarm(ABLE)
-                .category(MEMBER)
+                .alarmStatus(ENABLED)
+                .memberType(MEMBER)
                 .build();
 
             em.persist(member);
@@ -90,8 +90,8 @@ class MemberServiceTest {
                 .email("laborlawseon@gmail.com")
                 .password("12345678")
                 .nickname("seonwoo_jung")
-                .isAlarm(ABLE)
-                .category(MEMBER)
+                .alarmStatus(ENABLED)
+                .memberType(MEMBER)
                 .build();
 
             em.persist(member);
@@ -119,8 +119,8 @@ class MemberServiceTest {
                 .email("laborlawseon@gmail.com")
                 .password(encoder.encode("12345678"))
                 .nickname("seonwoo_jung")
-                .isAlarm(ABLE)
-                .category(MEMBER)
+                .alarmStatus(ENABLED)
+                .memberType(MEMBER)
                 .build();
             em.persist(member);
         }
@@ -159,8 +159,8 @@ class MemberServiceTest {
                 .mobileNum("010-4000-1278")
                 .password(encoder.encode("12345678"))
                 .nickname("seonwoo_jung")
-                .isAlarm(ABLE)
-                .category(MEMBER)
+                .alarmStatus(ENABLED)
+                .memberType(MEMBER)
                 .build();
             em.persist(member);
         }
@@ -169,7 +169,7 @@ class MemberServiceTest {
         @DisplayName("아이디를 찾는다.")
         void findMember() {
             // given
-            String email = memberService.findMemberId(new MemberFindIdCommand(member.getMobileNum(), member.getNickname()));
+            String email = memberService.findMemberId(new MemberFindIdCommandRequest(member.getMobileNum(), member.getNickname()));
             assertThat(member.getEmail()).isEqualTo(email);
         }
 
