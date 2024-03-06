@@ -5,7 +5,7 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.application.WorkoutService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.in.WorkoutHistoryAddCommand;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryAddCommandResult;
+import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryCommandResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
@@ -32,8 +32,8 @@ public class WorkoutController {
             @ApiResponse(responseCode = "200", description = "운동기록ID, 회원ID, 운동기록 내용을 반환한다.")
     })
     @PostMapping("/workout-histories")
-    public ResponseEntity<WorkoutHistoryAddCommandResult> addWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
-                                                                            @Valid WorkoutHistoryAddCommand command) {
+    public ResponseEntity<WorkoutHistoryCommandResult> addWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
+                                                                         @Valid WorkoutHistoryAddCommand command) {
         Member member = commonService.getMemberIdByToken(bearerToken);
         return ResponseEntity.ok(workoutService.addWorkoutHistory(member, command));
     }
@@ -65,6 +65,27 @@ public class WorkoutController {
     @GetMapping("/workout-histories/{workoutHistoryId}")
     public ResponseEntity<WorkoutHistoryDto> getWorkoutHistoryDetail(@PathVariable("workoutHistoryId") Long workoutHistoryId) {
         return ResponseEntity.ok(workoutService.getWorkoutHistoryDetail(workoutHistoryId));
+    }
+
+    @Operation(summary = "운동기록 삭제", responses = {
+            @ApiResponse(responseCode = "200", description = "운동기록 삭제 완료.")
+    })
+    @DeleteMapping("/workout-histories/{workoutHistoryId}")
+    public ResponseEntity<?> deleteWorkoutHistory(@PathVariable("workoutHistoryId") Long workoutHistoryId) {
+        workoutService.deleteWorkoutHistory(workoutHistoryId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "운동기록 수정", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "운동기록ID, 회원ID, 운동기록 내용을 반환한다.")
+    })
+    @PutMapping("/workout-histories/{workoutHistoryId}")
+    public ResponseEntity<WorkoutHistoryCommandResult> updateWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
+                                                                            @PathVariable("workoutHistoryId") Long workoutHistoryId,
+                                                                            @Valid WorkoutHistoryAddCommand command) {
+        Member member = commonService.getMemberIdByToken(bearerToken);
+        return ResponseEntity.ok(workoutService.updateWorkoutHistory(member, workoutHistoryId, command));
     }
 
 }

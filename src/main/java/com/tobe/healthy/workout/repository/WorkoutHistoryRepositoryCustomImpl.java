@@ -4,6 +4,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.file.domain.entity.QWorkoutHistoryFile;
+import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.QWorkoutHistory;
 import lombok.RequiredArgsConstructor;
@@ -80,4 +81,5 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
                 .orderBy(qHistoryFile.createdAt.desc())
                 .fetch();
     }
+
 }

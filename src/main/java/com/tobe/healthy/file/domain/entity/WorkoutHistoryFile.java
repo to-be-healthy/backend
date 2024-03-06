@@ -30,7 +30,7 @@ public class WorkoutHistoryFile extends BaseTimeEntity<WorkoutHistoryFile, Long>
     private String filePath;
     private Long fileSize;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workout_history_id")
     private WorkoutHistory workoutHistory;
 
@@ -44,4 +44,5 @@ public class WorkoutHistoryFile extends BaseTimeEntity<WorkoutHistoryFile, Long>
                 .workoutHistory(history)
                 .build();
     }
+
 }

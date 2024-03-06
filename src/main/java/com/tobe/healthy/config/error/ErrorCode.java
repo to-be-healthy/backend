@@ -22,7 +22,8 @@ public enum ErrorCode {
 	SERVER_ERROR(500, "S_001", "서버에서 오류가 발생하였습니다."),
 	FILE_FIND_ERROR(503, "S_003", "파일 조회중 에러가 발생하였습니다."),
 	FILE_UPLOAD_ERROR(501, "S_002", "파일 업로드중 에러가 발생하였습니다."),
-	MAIL_SEND_ERROR(504, "S_004", "메일 전송중 에러가 발생했습니다.");
+	MAIL_SEND_ERROR(504, "S_004", "메일 전송중 에러가 발생했습니다."),
+	FILE_REMOVE_ERROR(505, "S_005", "파일 삭제중 에러가 발생하였습니다.");
 
 
 	private final int status;

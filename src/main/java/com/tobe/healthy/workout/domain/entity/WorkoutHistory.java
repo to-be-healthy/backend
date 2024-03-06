@@ -1,10 +1,15 @@
 package com.tobe.healthy.workout.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
+import com.tobe.healthy.workout.domain.dto.in.WorkoutHistoryAddCommand;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "workout_history")
@@ -27,6 +32,9 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     private Long trainerId;
 
+    @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
+    private List<WorkoutHistoryFile> historyFiles = new ArrayList<>();
+
     public static WorkoutHistory create(WorkoutHistoryDto historyDto, Member member) {
         return WorkoutHistory.builder()
                 .workoutHistoryId(historyDto.getWorkoutHistoryId())
@@ -35,4 +43,9 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
                 .trainerId(historyDto.getTrainerId())
                 .build();
     }
+
+    public void updateContent(String content){
+        this.content = content;
+    }
+
 }

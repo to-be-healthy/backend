@@ -1,10 +1,7 @@
 package com.tobe.healthy.file.application;
 
 
-import static com.tobe.healthy.config.error.ErrorCode.FILE_FIND_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.SERVER_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.*;
 import static java.io.File.separator;
 import static java.nio.file.Files.probeContentType;
 import static java.nio.file.Paths.get;
@@ -22,7 +19,9 @@ import com.tobe.healthy.file.repository.WorkoutFileRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,7 +56,7 @@ public class FileService {
 	public Boolean uploadFile(MultipartFile uploadFile, FileRegisterCommand request) {
 		if (!uploadFile.isEmpty()) {
 			try {
-				String savedFileName = randomUUID().toString();
+				String savedFileName = System.currentTimeMillis() + "_" + randomUUID();
 				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
 
 				Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
@@ -127,7 +126,7 @@ public class FileService {
 	public void uploadWorkoutFile(MultipartFile uploadFile, WorkoutHistory history) {
 		if (!uploadFile.isEmpty()) {
 			try {
-				String savedFileName = randomUUID().toString();
+				String savedFileName = System.currentTimeMillis() + "_" + randomUUID();
 				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
 				Path copyOfLocation = get(uploadDir + separator + cleanPath(savedFileName + extension));
 				Files.createDirectories(copyOfLocation.getParent());
@@ -140,6 +139,16 @@ public class FileService {
 				e.printStackTrace();
 				throw new CustomException(FILE_UPLOAD_ERROR);
 			}
+		}
+	}
+
+	public void deleteFile(String fileName){
+		try{
+			File file = new File(fileName);
+			file.delete();
+		}catch (Exception e){
+			e.printStackTrace();
+			throw new CustomException(FILE_REMOVE_ERROR);
 		}
 	}
 }

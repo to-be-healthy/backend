@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class WorkoutHistoryAddCommandResult {
+public class WorkoutHistoryCommandResult {
 
     private Long workoutHistoryId;
     private Long memberId;
