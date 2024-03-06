@@ -13,13 +13,13 @@ public class MemberJoinCommandResult {
     private String email;
     private String nickname;
     private String mobileNum;
-    private MemberType category;
+    private MemberType memberType;
 
     public static MemberJoinCommandResult of(Member member){
         return MemberJoinCommandResult.builder()
                 .email(member.getEmail())
                 .nickname(member.getNickname())
-                .category(member.getMemberType())
+                .memberType(member.getMemberType())
                 .mobileNum(member.getMobileNum())
                 .build();
     }

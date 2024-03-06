@@ -1,5 +1,7 @@
 package com.tobe.healthy.config.security;
 
+import static io.jsonwebtoken.SignatureAlgorithm.HS256;
+
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
@@ -8,6 +10,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +37,7 @@ public class JwtTokenGenerator {
         long nowInMilliseconds = new Date().getTime();
         String accessToken = createAccessToken(member.getEmail(), "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
 
-        String refreshToken = createRefreshToken(getRefreshTokenValid(nowInMilliseconds));
+        String refreshToken = createRefreshToken(member.getEmail(), getRefreshTokenValid(nowInMilliseconds));
 
         redisService.setValuesWithTimeout(member.getEmail(), refreshToken, getRefreshTokenValid(nowInMilliseconds).getTime());
 
@@ -56,19 +59,27 @@ public class JwtTokenGenerator {
     }
 
     private String createAccessToken(String email, String role, Date expiry) {
-        Claims claims = Jwts.claims().setExpiration(expiry).setIssuedAt(new Date());
+        Claims claims = Jwts.claims();
         claims.put("email", email);
         claims.put("role", role);
+        claims.put("uuid", UUID.randomUUID().toString());
         return Jwts.builder()
                 .setClaims(claims)
-                .signWith(key)
+                .setIssuedAt(new Date())
+                .setExpiration(expiry)
+                .signWith(key, HS256)
                 .compact();
     }
 
-    private String createRefreshToken(Date expiry) {
+    private String createRefreshToken(String email, Date expiry) {
+        Claims claims = Jwts.claims();
+        claims.put("email", email);
+        claims.put("uuid", UUID.randomUUID().toString());
         return Jwts.builder()
-                .setClaims(Jwts.claims().setExpiration(expiry).setIssuedAt(new Date()))
-                .signWith(key)
+                .setClaims(claims)
+                .setIssuedAt(new Date())
+                .setExpiration(expiry)
+                .signWith(key, HS256)
                 .compact();
     }
 }

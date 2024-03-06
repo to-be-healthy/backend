@@ -5,6 +5,7 @@ import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.tobe.healthy.common.RedisService;
+import com.tobe.healthy.config.security.JwtTokenProvider;
 import com.tobe.healthy.file.application.FileService;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommandRequest;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -112,6 +114,9 @@ class MemberServiceTest {
 
         private Member member;
 
+        @Autowired
+        private JwtTokenProvider tokenProvider;
+
         @BeforeEach
         @DisplayName("회원을 등록한다.")
 		void setup() {
@@ -132,17 +137,11 @@ class MemberServiceTest {
             log.info("tokens => {}", tokens);
         }
 
-        @Test
+        @RepeatedTest(100)
         @DisplayName("토큰을 갱신한다.")
         void refreshToken() {
             Tokens before = memberService.login(new MemberLoginCommand(member.getEmail(), "12345678"));
-
             Tokens after = memberService.refreshToken(member.getEmail(), before.getRefreshToken());
-
-            log.info("before.AccessToken => {}", before.getAccessToken());
-            log.info("before.RefreshToken => {}", before.getRefreshToken());
-            log.info("after.AccessToken => {}", after.getAccessToken());
-            log.info("after.RefreshToken => {}", after.getRefreshToken());
             assertThat(before.getAccessToken()).isNotEqualTo(after.getAccessToken());
         }
     }
