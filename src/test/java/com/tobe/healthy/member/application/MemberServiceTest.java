@@ -137,7 +137,11 @@ class MemberServiceTest {
             log.info("tokens => {}", tokens);
         }
 
-        @RepeatedTest(100)
+        /**
+         *  총 반복횟수: {totalRepetitions}
+         *  현재 반복횟수: {currentRepetition}
+         */
+        @RepeatedTest(name = "{currentRepetition}번 째 토큰 갱신", value = 100)
         @DisplayName("토큰을 갱신한다.")
         void refreshToken() {
             Tokens before = memberService.login(new MemberLoginCommand(member.getEmail(), "12345678"));
