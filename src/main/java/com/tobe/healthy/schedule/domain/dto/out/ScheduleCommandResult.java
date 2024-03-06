@@ -1,7 +1,7 @@
 package com.tobe.healthy.schedule.domain.dto.out;
 
 import com.querydsl.core.annotations.QueryProjection;
-import com.tobe.healthy.schedule.domain.entity.ReserveType;
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
@@ -14,17 +14,17 @@ public class ScheduleCommandResult {
 	private Long id;
 	private LocalDateTime startDt;
 	private LocalDateTime endDt;
-	private ReserveType isReserve;
+	private ReservationStatus reservationStatus;
 	private int round;
 	private String trainerName;
 	private String applicantName;
 
 	@QueryProjection
-	public ScheduleCommandResult(Long id, LocalDateTime startDt, LocalDateTime endDt, ReserveType isReserve, int round, String trainerName, String applicantName) {
+	public ScheduleCommandResult(Long id, LocalDateTime startDt, LocalDateTime endDt, ReservationStatus reservationStatus, int round, String trainerName, String applicantName) {
 		this.id = id;
 		this.startDt = startDt;
 		this.endDt = endDt;
-		this.isReserve = isReserve;
+		this.reservationStatus = reservationStatus;
 		this.round = round;
 		this.trainerName = trainerName;
 		this.applicantName = applicantName;

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
+public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 
 	private final JPAQueryFactory queryFactory;
 
@@ -26,7 +26,7 @@ public class ScheduleRepositoryCustomImpl implements ScheduleRepositoryCustom {
 				schedule.id,
 				schedule.startDt,
 				schedule.endDt,
-				schedule.isReserve,
+				schedule.reservationStatus,
 				schedule.round,
 				trainer.nickname,
 				applicant.nickname))

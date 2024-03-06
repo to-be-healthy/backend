@@ -1,4 +1,4 @@
-package com.tobe.healthy.member.application;
+package com.tobe.healthy.config.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,7 +22,6 @@ public class CustomMemberDetailService implements UserDetailsService {
 	}
 
 	public static class AccountContext extends User {
-
 		public AccountContext(String username, Collection<? extends GrantedAuthority> authorities) {
 			super(username, "", authorities);
 		}

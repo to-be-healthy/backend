@@ -1,7 +1,7 @@
 package com.tobe.healthy.schedule.domain.entity;
 
-import static com.tobe.healthy.schedule.domain.entity.ReserveType.FALSE;
-import static com.tobe.healthy.schedule.domain.entity.ReserveType.TRUE;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
@@ -32,7 +32,7 @@ import lombok.ToString;
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @Builder
-@ToString(exclude = {"trainer", "member"})
+@ToString(exclude = {"trainer", "applicant"})
 public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@Id
@@ -45,7 +45,7 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	private LocalDateTime endDt;
 
 	@Enumerated(STRING)
-	private ReserveType isReserve = FALSE;
+	private ReservationStatus reservationStatus = AVAILABLE;
 
 	private int round;
 
@@ -66,18 +66,18 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 			.startDt(request.getStartDt())
 			.endDt(request.getEndDt())
 			.trainer(trainer)
-			.isReserve(FALSE);
+			.reservationStatus(AVAILABLE);
 
 		if (!isEmpty(member)) {
 			reserve.applicant(member);
-			reserve.isReserve(TRUE);
+			reserve.reservationStatus(COMPLETED);
 		}
 
 		return reserve.build();
 	}
 
 	public void cancelSchedule() {
-		this.isReserve = FALSE;
+		this.reservationStatus = AVAILABLE;
 		this.applicant = null;
 	}
 }

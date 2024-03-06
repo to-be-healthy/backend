@@ -139,8 +139,10 @@ class MemberServiceTest {
 
             Tokens after = memberService.refreshToken(member.getEmail(), before.getRefreshToken());
 
-            log.info("before => {}", before.getAccessToken());
-            log.info("after => {}", after.getAccessToken());
+            log.info("before.AccessToken => {}", before.getAccessToken());
+            log.info("before.RefreshToken => {}", before.getRefreshToken());
+            log.info("after.AccessToken => {}", after.getAccessToken());
+            log.info("after.RefreshToken => {}", after.getRefreshToken());
             assertThat(before.getAccessToken()).isNotEqualTo(after.getAccessToken());
         }
     }

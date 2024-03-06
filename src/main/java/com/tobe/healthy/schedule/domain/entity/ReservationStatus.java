@@ -6,9 +6,9 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum ReserveType implements EnumMapperType {
-	TRUE("예약완료"),
-	FALSE("예약가능");
+public enum ReservationStatus implements EnumMapperType {
+	COMPLETED("예약완료"),
+	AVAILABLE("예약가능");
 
 	private final String description;
 

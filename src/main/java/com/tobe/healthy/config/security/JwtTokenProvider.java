@@ -2,7 +2,6 @@ package com.tobe.healthy.config.security;
 
 import static java.lang.String.valueOf;
 
-import com.tobe.healthy.member.application.CustomMemberDetailService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
