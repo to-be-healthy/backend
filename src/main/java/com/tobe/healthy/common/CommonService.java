@@ -19,7 +19,7 @@ public class CommonService {
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
 
-    public Member getMemberIdByToken(String bearerToken){
+    public Member getMemberByToken(String bearerToken){
         String accessToken = bearerToken.substring(7);
         log.info("accessToken: {}", accessToken);
         Long memberId = Long.parseLong(jwtTokenProvider.getUsernameFromToken(accessToken));

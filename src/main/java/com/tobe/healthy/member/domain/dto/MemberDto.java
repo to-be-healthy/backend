@@ -11,7 +11,6 @@ public class MemberDto {
 
     private Long id;
     private String email;
-    private String password;
     private String nickname;
     private String mobileNum;
 
@@ -19,7 +18,6 @@ public class MemberDto {
         return MemberDto.builder()
                 .id(member.getId())
                 .email(member.getEmail())
-                .password(member.getPassword())
                 .nickname(member.getNickname())
                 .mobileNum(member.getMobileNum())
                 .build();

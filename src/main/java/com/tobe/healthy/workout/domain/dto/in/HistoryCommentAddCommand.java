@@ -13,15 +13,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class WorkoutHistoryAddCommand {
+public class HistoryCommentAddCommand {
 
     @NotEmpty(message = "내용을 입력해 주세요.")
     private String content;
-
-    @NotNull(message = "운동을 추가해 주세요.")
-    private List<WorkoutForm> workoutFormList = new ArrayList<>();
-
-    @NotEmpty(message = "사진을 추가해 주세요.")
-    private List<MultipartFile> files = new ArrayList<>();
 
 }

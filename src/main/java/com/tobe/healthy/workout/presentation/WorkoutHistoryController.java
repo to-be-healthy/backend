@@ -2,10 +2,9 @@ package com.tobe.healthy.workout.presentation;
 
 import com.tobe.healthy.common.CommonService;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.workout.application.WorkoutService;
+import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.dto.in.WorkoutHistoryAddCommand;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryCommandResult;
+import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
@@ -22,19 +21,19 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping
 @Slf4j
-public class WorkoutController {
+public class WorkoutHistoryController {
 
     private final CommonService commonService;
-    private final WorkoutService workoutService;
+    private final WorkoutHistoryService workoutService;
 
     @Operation(summary = "운동기록 등록", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동기록ID, 회원ID, 운동기록 내용을 반환한다.")
     })
     @PostMapping("/workout-histories")
-    public ResponseEntity<WorkoutHistoryCommandResult> addWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
-                                                                         @Valid WorkoutHistoryAddCommand command) {
-        Member member = commonService.getMemberIdByToken(bearerToken);
+    public ResponseEntity<WorkoutHistoryDto> addWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
+                                                               @Valid HistoryAddCommand command) {
+        Member member = commonService.getMemberByToken(bearerToken);
         return ResponseEntity.ok(workoutService.addWorkoutHistory(member, command));
     }
 
@@ -81,10 +80,10 @@ public class WorkoutController {
             @ApiResponse(responseCode = "200", description = "운동기록ID, 회원ID, 운동기록 내용을 반환한다.")
     })
     @PutMapping("/workout-histories/{workoutHistoryId}")
-    public ResponseEntity<WorkoutHistoryCommandResult> updateWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
+    public ResponseEntity<WorkoutHistoryDto> updateWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
                                                                             @PathVariable("workoutHistoryId") Long workoutHistoryId,
-                                                                            @Valid WorkoutHistoryAddCommand command) {
-        Member member = commonService.getMemberIdByToken(bearerToken);
+                                                                            @Valid HistoryAddCommand command) {
+        Member member = commonService.getMemberByToken(bearerToken);
         return ResponseEntity.ok(workoutService.updateWorkoutHistory(member, workoutHistoryId, command));
     }
 

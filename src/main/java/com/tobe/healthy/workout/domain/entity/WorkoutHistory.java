@@ -4,7 +4,6 @@ import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.dto.in.WorkoutHistoryAddCommand;
 import jakarta.persistence.*;
 import lombok.*;
 

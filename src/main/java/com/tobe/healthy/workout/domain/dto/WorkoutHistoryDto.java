@@ -23,8 +23,6 @@ public class WorkoutHistoryDto {
     private String content;
     private Long trainerId;
     private List<WorkoutHistoryFileDto> files = new ArrayList<>();
-
-    @JsonIgnore
     private MemberDto member;
 
     @JsonIgnore
@@ -42,9 +40,19 @@ public class WorkoutHistoryDto {
 
     public static WorkoutHistoryDto create(WorkoutHistory history, List<WorkoutHistoryFileDto> files) {
         return WorkoutHistoryDto.builder()
+                .workoutHistoryId(history.getWorkoutHistoryId())
                 .content(history.getContent())
                 .member(MemberDto.from(history.getMember()))
                 .files(files)
+                .trainerId(history.getTrainerId())
+                .build();
+    }
+
+    public static WorkoutHistoryDto create(WorkoutHistory history) {
+        return WorkoutHistoryDto.builder()
+                .workoutHistoryId(history.getWorkoutHistoryId())
+                .content(history.getContent())
+                .member(MemberDto.from(history.getMember()))
                 .trainerId(history.getTrainerId())
                 .build();
     }
