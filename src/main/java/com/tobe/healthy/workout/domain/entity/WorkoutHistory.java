@@ -1,17 +1,20 @@
 package com.tobe.healthy.workout.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "workout_history")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(exclude = "member")
+@AllArgsConstructor
+@Builder
 @Getter
 public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
@@ -26,11 +29,22 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    public static WorkoutHistory create(String content, Member member) {
-        WorkoutHistory history = new WorkoutHistory();
-        history.content = content;
-        history.member = member;
-        return history;
+    private Long trainerId;
+
+    @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
+    private List<WorkoutHistoryFile> historyFiles = new ArrayList<>();
+
+    public static WorkoutHistory create(WorkoutHistoryDto historyDto, Member member) {
+        return WorkoutHistory.builder()
+                .workoutHistoryId(historyDto.getWorkoutHistoryId())
+                .content(historyDto.getContent())
+                .member(member)
+                .trainerId(historyDto.getTrainerId())
+                .build();
+    }
+
+    public void updateContent(String content){
+        this.content = content;
     }
 
 }
