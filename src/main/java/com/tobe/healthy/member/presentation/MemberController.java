@@ -1,5 +1,6 @@
 package com.tobe.healthy.member.presentation;
 
+import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommandRequest;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,8 +40,12 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "이메일 인증번호 전송 성공")
 	})
 	@GetMapping("/send-auth")
-	public ResponseEntity<String> sendAuthMail(@RequestParam String email) {
-		return ResponseEntity.ok(memberService.sendAuthMail(email));
+	public ResponseHandler<String> sendAuthMail(@RequestParam String email) {
+		return ResponseHandler.<String>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.sendAuthMail(email))
+			.message("인증번호를 전송하였습니다.")
+			.build();
 	}
 
 	@Operation(summary = "인증번호를 검증한다.", responses = {
@@ -47,8 +53,12 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "이메일 인증번호 검증 성공")
 	})
 	@PostMapping("/verify-auth")
-	public ResponseEntity<String> verifyAuthMail(@RequestBody VerifyAuthMailRequest request) {
-		return ResponseEntity.ok(memberService.verifyAuthMail(request));
+	public ResponseHandler<String> verifyAuthMail(@RequestBody VerifyAuthMailRequest request) {
+		return ResponseHandler.<String>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.verifyAuthMail(request))
+			.message("인증번호가 확인되었습니다.")
+			.build();
 	}
 
 	@Operation(summary = "회원가입", responses = {
@@ -57,8 +67,12 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
 	})
 	@PostMapping("/join")
-	public ResponseEntity<MemberJoinCommandResult> join(@RequestBody @Valid MemberJoinCommand request) {
-		return ResponseEntity.ok(memberService.joinMember(request));
+	public ResponseHandler<MemberJoinCommandResult> join(@RequestBody @Valid MemberJoinCommand request) {
+		return ResponseHandler.<MemberJoinCommandResult>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.joinMember(request))
+			.message("회원가입이 완료되었습니다.")
+			.build();
 	}
 
 	@Operation(summary = "로그인", responses = {
@@ -66,8 +80,12 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "로그인에 성공하고, Access Token, Refresh Token을 반환한다.")
 	})
 	@PostMapping("/login")
-	public ResponseEntity<Tokens> login(@RequestBody @Valid MemberLoginCommand request) {
-		return ResponseEntity.ok(memberService.login(request));
+	public ResponseHandler<Tokens> login(@RequestBody @Valid MemberLoginCommand request) {
+		return ResponseHandler.<Tokens>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.login(request))
+			.message("로그인 되었습니다.")
+			.build();
 	}
 
 	@Operation(summary = "토큰을 갱신한다.", responses = {
@@ -77,8 +95,12 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token을 반환한다.")
 	})
 	@PostMapping("/refresh-token")
-	public ResponseEntity<Tokens> refreshToken(String email, String refreshToken) {
-		return ResponseEntity.ok(memberService.refreshToken(email, refreshToken));
+	public ResponseHandler<Tokens> refreshToken(String email, String refreshToken) {
+		return ResponseHandler.<Tokens>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.refreshToken(email, refreshToken))
+			.message("토큰이 갱신되었습니다.")
+			.build();
 	}
 
 	@Operation(summary = "아이디를 찾는다.", responses = {
@@ -86,8 +108,12 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "휴대폰 번호, 닉네임에 일치하는 이메일을 반환한다.")
 	})
 	@PostMapping("/find-id")
-	public ResponseEntity<String> findMemberId(@RequestBody @Valid MemberFindIdCommandRequest request) {
-		return ResponseEntity.ok(memberService.findMemberId(request));
+	public ResponseHandler<String> findMemberId(@RequestBody @Valid MemberFindIdCommandRequest request) {
+		return ResponseHandler.<String>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.findMemberId(request))
+			.message("아이디 찾기에 성공하였습니다.")
+			.build();
 	}
 
 	@Operation(summary = "비밀번호를 찾는다.", responses = {
@@ -95,12 +121,25 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "등록된 이메일에 초기화 비밀번호를 전송한다.")
 	})
 	@PostMapping("/find-pw")
-	public ResponseEntity<String> findMemberPW(@RequestBody @Valid MemberFindPWCommand request) {
-		return ResponseEntity.ok(memberService.findMemberPW(request));
+	public ResponseHandler<String> findMemberPW(@RequestBody @Valid MemberFindPWCommand request) {
+		return ResponseHandler.<String>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.findMemberPW(request))
+			.message("이메일에 초기화 비밀번호가 전송되었습니다.")
+			.build();
 	}
 
 	@GetMapping("/code/kakao")
 	public ResponseEntity<?> oauth(MemberOauthCommandRequest request) {
 		return ResponseEntity.ok(memberService.getAccessToken(request.getCode()));
+	}
+
+	@PostMapping("/withdraw")
+	public ResponseHandler<String> withdrawMember(String email) {
+		return ResponseHandler.<String>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.withdrawMember(email))
+			.message("회원탈퇴 되었습니다.")
+			.build();
 	}
 }

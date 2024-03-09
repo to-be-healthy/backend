@@ -24,8 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @AllArgsConstructor
@@ -61,14 +63,20 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @JoinColumn(name = "gym_id")
     private Gym gym;
 
-    @OneToMany(mappedBy = "trainer")
+    @OneToMany(fetch = LAZY, mappedBy = "trainer")
+    @Default
     private List<Schedule> trainerSchedules = new ArrayList<>();
 
-    @OneToMany(mappedBy = "applicant")
+    @OneToMany(fetch = LAZY, mappedBy = "applicant")
+    @Default
     private List<Schedule> applicantSchedules = new ArrayList<>();
 
     @OneToOne(mappedBy = "member")
     private StandBySchedule standBySchedule;
+
+    @ColumnDefault("'N'")
+    @Default
+    private char delYn = 'N';
 
     public static Member join(MemberJoinCommand request, String password) {
         Member member = new Member();
@@ -87,5 +95,9 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
     public void resetPassword(String password) {
         this.password = password;
+    }
+
+    public void withdrawMember() {
+        this.delYn = 'Y';
     }
 }

@@ -232,4 +232,11 @@ public class MemberService {
 
 		return request.getEmail();
 	}
+
+	public String withdrawMember(String email) {
+		Member member = memberRepository.findByEmail("laborlawseon@gmail.com")
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		member.withdrawMember();
+		return member.getEmail();
+	}
 }

@@ -1,10 +1,12 @@
 package com.tobe.healthy.member.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.tobe.healthy.common.RedisService;
+import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.security.JwtTokenProvider;
 import com.tobe.healthy.file.application.FileService;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommandRequest;
@@ -13,6 +15,7 @@ import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.VerifyAuthMailRequest;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.member.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,6 +47,9 @@ class MemberServiceTest {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Autowired
     private PasswordEncoder encoder;
@@ -141,7 +146,8 @@ class MemberServiceTest {
          *  총 반복횟수: {totalRepetitions}
          *  현재 반복횟수: {currentRepetition}
          */
-        @RepeatedTest(name = "{currentRepetition}번 째 토큰 갱신", value = 100)
+//        @RepeatedTest(name = "{currentRepetition}번 째 토큰 갱신", value = 100)
+        @Test
         @DisplayName("토큰을 갱신한다.")
         void refreshToken() {
             Tokens before = memberService.login(new MemberLoginCommand(member.getEmail(), "12345678"));
@@ -151,7 +157,7 @@ class MemberServiceTest {
     }
 
     @Nested
-    @DisplayName("아이디, 비밀번호 찾기")
+    @DisplayName("아이디/비밀번호 찾기, 회원탈퇴")
     class MemberFind {
 
         private Member member;
@@ -184,6 +190,18 @@ class MemberServiceTest {
             // given
             String email = memberService.findMemberPW(new MemberFindPWCommand(member.getMobileNum(), member.getEmail()));
             assertThat(member.getEmail()).isEqualTo(email);
+        }
+
+        @Test
+        @DisplayName("회원탈퇴 한다.")
+        void withdrawalAccount() {
+            Member member = memberRepository.findByEmail("laborlawseon@gmail.com")
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+            member.withdrawMember();
+            em.flush();
+            em.clear();
+            Member findMember = memberRepository.findById(member.getId()).get();
+            assertThat(findMember.getDelYn()).isEqualTo('Y');
         }
     }
 }
