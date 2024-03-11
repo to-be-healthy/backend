@@ -9,6 +9,8 @@ import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -38,12 +40,12 @@ public class MemberController {
 	 * 3. 사용할 실명 인증
 	 * 4. 회원가입
 	 */
-	@Operation(summary = "아이디 중복을 확인한다.", responses = {
-		@ApiResponse(responseCode = "400", description = "이미 등록된 아이디입니다."),
-		@ApiResponse(responseCode = "200", description = "사용 가능한 아이디입니다.")
+	@Operation(summary = "아이디 중복 확인하기", responses = {
+		@ApiResponse(responseCode = "400", description = "이미 등록된 아이디"),
+		@ApiResponse(responseCode = "200", description = "사용 가능한 아이디")
 	})
 	@GetMapping("/validation/userId")
-	public ResponseHandler<Boolean> validateUsernameDuplication(@RequestParam String userId) {
+	public ResponseHandler<Boolean> validateUsernameDuplication(@Parameter(description = "아이디") @RequestParam String userId) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.validateUserIdDuplication(userId))
@@ -56,7 +58,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "사용 가능한 이메일입니다.")
 	})
 	@GetMapping("/validation/email")
-	public ResponseHandler<Boolean> validateEmailDuplication(@RequestParam String email) {
+	public ResponseHandler<Boolean> validateEmailDuplication(@Parameter(description = "이메일") @RequestParam String email) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.validateEmailDuplication(email))
@@ -69,7 +71,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "이메일로 인증번호를 전송하였습니다.")
 	})
 	@PostMapping("/send-email-verification")
-	public ResponseHandler<String> sendEmailVerification(String email) {
+	public ResponseHandler<String> sendEmailVerification(@Parameter(description = "이메일") @RequestParam String email) {
 		return ResponseHandler.<String>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.sendEmailVerification(email))
@@ -81,8 +83,10 @@ public class MemberController {
 		@ApiResponse(responseCode = "400", description = "이메일 인증번호가 일치하지 않습니다."),
 		@ApiResponse(responseCode = "200", description = "이메일 인증번호가 일치합니다.")
 	})
+	@Schema(name = "authNumber")
 	@PostMapping("/email-verification")
-	public ResponseHandler<Boolean> verifyAuthMail(@RequestParam String authNumber, @RequestParam String email) {
+	public ResponseHandler<Boolean> verifyAuthMail(@Parameter(description = "인증번호") @RequestParam String authNumber,
+												   @Parameter(description = "이메일")   @RequestParam String email) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.verifyEmailAuthNumber(authNumber, email))
@@ -124,7 +128,8 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token을 반환한다.")
 	})
 	@PostMapping("/refresh-token")
-	public ResponseHandler<Tokens> refreshToken(String userId, String refreshToken) {
+	public ResponseHandler<Tokens> refreshToken(@Parameter(description = "아이디") String userId,
+												@Parameter(description = "갱신 토큰") String refreshToken) {
 		return ResponseHandler.<Tokens>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.refreshToken(userId, refreshToken))
@@ -163,7 +168,8 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "회원 탈퇴 되었습니다.")
 	})
 	@PostMapping("/delete")
-	public ResponseHandler<String> deleteMember(@RequestParam String userId, @RequestParam String password) {
+	public ResponseHandler<String> deleteMember(@Parameter(description = "아이디") @RequestParam String userId,
+												@Parameter(description = "비밀번호") @RequestParam String password) {
 		return ResponseHandler.<String>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.deleteMember(userId, password))
