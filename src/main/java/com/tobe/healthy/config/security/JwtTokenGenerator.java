@@ -35,11 +35,11 @@ public class JwtTokenGenerator {
 
     public Tokens create(Member member) {
         long nowInMilliseconds = new Date().getTime();
-        String accessToken = createAccessToken(member.getEmail(), "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
+        String accessToken = createAccessToken(member.getUserId(), "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
 
-        String refreshToken = createRefreshToken(member.getEmail(), getRefreshTokenValid(nowInMilliseconds));
+        String refreshToken = createRefreshToken(member.getUserId(), getRefreshTokenValid(nowInMilliseconds));
 
-        redisService.setValuesWithTimeout(member.getEmail(), refreshToken, getRefreshTokenValid(nowInMilliseconds).getTime());
+        redisService.setValuesWithTimeout(member.getUserId(), refreshToken, getRefreshTokenValid(nowInMilliseconds).getTime());
 
         return new Tokens(accessToken, refreshToken);
     }
@@ -52,15 +52,15 @@ public class JwtTokenGenerator {
         return new Date(nowInMilliseconds + accessTokenValidSeconds * 1000);
     }
 
-    public Tokens exchangeAccessToken(String email, String refreshToken) {
+    public Tokens exchangeAccessToken(String userId, String refreshToken) {
         long nowInMilliseconds = new Date().getTime();
-        String changedAccessToken = createAccessToken(email, "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
+        String changedAccessToken = createAccessToken(userId, "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
         return new Tokens(changedAccessToken, refreshToken);
     }
 
-    private String createAccessToken(String email, String role, Date expiry) {
+    private String createAccessToken(String userId, String role, Date expiry) {
         Claims claims = Jwts.claims();
-        claims.put("email", email);
+        claims.put("userId", userId);
         claims.put("role", role);
         claims.put("uuid", UUID.randomUUID().toString());
         return Jwts.builder()
@@ -71,9 +71,9 @@ public class JwtTokenGenerator {
                 .compact();
     }
 
-    private String createRefreshToken(String email, Date expiry) {
+    private String createRefreshToken(String userId, Date expiry) {
         Claims claims = Jwts.claims();
-        claims.put("email", email);
+        claims.put("userId", userId);
         claims.put("uuid", UUID.randomUUID().toString());
         return Jwts.builder()
                 .setClaims(claims)

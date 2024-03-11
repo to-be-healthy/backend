@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberFindIdCommandRequest {
-	@NotEmpty(message = "휴대폰번호를 입력해 주세요.")
-	private String mobileNum;
+public class MemberFindIdCommand {
+	@NotEmpty(message = "이메일을 입력해 주세요.")
+	private String email;
 
-	@NotEmpty(message = "닉네임을 입력해 주세요.")
-	private String nickname;
+	@NotEmpty(message = "실명을 입력해 주세요.")
+	private String name;
 }

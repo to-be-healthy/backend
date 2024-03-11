@@ -11,16 +11,16 @@ import lombok.Data;
 @Builder
 public class MemberJoinCommandResult {
     private String email;
-    private String nickname;
-    private String mobileNum;
+    private String userId;
+    private String name;
     private MemberType memberType;
 
     public static MemberJoinCommandResult of(Member member){
         return MemberJoinCommandResult.builder()
                 .email(member.getEmail())
-                .nickname(member.getNickname())
+                .userId(member.getUserId())
+                .name(member.getName())
                 .memberType(member.getMemberType())
-                .mobileNum(member.getMobileNum())
                 .build();
     }
 }

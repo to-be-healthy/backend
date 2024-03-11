@@ -2,9 +2,9 @@ package com.tobe.healthy.member.application;
 
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_DUPLICATION_EMAIL;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_DUPLICATION_NICKNAME;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
 import static com.tobe.healthy.member.domain.entity.Oauth.CLIENT_ID;
@@ -20,13 +20,12 @@ import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.application.FileService;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommandRequest;
+import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
-import com.tobe.healthy.member.domain.dto.in.VerifyAuthMailRequest;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
@@ -63,9 +62,50 @@ public class MemberService {
 	private final JavaMailSender mailSender;
 	private final RedisService redisService;
 
+	public boolean validateUserIdDuplication(String memberId) {
+		memberRepository.findByUserId(memberId).ifPresent(m -> {
+			throw new CustomException(MEMBER_ID_DUPLICATION);
+		});
+		return true;
+	}
+
+	public Boolean validateEmailDuplication(String email) {
+		memberRepository.findByEmail(email).ifPresent(m -> {
+			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
+		});
+		return true;
+	}
+
+	public String sendEmailVerification(String email) {
+		// 1. 이메일 중복 확인
+		memberRepository.findByEmail(email).ifPresent(e -> {
+			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
+		});
+
+		// 2. 인증번호를 redis에 저장한다.
+		String authKey = getAuthCode();
+		redisService.setValuesWithTimeout(email, authKey, 3 * 60 * 1000); // 3분
+
+		// 3. 이메일에 인증번호 전송한다.
+		sendAuthMail(email, authKey);
+
+		return email;
+	}
+
+	public Boolean verifyEmailAuthNumber(String authNumber, String email) {
+		String value = redisService.getValues(email);
+
+		// 1. 일치하는 데이터가 없을경우
+		if (isEmpty(value) || !value.equals(authNumber)) {
+			throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
+		}
+
+		return true;
+	}
+
 	public MemberJoinCommandResult joinMember(MemberJoinCommand request) {
-		validateDuplicateEmail(request);
-		validateDuplicateNickname(request);
+		validateDuplicationUserId(request.getUserId());
+		validateDuplicationEmail(request.getEmail());
 
 		String password = passwordEncoder.encode(request.getPassword());
 		Member member = Member.join(request, password);
@@ -75,15 +115,15 @@ public class MemberService {
 	}
 
 	public Tokens login(MemberLoginCommand request) {
-		return memberRepository.findByEmail(request.getEmail())
+		return memberRepository.findByUserId(request.getUserId())
 			.filter(member -> passwordEncoder.matches(request.getPassword(), member.getPassword()))
 			.map(tokenGenerator::create)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 	}
 
-	public Tokens refreshToken(String email, String refreshToken) {
+	public Tokens refreshToken(String userId, String refreshToken) {
 		// 1. Redis에서 유효한 token이 있는지 조회한다.
-		String result = redisService.getValues(email);
+		String result = redisService.getValues(userId);
 
 		// 2. Refresh Token이 존재하지 않음.
 		if (isEmpty(result)) {
@@ -95,11 +135,30 @@ public class MemberService {
 			throw new CustomException(REFRESH_TOKEN_NOT_VALID);
 		}
 
-		Member member = memberRepository.findByEmail(email)
+		Member member = memberRepository.findByUserId(userId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 		// 4. 새로운 AccessToken과 기존의 RefreshToken을 반환한다.
-		return tokenGenerator.exchangeAccessToken(member.getEmail(), refreshToken);
+		return tokenGenerator.exchangeAccessToken(member.getUserId(), refreshToken);
+	}
+
+	public String findUserId(MemberFindIdCommand request) {
+		Member entity = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		return entity.getUserId();
+	}
+
+	public String findMemberPW(MemberFindPWCommand request) {
+		Member member = memberRepository.findByUserIdAndName(request.getUserId(), request.getName())
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		sendResetPassword(member.getEmail(), member);
+		return member.getEmail();
+	}
+
+	private void validateDuplicationUserId(String userId) {
+		memberRepository.findByUserId(userId).ifPresent(m -> {
+			throw new CustomException(MEMBER_ID_DUPLICATION);
+		});
 	}
 
 	public String getAccessToken(String authCode) {
@@ -141,7 +200,7 @@ public class MemberService {
 	public String sendAuthMail(String email) {
 		// 1. 이메일 중복 확인
 		memberRepository.findByEmail(email).ifPresent(e -> {
-			throw new CustomException(MEMBER_DUPLICATION_EMAIL);
+			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
 		});
 
 		// 2. 인증번호를 redis에 저장한다.
@@ -168,29 +227,10 @@ public class MemberService {
 		}
 	}
 
-	private void validateDuplicateEmail(MemberJoinCommand request) {
-		memberRepository.findByEmail(request.getEmail()).ifPresent(m -> {
-			throw new CustomException(MEMBER_DUPLICATION_EMAIL);
+	private void validateDuplicationEmail(String email) {
+		memberRepository.findByEmail(email).ifPresent(m -> {
+			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
 		});
-	}
-
-	private void validateDuplicateNickname(MemberJoinCommand request) {
-		memberRepository.findByNickname(request.getNickname()).ifPresent(m -> {
-			throw new CustomException(MEMBER_DUPLICATION_NICKNAME);
-		});
-	}
-
-	public String findMemberId(MemberFindIdCommandRequest request) {
-		Member entity = memberRepository.findByMobileNumAndNickname(request.getMobileNum(), request.getNickname())
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		return entity.getEmail();
-	}
-
-	public String findMemberPW(MemberFindPWCommand request) {
-		Member member = memberRepository.findByMobileNumAndEmail(request.getMobileNum(), request.getEmail())
-				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		sendResetPassword(request.getEmail(), member);
-		return request.getEmail();
 	}
 
 	private void sendResetPassword(String email, Member member) {
@@ -222,21 +262,10 @@ public class MemberService {
 		return buffer.toString();
 	}
 
-	public String verifyAuthMail(VerifyAuthMailRequest request) {
-		String value = redisService.getValues(request.getEmail());
-
-		// 1. 일치하는 데이터가 없을경우
-		if (isEmpty(value) || !value.equals(request.getAuthKey())) {
-			throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
-		}
-
-		return request.getEmail();
-	}
-
-	public String withdrawMember(String email) {
-		Member member = memberRepository.findByEmail("laborlawseon@gmail.com")
+	public String deleteMember(String userId) {
+		Member member = memberRepository.findByUserId(userId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		member.withdrawMember();
-		return member.getEmail();
+		member.deleteMember();
+		return member.getUserId();
 	}
 }

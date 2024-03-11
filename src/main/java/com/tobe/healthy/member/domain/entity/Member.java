@@ -40,12 +40,10 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "member_id")
     private Long id;
-
+    private String userId;
     private String email;
-
     private String password;
-
-    private String nickname;
+    private String name;
 
     @OneToOne(fetch = LAZY, cascade = ALL)
     @JoinColumn(name = "profile_id")
@@ -56,8 +54,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
     @Enumerated(STRING)
     private MemberType memberType;
-
-    private String mobileNum;
 
     @OneToOne(fetch = LAZY, cascade = ALL)
     @JoinColumn(name = "gym_id")
@@ -80,12 +76,12 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
     public static Member join(MemberJoinCommand request, String password) {
         Member member = new Member();
+        member.userId = request.getUserId();
         member.email = request.getEmail();
         member.password = password;
-        member.nickname = request.getNickname();
+        member.name = request.getName();
         member.alarmStatus = ENABLED;
         member.memberType = request.getMemberType();
-        member.mobileNum = request.getMobileNum();
         return member;
     }
 
@@ -97,7 +93,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
         this.password = password;
     }
 
-    public void withdrawMember() {
+    public void deleteMember() {
         this.delYn = 'Y';
     }
 }

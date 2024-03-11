@@ -28,8 +28,8 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				schedule.endDt,
 				schedule.reservationStatus,
 				schedule.round,
-				trainer.nickname,
-				applicant.nickname))
+				trainer.name,
+				applicant.name))
 			.from(schedule)
 			.leftJoin(schedule.trainer, trainer)
 			.leftJoin(schedule.applicant, applicant)

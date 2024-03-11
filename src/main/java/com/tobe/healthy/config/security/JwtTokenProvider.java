@@ -47,7 +47,7 @@ public class JwtTokenProvider {
     // Jwt 토큰으로 인증 정보를 조회
     public Authentication getAuthentication(String token) {
         Claims claims = decode(token.substring("Bearer ".length()));
-        UserDetails userDetails = customMemberDetailService.loadUserByUsername(valueOf(claims.get("email")));
+        UserDetails userDetails = customMemberDetailService.loadUserByUsername(valueOf(claims.get("userId")));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 

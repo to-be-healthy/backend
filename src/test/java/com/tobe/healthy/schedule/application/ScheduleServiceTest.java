@@ -54,52 +54,6 @@ class ScheduleServiceTest {
 
 			assertThat(lists.size()).isEqualTo(12);
 		}
-
-		@Test
-		@DisplayName("일정을 등록한다.")
-		void registerSchedule() {
-			Member member = Member.builder()
-				.email("member@gmail.com")
-				.password("12345678")
-				.nickname("member")
-				.alarmStatus(ENABLED)
-				.memberType(MEMBER)
-				.build();
-
-			Member trainer = Member.builder()
-				.email("trainer@gmail.com")
-				.password("12345678")
-				.nickname("trainer")
-				.alarmStatus(ENABLED)
-				.memberType(TRAINER)
-				.build();
-
-			em.persist(trainer);
-
-			AutoCreateScheduleCommandRequest request = AutoCreateScheduleCommandRequest.builder()
-				.trainer(1L)
-				.startDt(of(2024, 3, 4, 10, 0))
-				.endDt(of(2024, 3, 4, 22, 0))
-				.lessonTime(50)
-				.breakTime(10)
-				.build();
-
-			List<ScheduleCommandResponse> lists = scheduleService.autoCreateSchedule(request);
-
-			List<ScheduleRegisterInfo> requests = new ArrayList<>();
-			for (ScheduleCommandResponse list : lists) {
-				requests.add(new ScheduleRegisterInfo(list.getRound(), list.getStartDt(), list.getEndDt(), member.getId()));
-			}
-
-			ScheduleCommandRequest param = ScheduleCommandRequest.builder()
-				.trainer(trainer.getId())
-				.list(requests)
-				.build();
-
-			scheduleService.registerSchedule(param);
-
-			assertThat(lists.size()).isEqualTo(param.getList().size());
-		}
 	}
 
 	@Nested

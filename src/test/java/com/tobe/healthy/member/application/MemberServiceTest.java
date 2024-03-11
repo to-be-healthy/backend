@@ -9,10 +9,9 @@ import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.security.JwtTokenProvider;
 import com.tobe.healthy.file.application.FileService;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommandRequest;
+import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-import com.tobe.healthy.member.domain.dto.in.VerifyAuthMailRequest;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -66,10 +65,8 @@ class MemberServiceTest {
             String sendEmail = memberService.sendAuthMail(email);
 
             String authKey = redisService.getValues(sendEmail);
-            VerifyAuthMailRequest request = VerifyAuthMailRequest.builder().email(sendEmail)
-                .authKey(authKey).build();
 
-            assertThat(memberService.verifyAuthMail(request)).isEqualTo(sendEmail);
+            assertThat(memberService.verifyEmailAuthNumber(authKey, email)).isTrue();
         }
 
         @Test
@@ -78,7 +75,8 @@ class MemberServiceTest {
             Member member = Member.builder()
                 .email("laborlawseon@gmail.com")
                 .password("12345678")
-                .nickname("seonwoo_jung")
+                .userId("seonwoo_jung")
+                .name("정선우")
                 .alarmStatus(ENABLED)
                 .memberType(MEMBER)
                 .build();
@@ -96,7 +94,8 @@ class MemberServiceTest {
             Member member = Member.builder()
                 .email("laborlawseon@gmail.com")
                 .password("12345678")
-                .nickname("seonwoo_jung")
+                .userId("seonwoo_jung")
+                .name("정선우")
                 .alarmStatus(ENABLED)
                 .memberType(MEMBER)
                 .build();
@@ -128,7 +127,8 @@ class MemberServiceTest {
             member = Member.builder()
                 .email("laborlawseon@gmail.com")
                 .password(encoder.encode("12345678"))
-                .nickname("seonwoo_jung")
+                .userId("seonwoo_jung")
+                .name("정선우")
                 .alarmStatus(ENABLED)
                 .memberType(MEMBER)
                 .build();
@@ -138,7 +138,7 @@ class MemberServiceTest {
         @Test
         @DisplayName("로그인을 진행한다.")
         void login() {
-            Tokens tokens = memberService.login(new MemberLoginCommand(member.getEmail(), "12345678"));
+            Tokens tokens = memberService.login(new MemberLoginCommand(member.getUserId(), "12345678"));
             log.info("tokens => {}", tokens);
         }
 
@@ -150,8 +150,8 @@ class MemberServiceTest {
         @Test
         @DisplayName("토큰을 갱신한다.")
         void refreshToken() {
-            Tokens before = memberService.login(new MemberLoginCommand(member.getEmail(), "12345678"));
-            Tokens after = memberService.refreshToken(member.getEmail(), before.getRefreshToken());
+            Tokens before = memberService.login(new MemberLoginCommand(member.getUserId(), "12345678"));
+            Tokens after = memberService.refreshToken(member.getUserId(), before.getRefreshToken());
             assertThat(before.getAccessToken()).isNotEqualTo(after.getAccessToken());
         }
     }
@@ -167,9 +167,9 @@ class MemberServiceTest {
         void setup() {
             member = Member.builder()
                 .email("laborlawseon@gmail.com")
-                .mobileNum("010-4000-1278")
+                .userId("laborlawseon")
                 .password(encoder.encode("12345678"))
-                .nickname("seonwoo_jung")
+                .name("seonwoo_jung")
                 .alarmStatus(ENABLED)
                 .memberType(MEMBER)
                 .build();
@@ -180,27 +180,29 @@ class MemberServiceTest {
         @DisplayName("아이디를 찾는다.")
         void findMember() {
             // given
-            String email = memberService.findMemberId(new MemberFindIdCommandRequest(member.getMobileNum(), member.getNickname()));
-            assertThat(member.getEmail()).isEqualTo(email);
+            String userId = memberService.findUserId(new MemberFindIdCommand(member.getEmail(), member.getName()));
+            assertThat(member.getUserId()).isEqualTo(userId);
         }
 
         @Test
         @DisplayName("비밀번호를 찾는다.")
         void findMemberPassword() {
             // given
-            String email = memberService.findMemberPW(new MemberFindPWCommand(member.getMobileNum(), member.getEmail()));
+            String email = memberService.findMemberPW(new MemberFindPWCommand(member.getUserId(), member.getName()));
             assertThat(member.getEmail()).isEqualTo(email);
         }
 
         @Test
         @DisplayName("회원탈퇴 한다.")
         void withdrawalAccount() {
-            Member member = memberRepository.findByEmail("laborlawseon@gmail.com")
+            Member member = memberRepository.findByUserId("laborlawseon")
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-            member.withdrawMember();
+            member.deleteMember();
             em.flush();
             em.clear();
-            Member findMember = memberRepository.findById(member.getId()).get();
+            Member findMember = em.createQuery(
+                    "select m from Member m where m.userId = :userId and delYn = 'Y'", Member.class)
+                .setParameter("userId", member.getUserId()).getSingleResult();
             assertThat(findMember.getDelYn()).isEqualTo('Y');
         }
     }
