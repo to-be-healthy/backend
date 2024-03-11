@@ -25,11 +25,13 @@ public enum ErrorCode {
 	MAIL_AUTH_CODE_NOT_VALID(BAD_REQUEST, "C_010", "이메일 인증번호가 일치하지 않습니다."),
 	REFRESH_TOKEN_NOT_VALID(BAD_REQUEST, "C_011", "갱신 토큰이 유효하지 않습니다."),
 	MEMBER_ID_DUPLICATION(BAD_REQUEST, "C_012", "이미 둥록된 아이디입니다."),
+  MEMBER_ALREADY_MAPPED(BAD_REQUEST, "C_013", "이미 등록된 회원입니다."),
 	SERVER_ERROR(INTERNAL_SERVER_ERROR, "S_001", "서버에서 오류가 발생하였습니다."),
 	FILE_UPLOAD_ERROR(INTERNAL_SERVER_ERROR, "S_002", "파일 업로드중 에러가 발생하였습니다."),
 	FILE_FIND_ERROR(INTERNAL_SERVER_ERROR, "S_003", "파일 조회중 에러가 발생하였습니다."),
-	MAIL_SEND_ERROR(INTERNAL_SERVER_ERROR, "S_004", "메일 전송중 에러가 발생했습니다.");
-
+	MAIL_SEND_ERROR(INTERNAL_SERVER_ERROR, "S_004", "메일 전송중 에러가 발생했습니다."),
+  FILE_REMOVE_ERROR(INTERNAL_SERVER_ERROR, "S_005", "파일 삭제중 에러가 발생하였습니다.");
+  
 	private final HttpStatus status;
 	private final String code;
 	private final String message;

@@ -2,31 +2,28 @@ package com.tobe.healthy.home.repository;
 
 import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.applicationform.domain.entity.QApplicationForm;
 import com.tobe.healthy.common.ResultFormatType;
 import com.tobe.healthy.workout.domain.entity.QWorkoutHistory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 @Repository
+@RequiredArgsConstructor
 public class MemberHomeRepositoryCustomImpl implements MemberHomeRepositoryCustom{
 
     private final JPAQueryFactory queryFactory;
     private QApplicationForm qAppliform = QApplicationForm.applicationForm;
     private QWorkoutHistory qWorkoutHistory = QWorkoutHistory.workoutHistory;
 
-    public MemberHomeRepositoryCustomImpl(JPAQueryFactory queryFactory) {
-        this.queryFactory = queryFactory;
-    }
-
-    public long getAttendanceOfMonth(Long memberId, LocalDate startDay, LocalDate endDay){
+    @Override
+    public long getAttendanceOfMonth(long memberId, LocalDate startDay, LocalDate endDay) {
         List<String> ptDates = queryFactory.select(Expressions.stringTemplate(
                 "DATE_FORMAT({0}, {1})"
                 , qAppliform.createdAt
@@ -50,6 +47,4 @@ public class MemberHomeRepositoryCustomImpl implements MemberHomeRepositoryCusto
         ptDateSet.addAll(wkDates);
         return ptDateSet.size();
     }
-
-
 }
