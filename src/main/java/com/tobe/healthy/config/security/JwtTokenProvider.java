@@ -2,7 +2,6 @@ package com.tobe.healthy.config.security;
 
 import static java.lang.String.valueOf;
 
-import com.tobe.healthy.member.application.CustomMemberDetailService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -23,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JwtTokenProvider { // JWT 토큰 검증 모듈
+public class JwtTokenProvider {
 
     private final CustomMemberDetailService customMemberDetailService;
 
@@ -50,7 +49,7 @@ public class JwtTokenProvider { // JWT 토큰 검증 모듈
     // Jwt 토큰으로 인증 정보를 조회
     public Authentication getAuthentication(String token) {
         Claims claims = decode(token.substring("Bearer ".length()));
-        UserDetails userDetails = customMemberDetailService.loadUserByUsername(valueOf(claims.get("email")));
+        UserDetails userDetails = customMemberDetailService.loadUserByUsername(valueOf(claims.get("userId")));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 

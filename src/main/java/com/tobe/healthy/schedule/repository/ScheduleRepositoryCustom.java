@@ -1,8 +1,8 @@
 package com.tobe.healthy.schedule.repository;
 
-import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommand;
-import java.time.LocalDateTime;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import java.util.List;
 
 public interface ScheduleRepositoryCustom {
-	LocalDateTime registerSchedule(ScheduleCommand request);
+	List<ScheduleCommandResult> findAllSchedule();
 }

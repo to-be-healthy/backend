@@ -14,10 +14,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@Slf4j
 @EnableWebSecurity
 @RequiredArgsConstructor
 @Configuration
-@Slf4j
 public class SecurityConfig {
 
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
@@ -25,19 +25,18 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http.httpBasic(AbstractHttpConfigurer::disable)
-                    .cors(AbstractHttpConfigurer::disable)
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-                    .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint))
-                    .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers("file/**", "/api/**", "/**").permitAll()
-                            .anyRequest().hasRole("MEMBER")
-//                        authorize -> authorize.requestMatchers("/api/auth/**", "/favicon.ico", "/file/**").permitAll()
-//                                              .anyRequest().hasRole("MEMBER")
-                    )
-                    .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                    .build();
+        return http
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .cors(AbstractHttpConfigurer::disable)
+            .csrf(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+            .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint)) // 401 에러 예외 처리
+            .authorizeHttpRequests(
+                authorize -> authorize.requestMatchers("/api/auth/**", "/favicon.ico", "/file/**", "/v3/**", "/swagger-ui/**").permitAll()
+                    .anyRequest().authenticated())
+            .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+            .build();
     }
 
     @Bean

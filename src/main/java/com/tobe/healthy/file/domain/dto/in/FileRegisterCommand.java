@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class FileRegisterCommand {
-	private Long memberId;
+	private Long member;
 }

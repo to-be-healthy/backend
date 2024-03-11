@@ -6,8 +6,8 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum Alarm implements EnumMapperType {
-    ABLE("알림켜기"),
+public enum AlarmStatus implements EnumMapperType {
+    ENABLED("알림켜기"),
     DISABLE("알림끄기");
 
     private final String description;
