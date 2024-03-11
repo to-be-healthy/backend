@@ -10,16 +10,18 @@ import lombok.Data;
 public class MemberDto {
 
     private Long id;
+    private String userId;
     private String email;
-    private String nickname;
-    private String mobileNum;
+    private String name;
+    private char delYn;
 
     public static MemberDto from(Member member){
         return MemberDto.builder()
                 .id(member.getId())
+                .userId(member.getUserId())
                 .email(member.getEmail())
-                .nickname(member.getNickname())
-                .mobileNum(member.getMobileNum())
+                .name(member.getName())
+                .delYn(member.getDelYn())
                 .build();
     }
 

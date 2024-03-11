@@ -22,8 +22,8 @@ public class CommonService {
     public Member getMemberByToken(String bearerToken){
         String accessToken = bearerToken.substring(7);
         log.info("accessToken: {}", accessToken);
-        Long memberId = Long.parseLong(jwtTokenProvider.getUsernameFromToken(accessToken));
-        Optional<Member> member = memberRepository.findById(memberId);
+        String memberId = jwtTokenProvider.getUsernameFromToken(accessToken);
+        Optional<Member> member = memberRepository.findByUserId(memberId);
         member.orElseThrow(()-> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         return member.get();
     }

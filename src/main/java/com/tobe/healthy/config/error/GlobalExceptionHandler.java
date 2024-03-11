@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
         log.warn("MethodArgumentNotValidExceptio: {}", e.getMessage());
         String errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
         final ErrorResponse response = of(errorMessage);
-        return new ResponseEntity<>(response, valueOf(HttpStatus.BAD_REQUEST.value()));
+        return new ResponseEntity<>(response, HttpStatusCode.valueOf(HttpStatus.BAD_REQUEST.value()));
     }
 
 }
