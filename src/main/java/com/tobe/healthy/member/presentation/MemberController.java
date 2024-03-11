@@ -15,9 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -164,11 +162,11 @@ public class MemberController {
 		@ApiResponse(responseCode = "400", description = "등록된 회원이 아닙니다."),
 		@ApiResponse(responseCode = "200", description = "회원 탈퇴 되었습니다.")
 	})
-	@DeleteMapping("/{userId}")
-	public ResponseHandler<String> deleteMember(@PathVariable String userId) {
+	@PostMapping("/delete")
+	public ResponseHandler<String> deleteMember(@RequestParam String userId, @RequestParam String password) {
 		return ResponseHandler.<String>builder()
 			.statusCode(HttpStatus.OK)
-			.data(memberService.deleteMember(userId))
+			.data(memberService.deleteMember(userId, password))
 			.message("회원탈퇴 되었습니다.")
 			.build();
 	}

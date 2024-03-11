@@ -262,8 +262,9 @@ public class MemberService {
 		return buffer.toString();
 	}
 
-	public String deleteMember(String userId) {
+	public String deleteMember(String userId, String password) {
 		Member member = memberRepository.findByUserId(userId)
+			.filter(m -> passwordEncoder.matches(password, m.getPassword()))
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.deleteMember();
 		return member.getUserId();
