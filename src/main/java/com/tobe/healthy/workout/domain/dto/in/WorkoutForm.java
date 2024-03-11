@@ -5,11 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class WorkoutHistoryAddCommand {
+@AllArgsConstructor
+public class WorkoutForm {
 
-    private Long memberId;
-    private String content;
+    private Long workoutId;
+    private int set;
+    private int weight;
+    private int numberOfCycles;
 
 }
