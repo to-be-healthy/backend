@@ -35,9 +35,9 @@ public class JwtTokenGenerator {
 
     public Tokens create(Member member) {
         long nowInMilliseconds = new Date().getTime();
-        String accessToken = createAccessToken(member.getUserId(), "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
+        String accessToken = createAccessToken(member.getId(), member.getUserId(), "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
 
-        String refreshToken = createRefreshToken(member.getUserId(), getRefreshTokenValid(nowInMilliseconds));
+        String refreshToken = createRefreshToken(member.getId(), member.getUserId(), getRefreshTokenValid(nowInMilliseconds));
 
         redisService.setValuesWithTimeout(member.getUserId(), refreshToken, getRefreshTokenValid(nowInMilliseconds).getTime());
 
@@ -52,14 +52,15 @@ public class JwtTokenGenerator {
         return new Date(nowInMilliseconds + accessTokenValidSeconds * 1000);
     }
 
-    public Tokens exchangeAccessToken(String userId, String refreshToken) {
+    public Tokens exchangeAccessToken(Long memberId, String userId, String refreshToken) {
         long nowInMilliseconds = new Date().getTime();
-        String changedAccessToken = createAccessToken(userId, "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
+        String changedAccessToken = createAccessToken(memberId, userId, "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
         return new Tokens(changedAccessToken, refreshToken);
     }
 
-    private String createAccessToken(String userId, String role, Date expiry) {
+    private String createAccessToken(Long memberId, String userId, String role, Date expiry) {
         Claims claims = Jwts.claims();
+        claims.put("memberId", memberId);
         claims.put("userId", userId);
         claims.put("role", role);
         claims.put("uuid", UUID.randomUUID().toString());
@@ -71,8 +72,9 @@ public class JwtTokenGenerator {
                 .compact();
     }
 
-    private String createRefreshToken(String userId, Date expiry) {
+    private String createRefreshToken(Long memberId, String userId, Date expiry) {
         Claims claims = Jwts.claims();
+        claims.put("memberId", memberId);
         claims.put("userId", userId);
         claims.put("uuid", UUID.randomUUID().toString());
         return Jwts.builder()
