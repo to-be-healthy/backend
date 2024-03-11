@@ -1,32 +1,32 @@
 package com.tobe.healthy.schedule.domain.dto.out;
 
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.schedule.domain.entity.ReserveType;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.querydsl.core.annotations.QueryProjection;
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class ScheduleCommandResult {
 	private Long id;
-	private LocalDateTime startDate;
-	private ReserveType isReserve;
-	private String round;
-	private Member trainerId;
-	private Member applicantId;
+	private LocalDateTime startDt;
+	private LocalDateTime endDt;
+	private ReservationStatus reservationStatus;
+	private int round;
+	private String trainerName;
+	private String applicantName;
 
-	public static ScheduleCommandResult of(Schedule schedule){
-		return ScheduleCommandResult.builder()
-			.id(schedule.getId())
-			.startDate(schedule.getStartDate())
-			.isReserve(schedule.getIsReserve())
-			.round(schedule.getRound())
-			.trainerId(schedule.getTrainerId())
-			.applicantId(schedule.getApplicantId())
-			.build();
+	@QueryProjection
+	public ScheduleCommandResult(Long id, LocalDateTime startDt, LocalDateTime endDt, ReservationStatus reservationStatus, int round, String trainerName, String applicantName) {
+		this.id = id;
+		this.startDt = startDt;
+		this.endDt = endDt;
+		this.reservationStatus = reservationStatus;
+		this.round = round;
+		this.trainerName = trainerName;
+		this.applicantName = applicantName;
 	}
 }

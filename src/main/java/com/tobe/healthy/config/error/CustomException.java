@@ -2,13 +2,14 @@ package com.tobe.healthy.config.error;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 @Getter
 public class CustomException extends RuntimeException {
     private ErrorCode errorCode;
 
-    public int getStatus() {
+    public HttpStatus getStatus() {
         return this.errorCode.getStatus();
     }
 

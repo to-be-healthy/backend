@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum MemberCategory implements EnumMapperType {
+public enum MemberType implements EnumMapperType {
     MEMBER("회원"),
     TRAINER("트레이너");
 
