@@ -5,7 +5,11 @@ import com.tobe.healthy.schedule.application.ScheduleService;
 import com.tobe.healthy.schedule.application.ScheduleService.ScheduleInfo;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommandRequest;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest;
+import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
@@ -15,7 +19,6 @@ import java.util.TreeMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +35,9 @@ public class ScheduleController {
 
 	private final ScheduleService scheduleService;
 
+	@Operation(summary = "자동으로 일정을 생성한다.", responses = {
+		@ApiResponse(responseCode = "200", description = "자동으로 일정 생성 완료")
+	})
 	@PostMapping("/create")
 	public ResponseHandler<TreeMap<LocalDate, ArrayList<ScheduleInfo>>> createSchedule(@RequestBody @Valid AutoCreateScheduleCommandRequest request) {
 		return ResponseHandler.<TreeMap<LocalDate, ArrayList<ScheduleInfo>>>builder()
@@ -41,6 +47,10 @@ public class ScheduleController {
 			.build();
 	}
 
+	@Operation(summary = "일정을 등록한다.", responses = {
+		@ApiResponse(responseCode = "200", description = "일정 등록 완료"),
+		@ApiResponse(responseCode = "404", description = "회원을 찾을 수 없습니다.")
+	})
 	@PostMapping
 	public ResponseHandler<Boolean> registerSchedule(@RequestBody ScheduleCommandRequest request) {
 		return ResponseHandler.<Boolean>builder()
@@ -50,17 +60,24 @@ public class ScheduleController {
 			.build();
 	}
 
-	@GetMapping
-	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule() {
+	@Operation(summary = "전체 일정을 조회한다.", responses = {
+		@ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
+	})
+	@PostMapping("/find")
+	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule(@RequestBody ScheduleSearchCond searchCond) {
 		return ResponseHandler.<List<ScheduleCommandResult>>builder()
 			.statusCode(HttpStatus.OK)
-			.data(scheduleService.findAllSchedule())
+			.data(scheduleService.findAllSchedule(searchCond))
 			.message("전체 일정을 조회했습니다.")
 			.build();
 	}
 
+	@Operation(summary = "일정을 취소한다.", responses = {
+		@ApiResponse(responseCode = "200", description = "해당 일정을 취소하였습니다."),
+		@ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
+	})
 	@PatchMapping("/{scheduleId}")
-	public ResponseHandler<Boolean> cancelSchedule(@PathVariable Long scheduleId) {
+	public ResponseHandler<Boolean> cancelSchedule(@Parameter(description = "일정 아이디") @PathVariable Long scheduleId) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(scheduleService.cancelSchedule(scheduleId))

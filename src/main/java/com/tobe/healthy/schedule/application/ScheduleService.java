@@ -13,6 +13,7 @@ import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest.ScheduleRegister;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -95,8 +96,8 @@ public class ScheduleService {
 		return true;
 	}
 
-	public List<ScheduleCommandResult> findAllSchedule() {
-		return scheduleRepository.findAllSchedule();
+	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond) {
+		return scheduleRepository.findAllSchedule(searchCond);
 	}
 
 	public Boolean cancelSchedule(Long scheduleId) {
