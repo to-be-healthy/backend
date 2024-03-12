@@ -1,32 +1,52 @@
 package com.tobe.healthy.schedule.domain.dto.out;
 
-import com.querydsl.core.annotations.QueryProjection;
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
-import java.time.LocalDateTime;
+import com.tobe.healthy.schedule.domain.entity.Schedule;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.util.ObjectUtils;
 
 @Data
 @NoArgsConstructor
 @Builder
+@AllArgsConstructor
 public class ScheduleCommandResult {
-	private Long id;
-	private LocalDateTime startDt;
-	private LocalDateTime endDt;
+
+	private Long scheduleId;
+	private LocalDate lessonDt;
+	private LocalTime lessonStartTime;
+	private LocalTime lessonEndTime;
 	private ReservationStatus reservationStatus;
 	private int round;
 	private String trainerName;
 	private String applicantName;
+	private String standByName;
 
-	@QueryProjection
-	public ScheduleCommandResult(Long id, LocalDateTime startDt, LocalDateTime endDt, ReservationStatus reservationStatus, int round, String trainerName, String applicantName) {
-		this.id = id;
-		this.startDt = startDt;
-		this.endDt = endDt;
-		this.reservationStatus = reservationStatus;
-		this.round = round;
-		this.trainerName = trainerName;
-		this.applicantName = applicantName;
+	public static ScheduleCommandResult of(Schedule entity) {
+		ScheduleCommandResultBuilder builder = ScheduleCommandResult.builder()
+			.scheduleId(entity.getId())
+			.lessonDt(entity.getLessonDt())
+			.lessonStartTime(entity.getLessonStartTime())
+			.lessonEndTime(entity.getLessonEndTime())
+			.reservationStatus(entity.getReservationStatus())
+			.round(entity.getRound());
+
+		if (!ObjectUtils.isEmpty(entity.getTrainer())) {
+			builder.trainerName(entity.getTrainer().getName());
+		}
+
+		if (!ObjectUtils.isEmpty(entity.getApplicant())) {
+			builder.applicantName(entity.getApplicant().getName());
+		}
+
+		if (!ObjectUtils.isEmpty(entity.getStandBySchedule())) {
+			builder.standByName(entity.getStandBySchedule().getMember().getName());
+		}
+
+		return builder.build();
 	}
 }

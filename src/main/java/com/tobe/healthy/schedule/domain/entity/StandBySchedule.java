@@ -29,8 +29,7 @@ public class StandBySchedule extends BaseTimeEntity<StandBySchedule, Long> {
 	@Column(name = "stand_by_schedule_id")
 	private Long id;
 
-	@OneToOne(fetch = LAZY, cascade = ALL)
-	@JoinColumn(name = "schedule_id")
+	@OneToOne(fetch = LAZY, mappedBy = "standBySchedule")
 	private Schedule schedule;
 
 	@OneToOne(fetch = LAZY, cascade = ALL)

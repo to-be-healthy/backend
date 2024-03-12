@@ -1,7 +1,8 @@
 package com.tobe.healthy.schedule.domain.dto.in;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,15 +11,16 @@ import lombok.Data;
 @Builder
 public class ScheduleCommandRequest {
 	private Long trainer;
-	private List<ScheduleRegisterInfo> list;
+	private Map<String, List<ScheduleRegister>> schedule;
 
 	@Data
 	@Builder
 	@AllArgsConstructor
-	public static class ScheduleRegisterInfo {
+	public static class ScheduleRegister {
 		private int round;
-		private LocalDateTime startDt;
-		private LocalDateTime endDt;
+		private LocalTime startTime;
+		private LocalTime endTime;
 		private Long applicant;
 	}
 }
+
