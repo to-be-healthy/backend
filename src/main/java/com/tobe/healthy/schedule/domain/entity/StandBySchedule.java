@@ -35,4 +35,12 @@ public class StandBySchedule extends BaseTimeEntity<StandBySchedule, Long> {
 	@OneToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "member_id")
 	private Member member;
+
+	public static StandBySchedule register(Member member, Schedule schedule) {
+		StandBySchedule entity = StandBySchedule.builder()
+			.schedule(schedule)
+			.member(member)
+			.build();
+		return entity;
+	}
 }

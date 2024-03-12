@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
 public class CustomMemberDetailService implements UserDetailsService {
 
 	@Override
-	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+	public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
 		List<GrantedAuthority> roles = new ArrayList<>();
 		roles.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
-		return new AccountContext(email, roles);
+		return new AccountContext(userId, roles);
 	}
 
 	public static class AccountContext extends User {

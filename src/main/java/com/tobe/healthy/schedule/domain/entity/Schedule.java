@@ -76,8 +76,15 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 			reserve.applicant(member);
 			reserve.reservationStatus(COMPLETED);
 		}
-
 		return reserve.build();
+	}
+
+	public void registerSchedule(Member member) {
+		this.applicant = member;
+	}
+
+	public void registerSchedule(StandBySchedule standBySchedule) {
+		this.standBySchedule = standBySchedule;
 	}
 
 	public void cancelSchedule() {
