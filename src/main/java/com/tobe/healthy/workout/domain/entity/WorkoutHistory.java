@@ -34,9 +34,9 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     private Long trainerId;
 
-    @ColumnDefault("'N'")
+    @ColumnDefault("false")
     @Builder.Default
-    private char delYn = 'N';
+    private Boolean delYn = false;
 
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
     private List<WorkoutHistoryFile> historyFiles = new ArrayList<>();
@@ -58,7 +58,7 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     }
 
     public void deleteWorkoutHistory() {
-        this.delYn = 'Y';
+        this.delYn = true;
         this.historyFiles.forEach(WorkoutHistoryFile::deleteWorkoutHistoryFile);
         this.historyComments.forEach(content -> content.deleteWorkoutHistoryComment());
         //TODO: 좋아요 삭제

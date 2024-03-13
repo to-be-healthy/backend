@@ -29,9 +29,9 @@ public class WorkoutHistoryComment extends BaseTimeEntity<WorkoutHistoryComment,
 
     private String content;
 
-    @ColumnDefault("'N'")
+    @ColumnDefault("false")
     @Builder.Default
-    private char delYn = 'N';
+    private Boolean delYn = false;
 
     public static WorkoutHistoryComment create(WorkoutHistory history, Member member, String content) {
         return WorkoutHistoryComment.builder()
@@ -42,7 +42,10 @@ public class WorkoutHistoryComment extends BaseTimeEntity<WorkoutHistoryComment,
     }
 
     public void deleteWorkoutHistoryComment() {
-        this.delYn = 'Y';
+        this.delYn = true;
     }
 
+    public void updateContent(String content){
+        this.content = content;
+    }
 }

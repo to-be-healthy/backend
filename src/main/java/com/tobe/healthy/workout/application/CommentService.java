@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_COMMENT_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_NOT_FOUND;
 
 @Service
@@ -25,10 +26,18 @@ public class CommentService {
 
     @Transactional
     public WorkoutHistoryCommentDto addComments(Long workoutHistoryId, HistoryCommentAddCommand command, Member member) {
-        WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndMemberId(workoutHistoryId, member.getId())
+        WorkoutHistory history = workoutHistoryRepository.findById(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         WorkoutHistoryComment comment = WorkoutHistoryComment.create(history, member, command.getContent());
         commentRepository.save(comment);
+        return WorkoutHistoryCommentDto.from(comment);
+    }
+
+    @Transactional
+    public WorkoutHistoryCommentDto updateComment(Member member, Long workoutHistoryId, Long commentId, HistoryCommentAddCommand command) {
+        WorkoutHistoryComment comment = commentRepository.findByCommentIdAndMemberIdAndDelYnFalse(commentId, member.getId())
+                .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_COMMENT_NOT_FOUND));
+        comment.updateContent(command.getContent());
         return WorkoutHistoryCommentDto.from(comment);
     }
 }

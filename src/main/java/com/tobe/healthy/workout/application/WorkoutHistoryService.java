@@ -78,7 +78,7 @@ public class WorkoutHistoryService {
     }
 
     public WorkoutHistoryDto getWorkoutHistoryDetail(Long workoutHistoryId) {
-        WorkoutHistory history = workoutHistoryRepository.findById(workoutHistoryId)
+        WorkoutHistory history = workoutHistoryRepository.findByIdAndDelYnFalse(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         List<Long> ids = Arrays.asList(history.getWorkoutHistoryId());
         List<WorkoutHistoryFileDto> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
@@ -87,7 +87,7 @@ public class WorkoutHistoryService {
 
     @Transactional
     public void deleteWorkoutHistory(Long workoutHistoryId) {
-        WorkoutHistory history = workoutHistoryRepository.findById(workoutHistoryId)
+        WorkoutHistory history = workoutHistoryRepository.findByIdAndDelYnFalse(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         history.deleteWorkoutHistory();
         history.getHistoryFiles().forEach(file ->
@@ -97,7 +97,7 @@ public class WorkoutHistoryService {
 
     @Transactional
     public WorkoutHistoryDto updateWorkoutHistory(Member member, Long workoutHistoryId, HistoryAddCommand command) {
-        WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndMemberId(workoutHistoryId, member.getId())
+        WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndMemberIdAndDelYnFalse(workoutHistoryId, member.getId())
             .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         history.updateContent(command.getContent());
         history.deleteWorkoutHistory();

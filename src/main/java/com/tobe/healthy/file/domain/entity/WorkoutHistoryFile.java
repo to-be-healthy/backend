@@ -31,9 +31,9 @@ public class WorkoutHistoryFile extends BaseTimeEntity<WorkoutHistoryFile, Long>
     private String filePath;
     private Long fileSize;
 
-    @ColumnDefault("'N'")
+    @ColumnDefault("false")
     @Builder.Default
-    private char delYn = 'N';
+    private Boolean delYn = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workout_history_id")
@@ -51,7 +51,7 @@ public class WorkoutHistoryFile extends BaseTimeEntity<WorkoutHistoryFile, Long>
     }
 
     public void deleteWorkoutHistoryFile() {
-        this.delYn = 'Y';
+        this.delYn = true;
     }
 
 }
