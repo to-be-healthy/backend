@@ -6,9 +6,12 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.io.File.separator;
 
 @Entity
 @Table(name = "workout_history")
@@ -31,8 +34,15 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     private Long trainerId;
 
+    @ColumnDefault("'N'")
+    @Builder.Default
+    private char delYn = 'N';
+
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
     private List<WorkoutHistoryFile> historyFiles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
+    private List<WorkoutHistoryComment> historyComments = new ArrayList<>();
 
     public static WorkoutHistory create(WorkoutHistoryDto historyDto, Member member) {
         return WorkoutHistory.builder()
@@ -45,6 +55,13 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     public void updateContent(String content){
         this.content = content;
+    }
+
+    public void deleteWorkoutHistory() {
+        this.delYn = 'Y';
+        this.historyFiles.forEach(WorkoutHistoryFile::deleteWorkoutHistoryFile);
+        this.historyComments.forEach(content -> content.deleteWorkoutHistoryComment());
+        //TODO: 좋아요 삭제
     }
 
 }

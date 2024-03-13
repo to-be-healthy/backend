@@ -19,7 +19,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping
 @Slf4j
 public class WorkoutHistoryController {
 
@@ -69,7 +68,7 @@ public class WorkoutHistoryController {
     @Operation(summary = "운동기록 삭제", responses = {
             @ApiResponse(responseCode = "200", description = "운동기록 삭제 완료.")
     })
-    @DeleteMapping("/workout-histories/{workoutHistoryId}")
+    @PatchMapping("/workout-histories/{workoutHistoryId}")
     public ResponseEntity<?> deleteWorkoutHistory(@PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.deleteWorkoutHistory(workoutHistoryId);
         return ResponseEntity.ok().build();

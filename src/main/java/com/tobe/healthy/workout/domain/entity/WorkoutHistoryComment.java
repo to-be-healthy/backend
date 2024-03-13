@@ -4,6 +4,7 @@ import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "workout_history_comment")
@@ -28,6 +29,10 @@ public class WorkoutHistoryComment extends BaseTimeEntity<WorkoutHistoryComment,
 
     private String content;
 
+    @ColumnDefault("'N'")
+    @Builder.Default
+    private char delYn = 'N';
+
     public static WorkoutHistoryComment create(WorkoutHistory history, Member member, String content) {
         return WorkoutHistoryComment.builder()
                 .workoutHistory(history)
@@ -35,4 +40,9 @@ public class WorkoutHistoryComment extends BaseTimeEntity<WorkoutHistoryComment,
                 .content(content)
                 .build();
     }
+
+    public void deleteWorkoutHistoryComment() {
+        this.delYn = 'Y';
+    }
+
 }
