@@ -7,11 +7,10 @@ import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
-import static org.springframework.util.ObjectUtils.isEmpty;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest.ScheduleRegisterInfo;
+import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest.ScheduleRegister;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -20,31 +19,34 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.util.ObjectUtils;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @Builder
-@ToString(exclude = {"trainer", "applicant"})
+@ToString
 public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
 	@Column(name = "schedule_id")
 	private Long id;
-
-	private LocalDateTime startDt;
-
-	private LocalDateTime endDt;
+	private LocalDate lessonDt;
+	private LocalTime lessonStartTime;
+	private LocalTime lessonEndTime;
 
 	@Enumerated(STRING)
+	@Default
 	private ReservationStatus reservationStatus = AVAILABLE;
 
 	private int round;
@@ -57,23 +59,32 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@JoinColumn(name = "applicant_id")
 	private Member applicant;
 
-	@OneToOne(mappedBy = "schedule")
+	@OneToOne(fetch = LAZY, cascade = ALL)
+	@JoinColumn(name = "stand_by_schedule_id")
 	private StandBySchedule standBySchedule;
 
-	public static Schedule registerSchedule(Member trainer, Member member, ScheduleRegisterInfo request) {
+	public static Schedule registerSchedule(LocalDate date, Member trainer, Member member, ScheduleRegister request) {
 		ScheduleBuilder reserve = Schedule.builder()
+			.lessonDt(date)
 			.round(request.getRound())
-			.startDt(request.getStartDt())
-			.endDt(request.getEndDt())
+			.lessonStartTime(request.getStartTime())
+			.lessonEndTime(request.getEndTime())
 			.trainer(trainer)
 			.reservationStatus(AVAILABLE);
 
-		if (!isEmpty(member)) {
+		if (!ObjectUtils.isEmpty(member)) {
 			reserve.applicant(member);
 			reserve.reservationStatus(COMPLETED);
 		}
-
 		return reserve.build();
+	}
+
+	public void registerSchedule(Member member) {
+		this.applicant = member;
+	}
+
+	public void registerSchedule(StandBySchedule standBySchedule) {
+		this.standBySchedule = standBySchedule;
 	}
 
 	public void cancelSchedule() {

@@ -139,7 +139,7 @@ public class MemberService {
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 		// 4. 새로운 AccessToken과 기존의 RefreshToken을 반환한다.
-		return tokenGenerator.exchangeAccessToken(member.getUserId(), refreshToken);
+		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), refreshToken);
 	}
 
 	public String findUserId(MemberFindIdCommand request) {
@@ -175,15 +175,16 @@ public class MemberService {
 
 			HttpHeaders header = new HttpHeaders();
 			header.set("Authorization", "Bearer " + body.getAccessToken());
-			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange("https://kapi.kakao.com/v2/user/me", GET, new HttpEntity<>(header), KakaoUserInfo.class);
+			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange(
+				"https://kapi.kakao.com/v2/user/me", GET, new HttpEntity<>(header),
+				KakaoUserInfo.class);
 			KakaoUserInfo dto = entity.getBody();
 
-			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(), byte[].class);
+			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(),
+				byte[].class);
 			fileService.uploadFile(image, dto.getProperties().getProfileImage());
 
-			// todo: 소셜 회원가입시 email을 필수로 받는게 나을 거 같음. UUID로 하면, 복잡해짐
 		}
-
 		return null;
 	}
 
