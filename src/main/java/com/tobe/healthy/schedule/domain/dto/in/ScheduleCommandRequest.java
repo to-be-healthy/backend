@@ -11,6 +11,7 @@ import lombok.Data;
 
 @Data
 @Builder
+@Schema(description = "일정 등록 DTO")
 public class ScheduleCommandRequest {
 
 	@Schema(description = "트레이너 아이디", example = "1")

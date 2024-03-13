@@ -1,17 +1,20 @@
 package com.tobe.healthy.member.domain.dto.in;
 
 import com.tobe.healthy.member.domain.entity.MemberType;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
+@Schema(description = "회원가입 DTO")
 public class MemberJoinCommand {
     @Schema(description = "아이디" , example = "to-be-healthy")
     @NotEmpty(message = "아이디를 입력해 주세요.")
     private String userId;
 
+    @Parameter(description = "아이디" , example = "to-be-healthy")
     @Schema(description = "이메일" , example = "to-be-healthy@gmail.com")
     @NotEmpty(message = "이메일을 입력해 주세요.")
     private String email;

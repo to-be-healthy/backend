@@ -24,7 +24,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
 
     properties:
       hibernate:
@@ -82,7 +82,9 @@ springdoc:
     path: ${SPRINGDOC_SWAGGER_UI_PATH}
     disable-swagger-default-url: true
     display-request-duration: true
+    tags-sorter: alpha
     operations-sorter: alpha
+
 decorator:
   datasource:
     p6spy:

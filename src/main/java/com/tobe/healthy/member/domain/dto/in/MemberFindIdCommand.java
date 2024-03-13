@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "아이디 찾기 DTO")
 public class MemberFindIdCommand {
 	@Schema(description = "이메일" , example = "to-be-healthy@gmail.com")
 	@NotEmpty(message = "이메일을 입력해 주세요.")

@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.TreeMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/schedule")
 @Slf4j
-@Tag(name = "schedule", description = "일정 API")
+@Tag(name = "02.Schedule", description = "일정 API")
 public class ScheduleController {
 
 	private final ScheduleService scheduleService;
@@ -43,7 +42,7 @@ public class ScheduleController {
 		@ApiResponse(responseCode = "200", description = "자동으로 일정 생성 완료")
 	})
 	@PostMapping("/create")
-	public ResponseHandler<TreeMap<LocalDate, ArrayList<ScheduleInfo>>> createSchedule(@ParameterObject @RequestBody @Valid AutoCreateScheduleCommandRequest request) {
+	public ResponseHandler<TreeMap<LocalDate, ArrayList<ScheduleInfo>>> createSchedule(@RequestBody @Valid AutoCreateScheduleCommandRequest request) {
 		return ResponseHandler.<TreeMap<LocalDate, ArrayList<ScheduleInfo>>>builder()
 			.statusCode(HttpStatus.OK)
 			.data(scheduleService.autoCreateSchedule(request))
@@ -68,7 +67,7 @@ public class ScheduleController {
 		@ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
 	})
 	@PostMapping("/find")
-	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule(@ParameterObject @RequestBody ScheduleSearchCond searchCond) {
+	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule(@RequestBody ScheduleSearchCond searchCond) {
 		return ResponseHandler.<List<ScheduleCommandResult>>builder()
 			.statusCode(HttpStatus.OK)
 			.data(scheduleService.findAllSchedule(searchCond))

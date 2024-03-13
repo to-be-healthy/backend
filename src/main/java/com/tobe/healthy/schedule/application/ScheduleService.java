@@ -6,7 +6,6 @@ import static com.tobe.healthy.config.error.ErrorCode.NOT_STAND_BY_SCHEDULE;
 import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
 import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
-import static java.util.stream.Collectors.toList;
 
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
@@ -71,10 +70,7 @@ public class ScheduleService {
 	}
 
 	public List<ScheduleCommandResult> findAllByApplicantId(Long memberId) {
-		List<Schedule> schedules = scheduleRepository.findAllByApplicantId(memberId);
-		return schedules.stream()
-			.map(ScheduleCommandResult::of)
-			.collect(toList());
+		return scheduleRepository.findAllByApplicantId(memberId);
 	}
 
 	public Boolean reserveSchedule(Long scheduleId, Long memberId) {

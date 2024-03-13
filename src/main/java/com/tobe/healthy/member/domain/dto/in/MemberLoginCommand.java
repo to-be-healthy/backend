@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "로그인 DTO")
 public class MemberLoginCommand {
     @Schema(description = "아이디")
     @NotEmpty(message = "아이디를 입력해 주세요.")

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import lombok.Data;
 
 @Data
+@Schema(description = "일정 조회 조건 DTO")
 public class ScheduleSearchCond {
 	@Schema(description = "조회할 수업 일자", example = "2024-04-01")
 	private LocalDate lessonDt;

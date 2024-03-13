@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Schema(description = "일정 자동생성 DTO")
 public class AutoCreateScheduleCommandRequest {
 
 	@Schema(description = "트레이너 아이디")
