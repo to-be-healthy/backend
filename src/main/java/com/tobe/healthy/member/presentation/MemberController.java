@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -86,7 +87,7 @@ public class MemberController {
 	@Schema(name = "authNumber")
 	@PostMapping("/email-verification")
 	public ResponseHandler<Boolean> verifyAuthMail(@Parameter(description = "인증번호") @RequestParam String authNumber,
-												   @Parameter(description = "이메일")   @RequestParam String email) {
+												   @Parameter(description = "이메일") @RequestParam String email) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.verifyEmailAuthNumber(authNumber, email))
@@ -100,7 +101,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
 	})
 	@PostMapping("/join")
-	public ResponseHandler<MemberJoinCommandResult> join(@RequestBody @Valid MemberJoinCommand request) {
+	public ResponseHandler<MemberJoinCommandResult> join(@ParameterObject @RequestBody @Valid MemberJoinCommand request) {
 		return ResponseHandler.<MemberJoinCommandResult>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.joinMember(request))
@@ -113,7 +114,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "로그인에 성공하고, Access Token, Refresh Token을 반환한다.")
 	})
 	@PostMapping("/login")
-	public ResponseHandler<Tokens> login(@RequestBody @Valid MemberLoginCommand request) {
+	public ResponseHandler<Tokens> login(@ParameterObject @RequestBody @Valid MemberLoginCommand request) {
 		return ResponseHandler.<Tokens>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.login(request))
@@ -128,8 +129,8 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token을 반환한다.")
 	})
 	@PostMapping("/refresh-token")
-	public ResponseHandler<Tokens> refreshToken(@Parameter(description = "아이디") String userId,
-												@Parameter(description = "갱신 토큰") String refreshToken) {
+	public ResponseHandler<Tokens> refreshToken(@Parameter(description = "아이디") @RequestParam String userId,
+												@Parameter(description = "갱신 토큰") @RequestParam String refreshToken) {
 		return ResponseHandler.<Tokens>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.refreshToken(userId, refreshToken))
@@ -142,7 +143,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "휴대폰 번호, 닉네임에 일치하는 이메일을 반환한다.")
 	})
 	@PostMapping("/find/userId")
-	public ResponseHandler<String> findUserId(@RequestBody @Valid MemberFindIdCommand request) {
+	public ResponseHandler<String> findUserId(@ParameterObject @RequestBody @Valid MemberFindIdCommand request) {
 		return ResponseHandler.<String>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.findUserId(request))
@@ -155,7 +156,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "등록된 이메일에 초기화 비밀번호를 전송한다.")
 	})
 	@PostMapping("/find/password")
-	public ResponseHandler<String> findMemberPW(@RequestBody @Valid MemberFindPWCommand request) {
+	public ResponseHandler<String> findMemberPW(@ParameterObject @RequestBody @Valid MemberFindPWCommand request) {
 		return ResponseHandler.<String>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.findMemberPW(request))

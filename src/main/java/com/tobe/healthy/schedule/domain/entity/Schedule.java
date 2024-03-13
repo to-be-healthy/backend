@@ -27,6 +27,7 @@ import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.util.ObjectUtils;
 
 @Entity
@@ -63,6 +64,10 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@JoinColumn(name = "stand_by_schedule_id")
 	private StandBySchedule standBySchedule;
 
+	@ColumnDefault("'N'")
+	@Default
+	private char delYn = 'N';
+
 	public static Schedule registerSchedule(LocalDate date, Member trainer, Member member, ScheduleRegister request) {
 		ScheduleBuilder reserve = Schedule.builder()
 			.lessonDt(date)
@@ -81,13 +86,19 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	public void registerSchedule(Member member) {
 		this.applicant = member;
+		this.reservationStatus = COMPLETED;
 	}
 
 	public void registerSchedule(StandBySchedule standBySchedule) {
 		this.standBySchedule = standBySchedule;
 	}
 
-	public void cancelSchedule() {
+	public void cancelTrainerSchedule() {
+		this.delYn = 'Y';
+		this.applicant = null;
+	}
+
+	public void cancelMemberSchedule() {
 		this.reservationStatus = AVAILABLE;
 		this.applicant = null;
 	}

@@ -1,8 +1,8 @@
 package com.tobe.healthy.schedule.application;
 
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.NOT_STAND_BY_SCHEDULE;
 import static com.tobe.healthy.config.error.ErrorCode.NOT_RESERVABLE_SCHEDULE;
+import static com.tobe.healthy.config.error.ErrorCode.NOT_STAND_BY_SCHEDULE;
 import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
 import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
@@ -16,6 +16,7 @@ import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest.ScheduleRegister;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
@@ -25,11 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -79,10 +77,8 @@ public class ScheduleService {
 			.collect(toList());
 	}
 
-	public Boolean reserveSchedule(Long scheduleId) {
-		String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-
-		Member member = memberRepository.findByUserId(userId)
+	public Boolean reserveSchedule(Long scheduleId, Long memberId) {
+		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 		Schedule schedule = scheduleRepository.findAvailableScheduleById(scheduleId)
@@ -93,10 +89,9 @@ public class ScheduleService {
 		return true;
 	}
 
-	public Boolean registerStandBySchedule(Long scheduleId) {
-		String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+	public Boolean registerStandBySchedule(Long scheduleId, Long memberId) {
 
-		Member member = memberRepository.findByUserId(userId)
+		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 		Schedule schedule = scheduleRepository.findAvailableStandById(scheduleId)
@@ -107,14 +102,6 @@ public class ScheduleService {
 		schedule.registerSchedule(standBySchedule);
 
 		return true;
-	}
-
-	@Data
-	@AllArgsConstructor
-	public static class ScheduleInfo {
-		LocalTime startTime;
-		LocalTime endTime;
-		int round;
 	}
 
 	private boolean isHoliday(LocalDate startDt) {
@@ -144,25 +131,20 @@ public class ScheduleService {
 		return scheduleRepository.findAllSchedule(searchCond);
 	}
 
-	public Boolean cancelTrainerSchedule(Long scheduleId) {
-		String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-
-		Member trainer = memberRepository.findByUserId(userId)
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-
-		Schedule entity = scheduleRepository.findByTrainerIdAndId(trainer.getId(), scheduleId)
+	public Boolean cancelTrainerSchedule(Long scheduleId, Long memberId) {
+		Schedule entity = scheduleRepository.findScheduleByTrainerId(memberId, scheduleId)
 			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
-		entity.cancelSchedule();
+		entity.cancelTrainerSchedule();
+
 		return true;
 	}
 
-	public Boolean cancelMemberSchedule(Long scheduleId) {
-		String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-		Schedule entity = scheduleRepository.findById(scheduleId)
+	public Boolean cancelMemberSchedule(Long scheduleId, Long memberId) {
+		Schedule entity = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
 				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
-		entity.cancelSchedule();
+		entity.cancelMemberSchedule();
 		return true;
 	}
 }
