@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/api/schedule")
+@RequestMapping("/api/v1/schedule")
 @Slf4j
 @Tag(name = "02.Schedule", description = "수업 일정 API")
 public class ScheduleController {
@@ -56,7 +56,7 @@ public class ScheduleController {
 		@ApiResponse(responseCode = "404", description = "트레이너를 찾을 수 없습니다.")
 	})
 	@PostMapping
-	public ResponseHandler<Boolean> registerSchedule(@RequestBody ScheduleCommandRequest request) {
+	public ResponseHandler<Boolean> registerSchedule(@RequestBody @Valid ScheduleCommandRequest request) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(scheduleService.registerSchedule(request))

@@ -6,10 +6,9 @@ import static com.tobe.healthy.schedule.domain.entity.QStandBySchedule.standBySc
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.QMember;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
-import com.tobe.healthy.schedule.domain.entity.QSchedule;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.domain.entity.Schedule;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;

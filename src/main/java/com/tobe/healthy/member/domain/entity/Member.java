@@ -73,9 +73,9 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @Default
     private List<StandBySchedule> standBySchedules = new ArrayList<>();
 
-    @ColumnDefault("'N'")
+    @ColumnDefault("false")
     @Default
-    private char delYn = 'N';
+    private boolean delYn = false;
 
     public static Member join(MemberJoinCommand request, String password) {
         Member member = new Member();
@@ -97,6 +97,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
     }
 
     public void deleteMember() {
-        this.delYn = 'Y';
+        this.delYn = true;
     }
 }

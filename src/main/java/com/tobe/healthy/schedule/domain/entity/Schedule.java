@@ -68,9 +68,9 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@Default
 	private List<StandBySchedule> standBySchedule = new ArrayList<>();
 
-	@ColumnDefault("'N'")
+	@ColumnDefault("false")
 	@Default
-	private char delYn = 'N';
+	private boolean delYn = false;
 
 	public static Schedule registerSchedule(LocalDate date, Member trainer, Member member, ScheduleRegister request) {
 		ScheduleBuilder reserve = Schedule.builder()
@@ -94,7 +94,7 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	}
 
 	public void cancelTrainerSchedule() {
-		this.delYn = 'Y';
+		this.delYn = true;
 		this.applicant = null;
 	}
 
