@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping
+@RequestMapping("/api/v1")
 @Slf4j
 public class TrainerController {
 

@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping
+@RequestMapping("/api/v1")
 @Slf4j
 public class WorkoutHistoryController {
 

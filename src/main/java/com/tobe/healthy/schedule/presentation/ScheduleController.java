@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/schedule")
+@RequestMapping("/api/v1/schedule")
 @Slf4j
 @Tag(name = "schedule", description = "일정 API")
 public class ScheduleController {
