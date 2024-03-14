@@ -13,9 +13,9 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long>, Sched
 	@Query("select s from Schedule s where s.applicant.id = :userId and s.id = :scheduleId and s.delYn = 'N'")
 	Optional<Schedule> findScheduleByApplicantId(Long userId, Long scheduleId);
 
-	@Query("select s from Schedule s left join s.standBySchedule where s.id = :scheduleId and s.reservationStatus = 'COMPLETED' and s.applicant is not null and s.standBySchedule.id is null and s.delYn = 'N'")
+	@Query("select s from Schedule s left join fetch s.standBySchedule where s.id = :scheduleId and s.reservationStatus = 'COMPLETED' and s.applicant is not null and s.delYn = 'N'")
 	Optional<Schedule> findAvailableStandById(Long scheduleId);
 
-	@Query("select s from Schedule s left join s.standBySchedule where s.id = :scheduleId and s.reservationStatus = 'AVAILABLE' and s.applicant is null and s.standBySchedule.id is null and s.delYn = 'N'")
+	@Query("select s from Schedule s where s.id = :scheduleId and s.reservationStatus = 'AVAILABLE' and s.applicant is null and s.delYn = 'N'")
 	Optional<Schedule> findAvailableScheduleById(Long scheduleId);
 }

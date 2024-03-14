@@ -13,7 +13,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,7 +31,7 @@ public class StandBySchedule extends BaseTimeEntity<StandBySchedule, Long> {
 	@Column(name = "stand_by_schedule_id")
 	private Long id;
 
-	@OneToOne(fetch = LAZY, cascade = ALL)
+	@ManyToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "schedule_id")
 	private Schedule schedule;
 

@@ -93,6 +93,10 @@ public class ScheduleService {
 		Schedule schedule = scheduleRepository.findAvailableStandById(scheduleId)
 			.orElseThrow(() -> new CustomException(NOT_STAND_BY_SCHEDULE));
 
+		if (!ObjectUtils.isEmpty(schedule.getStandBySchedule())) {
+			throw new CustomException(NOT_STAND_BY_SCHEDULE);
+		}
+
 		StandBySchedule standBySchedule = StandBySchedule.register(member, schedule);
 
 		standByScheduleRepository.save(standBySchedule);

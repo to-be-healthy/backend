@@ -18,9 +18,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -62,8 +64,9 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@JoinColumn(name = "applicant_id")
 	private Member applicant;
 
-	@OneToOne(mappedBy = "schedule")
-	private StandBySchedule standBySchedule;
+	@OneToMany(fetch = LAZY, mappedBy = "schedule")
+	@Default
+	private List<StandBySchedule> standBySchedule = new ArrayList<>();
 
 	@ColumnDefault("'N'")
 	@Default

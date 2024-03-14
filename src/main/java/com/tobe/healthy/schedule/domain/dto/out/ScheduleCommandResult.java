@@ -44,7 +44,7 @@ public class ScheduleCommandResult {
 		}
 
 		if (!ObjectUtils.isEmpty(entity.getStandBySchedule())) {
-			builder.standByName(entity.getStandBySchedule().getMember().getName());
+			builder.standByName(entity.getStandBySchedule().get(0).getMember().getName());
 		}
 
 		return builder.build();
