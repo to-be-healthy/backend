@@ -36,11 +36,16 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     @Builder.Default
     private Boolean delYn = false;
 
+    @ColumnDefault("0")
+    @Builder.Default
+    private Long likeCnt = 0L;
+
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
     private List<WorkoutHistoryFile> historyFiles = new ArrayList<>();
 
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
     private List<WorkoutHistoryComment> historyComments = new ArrayList<>();
+
 
     public static WorkoutHistory create(WorkoutHistoryDto historyDto, Member member) {
         return WorkoutHistory.builder()
@@ -55,11 +60,14 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
         this.content = content;
     }
 
+    public void updateLikeCnt(Long likeCnt){
+        this.likeCnt = likeCnt;
+    }
+
     public void deleteWorkoutHistory() {
         this.delYn = true;
         this.historyFiles.forEach(WorkoutHistoryFile::deleteWorkoutHistoryFile);
-        this.historyComments.forEach(content -> content.deleteComment());
-        //TODO: 좋아요 삭제
+        this.historyComments.forEach(WorkoutHistoryComment::deleteComment);
     }
 
 }

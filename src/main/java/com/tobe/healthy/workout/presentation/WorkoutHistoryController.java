@@ -91,4 +91,28 @@ public class WorkoutHistoryController {
         return ResponseEntity.ok(workoutService.updateWorkoutHistory(member, workoutHistoryId, command));
     }
 
+    @Operation(summary = "운동기록 좋아요", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "좋아요 완료.")
+    })
+    @PostMapping("/like/workout-histories/{workoutHistoryId}")
+    public ResponseEntity<?> likeWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
+                                                                @PathVariable("workoutHistoryId") Long workoutHistoryId) {
+        Member member = commonService.getMemberByToken(bearerToken);
+        workoutService.likeWorkoutHistory(member, workoutHistoryId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "운동기록 좋아요 취소", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "좋아요 취소 완료.")
+    })
+    @DeleteMapping("/like/workout-histories/{workoutHistoryId}")
+    public ResponseEntity<?> deleteLikeWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
+                                                @PathVariable("workoutHistoryId") Long workoutHistoryId) {
+        Member member = commonService.getMemberByToken(bearerToken);
+        workoutService.deleteLikeWorkoutHistory(member, workoutHistoryId);
+        return ResponseEntity.ok().build();
+    }
+
 }

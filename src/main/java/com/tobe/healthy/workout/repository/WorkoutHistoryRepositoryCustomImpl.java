@@ -33,7 +33,8 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         List<WorkoutHistoryDto> workoutHistories =  queryFactory
                 .select(Projections.fields(WorkoutHistoryDto.class,
                         qHistory.workoutHistoryId,
-                        qHistory.content
+                        qHistory.content,
+                        qHistory.likeCnt
                 ))
                 .from(qHistory)
                 .where(qHistory.member.id.eq(memberId), qHistory.delYn.eq(false))
@@ -54,7 +55,8 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         List<WorkoutHistoryDto> workoutHistories =  queryFactory
                 .select(Projections.fields(WorkoutHistoryDto.class,
                         qHistory.workoutHistoryId,
-                        qHistory.content
+                        qHistory.content,
+                        qHistory.likeCnt
                 ))
                 .from(qHistory)
                 .where(qHistory.trainerId.eq(trainerId), qHistory.delYn.eq(false))

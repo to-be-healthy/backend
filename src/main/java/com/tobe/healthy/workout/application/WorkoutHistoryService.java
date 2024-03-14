@@ -11,6 +11,9 @@ import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistoryLike;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistoryLikePK;
+import com.tobe.healthy.workout.repository.WorkoutHistoryLikeRepository;
 import com.tobe.healthy.workout.repository.WorkoutHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +37,7 @@ import static java.io.File.separator;
 public class WorkoutHistoryService {
 
     private final FileService fileService;
-    private final WorkoutFileRepository workoutFileRepository;
+    private final WorkoutHistoryLikeRepository workoutHistoryLikeRepository;
     private final WorkoutHistoryRepository workoutHistoryRepository;
     private final TrainerMemberMappingRepository mappingRepository;
 
@@ -90,6 +93,7 @@ public class WorkoutHistoryService {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndMemberIdAndDelYnFalse(workoutHistoryId, member.getId())
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         history.deleteWorkoutHistory();
+        workoutHistoryLikeRepository.deleteLikeByWorkoutHistoryId(workoutHistoryId);
         history.getHistoryFiles().forEach(file ->
             fileService.deleteFile(file.getFilePath() + separator + file.getFileName() + file.getExtension())
         );
@@ -101,6 +105,7 @@ public class WorkoutHistoryService {
             .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         history.updateContent(command.getContent());
         history.deleteWorkoutHistory();
+        workoutHistoryLikeRepository.deleteLikeByWorkoutHistoryId(workoutHistoryId);
         history.getHistoryFiles().forEach(file ->
                 fileService.deleteFile(file.getFilePath() + separator + file.getFileName() + file.getExtension())
         );
@@ -108,5 +113,21 @@ public class WorkoutHistoryService {
         List<Long> ids = Arrays.asList(history.getWorkoutHistoryId());
         List<WorkoutHistoryFileDto> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
         return WorkoutHistoryDto.create(history, files);
+    }
+
+    @Transactional
+    public void likeWorkoutHistory(Member member, Long workoutHistoryId) {
+        WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndDelYnFalse(workoutHistoryId)
+                .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
+        workoutHistoryLikeRepository.save(WorkoutHistoryLike.from(WorkoutHistoryLikePK.create(history, member)));
+        history.updateLikeCnt(workoutHistoryLikeRepository.getLikeCnt(history.getWorkoutHistoryId()));
+    }
+
+    @Transactional
+    public void deleteLikeWorkoutHistory(Member member, Long workoutHistoryId) {
+        WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndDelYnFalse(workoutHistoryId)
+                .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
+        workoutHistoryLikeRepository.delete(WorkoutHistoryLike.from(WorkoutHistoryLikePK.create(history, member)));
+        history.updateLikeCnt(workoutHistoryLikeRepository.getLikeCnt(history.getWorkoutHistoryId()));
     }
 }
