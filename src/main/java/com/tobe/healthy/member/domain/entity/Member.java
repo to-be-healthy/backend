@@ -1,6 +1,7 @@
 package com.tobe.healthy.member.domain.entity;
 
 import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
+import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
@@ -42,9 +43,15 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "member_id")
     private Long id;
+
+    @Column(unique = true)
     private String userId;
+
+    @Column(unique = true)
     private String email;
+
     private String password;
+
     private String name;
 
     @OneToOne(fetch = LAZY, cascade = ALL)
@@ -52,10 +59,12 @@ public class Member extends BaseTimeEntity<Member, Long> {
     private Profile profileId;
 
     @Enumerated(STRING)
-    private AlarmStatus alarmStatus;
+    @Default
+    private AlarmStatus alarmStatus = ENABLED;
 
     @Enumerated(STRING)
-    private MemberType memberType;
+    @Default
+    private MemberType memberType = MEMBER;
 
     @OneToOne(fetch = LAZY, cascade = ALL)
     @JoinColumn(name = "gym_id")

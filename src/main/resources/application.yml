@@ -41,6 +41,7 @@ jwt:
   refresh-token-valid-seconds: ${JWT_REFRESH_TOKEN_VALID_SECONDS}
 
 server:
+  port: 8888
   servlet:
     encoding:
       charset: UTF-8
@@ -79,7 +80,6 @@ springdoc:
   default-produces-media-type: application/json;charset=UTF-8
 
   swagger-ui:
-    path: ${SPRINGDOC_SWAGGER_UI_PATH}
     disable-swagger-default-url: true
     display-request-duration: true
     tags-sorter: alpha
