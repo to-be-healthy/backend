@@ -4,6 +4,7 @@ import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.NOT_RESERVABLE_SCHEDULE;
 import static com.tobe.healthy.config.error.ErrorCode.NOT_STAND_BY_SCHEDULE;
 import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.STAND_BY_SCHEDULE_NOT_FOUND;
 import static java.time.DayOfWeek.SATURDAY;
 import static java.time.DayOfWeek.SUNDAY;
 
@@ -104,10 +105,6 @@ public class ScheduleService {
 		return true;
 	}
 
-	private boolean isHoliday(LocalDate startDt) {
-		return startDt.getDayOfWeek().equals(SUNDAY) || startDt.getDayOfWeek().equals(SATURDAY);
-	}
-
 	public Boolean registerSchedule(ScheduleCommandRequest request) {
 		for (Map.Entry<String, List<ScheduleRegister>> entry : request.getSchedule().entrySet()) {
 			String date = entry.getKey();
@@ -140,12 +137,24 @@ public class ScheduleService {
 		return true;
 	}
 
-	public Boolean cancelMemberSchedule(Long scheduleId, Member member) {
-		log.info("member => {}", member);
-		Schedule entity = scheduleRepository.findScheduleByApplicantId(member.getId(), scheduleId)
+	public Boolean cancelMemberSchedule(Long scheduleId, Long memberId) {
+		Schedule entity = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
 				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
 		entity.cancelMemberSchedule();
+		return true;
+	}
+
+	private boolean isHoliday(LocalDate startDt) {
+		return startDt.getDayOfWeek().equals(SUNDAY) || startDt.getDayOfWeek().equals(SATURDAY);
+	}
+
+	public Boolean cancelStandBySchedule(Long scheduleId, Long memberId) {
+		StandBySchedule standBySchedule = standByScheduleRepository.findByScheduleIdAndMemberId(scheduleId, memberId)
+			.orElseThrow(() -> new CustomException(STAND_BY_SCHEDULE_NOT_FOUND));
+
+		standByScheduleRepository.delete(standBySchedule);
+
 		return true;
 	}
 }

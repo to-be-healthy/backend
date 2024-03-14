@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,15 +32,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/schedule")
+@RequestMapping("/v1/api/schedule")
 @Slf4j
-@Tag(name = "02.Schedule", description = "일정 API")
+@Tag(name = "02.Schedule", description = "수업 일정 API")
 public class ScheduleController {
 
 	private final ScheduleService scheduleService;
 
-	@Operation(summary = "자동으로 일정을 생성한다.", responses = {
-		@ApiResponse(responseCode = "200", description = "자동으로 일정 생성 완료")
+	@Operation(summary = "자동으로 수업 일정을 생성한다.", responses = {
+		@ApiResponse(responseCode = "200", description = "자동 수업 일정 생성 완료")
 	})
 	@PostMapping("/create")
 	public ResponseHandler<TreeMap<LocalDate, ArrayList<ScheduleInfo>>> createSchedule(@RequestBody @Valid AutoCreateScheduleCommandRequest request) {
@@ -50,9 +51,9 @@ public class ScheduleController {
 			.build();
 	}
 
-	@Operation(summary = "일정을 등록한다.", responses = {
-		@ApiResponse(responseCode = "200", description = "일정 등록 완료"),
-		@ApiResponse(responseCode = "404", description = "회원을 찾을 수 없습니다.")
+	@Operation(summary = "수업 일정을 등록한다.", responses = {
+		@ApiResponse(responseCode = "200", description = "수업 일정 등록 완료"),
+		@ApiResponse(responseCode = "404", description = "트레이너를 찾을 수 없습니다.")
 	})
 	@PostMapping
 	public ResponseHandler<Boolean> registerSchedule(@RequestBody ScheduleCommandRequest request) {
@@ -87,11 +88,11 @@ public class ScheduleController {
 			.build();
 	}
 
-	@Operation(summary = "수업 신청한다.", responses = {
+	@Operation(summary = "수업을 신청한다.", responses = {
 		@ApiResponse(responseCode = "200", description = "수업 신청 완료")
 	})
 	@PostMapping("/{scheduleId}")
-	public ResponseHandler<Boolean> reserveSchedule(@Parameter(description = "일정 아이디") @PathVariable Long scheduleId, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+	public ResponseHandler<Boolean> reserveSchedule(@Parameter(description = "수업 일정 아이디") @PathVariable Long scheduleId, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(scheduleService.reserveSchedule(scheduleId, customMemberDetails.getMemberId()))
@@ -108,6 +109,18 @@ public class ScheduleController {
 			.statusCode(HttpStatus.OK)
 			.data(scheduleService.registerStandBySchedule(scheduleId, customMemberDetails.getMemberId()))
 			.message("대기 신청 되었습니다.")
+			.build();
+	}
+
+	@Operation(summary = "신청한 수업의 대기를 취소한다.", responses = {
+		@ApiResponse(responseCode = "200", description = "수업 대기 취소 완료")
+	})
+	@DeleteMapping("stand-by/{scheduleId}")
+	public ResponseHandler<Boolean> cancelStandBySchedule(@Parameter(description = "일정 아이디") @PathVariable Long scheduleId, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<Boolean>builder()
+			.statusCode(HttpStatus.OK)
+			.data(scheduleService.cancelStandBySchedule(scheduleId, customMemberDetails.getMemberId()))
+			.message("대기 신청이 취소되었습니다.")
 			.build();
 	}
 
@@ -132,7 +145,7 @@ public class ScheduleController {
 	public ResponseHandler<Boolean> cancelScheduleForMember(@Parameter(description = "일정 아이디") @PathVariable Long scheduleId, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
-			.data(scheduleService.cancelMemberSchedule(scheduleId, customMemberDetails.getMember()))
+			.data(scheduleService.cancelMemberSchedule(scheduleId, customMemberDetails.getMemberId()))
 			.message("수업을 취소하였습니다.")
 			.build();
 	}

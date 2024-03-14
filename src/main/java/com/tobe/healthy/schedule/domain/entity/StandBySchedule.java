@@ -1,6 +1,5 @@
 package com.tobe.healthy.schedule.domain.entity;
 
-import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -31,11 +30,11 @@ public class StandBySchedule extends BaseTimeEntity<StandBySchedule, Long> {
 	@Column(name = "stand_by_schedule_id")
 	private Long id;
 
-	@ManyToOne(fetch = LAZY, cascade = ALL)
+	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "schedule_id")
 	private Schedule schedule;
 
-	@ManyToOne(fetch = LAZY, cascade = ALL)
+	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "member_id")
 	private Member member;
 

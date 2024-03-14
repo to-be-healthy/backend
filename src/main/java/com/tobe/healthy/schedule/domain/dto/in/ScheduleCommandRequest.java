@@ -18,7 +18,7 @@ public class ScheduleCommandRequest {
 	@NotNull(message = "트레이너 정보를 입력해 주세요.")
 	private Long trainer;
 
-	@Schema(description = "등록할 일정", example = "{\"2023-03-15\": [{\"round\": 1, \"startTime\": \"10:00\", \"endTime\": \"11:00\", \"applicant\": 1}], \"2023-03-16\": [{\"round\": 2, \"startTime\": \"12:00\", \"endTime\": \"13:00\", \"applicant\": 1}]}")
+	@Schema(description = "등록할 일정", example = "{\"2024-03-15\": [{\"round\": 1, \"startTime\": \"10:00\", \"endTime\": \"11:00\", \"applicant\": 1}], \"2024-03-16\": [{\"round\": 1, \"startTime\": \"12:00\", \"endTime\": \"13:00\", \"applicant\": 1}]}")
 	@NotNull(message = "등록할 일정을 입력해 주세요.")
 	private Map<String, List<ScheduleRegister>> schedule;
 

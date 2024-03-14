@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Schema(description = "로그인 DTO")
 public class MemberLoginCommand {
-    @Schema(description = "아이디")
+    @Schema(description = "아이디", example = "to-be-healthy")
     @NotEmpty(message = "아이디를 입력해 주세요.")
     private String userId;
 
-    @Schema(description = "비밀번호")
+    @Schema(description = "비밀번호", example = "zxcvbnm=1")
     @NotEmpty(message = "비밀번호를 입력해 주세요.")
     private String password;
 }
