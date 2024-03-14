@@ -80,7 +80,6 @@ springdoc:
   default-produces-media-type: application/json;charset=UTF-8
 
   swagger-ui:
-    path: ${SPRINGDOC_SWAGGER_UI_PATH}
     disable-swagger-default-url: true
     display-request-duration: true
     operations-sorter: alpha
