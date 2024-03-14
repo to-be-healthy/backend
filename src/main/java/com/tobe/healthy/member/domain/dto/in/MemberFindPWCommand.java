@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(description = "비밀번호 찾기 DTO")
 public class MemberFindPWCommand {
 	@Schema(description = "아이디" , example = "to-be-healthy")
 	@NotEmpty(message = "아이디를 입력해 주세요.")

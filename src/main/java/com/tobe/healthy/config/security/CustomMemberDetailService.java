@@ -1,29 +1,25 @@
 package com.tobe.healthy.config.security;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+
+import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.member.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class CustomMemberDetailService implements UserDetailsService {
 
-	@Override
-	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-		List<GrantedAuthority> roles = new ArrayList<>();
-		roles.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
-		return new AccountContext(email, roles);
-	}
+	private final MemberRepository memberRepository;
 
-	public static class AccountContext extends User {
-		public AccountContext(String username, Collection<? extends GrantedAuthority> authorities) {
-			super(username, "", authorities);
-		}
+	@Override
+	public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+		return memberRepository.findByUserId(userId)
+			.map(m -> new CustomMemberDetails(m))
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 	}
 }

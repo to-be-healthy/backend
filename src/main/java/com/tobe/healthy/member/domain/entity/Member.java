@@ -29,12 +29,14 @@ import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @Builder
+@DynamicUpdate
 public class Member extends BaseTimeEntity<Member, Long> {
 
     @Id
@@ -76,12 +78,13 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @Default
     private List<Schedule> applicantSchedules = new ArrayList<>();
 
-    @OneToOne(mappedBy = "member")
-    private StandBySchedule standBySchedule;
-
-    @ColumnDefault("'N'")
+    @OneToMany(mappedBy = "member")
     @Default
-    private char delYn = 'N';
+    private List<StandBySchedule> standBySchedules = new ArrayList<>();
+
+    @ColumnDefault("false")
+    @Default
+    private boolean delYn = false;
 
     public static Member join(MemberJoinCommand request, String password) {
         Member member = new Member();
@@ -103,6 +106,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
     }
 
     public void deleteMember() {
-        this.delYn = 'Y';
+        this.delYn = true;
     }
 }
