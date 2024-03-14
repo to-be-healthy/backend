@@ -7,6 +7,7 @@ import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
+@Tag(name = "workoutHistory", description = "운동기록 API")
 @Slf4j
 public class WorkoutHistoryController {
 
@@ -70,8 +72,10 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "운동기록 삭제 완료.")
     })
     @PatchMapping("/workout-histories/{workoutHistoryId}")
-    public ResponseEntity<?> deleteWorkoutHistory(@PathVariable("workoutHistoryId") Long workoutHistoryId) {
-        workoutService.deleteWorkoutHistory(workoutHistoryId);
+    public ResponseEntity<?> deleteWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
+                                                  @PathVariable("workoutHistoryId") Long workoutHistoryId) {
+        Member member = commonService.getMemberByToken(bearerToken);
+        workoutService.deleteWorkoutHistory(member, workoutHistoryId);
         return ResponseEntity.ok().build();
     }
 
@@ -81,8 +85,8 @@ public class WorkoutHistoryController {
     })
     @PutMapping("/workout-histories/{workoutHistoryId}")
     public ResponseEntity<WorkoutHistoryDto> updateWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
-                                                                            @PathVariable("workoutHistoryId") Long workoutHistoryId,
-                                                                            @Valid HistoryAddCommand command) {
+                                                                  @PathVariable("workoutHistoryId") Long workoutHistoryId,
+                                                                  @Valid HistoryAddCommand command) {
         Member member = commonService.getMemberByToken(bearerToken);
         return ResponseEntity.ok(workoutService.updateWorkoutHistory(member, workoutHistoryId, command));
     }

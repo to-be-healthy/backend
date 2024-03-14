@@ -8,6 +8,6 @@ import java.util.Optional;
 public interface WorkoutHistoryRepository extends JpaRepository<WorkoutHistory, Long>, WorkoutHistoryRepositoryCustom {
 
     Optional<WorkoutHistory> findByWorkoutHistoryIdAndMemberIdAndDelYnFalse(Long workoutHistoryId, Long memberId);
+    Optional<WorkoutHistory> findByWorkoutHistoryIdAndDelYnFalse(Long workoutHistoryId);
 
-    Optional<WorkoutHistory> findByIdAndDelYnFalse(Long workoutHistoryId);
 }

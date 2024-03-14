@@ -41,7 +41,7 @@ public class WorkoutHistoryComment extends BaseTimeEntity<WorkoutHistoryComment,
                 .build();
     }
 
-    public void deleteWorkoutHistoryComment() {
+    public void deleteComment() {
         this.delYn = true;
     }
 

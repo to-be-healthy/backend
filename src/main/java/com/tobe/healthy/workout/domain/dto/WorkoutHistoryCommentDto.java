@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 
 @Data
 @Builder
@@ -18,6 +20,10 @@ public class WorkoutHistoryCommentDto {
     private WorkoutHistoryDto workoutHistory;
     private MemberDto member;
     private String content;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    private String name;
 
     public static WorkoutHistoryCommentDto from(WorkoutHistoryComment comment) {
         return WorkoutHistoryCommentDto.builder()

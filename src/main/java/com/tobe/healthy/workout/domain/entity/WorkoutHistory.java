@@ -11,8 +11,6 @@ import org.hibernate.annotations.ColumnDefault;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.io.File.separator;
-
 @Entity
 @Table(name = "workout_history")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -60,7 +58,7 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     public void deleteWorkoutHistory() {
         this.delYn = true;
         this.historyFiles.forEach(WorkoutHistoryFile::deleteWorkoutHistoryFile);
-        this.historyComments.forEach(content -> content.deleteWorkoutHistoryComment());
+        this.historyComments.forEach(content -> content.deleteComment());
         //TODO: 좋아요 삭제
     }
 
