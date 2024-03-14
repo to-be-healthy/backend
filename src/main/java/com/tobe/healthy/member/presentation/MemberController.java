@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/v1/api/auth")
 @Slf4j
 @Tag(name = "01.Member", description = "회원 API")
 public class MemberController {

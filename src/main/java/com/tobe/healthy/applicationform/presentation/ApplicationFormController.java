@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/application-forms")
+@RequestMapping("/v1/api/application-forms")
 @Slf4j
 public class ApplicationFormController {
 
