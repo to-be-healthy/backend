@@ -132,7 +132,7 @@ public class ScheduleController {
 	public ResponseHandler<Boolean> cancelScheduleForMember(@Parameter(description = "일정 아이디") @PathVariable Long scheduleId, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
-			.data(scheduleService.cancelMemberSchedule(scheduleId, customMemberDetails.getMemberId()))
+			.data(scheduleService.cancelMemberSchedule(scheduleId, customMemberDetails.getMember()))
 			.message("수업을 취소하였습니다.")
 			.build();
 	}

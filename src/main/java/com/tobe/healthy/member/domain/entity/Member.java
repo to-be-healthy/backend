@@ -28,12 +28,14 @@ import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @Builder
+@DynamicUpdate
 public class Member extends BaseTimeEntity<Member, Long> {
 
     @Id
@@ -67,7 +69,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @Default
     private List<Schedule> applicantSchedules = new ArrayList<>();
 
-    @OneToMany(fetch = LAZY, mappedBy = "member")
+    @OneToMany(mappedBy = "member")
+    @Default
     private List<StandBySchedule> standBySchedules = new ArrayList<>();
 
     @ColumnDefault("'N'")

@@ -95,7 +95,7 @@ public class ScheduleService {
 
 		StandBySchedule standBySchedule = StandBySchedule.register(member, schedule);
 
-		schedule.registerSchedule(standBySchedule);
+		standByScheduleRepository.save(standBySchedule);
 
 		return true;
 	}
@@ -136,8 +136,9 @@ public class ScheduleService {
 		return true;
 	}
 
-	public Boolean cancelMemberSchedule(Long scheduleId, Long memberId) {
-		Schedule entity = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
+	public Boolean cancelMemberSchedule(Long scheduleId, Member member) {
+		log.info("member => {}", member);
+		Schedule entity = scheduleRepository.findScheduleByApplicantId(member.getId(), scheduleId)
 				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
 		entity.cancelMemberSchedule();

@@ -18,19 +18,22 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @Builder
+@DynamicUpdate
 public class StandBySchedule extends BaseTimeEntity<StandBySchedule, Long> {
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
 	@Column(name = "stand_by_schedule_id")
 	private Long id;
 
-	@OneToOne(fetch = LAZY, mappedBy = "standBySchedule")
+	@OneToOne(fetch = LAZY, cascade = ALL)
+	@JoinColumn(name = "schedule_id")
 	private Schedule schedule;
 
 	@ManyToOne(fetch = LAZY, cascade = ALL)
@@ -38,10 +41,13 @@ public class StandBySchedule extends BaseTimeEntity<StandBySchedule, Long> {
 	private Member member;
 
 	public static StandBySchedule register(Member member, Schedule schedule) {
-		StandBySchedule entity = StandBySchedule.builder()
+		return StandBySchedule.builder()
 			.schedule(schedule)
 			.member(member)
 			.build();
-		return entity;
+	}
+
+	public void registerSchedule(Schedule schedule) {
+		this.schedule = schedule;
 	}
 }

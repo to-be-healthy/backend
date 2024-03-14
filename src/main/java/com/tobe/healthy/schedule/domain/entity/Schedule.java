@@ -28,6 +28,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.util.ObjectUtils;
 
 @Entity
@@ -36,6 +37,7 @@ import org.springframework.util.ObjectUtils;
 @Getter
 @Builder
 @ToString
+@DynamicUpdate
 public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@Id
@@ -60,8 +62,7 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@JoinColumn(name = "applicant_id")
 	private Member applicant;
 
-	@OneToOne(fetch = LAZY, cascade = ALL)
-	@JoinColumn(name = "stand_by_schedule_id")
+	@OneToOne(mappedBy = "schedule")
 	private StandBySchedule standBySchedule;
 
 	@ColumnDefault("'N'")
@@ -87,10 +88,6 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	public void registerSchedule(Member member) {
 		this.applicant = member;
 		this.reservationStatus = COMPLETED;
-	}
-
-	public void registerSchedule(StandBySchedule standBySchedule) {
-		this.standBySchedule = standBySchedule;
 	}
 
 	public void cancelTrainerSchedule() {
