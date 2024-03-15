@@ -23,6 +23,11 @@ public class WorkoutHistoryCommentDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    private Long parentCommentId;
+    private Long depth;
+    private Long orderNum;
+    private boolean delYn;
+
     private String name;
 
     public static WorkoutHistoryCommentDto from(WorkoutHistoryComment comment) {
@@ -33,6 +38,10 @@ public class WorkoutHistoryCommentDto {
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
+                .parentCommentId(comment.getParentCommentId())
+                .depth(comment.getDepth())
+                .orderNum(comment.getOrderNum())
+                .delYn(comment.getDelYn())
                 .build();
     }
 }

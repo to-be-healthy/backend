@@ -1,7 +1,9 @@
 package com.tobe.healthy.workout.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.common.ResultFormatType;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.workout.domain.dto.in.HistoryCommentAddCommand;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -33,11 +35,22 @@ public class WorkoutHistoryComment extends BaseTimeEntity<WorkoutHistoryComment,
     @Builder.Default
     private Boolean delYn = false;
 
-    public static WorkoutHistoryComment create(WorkoutHistory history, Member member, String content) {
+    private Long parentCommentId;
+    private Long depth;
+    private Long orderNum;
+
+    public static WorkoutHistoryComment create(WorkoutHistory history,
+                                               Member member,
+                                               HistoryCommentAddCommand command,
+                                               Long depth,
+                                               Long orderNum) {
         return WorkoutHistoryComment.builder()
                 .workoutHistory(history)
                 .member(member)
-                .content(content)
+                .content(command.getContent())
+                .parentCommentId(command.getParentCommentId())
+                .depth(depth)
+                .orderNum(orderNum)
                 .build();
     }
 

@@ -43,7 +43,7 @@ public class CommentController {
                 .build();
     }
 
-    @Operation(summary = "운동기록 댓글 등록", responses = {
+    @Operation(summary = "운동기록 댓글(답글) 등록", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동기록 댓글을 반환한다.")
     })

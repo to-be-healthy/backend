@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_COMMENT_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_NOT_FOUND;
@@ -31,7 +32,17 @@ public class CommentService {
     public WorkoutHistoryCommentDto addComment(Long workoutHistoryId, HistoryCommentAddCommand command, Member member) {
         WorkoutHistory history = workoutHistoryRepository.findById(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
-        WorkoutHistoryComment comment = WorkoutHistoryComment.create(history, member, command.getContent());
+        Long depth = 0L, orderNum = 0L;
+        if(command.getParentCommentId() == null){ //댓글
+            depth = 0L;
+            orderNum = commentRepository.countByWorkoutHistoryAndDelYnFalse(history);
+        }else{ //대댓글
+            WorkoutHistoryComment parentComment = commentRepository.findByCommentIdAndDelYnFalse(command.getParentCommentId())
+                    .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_COMMENT_NOT_FOUND));
+            depth = parentComment.getDepth()+1;
+            orderNum = parentComment.getOrderNum();
+        }
+        WorkoutHistoryComment comment = WorkoutHistoryComment.create(history, member, command, depth, orderNum);
         commentRepository.save(comment);
         return WorkoutHistoryCommentDto.from(comment);
     }

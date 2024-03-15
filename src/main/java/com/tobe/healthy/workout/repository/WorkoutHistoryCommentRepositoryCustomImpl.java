@@ -30,23 +30,26 @@ public class WorkoutHistoryCommentRepositoryCustomImpl implements WorkoutHistory
         Long totalCnt = queryFactory
                 .select(qComment.count())
                 .from(qComment)
-                .where(qComment.workoutHistory.workoutHistoryId.eq(workoutHistoryId), qComment.delYn.eq(false))
+                .where(qComment.workoutHistory.workoutHistoryId.eq(workoutHistoryId))
                 .fetchOne();
         List<WorkoutHistoryCommentDto> comments =  queryFactory
                 .select(Projections.fields(WorkoutHistoryCommentDto.class,
                         qComment.commentId,
                         qComment.content,
+                        qComment.parentCommentId,
+                        qComment.depth,
+                        qComment.orderNum,
+                        qComment.delYn,
                         qComment.createdAt,
                         qComment.updatedAt,
                         qComment.member.name
                 ))
                 .from(qComment)
-                .where(qComment.workoutHistory.workoutHistoryId.eq(workoutHistoryId), qComment.delYn.eq(false))
-                .orderBy(qComment.createdAt.asc())
+                .where(qComment.workoutHistory.workoutHistoryId.eq(workoutHistoryId))
+                .orderBy(qComment.orderNum.asc(), qComment.createdAt.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-
         return PageableExecutionUtils.getPage(comments, pageable, ()-> totalCnt );
     }
 }
