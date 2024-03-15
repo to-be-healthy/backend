@@ -31,6 +31,8 @@ public class WorkoutHistoryCommentDto {
                 .workoutHistory(WorkoutHistoryDto.create(comment.getWorkoutHistory()))
                 .member(MemberDto.from(comment.getMember()))
                 .content(comment.getContent())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
                 .build();
     }
 }

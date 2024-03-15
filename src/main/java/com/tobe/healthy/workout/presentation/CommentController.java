@@ -1,6 +1,7 @@
 package com.tobe.healthy.workout.presentation;
 
 import com.tobe.healthy.common.CommonService;
+import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.application.CommentService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryCommentDto;
@@ -12,7 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,9 +34,13 @@ public class CommentController {
             @ApiResponse(responseCode = "200", description = "운동기록의 댓글, 페이징을 반환한다.")
     })
     @GetMapping("/workout-histories/{workoutHistoryId}/comments")
-    public ResponseEntity<List<WorkoutHistoryCommentDto>> getCommentsByHistoryId(@PathVariable("workoutHistoryId") Long workoutHistoryId,
+    public ResponseHandler<List<WorkoutHistoryCommentDto>> getCommentsByHistoryId(@PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                                  Pageable pageable) {
-        return ResponseEntity.ok(commentService.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable));
+        return ResponseHandler.<List<WorkoutHistoryCommentDto>>builder()
+                .statusCode(HttpStatus.OK)
+                .data(commentService.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable))
+                .message("댓글이 조회되었습니다.")
+                .build();
     }
 
     @Operation(summary = "운동기록 댓글 등록", responses = {
@@ -43,11 +48,15 @@ public class CommentController {
             @ApiResponse(responseCode = "200", description = "운동기록 댓글을 반환한다.")
     })
     @PostMapping("/workout-histories/{workoutHistoryId}/comments")
-    public ResponseEntity<WorkoutHistoryCommentDto> addComment(@RequestHeader(name="Authorization") String bearerToken,
+    public ResponseHandler<WorkoutHistoryCommentDto> addComment(@RequestHeader(name="Authorization") String bearerToken,
                                                                 @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                 @Valid HistoryCommentAddCommand command) {
         Member member = commonService.getMemberByToken(bearerToken);
-        return ResponseEntity.ok(commentService.addComment(workoutHistoryId, command, member));
+        return ResponseHandler.<WorkoutHistoryCommentDto>builder()
+                .statusCode(HttpStatus.OK)
+                .data(commentService.addComment(workoutHistoryId, command, member))
+                .message("댓글이 등록되었습니다.")
+                .build();
     }
 
     @Operation(summary = "운동기록 댓글 수정", responses = {
@@ -55,24 +64,31 @@ public class CommentController {
             @ApiResponse(responseCode = "200", description = "운동기록 댓글을 반환한다.")
     })
     @PutMapping("/workout-histories/{workoutHistoryId}/comments/{commentId}")
-    public ResponseEntity<WorkoutHistoryCommentDto> updateComment(@RequestHeader(name="Authorization") String bearerToken,
+    public ResponseHandler<WorkoutHistoryCommentDto> updateComment(@RequestHeader(name="Authorization") String bearerToken,
                                                                   @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                   @PathVariable("commentId") Long commentId,
                                                                   @Valid HistoryCommentAddCommand command) {
         Member member = commonService.getMemberByToken(bearerToken);
-        return ResponseEntity.ok(commentService.updateComment(member, workoutHistoryId, commentId, command));
+        return ResponseHandler.<WorkoutHistoryCommentDto>builder()
+                .statusCode(HttpStatus.OK)
+                .data(commentService.updateComment(member, workoutHistoryId, commentId, command))
+                .message("댓글이 수정되었습니다.")
+                .build();
     }
 
     @Operation(summary = "운동기록 댓글 삭제", responses = {
             @ApiResponse(responseCode = "200", description = "운동기록 댓글 삭제 완료.")
     })
     @PatchMapping("/workout-histories/{workoutHistoryId}/comments/{commentId}")
-    public ResponseEntity<?> deleteComment(@RequestHeader(name="Authorization") String bearerToken,
+    public ResponseHandler<?> deleteComment(@RequestHeader(name="Authorization") String bearerToken,
                                            @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                            @PathVariable("commentId") Long commentId) {
         Member member = commonService.getMemberByToken(bearerToken);
         commentService.deleteComment(member, workoutHistoryId, commentId);
-        return ResponseEntity.ok().build();
+        return ResponseHandler.builder()
+                .statusCode(HttpStatus.OK)
+                .message("댓글이 삭제되었습니다.")
+                .build();
     }
 
 }

@@ -104,8 +104,6 @@ public class WorkoutHistoryService {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndMemberIdAndDelYnFalse(workoutHistoryId, member.getId())
             .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         history.updateContent(command.getContent());
-        history.deleteWorkoutHistory();
-        workoutHistoryLikeRepository.deleteLikeByWorkoutHistoryId(workoutHistoryId);
         history.getHistoryFiles().forEach(file ->
                 fileService.deleteFile(file.getFilePath() + separator + file.getFileName() + file.getExtension())
         );
