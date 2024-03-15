@@ -13,7 +13,7 @@ public class MemberDto {
     private String userId;
     private String email;
     private String name;
-    private char delYn;
+    private boolean delYn;
 
     public static MemberDto from(Member member){
         return MemberDto.builder()
@@ -21,7 +21,7 @@ public class MemberDto {
                 .userId(member.getUserId())
                 .email(member.getEmail())
                 .name(member.getName())
-                .delYn(member.getDelYn())
+                .delYn(member.isDelYn())
                 .build();
     }
 

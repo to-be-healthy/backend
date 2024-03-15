@@ -1,6 +1,5 @@
 package com.tobe.healthy.schedule.domain.entity;
 
-import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -12,35 +11,41 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @Builder
+@DynamicUpdate
 public class StandBySchedule extends BaseTimeEntity<StandBySchedule, Long> {
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
 	@Column(name = "stand_by_schedule_id")
 	private Long id;
 
-	@OneToOne(fetch = LAZY, mappedBy = "standBySchedule")
+	@ManyToOne(fetch = LAZY)
+	@JoinColumn(name = "schedule_id")
 	private Schedule schedule;
 
-	@OneToOne(fetch = LAZY, cascade = ALL)
+	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "member_id")
 	private Member member;
 
 	public static StandBySchedule register(Member member, Schedule schedule) {
-		StandBySchedule entity = StandBySchedule.builder()
+		return StandBySchedule.builder()
 			.schedule(schedule)
 			.member(member)
 			.build();
-		return entity;
+	}
+
+	public void registerSchedule(Schedule schedule) {
+		this.schedule = schedule;
 	}
 }

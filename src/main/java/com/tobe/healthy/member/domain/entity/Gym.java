@@ -13,12 +13,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @Builder
 @AllArgsConstructor
+@DynamicUpdate
 public class Gym extends BaseTimeEntity<Gym, Long> {
 
     @Id

@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 @Slf4j
-@Tag(name = "member", description = "회원 API")
+@Tag(name = "01.Member", description = "회원 API")
 public class MemberController {
 
 	private final MemberService memberService;
@@ -86,7 +86,7 @@ public class MemberController {
 	@Schema(name = "authNumber")
 	@PostMapping("/email-verification")
 	public ResponseHandler<Boolean> verifyAuthMail(@Parameter(description = "인증번호") @RequestParam String authNumber,
-												   @Parameter(description = "이메일")   @RequestParam String email) {
+												   @Parameter(description = "이메일") @RequestParam String email) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.verifyEmailAuthNumber(authNumber, email))
@@ -128,8 +128,8 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token을 반환한다.")
 	})
 	@PostMapping("/refresh-token")
-	public ResponseHandler<Tokens> refreshToken(@Parameter(description = "아이디") String userId,
-												@Parameter(description = "갱신 토큰") String refreshToken) {
+	public ResponseHandler<Tokens> refreshToken(@Parameter(description = "아이디") @RequestParam String userId,
+												@Parameter(description = "갱신 토큰") @RequestParam String refreshToken) {
 		return ResponseHandler.<Tokens>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.refreshToken(userId, refreshToken))

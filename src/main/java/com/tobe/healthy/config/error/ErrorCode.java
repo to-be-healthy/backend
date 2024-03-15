@@ -29,6 +29,7 @@ public enum ErrorCode {
 	NOT_STAND_BY_SCHEDULE(BAD_REQUEST, "C_014", "대기할 수 없는 일정입니다."),
 	SCHEDULE_NOT_FOUND(NOT_FOUND, "C_015", "일정을 찾을 수 없습니다."),
 	WORKOUT_HISTORY_COMMENT_NOT_FOUND(NOT_FOUND, "C_016", "댓글이 존재하지 않습니다."),
+	STAND_BY_SCHEDULE_NOT_FOUND(NOT_FOUND, "C_016", "대기한 일정을 찾을 수 없습니다."),
 	SERVER_ERROR(INTERNAL_SERVER_ERROR, "S_001", "서버에서 오류가 발생하였습니다."),
 	FILE_UPLOAD_ERROR(INTERNAL_SERVER_ERROR, "S_002", "파일 업로드중 에러가 발생하였습니다."),
 	FILE_FIND_ERROR(INTERNAL_SERVER_ERROR, "S_003", "파일 조회중 에러가 발생하였습니다."),

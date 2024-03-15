@@ -6,9 +6,9 @@ import static com.tobe.healthy.schedule.domain.entity.QStandBySchedule.standBySc
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.QMember;
+import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +38,22 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.orderBy(schedule.lessonDt.asc(), schedule.round.asc())
 				.fetch();
 
+		return fetch.stream()
+			.map(ScheduleCommandResult::of)
+			.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<ScheduleCommandResult> findAllByApplicantId(Long memberId) {
+		QMember trainer = new QMember("trainer");
+		List<Schedule> fetch = queryFactory
+			.select(schedule)
+			.from(schedule)
+			.leftJoin(schedule.trainer, trainer).fetchJoin()
+			.leftJoin(schedule.standBySchedule, standBySchedule).fetchJoin()
+			.where(schedule.applicant.id.eq(memberId))
+			.orderBy(schedule.lessonDt.desc(), schedule.round.desc())
+			.fetch();
 		return fetch.stream()
 			.map(ScheduleCommandResult::of)
 			.collect(Collectors.toList());

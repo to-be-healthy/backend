@@ -13,7 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Schema(description = "일정 자동생성 DTO")
 public class AutoCreateScheduleCommandRequest {
+
 	@Schema(description = "트레이너 아이디")
 	@NotNull(message = "트레이너 아이디를 입력해 주세요.")
 	private Long trainer;
@@ -26,19 +28,19 @@ public class AutoCreateScheduleCommandRequest {
 	@NotNull(message = "자동으로 생성할 수업 종료 일자를 입력해 주세요.")
 	private LocalDate endDt;
 
-	@Schema(description = "자동으로 생성할 평일 수업 시작 시간", example = "10:00:00")
+	@Schema(description = "자동으로 생성할 평일 수업 시작 시간", example = "10:00:00", type = "string")
 	@NotNull(message = "자동으로 생성할 평일 수업 시작 시간을 입력해 주세요.")
 	private LocalTime weekdayStartTime;
 
-	@Schema(description = "자동으로 생성할 평일 수업 종료 시간", example = "22:00:00")
+	@Schema(description = "자동으로 생성할 평일 수업 종료 시간", example = "22:00:00", type = "string")
 	@NotNull(message = "자동으로 생성할 평일 수업 종료 시간을 입력해 주세요.")
 	private LocalTime weekdayEndTime;
 
-	@Schema(description = "자동으로 생성할 주말 수업 시작 시간", example = "12:00:00")
+	@Schema(description = "자동으로 생성할 주말 수업 시작 시간", example = "12:00:00", type = "string")
 	@NotNull(message = "자동으로 생성할 주말 수업 시작 시간을 입력해 주세요.")
 	private LocalTime weekendStartTime;
 
-	@Schema(description = "자동으로 생성할 주말 수업 종료 시간", example = "20:00:00")
+	@Schema(description = "자동으로 생성할 주말 수업 종료 시간", example = "20:00:00", type = "string")
 	@NotNull(message = "자동으로 생성할 주말 수업 종료 시간을 입력해 주세요.")
 	private LocalTime weekendEndTime;
 

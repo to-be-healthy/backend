@@ -18,15 +18,19 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.util.ObjectUtils;
 
 @Entity
@@ -35,6 +39,7 @@ import org.springframework.util.ObjectUtils;
 @Getter
 @Builder
 @ToString
+@DynamicUpdate
 public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@Id
@@ -59,9 +64,13 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@JoinColumn(name = "applicant_id")
 	private Member applicant;
 
-	@OneToOne(fetch = LAZY, cascade = ALL)
-	@JoinColumn(name = "stand_by_schedule_id")
-	private StandBySchedule standBySchedule;
+	@OneToMany(fetch = LAZY, mappedBy = "schedule")
+	@Default
+	private List<StandBySchedule> standBySchedule = new ArrayList<>();
+
+	@ColumnDefault("false")
+	@Default
+	private boolean delYn = false;
 
 	public static Schedule registerSchedule(LocalDate date, Member trainer, Member member, ScheduleRegister request) {
 		ScheduleBuilder reserve = Schedule.builder()
@@ -81,13 +90,15 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	public void registerSchedule(Member member) {
 		this.applicant = member;
+		this.reservationStatus = COMPLETED;
 	}
 
-	public void registerSchedule(StandBySchedule standBySchedule) {
-		this.standBySchedule = standBySchedule;
+	public void cancelTrainerSchedule() {
+		this.delYn = true;
+		this.applicant = null;
 	}
 
-	public void cancelSchedule() {
+	public void cancelMemberSchedule() {
 		this.reservationStatus = AVAILABLE;
 		this.applicant = null;
 	}

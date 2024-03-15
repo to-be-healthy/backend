@@ -12,6 +12,7 @@ import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -28,12 +29,14 @@ import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @Builder
+@DynamicUpdate
 public class Member extends BaseTimeEntity<Member, Long> {
 
     @Id
@@ -75,9 +78,13 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @Default
     private List<Schedule> applicantSchedules = new ArrayList<>();
 
-    @ColumnDefault("'N'")
+    @OneToMany(mappedBy = "member")
     @Default
-    private char delYn = 'N';
+    private List<StandBySchedule> standBySchedules = new ArrayList<>();
+
+    @ColumnDefault("false")
+    @Default
+    private boolean delYn = false;
 
     public static Member join(MemberJoinCommand request, String password) {
         Member member = new Member();
@@ -99,6 +106,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
     }
 
     public void deleteMember() {
-        this.delYn = 'Y';
+        this.delYn = true;
     }
 }
