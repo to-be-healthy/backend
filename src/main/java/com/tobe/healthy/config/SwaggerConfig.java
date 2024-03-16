@@ -37,7 +37,7 @@ public class SwaggerConfig {
 
 		return new OpenAPI()
 			.info(info)
-			.addServersItem(new Server().url("/"))
+			.addServersItem(new Server().url("http://www.to-be-healthy.site"))
 			.addSecurityItem(securityRequirement)
 			.components(components);
 	}
