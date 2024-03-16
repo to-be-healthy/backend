@@ -6,6 +6,7 @@ import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberOauthCommandRequest;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +18,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -163,6 +165,9 @@ public class MemberController {
 			.build();
 	}
 
+	/**
+	 * 로그인 된 상태에서, 회원탈퇴를 진행하기 때문에 parameter로 아이디를 받을 필요가 없음.
+	 */
 	@Operation(summary = "회원 탈퇴한다.", responses = {
 		@ApiResponse(responseCode = "400", description = "등록된 회원이 아닙니다."),
 		@ApiResponse(responseCode = "200", description = "회원 탈퇴 되었습니다.")
@@ -177,8 +182,9 @@ public class MemberController {
 			.build();
 	}
 
-	//	@GetMapping("/code/kakao")
-//	public ResponseEntity<?> oauth(MemberOauthCommandRequest request) {
-//		return ResponseEntity.ok(memberService.getAccessToken(request.getCode()));
-//	}
+	// todo: 2024-03-16 토요일 오후 16:50 소셜 로그인시 가입여부를 확인하고, id는 uuid로 설정한다. - seonwoo_jung
+		@GetMapping("/code/kakao")
+	public ResponseEntity<?> oauth(MemberOauthCommandRequest request) {
+		return ResponseEntity.ok(memberService.getAccessToken(request.getCode()));
+	}
 }

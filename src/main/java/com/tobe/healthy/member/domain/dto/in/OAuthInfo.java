@@ -23,6 +23,7 @@ public class OAuthInfo {
 	@JsonProperty("refresh_token_expires_in")
 	private int refreshTokenExpiresIn;
 
+	// 카카오 시작
 	@Data
 	public static class KakaoUserInfo {
 
@@ -58,6 +59,20 @@ public class OAuthInfo {
 			private boolean profileImageNeedsAgreement;
 
 			private Profile profile;
+
+			@JsonProperty("has_email")
+			private boolean hasEmail;
+
+			@JsonProperty("email_needs_agreement")
+			private boolean emailNeedsAgreement;
+
+			@JsonProperty("is_email_valid")
+			private boolean isEmailValid;
+
+			@JsonProperty("is_email_verified")
+			private boolean isEmailVerified;
+
+			private String email;
 		}
 
 		@Data
@@ -73,6 +88,10 @@ public class OAuthInfo {
 
 			@JsonProperty("is_default_image")
 			private boolean isDefaultImage;
+
+			@JsonProperty("is_default_nickname")
+			private boolean isDefaultNickname;
 		}
 	}
+	// 카카오 끝
 }
