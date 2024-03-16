@@ -29,7 +29,7 @@ jwt:
   refresh-token-valid-seconds: ${JWT_REFRESH_TOKEN_VALID_SECONDS}
 
 server:
-  port: 8888
+  port: 8080
   servlet:
     encoding:
       charset: UTF-8
