@@ -24,6 +24,7 @@ public class WorkoutHistoryDto {
     private Long trainerId;
     private List<WorkoutHistoryFileDto> files = new ArrayList<>();
     private MemberDto member;
+    private Long likeCnt;
 
     @JsonIgnore
     private List<MultipartFile> multipartFiles = new ArrayList<>();
@@ -45,6 +46,7 @@ public class WorkoutHistoryDto {
                 .member(MemberDto.from(history.getMember()))
                 .files(files)
                 .trainerId(history.getTrainerId())
+                .likeCnt(history.getLikeCnt())
                 .build();
     }
 
@@ -54,6 +56,7 @@ public class WorkoutHistoryDto {
                 .content(history.getContent())
                 .member(MemberDto.from(history.getMember()))
                 .trainerId(history.getTrainerId())
+                .likeCnt(history.getLikeCnt())
                 .build();
     }
 }

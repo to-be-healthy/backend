@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 
 @Data
 @Builder
@@ -18,6 +20,15 @@ public class WorkoutHistoryCommentDto {
     private WorkoutHistoryDto workoutHistory;
     private MemberDto member;
     private String content;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    private Long parentCommentId;
+    private Long depth;
+    private Long orderNum;
+    private boolean delYn;
+
+    private String name;
 
     public static WorkoutHistoryCommentDto from(WorkoutHistoryComment comment) {
         return WorkoutHistoryCommentDto.builder()
@@ -25,6 +36,12 @@ public class WorkoutHistoryCommentDto {
                 .workoutHistory(WorkoutHistoryDto.create(comment.getWorkoutHistory()))
                 .member(MemberDto.from(comment.getMember()))
                 .content(comment.getContent())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .parentCommentId(comment.getParentCommentId())
+                .depth(comment.getDepth())
+                .orderNum(comment.getOrderNum())
+                .delYn(comment.getDelYn())
                 .build();
     }
 }

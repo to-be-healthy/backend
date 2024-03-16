@@ -28,15 +28,16 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         Long totalCnt = queryFactory
                 .select(qHistory.count())
                 .from(qHistory)
-                .where(qHistory.member.id.eq(memberId))
+                .where(qHistory.member.id.eq(memberId), qHistory.delYn.eq(false))
                 .fetchOne();
         List<WorkoutHistoryDto> workoutHistories =  queryFactory
                 .select(Projections.fields(WorkoutHistoryDto.class,
                         qHistory.workoutHistoryId,
-                        qHistory.content
+                        qHistory.content,
+                        qHistory.likeCnt
                 ))
                 .from(qHistory)
-                .where(qHistory.member.id.eq(memberId))
+                .where(qHistory.member.id.eq(memberId), qHistory.delYn.eq(false))
                 .orderBy(qHistory.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -49,15 +50,16 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         Long totalCnt = queryFactory
                 .select(qHistory.count())
                 .from(qHistory)
-                .where(qHistory.trainerId.eq(trainerId))
+                .where(qHistory.trainerId.eq(trainerId), qHistory.delYn.eq(false))
                 .fetchOne();
         List<WorkoutHistoryDto> workoutHistories =  queryFactory
                 .select(Projections.fields(WorkoutHistoryDto.class,
                         qHistory.workoutHistoryId,
-                        qHistory.content
+                        qHistory.content,
+                        qHistory.likeCnt
                 ))
                 .from(qHistory)
-                .where(qHistory.trainerId.eq(trainerId))
+                .where(qHistory.trainerId.eq(trainerId), qHistory.delYn.eq(false))
                 .orderBy(qHistory.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -77,7 +79,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
                         qHistoryFile.fileSize
                 ))
                 .from(qHistoryFile)
-                .where(qHistoryFile.workoutHistory.workoutHistoryId.in(ids))
+                .where(qHistoryFile.workoutHistory.workoutHistoryId.in(ids), qHistoryFile.delYn.eq(false))
                 .orderBy(qHistoryFile.createdAt.desc())
                 .fetch();
     }

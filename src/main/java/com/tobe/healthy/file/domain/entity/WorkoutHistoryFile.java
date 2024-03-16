@@ -4,6 +4,7 @@ import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -30,6 +31,10 @@ public class WorkoutHistoryFile extends BaseTimeEntity<WorkoutHistoryFile, Long>
     private String filePath;
     private Long fileSize;
 
+    @ColumnDefault("false")
+    @Builder.Default
+    private Boolean delYn = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workout_history_id")
     private WorkoutHistory workoutHistory;
@@ -43,6 +48,10 @@ public class WorkoutHistoryFile extends BaseTimeEntity<WorkoutHistoryFile, Long>
                 .fileSize(fileSize)
                 .workoutHistory(history)
                 .build();
+    }
+
+    public void deleteWorkoutHistoryFile() {
+        this.delYn = true;
     }
 
 }

@@ -59,13 +59,9 @@ public class JwtTokenProvider {
         return !claims.getBody().getExpiration().before(new Date());// 만료시간이 현재시간보다 전인지 확인
     }
 
-    public String getUsernameFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
-    }
-
-    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
+    public Long getIdFromToken(String token) {
         final Claims claims = getAllClaimsFromToken(token);
-        return claimsResolver.apply(claims);
+        return Long.parseLong(claims.get("memberId").toString());
     }
 
     private Claims getAllClaimsFromToken(String token) {

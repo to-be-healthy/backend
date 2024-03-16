@@ -4,12 +4,13 @@ import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface WorkoutHistoryRepositoryCustom {
 
-    Page<WorkoutHistoryDto> getWorkoutHistory(Long memberId, Pageable pageable);
-    Page<WorkoutHistoryDto> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable);
-    List<WorkoutHistoryFileDto> getWorkoutHistoryFile(List<Long> ids);
+    Page<WorkoutHistoryDto> getWorkoutHistory(@Param("memberId") Long memberId, Pageable pageable);
+    Page<WorkoutHistoryDto> getWorkoutHistoryByTrainer(@Param("trainerId") Long trainerId, Pageable pageable);
+    List<WorkoutHistoryFileDto> getWorkoutHistoryFile(@Param("ids") List<Long> ids);
 }
