@@ -3,6 +3,7 @@ package com.tobe.healthy.member.domain.entity;
 import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
 import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -19,10 +20,12 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -66,7 +69,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @Default
     private MemberType memberType = MEMBER;
 
-    @OneToOne(fetch = LAZY, cascade = ALL)
+    @ManyToOne(fetch = LAZY, cascade = PERSIST)
     @JoinColumn(name = "gym_id")
     private Gym gym;
 
@@ -81,6 +84,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @OneToMany(mappedBy = "member")
     @Default
     private List<StandBySchedule> standBySchedules = new ArrayList<>();
+
+//    private String provider;
 
     @ColumnDefault("false")
     @Default
@@ -97,12 +102,25 @@ public class Member extends BaseTimeEntity<Member, Long> {
         return member;
     }
 
+    public static Member join(String email, String name) {
+        return Member.builder()
+            .userId(UUID.randomUUID().toString())
+            .email(email)
+            .name(name)
+            .alarmStatus(ENABLED)
+            .build();
+    }
+
     public void registerProfile(Profile profileId) {
         this.profileId = profileId;
     }
 
     public void resetPassword(String password) {
         this.password = password;
+    }
+
+    public void registerGym(Gym gym) {
+        this.gym = gym;
     }
 
     public void deleteMember() {

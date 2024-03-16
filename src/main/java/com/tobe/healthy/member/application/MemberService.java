@@ -3,8 +3,8 @@ package com.tobe.healthy.member.application;
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
 import static com.tobe.healthy.member.domain.entity.Oauth.CLIENT_ID;
@@ -26,6 +26,7 @@ import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
@@ -175,14 +176,27 @@ public class MemberService {
 
 			HttpHeaders header = new HttpHeaders();
 			header.set("Authorization", "Bearer " + body.getAccessToken());
-			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange(
-				"https://kapi.kakao.com/v2/user/me", GET, new HttpEntity<>(header),
-				KakaoUserInfo.class);
+			// token을 받아서 사용자 정보를 조회한다.
+			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange("https://kapi.kakao.com/v2/user/me", GET, new HttpEntity<>(header), KakaoUserInfo.class);
 			KakaoUserInfo dto = entity.getBody();
+			// email
+			String email = dto.getKakaoAccount().getEmail();
+			// uuid 생성
 
-			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(),
-				byte[].class);
-			fileService.uploadFile(image, dto.getProperties().getProfileImage());
+			String name = dto.getKakaoAccount().getProfile().getNickname();
+
+			memberRepository.findByEmail(email).ifPresent(m -> {
+				throw new CustomException(MEMBER_EMAIL_DUPLICATION);
+			});
+
+//			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(), byte[].class);
+//
+//			fileService.uploadFile(image, dto.getProperties().getProfileImage());
+//
+//			Member member = Member.join(email, name);
+//
+//			memberRepository.save(member);
+//			FileService.uploadFile();
 
 		}
 		return null;
@@ -195,7 +209,7 @@ public class MemberService {
 		requestBody.add("redirect_uri", REDIRECT_URL.getDescription()); // 본인이 설정한 주소
 		requestBody.add("client_secret", CLIENT_SECRET.getDescription());
 		requestBody.add("code", authCode);
-		return new HttpEntity<>(requestBody,headers);
+		return new HttpEntity<>(requestBody, headers);
 	}
 
 	public String sendAuthMail(String email) {
@@ -269,5 +283,39 @@ public class MemberService {
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.deleteMember();
 		return member.getUserId();
+	}
+
+	public void getAccessToken(String code, String state) {
+		log.info("code => {} state => {} ", code, state);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(APPLICATION_FORM_URLENCODED);
+
+		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+		requestBody.add("grant_type", "authorization_code");
+		requestBody.add("client_id", "C1sJMU7fEMkDTN39y8Pt");
+		requestBody.add("client_secret", "igvBuycGcG");
+		requestBody.add("code", code);
+		requestBody.add("state", state);
+
+		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+		ResponseEntity<OAuthInfo> responseEntity = restTemplate.postForEntity("https://nid.naver.com/oauth2.0/token", requestEntity, OAuthInfo.class);
+		log.info("responseEntity => {}", responseEntity);
+
+		if (responseEntity.getStatusCode().is2xxSuccessful()) {
+			OAuthInfo body = responseEntity.getBody();
+			log.info("body => {}", body);
+
+			HttpHeaders header = new HttpHeaders();
+			header.set("Authorization", "Bearer " + body.getAccessToken());
+			ResponseEntity<NaverUserInfo> entity = restTemplate.exchange("https://openapi.naver.com/v1/nid/me", GET, new HttpEntity<>(header), NaverUserInfo.class);
+			NaverUserInfo dto = entity.getBody();
+
+			// 사용자 이메일, 이름을 받음
+			log.info("dto => {}", dto);
+			String email = dto.getResponse().getEmail();
+			String userId = email.substring(0, email.indexOf("@"));
+			String name = dto.getResponse().getName();
+		}
 	}
 }
