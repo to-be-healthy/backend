@@ -3,6 +3,7 @@ package com.tobe.healthy.member.domain.entity;
 import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
 import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -19,6 +20,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
@@ -67,7 +69,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @Default
     private MemberType memberType = MEMBER;
 
-    @OneToOne(fetch = LAZY, cascade = ALL)
+    @ManyToOne(fetch = LAZY, cascade = PERSIST)
     @JoinColumn(name = "gym_id")
     private Gym gym;
 
@@ -115,6 +117,10 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
     public void resetPassword(String password) {
         this.password = password;
+    }
+
+    public void registerGym(Gym gym) {
+        this.gym = gym;
     }
 
     public void deleteMember() {

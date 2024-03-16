@@ -12,6 +12,7 @@ import com.tobe.healthy.file.application.FileService;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
+import com.tobe.healthy.member.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -85,6 +86,30 @@ class MemberServiceTest {
 
             Member findMember = em.find(Member.class, member.getId());
             assertThat(member.getId()).isEqualTo(findMember.getId());
+        }
+
+        @Test
+        @DisplayName("내가 다니는 헬스장을 등록한다.")
+        void registerGym() {
+            Gym gym = Gym.builder()
+                .name("쏘마휘트니스")
+                .build();
+
+            Member member = Member.builder()
+                .email("laborlawseon@gmail.com")
+                .password("12345678")
+                .userId("seonwoo_jung")
+                .name("정선우")
+                .alarmStatus(ENABLED)
+                .memberType(MEMBER)
+                .gym(gym)
+                .build();
+
+            em.persist(member);
+
+            log.info("gymId => {}", member.getGym().getId());
+            // then
+            assertThat(gym.getId()).isEqualTo(member.getGym().getId());
         }
 
         @Test
@@ -201,7 +226,7 @@ class MemberServiceTest {
             em.flush();
             em.clear();
             Member findMember = em.createQuery(
-                    "select m from Member m where m.userId = :userId and delYn = 'Y'", Member.class)
+                    "select m from Member m where m.userId = :userId and delYn = true", Member.class)
                 .setParameter("userId", member.getUserId()).getSingleResult();
             assertThat(findMember.isDelYn()).isEqualTo(true);
         }

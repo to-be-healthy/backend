@@ -23,6 +23,23 @@ public class OAuthInfo {
 	@JsonProperty("refresh_token_expires_in")
 	private int refreshTokenExpiresIn;
 
+	@Data
+	public static class NaverUserInfo {
+		@JsonProperty("resultcode")
+		private String resultCode;
+		private String message;
+		private NaverUserInfoDetail response;
+
+		@Data
+		public static class NaverUserInfoDetail {
+			private String id;
+			@JsonProperty("profileimage")
+			private String profileImage;
+			private String email;
+			private String name;
+		}
+	}
+
 	// 카카오 시작
 	@Data
 	public static class KakaoUserInfo {

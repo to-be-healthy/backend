@@ -6,7 +6,6 @@ import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberOauthCommandRequest;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +17,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,13 +33,6 @@ public class MemberController {
 
 	private final MemberService memberService;
 
-	/**
-	 * 회원가입 프로세스
-	 * 1. 아이디 인증
-	 * 2. 이메일 인증
-	 * 3. 사용할 실명 인증
-	 * 4. 회원가입
-	 */
 	@Operation(summary = "아이디 중복 확인하기", responses = {
 		@ApiResponse(responseCode = "400", description = "이미 등록된 아이디"),
 		@ApiResponse(responseCode = "200", description = "사용 가능한 아이디")
@@ -87,8 +78,7 @@ public class MemberController {
 	})
 	@Schema(name = "authNumber")
 	@PostMapping("/email-verification")
-	public ResponseHandler<Boolean> verifyAuthMail(@Parameter(description = "인증번호") @RequestParam String authNumber,
-												   @Parameter(description = "이메일") @RequestParam String email) {
+	public ResponseHandler<Boolean> verifyAuthMail(@Parameter(description = "인증번호") @RequestParam String authNumber, @Parameter(description = "이메일") @RequestParam String email) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.verifyEmailAuthNumber(authNumber, email))
@@ -130,8 +120,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token을 반환한다.")
 	})
 	@PostMapping("/refresh-token")
-	public ResponseHandler<Tokens> refreshToken(@Parameter(description = "아이디") @RequestParam String userId,
-												@Parameter(description = "갱신 토큰") @RequestParam String refreshToken) {
+	public ResponseHandler<Tokens> refreshToken(@Parameter(description = "아이디") @RequestParam String userId, @Parameter(description = "갱신 토큰") @RequestParam String refreshToken) {
 		return ResponseHandler.<Tokens>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.refreshToken(userId, refreshToken))
@@ -165,16 +154,12 @@ public class MemberController {
 			.build();
 	}
 
-	/**
-	 * 로그인 된 상태에서, 회원탈퇴를 진행하기 때문에 parameter로 아이디를 받을 필요가 없음.
-	 */
 	@Operation(summary = "회원 탈퇴한다.", responses = {
 		@ApiResponse(responseCode = "400", description = "등록된 회원이 아닙니다."),
 		@ApiResponse(responseCode = "200", description = "회원 탈퇴 되었습니다.")
 	})
 	@PostMapping("/delete")
-	public ResponseHandler<String> deleteMember(@Parameter(description = "아이디") @RequestParam String userId,
-												@Parameter(description = "비밀번호") @RequestParam String password) {
+	public ResponseHandler<String> deleteMember(@Parameter(description = "아이디") @RequestParam String userId, @Parameter(description = "비밀번호") @RequestParam String password) {
 		return ResponseHandler.<String>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.deleteMember(userId, password))
@@ -182,9 +167,13 @@ public class MemberController {
 			.build();
 	}
 
-	// todo: 2024-03-16 토요일 오후 16:50 소셜 로그인시 가입여부를 확인하고, id는 uuid로 설정한다. - seonwoo_jung
-		@GetMapping("/code/kakao")
-	public ResponseEntity<?> oauth(MemberOauthCommandRequest request) {
-		return ResponseEntity.ok(memberService.getAccessToken(request.getCode()));
+	@GetMapping("/code/naver")
+	public void oauth(String code, String state) {
+		memberService.getAccessToken(code, state);
 	}
+
+	//	@GetMapping("/code/kakao")
+//	public ResponseEntity<?> oauth(MemberOauthCommandRequest request) {
+//		return ResponseEntity.ok(memberService.getAccessToken(request.getCode()));
+//	}
 }
