@@ -102,12 +102,13 @@ public class Member extends BaseTimeEntity<Member, Long> {
         return member;
     }
 
-    public static Member join(String email, String name) {
+    public static Member join(String email, String name, Profile profile) {
         return Member.builder()
             .userId(UUID.randomUUID().toString())
             .email(email)
             .name(name)
             .alarmStatus(ENABLED)
+            .profileId(profile)
             .build();
     }
 

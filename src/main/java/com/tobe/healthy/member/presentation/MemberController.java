@@ -6,6 +6,7 @@ import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberOauthCommandRequest;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -168,12 +170,22 @@ public class MemberController {
 	}
 
 	@GetMapping("/code/naver")
-	public void oauth(String code, String state) {
+	public void oauth(String code, String state) throws IOException {
 		memberService.getAccessToken(code, state);
 	}
 
-	//	@GetMapping("/code/kakao")
-//	public ResponseEntity<?> oauth(MemberOauthCommandRequest request) {
-//		return ResponseEntity.ok(memberService.getAccessToken(request.getCode()));
-//	}
+	@GetMapping("/code/kakao")
+	public void oauth2(MemberOauthCommandRequest request) throws IOException {
+		memberService.getAccessToken(request.getCode());
+	}
+
+	@GetMapping("/google")
+	public void oauth3(String code, String scope) throws IOException {
+		memberService.getAccessToken3(code, scope);
+	}
+
+	@GetMapping("/code/google")
+	public void oauth4() throws IOException {
+
+	}
 }

@@ -12,14 +12,18 @@ import static com.tobe.healthy.member.domain.entity.Oauth.CLIENT_SECRET;
 import static com.tobe.healthy.member.domain.entity.Oauth.GRANT_TYPE;
 import static com.tobe.healthy.member.domain.entity.Oauth.KAKAO_TOKEN_URL;
 import static com.tobe.healthy.member.domain.entity.Oauth.REDIRECT_URL;
+import static java.io.File.separator;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.util.StringUtils.cleanPath;
 
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.application.FileService;
+import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
@@ -33,10 +37,18 @@ import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Random;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +74,9 @@ public class MemberService {
 	private final FileService fileService;
 	private final JavaMailSender mailSender;
 	private final RedisService redisService;
+
+	@Value("${file.upload.location}")
+	private String uploadDir;
 
 	public boolean validateUserIdDuplication(String memberId) {
 		memberRepository.findByUserId(memberId).ifPresent(m -> {
@@ -162,7 +177,7 @@ public class MemberService {
 		});
 	}
 
-	public String getAccessToken(String authCode) {
+	public String getAccessToken(String authCode) throws IOException {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(APPLICATION_FORM_URLENCODED);
 
@@ -172,33 +187,77 @@ public class MemberService {
 
 		if (responseEntity.getStatusCode().is2xxSuccessful()) {
 			OAuthInfo body = responseEntity.getBody();
-			log.info("body => {}", body);
 
 			HttpHeaders header = new HttpHeaders();
 			header.set("Authorization", "Bearer " + body.getAccessToken());
 			// token을 받아서 사용자 정보를 조회한다.
 			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange("https://kapi.kakao.com/v2/user/me", GET, new HttpEntity<>(header), KakaoUserInfo.class);
 			KakaoUserInfo dto = entity.getBody();
-			// email
-			String email = dto.getKakaoAccount().getEmail();
-			// uuid 생성
 
+			String email = dto.getKakaoAccount().getEmail();
 			String name = dto.getKakaoAccount().getProfile().getNickname();
+			String imageName = dto.getProperties().getProfileImage();
 
 			memberRepository.findByEmail(email).ifPresent(m -> {
 				throw new CustomException(MEMBER_EMAIL_DUPLICATION);
 			});
 
-//			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(), byte[].class);
-//
-//			fileService.uploadFile(image, dto.getProperties().getProfileImage());
-//
-//			Member member = Member.join(email, name);
-//
-//			memberRepository.save(member);
-//			FileService.uploadFile();
+			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(), byte[].class);
+			String savedFileName = System.currentTimeMillis() + "_" + UUID.randomUUID();
+			String extension = imageName.substring(imageName.lastIndexOf("."));
 
+			InputStream inputStream = new ByteArrayInputStream(image);
+			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
+			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
+
+			Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
+
+			Member member = Member.join(email, name, profile);
+			memberRepository.save(member);
 		}
+		return null;
+	}
+
+	public String getAccessToken3(String code, String scope) throws IOException {
+
+		log.info("code => {} scope => {}", code, scope);
+		//		HttpHeaders headers = new HttpHeaders();
+//		headers.setContentType(APPLICATION_FORM_URLENCODED);
+//
+//		HttpEntity<MultiValueMap<String, String>> requestEntity = getMultiValueMapHttpEntity(authCode, headers);
+//
+//		ResponseEntity<OAuthInfo> responseEntity = restTemplate.postForEntity(KAKAO_TOKEN_URL.getDescription(), requestEntity, OAuthInfo.class);
+//
+//		if (responseEntity.getStatusCode().is2xxSuccessful()) {
+//			OAuthInfo body = responseEntity.getBody();
+//
+//			HttpHeaders header = new HttpHeaders();
+//			header.set("Authorization", "Bearer " + body.getAccessToken());
+//			// token을 받아서 사용자 정보를 조회한다.
+//			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange("https://kapi.kakao.com/v2/user/me", GET, new HttpEntity<>(header), KakaoUserInfo.class);
+//			KakaoUserInfo dto = entity.getBody();
+//
+//			String email = dto.getKakaoAccount().getEmail();
+//			String name = dto.getKakaoAccount().getProfile().getNickname();
+//			String imageName = dto.getProperties().getProfileImage();
+//
+//			memberRepository.findByEmail(email).ifPresent(m -> {
+//				throw new CustomException(MEMBER_EMAIL_DUPLICATION);
+//			});
+//
+//			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(), byte[].class);
+//			String savedFileName = System.currentTimeMillis() + "_" + UUID.randomUUID();
+//			String extension = imageName.substring(imageName.lastIndexOf("."));
+//
+//			InputStream inputStream = new ByteArrayInputStream(image);
+//			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
+//			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
+//
+//			Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
+//
+//			Member member = Member.join(email, name, profile);
+//			memberRepository.save(member);
+//		}
 		return null;
 	}
 
@@ -285,7 +344,7 @@ public class MemberService {
 		return member.getUserId();
 	}
 
-	public void getAccessToken(String code, String state) {
+	public void getAccessToken(String code, String state) throws IOException {
 		log.info("code => {} state => {} ", code, state);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(APPLICATION_FORM_URLENCODED);
@@ -310,12 +369,29 @@ public class MemberService {
 			header.set("Authorization", "Bearer " + body.getAccessToken());
 			ResponseEntity<NaverUserInfo> entity = restTemplate.exchange("https://openapi.naver.com/v1/nid/me", GET, new HttpEntity<>(header), NaverUserInfo.class);
 			NaverUserInfo dto = entity.getBody();
+			String email = dto.getResponse().getEmail();
+			String name = dto.getResponse().getName();
+
+			memberRepository.findByEmail(email).ifPresent(m -> {
+				throw new CustomException(MEMBER_EMAIL_DUPLICATION);
+			});
 
 			// 사용자 이메일, 이름을 받음
 			log.info("dto => {}", dto);
-			String email = dto.getResponse().getEmail();
-			String userId = email.substring(0, email.indexOf("@"));
-			String name = dto.getResponse().getName();
+			byte[] image = restTemplate.getForObject(dto.getResponse().getProfileImage(), byte[].class);
+			log.info("image => {}", image);
+			String savedFileName = System.currentTimeMillis() + "_" + UUID.randomUUID();
+			String profileImage = dto.getResponse().getProfileImage();
+			String extension = profileImage.substring(profileImage.lastIndexOf("."));
+
+			InputStream inputStream = new ByteArrayInputStream(image);
+			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
+			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
+
+			Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
+
+			Member member = Member.join(email, name, profile);
+			memberRepository.save(member);
 		}
 	}
 }

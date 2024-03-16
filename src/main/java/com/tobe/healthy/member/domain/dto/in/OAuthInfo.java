@@ -27,15 +27,20 @@ public class OAuthInfo {
 	public static class NaverUserInfo {
 		@JsonProperty("resultcode")
 		private String resultCode;
+
 		private String message;
+
 		private NaverUserInfoDetail response;
 
 		@Data
 		public static class NaverUserInfoDetail {
 			private String id;
-			@JsonProperty("profileimage")
+
+			@JsonProperty("profile_image")
 			private String profileImage;
+
 			private String email;
+
 			private String name;
 		}
 	}

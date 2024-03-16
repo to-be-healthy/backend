@@ -1,7 +1,11 @@
 package com.tobe.healthy.file.application;
 
 
-import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.config.error.ErrorCode.FILE_FIND_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.FILE_REMOVE_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.SERVER_ERROR;
 import static java.io.File.separator;
 import static java.nio.file.Files.probeContentType;
 import static java.nio.file.Paths.get;
@@ -17,17 +21,15 @@ import com.tobe.healthy.file.repository.FileRepository;
 import com.tobe.healthy.file.repository.WorkoutFileRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
-
-import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,7 +63,7 @@ public class FileService {
 				Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
 				Files.copy(uploadFile.getInputStream(), copyOfLocation, REPLACE_EXISTING);
 
-				Profile profile = Profile.create(savedFileName, cleanPath(uploadFile.getOriginalFilename()), extension, uploadDir + separator, uploadFile.getSize());
+				Profile profile = Profile.create(savedFileName, cleanPath(uploadFile.getOriginalFilename()), extension, uploadDir + separator, (int) uploadFile.getSize());
 				
 				Member member = memberRepository.findById(memberId)
 					.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
@@ -91,7 +93,8 @@ public class FileService {
 
 			String fileName = fileFullName.substring(0, fileFullName.lastIndexOf("."));
 
-			Profile profile = Profile.create(savedFileName, fileName, extension, uploadDir + separator, fileSize);
+			Profile profile = Profile.create(savedFileName, fileName, extension, uploadDir + separator,
+				(int) fileSize);
 
 		} catch (IOException e) {
 			throw new CustomException(SERVER_ERROR);

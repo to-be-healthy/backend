@@ -38,9 +38,9 @@ public class Profile extends BaseTimeEntity<Profile, Long> {
 
 	private String filePath;
 
-	private Long fileSize;
+	private int fileSize;
 
-	public static Profile create(String savedFileName, String originalName, String extension, String filePath, Long fileSize) {
+	public static Profile create(String savedFileName, String originalName, String extension, String filePath, int fileSize) {
 		return Profile.builder()
 			.fileName(savedFileName)
 			.originalName(originalName)
