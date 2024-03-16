@@ -203,7 +203,7 @@ class MemberServiceTest {
             Member findMember = em.createQuery(
                     "select m from Member m where m.userId = :userId and delYn = 'Y'", Member.class)
                 .setParameter("userId", member.getUserId()).getSingleResult();
-            assertThat(findMember.getDelYn()).isEqualTo('Y');
+            assertThat(findMember.isDelYn()).isEqualTo(true);
         }
     }
 }

@@ -23,6 +23,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Builder.Default;
@@ -82,6 +83,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @Default
     private List<StandBySchedule> standBySchedules = new ArrayList<>();
 
+//    private String provider;
+
     @ColumnDefault("false")
     @Default
     private boolean delYn = false;
@@ -95,6 +98,15 @@ public class Member extends BaseTimeEntity<Member, Long> {
         member.alarmStatus = ENABLED;
         member.memberType = request.getMemberType();
         return member;
+    }
+
+    public static Member join(String email, String name) {
+        return Member.builder()
+            .userId(UUID.randomUUID().toString())
+            .email(email)
+            .name(name)
+            .alarmStatus(ENABLED)
+            .build();
     }
 
     public void registerProfile(Profile profileId) {

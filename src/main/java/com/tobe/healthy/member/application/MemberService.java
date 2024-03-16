@@ -3,8 +3,8 @@ package com.tobe.healthy.member.application;
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
 import static com.tobe.healthy.member.domain.entity.Oauth.CLIENT_ID;
@@ -175,14 +175,27 @@ public class MemberService {
 
 			HttpHeaders header = new HttpHeaders();
 			header.set("Authorization", "Bearer " + body.getAccessToken());
-			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange(
-				"https://kapi.kakao.com/v2/user/me", GET, new HttpEntity<>(header),
-				KakaoUserInfo.class);
+			// token을 받아서 사용자 정보를 조회한다.
+			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange("https://kapi.kakao.com/v2/user/me", GET, new HttpEntity<>(header), KakaoUserInfo.class);
 			KakaoUserInfo dto = entity.getBody();
+			// email
+			String email = dto.getKakaoAccount().getEmail();
+			// uuid 생성
 
-			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(),
-				byte[].class);
-			fileService.uploadFile(image, dto.getProperties().getProfileImage());
+			String name = dto.getKakaoAccount().getProfile().getNickname();
+
+			memberRepository.findByEmail(email).ifPresent(m -> {
+				throw new CustomException(MEMBER_EMAIL_DUPLICATION);
+			});
+
+//			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(), byte[].class);
+//
+//			fileService.uploadFile(image, dto.getProperties().getProfileImage());
+//
+//			Member member = Member.join(email, name);
+//
+//			memberRepository.save(member);
+//			FileService.uploadFile();
 
 		}
 		return null;
