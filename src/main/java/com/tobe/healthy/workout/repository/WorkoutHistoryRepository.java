@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface WorkoutHistoryRepository extends JpaRepository<WorkoutHistory, Long>, WorkoutHistoryRepositoryCustom {
 
-    Optional<WorkoutHistory> findByWorkoutHistoryIdAndMemberId(Long workoutHistoryId, Long memberId);
+    Optional<WorkoutHistory> findByWorkoutHistoryIdAndMemberIdAndDelYnFalse(Long workoutHistoryId, Long memberId);
+    Optional<WorkoutHistory> findByWorkoutHistoryIdAndDelYnFalse(Long workoutHistoryId);
 
 }
