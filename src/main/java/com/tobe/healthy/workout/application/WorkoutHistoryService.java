@@ -3,7 +3,7 @@ package com.tobe.healthy.workout.application;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.file.application.FileService;
 import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
-import com.tobe.healthy.file.repository.WorkoutFileRepository;
+import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
@@ -47,21 +47,23 @@ public class WorkoutHistoryService {
         Optional<TrainerMemberMapping> mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId());
         Long trainerId = mapping.map(TrainerMemberMapping::getTrainerId).orElse(null);
         MemberDto memberDto = MemberDto.from(member);
-        WorkoutHistoryDto workoutHistoryDto = WorkoutHistoryDto.create(command.getContent(), memberDto, command.getFiles(), trainerId);
+        WorkoutHistoryDto workoutHistoryDto = WorkoutHistoryDto.from(command.getContent(), memberDto, command.getFiles(), trainerId);
         WorkoutHistory history = WorkoutHistory.create(workoutHistoryDto, member);
         workoutHistoryRepository.save(history);
         fileService.uploadWorkoutFiles(history, command.getFiles());
         List<Long> ids = Arrays.asList(history.getWorkoutHistoryId());
-        List<WorkoutHistoryFileDto> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
-        return WorkoutHistoryDto.create(history, files);
+        List<WorkoutHistoryFile> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
+        List<WorkoutHistoryFileDto> filesDto = files.stream().map(WorkoutHistoryFileDto::from).collect(Collectors.toList());
+        return WorkoutHistoryDto.from(history, filesDto);
     }
 
     public List<WorkoutHistoryDto> getWorkoutHistory(Long memberId, Pageable pageable) {
-        Page<WorkoutHistoryDto> histories = workoutHistoryRepository.getWorkoutHistory(memberId, pageable);
-        List<Long> ids = histories.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
-        List<WorkoutHistoryFileDto> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
-        return histories.stream().map(h -> {
-            List<WorkoutHistoryFileDto> thisFiles = files.stream()
+        Page<WorkoutHistory> histories = workoutHistoryRepository.getWorkoutHistory(memberId, pageable);
+        List<WorkoutHistoryDto> historiesDto = histories.map(WorkoutHistoryDto::from).stream().toList();
+        List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
+        List<WorkoutHistoryFile> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
+        return historiesDto.stream().map(h -> {
+            List<WorkoutHistoryFileDto> thisFiles = files.stream().map(WorkoutHistoryFileDto::from)
                     .filter(f -> f.getWorkoutHistoryId() == h.getWorkoutHistoryId()).collect(Collectors.toList());
             h.setFiles(thisFiles);
             return h;
@@ -69,11 +71,12 @@ public class WorkoutHistoryService {
     }
 
     public List<WorkoutHistoryDto> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable) {
-        Page<WorkoutHistoryDto> histories = workoutHistoryRepository.getWorkoutHistoryByTrainer(trainerId, pageable);
-        List<Long> ids = histories.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
-        List<WorkoutHistoryFileDto> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
-        return histories.stream().map(h -> {
-            List<WorkoutHistoryFileDto> thisFiles = files.stream()
+        Page<WorkoutHistory> histories = workoutHistoryRepository.getWorkoutHistoryByTrainer(trainerId, pageable);
+        List<WorkoutHistoryDto> historiesDto = histories.map(WorkoutHistoryDto::from).stream().toList();
+        List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
+        List<WorkoutHistoryFile> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
+        return historiesDto.stream().map(h -> {
+            List<WorkoutHistoryFileDto> thisFiles = files.stream().map(WorkoutHistoryFileDto::from)
                     .filter(f -> f.getWorkoutHistoryId() == h.getWorkoutHistoryId()).collect(Collectors.toList());
             h.setFiles(thisFiles);
             return h;
@@ -84,8 +87,9 @@ public class WorkoutHistoryService {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndDelYnFalse(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         List<Long> ids = Arrays.asList(history.getWorkoutHistoryId());
-        List<WorkoutHistoryFileDto> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
-        return WorkoutHistoryDto.create(history, files);
+        List<WorkoutHistoryFile> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
+        List<WorkoutHistoryFileDto> filesDto = files.stream().map(WorkoutHistoryFileDto::from).collect(Collectors.toList());
+        return WorkoutHistoryDto.from(history, filesDto);
     }
 
     @Transactional
@@ -109,8 +113,9 @@ public class WorkoutHistoryService {
         );
         fileService.uploadWorkoutFiles(history, command.getFiles());
         List<Long> ids = Arrays.asList(history.getWorkoutHistoryId());
-        List<WorkoutHistoryFileDto> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
-        return WorkoutHistoryDto.create(history, files);
+        List<WorkoutHistoryFile> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
+        List<WorkoutHistoryFileDto> filesDto = files.stream().map(WorkoutHistoryFileDto::from).collect(Collectors.toList());
+        return WorkoutHistoryDto.from(history, filesDto);
     }
 
     @Transactional

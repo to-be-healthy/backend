@@ -33,7 +33,7 @@ public class WorkoutHistoryCommentDto {
     public static WorkoutHistoryCommentDto from(WorkoutHistoryComment comment) {
         return WorkoutHistoryCommentDto.builder()
                 .commentId(comment.getCommentId())
-                .workoutHistory(WorkoutHistoryDto.create(comment.getWorkoutHistory()))
+                .workoutHistory(WorkoutHistoryDto.from(comment.getWorkoutHistory()))
                 .member(MemberDto.from(comment.getMember()))
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
@@ -42,6 +42,7 @@ public class WorkoutHistoryCommentDto {
                 .depth(comment.getDepth())
                 .orderNum(comment.getOrderNum())
                 .delYn(comment.getDelYn())
+                .name(comment.getMember().getName())
                 .build();
     }
 }

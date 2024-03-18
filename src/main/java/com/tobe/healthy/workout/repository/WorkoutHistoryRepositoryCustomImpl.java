@@ -1,17 +1,20 @@
 package com.tobe.healthy.workout.repository;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.file.domain.entity.QWorkoutHistoryFile;
 import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.QWorkoutHistory;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
@@ -24,20 +27,16 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     private QWorkoutHistoryFile qHistoryFile = QWorkoutHistoryFile.workoutHistoryFile;
 
     @Override
-    public Page<WorkoutHistoryDto> getWorkoutHistory(Long memberId, Pageable pageable) {
+    public Page<WorkoutHistory> getWorkoutHistory(Long memberId, Pageable pageable) {
         Long totalCnt = queryFactory
                 .select(qHistory.count())
                 .from(qHistory)
-                .where(qHistory.member.id.eq(memberId), qHistory.delYn.eq(false))
+                .where(qHistory.member.id.eq(memberId), historyDeYnEq(false))
                 .fetchOne();
-        List<WorkoutHistoryDto> workoutHistories =  queryFactory
-                .select(Projections.fields(WorkoutHistoryDto.class,
-                        qHistory.workoutHistoryId,
-                        qHistory.content,
-                        qHistory.likeCnt
-                ))
+        List<WorkoutHistory> workoutHistories =  queryFactory
+                .select(qHistory)
                 .from(qHistory)
-                .where(qHistory.member.id.eq(memberId), qHistory.delYn.eq(false))
+                .where(qHistory.member.id.eq(memberId), historyDeYnEq(false))
                 .orderBy(qHistory.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -46,20 +45,16 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     }
 
     @Override
-    public Page<WorkoutHistoryDto> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable) {
+    public Page<WorkoutHistory> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable) {
         Long totalCnt = queryFactory
                 .select(qHistory.count())
                 .from(qHistory)
-                .where(qHistory.trainerId.eq(trainerId), qHistory.delYn.eq(false))
+                .where(qHistory.trainerId.eq(trainerId), historyDeYnEq(false))
                 .fetchOne();
-        List<WorkoutHistoryDto> workoutHistories =  queryFactory
-                .select(Projections.fields(WorkoutHistoryDto.class,
-                        qHistory.workoutHistoryId,
-                        qHistory.content,
-                        qHistory.likeCnt
-                ))
+        List<WorkoutHistory> workoutHistories =  queryFactory
+                .select(qHistory)
                 .from(qHistory)
-                .where(qHistory.trainerId.eq(trainerId), qHistory.delYn.eq(false))
+                .where(qHistory.trainerId.eq(trainerId), historyDeYnEq(false))
                 .orderBy(qHistory.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -68,20 +63,20 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     }
 
     @Override
-    public List<WorkoutHistoryFileDto> getWorkoutHistoryFile(List<Long> ids) {
-        return queryFactory.select(Projections.fields(WorkoutHistoryFileDto.class,
-                        qHistoryFile.id,
-                        qHistoryFile.workoutHistory.workoutHistoryId,
-                        qHistoryFile.fileName,
-                        qHistoryFile.originalName,
-                        qHistoryFile.extension,
-                        qHistoryFile.filePath,
-                        qHistoryFile.fileSize
-                ))
+    public List<WorkoutHistoryFile> getWorkoutHistoryFile(List<Long> ids) {
+        return queryFactory.select(qHistoryFile)
                 .from(qHistoryFile)
-                .where(qHistoryFile.workoutHistory.workoutHistoryId.in(ids), qHistoryFile.delYn.eq(false))
+                .where(qHistoryFile.workoutHistory.workoutHistoryId.in(ids), historyFileDeYnEq(false))
                 .orderBy(qHistoryFile.createdAt.desc())
                 .fetch();
+    }
+
+    private BooleanExpression historyDeYnEq(boolean bool) {
+        return qHistory.delYn.eq(bool);
+    }
+
+    private BooleanExpression historyFileDeYnEq(boolean bool) {
+        return qHistoryFile.delYn.eq(bool);
     }
 
 }

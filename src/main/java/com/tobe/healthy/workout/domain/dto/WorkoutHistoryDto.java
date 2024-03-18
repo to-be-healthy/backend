@@ -30,7 +30,7 @@ public class WorkoutHistoryDto {
     private List<MultipartFile> multipartFiles = new ArrayList<>();
 
 
-    public static WorkoutHistoryDto create(String content, MemberDto memberDto, List<MultipartFile> files, Long trainerId) {
+    public static WorkoutHistoryDto from(String content, MemberDto memberDto, List<MultipartFile> files, Long trainerId) {
         return WorkoutHistoryDto.builder()
                 .content(content)
                 .member(memberDto)
@@ -39,7 +39,7 @@ public class WorkoutHistoryDto {
                 .build();
     }
 
-    public static WorkoutHistoryDto create(WorkoutHistory history, List<WorkoutHistoryFileDto> files) {
+    public static WorkoutHistoryDto from(WorkoutHistory history, List<WorkoutHistoryFileDto> files) {
         return WorkoutHistoryDto.builder()
                 .workoutHistoryId(history.getWorkoutHistoryId())
                 .content(history.getContent())
@@ -50,7 +50,7 @@ public class WorkoutHistoryDto {
                 .build();
     }
 
-    public static WorkoutHistoryDto create(WorkoutHistory history) {
+    public static WorkoutHistoryDto from(WorkoutHistory history) {
         return WorkoutHistoryDto.builder()
                 .workoutHistoryId(history.getWorkoutHistoryId())
                 .content(history.getContent())

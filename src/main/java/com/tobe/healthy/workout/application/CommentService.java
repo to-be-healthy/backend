@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_COMMENT_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_NOT_FOUND;
@@ -56,7 +57,8 @@ public class CommentService {
     }
 
     public List<WorkoutHistoryCommentDto> getCommentsByWorkoutHistoryId(Long workoutHistoryId, Pageable pageable) {
-        return commentRepository.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable).stream().toList();
+        List<WorkoutHistoryComment> comments = commentRepository.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable).stream().toList();
+        return comments.stream().map(WorkoutHistoryCommentDto::from).collect(Collectors.toList());
     }
 
     @Transactional
