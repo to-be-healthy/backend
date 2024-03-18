@@ -2,6 +2,7 @@ package com.tobe.healthy.workout.presentation;
 
 import com.tobe.healthy.common.CommonService;
 import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleInfo;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,12 +38,11 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "운동기록ID, 회원ID, 운동기록 내용을 반환한다.")
     })
     @PostMapping("/workout-histories")
-    public ResponseHandler<WorkoutHistoryDto> addWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
-                                                               @Valid HistoryAddCommand command) {
-        Member member = commonService.getMemberByToken(bearerToken);
+    public ResponseHandler<WorkoutHistoryDto> addWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                @Valid HistoryAddCommand command) {
         return ResponseHandler.<WorkoutHistoryDto>builder()
                 .statusCode(HttpStatus.OK)
-                .data(workoutService.addWorkoutHistory(member, command))
+                .data(workoutService.addWorkoutHistory(customMemberDetails.getMember(), command))
                 .message("운동기록이 등록되었습니다.")
                 .build();
     }
@@ -91,10 +92,9 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "운동기록 삭제 완료.")
     })
     @PatchMapping("/workout-histories/{workoutHistoryId}")
-    public ResponseHandler<?> deleteWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
+    public ResponseHandler<?> deleteWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                   @PathVariable("workoutHistoryId") Long workoutHistoryId) {
-        Member member = commonService.getMemberByToken(bearerToken);
-        workoutService.deleteWorkoutHistory(member, workoutHistoryId);
+        workoutService.deleteWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
         return ResponseHandler.builder()
                 .statusCode(HttpStatus.OK)
                 .message("운동기록이 삭제되었습니다.")
@@ -106,13 +106,12 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "운동기록ID, 회원ID, 운동기록 내용을 반환한다.")
     })
     @PutMapping("/workout-histories/{workoutHistoryId}")
-    public ResponseHandler<WorkoutHistoryDto> updateWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
+    public ResponseHandler<WorkoutHistoryDto> updateWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                   @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                   @Valid HistoryAddCommand command) {
-        Member member = commonService.getMemberByToken(bearerToken);
         return ResponseHandler.<WorkoutHistoryDto>builder()
                 .statusCode(HttpStatus.OK)
-                .data(workoutService.updateWorkoutHistory(member, workoutHistoryId, command))
+                .data(workoutService.updateWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId, command))
                 .message("운동기록이 수정되었습니다.")
                 .build();
     }
@@ -122,10 +121,9 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "좋아요 완료.")
     })
     @PostMapping("/like/workout-histories/{workoutHistoryId}")
-    public ResponseHandler<?> likeWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
-                                                                @PathVariable("workoutHistoryId") Long workoutHistoryId) {
-        Member member = commonService.getMemberByToken(bearerToken);
-        workoutService.likeWorkoutHistory(member, workoutHistoryId);
+    public ResponseHandler<?> likeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                 @PathVariable("workoutHistoryId") Long workoutHistoryId) {
+        workoutService.likeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
         return ResponseHandler.builder()
                 .statusCode(HttpStatus.OK)
                 .message("운동기록 좋아요에 성공하였습니다.")
@@ -137,10 +135,9 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "좋아요 취소 완료.")
     })
     @DeleteMapping("/like/workout-histories/{workoutHistoryId}")
-    public ResponseHandler<?> deleteLikeWorkoutHistory(@RequestHeader(name="Authorization") String bearerToken,
-                                                @PathVariable("workoutHistoryId") Long workoutHistoryId) {
-        Member member = commonService.getMemberByToken(bearerToken);
-        workoutService.deleteLikeWorkoutHistory(member, workoutHistoryId);
+    public ResponseHandler<?> deleteLikeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                       @PathVariable("workoutHistoryId") Long workoutHistoryId) {
+        workoutService.deleteLikeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
         return ResponseHandler.builder()
                 .statusCode(HttpStatus.OK)
                 .message("운동기록 좋아요가 취소되었습니다.")
