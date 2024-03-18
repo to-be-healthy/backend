@@ -9,6 +9,7 @@ import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberOauthCommandRequest;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.trainer.application.TrainerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -167,6 +168,20 @@ public class MemberController {
 			.data(memberService.deleteMember(userId, password))
 			.message("회원탈퇴 되었습니다.")
 			.build();
+	}
+
+	@Operation(summary = "초대링크 회원가입", responses = {
+			@ApiResponse(responseCode = "401", description = "이미 등록된 이메일입니다."),
+			@ApiResponse(responseCode = "405", description = "이미 등록된 닉네임입니다."),
+			@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
+	})
+	@PostMapping("/invitation/join")
+	public ResponseHandler<MemberJoinCommandResult> joinWithInvitation(@RequestBody @Valid MemberJoinCommand request) {
+		return ResponseHandler.<MemberJoinCommandResult>builder()
+				.statusCode(HttpStatus.OK)
+				.data(memberService.joinWithInvitation(request))
+				.message("회원가입이 완료되었습니다.")
+				.build();
 	}
 
 	@GetMapping("/code/naver")

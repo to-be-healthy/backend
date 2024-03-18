@@ -40,9 +40,11 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     @Builder.Default
     private Long likeCnt = 0L;
 
+    @Builder.Default
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
     private List<WorkoutHistoryFile> historyFiles = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
     private List<WorkoutHistoryComment> historyComments = new ArrayList<>();
 

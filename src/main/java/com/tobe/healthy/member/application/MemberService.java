@@ -1,12 +1,6 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.member.domain.entity.Oauth.CLIENT_ID;
 import static com.tobe.healthy.member.domain.entity.Oauth.CLIENT_SECRET;
 import static com.tobe.healthy.member.domain.entity.Oauth.GRANT_TYPE;
@@ -35,6 +29,7 @@ import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.trainer.application.TrainerService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
@@ -49,6 +44,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +70,7 @@ public class MemberService {
 	private final FileService fileService;
 	private final JavaMailSender mailSender;
 	private final RedisService redisService;
+	private final TrainerService trainerService;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -393,5 +390,23 @@ public class MemberService {
 			Member member = Member.join(email, name, profile);
 			memberRepository.save(member);
 		}
+	}
+
+	@Transactional
+	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
+		String invitationKey = "invitation:" + request.getTrainerId() + ":" + request.getEmail();
+		//TODO: 프론트와 상의 후 초대링크 페이지 url 수정하기
+		String invitationLink = "http://www.temp.com?trainerId=" + request.getTrainerId() + "&email=" + request.getEmail();
+		String value = redisService.getValues(invitationKey);
+		if (isEmpty(value)) {
+			throw new CustomException(INVITE_LINK_NOT_FOUND);
+		}
+		if (!value.equals(invitationLink)) {
+			throw new CustomException(INVITE_LINK_NOT_VALID);
+		}
+		MemberJoinCommandResult result = joinMember(request);
+		trainerService.addMemberOfTrainer(request.getTrainerId(), result.getId());
+		redisService.deleteValues(invitationKey);
+		return result;
 	}
 }

@@ -1,6 +1,7 @@
 package com.tobe.healthy.member.repository;
 
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -22,4 +23,7 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
 	@Query("select m from Member m where m.id = :memberId and m.delYn = false")
 	Optional<Member> findById(@Param("memberId") Long memberId);
+
+	Optional<Member> findByIdAndMemberTypeAndDelYnFalse(Long memberId, MemberType memberType);
+
 }
