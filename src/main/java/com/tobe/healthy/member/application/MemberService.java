@@ -25,6 +25,7 @@ import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
+import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
@@ -40,9 +41,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Random;
 import java.util.UUID;
+
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
@@ -394,19 +400,27 @@ public class MemberService {
 
 	@Transactional
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
-		String invitationKey = "invitation:" + request.getTrainerId() + ":" + request.getEmail();
-		//TODO: 프론트와 상의 후 초대링크 페이지 url 수정하기
-		String invitationLink = "http://www.temp.com?trainerId=" + request.getTrainerId() + "&email=" + request.getEmail();
-		String value = redisService.getValues(invitationKey);
-		if (isEmpty(value)) {
-			throw new CustomException(INVITE_LINK_NOT_FOUND);
-		}
-		if (!value.equals(invitationLink)) {
-			throw new CustomException(INVITE_LINK_NOT_VALID);
-		}
 		MemberJoinCommandResult result = joinMember(request);
 		trainerService.addMemberOfTrainer(request.getTrainerId(), result.getId());
-		redisService.deleteValues(invitationKey);
 		return result;
+	}
+
+	public InvitationMappingResult getInvitationMapping(String uuid) {
+		String invitationKey = "invitation:" + uuid;
+		String mappedData = redisService.getValues(invitationKey);
+		if (isEmpty(mappedData)) {
+			throw new CustomException(INVITE_LINK_NOT_FOUND);
+		}
+		JSONObject job = null;
+		try{
+			JSONParser parser = new JSONParser();
+			job = (JSONObject) parser.parse(mappedData);
+		}catch (ParseException e){
+			e.printStackTrace();
+		}
+		Long trainerId = Long.valueOf(String.valueOf(job.get("trainerId")));
+		String email = job.get("email").toString();
+		Member member = memberRepository.findByMemberIdWithGym(trainerId);
+		return InvitationMappingResult.create(member, email);
 	}
 }

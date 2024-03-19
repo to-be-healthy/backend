@@ -7,16 +7,22 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
-import com.tobe.healthy.trainer.domain.dto.out.MemberInviteCommandResult;
+import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONObject;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
 
@@ -43,17 +49,23 @@ public class TrainerService {
         return TrainerMemberMappingDto.from(mapping);
     }
 
-    public MemberInviteCommandResult inviteMember(String email, Member trainer) {
+    public void inviteMember(MemberInviteCommand command, Member trainer) {
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), MemberType.TRAINER)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-        memberRepository.findByEmail(email)
-                .ifPresent(i -> {throw new CustomException(ErrorCode.MEMBER_ALREADY_MAPPED);});
-        String invitationKey = "invitation:" + trainer.getId() + ":" + email;
-        //TODO: 프론트와 상의 후 초대링크 페이지 url 수정하기
-        String invitationLink = "http://www.temp.com?trainerId=" + trainer.getId() + "&email=" + email;
-        sendInviteLink(email, trainer, invitationLink);
-        redisService.setValuesWithTimeout(invitationKey, invitationLink, 3 * 24 * 60 * 60 * 1000); // 3days
-        return MemberInviteCommandResult.from(email, trainer.getId(), invitationLink);
+        List<String> emails = command.getEmails();
+        for(String email : emails){
+            memberRepository.findByEmail(email).ifPresent(i -> {throw new CustomException(ErrorCode.MEMBER_ALREADY_MAPPED);});
+            String uuid = System.currentTimeMillis() + "_" + UUID.randomUUID();
+            //TODO: 프론트와 상의 후 초대링크 페이지 url 수정하기
+            String invitationKey = "invitation:" + uuid;
+            String invitationLink = "http://www.temp.com?" + uuid;
+            sendInviteLink(email, trainer, invitationLink);
+            Map<String, Object> invitedMapping = new HashMap<>() {{
+                put("trainerId", trainer.getId());
+                put("email", email);
+            }};
+            redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), 3 * 24 * 60 * 60 * 1000); // 3days
+        }
     }
 
     private void sendInviteLink(String email, Member trainer, String invitationLink) {
@@ -64,7 +76,7 @@ public class TrainerService {
             mimeMessageHelper.setSubject("[건강해짐] 안녕하세요. {trainerName}님이 고객님을 초대했습니다.".replace("{trainerName}", trainer.getName())); // 메일 제목
             String text = "안녕하세요. {trainerName}님이 고객님을 초대했습니다.\n하단 링크를 통해 회원가입을 해주세요.\n{inviteLink}"
                     .replace("{trainerName}", trainer.getName())
-                    .replace("{inviteLink}", "http://www.temp.com?trainerId="+trainer.getId()+"&email="+email);
+                    .replace("{inviteLink}", invitationLink);
             mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
             mailSender.send(mimeMessage);
         } catch (Exception e) {

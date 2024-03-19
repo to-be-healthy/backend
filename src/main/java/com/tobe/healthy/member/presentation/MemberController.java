@@ -7,6 +7,7 @@ import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberOauthCommandRequest;
+import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.trainer.application.TrainerService;
@@ -168,6 +169,19 @@ public class MemberController {
 			.data(memberService.deleteMember(userId, password))
 			.message("회원탈퇴 되었습니다.")
 			.build();
+	}
+
+	@Operation(summary = "초대링크 uuid 데이터 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청"),
+			@ApiResponse(responseCode = "200", description = "성공")
+	})
+	@GetMapping("/invitation/uuid")
+	public ResponseHandler<InvitationMappingResult> getInvitationMapping(@RequestParam String uuid) {
+		return ResponseHandler.<InvitationMappingResult>builder()
+				.statusCode(HttpStatus.OK)
+				.data(memberService.getInvitationMapping(uuid))
+				.message("조회가 완료되었습니다.")
+				.build();
 	}
 
 	@Operation(summary = "초대링크 회원가입", responses = {

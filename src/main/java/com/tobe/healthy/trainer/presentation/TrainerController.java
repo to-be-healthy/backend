@@ -4,7 +4,7 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
-import com.tobe.healthy.trainer.domain.dto.out.MemberInviteCommandResult;
+import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,11 +27,11 @@ public class TrainerController {
 		@ApiResponse(responseCode = "200", description = "회원초대가 완료 되었습니다.")
     })
     @PostMapping("/invitation")
-    public ResponseHandler<MemberInviteCommandResult> inviteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                   @Parameter(description = "이메일") @RequestParam String email) {
-        return ResponseHandler.<MemberInviteCommandResult>builder()
+    public ResponseHandler<?> inviteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                           @Parameter(description = "이메일") @RequestBody MemberInviteCommand command) {
+        trainerService.inviteMember(command, customMemberDetails.getMember());
+        return ResponseHandler.builder()
                 .statusCode(HttpStatus.OK)
-                .data(trainerService.inviteMember(email, customMemberDetails.getMember()))
                 .message("회원초대가 완료 되었습니다.")
                 .build();
     }
