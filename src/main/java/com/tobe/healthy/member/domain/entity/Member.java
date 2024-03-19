@@ -2,6 +2,7 @@ package com.tobe.healthy.member.domain.entity;
 
 import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
+import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.EnumType.STRING;
@@ -85,7 +86,9 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @Default
     private List<StandBySchedule> standBySchedules = new ArrayList<>();
 
-//    private String provider;
+    @Enumerated(STRING)
+    @Default
+    private SocialType socialType = NONE;
 
     @ColumnDefault("false")
     @Default
@@ -102,13 +105,14 @@ public class Member extends BaseTimeEntity<Member, Long> {
         return member;
     }
 
-    public static Member join(String email, String name, Profile profile) {
+    public static Member join(String email, String name, Profile profile, SocialType socialType) {
         return Member.builder()
             .userId(UUID.randomUUID().toString())
             .email(email)
             .name(name)
             .alarmStatus(ENABLED)
             .profileId(profile)
+            .socialType(socialType)
             .build();
     }
 

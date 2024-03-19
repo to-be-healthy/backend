@@ -25,6 +25,7 @@ public class OAuthInfo {
 
 	@Data
 	public static class NaverUserInfo {
+
 		@JsonProperty("resultcode")
 		private String resultCode;
 
@@ -34,6 +35,7 @@ public class OAuthInfo {
 
 		@Data
 		public static class NaverUserInfoDetail {
+
 			private String id;
 
 			@JsonProperty("profile_image")

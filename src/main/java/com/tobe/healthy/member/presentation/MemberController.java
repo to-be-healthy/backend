@@ -6,7 +6,6 @@ import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberOauthCommandRequest;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
@@ -169,14 +168,24 @@ public class MemberController {
 			.build();
 	}
 
+	// redirect
 	@GetMapping("/code/naver")
-	public void oauth(String code, String state) throws IOException {
-		memberService.getAccessToken(code, state);
+	public ResponseHandler<String> getNaverOAuth(String code, String state) {
+		return ResponseHandler.<String>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.getNaverAccessToken(code, state))
+			.message("회원가입이 완료되었습니다.")
+			.build();
 	}
 
+	// redirect
 	@GetMapping("/code/kakao")
-	public void oauth2(MemberOauthCommandRequest request) throws IOException {
-		memberService.getAccessToken(request.getCode());
+	public ResponseHandler<String> getKakaoOAuth(String code) {
+		return ResponseHandler.<String>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.getKakaoAccessToken(code))
+			.message("회원가입이 완료되었습니다.")
+			.build();
 	}
 
 	@GetMapping("/google")
