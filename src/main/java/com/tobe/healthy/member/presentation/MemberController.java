@@ -241,20 +241,20 @@ public class MemberController {
 	}
 
 	@GetMapping("/naver")
-	public ResponseHandler<String> getNaverOAuth(String code, String state) {
-		return ResponseHandler.<String>builder()
+	public ResponseHandler<Tokens> getNaverOAuth(String code, String state) {
+		return ResponseHandler.<Tokens>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.getNaverAccessToken(code, state))
-			.message("회원가입이 완료되었습니다.")
+			.message("")
 			.build();
 	}
 
 	@GetMapping("/kakao")
-	public ResponseHandler<String> getKakaoOAuth(String code) {
-		return ResponseHandler.<String>builder()
+	public ResponseHandler<Tokens> getKakaoOAuth(String code) {
+		return ResponseHandler.<Tokens>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.getKakaoAccessToken(code))
-			.message("회원가입이 완료되었습니다.")
+			.message("")
 			.build();
 	}
 }

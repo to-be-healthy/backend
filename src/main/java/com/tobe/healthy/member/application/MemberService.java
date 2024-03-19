@@ -176,227 +176,12 @@ public class MemberService {
 		return member.getEmail();
 	}
 
-	private void validateDuplicationUserId(String userId) {
-		memberRepository.findByUserId(userId).ifPresent(m -> {
-			throw new CustomException(MEMBER_ID_DUPLICATION);
-		});
-	}
-
-	public String sendAuthMail(String email) {
-		// 1. 이메일 중복 확인
-		memberRepository.findByEmail(email).ifPresent(e -> {
-			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
-		});
-
-		// 2. 인증번호를 redis에 저장한다.
-		String authKey = getAuthCode();
-		redisService.setValuesWithTimeout(email, authKey, 3 * 60 * 1000); // 3분
-
-		// 3. 이메일에 인증번호 전송한다.
-		sendAuthMail(email, authKey);
-
-		return email;
-	}
-
-	private void sendAuthMail(String email, String authKey) {
-		MimeMessage mimeMessage = mailSender.createMimeMessage();
-		try {
-			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-			mimeMessageHelper.setTo(email);
-			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 회원가입 인증번호입니다."); // 메일 제목
-			String text = "안녕하세요. 건강해짐 인증번호는 authKey 입니다. \n확인후 입력해 주세요.".replace("authKey", authKey);
-			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
-			mailSender.send(mimeMessage);
-		} catch (MessagingException e) {
-			throw new CustomException(MAIL_SEND_ERROR);
-		}
-	}
-
-	private void validateDuplicationEmail(String email) {
-		memberRepository.findByEmail(email).ifPresent(m -> {
-			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
-		});
-	}
-
-	private void sendResetPassword(String email, Member member) {
-		MimeMessage mimeMessage = mailSender.createMimeMessage();
-		try {
-			String resetPW = RandomStringUtils.random(12, true, true);
-			member.resetPassword(passwordEncoder.encode(resetPW));
-			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-			mimeMessageHelper.setTo(email);
-			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 초기화 비밀번호입니다."); // 메일 제목
-			String text = "안녕하세요. 건강해짐 초기화 비밀번호는 resetPassword 입니다. \n로그인 후 반드시 비밀번호를 변경해 주세요.".replace("resetPassword", resetPW);
-			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
-			mailSender.send(mimeMessage);
-		} catch (MessagingException e) {
-			throw new CustomException(MAIL_SEND_ERROR);
-		}
-	}
-
-	private String getAuthCode() {
-		Random random = new Random();
-		StringBuilder buffer = new StringBuilder();
-		int num = 0;
-
-		while (buffer.length() < 6) {
-			num = random.nextInt(10);
-			buffer.append(num);
-		}
-
-		return buffer.toString();
-	}
-
 	public String deleteMember(String userId, String password) {
 		Member member = memberRepository.findByUserId(userId)
 			.filter(m -> passwordEncoder.matches(password, m.getPassword()))
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.deleteMember();
 		return member.getUserId();
-	}
-
-	public String getKakaoAccessToken(String authCode) {
-		OAuthInfo oAuthInfo = getKakaoOAuthAccessToken(authCode);
-		KakaoUserInfo kaKaoOAuthUserInfo = getKaKaoOAuthUserInfo(oAuthInfo);
-
-		String email = kaKaoOAuthUserInfo.getKakaoAccount().getEmail();
-		String name = kaKaoOAuthUserInfo.getKakaoAccount().getProfile().getNickname();
-		String imageName = kaKaoOAuthUserInfo.getProperties().getProfileImage();
-
-		memberRepository.findKakaoByEmailAndSocialType(email).ifPresent(m -> {
-			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
-		});
-
-		byte[] image = getProfileImage(imageName);
-		String savedFileName = createFileUUID();
-		String extension = getImageExtension(imageName);
-
-		try (InputStream inputStream = new ByteArrayInputStream(image)) {
-			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
-			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
-		} catch (Exception e) {
-			log.error("e => {}", e);
-			throw new CustomException(FILE_UPLOAD_ERROR);
-		}
-
-		Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
-
-		Member member = Member.join(email, name, profile, KAKAO);
-		memberRepository.save(member);
-
-		return member.getEmail();
-	}
-
-	private byte[] getProfileImage(String imageName) {
-		Mono<byte[]> responseMono = webClient.get().uri(imageName)
-			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-			.bodyToMono(byte[].class);
-		return responseMono.share().block();
-	}
-
-	private KakaoUserInfo getKaKaoOAuthUserInfo(OAuthInfo oAuthInfo) {
-		Mono<KakaoUserInfo> kakaoUserInfoMono = webClient.get()
-			.uri(oAuthConfig.getKakaoUserInfoUri())
-			.headers(header -> header.set("Authorization", "Bearer " + oAuthInfo.getAccessToken()))
-			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-			.bodyToMono(KakaoUserInfo.class);
-		return kakaoUserInfoMono.share().block();
-	}
-
-	private OAuthInfo getKakaoOAuthAccessToken(String authCode) {
-		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-		requestBody.add("grant_type", oAuthConfig.getKakaoGrantType());
-		requestBody.add("client_id", oAuthConfig.getKakaoClientId());       // 본인이 발급받은 key
-		requestBody.add("redirect_uri", oAuthConfig.getKakaoRedirectUri()); // 본인이 설정한 주소
-		requestBody.add("client_secret", oAuthConfig.getKakaoClientSecret());
-		requestBody.add("code", authCode);
-
-		Mono<OAuthInfo> responseMono = webClient.post()
-			.uri(oAuthConfig.getKakaoTokenUri())
-			.bodyValue(requestBody)
-			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
-			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-			.bodyToMono(OAuthInfo.class);
-		return responseMono.share().block();
-	}
-
-	public String getNaverAccessToken(String code, String state) {
-		OAuthInfo responseMono = getNaverOAuthAccessToken(code, state);
-
-		NaverUserInfo authorization = getNaverUserInfo(responseMono);
-
-		Member member = getMember(authorization);
-
-		return member.getEmail();
-	}
-
-	private Member getMember(NaverUserInfo authorization) {
-		memberRepository.findNaverByEmailAndSocialType(authorization.getResponse().getEmail()).ifPresent(m -> {
-			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
-		});
-
-		byte[] image = getProfileImage(authorization.getResponse().getProfileImage());
-		String savedFileName = createFileUUID();
-		String profileImage = authorization.getResponse().getProfileImage();
-		String extension = getImageExtension(profileImage);
-
-		try (InputStream inputStream = new ByteArrayInputStream(image)) {
-			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
-			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
-		} catch (IOException e) {
-			log.error("error => {}", e);
-			throw new CustomException(FILE_UPLOAD_ERROR);
-		}
-
-		Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
-
-		Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), profile, NAVER);
-		memberRepository.save(member);
-		return member;
-	}
-
-	private NaverUserInfo getNaverUserInfo(OAuthInfo responseMono) {
-		Mono<NaverUserInfo> naverUserInfo = webClient.get()
-			.uri(oAuthConfig.getNaverUserInfoUri())
-			.header("Authorization", "Bearer " + responseMono.getAccessToken())
-			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-			.bodyToMono(NaverUserInfo.class);
-		return naverUserInfo.share().block();
-	}
-
-	private OAuthInfo getNaverOAuthAccessToken(String code, String state) {
-		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-		requestBody.add("grant_type", oAuthConfig.getNaverGrantType());
-		requestBody.add("client_id", oAuthConfig.getNaverClientId());
-		requestBody.add("client_secret", oAuthConfig.getNaverClientSecret());
-		requestBody.add("code", code);
-		requestBody.add("state", state);
-
-		Mono<OAuthInfo> responseMono = webClient.post()
-					.uri(oAuthConfig.getNaverTokenUri())
-					.bodyValue(requestBody)
-					.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
-					.retrieve()
-					.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-					.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-					.bodyToMono(OAuthInfo.class);
-		return responseMono.share().block();
-	}
-
-	private String createFileUUID() {
-		return System.currentTimeMillis() + "_" + UUID.randomUUID();
-	}
-
-	private String getImageExtension(String profileImage) {
-		return profileImage.substring(profileImage.lastIndexOf("."));
 	}
 
 	public boolean changePassword(MemberPasswordChangeCommand request, Long memberId) {
@@ -457,5 +242,183 @@ public class MemberService {
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.changeTrainerFeedback(trainerFeedback);
 		return true;
+	}
+
+	public Tokens getKakaoAccessToken(String authCode) {
+		OAuthInfo oAuthInfo = getKakaoOAuthAccessToken(authCode);
+		KakaoUserInfo kaKaoOAuthUserInfo = getKaKaoOAuthUserInfo(oAuthInfo);
+
+		return memberRepository.findKakaoByEmailAndSocialType(kaKaoOAuthUserInfo.getKakaoAccount().getEmail())
+			.map(tokenGenerator::create)
+			.orElseGet(() -> {
+				Profile profile = getProfile(kaKaoOAuthUserInfo.getProperties().getProfileImage());
+				Member member = Member.join(kaKaoOAuthUserInfo.getKakaoAccount().getEmail(), kaKaoOAuthUserInfo.getKakaoAccount().getProfile().getNickname(), profile, KAKAO);
+				memberRepository.save(member);
+				return tokenGenerator.create(member);
+			});
+	}
+
+	private byte[] getProfileImage(String imageName) {
+		Mono<byte[]> responseMono = webClient.get().uri(imageName)
+			.retrieve()
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.bodyToMono(byte[].class);
+		return responseMono.share().block();
+	}
+
+	private KakaoUserInfo getKaKaoOAuthUserInfo(OAuthInfo oAuthInfo) {
+		Mono<KakaoUserInfo> kakaoUserInfoMono = webClient.get()
+			.uri(oAuthConfig.getKakaoUserInfoUri())
+			.headers(header -> header.set("Authorization", "Bearer " + oAuthInfo.getAccessToken()))
+			.retrieve()
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.bodyToMono(KakaoUserInfo.class);
+		return kakaoUserInfoMono.share().block();
+	}
+
+	private OAuthInfo getKakaoOAuthAccessToken(String authCode) {
+		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+		requestBody.add("grant_type", oAuthConfig.getKakaoGrantType());
+		requestBody.add("client_id", oAuthConfig.getKakaoClientId());       // 본인이 발급받은 key
+		requestBody.add("redirect_uri", oAuthConfig.getKakaoRedirectUri()); // 본인이 설정한 주소
+		requestBody.add("client_secret", oAuthConfig.getKakaoClientSecret());
+		requestBody.add("code", authCode);
+
+		Mono<OAuthInfo> responseMono = webClient.post()
+			.uri(oAuthConfig.getKakaoTokenUri())
+			.bodyValue(requestBody)
+			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+			.retrieve()
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.bodyToMono(OAuthInfo.class);
+		return responseMono.share().block();
+	}
+
+	public Tokens getNaverAccessToken(String code, String state) {
+		OAuthInfo responseMono = getNaverOAuthAccessToken(code, state);
+
+		NaverUserInfo authorization = getNaverUserInfo(responseMono);
+
+		return memberRepository.findNaverByEmailAndSocialType(authorization.getResponse().getEmail())
+			.map(tokenGenerator::create)
+			.orElseGet(() -> {
+				Profile profile = getProfile(authorization.getResponse().getProfileImage());
+				Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), profile, NAVER);
+				memberRepository.save(member);
+				return tokenGenerator.create(member);
+			});
+	}
+
+	private Profile getProfile(String profileImage) {
+		byte[] image = getProfileImage(profileImage);
+		String savedFileName = createFileUUID();
+		String extension = getImageExtension(profileImage);
+
+		try (InputStream inputStream = new ByteArrayInputStream(image)) {
+			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
+			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
+		} catch (IOException e) {
+			log.error("error => {}", e);
+			throw new CustomException(FILE_UPLOAD_ERROR);
+		}
+
+		Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
+		return profile;
+	}
+
+	private NaverUserInfo getNaverUserInfo(OAuthInfo responseMono) {
+		Mono<NaverUserInfo> naverUserInfo = webClient.get()
+			.uri(oAuthConfig.getNaverUserInfoUri())
+			.header("Authorization", "Bearer " + responseMono.getAccessToken())
+			.retrieve()
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.bodyToMono(NaverUserInfo.class);
+		return naverUserInfo.share().block();
+	}
+
+	private OAuthInfo getNaverOAuthAccessToken(String code, String state) {
+		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+		requestBody.add("grant_type", oAuthConfig.getNaverGrantType());
+		requestBody.add("client_id", oAuthConfig.getNaverClientId());
+		requestBody.add("client_secret", oAuthConfig.getNaverClientSecret());
+		requestBody.add("code", code);
+		requestBody.add("state", state);
+
+		Mono<OAuthInfo> responseMono = webClient.post()
+					.uri(oAuthConfig.getNaverTokenUri())
+					.bodyValue(requestBody)
+					.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+					.retrieve()
+					.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+					.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+					.bodyToMono(OAuthInfo.class);
+		return responseMono.share().block();
+	}
+
+	private String createFileUUID() {
+		return System.currentTimeMillis() + "_" + UUID.randomUUID();
+	}
+
+	private String getImageExtension(String profileImage) {
+		return profileImage.substring(profileImage.lastIndexOf("."));
+	}
+
+	private void validateDuplicationUserId(String userId) {
+		memberRepository.findByUserId(userId).ifPresent(m -> {
+			throw new CustomException(MEMBER_ID_DUPLICATION);
+		});
+	}
+
+	private void sendAuthMail(String email, String authKey) {
+		MimeMessage mimeMessage = mailSender.createMimeMessage();
+		try {
+			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+			mimeMessageHelper.setTo(email);
+			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 회원가입 인증번호입니다."); // 메일 제목
+			String text = "안녕하세요. 건강해짐 인증번호는 authKey 입니다. \n확인후 입력해 주세요.".replace("authKey", authKey);
+			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
+			mailSender.send(mimeMessage);
+		} catch (MessagingException e) {
+			throw new CustomException(MAIL_SEND_ERROR);
+		}
+	}
+
+	private void validateDuplicationEmail(String email) {
+		memberRepository.findByEmail(email).ifPresent(m -> {
+			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
+		});
+	}
+
+	private void sendResetPassword(String email, Member member) {
+		MimeMessage mimeMessage = mailSender.createMimeMessage();
+		try {
+			String resetPW = RandomStringUtils.random(12, true, true);
+			member.resetPassword(passwordEncoder.encode(resetPW));
+			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+			mimeMessageHelper.setTo(email);
+			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 초기화 비밀번호입니다."); // 메일 제목
+			String text = "안녕하세요. 건강해짐 초기화 비밀번호는 resetPassword 입니다. \n로그인 후 반드시 비밀번호를 변경해 주세요.".replace("resetPassword", resetPW);
+			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
+			mailSender.send(mimeMessage);
+		} catch (MessagingException e) {
+			throw new CustomException(MAIL_SEND_ERROR);
+		}
+	}
+
+	private String getAuthCode() {
+		Random random = new Random();
+		StringBuilder buffer = new StringBuilder();
+		int num = 0;
+
+		while (buffer.length() < 6) {
+			num = random.nextInt(10);
+			buffer.append(num);
+		}
+
+		return buffer.toString();
 	}
 }
