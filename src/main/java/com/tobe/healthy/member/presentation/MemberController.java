@@ -170,7 +170,7 @@ public class MemberController {
 
 	// redirect
 	@GetMapping("/code/naver")
-	public ResponseHandler<String> naverOAuth(String code, String state) throws IOException {
+	public ResponseHandler<String> getNaverOAuth(String code, String state) {
 		return ResponseHandler.<String>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.getNaverAccessToken(code, state))
@@ -180,7 +180,7 @@ public class MemberController {
 
 	// redirect
 	@GetMapping("/code/kakao")
-	public ResponseHandler<String> KakaoOAuth(String code) throws IOException {
+	public ResponseHandler<String> getKakaoOAuth(String code) {
 		return ResponseHandler.<String>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.getKakaoAccessToken(code))
