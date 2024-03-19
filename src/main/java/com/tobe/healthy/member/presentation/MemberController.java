@@ -168,8 +168,7 @@ public class MemberController {
 			.build();
 	}
 
-	// redirect
-	@GetMapping("/code/naver")
+	@GetMapping("/naver")
 	public ResponseHandler<String> getNaverOAuth(String code, String state) {
 		return ResponseHandler.<String>builder()
 			.statusCode(HttpStatus.OK)
@@ -178,8 +177,7 @@ public class MemberController {
 			.build();
 	}
 
-	// redirect
-	@GetMapping("/code/kakao")
+	@GetMapping("/kakao")
 	public ResponseHandler<String> getKakaoOAuth(String code) {
 		return ResponseHandler.<String>builder()
 			.statusCode(HttpStatus.OK)
