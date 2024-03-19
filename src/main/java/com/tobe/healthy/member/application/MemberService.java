@@ -281,8 +281,8 @@ public class MemberService {
 	private OAuthInfo getKakaoOAuthAccessToken(String authCode) {
 		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
 		requestBody.add("grant_type", oAuthConfig.getKakaoGrantType());
-		requestBody.add("client_id", oAuthConfig.getKakaoClientId());       // 본인이 발급받은 key
-		requestBody.add("redirect_uri", oAuthConfig.getKakaoRedirectUri()); // 본인이 설정한 주소
+		requestBody.add("client_id", oAuthConfig.getKakaoClientId());
+		requestBody.add("redirect_uri", oAuthConfig.getKakaoRedirectUri());
 		requestBody.add("client_secret", oAuthConfig.getKakaoClientSecret());
 		requestBody.add("code", authCode);
 
@@ -379,7 +379,7 @@ public class MemberService {
 			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
 			mimeMessageHelper.setTo(email);
 			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 회원가입 인증번호입니다."); // 메일 제목
-			String text = "안녕하세요. 건강해짐 인증번호는 authKey 입니다. \n확인후 입력해 주세요.".replace("authKey", authKey);
+			String text = String.format("안녕하세요. 건강해짐 인증번호는 %s 입니다. \n확인후 입력해 주세요.", authKey);
 			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
 			mailSender.send(mimeMessage);
 		} catch (MessagingException e) {
@@ -401,7 +401,7 @@ public class MemberService {
 			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
 			mimeMessageHelper.setTo(email);
 			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 초기화 비밀번호입니다."); // 메일 제목
-			String text = "안녕하세요. 건강해짐 초기화 비밀번호는 resetPassword 입니다. \n로그인 후 반드시 비밀번호를 변경해 주세요.".replace("resetPassword", resetPW);
+			String text = String.format("안녕하세요. 건강해짐 초기화 비밀번호는 %s 입니다. \n로그인 후 반드시 비밀번호를 변경해 주세요.", resetPW);
 			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
 			mailSender.send(mimeMessage);
 		} catch (MessagingException e) {
