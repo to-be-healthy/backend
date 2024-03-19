@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -184,15 +183,5 @@ public class MemberController {
 			.data(memberService.getKakaoAccessToken(code))
 			.message("회원가입이 완료되었습니다.")
 			.build();
-	}
-
-	@GetMapping("/google")
-	public void oauth3(String code, String scope) throws IOException {
-		memberService.getAccessToken3(code, scope);
-	}
-
-	@GetMapping("/code/google")
-	public void oauth4() throws IOException {
-
 	}
 }
