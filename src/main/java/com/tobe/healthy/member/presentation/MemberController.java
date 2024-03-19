@@ -206,7 +206,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "이름이 변경되었습니다.")
 	})
 	@PatchMapping("/change-name")
-	public ResponseHandler<Boolean> changeName(@RequestParam String name, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+	public ResponseHandler<Boolean> changeName(@Parameter(description = "변경할 닉네임") @RequestParam String name, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.changeName(name, customMemberDetails.getMemberId()))
@@ -219,7 +219,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "알림 상태가 변경되었습니다.")
 	})
 	@PatchMapping("/change-alarm")
-	public ResponseHandler<Boolean> changeAlarm(AlarmStatus alarmStatus, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+	public ResponseHandler<Boolean> changeAlarm(@Parameter(description = "변경할 알림 상태") @RequestParam AlarmStatus alarmStatus, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.changeAlarm(alarmStatus, customMemberDetails.getMemberId()))
@@ -232,7 +232,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "수업 기록 여부가 변경되었습니다.")
 	})
 	@PatchMapping("/change-trainer-feedback")
-	public ResponseHandler<Boolean> changeTrainerFeedback(TrainerFeedback trainerFeedback, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+	public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태") @RequestParam TrainerFeedback trainerFeedback, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(memberService.changeTrainerFeedback(trainerFeedback, customMemberDetails.getMemberId()))
