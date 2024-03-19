@@ -8,11 +8,11 @@ import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
-import static com.tobe.healthy.member.domain.entity.Oauth.KAKAO_CLIENT_ID;
-import static com.tobe.healthy.member.domain.entity.Oauth.KAKAO_CLIENT_SECRET;
-import static com.tobe.healthy.member.domain.entity.Oauth.KAKAO_GRANT_TYPE;
-import static com.tobe.healthy.member.domain.entity.Oauth.KAKAO_REDIRECT_URL;
-import static com.tobe.healthy.member.domain.entity.Oauth.KAKAO_TOKEN_URL;
+import static com.tobe.healthy.member.domain.entity.OAuth.KAKAO_CLIENT_ID;
+import static com.tobe.healthy.member.domain.entity.OAuth.KAKAO_CLIENT_SECRET;
+import static com.tobe.healthy.member.domain.entity.OAuth.KAKAO_GRANT_TYPE;
+import static com.tobe.healthy.member.domain.entity.OAuth.KAKAO_REDIRECT_URL;
+import static com.tobe.healthy.member.domain.entity.OAuth.KAKAO_TOKEN_URL;
 import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
 import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
 import static java.io.File.separator;
@@ -51,8 +51,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -61,7 +59,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -73,7 +70,6 @@ public class MemberService {
 
 	private final WebClient webClient;
 	private final PasswordEncoder passwordEncoder;
-	private final RestTemplate restTemplate;
 	private final MemberRepository memberRepository;
 	private final JwtTokenGenerator tokenGenerator;
 	private final FileService fileService;
@@ -182,16 +178,6 @@ public class MemberService {
 		});
 	}
 
-	private HttpEntity<MultiValueMap<String, String>> getMultiValueMapHttpEntity(String authCode, HttpHeaders headers) {
-		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-		requestBody.add("grant_type", KAKAO_GRANT_TYPE.getDescription());
-		requestBody.add("client_id", KAKAO_CLIENT_ID.getDescription());       // 본인이 발급받은 key
-		requestBody.add("redirect_uri", KAKAO_REDIRECT_URL.getDescription()); // 본인이 설정한 주소
-		requestBody.add("client_secret", KAKAO_CLIENT_SECRET.getDescription());
-		requestBody.add("code", authCode);
-		return new HttpEntity<>(requestBody, headers);
-	}
-
 	public String sendAuthMail(String email) {
 		// 1. 이메일 중복 확인
 		memberRepository.findByEmail(email).ifPresent(e -> {
@@ -268,6 +254,7 @@ public class MemberService {
 	public String getKakaoAccessToken(String authCode) {
 		OAuthInfo oAuthInfo = getKakaoOauthAccessToken(authCode);
 		KakaoUserInfo kaKaoOAuthUserInfo = getKaKaoOAuthUserInfo(oAuthInfo);
+
 		String email = kaKaoOAuthUserInfo.getKakaoAccount().getEmail();
 		String name = kaKaoOAuthUserInfo.getKakaoAccount().getProfile().getNickname();
 		String imageName = kaKaoOAuthUserInfo.getProperties().getProfileImage();
@@ -299,10 +286,8 @@ public class MemberService {
 	private byte[] getProfileImage(String imageName) {
 		Mono<byte[]> responseMono = webClient.get().uri(imageName)
 			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError,
-				response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError,
-				response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
 			.bodyToMono(byte[].class);
 		return responseMono.share().block();
 	}
@@ -312,10 +297,8 @@ public class MemberService {
 			.uri("https://kapi.kakao.com/v2/user/me")
 			.headers(header -> header.set("Authorization", "Bearer " + oAuthInfo.getAccessToken()))
 			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError,
-				response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError,
-				response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
 			.bodyToMono(KakaoUserInfo.class);
 		return kakaoUserInfoMono.share().block();
 	}
@@ -333,10 +316,8 @@ public class MemberService {
 			.bodyValue(requestBody)
 			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
 			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError,
-				response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError,
-				response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
 			.bodyToMono(OAuthInfo.class);
 		return responseMono.share().block();
 	}
@@ -381,10 +362,8 @@ public class MemberService {
 			.uri("https://openapi.naver.com/v1/nid/me")
 			.header("Authorization", "Bearer " + responseMono.getAccessToken())
 			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError,
-				response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError,
-				response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
 			.bodyToMono(NaverUserInfo.class);
 		return naverUserInfo.share().block();
 	}
