@@ -1,11 +1,13 @@
 package com.tobe.healthy.member.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,12 +19,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -164,6 +169,33 @@ public class MemberController {
 			.statusCode(HttpStatus.OK)
 			.data(memberService.deleteMember(userId, password))
 			.message("회원탈퇴 되었습니다.")
+			.build();
+	}
+
+	@Operation(summary = "비밀번호를 변경한다.", responses = {
+		@ApiResponse(responseCode = "400", description = "확인 비밀번호가 다릅니다."),
+		@ApiResponse(responseCode = "200", description = "비밀번호 변경이 완료 되었습니다.")
+	})
+	@PatchMapping("/change-password")
+	public ResponseHandler<Boolean> changePassword(@RequestBody @Valid MemberPasswordChangeCommand request, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<Boolean>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.changePassword(request, customMemberDetails.getMemberId()))
+			.message("비밀번호 변경이 완료되었습니다.")
+			.build();
+	}
+
+	@Operation(summary = "프로필 사진이 등록되었습니다.", responses = {
+		@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
+		@ApiResponse(responseCode = "500", description = "파일 업로드중 에러가 발생하였습니다."),
+		@ApiResponse(responseCode = "200", description = "프로필 사진이 등록되었습니다.")
+	})
+	@PatchMapping("/change-profile")
+	public ResponseHandler<Boolean> changeProfile(@RequestParam MultipartFile file, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<Boolean>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.changeProfile(file, customMemberDetails.getMemberId()))
+			.message("프로필 사진이 등록되었습니다.")
 			.build();
 	}
 

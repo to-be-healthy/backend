@@ -12,6 +12,7 @@ import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
 import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
 import static java.io.File.separator;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.util.StringUtils.cleanPath;
@@ -19,12 +20,15 @@ import static org.springframework.util.StringUtils.cleanPath;
 import com.tobe.healthy.common.OAuthConfig;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.config.error.ErrorCode;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
+import com.tobe.healthy.file.repository.FileRepository;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
@@ -40,6 +44,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +59,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -70,6 +76,7 @@ public class MemberService {
 	private final JavaMailSender mailSender;
 	private final RedisService redisService;
 	private final OAuthConfig oAuthConfig;
+	private final FileRepository fileRepository;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -388,5 +395,44 @@ public class MemberService {
 
 	private String getImageExtension(String profileImage) {
 		return profileImage.substring(profileImage.lastIndexOf("."));
+	}
+
+	public boolean changePassword(MemberPasswordChangeCommand request, Long memberId) {
+		if (!request.getCurrPassword1().equals(request.getCurrPassword2())) {
+			throw new CustomException(ErrorCode.NOT_MATCH_PASSWORD);
+		}
+
+		Member member = memberRepository.findById(memberId)
+			.filter(m -> passwordEncoder.matches(request.getCurrPassword1(), m.getPassword()))
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+		String password = passwordEncoder.encode(request.getChangePassword());
+
+		member.changePassword(password);
+
+		return true;
+	}
+
+	public Boolean changeProfile(MultipartFile file, Long memberId) {
+		if (!file.isEmpty()) {
+			Member member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+			String savedFileName = System.currentTimeMillis() + "_" + randomUUID();
+			String extension = Objects.requireNonNull(file.getOriginalFilename()).substring(file.getOriginalFilename().lastIndexOf("."));
+
+			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
+			try {
+				Files.copy(file.getInputStream(), copyOfLocation, REPLACE_EXISTING);
+			} catch (IOException e) {
+				throw new CustomException(FILE_UPLOAD_ERROR);
+			}
+
+			Profile profile = Profile.create(savedFileName, cleanPath(file.getOriginalFilename()), extension, uploadDir + separator, (int) file.getSize());
+
+			member.registerProfile(profile);
+			fileRepository.save(profile);
+		}
+		return true;
 	}
 }

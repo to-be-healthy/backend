@@ -131,4 +131,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
     public void deleteMember() {
         this.delYn = true;
     }
+
+    public void changePassword(String password) {
+        this.password = password;
+    }
 }
