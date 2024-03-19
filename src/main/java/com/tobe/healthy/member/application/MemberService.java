@@ -33,8 +33,10 @@ import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
+import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.member.domain.entity.TrainerFeedback;
 import com.tobe.healthy.member.repository.MemberRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -433,6 +435,27 @@ public class MemberService {
 			member.registerProfile(profile);
 			fileRepository.save(profile);
 		}
+		return true;
+	}
+
+	public Boolean changeName(String name, Long memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		member.changeName(name);
+		return true;
+	}
+
+	public Boolean changeAlarm(AlarmStatus alarmStatus, Long memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		member.changeAlarm(alarmStatus);
+		return true;
+	}
+
+	public Boolean changeTrainerFeedback(TrainerFeedback trainerFeedback, Long memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		member.changeTrainerFeedback(trainerFeedback);
 		return true;
 	}
 }

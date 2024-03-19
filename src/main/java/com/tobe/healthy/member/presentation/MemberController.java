@@ -9,7 +9,9 @@ import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
+import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.member.domain.entity.TrainerFeedback;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -196,6 +198,45 @@ public class MemberController {
 			.statusCode(HttpStatus.OK)
 			.data(memberService.changeProfile(file, customMemberDetails.getMemberId()))
 			.message("프로필 사진이 등록되었습니다.")
+			.build();
+	}
+
+	@Operation(summary = "이름이 변경되었습니다.", responses = {
+		@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
+		@ApiResponse(responseCode = "200", description = "이름이 변경되었습니다.")
+	})
+	@PatchMapping("/change-name")
+	public ResponseHandler<Boolean> changeName(@RequestParam String name, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<Boolean>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.changeName(name, customMemberDetails.getMemberId()))
+			.message("이름이 변경되었습니다.")
+			.build();
+	}
+
+	@Operation(summary = "알림 상태가 변경되었습니다.", responses = {
+		@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
+		@ApiResponse(responseCode = "200", description = "알림 상태가 변경되었습니다.")
+	})
+	@PatchMapping("/change-alarm")
+	public ResponseHandler<Boolean> changeAlarm(AlarmStatus alarmStatus, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<Boolean>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.changeAlarm(alarmStatus, customMemberDetails.getMemberId()))
+			.message("알림 상태가 변경되었습니다.")
+			.build();
+	}
+
+	@Operation(summary = "수업 기록 여부가 변경되었습니다.", responses = {
+		@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
+		@ApiResponse(responseCode = "200", description = "수업 기록 여부가 변경되었습니다.")
+	})
+	@PatchMapping("/change-trainer-feedback")
+	public ResponseHandler<Boolean> changeTrainerFeedback(TrainerFeedback trainerFeedback, @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<Boolean>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.changeTrainerFeedback(trainerFeedback, customMemberDetails.getMemberId()))
+			.message("수업 기록 여부가 변경되었습니다.")
 			.build();
 	}
 
