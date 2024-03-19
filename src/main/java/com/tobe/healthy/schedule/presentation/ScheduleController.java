@@ -3,8 +3,8 @@ package com.tobe.healthy.schedule.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.ScheduleService;
-import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommandRequest;
-import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest;
+import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
+import com.tobe.healthy.schedule.domain.dto.in.ScheduleRegisterCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleInfo;
@@ -43,7 +43,7 @@ public class ScheduleController {
 		@ApiResponse(responseCode = "200", description = "자동 수업 일정 생성 완료")
 	})
 	@PostMapping("/create")
-	public ResponseHandler<TreeMap<LocalDate, ArrayList<ScheduleInfo>>> createSchedule(@RequestBody @Valid AutoCreateScheduleCommandRequest request) {
+	public ResponseHandler<TreeMap<LocalDate, ArrayList<ScheduleInfo>>> createSchedule(@RequestBody @Valid AutoCreateScheduleCommand request) {
 		return ResponseHandler.<TreeMap<LocalDate, ArrayList<ScheduleInfo>>>builder()
 			.statusCode(HttpStatus.OK)
 			.data(scheduleService.autoCreateSchedule(request))
@@ -56,7 +56,7 @@ public class ScheduleController {
 		@ApiResponse(responseCode = "404", description = "트레이너를 찾을 수 없습니다.")
 	})
 	@PostMapping
-	public ResponseHandler<Boolean> registerSchedule(@RequestBody @Valid ScheduleCommandRequest request) {
+	public ResponseHandler<Boolean> registerSchedule(@RequestBody @Valid ScheduleRegisterCommand request) {
 		return ResponseHandler.<Boolean>builder()
 			.statusCode(HttpStatus.OK)
 			.data(scheduleService.registerSchedule(request))

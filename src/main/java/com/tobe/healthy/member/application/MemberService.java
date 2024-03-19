@@ -132,7 +132,7 @@ public class MemberService {
 		Member member = Member.join(request, password);
 		memberRepository.save(member);
 
-		return MemberJoinCommandResult.of(member);
+		return MemberJoinCommandResult.from(member);
 	}
 
 	public Tokens login(MemberLoginCommand request) {

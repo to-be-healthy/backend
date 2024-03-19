@@ -47,7 +47,6 @@ public class OAuthInfo {
 		}
 	}
 
-	// 카카오 시작
 	@Data
 	public static class KakaoUserInfo {
 
@@ -117,5 +116,4 @@ public class OAuthInfo {
 			private boolean isDefaultNickname;
 		}
 	}
-	// 카카오 끝
 }
