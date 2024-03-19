@@ -259,23 +259,25 @@ public class MemberService {
 	}
 
 	private byte[] getProfileImage(String imageName) {
-		Mono<byte[]> responseMono = webClient.get().uri(imageName)
+		return webClient.get().uri(imageName)
 			.retrieve()
 			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
 			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-			.bodyToMono(byte[].class);
-		return responseMono.share().block();
+			.bodyToMono(byte[].class)
+			.share()
+			.block();
 	}
 
 	private KakaoUserInfo getKaKaoOAuthUserInfo(OAuthInfo oAuthInfo) {
-		Mono<KakaoUserInfo> kakaoUserInfoMono = webClient.get()
+		return webClient.get()
 			.uri(oAuthConfig.getKakaoUserInfoUri())
 			.headers(header -> header.set("Authorization", "Bearer " + oAuthInfo.getAccessToken()))
 			.retrieve()
 			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
 			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-			.bodyToMono(KakaoUserInfo.class);
-		return kakaoUserInfoMono.share().block();
+			.bodyToMono(KakaoUserInfo.class)
+			.share()
+			.block();
 	}
 
 	private OAuthInfo getKakaoOAuthAccessToken(String authCode) {
@@ -285,16 +287,15 @@ public class MemberService {
 		requestBody.add("redirect_uri", oAuthConfig.getKakaoRedirectUri());
 		requestBody.add("client_secret", oAuthConfig.getKakaoClientSecret());
 		requestBody.add("code", authCode);
-
-		Mono<OAuthInfo> responseMono = webClient.post()
+		return webClient.post()
 			.uri(oAuthConfig.getKakaoTokenUri())
 			.bodyValue(requestBody)
 			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
 			.retrieve()
 			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
 			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-			.bodyToMono(OAuthInfo.class);
-		return responseMono.share().block();
+			.bodyToMono(OAuthInfo.class)
+			.share().block();
 	}
 
 	public Tokens getNaverAccessToken(String code, String state) {
@@ -330,14 +331,15 @@ public class MemberService {
 	}
 
 	private NaverUserInfo getNaverUserInfo(OAuthInfo responseMono) {
-		Mono<NaverUserInfo> naverUserInfo = webClient.get()
+		return webClient.get()
 			.uri(oAuthConfig.getNaverUserInfoUri())
 			.header("Authorization", "Bearer " + responseMono.getAccessToken())
 			.retrieve()
 			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
 			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-			.bodyToMono(NaverUserInfo.class);
-		return naverUserInfo.share().block();
+			.bodyToMono(NaverUserInfo.class)
+			.share()
+			.block();
 	}
 
 	private OAuthInfo getNaverOAuthAccessToken(String code, String state) {
@@ -347,16 +349,16 @@ public class MemberService {
 		requestBody.add("client_secret", oAuthConfig.getNaverClientSecret());
 		requestBody.add("code", code);
 		requestBody.add("state", state);
-
-		Mono<OAuthInfo> responseMono = webClient.post()
-					.uri(oAuthConfig.getNaverTokenUri())
-					.bodyValue(requestBody)
-					.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
-					.retrieve()
-					.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-					.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-					.bodyToMono(OAuthInfo.class);
-		return responseMono.share().block();
+		return webClient.post()
+			.uri(oAuthConfig.getNaverTokenUri())
+			.bodyValue(requestBody)
+			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+			.retrieve()
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.bodyToMono(OAuthInfo.class)
+			.share()
+			.block();
 	}
 
 	private String createFileUUID() {
