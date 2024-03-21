@@ -3,8 +3,6 @@ package com.tobe.healthy.workout.presentation;
 import com.tobe.healthy.common.CommonService;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleInfo;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
@@ -12,15 +10,19 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -41,7 +43,6 @@ public class WorkoutHistoryController {
     public ResponseHandler<WorkoutHistoryDto> addWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                 @Valid HistoryAddCommand command) {
         return ResponseHandler.<WorkoutHistoryDto>builder()
-                .statusCode(HttpStatus.OK)
                 .data(workoutService.addWorkoutHistory(customMemberDetails.getMember(), command))
                 .message("운동기록이 등록되었습니다.")
                 .build();
@@ -55,7 +56,6 @@ public class WorkoutHistoryController {
     public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistory(@PathVariable("memberId") Long memberId,
                                                                      Pageable pageable) {
         return ResponseHandler.<List<WorkoutHistoryDto>>builder()
-                .statusCode(HttpStatus.OK)
                 .data(workoutService.getWorkoutHistory(memberId, pageable))
                 .message("운동기록이 조회되었습니다.")
                 .build();
@@ -69,7 +69,6 @@ public class WorkoutHistoryController {
     public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistoryByTrainer(@PathVariable("trainerId") Long trainerId,
                                                                               Pageable pageable) {
         return ResponseHandler.<List<WorkoutHistoryDto>>builder()
-                .statusCode(HttpStatus.OK)
                 .data(workoutService.getWorkoutHistoryByTrainer(trainerId, pageable))
                 .message("운동기록이 조회되었습니다.")
                 .build();
@@ -82,7 +81,6 @@ public class WorkoutHistoryController {
     @GetMapping("/workout-histories/{workoutHistoryId}")
     public ResponseHandler<WorkoutHistoryDto> getWorkoutHistoryDetail(@PathVariable("workoutHistoryId") Long workoutHistoryId) {
         return ResponseHandler.<WorkoutHistoryDto>builder()
-                .statusCode(HttpStatus.OK)
                 .data(workoutService.getWorkoutHistoryDetail(workoutHistoryId))
                 .message("운동기록이 조회되었습니다.")
                 .build();
@@ -96,7 +94,6 @@ public class WorkoutHistoryController {
                                                   @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.deleteWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
         return ResponseHandler.builder()
-                .statusCode(HttpStatus.OK)
                 .message("운동기록이 삭제되었습니다.")
                 .build();
     }
@@ -110,7 +107,6 @@ public class WorkoutHistoryController {
                                                                   @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                   @Valid HistoryAddCommand command) {
         return ResponseHandler.<WorkoutHistoryDto>builder()
-                .statusCode(HttpStatus.OK)
                 .data(workoutService.updateWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId, command))
                 .message("운동기록이 수정되었습니다.")
                 .build();
@@ -125,7 +121,6 @@ public class WorkoutHistoryController {
                                                  @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.likeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
         return ResponseHandler.builder()
-                .statusCode(HttpStatus.OK)
                 .message("운동기록 좋아요에 성공하였습니다.")
                 .build();
     }
@@ -139,7 +134,6 @@ public class WorkoutHistoryController {
                                                        @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.deleteLikeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
         return ResponseHandler.builder()
-                .statusCode(HttpStatus.OK)
                 .message("운동기록 좋아요가 취소되었습니다.")
                 .build();
     }

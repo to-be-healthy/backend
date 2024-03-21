@@ -35,7 +35,10 @@ public enum ErrorCode {
 	FILE_UPLOAD_ERROR(INTERNAL_SERVER_ERROR, "S_002", "파일 업로드중 에러가 발생하였습니다."),
 	FILE_FIND_ERROR(INTERNAL_SERVER_ERROR, "S_003", "파일 조회중 에러가 발생하였습니다."),
 	MAIL_SEND_ERROR(INTERNAL_SERVER_ERROR, "S_004", "메일 전송중 에러가 발생했습니다."),
-	FILE_REMOVE_ERROR(INTERNAL_SERVER_ERROR, "S_005", "파일 삭제중 에러가 발생하였습니다.");
+	FILE_REMOVE_ERROR(INTERNAL_SERVER_ERROR, "S_005", "파일 삭제중 에러가 발생하였습니다."),
+	NAVER_CONNECTION_ERROR(INTERNAL_SERVER_ERROR, "S_006", "네이버 소셜서버와 연동중 에러가 발생하였습니다."),
+	KAKAO_CONNECTION_ERROR(INTERNAL_SERVER_ERROR, "S_007", "카카오 소셜서버와 연동중 에러가 발생하였습니다."),
+	JSON_PARSING_ERROR(INTERNAL_SERVER_ERROR, "S_008", "JSON 토큰을 파싱중 에러가 발생하였습니다.");
 
 	private final HttpStatus status;
 	private final String code;

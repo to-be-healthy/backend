@@ -1,21 +1,27 @@
 package com.tobe.healthy.member.domain.dto.in;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class IdToken {
-	private String kid;
-	private String typ;
-	private String alg;
+
 	private String aud;
+
 	private String sub;
+
 	@JsonProperty("auth_time")
-	private long authTime;
+	private int authTime;
+
 	private String iss;
+
 	private String nickname;
-	private long exp;
-	private long iat;
+
+	private int exp;
+
+	private int iat;
+
 	private String picture;
+
 	private String email;
 }

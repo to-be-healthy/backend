@@ -1,5 +1,26 @@
 package com.tobe.healthy.member.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.KAKAO_CONNECTION_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.NAVER_CONNECTION_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
+import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
+import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
+import static java.io.File.separator;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.UUID.randomUUID;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.util.StringUtils.cleanPath;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.OAuthConfig;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
@@ -7,8 +28,13 @@ import com.tobe.healthy.config.error.ErrorCode;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
-import com.tobe.healthy.member.domain.dto.in.*;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
+import com.tobe.healthy.member.domain.dto.in.IdToken;
+import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
@@ -16,8 +42,19 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.domain.entity.TrainerFeedback;
 import com.tobe.healthy.member.repository.MemberRepository;
+import io.jsonwebtoken.impl.Base64UrlCodec;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
+import java.util.Random;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -33,26 +70,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
-
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
-import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
-import static java.io.File.separator;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.util.UUID.randomUUID;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.util.StringUtils.cleanPath;
 
 @Service
 @RequiredArgsConstructor
@@ -233,13 +250,13 @@ public class MemberService {
 		return true;
 	}
 
-	public Tokens getKakaoAccessToken(String authCode) {
-		OAuthInfo oAuthInfo = getKakaoOAuthAccessToken(authCode);
-		return memberRepository.findKakaoByEmailAndSocialType(oAuthInfo.getIdToken().getEmail())
+	public Tokens getKakaoAccessToken(String code) {
+		IdToken response = getKakaoOAuthAccessToken(code);
+		return memberRepository.findKakaoByEmailAndSocialType(response.getEmail())
 			.map(tokenGenerator::create)
 			.orElseGet(() -> {
-				Profile profile = getProfile(oAuthInfo.getIdToken().getPicture());
-				Member member = Member.join(oAuthInfo.getIdToken().getEmail(), oAuthInfo.getIdToken().getNickname(), profile, KAKAO);
+				Profile profile = getProfile(response.getPicture());
+				Member member = Member.join(response.getEmail(), response.getNickname(), profile, KAKAO);
 				memberRepository.save(member);
 				return tokenGenerator.create(member);
 			});
@@ -255,34 +272,37 @@ public class MemberService {
 			.block();
 	}
 
-	private KakaoUserInfo getKaKaoOAuthUserInfo(OAuthInfo oAuthInfo) {
-		return webClient.get()
-			.uri(oAuthConfig.getKakaoUserInfoUri())
-			.headers(header -> header.set("Authorization", "Bearer " + oAuthInfo.getAccessToken()))
-			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-			.bodyToMono(KakaoUserInfo.class)
-			.share()
-			.block();
-	}
-
-	private OAuthInfo getKakaoOAuthAccessToken(String authCode) {
-		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-		requestBody.add("grant_type", oAuthConfig.getKakaoGrantType());
-		requestBody.add("client_id", oAuthConfig.getKakaoClientId());
-		requestBody.add("redirect_uri", oAuthConfig.getKakaoRedirectUri());
-		requestBody.add("code", authCode);
-		requestBody.add("client_secret", oAuthConfig.getKakaoClientSecret());
-		return webClient.post()
+	private IdToken getKakaoOAuthAccessToken(String code) {
+		MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
+		request.add("grant_type", "authorization_code");
+		request.add("client_id", "b744b34e90d30c3a0ff41ad4ade070f7");
+		request.add("redirect_uri", "https://to-be-healthy.site/callback");
+		request.add("code", code);
+		request.add("client_secret", "QMaOCZDGKnrCtnRbSl3nIRmsKVIPGJnd");
+		OAuthInfo result = webClient.post()
 			.uri(oAuthConfig.getKakaoTokenUri())
-			.bodyValue(requestBody)
+			.bodyValue(request)
 			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
 			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::isError, response ->
+				response.bodyToMono(String.class).flatMap(error -> {
+					log.error("error => {}", error);
+					return Mono.error(new CustomException(KAKAO_CONNECTION_ERROR));
+				}))
 			.bodyToMono(OAuthInfo.class)
 			.share().block();
+		try {
+			String token = decordToken(result);
+			return new ObjectMapper().readValue(token, IdToken.class);
+		} catch (JsonProcessingException e) {
+			log.error("error => {}", e);
+			throw new CustomException(ErrorCode.JSON_PARSING_ERROR);
+		}
+	}
+
+	private static String decordToken(OAuthInfo result) {
+		byte[] decode = new Base64UrlCodec().decode(result.getIdToken().split("\\.")[1]);
+		return new String(decode, StandardCharsets.UTF_8);
 	}
 
 	public Tokens getNaverAccessToken(String code, String state) {
@@ -334,18 +354,21 @@ public class MemberService {
 
 	private OAuthInfo getNaverOAuthAccessToken(String code, String state) {
 		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-		requestBody.add("grant_type", oAuthConfig.getNaverGrantType());
-		requestBody.add("client_id", oAuthConfig.getNaverClientId());
+		requestBody.add("grant_type", "authorization_code");
+		requestBody.add("client_id", "C1sJMU7fEMkDTN39y8Pt");
 		requestBody.add("code", code);
-		requestBody.add("client_secret", oAuthConfig.getNaverClientSecret());
+		requestBody.add("client_secret", "igvBuycGcG");
 		requestBody.add("state", state);
 		return webClient.post()
 			.uri(oAuthConfig.getNaverTokenUri())
 			.bodyValue(requestBody)
 			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
 			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::isError, response ->
+				response.bodyToMono(String.class).flatMap(error -> {
+					log.error("error => {}", error);
+					return Mono.error(new CustomException(NAVER_CONNECTION_ERROR));
+				}))
 			.bodyToMono(OAuthInfo.class)
 			.share()
 			.block();

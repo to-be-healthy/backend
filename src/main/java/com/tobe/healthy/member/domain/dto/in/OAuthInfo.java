@@ -16,7 +16,7 @@ public class OAuthInfo {
 	private String refreshToken;
 
 	@JsonProperty("id_token")
-	private IdToken idToken;
+	private String idToken;
 
 	@JsonProperty("expires_in")
 	private int expiresIn;
