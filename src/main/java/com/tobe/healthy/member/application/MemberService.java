@@ -1,16 +1,10 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.member.domain.entity.SocialType.*;
 import static java.io.File.separator;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.util.StringUtils.cleanPath;
@@ -20,12 +14,9 @@ import com.tobe.healthy.common.OAuthConfig;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
+import com.tobe.healthy.file.application.FileService;
 import com.tobe.healthy.file.domain.entity.Profile;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
+import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.GoogleUserInfo;
@@ -38,6 +29,8 @@ import jakarta.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -73,6 +66,7 @@ public class MemberService {
 	private final RedisService redisService;
 	private final OAuthConfig oAuthConfig;
 	private final ObjectMapper objectMapper;
+	private final FileService fileService;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -385,9 +379,8 @@ public class MemberService {
 		return responseMono.share().block();
 	}
 
-	public Tokens getGoogleOAuth(String code) {
-		OAuthInfo googleToken = getGoogleAccessToken(code);
-
+	public Tokens getGoogleOAuth(SocialLoginCommand command) {
+		OAuthInfo googleToken = getGoogleAccessToken(command.getCode());
 		String[] check = googleToken.getId_token().split("\\.");
 		Base64.Decoder decoder = Base64.getDecoder();
 		String payload = new String(decoder.decode(check[1]));
@@ -400,53 +393,44 @@ public class MemberService {
 		String email = idToken.get("email");
 		String name = idToken.get("name");
 		String imageName = idToken.get("picture");
-
-		memberRepository.findGoogleByEmailAndSocialType(email).ifPresent(m -> {
-			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
-		});
-
 		byte[] image = getProfileImage(imageName);
 		String savedFileName = createFileUUID();
-		String extension = getImageExtension(imageName);
+		String extension = ".jpg";
 
-		try (InputStream inputStream = new ByteArrayInputStream(image)) {
-			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
-			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
-		} catch (Exception e) {
-			log.error("e => {}", e);
-			throw new CustomException(FILE_UPLOAD_ERROR);
+		Optional<Member> optionalMember = memberRepository.findGoogleByEmailAndSocialType(email);
+		Member member;
+		if(optionalMember.isEmpty()){ //회원가입
+			Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
+			member = Member.join(email, name, profile, command.getMemberType(), GOOGLE);
+			memberRepository.save(member);
+			Path copyOfLocation = Paths.get(uploadDir + separator + savedFileName + extension);
+			try {
+				Files.copy(new ByteArrayInputStream(image), copyOfLocation, REPLACE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new CustomException(SERVER_ERROR);
+			}
+		}else{
+			member = optionalMember.get();
 		}
-
-		Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
-		Member member = Member.join(email, name, profile, GOOGLE);
-		memberRepository.save(member);
 
 		return memberRepository.findByUserId(member.getUserId())
 				.map(tokenGenerator::create)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 	}
 
-	private GoogleUserInfo getGoogleUserInfo(OAuthInfo oAuthInfo) {
-		Mono<GoogleUserInfo> googleUserInfoMono = webClient.get()
-				.uri(oAuthConfig.getGoogleUserInfoUri())
-				.headers(header -> header.set("Authorization", "Bearer " + oAuthInfo.getAccessToken()))
-				.retrieve()
-				.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-				.bodyToMono(GoogleUserInfo.class);
-		return googleUserInfoMono.share().block();
-	}
-
 	private OAuthInfo getGoogleAccessToken(String code) {
+		String decode = URLDecoder.decode(code, StandardCharsets.UTF_8);
 		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
 		requestBody.add("client_id", oAuthConfig.getGoogleClientId());
 		requestBody.add("client_secret", oAuthConfig.getGoogleClientSecret());
 		requestBody.add("grant_type", oAuthConfig.getGoogleGrantType());
 		requestBody.add("redirect_uri", oAuthConfig.getGoogleRedirectUri());
-		requestBody.add("code", code);
+		requestBody.add("code", decode);
 
 		Mono<OAuthInfo> responseMono = webClient.post()
 				.uri(oAuthConfig.getGoogleTokenUri())
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.accept(MediaType.APPLICATION_JSON)
 				.bodyValue(requestBody)
 				.retrieve()

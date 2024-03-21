@@ -18,4 +18,6 @@ public class MemberLoginCommand {
     @Schema(description = "비밀번호", example = "zxcvbnm=1")
     @NotEmpty(message = "비밀번호를 입력해 주세요.")
     private String password;
+
+    private String code;
 }

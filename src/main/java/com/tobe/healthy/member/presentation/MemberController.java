@@ -2,10 +2,7 @@ package com.tobe.healthy.member.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.member.application.MemberService;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
+import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
@@ -185,11 +182,11 @@ public class MemberController {
 			.build();
 	}
 
-	@PostMapping("/google")
-	public ResponseHandler<Tokens> getGoogleOAuth(String code) {
+	@PostMapping("/access-token/google")
+	public ResponseHandler<Tokens> getGoogleOAuth(@RequestBody SocialLoginCommand command) {
 		return ResponseHandler.<Tokens>builder()
 				.statusCode(HttpStatus.OK)
-				.data(memberService.getGoogleOAuth(code))
+				.data(memberService.getGoogleOAuth(command))
 				.message("로그인 되었습니다.")
 				.build();
 	}
