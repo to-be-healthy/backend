@@ -1,22 +1,5 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
-import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
-import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
-import static java.io.File.separator;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.util.UUID.randomUUID;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.util.StringUtils.cleanPath;
-
 import com.tobe.healthy.common.OAuthConfig;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
@@ -24,12 +7,7 @@ import com.tobe.healthy.config.error.ErrorCode;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
+import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
@@ -40,15 +18,6 @@ import com.tobe.healthy.member.domain.entity.TrainerFeedback;
 import com.tobe.healthy.member.repository.MemberRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -64,6 +33,26 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
+import java.util.Random;
+import java.util.UUID;
+
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
+import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
+import static java.io.File.separator;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.UUID.randomUUID;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.util.StringUtils.cleanPath;
 
 @Service
 @RequiredArgsConstructor
@@ -246,13 +235,11 @@ public class MemberService {
 
 	public Tokens getKakaoAccessToken(String authCode) {
 		OAuthInfo oAuthInfo = getKakaoOAuthAccessToken(authCode);
-		KakaoUserInfo kaKaoOAuthUserInfo = getKaKaoOAuthUserInfo(oAuthInfo);
-
-		return memberRepository.findKakaoByEmailAndSocialType(kaKaoOAuthUserInfo.getKakaoAccount().getEmail())
+		return memberRepository.findKakaoByEmailAndSocialType(oAuthInfo.getIdToken().getEmail())
 			.map(tokenGenerator::create)
 			.orElseGet(() -> {
-				Profile profile = getProfile(kaKaoOAuthUserInfo.getProperties().getProfileImage());
-				Member member = Member.join(kaKaoOAuthUserInfo.getKakaoAccount().getEmail(), kaKaoOAuthUserInfo.getKakaoAccount().getProfile().getNickname(), profile, KAKAO);
+				Profile profile = getProfile(oAuthInfo.getIdToken().getPicture());
+				Member member = Member.join(oAuthInfo.getIdToken().getEmail(), oAuthInfo.getIdToken().getNickname(), profile, KAKAO);
 				memberRepository.save(member);
 				return tokenGenerator.create(member);
 			});
@@ -285,8 +272,8 @@ public class MemberService {
 		requestBody.add("grant_type", oAuthConfig.getKakaoGrantType());
 		requestBody.add("client_id", oAuthConfig.getKakaoClientId());
 		requestBody.add("redirect_uri", oAuthConfig.getKakaoRedirectUri());
-		requestBody.add("client_secret", oAuthConfig.getKakaoClientSecret());
 		requestBody.add("code", authCode);
+		requestBody.add("client_secret", oAuthConfig.getKakaoClientSecret());
 		return webClient.post()
 			.uri(oAuthConfig.getKakaoTokenUri())
 			.bodyValue(requestBody)
@@ -319,15 +306,18 @@ public class MemberService {
 		String extension = getImageExtension(profileImage);
 
 		try (InputStream inputStream = new ByteArrayInputStream(image)) {
-			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
-			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
+			Path location = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
+			Path locationParent = location.getParent();
+			if (!Files.exists(locationParent)) {
+				Files.createDirectories(locationParent);
+			}
+			Files.copy(inputStream, location, REPLACE_EXISTING);
 		} catch (IOException e) {
 			log.error("error => {}", e);
 			throw new CustomException(FILE_UPLOAD_ERROR);
 		}
 
-		Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
-		return profile;
+		return Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
 	}
 
 	private NaverUserInfo getNaverUserInfo(OAuthInfo responseMono) {
@@ -346,8 +336,8 @@ public class MemberService {
 		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
 		requestBody.add("grant_type", oAuthConfig.getNaverGrantType());
 		requestBody.add("client_id", oAuthConfig.getNaverClientId());
-		requestBody.add("client_secret", oAuthConfig.getNaverClientSecret());
 		requestBody.add("code", code);
+		requestBody.add("client_secret", oAuthConfig.getNaverClientSecret());
 		requestBody.add("state", state);
 		return webClient.post()
 			.uri(oAuthConfig.getNaverTokenUri())
