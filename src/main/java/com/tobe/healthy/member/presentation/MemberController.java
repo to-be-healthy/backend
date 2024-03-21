@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -174,6 +173,7 @@ public class MemberController {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청"),
 			@ApiResponse(responseCode = "200", description = "성공")
 	})
+
 	@GetMapping("/invitation/uuid")
 	public ResponseHandler<InvitationMappingResult> getInvitationMapping(@RequestParam String uuid) {
 		return ResponseHandler.<InvitationMappingResult>builder()
@@ -196,24 +196,22 @@ public class MemberController {
 				.message("회원가입이 완료되었습니다.")
 				.build();
 	}
-
-	@GetMapping("/code/naver")
-	public void oauth(String code, String state) throws IOException {
-		memberService.getAccessToken(code, state);
+	
+	@GetMapping("/naver")
+	public ResponseHandler<String> getNaverOAuth(String code, String state) {
+		return ResponseHandler.<String>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.getNaverAccessToken(code, state))
+			.message("회원가입이 완료되었습니다.")
+			.build();
 	}
 
-	@GetMapping("/code/kakao")
-	public void oauth2(MemberOauthCommandRequest request) throws IOException {
-		memberService.getAccessToken(request.getCode());
-	}
-
-	@GetMapping("/google")
-	public void oauth3(String code, String scope) throws IOException {
-		memberService.getAccessToken3(code, scope);
-	}
-
-	@GetMapping("/code/google")
-	public void oauth4() throws IOException {
-
+	@GetMapping("/kakao")
+	public ResponseHandler<String> getKakaoOAuth(String code) {
+		return ResponseHandler.<String>builder()
+			.statusCode(HttpStatus.OK)
+			.data(memberService.getKakaoAccessToken(code))
+			.message("회원가입이 완료되었습니다.")
+			.build();
 	}
 }

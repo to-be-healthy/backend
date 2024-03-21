@@ -92,7 +92,7 @@ public class WorkoutHistoryController {
     public ResponseHandler<Void> deleteWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                   @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.deleteWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
-        return ResponseHandler.builder()
+        return ResponseHandler.<Void>builder()
                 .statusCode(HttpStatus.OK)
                 .message("운동기록이 삭제되었습니다.")
                 .build();
@@ -121,7 +121,7 @@ public class WorkoutHistoryController {
     public ResponseHandler<Void> likeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                  @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.likeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
-        return ResponseHandler.builder()
+        return ResponseHandler.<Void>builder()
                 .statusCode(HttpStatus.OK)
                 .message("운동기록 좋아요에 성공하였습니다.")
                 .build();
@@ -135,7 +135,7 @@ public class WorkoutHistoryController {
     public ResponseHandler<Void> deleteLikeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                        @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.deleteLikeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
-        return ResponseHandler.builder()
+        return ResponseHandler.<Void>builder()
                 .statusCode(HttpStatus.OK)
                 .message("운동기록 좋아요가 취소되었습니다.")
                 .build();

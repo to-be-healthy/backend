@@ -22,7 +22,6 @@ public class JwtFilter extends OncePerRequestFilter {
 		String token = tokenProvider.resolveToken(request);
 		if (token != null && tokenProvider.validateToken(token)) {
 			Authentication authentication = tokenProvider.getAuthentication(token);
-			// todo: 2024-03-13 수요일 오전 3:39 Security Context에 memberId까지 설정하기 - seonwoo_jung
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 

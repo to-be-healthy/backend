@@ -1,25 +1,29 @@
 package com.tobe.healthy.member.application;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.Oauth.CLIENT_ID;
-import static com.tobe.healthy.member.domain.entity.Oauth.CLIENT_SECRET;
-import static com.tobe.healthy.member.domain.entity.Oauth.GRANT_TYPE;
-import static com.tobe.healthy.member.domain.entity.Oauth.KAKAO_TOKEN_URL;
-import static com.tobe.healthy.member.domain.entity.Oauth.REDIRECT_URL;
+import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
+import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
+import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
 import static java.io.File.separator;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.util.StringUtils.cleanPath;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.RedisKeyPrefix;
+import com.tobe.healthy.common.OAuthConfig;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
-import com.tobe.healthy.file.application.FileService;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
@@ -50,9 +54,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -60,7 +62,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -68,14 +71,15 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class MemberService {
 
+	private final WebClient webClient;
 	private final PasswordEncoder passwordEncoder;
-	private final RestTemplate restTemplate;
 	private final MemberRepository memberRepository;
 	private final JwtTokenGenerator tokenGenerator;
 	private final JavaMailSender mailSender;
 	private final RedisService redisService;
 	private final TrainerService trainerService;
 	private final ObjectMapper objectMapper;
+	private final OAuthConfig oAuthConfig;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -179,100 +183,6 @@ public class MemberService {
 		});
 	}
 
-	public String getAccessToken(String authCode) throws IOException {
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(APPLICATION_FORM_URLENCODED);
-
-		HttpEntity<MultiValueMap<String, String>> requestEntity = getMultiValueMapHttpEntity(authCode, headers);
-
-		ResponseEntity<OAuthInfo> responseEntity = restTemplate.postForEntity(KAKAO_TOKEN_URL.getDescription(), requestEntity, OAuthInfo.class);
-
-		if (responseEntity.getStatusCode().is2xxSuccessful()) {
-			OAuthInfo body = responseEntity.getBody();
-
-			HttpHeaders header = new HttpHeaders();
-			header.set("Authorization", "Bearer " + body.getAccessToken());
-			// token을 받아서 사용자 정보를 조회한다.
-			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange("https://kapi.kakao.com/v2/user/me", GET, new HttpEntity<>(header), KakaoUserInfo.class);
-			KakaoUserInfo dto = entity.getBody();
-
-			String email = dto.getKakaoAccount().getEmail();
-			String name = dto.getKakaoAccount().getProfile().getNickname();
-			String imageName = dto.getProperties().getProfileImage();
-
-			memberRepository.findByEmail(email).ifPresent(m -> {
-				throw new CustomException(MEMBER_EMAIL_DUPLICATION);
-			});
-
-			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(), byte[].class);
-			String savedFileName = System.currentTimeMillis() + "_" + UUID.randomUUID();
-			String extension = imageName.substring(imageName.lastIndexOf("."));
-
-			InputStream inputStream = new ByteArrayInputStream(image);
-			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
-			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
-
-			Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
-
-			Member member = Member.join(email, name, profile);
-			memberRepository.save(member);
-		}
-		return null;
-	}
-
-	public String getAccessToken3(String code, String scope) throws IOException {
-
-		log.info("code => {} scope => {}", code, scope);
-		//		HttpHeaders headers = new HttpHeaders();
-//		headers.setContentType(APPLICATION_FORM_URLENCODED);
-//
-//		HttpEntity<MultiValueMap<String, String>> requestEntity = getMultiValueMapHttpEntity(authCode, headers);
-//
-//		ResponseEntity<OAuthInfo> responseEntity = restTemplate.postForEntity(KAKAO_TOKEN_URL.getDescription(), requestEntity, OAuthInfo.class);
-//
-//		if (responseEntity.getStatusCode().is2xxSuccessful()) {
-//			OAuthInfo body = responseEntity.getBody();
-//
-//			HttpHeaders header = new HttpHeaders();
-//			header.set("Authorization", "Bearer " + body.getAccessToken());
-//			// token을 받아서 사용자 정보를 조회한다.
-//			ResponseEntity<KakaoUserInfo> entity = restTemplate.exchange("https://kapi.kakao.com/v2/user/me", GET, new HttpEntity<>(header), KakaoUserInfo.class);
-//			KakaoUserInfo dto = entity.getBody();
-//
-//			String email = dto.getKakaoAccount().getEmail();
-//			String name = dto.getKakaoAccount().getProfile().getNickname();
-//			String imageName = dto.getProperties().getProfileImage();
-//
-//			memberRepository.findByEmail(email).ifPresent(m -> {
-//				throw new CustomException(MEMBER_EMAIL_DUPLICATION);
-//			});
-//
-//			byte[] image = restTemplate.getForObject(dto.getProperties().getProfileImage(), byte[].class);
-//			String savedFileName = System.currentTimeMillis() + "_" + UUID.randomUUID();
-//			String extension = imageName.substring(imageName.lastIndexOf("."));
-//
-//			InputStream inputStream = new ByteArrayInputStream(image);
-//			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
-//			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
-//
-//			Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
-//
-//			Member member = Member.join(email, name, profile);
-//			memberRepository.save(member);
-//		}
-		return null;
-	}
-
-	private HttpEntity<MultiValueMap<String, String>> getMultiValueMapHttpEntity(String authCode, HttpHeaders headers) {
-		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-		requestBody.add("grant_type", GRANT_TYPE.getDescription());
-		requestBody.add("client_id", CLIENT_ID.getDescription());       // 본인이 발급받은 key
-		requestBody.add("redirect_uri", REDIRECT_URL.getDescription()); // 본인이 설정한 주소
-		requestBody.add("client_secret", CLIENT_SECRET.getDescription());
-		requestBody.add("code", authCode);
-		return new HttpEntity<>(requestBody, headers);
-	}
-
 	public String sendAuthMail(String email) {
 		// 1. 이메일 중복 확인
 		memberRepository.findByEmail(email).ifPresent(e -> {
@@ -346,55 +256,148 @@ public class MemberService {
 		return member.getUserId();
 	}
 
-	public void getAccessToken(String code, String state) throws IOException {
-		log.info("code => {} state => {} ", code, state);
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(APPLICATION_FORM_URLENCODED);
+	public String getKakaoAccessToken(String authCode) {
+		OAuthInfo oAuthInfo = getKakaoOAuthAccessToken(authCode);
+		KakaoUserInfo kaKaoOAuthUserInfo = getKaKaoOAuthUserInfo(oAuthInfo);
 
+		String email = kaKaoOAuthUserInfo.getKakaoAccount().getEmail();
+		String name = kaKaoOAuthUserInfo.getKakaoAccount().getProfile().getNickname();
+		String imageName = kaKaoOAuthUserInfo.getProperties().getProfileImage();
+
+		memberRepository.findKakaoByEmailAndSocialType(email).ifPresent(m -> {
+			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
+		});
+
+		byte[] image = getProfileImage(imageName);
+		String savedFileName = createFileUUID();
+		String extension = getImageExtension(imageName);
+
+		try (InputStream inputStream = new ByteArrayInputStream(image)) {
+			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
+			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
+		} catch (Exception e) {
+			log.error("e => {}", e);
+			throw new CustomException(FILE_UPLOAD_ERROR);
+		}
+
+		Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
+
+		Member member = Member.join(email, name, profile, KAKAO);
+		memberRepository.save(member);
+
+		return member.getEmail();
+	}
+
+	private byte[] getProfileImage(String imageName) {
+		Mono<byte[]> responseMono = webClient.get().uri(imageName)
+			.retrieve()
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.bodyToMono(byte[].class);
+		return responseMono.share().block();
+	}
+
+	private KakaoUserInfo getKaKaoOAuthUserInfo(OAuthInfo oAuthInfo) {
+		Mono<KakaoUserInfo> kakaoUserInfoMono = webClient.get()
+			.uri(oAuthConfig.getKakaoUserInfoUri())
+			.headers(header -> header.set("Authorization", "Bearer " + oAuthInfo.getAccessToken()))
+			.retrieve()
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.bodyToMono(KakaoUserInfo.class);
+		return kakaoUserInfoMono.share().block();
+	}
+
+	private OAuthInfo getKakaoOAuthAccessToken(String authCode) {
 		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-		requestBody.add("grant_type", "authorization_code");
-		requestBody.add("client_id", "C1sJMU7fEMkDTN39y8Pt");
-		requestBody.add("client_secret", "igvBuycGcG");
+		requestBody.add("grant_type", oAuthConfig.getKakaoGrantType());
+		requestBody.add("client_id", oAuthConfig.getKakaoClientId());       // 본인이 발급받은 key
+		requestBody.add("redirect_uri", oAuthConfig.getKakaoRedirectUri()); // 본인이 설정한 주소
+		requestBody.add("client_secret", oAuthConfig.getKakaoClientSecret());
+		requestBody.add("code", authCode);
+
+		Mono<OAuthInfo> responseMono = webClient.post()
+			.uri(oAuthConfig.getKakaoTokenUri())
+			.bodyValue(requestBody)
+			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+			.retrieve()
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.bodyToMono(OAuthInfo.class);
+		return responseMono.share().block();
+	}
+
+	public String getNaverAccessToken(String code, String state) {
+		OAuthInfo responseMono = getNaverOAuthAccessToken(code, state);
+
+		NaverUserInfo authorization = getNaverUserInfo(responseMono);
+
+		Member member = getMember(authorization);
+
+		return member.getEmail();
+	}
+
+	private Member getMember(NaverUserInfo authorization) {
+		memberRepository.findNaverByEmailAndSocialType(authorization.getResponse().getEmail()).ifPresent(m -> {
+			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
+		});
+
+		byte[] image = getProfileImage(authorization.getResponse().getProfileImage());
+		String savedFileName = createFileUUID();
+		String profileImage = authorization.getResponse().getProfileImage();
+		String extension = getImageExtension(profileImage);
+
+		try (InputStream inputStream = new ByteArrayInputStream(image)) {
+			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
+			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
+		} catch (IOException e) {
+			log.error("error => {}", e);
+			throw new CustomException(FILE_UPLOAD_ERROR);
+		}
+
+		Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
+
+		Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), profile, NAVER);
+		memberRepository.save(member);
+		return member;
+	}
+
+	private NaverUserInfo getNaverUserInfo(OAuthInfo responseMono) {
+		Mono<NaverUserInfo> naverUserInfo = webClient.get()
+			.uri(oAuthConfig.getNaverUserInfoUri())
+			.header("Authorization", "Bearer " + responseMono.getAccessToken())
+			.retrieve()
+			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.bodyToMono(NaverUserInfo.class);
+		return naverUserInfo.share().block();
+	}
+
+	private OAuthInfo getNaverOAuthAccessToken(String code, String state) {
+		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+		requestBody.add("grant_type", oAuthConfig.getNaverGrantType());
+		requestBody.add("client_id", oAuthConfig.getNaverClientId());
+		requestBody.add("client_secret", oAuthConfig.getNaverClientSecret());
 		requestBody.add("code", code);
 		requestBody.add("state", state);
 
-		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+		Mono<OAuthInfo> responseMono = webClient.post()
+					.uri(oAuthConfig.getNaverTokenUri())
+					.bodyValue(requestBody)
+					.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+					.retrieve()
+					.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+					.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+					.bodyToMono(OAuthInfo.class);
+		return responseMono.share().block();
+	}
 
-		ResponseEntity<OAuthInfo> responseEntity = restTemplate.postForEntity("https://nid.naver.com/oauth2.0/token", requestEntity, OAuthInfo.class);
-		log.info("responseEntity => {}", responseEntity);
+	private String createFileUUID() {
+		return System.currentTimeMillis() + "_" + UUID.randomUUID();
+	}
 
-		if (responseEntity.getStatusCode().is2xxSuccessful()) {
-			OAuthInfo body = responseEntity.getBody();
-			log.info("body => {}", body);
-
-			HttpHeaders header = new HttpHeaders();
-			header.set("Authorization", "Bearer " + body.getAccessToken());
-			ResponseEntity<NaverUserInfo> entity = restTemplate.exchange("https://openapi.naver.com/v1/nid/me", GET, new HttpEntity<>(header), NaverUserInfo.class);
-			NaverUserInfo dto = entity.getBody();
-			String email = dto.getResponse().getEmail();
-			String name = dto.getResponse().getName();
-
-			memberRepository.findByEmail(email).ifPresent(m -> {
-				throw new CustomException(MEMBER_EMAIL_DUPLICATION);
-			});
-
-			// 사용자 이메일, 이름을 받음
-			log.info("dto => {}", dto);
-			byte[] image = restTemplate.getForObject(dto.getResponse().getProfileImage(), byte[].class);
-			log.info("image => {}", image);
-			String savedFileName = System.currentTimeMillis() + "_" + UUID.randomUUID();
-			String profileImage = dto.getResponse().getProfileImage();
-			String extension = profileImage.substring(profileImage.lastIndexOf("."));
-
-			InputStream inputStream = new ByteArrayInputStream(image);
-			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
-			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
-
-			Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
-
-			Member member = Member.join(email, name, profile);
-			memberRepository.save(member);
-		}
+	private String getImageExtension(String profileImage) {
+		return profileImage.substring(profileImage.lastIndexOf("."));
 	}
 
 	@Transactional

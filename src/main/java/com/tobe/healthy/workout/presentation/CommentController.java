@@ -84,7 +84,7 @@ public class CommentController {
                                            @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                            @PathVariable("commentId") Long commentId) {
         commentService.deleteComment(customMemberDetails.getMember(), workoutHistoryId, commentId);
-        return ResponseHandler.builder()
+        return ResponseHandler.<Void>builder()
                 .statusCode(HttpStatus.OK)
                 .message("댓글이 삭제되었습니다.")
                 .build();

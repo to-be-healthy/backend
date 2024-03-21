@@ -30,7 +30,7 @@ public class TrainerController {
     public ResponseHandler<Void> inviteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                            @Parameter(description = "이메일") @RequestBody MemberInviteCommand command) {
         trainerService.inviteMember(command, customMemberDetails.getMember());
-        return ResponseHandler.builder()
+        return ResponseHandler.<Void>builder()
                 .statusCode(HttpStatus.OK)
                 .message("회원초대가 완료 되었습니다.")
                 .build();

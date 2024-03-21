@@ -20,7 +20,7 @@ public class MemberHomeController {
     private final MemberHomeService memberHomeService;
 
     @GetMapping("/attendance")
-    public ResponseEntity<Void> getAttendance(@RequestParam("memberId") Long memberId){
+    public ResponseEntity<?> getAttendance(@RequestParam("memberId") Long memberId){
         AttendanceResult response = memberHomeService.getAttendance(memberId);
         return ResponseEntity.ok(response);
     }

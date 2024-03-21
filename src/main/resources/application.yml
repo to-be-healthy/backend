@@ -57,18 +57,18 @@ file:
 
 oauth:
   kakao:
-#    grant-type: ${OAUTH_KAKAO_GRANT_TYPE}
+    grant-type: ${OAUTH_KAKAO_GRANT_TYPE}
     client-id: ${OAUTH_KAKAO_CLIENT_ID}
     client-secret: ${OAUTH_KAKAO_CLIENT_SECRET}
-#    redirect-uri: ${OAUTH_KAKAO_REDIRECT_URI}
-#    token-uri: ${OAUTH_KAKAO_TOKEN_URI}
-#    user-info-uri: ${OAUTH_KAKAO_USER_INFO_URI}
+    redirect-uri: ${OAUTH_KAKAO_REDIRECT_URI}
+    token-uri: ${OAUTH_KAKAO_TOKEN_URI}
+    user-info-uri: ${OAUTH_KAKAO_USER_INFO_URI}
   naver:
-#    grant-type: ${OAUTH_NAVER_GRANT_TYPE}
+    grant-type: ${OAUTH_NAVER_GRANT_TYPE}
     client-id: ${OAUTH_NAVER_CLIENT_ID}
     client-secret: ${OAUTH_NAVER_CLIENT_SECRET}
-#    token-uri: ${OAUTH_NAVER_TOKEN_URI}
-#    user-info-uri: ${OAUTH_NAVER_USER_INFO_URI}
+    token-uri: ${OAUTH_NAVER_TOKEN_URI}
+    user-info-uri: ${OAUTH_NAVER_USER_INFO_URI}
 
 # Spring openapi
 springdoc:

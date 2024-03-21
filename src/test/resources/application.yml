@@ -43,23 +43,20 @@ file:
   upload:
     location: ${FILE_UPLOAD_LOCATION}
 
-  security:
-    oauth2:
-      client:
-        registration:
-          kakao:
-            client-id: ${OAUTH2_KAKAO_CLIENT_ID}
-            client-secret: ${OAUTH2_KAKAO_CLIENT_SECRET}
-            authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8080/api/auth/code/kakao
-            client-authentication-method: POST
-
-        provider:
-          kakao:
-            authorization-uri: https://kauth.kakao.com/oauth/authorize # "인가 코드 받기" 항목
-            token-uri: https://kauth.kakao.com/oauth/token # "토큰 받기" 항목
-            user-info-uri: https://kapi.kakao.com/v2/user/me # "사용자 정보 가져오기" 항목
-            user-name-attribute: id # 식별자 . 카카오의 경우 "id" 사용
+oauth:
+  kakao:
+    grant-type: ${OAUTH_KAKAO_GRANT_TYPE}
+    client-id: ${OAUTH_KAKAO_CLIENT_ID}
+    client-secret: ${OAUTH_KAKAO_CLIENT_SECRET}
+    redirect-uri: ${OAUTH_KAKAO_REDIRECT_URI}
+    token-uri: ${OAUTH_KAKAO_TOKEN_URI}
+    user-info-uri: ${OAUTH_KAKAO_USER_INFO_URI}
+  naver:
+    grant-type: ${OAUTH_NAVER_GRANT_TYPE}
+    client-id: ${OAUTH_NAVER_CLIENT_ID}
+    client-secret: ${OAUTH_NAVER_CLIENT_SECRET}
+    token-uri: ${OAUTH_NAVER_TOKEN_URI}
+    user-info-uri: ${OAUTH_NAVER_USER_INFO_URI}
 
 decorator:
   datasource:
