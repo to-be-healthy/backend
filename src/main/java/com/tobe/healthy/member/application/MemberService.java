@@ -8,14 +8,14 @@ import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
-import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
-import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
+import static com.tobe.healthy.member.domain.entity.SocialType.*;
 import static java.io.File.separator;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.util.StringUtils.cleanPath;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.OAuthConfig;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
@@ -28,6 +28,7 @@ import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo.GoogleUserInfo;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
@@ -40,13 +41,14 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -70,6 +72,7 @@ public class MemberService {
 	private final JavaMailSender mailSender;
 	private final RedisService redisService;
 	private final OAuthConfig oAuthConfig;
+	private final ObjectMapper objectMapper;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -382,6 +385,77 @@ public class MemberService {
 		return responseMono.share().block();
 	}
 
+	public Tokens getGoogleOAuth(String code) {
+		OAuthInfo googleToken = getGoogleAccessToken(code);
+
+		String[] check = googleToken.getId_token().split("\\.");
+		Base64.Decoder decoder = Base64.getDecoder();
+		String payload = new String(decoder.decode(check[1]));
+		Map<String, String> idToken = new HashMap<>();
+		try{
+			idToken = objectMapper.readValue(payload, Map.class);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		String email = idToken.get("email");
+		String name = idToken.get("name");
+		String imageName = idToken.get("picture");
+
+		memberRepository.findGoogleByEmailAndSocialType(email).ifPresent(m -> {
+			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
+		});
+
+		byte[] image = getProfileImage(imageName);
+		String savedFileName = createFileUUID();
+		String extension = getImageExtension(imageName);
+
+		try (InputStream inputStream = new ByteArrayInputStream(image)) {
+			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
+			Files.copy(inputStream, copyOfLocation, REPLACE_EXISTING);
+		} catch (Exception e) {
+			log.error("e => {}", e);
+			throw new CustomException(FILE_UPLOAD_ERROR);
+		}
+
+		Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
+		Member member = Member.join(email, name, profile, GOOGLE);
+		memberRepository.save(member);
+
+		return memberRepository.findByUserId(member.getUserId())
+				.map(tokenGenerator::create)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+	}
+
+	private GoogleUserInfo getGoogleUserInfo(OAuthInfo oAuthInfo) {
+		Mono<GoogleUserInfo> googleUserInfoMono = webClient.get()
+				.uri(oAuthConfig.getGoogleUserInfoUri())
+				.headers(header -> header.set("Authorization", "Bearer " + oAuthInfo.getAccessToken()))
+				.retrieve()
+				.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+				.bodyToMono(GoogleUserInfo.class);
+		return googleUserInfoMono.share().block();
+	}
+
+	private OAuthInfo getGoogleAccessToken(String code) {
+		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+		requestBody.add("client_id", oAuthConfig.getGoogleClientId());
+		requestBody.add("client_secret", oAuthConfig.getGoogleClientSecret());
+		requestBody.add("grant_type", oAuthConfig.getGoogleGrantType());
+		requestBody.add("redirect_uri", oAuthConfig.getGoogleRedirectUri());
+		requestBody.add("code", code);
+
+		Mono<OAuthInfo> responseMono = webClient.post()
+				.uri(oAuthConfig.getGoogleTokenUri())
+				.accept(MediaType.APPLICATION_JSON)
+				.bodyValue(requestBody)
+				.retrieve()
+				.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+				.bodyToMono(OAuthInfo.class);
+		return responseMono.share().block();
+	}
+
 	private String createFileUUID() {
 		return System.currentTimeMillis() + "_" + UUID.randomUUID();
 	}
@@ -389,4 +463,5 @@ public class MemberService {
 	private String getImageExtension(String profileImage) {
 		return profileImage.substring(profileImage.lastIndexOf("."));
 	}
+
 }

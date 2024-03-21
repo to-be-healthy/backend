@@ -184,4 +184,13 @@ public class MemberController {
 			.message("회원가입이 완료되었습니다.")
 			.build();
 	}
+
+	@PostMapping("/google")
+	public ResponseHandler<Tokens> getGoogleOAuth(String code) {
+		return ResponseHandler.<Tokens>builder()
+				.statusCode(HttpStatus.OK)
+				.data(memberService.getGoogleOAuth(code))
+				.message("로그인 되었습니다.")
+				.build();
+	}
 }
