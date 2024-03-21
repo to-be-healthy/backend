@@ -117,7 +117,7 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "좋아요 완료.")
     })
-    @PostMapping("/like/workout-histories/{workoutHistoryId}")
+    @PostMapping("/workout-histories/{workoutHistoryId}/like")
     public ResponseHandler<Void> likeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                  @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.likeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
@@ -131,7 +131,7 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "좋아요 취소 완료.")
     })
-    @DeleteMapping("/like/workout-histories/{workoutHistoryId}")
+    @DeleteMapping("/workout-histories/{workoutHistoryId}/like")
     public ResponseHandler<Void> deleteLikeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                        @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.deleteLikeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
