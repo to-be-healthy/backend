@@ -20,7 +20,7 @@ public class ApplicationFormController {
     private final ApplicationFormService applicationFormService;
 
     @PostMapping
-    public ResponseEntity<?> addApplicationForm(@RequestBody ApplicationFormAddCommand request) {
+    public ResponseEntity<Void> addApplicationForm(@RequestBody ApplicationFormAddCommand request) {
         ApplicationFormAddCommandResult response = applicationFormService.addApplicationForm(request);
         return ResponseEntity.ok(response);
     }

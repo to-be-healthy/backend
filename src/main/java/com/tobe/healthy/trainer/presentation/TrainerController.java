@@ -27,7 +27,7 @@ public class TrainerController {
 		@ApiResponse(responseCode = "200", description = "회원초대가 완료 되었습니다.")
     })
     @PostMapping("/invitation")
-    public ResponseHandler<?> inviteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    public ResponseHandler<Void> inviteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                            @Parameter(description = "이메일") @RequestBody MemberInviteCommand command) {
         trainerService.inviteMember(command, customMemberDetails.getMember());
         return ResponseHandler.builder()

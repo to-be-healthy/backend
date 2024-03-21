@@ -3,8 +3,6 @@ package com.tobe.healthy.workout.presentation;
 import com.tobe.healthy.common.CommonService;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleInfo;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
@@ -16,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,7 +89,7 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "운동기록 삭제 완료.")
     })
     @PatchMapping("/workout-histories/{workoutHistoryId}")
-    public ResponseHandler<?> deleteWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    public ResponseHandler<Void> deleteWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                   @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.deleteWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
         return ResponseHandler.builder()
@@ -121,7 +118,7 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "좋아요 완료.")
     })
     @PostMapping("/like/workout-histories/{workoutHistoryId}")
-    public ResponseHandler<?> likeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    public ResponseHandler<Void> likeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                  @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.likeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
         return ResponseHandler.builder()
@@ -135,7 +132,7 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "좋아요 취소 완료.")
     })
     @DeleteMapping("/like/workout-histories/{workoutHistoryId}")
-    public ResponseHandler<?> deleteLikeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    public ResponseHandler<Void> deleteLikeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                        @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.deleteLikeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
         return ResponseHandler.builder()
