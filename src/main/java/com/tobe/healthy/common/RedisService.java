@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class RedisService {
+
 	private final RedisTemplate<String, String> redisTemplate;
 
 	public void setValues(String key, String value){

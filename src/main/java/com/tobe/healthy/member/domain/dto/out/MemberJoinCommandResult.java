@@ -10,6 +10,7 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 public class MemberJoinCommandResult {
+    private Long id;
     private String email;
     private String userId;
     private String name;
@@ -17,6 +18,7 @@ public class MemberJoinCommandResult {
 
     public static MemberJoinCommandResult of(Member member){
         return MemberJoinCommandResult.builder()
+                .id(member.getId())
                 .email(member.getEmail())
                 .userId(member.getUserId())
                 .name(member.getName())

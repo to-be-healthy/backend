@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface TrainerMemberMappingRepository extends JpaRepository<TrainerMemberMapping, Long> {
 
-    Optional<TrainerMemberMapping> findByTrainerIdAndMemberId(@Param("trainerId") Long trainerId, @Param("memberId") Long memberId);
-    Optional<TrainerMemberMapping> findTop1ByMemberIdOrderByCreatedAtDesc(@Param("memberId") Long memberId);
+    Optional<TrainerMemberMapping> findByTrainerIdAndMemberId(Long trainerId, Long memberId);
+    Optional<TrainerMemberMapping> findTop1ByMemberIdOrderByCreatedAtDesc(Long memberId);
 
 }

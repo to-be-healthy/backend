@@ -22,10 +22,11 @@ public class WorkoutHistoryDto {
     private Long workoutHistoryId;
     private String content;
     private Long trainerId;
+    @Builder.Default
     private List<WorkoutHistoryFileDto> files = new ArrayList<>();
     private MemberDto member;
     private Long likeCnt;
-
+    @Builder.Default
     @JsonIgnore
     private List<MultipartFile> multipartFiles = new ArrayList<>();
 
