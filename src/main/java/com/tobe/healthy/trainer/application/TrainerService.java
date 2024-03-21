@@ -1,5 +1,6 @@
 package com.tobe.healthy.trainer.application;
 
+import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.ErrorCode;
@@ -57,11 +58,11 @@ public class TrainerService {
             memberRepository.findByEmail(email).ifPresent(i -> {throw new CustomException(ErrorCode.MEMBER_ALREADY_MAPPED);});
             String uuid = System.currentTimeMillis() + "_" + UUID.randomUUID();
             //TODO: 프론트와 상의 후 초대링크 페이지 url 수정하기
-            String invitationKey = "invitation:" + uuid;
+            String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
             String invitationLink = "http://www.temp.com?" + uuid;
             sendInviteLink(email, trainer, invitationLink);
-            Map<String, Object> invitedMapping = new HashMap<>() {{
-                put("trainerId", trainer.getId());
+            Map<String, String> invitedMapping = new HashMap<>() {{
+                put("trainerId", trainer.getId().toString());
                 put("email", email);
             }};
             redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), 3 * 24 * 60 * 60 * 1000); // 3days

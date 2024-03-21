@@ -13,6 +13,9 @@ import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.util.StringUtils.cleanPath;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
@@ -39,18 +42,14 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
 
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -73,10 +72,10 @@ public class MemberService {
 	private final RestTemplate restTemplate;
 	private final MemberRepository memberRepository;
 	private final JwtTokenGenerator tokenGenerator;
-	private final FileService fileService;
 	private final JavaMailSender mailSender;
 	private final RedisService redisService;
 	private final TrainerService trainerService;
+	private final ObjectMapper objectMapper;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -406,20 +405,19 @@ public class MemberService {
 	}
 
 	public InvitationMappingResult getInvitationMapping(String uuid) {
-		String invitationKey = "invitation:" + uuid;
+		String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
 		String mappedData = redisService.getValues(invitationKey);
 		if (isEmpty(mappedData)) {
 			throw new CustomException(INVITE_LINK_NOT_FOUND);
 		}
-		JSONObject job = null;
-		try{
-			JSONParser parser = new JSONParser();
-			job = (JSONObject) parser.parse(mappedData);
-		}catch (ParseException e){
+		HashMap<String, String> map = new HashMap<>();
+		try {
+			map = objectMapper.readValue(mappedData, HashMap.class);
+		} catch (JsonProcessingException e){
 			e.printStackTrace();
 		}
-		Long trainerId = Long.valueOf(String.valueOf(job.get("trainerId")));
-		String email = job.get("email").toString();
+		Long trainerId = Long.valueOf(map.get("trainerId"));
+		String email = map.get("email");
 		Member member = memberRepository.findByMemberIdWithGym(trainerId);
 		return InvitationMappingResult.create(member, email);
 	}
