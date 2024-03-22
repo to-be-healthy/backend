@@ -3,12 +3,7 @@ package com.tobe.healthy.member.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.member.application.MemberService;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberOauthCommandRequest;
+import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
@@ -274,6 +269,15 @@ public class MemberController {
 		return ResponseHandler.<Tokens>builder()
 				.data(memberService.getKakaoAccessToken(code))
 				.message("요청이 처리되었습니다.")
+				.build();
+	}
+
+	@PostMapping("/access-token/google")
+	public ResponseHandler<Tokens> getGoogleOAuth(@RequestBody SocialLoginCommand command) {
+		return ResponseHandler.<Tokens>builder()
+				.statusCode(HttpStatus.OK)
+				.data(memberService.getGoogleOAuth(command))
+				.message("로그인 되었습니다.")
 				.build();
 	}
 }
