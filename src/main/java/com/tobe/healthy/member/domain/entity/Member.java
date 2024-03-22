@@ -3,7 +3,6 @@ package com.tobe.healthy.member.domain.entity;
 import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
 import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
-import static com.tobe.healthy.member.domain.entity.TrainerFeedback.ENABLED_RECORD;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.EnumType.STRING;
@@ -63,9 +62,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @JoinColumn(name = "profile_id")
     private Profile profileId;
 
-    @Enumerated(STRING)
-    @Default
-    private AlarmStatus alarmStatus = ENABLED;
 
     @Enumerated(STRING)
     @Default
@@ -93,21 +89,25 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
     @Enumerated(STRING)
     @Default
-    private TrainerFeedback trainerFeedback = ENABLED_RECORD;
+    private AlarmStatus pushAlarmStatus = ENABLED;
+
+    @Enumerated(STRING)
+    @Default
+    private AlarmStatus feedbackAlarmStatus = ENABLED;
 
     @ColumnDefault("false")
     @Default
     private boolean delYn = false;
 
     public static Member join(MemberJoinCommand request, String password) {
-        Member member = new Member();
-        member.userId = request.getUserId();
-        member.email = request.getEmail();
-        member.password = password;
-        member.name = request.getName();
-        member.alarmStatus = ENABLED;
-        member.memberType = request.getMemberType();
-        return member;
+        return Member.builder()
+            .userId(request.getUserId())
+            .email(request.getEmail())
+            .password(password)
+            .name(request.getName())
+            .pushAlarmStatus(ENABLED)
+            .memberType(request.getMemberType())
+            .build();
     }
 
     public static Member join(String email, String name, Profile profile, SocialType socialType) {
@@ -115,7 +115,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
             .userId(UUID.randomUUID().toString())
             .email(email)
             .name(name)
-            .alarmStatus(ENABLED)
+            .pushAlarmStatus(ENABLED)
             .profileId(profile)
             .socialType(socialType)
             .build();
@@ -146,10 +146,10 @@ public class Member extends BaseTimeEntity<Member, Long> {
     }
 
     public void changeAlarm(AlarmStatus alarmStatus) {
-        this.alarmStatus = alarmStatus;
+        this.pushAlarmStatus = alarmStatus;
     }
 
-    public void changeTrainerFeedback(TrainerFeedback trainerFeedback) {
-        this.trainerFeedback = trainerFeedback;
+    public void changeTrainerFeedback(AlarmStatus feedbackAlarmStatus) {
+        this.feedbackAlarmStatus = feedbackAlarmStatus;
     }
 }

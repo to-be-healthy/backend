@@ -33,8 +33,8 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
             .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint)) // 401 에러 예외 처리
             .authorizeHttpRequests(
-                authorize -> authorize.requestMatchers("/api/v1/auth/**", "/favicon.ico", "/file/**", "/v3/**", "/swagger-ui/**").permitAll()
-                    .anyRequest().authenticated())
+                authorize -> authorize.requestMatchers("/auth/v1/**", "/favicon.ico", "/file/**", "/v3/**", "/swagger-ui/**").permitAll()
+									  .anyRequest().authenticated())
             .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
             .build();
     }

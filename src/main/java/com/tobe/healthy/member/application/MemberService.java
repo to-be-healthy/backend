@@ -1,7 +1,7 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.INVITE_LINK_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.KAKAO_CONNECTION_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
@@ -9,6 +9,7 @@ import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.NAVER_CONNECTION_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.PROFILE_ACCESS_FAILED;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
 import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
@@ -22,8 +23,8 @@ import static org.springframework.util.StringUtils.cleanPath;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.OAuthConfig;
+import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.ErrorCode;
@@ -43,10 +44,9 @@ import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
-import com.tobe.healthy.member.domain.entity.TrainerFeedback;
 import com.tobe.healthy.member.repository.MemberRepository;
-import io.jsonwebtoken.impl.Base64UrlCodec;
 import com.tobe.healthy.trainer.application.TrainerService;
+import io.jsonwebtoken.impl.Base64UrlCodec;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
@@ -56,11 +56,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -112,7 +111,6 @@ public class MemberService {
 	}
 
 	public String sendEmailVerification(String email) {
-		// 1. 이메일 중복 확인
 		memberRepository.findByEmail(email).ifPresent(e -> {
 			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
 		});
@@ -157,15 +155,12 @@ public class MemberService {
 	}
 
 	public Tokens refreshToken(String userId, String refreshToken) {
-		// 1. Redis에서 유효한 token이 있는지 조회한다.
 		String result = redisService.getValues(userId);
 
-		// 2. Refresh Token이 존재하지 않음.
 		if (isEmpty(result)) {
 			throw new CustomException(REFRESH_TOKEN_NOT_FOUND);
 		}
 
-		// 3. Refresh Token이 유효하지 않을경우
 		if (!result.equals(refreshToken)) {
 			throw new CustomException(REFRESH_TOKEN_NOT_VALID);
 		}
@@ -173,14 +168,13 @@ public class MemberService {
 		Member member = memberRepository.findByUserId(userId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		// 4. 새로운 AccessToken과 기존의 RefreshToken을 반환한다.
-		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), refreshToken);
+		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), member.getMemberType(), refreshToken);
 	}
 
 	public String findUserId(MemberFindIdCommand request) {
-		Member entity = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
+		Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		return entity.getUserId();
+		return member.getUserId();
 	}
 
 	public String findMemberPW(MemberFindPWCommand request) {
@@ -190,8 +184,8 @@ public class MemberService {
 		return member.getEmail();
 	}
 
-	public String deleteMember(String userId, String password) {
-		Member member = memberRepository.findByUserId(userId)
+	public String deleteMember(String password, Long memberId) {
+		Member member = memberRepository.findById(memberId)
 			.filter(m -> passwordEncoder.matches(password, m.getPassword()))
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.deleteMember();
@@ -251,10 +245,10 @@ public class MemberService {
 		return true;
 	}
 
-	public Boolean changeTrainerFeedback(TrainerFeedback trainerFeedback, Long memberId) {
+	public Boolean changeTrainerFeedback(AlarmStatus alarmStatus, Long memberId) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		member.changeTrainerFeedback(trainerFeedback);
+		member.changeTrainerFeedback(alarmStatus);
 		return true;
 	}
 
@@ -273,8 +267,11 @@ public class MemberService {
 	private byte[] getProfileImage(String imageName) {
 		return webClient.get().uri(imageName)
 			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::isError, response ->
+				response.bodyToMono(String.class).flatMap(error -> {
+					log.error("error => {}", error);
+					return Mono.error(new CustomException(PROFILE_ACCESS_FAILED));
+				}))
 			.bodyToMono(byte[].class)
 			.share()
 			.block();
@@ -353,8 +350,11 @@ public class MemberService {
 			.uri(oAuthConfig.getNaverUserInfoUri())
 			.header("Authorization", "Bearer " + responseMono.getAccessToken())
 			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::isError, response ->
+				response.bodyToMono(String.class).flatMap(error -> {
+					log.error("error => {}", error);
+					return Mono.error(new CustomException(NAVER_CONNECTION_ERROR));
+				}))
 			.bodyToMono(NaverUserInfo.class)
 			.share()
 			.block();
@@ -399,7 +399,8 @@ public class MemberService {
 	private void sendAuthMail(String email, String authKey) {
 		MimeMessage mimeMessage = mailSender.createMimeMessage();
 		try {
-			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false,
+				"UTF-8");
 			mimeMessageHelper.setTo(email);
 			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 회원가입 인증번호입니다."); // 메일 제목
 			String text = String.format("안녕하세요. 건강해짐 인증번호는 %s 입니다. \n확인후 입력해 주세요.", authKey);
@@ -421,7 +422,8 @@ public class MemberService {
 		try {
 			String resetPW = RandomStringUtils.random(12, true, true);
 			member.resetPassword(passwordEncoder.encode(resetPW));
-			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false,
+				"UTF-8");
 			mimeMessageHelper.setTo(email);
 			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 초기화 비밀번호입니다."); // 메일 제목
 			String text = String.format("안녕하세요. 건강해짐 초기화 비밀번호는 %s 입니다. \n로그인 후 반드시 비밀번호를 변경해 주세요.", resetPW);
@@ -443,7 +445,8 @@ public class MemberService {
 		}
 
 		return buffer.toString();
-    
+	}
+
 	@Transactional
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
 		MemberJoinCommandResult result = joinMember(request);
@@ -460,7 +463,7 @@ public class MemberService {
 		HashMap<String, String> map = new HashMap<>();
 		try {
 			map = objectMapper.readValue(mappedData, HashMap.class);
-		} catch (JsonProcessingException e){
+		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
 		Long trainerId = Long.valueOf(map.get("trainerId"));

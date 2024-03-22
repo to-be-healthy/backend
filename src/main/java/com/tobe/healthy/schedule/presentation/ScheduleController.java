@@ -25,7 +25,7 @@ import java.util.TreeMap;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/schedule")
+@RequestMapping("/schedule/v1")
 @Slf4j
 @Tag(name = "02.Schedule", description = "수업 일정 API")
 public class ScheduleController {

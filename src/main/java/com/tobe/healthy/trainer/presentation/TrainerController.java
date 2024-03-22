@@ -10,9 +10,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +34,6 @@ public class TrainerController {
                                            @Parameter(description = "이메일") @RequestBody MemberInviteCommand command) {
         trainerService.inviteMember(command, customMemberDetails.getMember());
         return ResponseHandler.<Void>builder()
-                .statusCode(HttpStatus.OK)
                 .message("회원초대가 완료 되었습니다.")
                 .build();
     }
@@ -44,7 +46,6 @@ public class TrainerController {
     public ResponseHandler<TrainerMemberMappingDto> addMemberOfTrainer(@PathVariable("trainerId") Long trainerId,
                                                                        @PathVariable("memberId") Long memberId) {
         return ResponseHandler.<TrainerMemberMappingDto>builder()
-                .statusCode(HttpStatus.OK)
                 .data(trainerService.addMemberOfTrainer(trainerId, memberId))
                 .message("내 회원으로 등록되었습니다.")
                 .build();

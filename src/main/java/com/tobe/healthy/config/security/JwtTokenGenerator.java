@@ -4,6 +4,7 @@ import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -35,7 +36,10 @@ public class JwtTokenGenerator {
 
     public Tokens create(Member member) {
         long nowInMilliseconds = new Date().getTime();
-        String accessToken = createAccessToken(member.getId(), member.getUserId(), "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
+
+        String role = "ROLE_" + member.getMemberType().name();
+
+        String accessToken = createAccessToken(member.getId(), member.getUserId(), role, getAccessTokenValid(nowInMilliseconds));
 
         String refreshToken = createRefreshToken(member.getId(), member.getUserId(), getRefreshTokenValid(nowInMilliseconds));
 
@@ -52,9 +56,10 @@ public class JwtTokenGenerator {
         return new Date(nowInMilliseconds + accessTokenValidSeconds * 1000);
     }
 
-    public Tokens exchangeAccessToken(Long memberId, String userId, String refreshToken) {
+    public Tokens exchangeAccessToken(Long memberId, String userId, MemberType memberType, String refreshToken) {
         long nowInMilliseconds = new Date().getTime();
-        String changedAccessToken = createAccessToken(memberId, userId, "ROLE_MEMBER", getAccessTokenValid(nowInMilliseconds));
+        String role = "ROLE_" + memberType.name();
+        String changedAccessToken = createAccessToken(memberId, userId, role, getAccessTokenValid(nowInMilliseconds));
         return new Tokens(changedAccessToken, refreshToken, userId);
     }
 
