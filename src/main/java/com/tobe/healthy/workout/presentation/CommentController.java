@@ -80,11 +80,11 @@ public class CommentController {
             @ApiResponse(responseCode = "200", description = "운동기록 댓글 삭제 완료.")
     })
     @PatchMapping("/workout-histories/{workoutHistoryId}/comments/{commentId}")
-    public ResponseHandler<?> deleteComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    public ResponseHandler<Void> deleteComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                            @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                            @PathVariable("commentId") Long commentId) {
         commentService.deleteComment(customMemberDetails.getMember(), workoutHistoryId, commentId);
-        return ResponseHandler.builder()
+        return ResponseHandler.<Void>builder()
                 .message("댓글이 삭제되었습니다.")
                 .build();
     }

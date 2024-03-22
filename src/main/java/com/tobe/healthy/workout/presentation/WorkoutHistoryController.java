@@ -90,10 +90,10 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "운동기록 삭제 완료.")
     })
     @PatchMapping("/workout-histories/{workoutHistoryId}")
-    public ResponseHandler<?> deleteWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    public ResponseHandler<Void> deleteWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                   @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.deleteWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
-        return ResponseHandler.builder()
+        return ResponseHandler.<Void>builder()
                 .message("운동기록이 삭제되었습니다.")
                 .build();
     }
@@ -116,11 +116,11 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "좋아요 완료.")
     })
-    @PostMapping("/like/workout-histories/{workoutHistoryId}")
-    public ResponseHandler<?> likeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    @PostMapping("/workout-histories/{workoutHistoryId}/like")
+    public ResponseHandler<Void> likeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                  @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.likeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
-        return ResponseHandler.builder()
+        return ResponseHandler.<Void>builder()
                 .message("운동기록 좋아요에 성공하였습니다.")
                 .build();
     }
@@ -129,11 +129,11 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "좋아요 취소 완료.")
     })
-    @DeleteMapping("/like/workout-histories/{workoutHistoryId}")
-    public ResponseHandler<?> deleteLikeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    @DeleteMapping("/workout-histories/{workoutHistoryId}/like")
+    public ResponseHandler<Void> deleteLikeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                        @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.deleteLikeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
-        return ResponseHandler.builder()
+        return ResponseHandler.<Void>builder()
                 .message("운동기록 좋아요가 취소되었습니다.")
                 .build();
     }

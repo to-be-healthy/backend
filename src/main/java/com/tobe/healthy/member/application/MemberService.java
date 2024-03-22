@@ -1,5 +1,6 @@
 package com.tobe.healthy.member.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.KAKAO_CONNECTION_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
@@ -21,6 +22,7 @@ import static org.springframework.util.StringUtils.cleanPath;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.OAuthConfig;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
@@ -36,6 +38,7 @@ import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
+import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
@@ -43,6 +46,7 @@ import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.domain.entity.TrainerFeedback;
 import com.tobe.healthy.member.repository.MemberRepository;
 import io.jsonwebtoken.impl.Base64UrlCodec;
+import com.tobe.healthy.trainer.application.TrainerService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
@@ -53,8 +57,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -83,6 +89,8 @@ public class MemberService {
 	private final JwtTokenGenerator tokenGenerator;
 	private final JavaMailSender mailSender;
 	private final RedisService redisService;
+	private final TrainerService trainerService;
+	private final ObjectMapper objectMapper;
 	private final OAuthConfig oAuthConfig;
 	private final FileRepository fileRepository;
 
@@ -435,5 +443,29 @@ public class MemberService {
 		}
 
 		return buffer.toString();
+    
+	@Transactional
+	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
+		MemberJoinCommandResult result = joinMember(request);
+		trainerService.addMemberOfTrainer(request.getTrainerId(), result.getId());
+		return result;
+	}
+
+	public InvitationMappingResult getInvitationMapping(String uuid) {
+		String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
+		String mappedData = redisService.getValues(invitationKey);
+		if (isEmpty(mappedData)) {
+			throw new CustomException(INVITE_LINK_NOT_FOUND);
+		}
+		HashMap<String, String> map = new HashMap<>();
+		try {
+			map = objectMapper.readValue(mappedData, HashMap.class);
+		} catch (JsonProcessingException e){
+			e.printStackTrace();
+		}
+		Long trainerId = Long.valueOf(map.get("trainerId"));
+		String email = map.get("email");
+		Member member = memberRepository.findByMemberIdWithGym(trainerId);
+		return InvitationMappingResult.create(member, email);
 	}
 }
