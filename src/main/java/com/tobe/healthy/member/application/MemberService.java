@@ -2,6 +2,16 @@ package com.tobe.healthy.member.application;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.member.domain.entity.SocialType.*;
+import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
+import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
+import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
 import static java.io.File.separator;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.UUID.randomUUID;
@@ -9,7 +19,9 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.util.StringUtils.cleanPath;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.OAuthConfig;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
@@ -20,10 +32,12 @@ import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.GoogleUserInfo;
+import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.trainer.application.TrainerService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
@@ -64,6 +78,8 @@ public class MemberService {
 	private final JwtTokenGenerator tokenGenerator;
 	private final JavaMailSender mailSender;
 	private final RedisService redisService;
+	private final TrainerService trainerService;
+	private final ObjectMapper objectMapper;
 	private final OAuthConfig oAuthConfig;
 	private final ObjectMapper objectMapper;
 	private final FileService fileService;
@@ -448,4 +464,28 @@ public class MemberService {
 		return profileImage.substring(profileImage.lastIndexOf("."));
 	}
 
+	@Transactional
+	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
+		MemberJoinCommandResult result = joinMember(request);
+		trainerService.addMemberOfTrainer(request.getTrainerId(), result.getId());
+		return result;
+	}
+
+	public InvitationMappingResult getInvitationMapping(String uuid) {
+		String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
+		String mappedData = redisService.getValues(invitationKey);
+		if (isEmpty(mappedData)) {
+			throw new CustomException(INVITE_LINK_NOT_FOUND);
+		}
+		HashMap<String, String> map = new HashMap<>();
+		try {
+			map = objectMapper.readValue(mappedData, HashMap.class);
+		} catch (JsonProcessingException e){
+			e.printStackTrace();
+		}
+		Long trainerId = Long.valueOf(map.get("trainerId"));
+		String email = map.get("email");
+		Member member = memberRepository.findByMemberIdWithGym(trainerId);
+		return InvitationMappingResult.create(member, email);
+	}
 }
