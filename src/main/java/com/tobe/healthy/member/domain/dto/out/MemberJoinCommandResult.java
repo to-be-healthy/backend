@@ -16,7 +16,7 @@ public class MemberJoinCommandResult {
     private String name;
     private MemberType memberType;
 
-    public static MemberJoinCommandResult of(Member member){
+    public static MemberJoinCommandResult from(Member member){
         return MemberJoinCommandResult.builder()
                 .id(member.getId())
                 .email(member.getEmail())

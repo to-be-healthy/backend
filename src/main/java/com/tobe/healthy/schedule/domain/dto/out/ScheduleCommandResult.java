@@ -26,7 +26,7 @@ public class ScheduleCommandResult {
 	private String applicantName;
 	private String standByName;
 
-	public static ScheduleCommandResult of(Schedule entity) {
+	public static ScheduleCommandResult from(Schedule entity) {
 		ScheduleCommandResultBuilder builder = ScheduleCommandResult.builder()
 			.scheduleId(entity.getId())
 			.lessonDt(entity.getLessonDt())

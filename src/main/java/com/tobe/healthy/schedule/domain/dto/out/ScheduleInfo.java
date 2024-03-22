@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ScheduleInfo {
-	LocalTime startTime;
-	LocalTime endTime;
-	int round;
+	private LocalTime startTime;
+	private LocalTime endTime;
+	private int round;
 }

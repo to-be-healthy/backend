@@ -11,9 +11,9 @@ import static java.time.DayOfWeek.SUNDAY;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommandRequest;
-import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest;
-import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest.ScheduleRegister;
+import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
+import com.tobe.healthy.schedule.domain.dto.in.ScheduleRegisterCommand;
+import com.tobe.healthy.schedule.domain.dto.in.ScheduleRegisterCommand.ScheduleRegister;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleInfo;
@@ -44,7 +44,7 @@ public class ScheduleService {
 
 	private final StandByScheduleRepository standByScheduleRepository;
 
-	public TreeMap<LocalDate, ArrayList<ScheduleInfo>> autoCreateSchedule(AutoCreateScheduleCommandRequest request) {
+	public TreeMap<LocalDate, ArrayList<ScheduleInfo>> autoCreateSchedule(AutoCreateScheduleCommand request) {
 		TreeMap<LocalDate, ArrayList<ScheduleInfo>> map = new TreeMap<>();
 		LocalDate startDt = request.getStartDt();
 		while (!startDt.isAfter(request.getEndDt())) {
@@ -105,7 +105,7 @@ public class ScheduleService {
 		return true;
 	}
 
-	public Boolean registerSchedule(ScheduleCommandRequest request) {
+	public Boolean registerSchedule(ScheduleRegisterCommand request) {
 		for (Map.Entry<String, List<ScheduleRegister>> entry : request.getSchedule().entrySet()) {
 			String date = entry.getKey();
 			List<ScheduleRegister> scheduleRegisters = entry.getValue();

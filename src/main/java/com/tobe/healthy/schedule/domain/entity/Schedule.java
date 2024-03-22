@@ -10,7 +10,7 @@ import static lombok.AccessLevel.PROTECTED;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.schedule.domain.dto.in.ScheduleCommandRequest.ScheduleRegister;
+import com.tobe.healthy.schedule.domain.dto.in.ScheduleRegisterCommand.ScheduleRegister;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;

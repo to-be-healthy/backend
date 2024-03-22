@@ -3,6 +3,7 @@ package com.tobe.healthy.member.domain.entity;
 import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
 import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
+import static com.tobe.healthy.member.domain.entity.TrainerFeedback.ENABLED_RECORD;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.EnumType.STRING;
@@ -90,6 +91,10 @@ public class Member extends BaseTimeEntity<Member, Long> {
     @Default
     private SocialType socialType = NONE;
 
+    @Enumerated(STRING)
+    @Default
+    private TrainerFeedback trainerFeedback = ENABLED_RECORD;
+
     @ColumnDefault("false")
     @Default
     private boolean delYn = false;
@@ -130,5 +135,21 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
     public void deleteMember() {
         this.delYn = true;
+    }
+
+    public void changePassword(String password) {
+        this.password = password;
+    }
+
+    public void changeName(String name) {
+        this.name = name;
+    }
+
+    public void changeAlarm(AlarmStatus alarmStatus) {
+        this.alarmStatus = alarmStatus;
+    }
+
+    public void changeTrainerFeedback(TrainerFeedback trainerFeedback) {
+        this.trainerFeedback = trainerFeedback;
     }
 }

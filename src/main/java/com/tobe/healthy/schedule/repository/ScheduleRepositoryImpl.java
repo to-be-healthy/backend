@@ -39,7 +39,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.fetch();
 
 		return fetch.stream()
-			.map(ScheduleCommandResult::of)
+			.map(ScheduleCommandResult::from)
 			.collect(Collectors.toList());
 	}
 
@@ -55,7 +55,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 			.orderBy(schedule.lessonDt.desc(), schedule.round.desc())
 			.fetch();
 		return fetch.stream()
-			.map(ScheduleCommandResult::of)
+			.map(ScheduleCommandResult::from)
 			.collect(Collectors.toList());
 	}
 
