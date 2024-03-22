@@ -63,7 +63,7 @@ class MemberServiceTest {
         void verifyAuth() {
             // given
             String email = "laborlawseon@gmail.com";
-            String sendEmail = memberService.sendAuthMail(email);
+            String sendEmail = memberService.sendEmailVerification(email);
 
             String authKey = redisService.getValues(sendEmail);
 

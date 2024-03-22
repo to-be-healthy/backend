@@ -15,6 +15,9 @@ public class OAuthInfo {
 	@JsonProperty("refresh_token")
 	private String refreshToken;
 
+	@JsonProperty("id_token")
+	private String idToken;
+
 	@JsonProperty("expires_in")
 	private int expiresIn;
 
@@ -49,7 +52,6 @@ public class OAuthInfo {
 		}
 	}
 
-	// 카카오 시작
 	@Data
 	public static class KakaoUserInfo {
 

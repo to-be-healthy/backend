@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Schema(description = "일정 자동생성 DTO")
-public class AutoCreateScheduleCommandRequest {
+public class AutoCreateScheduleCommand {
 
 	@Schema(description = "트레이너 아이디")
 	@NotNull(message = "트레이너 아이디를 입력해 주세요.")

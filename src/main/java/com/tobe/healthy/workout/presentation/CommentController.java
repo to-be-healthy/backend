@@ -3,7 +3,6 @@ package com.tobe.healthy.workout.presentation;
 import com.tobe.healthy.common.CommonService;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
-import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.application.CommentService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryCommentDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryCommentAddCommand;
@@ -11,14 +10,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -39,7 +42,6 @@ public class CommentController {
     public ResponseHandler<List<WorkoutHistoryCommentDto>> getCommentsByHistoryId(@PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                                  Pageable pageable) {
         return ResponseHandler.<List<WorkoutHistoryCommentDto>>builder()
-                .statusCode(HttpStatus.OK)
                 .data(commentService.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable))
                 .message("댓글이 조회되었습니다.")
                 .build();
@@ -54,7 +56,6 @@ public class CommentController {
                                                                 @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                 @Valid HistoryCommentAddCommand command) {
         return ResponseHandler.<WorkoutHistoryCommentDto>builder()
-                .statusCode(HttpStatus.OK)
                 .data(commentService.addComment(workoutHistoryId, command, customMemberDetails.getMember()))
                 .message("댓글이 등록되었습니다.")
                 .build();
@@ -70,7 +71,6 @@ public class CommentController {
                                                                   @PathVariable("commentId") Long commentId,
                                                                   @Valid HistoryCommentAddCommand command) {
         return ResponseHandler.<WorkoutHistoryCommentDto>builder()
-                .statusCode(HttpStatus.OK)
                 .data(commentService.updateComment(customMemberDetails.getMember(), workoutHistoryId, commentId, command))
                 .message("댓글이 수정되었습니다.")
                 .build();
@@ -85,7 +85,6 @@ public class CommentController {
                                            @PathVariable("commentId") Long commentId) {
         commentService.deleteComment(customMemberDetails.getMember(), workoutHistoryId, commentId);
         return ResponseHandler.<Void>builder()
-                .statusCode(HttpStatus.OK)
                 .message("댓글이 삭제되었습니다.")
                 .build();
     }

@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 @Builder
 @Schema(description = "일정 등록 DTO")
-public class ScheduleCommandRequest {
+public class ScheduleRegisterCommand {
 
 	@Schema(description = "트레이너 아이디", example = "1")
 	@NotNull(message = "트레이너 정보를 입력해 주세요.")
