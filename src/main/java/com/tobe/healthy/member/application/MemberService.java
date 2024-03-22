@@ -508,6 +508,7 @@ public class MemberService {
 		}
 
 		return buffer.toString();
+	}
     
 	@Transactional
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {

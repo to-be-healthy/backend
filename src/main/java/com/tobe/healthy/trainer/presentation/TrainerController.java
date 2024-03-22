@@ -31,7 +31,6 @@ public class TrainerController {
                                            @Parameter(description = "이메일") @RequestBody MemberInviteCommand command) {
         trainerService.inviteMember(command, customMemberDetails.getMember());
         return ResponseHandler.<Void>builder()
-                .statusCode(HttpStatus.OK)
                 .message("회원초대가 완료 되었습니다.")
                 .build();
     }
@@ -44,7 +43,6 @@ public class TrainerController {
     public ResponseHandler<TrainerMemberMappingDto> addMemberOfTrainer(@PathVariable("trainerId") Long trainerId,
                                                                        @PathVariable("memberId") Long memberId) {
         return ResponseHandler.<TrainerMemberMappingDto>builder()
-                .statusCode(HttpStatus.OK)
                 .data(trainerService.addMemberOfTrainer(trainerId, memberId))
                 .message("내 회원으로 등록되었습니다.")
                 .build();

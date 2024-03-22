@@ -170,7 +170,8 @@ public class MemberController {
 		return ResponseHandler.<Boolean>builder()
 			.data(memberService.changePassword(request, customMemberDetails.getMemberId()))
 			.message("비밀번호 변경이 완료되었습니다.")
-
+			.build();
+	}
   @Operation(summary = "초대링크 uuid 데이터 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청"),
 			@ApiResponse(responseCode = "200", description = "성공")
@@ -178,7 +179,6 @@ public class MemberController {
 	@GetMapping("/invitation/uuid")
 	public ResponseHandler<InvitationMappingResult> getInvitationMapping(@RequestParam String uuid) {
 		return ResponseHandler.<InvitationMappingResult>builder()
-				.statusCode(HttpStatus.OK)
 				.data(memberService.getInvitationMapping(uuid))
 				.message("조회가 완료되었습니다.")
 				.build();
@@ -192,18 +192,9 @@ public class MemberController {
 	@PostMapping("/invitation/join")
 	public ResponseHandler<MemberJoinCommandResult> joinWithInvitation(@RequestBody @Valid MemberJoinCommand request) {
 		return ResponseHandler.<MemberJoinCommandResult>builder()
-				.statusCode(HttpStatus.OK)
 				.data(memberService.joinWithInvitation(request))
 				.message("회원가입이 완료되었습니다.")
 				.build();
-	}
-	
-	@GetMapping("/naver")
-	public ResponseHandler<String> getNaverOAuth(String code, String state) {
-		return ResponseHandler.<String>builder()
-			.data(memberService.getNaverAccessToken(code, state))
-			.message("회원가입이 완료되었습니다.")
-			.build();
 	}
 
 	@Operation(summary = "프로필 사진이 등록되었습니다.", responses = {
@@ -275,9 +266,8 @@ public class MemberController {
 	@PostMapping("/access-token/google")
 	public ResponseHandler<Tokens> getGoogleOAuth(@RequestBody SocialLoginCommand command) {
 		return ResponseHandler.<Tokens>builder()
-				.statusCode(HttpStatus.OK)
 				.data(memberService.getGoogleOAuth(command))
-				.message("로그인 되었습니다.")
+				.message("요청이 처리되었습니다.")
 				.build();
 	}
 }
