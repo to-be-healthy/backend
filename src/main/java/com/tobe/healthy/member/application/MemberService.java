@@ -81,8 +81,6 @@ public class MemberService {
 	private final TrainerService trainerService;
 	private final ObjectMapper objectMapper;
 	private final OAuthConfig oAuthConfig;
-	private final ObjectMapper objectMapper;
-	private final FileService fileService;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
