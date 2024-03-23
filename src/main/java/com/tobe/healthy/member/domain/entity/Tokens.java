@@ -11,4 +11,5 @@ public class Tokens {
     private String accessToken;
     private String refreshToken;
     private String userId;
+    private String role;
 }

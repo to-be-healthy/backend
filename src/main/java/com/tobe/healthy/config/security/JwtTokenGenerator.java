@@ -45,7 +45,7 @@ public class JwtTokenGenerator {
 
         redisService.setValuesWithTimeout(member.getUserId(), refreshToken, getRefreshTokenValid(nowInMilliseconds).getTime());
 
-        return new Tokens(accessToken, refreshToken, member.getUserId());
+        return new Tokens(accessToken, refreshToken, member.getUserId(), role);
     }
 
     private Date getRefreshTokenValid(long nowInMilliseconds) {
@@ -60,7 +60,7 @@ public class JwtTokenGenerator {
         long nowInMilliseconds = new Date().getTime();
         String role = "ROLE_" + memberType.name();
         String changedAccessToken = createAccessToken(memberId, userId, role, getAccessTokenValid(nowInMilliseconds));
-        return new Tokens(changedAccessToken, refreshToken, userId);
+        return new Tokens(changedAccessToken, refreshToken, userId, role);
     }
 
     private String createAccessToken(Long memberId, String userId, String role, Date expiry) {

@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -106,7 +107,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 		@ApiResponse(responseCode = "200", description = "수업 기록 여부가 변경되었습니다.")
 	})
-//	@PreAuthorize("hasAuthority(qwe)")
+	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	@PatchMapping("/trainer-feedback")
 	public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태") @RequestParam AlarmStatus alarmStatus,
 														  @AuthenticationPrincipal CustomMemberDetails member) {
