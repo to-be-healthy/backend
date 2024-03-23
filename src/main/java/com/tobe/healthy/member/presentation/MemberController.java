@@ -42,6 +42,7 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "회원 탈퇴 되었습니다.")
 	})
 	@PostMapping("/delete")
+	@PreAuthorize("hasAuthority('TRAINER')")
 	public ResponseHandler<String> deleteMember(@Parameter(description = "비밀번호") @RequestParam String password,
 												@AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<String>builder()
