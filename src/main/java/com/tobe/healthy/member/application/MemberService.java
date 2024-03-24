@@ -1,5 +1,6 @@
 package com.tobe.healthy.member.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.CONFIRM_PASSWORD_NOT_MATCHED;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.INVITE_LINK_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.KAKAO_CONNECTION_ERROR;
@@ -7,11 +8,15 @@ import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_LENGTH_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_NOT_VALID;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.NAVER_CONNECTION_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
 import static com.tobe.healthy.config.error.ErrorCode.PROFILE_ACCESS_FAILED;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.USERID_POLICY_VIOLATION;
 import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
 import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
 import static java.io.File.separator;
@@ -60,6 +65,7 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -137,6 +143,8 @@ public class MemberService {
 	}
 
 	public MemberJoinCommandResult joinMember(MemberJoinCommand request) {
+		validateName(request);
+		validatePassword(request);
 		validateDuplicationUserId(request.getUserId());
 		validateDuplicationEmail(request.getEmail());
 
@@ -145,6 +153,27 @@ public class MemberService {
 		memberRepository.save(member);
 
 		return MemberJoinCommandResult.from(member);
+	}
+
+	private void validatePassword(MemberJoinCommand request) {
+		if (!request.getPassword().equals(request.getPasswordConfirm())) {
+			throw new CustomException(CONFIRM_PASSWORD_NOT_MATCHED);
+		}
+		String regexp = "^[A-Za-z0-9]+$";
+		if (request.getPassword().length() < 8 || !Pattern.matches(regexp, request.getPassword())) {
+			throw new CustomException(PASSWORD_POLICY_VIOLATION);
+		}
+	}
+
+	private void validateName(MemberJoinCommand request) {
+		if (request.getName().length() < 2) {
+			throw new CustomException(MEMBER_NAME_LENGTH_NOT_VALID);
+		}
+
+		String regexp = "^[가-힣A-Za-z]+$";
+		if (!Pattern.matches(regexp, request.getName())) {
+			throw new CustomException(MEMBER_NAME_NOT_VALID);
+		}
 	}
 
 	public Tokens login(MemberLoginCommand request) {
@@ -391,6 +420,9 @@ public class MemberService {
 	}
 
 	private void validateDuplicationUserId(String userId) {
+		if (Pattern.matches("^[가-힣]+$", userId)) {
+			throw new CustomException(USERID_POLICY_VIOLATION);
+		}
 		memberRepository.findByUserId(userId).ifPresent(m -> {
 			throw new CustomException(MEMBER_ID_DUPLICATION);
 		});

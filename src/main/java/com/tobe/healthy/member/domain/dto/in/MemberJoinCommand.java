@@ -23,6 +23,10 @@ public class MemberJoinCommand {
     @NotEmpty(message = "비밀번호를 입력해 주세요.")
     private String password;
 
+    @Schema(description = "비밀번호 확인" , example = "zxcvbnm=1")
+    @NotEmpty(message = "비밀번호를 재입력해 주세요.")
+    private String passwordConfirm;
+
     @Schema(description = "실명" , example = "홍길동")
     @NotEmpty(message = "실명을 입력해 주세요.")
     private String name;
