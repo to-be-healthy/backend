@@ -16,13 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -76,7 +70,7 @@ public class MemberAuthController {
 	})
 	@PostMapping("/validation/confirm-email")
 	public ResponseHandler<Boolean> verifyAuthMail(@Parameter(description = "이메일") @RequestParam String email,
-												   @Parameter(description = "이메일 인증번호") @PathVariable String emailKey) {
+												   @Parameter(description = "이메일 인증번호") @RequestParam String emailKey) {
 		return ResponseHandler.<Boolean>builder()
 			.data(memberService.verifyEmailAuthNumber(emailKey, email))
 			.message("인증번호가 확인되었습니다.")
