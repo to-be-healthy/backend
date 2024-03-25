@@ -90,11 +90,8 @@ public class FileService {
 
 			// 파일의 용량 구하기
 			long fileSize = Files.size(copyOfLocation);
-
 			String fileName = fileFullName.substring(0, fileFullName.lastIndexOf("."));
-
-			Profile profile = Profile.create(savedFileName, fileName, extension, uploadDir + separator,
-				(int) fileSize);
+			Profile profile = Profile.create(savedFileName, fileName, extension, uploadDir + separator, (int) fileSize);
 
 		} catch (IOException e) {
 			throw new CustomException(SERVER_ERROR);

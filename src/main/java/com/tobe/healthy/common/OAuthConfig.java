@@ -42,5 +42,24 @@ public class OAuthConfig {
 
 	@Value("${oauth.naver.user-info-uri}")
 	private String naverUserInfoUri;
+
+	@Value("${oauth.google.client-id}")
+	private String googleClientId;
+
+	@Value("${oauth.google.client-secret}")
+	private String googleClientSecret;
+
+	@Value("${oauth.google.token-uri}")
+	private String googleTokenUri;
+
+	@Value("${oauth.google.user-info-uri}")
+	private String googleUserInfoUri;
+
+	@Value("${oauth.google.grant-type}")
+	private String googleGrantType;
+
+	@Value("${oauth.google.redirect-uri}")
+	private String googleRedirectUri;
+
 }
 

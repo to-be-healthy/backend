@@ -16,27 +16,27 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
+import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryComment.workoutHistoryComment;
+
 
 @Repository
 @RequiredArgsConstructor
 public class WorkoutHistoryCommentRepositoryCustomImpl implements WorkoutHistoryCommentRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-    private QWorkoutHistoryComment qComment = QWorkoutHistoryComment.workoutHistoryComment;
-    private QMember qMember = QMember.member;
 
     @Override
     public Page<WorkoutHistoryComment> getCommentsByWorkoutHistoryId(Long workoutHistoryId, Pageable pageable) {
         Long totalCnt = queryFactory
-                .select(qComment.count())
-                .from(qComment)
+                .select(workoutHistoryComment.count())
+                .from(workoutHistoryComment)
                 .where(historyIdEq(workoutHistoryId))
                 .fetchOne();
         List<WorkoutHistoryComment> comments =  queryFactory
-                .select(qComment)
-                .from(qComment)
+                .select(workoutHistoryComment)
+                .from(workoutHistoryComment)
                 .where(historyIdEq(workoutHistoryId))
-                .orderBy(qComment.orderNum.asc(), qComment.createdAt.asc())
+                .orderBy(workoutHistoryComment.orderNum.asc(), workoutHistoryComment.createdAt.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -45,7 +45,7 @@ public class WorkoutHistoryCommentRepositoryCustomImpl implements WorkoutHistory
 
     private BooleanExpression historyIdEq(Long workoutHistoryId) {
         if (!ObjectUtils.isEmpty(workoutHistoryId)){
-            return qComment.workoutHistory.workoutHistoryId.eq(workoutHistoryId);
+            return workoutHistoryComment.workoutHistory.workoutHistoryId.eq(workoutHistoryId);
         }
         return null;
     }

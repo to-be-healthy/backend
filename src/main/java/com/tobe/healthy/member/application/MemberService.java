@@ -1,5 +1,14 @@
 package com.tobe.healthy.member.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.SocialType.*;
+import static java.io.File.separator;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.UUID.randomUUID;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.util.StringUtils.cleanPath;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.OAuthConfig;
@@ -8,10 +17,14 @@ import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.ErrorCode;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
+import com.tobe.healthy.file.application.FileService;
 import com.tobe.healthy.file.domain.entity.Profile;
+import com.tobe.healthy.member.domain.dto.in.*;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.file.repository.FileRepository;
 import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo.GoogleUserInfo;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
@@ -20,11 +33,26 @@ import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import io.jsonwebtoken.impl.Base64UrlCodec;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -386,6 +414,67 @@ public class MemberService {
 			.block();
 	}
 
+	public Tokens getGoogleOAuth(SocialLoginCommand command) {
+		OAuthInfo googleToken = getGoogleAccessToken(command.getCode());
+		String[] check = googleToken.getId_token().split("\\.");
+		Base64.Decoder decoder = Base64.getDecoder();
+		String payload = new String(decoder.decode(check[1]));
+		Map<String, String> idToken = new HashMap<>();
+		try{
+			idToken = objectMapper.readValue(payload, Map.class);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		String email = idToken.get("email");
+		String name = idToken.get("name");
+		String imageName = idToken.get("picture");
+		byte[] image = getProfileImage(imageName);
+		String savedFileName = createFileUUID();
+		String extension = ".jpg";
+
+		Optional<Member> optionalMember = memberRepository.findGoogleByEmailAndSocialType(email);
+		Member member;
+		if(optionalMember.isEmpty()){ //회원가입
+			Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
+			member = Member.join(email, name, profile, command.getMemberType(), GOOGLE);
+			memberRepository.save(member);
+			Path copyOfLocation = Paths.get(uploadDir + separator + savedFileName + extension);
+			try {
+				Files.copy(new ByteArrayInputStream(image), copyOfLocation, REPLACE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new CustomException(SERVER_ERROR);
+			}
+		}else{
+			member = optionalMember.get();
+		}
+
+		return memberRepository.findByUserId(member.getUserId())
+				.map(tokenGenerator::create)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+	}
+
+	private OAuthInfo getGoogleAccessToken(String code) {
+		String decode = URLDecoder.decode(code, StandardCharsets.UTF_8);
+		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+		requestBody.add("client_id", oAuthConfig.getGoogleClientId());
+		requestBody.add("client_secret", oAuthConfig.getGoogleClientSecret());
+		requestBody.add("grant_type", oAuthConfig.getGoogleGrantType());
+		requestBody.add("redirect_uri", oAuthConfig.getGoogleRedirectUri());
+		requestBody.add("code", decode);
+
+		Mono<OAuthInfo> responseMono = webClient.post()
+				.uri(oAuthConfig.getGoogleTokenUri())
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.accept(MediaType.APPLICATION_JSON)
+				.bodyValue(requestBody)
+				.retrieve()
+				.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
+				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+				.bodyToMono(OAuthInfo.class);
+		return responseMono.share().block();
+	}
+
 	private String createFileUUID() {
 		return System.currentTimeMillis() + "_" + UUID.randomUUID();
 	}
@@ -431,7 +520,7 @@ public class MemberService {
 
 		return buffer.toString();
 	}
-
+  
 	@Transactional
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
 		MemberJoinCommandResult result = joinMember(request);
