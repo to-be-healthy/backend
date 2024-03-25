@@ -125,12 +125,11 @@ public class MemberService {
 			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
 		});
 
-		// 2. 인증번호를 redis에 저장한다.
 		String authKey = getAuthCode();
 		redisService.setValuesWithTimeout(email, authKey, 3 * 60 * 1000); // 3분
 
 		// 3. 이메일에 인증번호 전송한다.
-		sendAuthMail(email, authKey);
+		mailService.sendAuthMail(email, authKey);
 
 		return email;
 	}
@@ -147,7 +146,7 @@ public class MemberService {
 	}
 
 	public MemberJoinCommandResult joinMember(MemberJoinCommand request) {
-		validateName(request);
+		validateName(request.getName());
 		validatePassword(request);
 		validateDuplicationUserId(request.getUserId());
 		validateDuplicationEmail(request.getEmail());
@@ -169,13 +168,13 @@ public class MemberService {
 		}
 	}
 
-	private void validateName(MemberJoinCommand request) {
-		if (request.getName().length() < 2) {
+	private void validateName(String name) {
+		if (name.length() < 2) {
 			throw new CustomException(MEMBER_NAME_LENGTH_NOT_VALID);
 		}
 
 		String regexp = "^[가-힣A-Za-z]+$";
-		if (!Pattern.matches(regexp, request.getName())) {
+		if (!Pattern.matches(regexp, name)) {
 			throw new CustomException(MEMBER_NAME_NOT_VALID);
 		}
 	}
@@ -504,10 +503,6 @@ public class MemberService {
 		});
 	}
 
-	private void sendAuthMail(String email, String authKey) {
-		mailService.sendAuthMail(email, authKey);
-	}
-
 	private void validateDuplicationEmail(String email) {
 		memberRepository.findByEmail(email).ifPresent(m -> {
 			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
@@ -532,8 +527,7 @@ public class MemberService {
 
 		return buffer.toString();
 	}
-
-	@Transactional
+	
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
 		MemberJoinCommandResult result = joinMember(request);
 		trainerService.addMemberOfTrainer(request.getTrainerId(), result.getId());

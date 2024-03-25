@@ -1,5 +1,8 @@
 package com.tobe.healthy.config.security;
 
+import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
+
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import java.util.ArrayList;
@@ -22,7 +25,11 @@ public class CustomMemberDetails implements UserDetails {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> roles = new ArrayList<>();
-		roles.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
+		if (member.getMemberType().equals(MEMBER)) {
+			roles.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
+		} else if (member.getMemberType().equals(TRAINER)) {
+			roles.add(new SimpleGrantedAuthority("ROLE_TRAINER"));
+		}
 		return roles;
 	}
 
