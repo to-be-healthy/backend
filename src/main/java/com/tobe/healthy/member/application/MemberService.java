@@ -1,7 +1,26 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.SocialType.*;
+import static com.tobe.healthy.config.error.ErrorCode.CONFIRM_PASSWORD_NOT_MATCHED;
+import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.INVITE_LINK_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.KAKAO_CONNECTION_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_LENGTH_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.NAVER_CONNECTION_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.NOT_MATCH_PASSWORD;
+import static com.tobe.healthy.config.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
+import static com.tobe.healthy.config.error.ErrorCode.PROFILE_ACCESS_FAILED;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.SERVER_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.USERID_POLICY_VIOLATION;
+import static com.tobe.healthy.member.domain.entity.SocialType.GOOGLE;
+import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
+import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
 import static java.io.File.separator;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.UUID.randomUUID;
@@ -14,17 +33,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.OAuthConfig;
 import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
+import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.ErrorCode;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
-import com.tobe.healthy.file.application.FileService;
 import com.tobe.healthy.file.domain.entity.Profile;
-import com.tobe.healthy.member.domain.dto.in.*;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.file.repository.FileRepository;
-import com.tobe.healthy.member.domain.dto.in.*;
+import com.tobe.healthy.member.domain.dto.in.IdToken;
+import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo.GoogleUserInfo;
+import com.tobe.healthy.member.domain.dto.in.SocialLoginCommand;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
@@ -33,8 +56,6 @@ import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import io.jsonwebtoken.impl.Base64UrlCodec;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,16 +64,20 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,29 +86,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
-import java.util.regex.Pattern;
-
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
-import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
-import static java.io.File.separator;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.util.UUID.randomUUID;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.util.StringUtils.cleanPath;
 
 @Service
 @RequiredArgsConstructor
@@ -98,7 +100,7 @@ public class MemberService {
 	private final RedisService redisService;
 	private final TrainerService trainerService;
 	private final ObjectMapper objectMapper;
-	private final OAuthConfig oAuthConfig;
+	private final OAuthProperties oAuthProperties;
 	private final FileRepository fileRepository;
 	private final MailService mailService;
 
@@ -200,7 +202,8 @@ public class MemberService {
 		Member member = memberRepository.findByUserId(userId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), member.getMemberType(), refreshToken);
+		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(),
+			member.getMemberType(), refreshToken);
 	}
 
 	public String findUserId(MemberFindIdCommand request) {
@@ -246,16 +249,19 @@ public class MemberService {
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 			String savedFileName = System.currentTimeMillis() + "_" + randomUUID();
-			String extension = Objects.requireNonNull(file.getOriginalFilename()).substring(file.getOriginalFilename().lastIndexOf("."));
+			String extension = Objects.requireNonNull(file.getOriginalFilename())
+				.substring(file.getOriginalFilename().lastIndexOf("."));
 
-			Path copyOfLocation = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
+			Path copyOfLocation = Paths.get(
+				uploadDir + separator + cleanPath(savedFileName + extension));
 			try {
 				Files.copy(file.getInputStream(), copyOfLocation, REPLACE_EXISTING);
 			} catch (IOException e) {
 				throw new CustomException(FILE_UPLOAD_ERROR);
 			}
 
-			Profile profile = Profile.create(savedFileName, cleanPath(file.getOriginalFilename()), extension, uploadDir + separator, (int) file.getSize());
+			Profile profile = Profile.create(savedFileName, cleanPath(file.getOriginalFilename()),
+				extension, uploadDir + separator, (int) file.getSize());
 
 			member.registerProfile(profile);
 			fileRepository.save(profile);
@@ -290,7 +296,8 @@ public class MemberService {
 			.map(tokenGenerator::create)
 			.orElseGet(() -> {
 				Profile profile = getProfile(response.getPicture());
-				Member member = Member.join(response.getEmail(), response.getNickname(), profile, KAKAO);
+				Member member = Member.join(response.getEmail(), response.getNickname(), profile,
+					KAKAO);
 				memberRepository.save(member);
 				return tokenGenerator.create(member);
 			});
@@ -347,11 +354,13 @@ public class MemberService {
 
 		NaverUserInfo authorization = getNaverUserInfo(responseMono);
 
-		return memberRepository.findNaverByEmailAndSocialType(authorization.getResponse().getEmail())
+		return memberRepository.findNaverByEmailAndSocialType(
+				authorization.getResponse().getEmail())
 			.map(tokenGenerator::create)
 			.orElseGet(() -> {
 				Profile profile = getProfile(authorization.getResponse().getProfileImage());
-				Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), profile, NAVER);
+				Member member = Member.join(authorization.getResponse().getEmail(),
+					authorization.getResponse().getName(), profile, NAVER);
 				memberRepository.save(member);
 				return tokenGenerator.create(member);
 			});
@@ -374,7 +383,8 @@ public class MemberService {
 			throw new CustomException(FILE_UPLOAD_ERROR);
 		}
 
-		return Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
+		return Profile.create(savedFileName, cleanPath(savedFileName), extension,
+			uploadDir + separator, image.length);
 	}
 
 	private NaverUserInfo getNaverUserInfo(OAuthInfo responseMono) {
@@ -400,7 +410,7 @@ public class MemberService {
 		requestBody.add("client_secret", "igvBuycGcG");
 		requestBody.add("state", state);
 		return webClient.post()
-			.uri(oAuthConfig.getNaverTokenUri())
+			.uri(oAuthProperties.getNaver().getTokenUri())
 			.bodyValue(requestBody)
 			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
 			.retrieve()
@@ -420,9 +430,9 @@ public class MemberService {
 		Base64.Decoder decoder = Base64.getDecoder();
 		String payload = new String(decoder.decode(check[1]));
 		Map<String, String> idToken = new HashMap<>();
-		try{
+		try {
 			idToken = objectMapper.readValue(payload, Map.class);
-		}catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		String email = idToken.get("email");
@@ -434,8 +444,9 @@ public class MemberService {
 
 		Optional<Member> optionalMember = memberRepository.findGoogleByEmailAndSocialType(email);
 		Member member;
-		if(optionalMember.isEmpty()){ //회원가입
-			Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension, uploadDir + separator, image.length);
+		if (optionalMember.isEmpty()) { //회원가입
+			Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension,
+				uploadDir + separator, image.length);
 			member = Member.join(email, name, profile, command.getMemberType(), GOOGLE);
 			memberRepository.save(member);
 			Path copyOfLocation = Paths.get(uploadDir + separator + savedFileName + extension);
@@ -445,13 +456,13 @@ public class MemberService {
 				e.printStackTrace();
 				throw new CustomException(SERVER_ERROR);
 			}
-		}else{
+		} else {
 			member = optionalMember.get();
 		}
 
 		return memberRepository.findByUserId(member.getUserId())
-				.map(tokenGenerator::create)
-				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+			.map(tokenGenerator::create)
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 	}
 
 	private OAuthInfo getGoogleAccessToken(String code) {
@@ -464,14 +475,16 @@ public class MemberService {
 		requestBody.add("code", decode);
 
 		Mono<OAuthInfo> responseMono = webClient.post()
-				.uri(oAuthConfig.getGoogleTokenUri())
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.accept(MediaType.APPLICATION_JSON)
-				.bodyValue(requestBody)
-				.retrieve()
-				.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
-				.bodyToMono(OAuthInfo.class);
+			.uri(oAuthConfig.getGoogleTokenUri())
+			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			.accept(MediaType.APPLICATION_JSON)
+			.bodyValue(requestBody)
+			.retrieve()
+			.onStatus(HttpStatusCode::is4xxClientError,
+				response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::is5xxServerError,
+				response -> Mono.error(RuntimeException::new))
+			.bodyToMono(OAuthInfo.class);
 		return responseMono.share().block();
 	}
 
@@ -520,7 +533,7 @@ public class MemberService {
 
 		return buffer.toString();
 	}
-  
+
 	@Transactional
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
 		MemberJoinCommandResult result = joinMember(request);
