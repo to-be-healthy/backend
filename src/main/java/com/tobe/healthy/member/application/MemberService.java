@@ -1,31 +1,5 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.CONFIRM_PASSWORD_NOT_MATCHED;
-import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.INVITE_LINK_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.KAKAO_CONNECTION_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_LENGTH_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.NAVER_CONNECTION_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
-import static com.tobe.healthy.config.error.ErrorCode.PROFILE_ACCESS_FAILED;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.USERID_POLICY_VIOLATION;
-import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
-import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
-import static java.io.File.separator;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.util.UUID.randomUUID;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.util.StringUtils.cleanPath;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.OAuthConfig;
@@ -36,13 +10,7 @@ import com.tobe.healthy.config.error.ErrorCode;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
-import com.tobe.healthy.member.domain.dto.in.IdToken;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
+import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
@@ -52,8 +20,20 @@ import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import io.jsonwebtoken.impl.Base64UrlCodec;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,21 +46,16 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
+import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
+import static java.io.File.separator;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.UUID.randomUUID;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.util.StringUtils.cleanPath;
 
 @Service
 @RequiredArgsConstructor
@@ -92,12 +67,12 @@ public class MemberService {
 	private final PasswordEncoder passwordEncoder;
 	private final MemberRepository memberRepository;
 	private final JwtTokenGenerator tokenGenerator;
-	private final JavaMailSender mailSender;
 	private final RedisService redisService;
 	private final TrainerService trainerService;
 	private final ObjectMapper objectMapper;
 	private final OAuthConfig oAuthConfig;
 	private final FileRepository fileRepository;
+	private final MailService mailService;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -429,18 +404,7 @@ public class MemberService {
 	}
 
 	private void sendAuthMail(String email, String authKey) {
-		MimeMessage mimeMessage = mailSender.createMimeMessage();
-		try {
-			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false,
-				"UTF-8");
-			mimeMessageHelper.setTo(email);
-			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 회원가입 인증번호입니다."); // 메일 제목
-			String text = String.format("안녕하세요. 건강해짐 인증번호는 %s 입니다. \n확인후 입력해 주세요.", authKey);
-			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
-			mailSender.send(mimeMessage);
-		} catch (MessagingException e) {
-			throw new CustomException(MAIL_SEND_ERROR);
-		}
+		mailService.sendAuthMail(email, authKey);
 	}
 
 	private void validateDuplicationEmail(String email) {
@@ -450,20 +414,9 @@ public class MemberService {
 	}
 
 	private void sendResetPassword(String email, Member member) {
-		MimeMessage mimeMessage = mailSender.createMimeMessage();
-		try {
-			String resetPW = RandomStringUtils.random(12, true, true);
-			member.resetPassword(passwordEncoder.encode(resetPW));
-			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false,
-				"UTF-8");
-			mimeMessageHelper.setTo(email);
-			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 초기화 비밀번호입니다."); // 메일 제목
-			String text = String.format("안녕하세요. 건강해짐 초기화 비밀번호는 %s 입니다. \n로그인 후 반드시 비밀번호를 변경해 주세요.", resetPW);
-			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
-			mailSender.send(mimeMessage);
-		} catch (MessagingException e) {
-			throw new CustomException(MAIL_SEND_ERROR);
-		}
+		String resetPW = RandomStringUtils.random(12, true, true);
+		member.resetPassword(passwordEncoder.encode(resetPW));
+		mailService.sendResetPassword(email, resetPW);
 	}
 
 	private String getAuthCode() {
