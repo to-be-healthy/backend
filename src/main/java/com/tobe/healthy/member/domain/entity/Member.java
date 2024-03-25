@@ -147,7 +147,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
         this.pushAlarmStatus = alarmStatus;
     }
 
-    public void changeTrainerFeedback(AlarmStatus feedbackAlarmStatus) {
-        this.feedbackAlarmStatus = feedbackAlarmStatus;
+    public void changeTrainerFeedback(AlarmStatus alarmStatus) {
+        this.feedbackAlarmStatus = alarmStatus;
     }
 }

@@ -29,8 +29,8 @@ public class MemberAuthController {
 	private final MemberService memberService;
 
 	@Operation(summary = "아이디 중복 확인하기", responses = {
-		@ApiResponse(responseCode = "400", description = "이미 등록된 아이디"),
-		@ApiResponse(responseCode = "200", description = "사용 가능한 아이디")
+		@ApiResponse(responseCode = "400", description = "이미 등록된 아이디입니다."),
+		@ApiResponse(responseCode = "200", description = "사용 가능한 아이디입니다.")
 	})
 	@GetMapping("/validation/user-id")
 	public ResponseHandler<Boolean> validateUsernameDuplication(@Parameter(description = "아이디") @RequestParam String userId) {
@@ -53,6 +53,7 @@ public class MemberAuthController {
 	}
 
 	@Operation(summary = "이메일로 인증번호를 전송한다.", responses = {
+		@ApiResponse(responseCode = "500", description = "메일 전송중 에러가 발생하였습니다."),
 		@ApiResponse(responseCode = "400", description = "이미 등록된 이메일입니다."),
 		@ApiResponse(responseCode = "200", description = "이메일로 인증번호를 전송하였습니다.")
 	})
@@ -78,8 +79,13 @@ public class MemberAuthController {
 	}
 
 	@Operation(summary = "회원가입", responses = {
-		@ApiResponse(responseCode = "401", description = "이미 등록된 이메일입니다."),
-		@ApiResponse(responseCode = "405", description = "이미 등록된 닉네임입니다."),
+		@ApiResponse(responseCode = "400", description = "이름의 길이는 2자 이상이여야 합니다."),
+		@ApiResponse(responseCode = "400", description = "이름은 한글 또는 영어만 입력할 수 있습니다."),
+		@ApiResponse(responseCode = "400", description = "확인 비밀번호가 일치하지 않습니다."),
+		@ApiResponse(responseCode = "400", description = "비밀번호는 영어 대/소문자와 숫자로 구성된 8자리 이상 문자여야 합니다."),
+		@ApiResponse(responseCode = "400", description = "아이디에 한글을 포함할 수 없습니다."),
+		@ApiResponse(responseCode = "400", description = "이미 등록된 아이디입니다."),
+		@ApiResponse(responseCode = "400", description = "이미 등록된 이메일입니다."),
 		@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
 	})
 	@PostMapping("/join")
@@ -92,7 +98,7 @@ public class MemberAuthController {
 
 	@Operation(summary = "로그인", responses = {
 		@ApiResponse(responseCode = "400", description = "아이디 또는 비밀번호가 잘못되었습니다."),
-		@ApiResponse(responseCode = "200", description = "로그인에 성공하고, Access Token, Refresh Token을 반환한다.")
+		@ApiResponse(responseCode = "200", description = "로그인에 성공하고, Access Token, Refresh Token, userId, Role을 반환한다.")
 	})
 	@PostMapping("/login")
 	public ResponseHandler<Tokens> login(@RequestBody MemberLoginCommand request) {
@@ -103,10 +109,10 @@ public class MemberAuthController {
 	}
 
 	@Operation(summary = "토큰을 갱신한다.", responses = {
-		@ApiResponse(responseCode = "405", description = "Refresh Token 유효기간이 만료되었습니다."),
-		@ApiResponse(responseCode = "406", description = "Refresh Token을 찾을 수 없습니다."),
-		@ApiResponse(responseCode = "400", description = "회원을 찾을 수 없습니다."),
-		@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token을 반환한다.")
+		@ApiResponse(responseCode = "404", description = "Refresh Token을 찾을 수 없습니다."),
+		@ApiResponse(responseCode = "400", description = "Refresh Token이 유효하지 않습니다."),
+		@ApiResponse(responseCode = "404", description = "회원을 찾을 수 없습니다."),
+		@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token, userId, Role을 반환한다.")
 	})
 	@PostMapping("/refresh-token")
 	public ResponseHandler<Tokens> refreshToken(@Parameter(description = "아이디") @RequestParam String userId,
@@ -118,8 +124,8 @@ public class MemberAuthController {
 	}
 
 	@Operation(summary = "아이디를 찾는다.", responses = {
-		@ApiResponse(responseCode = "400", description = "등록된 회원이 아닙니다."),
-		@ApiResponse(responseCode = "200", description = "휴대폰 번호, 닉네임에 일치하는 이메일을 반환한다.")
+		@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
+		@ApiResponse(responseCode = "200", description = "이메일 이름이 일치한 사용자 아이디를 반환한다.")
 	})
 	@PostMapping("/find/user-id")
 	public ResponseHandler<String> findUserId(@RequestBody MemberFindIdCommand request) {
@@ -130,8 +136,9 @@ public class MemberAuthController {
 	}
 
 	@Operation(summary = "비밀번호를 찾는다.", responses = {
-		@ApiResponse(responseCode = "400", description = "등록된 회원이 아닙니다."),
-		@ApiResponse(responseCode = "200", description = "등록된 이메일에 초기화 비밀번호를 전송한다.")
+		@ApiResponse(responseCode = "500", description = "메일 전송중 에러가 발생했습니다."),
+		@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
+		@ApiResponse(responseCode = "200", description = "등록된 이메일로 초기화 비밀번호를 전송한다.")
 	})
 	@PostMapping("/find/password")
 	public ResponseHandler<String> findMemberPW(@RequestBody MemberFindPWCommand request) {

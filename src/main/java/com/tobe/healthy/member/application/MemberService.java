@@ -198,7 +198,7 @@ public class MemberService {
 
 	public boolean changePassword(MemberPasswordChangeCommand request, Long memberId) {
 		if (!request.getCurrPassword1().equals(request.getCurrPassword2())) {
-			throw new CustomException(ErrorCode.NOT_MATCH_PASSWORD);
+			throw new CustomException(NOT_MATCH_PASSWORD);
 		}
 
 		Member member = memberRepository.findById(memberId)

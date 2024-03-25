@@ -38,7 +38,8 @@ public class MemberController {
 	private final MemberService memberService;
 
 	@Operation(summary = "회원 탈퇴한다.", responses = {
-		@ApiResponse(responseCode = "400", description = "등록된 회원이 아닙니다."),
+		@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
+		@ApiResponse(responseCode = "400", description = "확인 비밀번호가 일치하지 않습니다."),
 		@ApiResponse(responseCode = "200", description = "회원 탈퇴 되었습니다.")
 	})
 	@PostMapping("/delete")
@@ -51,7 +52,8 @@ public class MemberController {
 	}
 
 	@Operation(summary = "비밀번호를 변경한다.", responses = {
-		@ApiResponse(responseCode = "400", description = "확인 비밀번호가 다릅니다."),
+		@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
+		@ApiResponse(responseCode = "400", description = "확인 비밀번호가 일치하지 않습니다."),
 		@ApiResponse(responseCode = "200", description = "비밀번호 변경이 완료 되었습니다.")
 	})
 	@PatchMapping("/password")
