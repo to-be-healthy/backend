@@ -2,12 +2,13 @@ package com.tobe.healthy.schedule.domain.dto.in;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
@@ -15,10 +16,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @Schema(description = "일정 자동생성 DTO")
 public class AutoCreateScheduleCommand {
-
-	@Schema(description = "트레이너 아이디")
-	@NotNull(message = "트레이너 아이디를 입력해 주세요.")
-	private Long trainer;
 
 	@Schema(description = "자동으로 생성할 수업 시작 일자", example = "2024-04-01")
 	@NotNull(message = "자동으로 생성할 수업 시작 일자를 입력해 주세요.")
