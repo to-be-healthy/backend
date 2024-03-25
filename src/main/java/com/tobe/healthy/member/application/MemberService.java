@@ -30,7 +30,6 @@ import static org.springframework.util.StringUtils.cleanPath;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tobe.healthy.common.OAuthConfig;
 import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.OAuthProperties;
@@ -324,7 +323,7 @@ public class MemberService {
 		request.add("code", code);
 		request.add("client_secret", "QMaOCZDGKnrCtnRbSl3nIRmsKVIPGJnd");
 		OAuthInfo result = webClient.post()
-			.uri(oAuthConfig.getKakaoTokenUri())
+			.uri(oAuthProperties.getKakao().getTokenUri())
 			.bodyValue(request)
 			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
 			.retrieve()
@@ -389,7 +388,7 @@ public class MemberService {
 
 	private NaverUserInfo getNaverUserInfo(OAuthInfo responseMono) {
 		return webClient.get()
-			.uri(oAuthConfig.getNaverUserInfoUri())
+			.uri(oAuthProperties.getNaver().getUserInfoUri())
 			.header("Authorization", "Bearer " + responseMono.getAccessToken())
 			.retrieve()
 			.onStatus(HttpStatusCode::isError, response ->
@@ -468,14 +467,14 @@ public class MemberService {
 	private OAuthInfo getGoogleAccessToken(String code) {
 		String decode = URLDecoder.decode(code, StandardCharsets.UTF_8);
 		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-		requestBody.add("client_id", oAuthConfig.getGoogleClientId());
-		requestBody.add("client_secret", oAuthConfig.getGoogleClientSecret());
-		requestBody.add("grant_type", oAuthConfig.getGoogleGrantType());
-		requestBody.add("redirect_uri", oAuthConfig.getGoogleRedirectUri());
+		requestBody.add("client_id", oAuthProperties.getGoogle().getClientId());
+		requestBody.add("client_secret", oAuthProperties.getGoogle().getClientSecret());
+		requestBody.add("grant_type", oAuthProperties.getGoogle().getGrantType());
+		requestBody.add("redirect_uri", oAuthProperties.getGoogle().getRedirectUri());
 		requestBody.add("code", decode);
 
 		Mono<OAuthInfo> responseMono = webClient.post()
-			.uri(oAuthConfig.getGoogleTokenUri())
+			.uri(oAuthProperties.getGoogle().getTokenUri())
 			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 			.accept(MediaType.APPLICATION_JSON)
 			.bodyValue(requestBody)
