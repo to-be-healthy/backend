@@ -53,7 +53,7 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     private List<WorkoutHistoryComment> historyComments = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "workoutHistory")
+    @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
     private List<CompletedExercise> completedExercises = new ArrayList<>();
 
 
@@ -76,8 +76,16 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     public void deleteWorkoutHistory() {
         this.delYn = true;
-        this.historyFiles.forEach(WorkoutHistoryFile::deleteWorkoutHistoryFile);
+        this.deleteFiles();
+        this.deleteComments();
+    }
+
+    public void deleteComments() {
         this.historyComments.forEach(WorkoutHistoryComment::deleteComment);
+    }
+
+    public void deleteFiles() {
+        this.historyFiles.forEach(WorkoutHistoryFile::deleteWorkoutHistoryFile);
     }
 
 }

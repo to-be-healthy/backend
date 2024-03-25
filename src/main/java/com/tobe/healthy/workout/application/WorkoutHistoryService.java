@@ -72,7 +72,8 @@ public class WorkoutHistoryService {
         List<WorkoutHistoryDto> historiesDto = histories.map(WorkoutHistoryDto::from).stream().toList();
         List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
         historiesDto = setHistoryListFile(historiesDto, ids);
-        return setHistoryListExercise(historiesDto, ids);
+        List<WorkoutHistoryDto> result = setHistoryListExercise(historiesDto, ids);
+        return result.isEmpty() ? null : result;
     }
 
     public List<WorkoutHistoryDto> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable) {
@@ -80,7 +81,8 @@ public class WorkoutHistoryService {
         List<WorkoutHistoryDto> historiesDto = histories.map(WorkoutHistoryDto::from).stream().toList();
         List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
         historiesDto = setHistoryListFile(historiesDto, ids);
-        return setHistoryListExercise(historiesDto, ids);
+        List<WorkoutHistoryDto> result = setHistoryListExercise(historiesDto, ids);
+        return result.isEmpty() ? null : result;
     }
 
     public WorkoutHistoryDto getWorkoutHistoryDetail(Long workoutHistoryId) {
@@ -96,6 +98,7 @@ public class WorkoutHistoryService {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndMemberIdAndDelYnFalse(workoutHistoryId, member.getId())
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         history.deleteWorkoutHistory();
+        completedExerciseRepository.deleteAllInBatch(history.getCompletedExercises());
         workoutHistoryLikeRepository.deleteLikeByWorkoutHistoryId(workoutHistoryId);
         history.getHistoryFiles().forEach(file ->
             fileService.deleteFile(file.getFilePath() + separator + file.getFileName() + file.getExtension())
@@ -106,7 +109,14 @@ public class WorkoutHistoryService {
     public WorkoutHistoryDto updateWorkoutHistory(Member member, Long workoutHistoryId, HistoryAddCommand command) {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndMemberIdAndDelYnFalse(workoutHistoryId, member.getId())
             .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
+        //내용 수정
         history.updateContent(command.getContent());
+        //운동종류 수정
+        completedExerciseRepository.deleteAllInBatch(history.getCompletedExercises());
+        completedExerciseRepository.flush();
+        saveCompletedExercises(history, command);
+        //파일 수정
+        history.deleteFiles();
         history.getHistoryFiles().forEach(file ->
                 fileService.deleteFile(file.getFilePath() + separator + file.getFileName() + file.getExtension())
         );
