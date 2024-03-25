@@ -1,13 +1,5 @@
 package com.tobe.healthy.schedule.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.NOT_RESERVABLE_SCHEDULE;
-import static com.tobe.healthy.config.error.ErrorCode.NOT_STAND_BY_SCHEDULE;
-import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.STAND_BY_SCHEDULE_NOT_FOUND;
-import static java.time.DayOfWeek.SATURDAY;
-import static java.time.DayOfWeek.SUNDAY;
-
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -20,17 +12,22 @@ import com.tobe.healthy.schedule.domain.dto.out.ScheduleInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
+
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static java.time.DayOfWeek.SATURDAY;
+import static java.time.DayOfWeek.SUNDAY;
 
 @Service
 @RequiredArgsConstructor
@@ -105,11 +102,11 @@ public class ScheduleService {
 		return true;
 	}
 
-	public Boolean registerSchedule(ScheduleRegisterCommand request) {
+	public Boolean registerSchedule(ScheduleRegisterCommand request, Long memberId) {
 		for (Map.Entry<String, List<ScheduleRegister>> entry : request.getSchedule().entrySet()) {
 			String date = entry.getKey();
 			List<ScheduleRegister> scheduleRegisters = entry.getValue();
-			Member trainer = memberRepository.findById(request.getTrainer())
+			Member trainer = memberRepository.findById(memberId)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 			for (ScheduleRegister scheduleRegister : scheduleRegisters) {
 				Member applicant = null;

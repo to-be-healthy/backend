@@ -2,18 +2,6 @@ package com.tobe.healthy.member.application;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.member.domain.entity.SocialType.*;
-import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.KAKAO_CONNECTION_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.NAVER_CONNECTION_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
-import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
-import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
 import static java.io.File.separator;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.UUID.randomUUID;
@@ -23,8 +11,8 @@ import static org.springframework.util.StringUtils.cleanPath;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.OAuthConfig;
+import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.ErrorCode;
@@ -34,13 +22,7 @@ import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.file.repository.FileRepository;
-import com.tobe.healthy.member.domain.dto.in.IdToken;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
+import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.GoogleUserInfo;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
@@ -48,10 +30,9 @@ import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
-import com.tobe.healthy.member.domain.entity.TrainerFeedback;
 import com.tobe.healthy.member.repository.MemberRepository;
-import io.jsonwebtoken.impl.Base64UrlCodec;
 import com.tobe.healthy.trainer.application.TrainerService;
+import io.jsonwebtoken.impl.Base64UrlCodec;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
@@ -81,6 +62,29 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.Random;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
+import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
+import static java.io.File.separator;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.UUID.randomUUID;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.util.StringUtils.cleanPath;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -91,12 +95,12 @@ public class MemberService {
 	private final PasswordEncoder passwordEncoder;
 	private final MemberRepository memberRepository;
 	private final JwtTokenGenerator tokenGenerator;
-	private final JavaMailSender mailSender;
 	private final RedisService redisService;
 	private final TrainerService trainerService;
 	private final ObjectMapper objectMapper;
 	private final OAuthConfig oAuthConfig;
 	private final FileRepository fileRepository;
+	private final MailService mailService;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -116,7 +120,6 @@ public class MemberService {
 	}
 
 	public String sendEmailVerification(String email) {
-		// 1. 이메일 중복 확인
 		memberRepository.findByEmail(email).ifPresent(e -> {
 			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
 		});
@@ -143,6 +146,8 @@ public class MemberService {
 	}
 
 	public MemberJoinCommandResult joinMember(MemberJoinCommand request) {
+		validateName(request);
+		validatePassword(request);
 		validateDuplicationUserId(request.getUserId());
 		validateDuplicationEmail(request.getEmail());
 
@@ -153,6 +158,27 @@ public class MemberService {
 		return MemberJoinCommandResult.from(member);
 	}
 
+	private void validatePassword(MemberJoinCommand request) {
+		if (!request.getPassword().equals(request.getPasswordConfirm())) {
+			throw new CustomException(CONFIRM_PASSWORD_NOT_MATCHED);
+		}
+		String regexp = "^[A-Za-z0-9]+$";
+		if (request.getPassword().length() < 8 || !Pattern.matches(regexp, request.getPassword())) {
+			throw new CustomException(PASSWORD_POLICY_VIOLATION);
+		}
+	}
+
+	private void validateName(MemberJoinCommand request) {
+		if (request.getName().length() < 2) {
+			throw new CustomException(MEMBER_NAME_LENGTH_NOT_VALID);
+		}
+
+		String regexp = "^[가-힣A-Za-z]+$";
+		if (!Pattern.matches(regexp, request.getName())) {
+			throw new CustomException(MEMBER_NAME_NOT_VALID);
+		}
+	}
+
 	public Tokens login(MemberLoginCommand request) {
 		return memberRepository.findByUserId(request.getUserId())
 			.filter(member -> passwordEncoder.matches(request.getPassword(), member.getPassword()))
@@ -161,15 +187,12 @@ public class MemberService {
 	}
 
 	public Tokens refreshToken(String userId, String refreshToken) {
-		// 1. Redis에서 유효한 token이 있는지 조회한다.
 		String result = redisService.getValues(userId);
 
-		// 2. Refresh Token이 존재하지 않음.
 		if (isEmpty(result)) {
 			throw new CustomException(REFRESH_TOKEN_NOT_FOUND);
 		}
 
-		// 3. Refresh Token이 유효하지 않을경우
 		if (!result.equals(refreshToken)) {
 			throw new CustomException(REFRESH_TOKEN_NOT_VALID);
 		}
@@ -177,14 +200,13 @@ public class MemberService {
 		Member member = memberRepository.findByUserId(userId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		// 4. 새로운 AccessToken과 기존의 RefreshToken을 반환한다.
-		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), refreshToken);
+		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), member.getMemberType(), refreshToken);
 	}
 
 	public String findUserId(MemberFindIdCommand request) {
-		Member entity = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
+		Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		return entity.getUserId();
+		return member.getUserId();
 	}
 
 	public String findMemberPW(MemberFindPWCommand request) {
@@ -194,8 +216,8 @@ public class MemberService {
 		return member.getEmail();
 	}
 
-	public String deleteMember(String userId, String password) {
-		Member member = memberRepository.findByUserId(userId)
+	public String deleteMember(String password, Long memberId) {
+		Member member = memberRepository.findById(memberId)
 			.filter(m -> passwordEncoder.matches(password, m.getPassword()))
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.deleteMember();
@@ -204,7 +226,7 @@ public class MemberService {
 
 	public boolean changePassword(MemberPasswordChangeCommand request, Long memberId) {
 		if (!request.getCurrPassword1().equals(request.getCurrPassword2())) {
-			throw new CustomException(ErrorCode.NOT_MATCH_PASSWORD);
+			throw new CustomException(NOT_MATCH_PASSWORD);
 		}
 
 		Member member = memberRepository.findById(memberId)
@@ -255,10 +277,10 @@ public class MemberService {
 		return true;
 	}
 
-	public Boolean changeTrainerFeedback(TrainerFeedback trainerFeedback, Long memberId) {
+	public Boolean changeTrainerFeedback(AlarmStatus alarmStatus, Long memberId) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		member.changeTrainerFeedback(trainerFeedback);
+		member.changeTrainerFeedback(alarmStatus);
 		return true;
 	}
 
@@ -277,8 +299,11 @@ public class MemberService {
 	private byte[] getProfileImage(String imageName) {
 		return webClient.get().uri(imageName)
 			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::isError, response ->
+				response.bodyToMono(String.class).flatMap(error -> {
+					log.error("error => {}", error);
+					return Mono.error(new CustomException(PROFILE_ACCESS_FAILED));
+				}))
 			.bodyToMono(byte[].class)
 			.share()
 			.block();
@@ -357,8 +382,11 @@ public class MemberService {
 			.uri(oAuthConfig.getNaverUserInfoUri())
 			.header("Authorization", "Bearer " + responseMono.getAccessToken())
 			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(RuntimeException::new))
+			.onStatus(HttpStatusCode::isError, response ->
+				response.bodyToMono(String.class).flatMap(error -> {
+					log.error("error => {}", error);
+					return Mono.error(new CustomException(NAVER_CONNECTION_ERROR));
+				}))
 			.bodyToMono(NaverUserInfo.class)
 			.share()
 			.block();
@@ -456,23 +484,16 @@ public class MemberService {
 	}
 
 	private void validateDuplicationUserId(String userId) {
+		if (Pattern.matches("^[가-힣]+$", userId)) {
+			throw new CustomException(USERID_POLICY_VIOLATION);
+		}
 		memberRepository.findByUserId(userId).ifPresent(m -> {
 			throw new CustomException(MEMBER_ID_DUPLICATION);
 		});
 	}
 
 	private void sendAuthMail(String email, String authKey) {
-		MimeMessage mimeMessage = mailSender.createMimeMessage();
-		try {
-			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-			mimeMessageHelper.setTo(email);
-			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 회원가입 인증번호입니다."); // 메일 제목
-			String text = String.format("안녕하세요. 건강해짐 인증번호는 %s 입니다. \n확인후 입력해 주세요.", authKey);
-			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
-			mailSender.send(mimeMessage);
-		} catch (MessagingException e) {
-			throw new CustomException(MAIL_SEND_ERROR);
-		}
+		mailService.sendAuthMail(email, authKey);
 	}
 
 	private void validateDuplicationEmail(String email) {
@@ -482,19 +503,9 @@ public class MemberService {
 	}
 
 	private void sendResetPassword(String email, Member member) {
-		MimeMessage mimeMessage = mailSender.createMimeMessage();
-		try {
-			String resetPW = RandomStringUtils.random(12, true, true);
-			member.resetPassword(passwordEncoder.encode(resetPW));
-			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-			mimeMessageHelper.setTo(email);
-			mimeMessageHelper.setSubject("안녕하세요. 건강해짐 초기화 비밀번호입니다."); // 메일 제목
-			String text = String.format("안녕하세요. 건강해짐 초기화 비밀번호는 %s 입니다. \n로그인 후 반드시 비밀번호를 변경해 주세요.", resetPW);
-			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
-			mailSender.send(mimeMessage);
-		} catch (MessagingException e) {
-			throw new CustomException(MAIL_SEND_ERROR);
-		}
+		String resetPW = RandomStringUtils.random(12, true, true);
+		member.resetPassword(passwordEncoder.encode(resetPW));
+		mailService.sendResetPassword(email, resetPW);
 	}
 
 	private String getAuthCode() {
@@ -509,7 +520,7 @@ public class MemberService {
 
 		return buffer.toString();
 	}
-    
+  
 	@Transactional
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
 		MemberJoinCommandResult result = joinMember(request);
@@ -526,7 +537,7 @@ public class MemberService {
 		HashMap<String, String> map = new HashMap<>();
 		try {
 			map = objectMapper.readValue(mappedData, HashMap.class);
-		} catch (JsonProcessingException e){
+		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
 		Long trainerId = Long.valueOf(map.get("trainerId"));

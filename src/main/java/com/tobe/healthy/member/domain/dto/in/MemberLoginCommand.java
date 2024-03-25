@@ -1,7 +1,9 @@
 package com.tobe.healthy.member.domain.dto.in;
 
+import com.tobe.healthy.member.domain.entity.MemberType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,9 +17,11 @@ public class MemberLoginCommand {
     @NotEmpty(message = "아이디를 입력해 주세요.")
     private String userId;
 
-    @Schema(description = "비밀번호", example = "zxcvbnm=1")
+    @Schema(description = "비밀번호", example = "zxcvbnm11")
     @NotEmpty(message = "비밀번호를 입력해 주세요.")
     private String password;
 
-    private String code;
+    @Schema(description = "회원 구분" , example = "MEMBER")
+    @NotNull(message = "회원 구분이 필요합니다.")
+    private MemberType memberType;
 }

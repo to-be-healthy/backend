@@ -1,6 +1,7 @@
 package com.tobe.healthy.config.security;
 
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -57,5 +58,9 @@ public class CustomMemberDetails implements UserDetails {
 
 	public Long getMemberId() {
 		return member.getId();
+	}
+
+	public MemberType getMemberType() {
+		return member.getMemberType();
 	}
 }
