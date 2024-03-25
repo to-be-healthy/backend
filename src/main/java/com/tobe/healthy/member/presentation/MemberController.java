@@ -32,7 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/member/v1")
 @Slf4j
 @Valid
-@Tag(name = "회원 API", description = "인증이 있어야만 접근 가능한 회원 API")
+@Tag(name = "02.회원정보 수정 API", description = "인증이 있어야만 접근 가능한 회원 API")
 public class MemberController {
 
 	private final MemberService memberService;
