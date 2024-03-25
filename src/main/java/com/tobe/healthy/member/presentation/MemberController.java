@@ -63,31 +63,6 @@ public class MemberController {
 			.message("비밀번호 변경이 완료되었습니다.")
 			.build();
 	}
-  
-  @Operation(summary = "초대링크 uuid 데이터 조회", responses = {
-			@ApiResponse(responseCode = "400", description = "잘못된 요청"),
-			@ApiResponse(responseCode = "200", description = "성공")
-	})
-	@GetMapping("/invitation/uuid")
-	public ResponseHandler<InvitationMappingResult> getInvitationMapping(@RequestParam String uuid) {
-		return ResponseHandler.<InvitationMappingResult>builder()
-				.data(memberService.getInvitationMapping(uuid))
-				.message("조회가 완료되었습니다.")
-				.build();
-	}
-
-	@Operation(summary = "초대링크 회원가입", responses = {
-			@ApiResponse(responseCode = "401", description = "이미 등록된 이메일입니다."),
-			@ApiResponse(responseCode = "405", description = "이미 등록된 닉네임입니다."),
-			@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
-	})
-	@PostMapping("/invitation/join")
-	public ResponseHandler<MemberJoinCommandResult> joinWithInvitation(@RequestBody @Valid MemberJoinCommand request) {
-		return ResponseHandler.<MemberJoinCommandResult>builder()
-				.data(memberService.joinWithInvitation(request))
-				.message("회원가입이 완료되었습니다.")
-				.build();
-	}
 
 	@Operation(summary = "프로필 사진이 등록되었습니다.", responses = {
 		@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
@@ -143,36 +118,4 @@ public class MemberController {
 			.build();
 	}
 
-	@Operation(summary = "초대링크 uuid 데이터 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
-		@ApiResponse(responseCode = "200", description = "성공")
-	})
-	@GetMapping("/invitation/uuid")
-	public ResponseHandler<InvitationMappingResult> getInvitationMapping(@RequestParam String uuid) {
-		return ResponseHandler.<InvitationMappingResult>builder()
-			.data(memberService.getInvitationMapping(uuid))
-			.message("조회가 완료되었습니다.")
-			.build();
-	}
-
-	@Operation(summary = "초대링크 회원가입", responses = {
-		@ApiResponse(responseCode = "401", description = "이미 등록된 이메일입니다."),
-		@ApiResponse(responseCode = "405", description = "이미 등록된 닉네임입니다."),
-		@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
-	})
-	@PostMapping("/invitation/join")
-	public ResponseHandler<MemberJoinCommandResult> joinWithInvitation(@RequestBody MemberJoinCommand request) {
-		return ResponseHandler.<MemberJoinCommandResult>builder()
-			.data(memberService.joinWithInvitation(request))
-			.message("회원가입이 완료되었습니다.")
-			.build();
-	}
-
-	@PostMapping("/access-token/google")
-	public ResponseHandler<Tokens> getGoogleOAuth(@RequestBody SocialLoginCommand command) {
-		return ResponseHandler.<Tokens>builder()
-				.data(memberService.getGoogleOAuth(command))
-				.message("요청이 처리되었습니다.")
-				.build();
-	}
 }

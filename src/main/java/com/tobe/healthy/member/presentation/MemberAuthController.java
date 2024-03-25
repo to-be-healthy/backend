@@ -2,10 +2,7 @@ package com.tobe.healthy.member.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.member.application.MemberService;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
+import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
@@ -202,4 +199,13 @@ public class MemberAuthController {
 			.message("요청이 처리되었습니다.")
 			.build();
 	}
+
+	@PostMapping("/access-token/google")
+	public ResponseHandler<Tokens> getGoogleOAuth(@RequestBody SocialLoginCommand command) {
+		return ResponseHandler.<Tokens>builder()
+				.data(memberService.getGoogleOAuth(command))
+				.message("요청이 처리되었습니다.")
+				.build();
+	}
+
 }

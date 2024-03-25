@@ -99,7 +99,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
                 .userId(UUID.randomUUID().toString())
                 .email(email)
                 .name(name)
-                .alarmStatus(ENABLED)
+                .pushAlarmStatus(ENABLED)
                 .profileId(profile)
                 .memberType(memberType)
                 .socialType(socialType)
