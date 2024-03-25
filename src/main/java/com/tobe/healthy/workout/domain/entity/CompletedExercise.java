@@ -14,20 +14,24 @@ public class CompletedExercise {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "exercise_id")
+    @Column(name = "completed_id")
+    private Long completedId;
+
     private Long exerciseId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workout_history_id")
     private WorkoutHistory workoutHistory;
 
+    private String name;
     private int setNum;
     private int weight;
     private int numberOfCycles;
 
-    public static CompletedExercise create(CompletedExerciseDto completed, WorkoutHistory history) {
+    public static CompletedExercise create(CompletedExerciseDto completed, WorkoutHistory history, String name) {
         return CompletedExercise.builder()
                 .exerciseId(completed.getExerciseId())
+                .name(name)
                 .setNum(completed.getSetNum())
                 .weight(completed.getWeight())
                 .numberOfCycles(completed.getNumberOfCycles())

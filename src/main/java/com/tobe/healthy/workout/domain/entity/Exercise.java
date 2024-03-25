@@ -1,5 +1,8 @@
 package com.tobe.healthy.workout.domain.entity;
 
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.workout.domain.dto.ExerciseDto;
+import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,5 +34,19 @@ public class Exercise {
     private String mechanics;
     private String names;
     private String subId;
+
+    public static Exercise from(ExerciseDto exerciseDto) {
+        return Exercise.builder()
+                .exerciseId(exerciseDto.getExerciseId())
+                .category(exerciseDto.getCategory())
+                .primaryMuscle(exerciseDto.getPrimaryMuscle())
+                .equipments(exerciseDto.getEquipments())
+                .forces(exerciseDto.getForces())
+                .levels(exerciseDto.getLevels())
+                .mechanics(exerciseDto.getMechanics())
+                .names(exerciseDto.getNames())
+                .subId(exerciseDto.getSubId())
+                .build();
+    }
 
 }

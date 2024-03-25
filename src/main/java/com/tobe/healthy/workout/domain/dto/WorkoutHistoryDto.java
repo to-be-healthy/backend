@@ -46,17 +46,6 @@ public class WorkoutHistoryDto {
                 .build();
     }
 
-    public static WorkoutHistoryDto create(WorkoutHistory history, List<WorkoutHistoryFileDto> files) {
-        return WorkoutHistoryDto.builder()
-                .workoutHistoryId(history.getWorkoutHistoryId())
-                .content(history.getContent())
-                .member(MemberDto.from(history.getMember()))
-                .files(files)
-                .trainerId(history.getTrainerId())
-                .likeCnt(history.getLikeCnt())
-                .build();
-    }
-
     public static WorkoutHistoryDto from(WorkoutHistory history) {
         return WorkoutHistoryDto.builder()
                 .workoutHistoryId(history.getWorkoutHistoryId())
