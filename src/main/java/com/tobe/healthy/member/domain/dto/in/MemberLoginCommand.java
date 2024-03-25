@@ -17,7 +17,7 @@ public class MemberLoginCommand {
     @NotEmpty(message = "아이디를 입력해 주세요.")
     private String userId;
 
-    @Schema(description = "비밀번호", example = "zxcvbnm=1")
+    @Schema(description = "비밀번호", example = "zxcvbnm11")
     @NotEmpty(message = "비밀번호를 입력해 주세요.")
     private String password;
 

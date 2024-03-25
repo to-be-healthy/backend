@@ -55,9 +55,11 @@ public class Member extends BaseTimeEntity<Member, Long> {
     private MemberType memberType = MEMBER;
 
 	@Enumerated(STRING)
+	@ColumnDefault("ENABLED")
 	private AlarmStatus pushAlarmStatus = ENABLED;
 
 	@Enumerated(STRING)
+	@ColumnDefault("ENABLED")
 	private AlarmStatus feedbackAlarmStatus = ENABLED;
 
     @ManyToOne(fetch = LAZY, cascade = PERSIST)
@@ -74,6 +76,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
     private List<StandBySchedule> standBySchedules = new ArrayList<>();
 
     @Enumerated(STRING)
+	@ColumnDefault("NONE")
     private SocialType socialType = NONE;
 
     @ColumnDefault("false")
@@ -87,6 +90,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
             .name(request.getName())
             .pushAlarmStatus(ENABLED)
             .memberType(request.getMemberType())
+			.socialType(NONE)
             .build();
     }
 
