@@ -42,7 +42,6 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "회원 탈퇴 되었습니다.")
 	})
 	@PostMapping("/delete")
-	@PreAuthorize("hasAuthority('TRAINER')")
 	public ResponseHandler<String> deleteMember(@Parameter(description = "비밀번호") @RequestParam String password,
 												@AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<String>builder()
@@ -108,8 +107,8 @@ public class MemberController {
 		@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 		@ApiResponse(responseCode = "200", description = "수업 기록 여부가 변경되었습니다.")
 	})
-	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	@PatchMapping("/trainer-feedback")
+	@PreAuthorize("hasAuthority('TRAINER')")
 	public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태") @RequestParam AlarmStatus alarmStatus,
 														  @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
