@@ -40,27 +40,27 @@ import org.hibernate.annotations.DynamicUpdate;
 @DynamicUpdate
 public class Member extends BaseTimeEntity<Member, Long> {
 
-    @Id
-    @GeneratedValue(strategy = IDENTITY)
-    @Column(name = "member_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = IDENTITY)
+	@Column(name = "member_id")
+	private Long id;
 
-    @Column(unique = true)
-    private String userId;
+	@Column(unique = true)
+	private String userId;
 
-    @Column(unique = true)
-    private String email;
+	@Column(unique = true)
+	private String email;
 
-    private String password;
+	private String password;
 
-    private String name;
+	private String name;
 
-    @OneToOne(fetch = LAZY, cascade = ALL)
-    @JoinColumn(name = "profile_id")
-    private Profile profileId;
+	@OneToOne(fetch = LAZY, cascade = ALL)
+	@JoinColumn(name = "profile_id")
+	private Profile profileId;
 
-    @Enumerated(STRING)
-    private MemberType memberType = MEMBER;
+	@Enumerated(STRING)
+	private MemberType memberType = MEMBER;
 
 	@Enumerated(STRING)
 	@ColumnDefault("ENABLED")
@@ -70,60 +70,60 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@ColumnDefault("ENABLED")
 	private AlarmStatus feedbackAlarmStatus = ENABLED;
 
-    @ManyToOne(fetch = LAZY, cascade = PERSIST)
-    @JoinColumn(name = "gym_id")
-    private Gym gym;
+	@ManyToOne(fetch = LAZY, cascade = PERSIST)
+	@JoinColumn(name = "gym_id")
+	private Gym gym;
 
-    @OneToMany(fetch = LAZY, mappedBy = "trainer")
-    private final List<Schedule> trainerSchedules = new ArrayList<>();
+	@OneToMany(fetch = LAZY, mappedBy = "trainer")
+	private final List<Schedule> trainerSchedules = new ArrayList<>();
 
-    @OneToMany(fetch = LAZY, mappedBy = "applicant")
-    private final List<Schedule> applicantSchedules = new ArrayList<>();
+	@OneToMany(fetch = LAZY, mappedBy = "applicant")
+	private final List<Schedule> applicantSchedules = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member")
-    private final List<StandBySchedule> standBySchedules = new ArrayList<>();
+	@OneToMany(mappedBy = "member")
+	private final List<StandBySchedule> standBySchedules = new ArrayList<>();
 
-    @Enumerated(STRING)
+	@Enumerated(STRING)
 	@ColumnDefault("NONE")
-    private SocialType socialType = NONE;
+	private SocialType socialType = NONE;
 
-    @ColumnDefault("false")
-    private boolean delYn = false;
+	@ColumnDefault("false")
+	private boolean delYn = false;
 
-    public static Member join(MemberJoinCommand request, String password) {
-        return Member.builder()
-            .userId(request.getUserId())
-            .email(request.getEmail())
-            .password(password)
-            .name(request.getName())
-            .pushAlarmStatus(ENABLED)
-            .memberType(request.getMemberType())
-			.socialType(NONE)
-            .build();
-    }
+	public static Member join(MemberJoinCommand request, String password) {
+		return Member.builder()
+				.userId(request.getUserId())
+				.email(request.getEmail())
+				.password(password)
+				.name(request.getName())
+				.pushAlarmStatus(ENABLED)
+				.memberType(request.getMemberType())
+				.socialType(NONE)
+				.build();
+	}
 
-    public static Member join(String email, String name, Profile profile, MemberType memberType, SocialType socialType) {
-        return Member.builder()
-                .userId(UUID.randomUUID().toString())
-                .email(email)
-                .name(name)
-                .pushAlarmStatus(ENABLED)
-                .profileId(profile)
-                .memberType(memberType)
-                .socialType(socialType)
-                .build();
-    }
+	public static Member join(String email, String name, Profile profile, MemberType memberType, SocialType socialType) {
+		return Member.builder()
+				.userId(UUID.randomUUID().toString())
+				.email(email)
+				.name(name)
+				.pushAlarmStatus(ENABLED)
+				.profileId(profile)
+				.memberType(memberType)
+				.socialType(socialType)
+				.build();
+	}
 
-    public static Member join(String email, String name, Profile profile, SocialType socialType) {
-        return Member.builder()
-            .userId(UUID.randomUUID().toString())
-            .email(email)
-            .name(name)
-            .pushAlarmStatus(ENABLED)
-            .profileId(profile)
-            .socialType(socialType)
-            .build();
-    }
+	public static Member join(String email, String name, Profile profile, SocialType socialType) {
+		return Member.builder()
+				.userId(UUID.randomUUID().toString())
+				.email(email)
+				.name(name)
+				.pushAlarmStatus(ENABLED)
+				.profileId(profile)
+				.socialType(socialType)
+				.build();
+	}
 
 	@Builder
 	public Member(String userId, String email, String password, String name, Profile profileId, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, SocialType socialType, boolean delYn) {
@@ -140,34 +140,34 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	}
 
 	public void registerProfile(Profile profileId) {
-        this.profileId = profileId;
-    }
+		this.profileId = profileId;
+	}
 
-    public void resetPassword(String password) {
-        this.password = password;
-    }
+	public void resetPassword(String password) {
+		this.password = password;
+	}
 
-    public void registerGym(Gym gym) {
-        this.gym = gym;
-    }
+	public void registerGym(Gym gym) {
+		this.gym = gym;
+	}
 
-    public void deleteMember() {
-        this.delYn = true;
-    }
+	public void deleteMember() {
+		this.delYn = true;
+	}
 
-    public void changePassword(String password) {
-        this.password = password;
-    }
+	public void changePassword(String password) {
+		this.password = password;
+	}
 
-    public void changeName(String name) {
-        this.name = name;
-    }
+	public void changeName(String name) {
+		this.name = name;
+	}
 
-    public void changeAlarm(AlarmStatus alarmStatus) {
-        this.pushAlarmStatus = alarmStatus;
-    }
+	public void changeAlarm(AlarmStatus alarmStatus) {
+		this.pushAlarmStatus = alarmStatus;
+	}
 
-    public void changeTrainerFeedback(AlarmStatus alarmStatus) {
-        this.feedbackAlarmStatus = alarmStatus;
-    }
+	public void changeTrainerFeedback(AlarmStatus alarmStatus) {
+		this.feedbackAlarmStatus = alarmStatus;
+	}
 }
