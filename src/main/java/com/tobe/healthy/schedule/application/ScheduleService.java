@@ -10,7 +10,6 @@ import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,25 +82,6 @@ public class ScheduleService {
 		return true;
 	}
 
-	public Boolean registerStandBySchedule(Long scheduleId, Long memberId) {
-
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-
-		Schedule schedule = scheduleRepository.findAvailableStandById(scheduleId)
-			.orElseThrow(() -> new CustomException(NOT_STAND_BY_SCHEDULE));
-
-		if (!ObjectUtils.isEmpty(schedule.getStandBySchedule())) {
-			throw new CustomException(NOT_STAND_BY_SCHEDULE);
-		}
-
-		StandBySchedule standBySchedule = StandBySchedule.register(member, schedule);
-
-		standByScheduleRepository.save(standBySchedule);
-
-		return true;
-	}
-
 	public Boolean registerSchedule(ScheduleRegisterCommand request, Long memberId) {
 		for (Map.Entry<String, List<ScheduleRegister>> entry : request.getSchedule().entrySet()) {
 			String date = entry.getKey();
@@ -144,14 +124,5 @@ public class ScheduleService {
 
 	private boolean isHoliday(LocalDate startDt) {
 		return startDt.getDayOfWeek().equals(SUNDAY) || startDt.getDayOfWeek().equals(SATURDAY);
-	}
-
-	public Boolean cancelStandBySchedule(Long scheduleId, Long memberId) {
-		StandBySchedule standBySchedule = standByScheduleRepository.findByScheduleIdAndMemberId(scheduleId, memberId)
-			.orElseThrow(() -> new CustomException(STAND_BY_SCHEDULE_NOT_FOUND));
-
-		standByScheduleRepository.delete(standBySchedule);
-
-		return true;
 	}
 }

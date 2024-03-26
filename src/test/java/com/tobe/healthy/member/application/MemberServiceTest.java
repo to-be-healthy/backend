@@ -12,7 +12,7 @@
 //import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 //import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
 //import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-//import com.tobe.healthy.member.domain.entity.Gym;
+//import com.tobe.healthy.gym.domain.entity.Gym;
 //import com.tobe.healthy.member.domain.entity.Member;
 //import com.tobe.healthy.member.domain.entity.Tokens;
 //import com.tobe.healthy.member.repository.MemberRepository;
