@@ -1,21 +1,5 @@
 package com.tobe.healthy.member.domain.entity;
 
-import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.file.domain.entity.Profile;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
-import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.DynamicUpdate;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
 import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
@@ -25,6 +9,29 @@ import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
+
+import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.file.domain.entity.Profile;
+import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
+import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
@@ -55,9 +62,11 @@ public class Member extends BaseTimeEntity<Member, Long> {
     private MemberType memberType = MEMBER;
 
 	@Enumerated(STRING)
+	@ColumnDefault("ENABLED")
 	private AlarmStatus pushAlarmStatus = ENABLED;
 
 	@Enumerated(STRING)
+	@ColumnDefault("ENABLED")
 	private AlarmStatus feedbackAlarmStatus = ENABLED;
 
     @ManyToOne(fetch = LAZY, cascade = PERSIST)
@@ -65,15 +74,16 @@ public class Member extends BaseTimeEntity<Member, Long> {
     private Gym gym;
 
     @OneToMany(fetch = LAZY, mappedBy = "trainer")
-    private List<Schedule> trainerSchedules = new ArrayList<>();
+    private final List<Schedule> trainerSchedules = new ArrayList<>();
 
     @OneToMany(fetch = LAZY, mappedBy = "applicant")
-    private List<Schedule> applicantSchedules = new ArrayList<>();
+    private final List<Schedule> applicantSchedules = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
-    private List<StandBySchedule> standBySchedules = new ArrayList<>();
+    private final List<StandBySchedule> standBySchedules = new ArrayList<>();
 
     @Enumerated(STRING)
+	@ColumnDefault("NONE")
     private SocialType socialType = NONE;
 
     @ColumnDefault("false")
@@ -96,8 +106,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
                 .userId(UUID.randomUUID().toString())
                 .email(email)
                 .name(name)
+                .pushAlarmStatus(ENABLED)
                 .profileId(profile)
-				.pushAlarmStatus(ENABLED)
                 .memberType(memberType)
                 .socialType(socialType)
                 .build();
