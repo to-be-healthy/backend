@@ -2,12 +2,14 @@ package com.tobe.healthy.gym.application;
 
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.gym.domain.dto.GymListCommandResult;
+import com.tobe.healthy.gym.domain.dto.TrainerCommandResult;
 import com.tobe.healthy.gym.domain.entity.Gym;
-import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.gym.repository.GymRepository;
+import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,5 +53,9 @@ public class GymService {
 				.build();
 		gymRepository.save(gym);
 		return true;
+	}
+
+	public List<TrainerCommandResult> findAllTrainersByGym(Long gymId) {
+		return memberRepository.findAllTrainerByGym(gymId).stream().map(TrainerCommandResult::new).toList();
 	}
 }
