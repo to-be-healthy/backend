@@ -4,6 +4,7 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.gym.application.GymService;
 import com.tobe.healthy.gym.domain.dto.GymListCommandResult;
+import com.tobe.healthy.gym.domain.dto.TrainerCommandResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -59,6 +60,17 @@ public class GymController {
 		return ResponseHandler.<Boolean>builder()
 				.data(gymService.selectMyGym(gymId, member.getMemberId()))
 				.message("내 헬스장으로 등록되었습니다.")
+				.build();
+	}
+
+	@Operation(summary = "헬스장의 트레이너들을 조회한다.", responses = {
+			@ApiResponse(responseCode = "200", description = "헬스장 트레이너 조회완료")
+	})
+	@GetMapping("/gym/{gymId}/trainers")
+	public ResponseHandler<List<TrainerCommandResult>> findAllTrainersByGym(@Parameter(description = "헬스장 ID") @PathVariable(name = "gymId") Long gymId) {
+		return ResponseHandler.<List<TrainerCommandResult>>builder()
+				.data(gymService.findAllTrainersByGym(gymId))
+				.message("헬스장의 트레이너들을 조회하였습니다.")
 				.build();
 	}
 }

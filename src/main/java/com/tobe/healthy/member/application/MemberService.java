@@ -496,7 +496,7 @@ public class MemberService {
 
 		return buffer.toString();
 	}
-	
+
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
 		MemberJoinCommandResult result = joinMember(request);
 		trainerService.addMemberOfTrainer(request.getTrainerId(), result.getId());
