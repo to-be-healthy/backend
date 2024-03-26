@@ -1,33 +1,5 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.CONFIRM_PASSWORD_NOT_MATCHED;
-import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.INVITE_LINK_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.KAKAO_CONNECTION_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_LENGTH_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.NAVER_CONNECTION_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.NOT_MATCH_PASSWORD;
-import static com.tobe.healthy.config.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
-import static com.tobe.healthy.config.error.ErrorCode.PROFILE_ACCESS_FAILED;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.SERVER_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.USERID_POLICY_VIOLATION;
-import static com.tobe.healthy.member.domain.entity.SocialType.GOOGLE;
-import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
-import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
-import static java.io.File.separator;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.util.UUID.randomUUID;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.util.StringUtils.cleanPath;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.RedisKeyPrefix;
@@ -38,15 +10,8 @@ import com.tobe.healthy.config.error.ErrorCode;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
-import com.tobe.healthy.member.domain.dto.in.IdToken;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
+import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
-import com.tobe.healthy.member.domain.dto.in.SocialLoginCommand;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
@@ -55,22 +20,6 @@ import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import io.jsonwebtoken.impl.Base64UrlCodec;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -85,6 +34,26 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.regex.Pattern;
+
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.SocialType.*;
+import static java.io.File.separator;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.UUID.randomUUID;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.util.StringUtils.cleanPath;
 
 @Service
 @RequiredArgsConstructor
@@ -316,11 +285,11 @@ public class MemberService {
 
 	private IdToken getKakaoOAuthAccessToken(String code) {
 		MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
-		request.add("grant_type", "authorization_code");
-		request.add("client_id", "b744b34e90d30c3a0ff41ad4ade070f7");
-		request.add("redirect_uri", "https://to-be-healthy.site/callback");
+		request.add("grant_type", oAuthProperties.getKakao().getGrantType());
+		request.add("client_id", oAuthProperties.getKakao().getClientId());
+		request.add("redirect_uri", oAuthProperties.getKakao().getRedirectUri());
 		request.add("code", code);
-		request.add("client_secret", "QMaOCZDGKnrCtnRbSl3nIRmsKVIPGJnd");
+		request.add("client_secret", oAuthProperties.getKakao().getClientSecret());
 		OAuthInfo result = webClient.post()
 			.uri(oAuthProperties.getKakao().getTokenUri())
 			.bodyValue(request)
@@ -402,10 +371,10 @@ public class MemberService {
 
 	private OAuthInfo getNaverOAuthAccessToken(String code, String state) {
 		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-		requestBody.add("grant_type", "authorization_code");
-		requestBody.add("client_id", "C1sJMU7fEMkDTN39y8Pt");
+		requestBody.add("grant_type", oAuthProperties.getNaver().getGrantType());
+		requestBody.add("client_id", oAuthProperties.getNaver().getClientId());
 		requestBody.add("code", code);
-		requestBody.add("client_secret", "igvBuycGcG");
+		requestBody.add("client_secret", oAuthProperties.getNaver().getClientSecret());
 		requestBody.add("state", state);
 		return webClient.post()
 			.uri(oAuthProperties.getNaver().getTokenUri())
