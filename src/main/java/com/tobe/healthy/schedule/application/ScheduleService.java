@@ -82,8 +82,6 @@ public class ScheduleService {
 		return true;
 	}
 
-
-
 	public Boolean registerSchedule(ScheduleRegisterCommand request, Long memberId) {
 		for (Map.Entry<String, List<ScheduleRegister>> entry : request.getSchedule().entrySet()) {
 			String date = entry.getKey();
@@ -127,6 +125,4 @@ public class ScheduleService {
 	private boolean isHoliday(LocalDate startDt) {
 		return startDt.getDayOfWeek().equals(SUNDAY) || startDt.getDayOfWeek().equals(SATURDAY);
 	}
-
-
 }
