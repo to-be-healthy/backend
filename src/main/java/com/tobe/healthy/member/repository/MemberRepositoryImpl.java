@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
-import static com.tobe.healthy.member.domain.entity.QGym.gym;
+import static com.tobe.healthy.gym.domain.entity.QGym.gym;
 import static com.tobe.healthy.member.domain.entity.QMember.member;
 
 
