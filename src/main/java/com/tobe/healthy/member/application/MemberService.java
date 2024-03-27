@@ -46,6 +46,8 @@ import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
+import com.tobe.healthy.gym.repository.GymRepository;
+import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.in.SocialLoginCommand;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
@@ -55,6 +57,8 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
+import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import io.jsonwebtoken.impl.Base64UrlCodec;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -102,6 +106,8 @@ public class MemberService {
 	private final ObjectMapper objectMapper;
 	private final OAuthProperties oAuthProperties;
 	private final FileRepository fileRepository;
+	private final TrainerMemberMappingRepository mappingRepository;
+	private final GymRepository gymRepository;
 	private final MailService mailService;
 
 	@Value("${file.upload.location}")
@@ -551,5 +557,18 @@ public class MemberService {
 		String email = map.get("email");
 		Member member = memberRepository.findByMemberIdWithGym(trainerId);
 		return InvitationMappingResult.create(member, email);
+	}
+
+	public MemberDto getMemberInfo(Long memberId) {
+		memberRepository.findById(memberId).orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		Member member = memberRepository.findByMemberIdWithProfile(memberId);
+		Optional<TrainerMemberMapping> mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId);
+		if(mapping.isPresent()){
+			Long trainerId = mapping.map(TrainerMemberMapping::getTrainerId).orElse(null);
+			Member trainer = memberRepository.findByMemberIdWithGym(trainerId);
+			return MemberDto.create(member, trainer.getGym());
+		}else{
+			return MemberDto.from(member);
+		}
 	}
 }

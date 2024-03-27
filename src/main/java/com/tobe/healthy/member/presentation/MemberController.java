@@ -3,8 +3,11 @@ package com.tobe.healthy.member.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.member.application.MemberService;
+import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
+import com.tobe.healthy.workout.application.WorkoutHistoryService;
+import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,20 +15,48 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/member/v1")
+@RequestMapping("/members/v1")
 @Slf4j
 @Valid
-@Tag(name = "02.회원정보 수정 API", description = "인증이 있어야만 접근 가능한 회원 API")
+@Tag(name = "02.회원정보 API", description = "인증이 있어야만 접근 가능한 회원 API")
 public class MemberController {
 
 	private final MemberService memberService;
+	private final WorkoutHistoryService workoutService;
+
+	@Operation(summary = "내 정보조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청."),
+			@ApiResponse(responseCode = "200", description = "회원 정보가 조회되었습니다.")
+	})
+	@GetMapping("/me")
+	public ResponseHandler<MemberDto> getMemberInfo(@AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<MemberDto>builder()
+				.data(memberService.getMemberInfo(member.getMemberId()))
+				.message("회원정보가 조회 되었습니다.")
+				.build();
+	}
+
+	@Operation(summary = "회원 정보조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청."),
+			@ApiResponse(responseCode = "200", description = "회원 정보가 조회되었습니다.")
+	})
+	@GetMapping("/{memberId}")
+	public ResponseHandler<MemberDto> getMemberInfo(@PathVariable("memberId") Long memberId) {
+		return ResponseHandler.<MemberDto>builder()
+				.data(memberService.getMemberInfo(memberId))
+				.message("회원정보가 조회 되었습니다.")
+				.build();
+	}
 
 	@Operation(summary = "회원 탈퇴한다.", responses = {
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
@@ -108,4 +139,18 @@ public class MemberController {
 				.message("수업 기록 여부가 변경되었습니다.")
 				.build();
 	}
+
+	@Operation(summary = "회원 운동기록 목록 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
+	})
+	@GetMapping("/{memberId}/workout-histories")
+	public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistory(@PathVariable("memberId") Long memberId,
+																	  Pageable pageable) {
+		return ResponseHandler.<List<WorkoutHistoryDto>>builder()
+				.data(workoutService.getWorkoutHistory(memberId, pageable))
+				.message("운동기록이 조회되었습니다.")
+				.build();
+	}
+
 }
