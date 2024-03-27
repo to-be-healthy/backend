@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1")
+@RequestMapping("/exercise/v1")
 @Tag(name = "Exercise", description = "운동종류 API")
 @Slf4j
 public class ExerciseController {
@@ -29,7 +29,7 @@ public class ExerciseController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동 종류를 반환한다.")
     })
-    @GetMapping("/exercise")
+    @GetMapping
     public ResponseHandler<List<ExerciseDto>> getExercise(@RequestParam(required = false) ExerciseCategory category,
                                                           @RequestParam(required = false) PrimaryMuscle primaryMuscle,
                                                           Pageable pageable) {
