@@ -38,6 +38,7 @@ public enum ErrorCode {
 	CONFIRM_PASSWORD_NOT_MATCHED(BAD_REQUEST, "C_022", "확인 비밀번호가 일치하지 않습니다."),
 	USERID_POLICY_VIOLATION(BAD_REQUEST, "C_023", "아이디에 한글을 포함할 수 없습니다."),
 	PASSWORD_POLICY_VIOLATION(BAD_REQUEST, "C_023", "비밀번호는 영어 대/소문자와 숫자로 구성된 8자리 이상 문자여야 합니다."),
+	GYM_NOT_FOUND(NOT_FOUND, "C_024", "등록된 헬스장이 없습니다."),
 
 	SERVER_ERROR(INTERNAL_SERVER_ERROR, "S_001", "서버에서 오류가 발생하였습니다."),
 	FILE_UPLOAD_ERROR(INTERNAL_SERVER_ERROR, "S_002", "파일 업로드중 에러가 발생하였습니다."),

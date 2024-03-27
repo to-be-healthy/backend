@@ -207,5 +207,4 @@ public class MemberAuthController {
 				.message("요청이 처리되었습니다.")
 				.build();
 	}
-
 }

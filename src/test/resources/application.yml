@@ -57,6 +57,13 @@ oauth:
     client-secret: ${OAUTH_NAVER_CLIENT_SECRET}
     token-uri: ${OAUTH_NAVER_TOKEN_URI}
     user-info-uri: ${OAUTH_NAVER_USER_INFO_URI}
+  google:
+    grant-type: ${OAUTH_GOOGLE_GRANT_TYPE}
+    client-id: ${OAUTH_GOOGLE_CLIENT_ID}
+    client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET}
+    token-uri: ${OAUTH_GOOGLE_TOKEN_URI}
+    user-info-uri: ${OAUTH_GOOGLE_USER_INFO_URI}
+    redirect-uri: ${OAUTH_GOOGLE_REDIRECT_URI}
 
 decorator:
   datasource:

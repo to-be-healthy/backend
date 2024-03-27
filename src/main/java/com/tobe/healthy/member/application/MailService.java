@@ -47,5 +47,4 @@ public class MailService {
 			throw new CustomException(MAIL_SEND_ERROR);
 		}
 	}
-
 }
