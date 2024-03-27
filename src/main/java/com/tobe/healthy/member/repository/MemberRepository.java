@@ -37,4 +37,5 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
 	@Query("select m from Member m where m.gym.id = :gymId and m.memberType = 'TRAINER' and m.delYn = false order by m.id desc")
 	Optional<Member> findAllTrainerByGym(@Param("gymId") Long gymId);
+
 }
