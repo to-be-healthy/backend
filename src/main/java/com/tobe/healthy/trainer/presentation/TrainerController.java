@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1")
-@Tag(name = "04. 트레이너 API", description = "트레이너 API")
+@Tag(name = "05. 트레이너 API", description = "트레이너 API")
 @Slf4j
 public class TrainerController {
 

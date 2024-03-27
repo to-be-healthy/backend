@@ -2,6 +2,7 @@ package com.tobe.healthy.member.repository;
 
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,4 +38,7 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
 	@Query("select m from Member m where m.gym.id = :gymId and m.memberType = 'TRAINER' and m.delYn = false order by m.id desc")
 	Optional<Member> findAllTrainerByGym(@Param("gymId") Long gymId);
+
+	@Query("select m from Member m where m.id in(:members) and m.memberType = 'MEMBER' and m.delYn = false")
+	List<Member> findAll(Long[] members);
 }

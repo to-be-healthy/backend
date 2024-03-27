@@ -22,20 +22,26 @@ public class TrainerMemberMapping extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "mapping_id")
     private Long mappingId;
-
+    private Long gymId;
     private Long trainerId;
     private Long memberId;
 
-    public static TrainerMemberMapping create(Long trainerId, Long memberId) {
+    public static TrainerMemberMapping create(Long gymId, Long trainerId, Long memberId) {
         return TrainerMemberMapping.builder()
+                .gymId(gymId)
                 .trainerId(trainerId)
                 .memberId(memberId)
                 .build();
     }
 
+    public static TrainerMemberMapping create(Long trainerId, Long memberId) {
+        return create(null, trainerId, memberId);
+    }
+
     @Builder
-    public TrainerMemberMapping(Long mappingId, Long trainerId, Long memberId) {
+    public TrainerMemberMapping(Long mappingId, Long gymId, Long trainerId, Long memberId) {
         this.mappingId = mappingId;
+        this.gymId = gymId;
         this.trainerId = trainerId;
         this.memberId = memberId;
     }

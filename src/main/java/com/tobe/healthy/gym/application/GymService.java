@@ -11,6 +11,8 @@ import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.gym.repository.GymRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ public class GymService {
 
 	private final MemberRepository memberRepository;
 	private final GymRepository gymRepository;
+	private final TrainerMemberMappingRepository trainerMemberMappingRepository;
 
 	public List<GymListCommandResult> findAllGym() {
 		return gymRepository.findAll()
@@ -57,5 +60,17 @@ public class GymService {
 		return memberRepository.findAllTrainerByGym(gymId).stream()
 			.map(TrainerCommandResult::new)
 			.toList();
+	}
+
+	public Boolean selectMyTrainer(Long gymId, Long trainerId, Long memberId) {
+		TrainerMemberMapping entity = TrainerMemberMapping.create(gymId, trainerId, memberId);
+		trainerMemberMappingRepository.save(entity);
+		return true;
+	}
+
+	public List<TrainerCommandResult> findAllMyMemberInTeam(Long memberId) {
+		List<TrainerMemberMapping> members = trainerMemberMappingRepository.findAllMembers(memberId);
+//		memberRepository.findAll(members.stream().map(Long::longValue));
+		return null;
 	}
 }
