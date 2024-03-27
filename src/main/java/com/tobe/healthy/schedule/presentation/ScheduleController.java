@@ -64,7 +64,7 @@ public class ScheduleController {
 			@ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
 	})
 	@GetMapping("/all")
-	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule(@RequestBody ScheduleSearchCond searchCond) {
+	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule(ScheduleSearchCond searchCond) {
 		return ResponseHandler.<List<ScheduleCommandResult>>builder()
 				.data(scheduleService.findAllSchedule(searchCond))
 				.message("전체 일정을 조회했습니다.")

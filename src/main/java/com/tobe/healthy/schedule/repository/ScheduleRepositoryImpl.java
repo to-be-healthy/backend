@@ -34,13 +34,17 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.leftJoin(schedule.trainer, trainer).fetchJoin()
 				.leftJoin(schedule.applicant, applicant).fetchJoin()
 				.leftJoin(schedule.standBySchedule, standBySchedule).fetchJoin()
-				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond))
+				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse())
 				.orderBy(schedule.lessonDt.asc(), schedule.round.asc())
 				.fetch();
 
 		return fetch.stream()
 			.map(ScheduleCommandResult::from)
 			.collect(Collectors.toList());
+	}
+
+	private BooleanExpression delYnFalse() {
+		return schedule.delYn.eq(false);
 	}
 
 	@Override
