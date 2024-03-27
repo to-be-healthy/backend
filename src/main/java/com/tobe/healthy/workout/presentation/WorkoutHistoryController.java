@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/workout-histories/v1")
-@Tag(name = "05. 운동기록 API", description = "운동기록 API")
+@Tag(name = "06-01. 운동기록 API", description = "운동기록 API")
 @Slf4j
 public class WorkoutHistoryController {
 

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/schedule/waiting/v1")
 @Slf4j
 @Valid
-@Tag(name = "03.수업 대기 API", description = "수업 대기 API")
+@Tag(name = "03-02.수업 대기 API", description = "수업 대기 API")
 public class ScheduleWaitingController {
 
 	private final ScheduleWaitingService scheduleWaitingService;
