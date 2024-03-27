@@ -29,7 +29,7 @@ import java.util.TreeMap;
 @RequestMapping("/schedule/v1")
 @Slf4j
 @Valid
-@Tag(name = "03.수업 API", description = "수업 일정 API")
+@Tag(name = "03-01.수업 API", description = "수업 일정 API")
 public class ScheduleController {
 
 	private final ScheduleService scheduleService;
