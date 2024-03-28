@@ -431,7 +431,7 @@ public class MemberService {
 
 	public Tokens getGoogleOAuth(SocialLoginCommand command) {
 		OAuthInfo googleToken = getGoogleAccessToken(command.getCode());
-		String[] check = googleToken.getId_token().split("\\.");
+		String[] check = googleToken.getIdToken().split("\\.");
 		Base64.Decoder decoder = Base64.getDecoder();
 		String payload = new String(decoder.decode(check[1]));
 		Map<String, String> idToken = new HashMap<>();
@@ -451,11 +451,12 @@ public class MemberService {
 		Member member;
 		if (optionalMember.isEmpty()) { //회원가입
 			Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension,
-				uploadDir + separator, image.length);
+					uploadDir + separator, image.length);
 			member = Member.join(email, name, profile, command.getMemberType(), GOOGLE);
 			memberRepository.save(member);
-			Path copyOfLocation = Paths.get(uploadDir + separator + savedFileName + extension);
 			try {
+				Path copyOfLocation = Paths.get(uploadDir + separator + savedFileName + extension);
+				Files.createDirectories(copyOfLocation.getParent());
 				Files.copy(new ByteArrayInputStream(image), copyOfLocation, REPLACE_EXISTING);
 			} catch (IOException e) {
 				e.printStackTrace();
