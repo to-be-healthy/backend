@@ -431,7 +431,7 @@ public class MemberService {
 
 	public Tokens getGoogleOAuth(SocialLoginCommand command) {
 		OAuthInfo googleToken = getGoogleAccessToken(command.getCode());
-		String[] check = googleToken.getId_token().split("\\.");
+		String[] check = googleToken.getIdToken().split("\\.");
 		Base64.Decoder decoder = Base64.getDecoder();
 		String payload = new String(decoder.decode(check[1]));
 		Map<String, String> idToken = new HashMap<>();
@@ -478,18 +478,22 @@ public class MemberService {
 		requestBody.add("grant_type", oAuthProperties.getGoogle().getGrantType());
 		requestBody.add("redirect_uri", oAuthProperties.getGoogle().getRedirectUri());
 		requestBody.add("code", decode);
-
-		Mono<OAuthInfo> responseMono = webClient.post()
-			.uri(oAuthProperties.getGoogle().getTokenUri())
-			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-			.accept(MediaType.APPLICATION_JSON)
-			.bodyValue(requestBody)
-			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError,
-				response -> Mono.error(RuntimeException::new))
-			.onStatus(HttpStatusCode::is5xxServerError,
-				response -> Mono.error(RuntimeException::new))
-			.bodyToMono(OAuthInfo.class);
+		Mono<OAuthInfo> responseMono = null;
+		try {
+			responseMono = webClient.post()
+					.uri(oAuthProperties.getGoogle().getTokenUri())
+					.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+					.accept(MediaType.APPLICATION_JSON)
+					.bodyValue(requestBody)
+					.retrieve()
+//			.onStatus(HttpStatusCode::is4xxClientError,
+//				response -> Mono.error(RuntimeException::new))
+//			.onStatus(HttpStatusCode::is5xxServerError,
+//				response -> Mono.error(RuntimeException::new))
+					.bodyToMono(OAuthInfo.class);
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 		return responseMono.share().block();
 	}
 
