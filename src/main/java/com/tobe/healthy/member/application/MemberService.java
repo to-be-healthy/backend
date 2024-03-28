@@ -454,8 +454,9 @@ public class MemberService {
 				uploadDir + separator, image.length);
 			member = Member.join(email, name, profile, command.getMemberType(), GOOGLE);
 			memberRepository.save(member);
-			Path copyOfLocation = Paths.get(uploadDir + separator + savedFileName + extension);
 			try {
+				Path copyOfLocation = Paths.get(uploadDir + separator + savedFileName + extension);
+				Files.createDirectories(copyOfLocation.getParent());
 				Files.copy(new ByteArrayInputStream(image), copyOfLocation, REPLACE_EXISTING);
 			} catch (IOException e) {
 				e.printStackTrace();
