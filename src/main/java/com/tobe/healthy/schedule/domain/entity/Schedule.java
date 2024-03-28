@@ -23,22 +23,16 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.util.ObjectUtils;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
-@Builder
-@ToString
 @DynamicUpdate
 public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
@@ -51,7 +45,6 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	private LocalTime lessonEndTime;
 
 	@Enumerated(STRING)
-	@Default
 	private ReservationStatus reservationStatus = AVAILABLE;
 
 	private int round;
@@ -65,11 +58,9 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	private Member applicant;
 
 	@OneToMany(fetch = LAZY, mappedBy = "schedule")
-	@Default
 	private List<StandBySchedule> standBySchedule = new ArrayList<>();
 
 	@ColumnDefault("false")
-	@Default
 	private boolean delYn = false;
 
 	public static Schedule registerSchedule(LocalDate date, Member trainer, Member member, ScheduleRegister request) {
@@ -101,5 +92,21 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	public void cancelMemberSchedule() {
 		this.reservationStatus = AVAILABLE;
 		this.applicant = null;
+	}
+
+	@Builder
+	public Schedule(Long id, LocalDate lessonDt, LocalTime lessonStartTime, LocalTime lessonEndTime,
+		ReservationStatus reservationStatus, int round, Member trainer, Member applicant,
+		List<StandBySchedule> standBySchedule, boolean delYn) {
+		this.id = id;
+		this.lessonDt = lessonDt;
+		this.lessonStartTime = lessonStartTime;
+		this.lessonEndTime = lessonEndTime;
+		this.reservationStatus = reservationStatus;
+		this.round = round;
+		this.trainer = trainer;
+		this.applicant = applicant;
+		this.standBySchedule = standBySchedule;
+		this.delYn = delYn;
 	}
 }
