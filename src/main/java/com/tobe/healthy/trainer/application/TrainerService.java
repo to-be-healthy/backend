@@ -57,9 +57,8 @@ public class TrainerService {
         for(String email : emails){
             memberRepository.findByEmail(email).ifPresent(i -> {throw new CustomException(ErrorCode.MEMBER_ALREADY_MAPPED);});
             String uuid = System.currentTimeMillis() + "_" + UUID.randomUUID();
-            //TODO: 프론트와 상의 후 초대링크 페이지 url 수정하기
             String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
-            String invitationLink = "http://www.temp.com?" + uuid;
+            String invitationLink = "https://www.to-be-healthy.site?" + uuid;
             sendInviteLink(email, trainer, invitationLink);
             Map<String, String> invitedMapping = new HashMap<>() {{
                 put("trainerId", trainer.getId().toString());
