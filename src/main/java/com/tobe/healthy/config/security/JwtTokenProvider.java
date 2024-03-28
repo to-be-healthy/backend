@@ -9,8 +9,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import java.util.Date;
-import java.util.function.Function;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +47,7 @@ public class JwtTokenProvider {
     // Jwt 토큰으로 인증 정보를 조회
     public Authentication getAuthentication(String token) {
         Claims claims = decode(token.substring("Bearer ".length()));
-        UserDetails userDetails = customMemberDetailService.loadUserByUsername(valueOf(claims.get("userId")));
+        UserDetails userDetails = customMemberDetailService.loadUserByUsername(valueOf(claims.get("memberId")));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
