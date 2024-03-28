@@ -30,6 +30,7 @@ public enum ErrorCode {
 	NOT_MATCH_PASSWORD(BAD_REQUEST, "C_017", "확인 비밀번호가 일치하지 않습니다."),
 	INVITE_LINK_NOT_FOUND(NOT_FOUND, "C_018", "초대링크를 찾을 수 없습니다."),
 	INVITE_LINK_NOT_VALID(BAD_REQUEST, "C_019", "초대링크가 유효하지 않습니다."),
+	EXERCISE_NOT_FOUND(NOT_FOUND, "C_020", "해당 운동이 존재하지 않습니다."),
 	PASSWORD_NOT_VALID(BAD_REQUEST, "C_019", "비밀번호가 일치하지 않습니다."),
 
 	MEMBER_NAME_LENGTH_NOT_VALID(BAD_REQUEST, "C_020", "이름의 길이는 2자 이상이여야 합니다."),

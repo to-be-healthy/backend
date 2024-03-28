@@ -3,6 +3,7 @@ package com.tobe.healthy.workout.domain.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,32 +23,26 @@ public class WorkoutHistoryDto {
     private Long workoutHistoryId;
     private String content;
     private Long trainerId;
-    @Builder.Default
-    private List<WorkoutHistoryFileDto> files = new ArrayList<>();
     private MemberDto member;
     private Long likeCnt;
+
     @Builder.Default
     @JsonIgnore
     private List<MultipartFile> multipartFiles = new ArrayList<>();
 
+    @Builder.Default
+    private List<WorkoutHistoryFileDto> files = new ArrayList<>();
 
-    public static WorkoutHistoryDto from(String content, MemberDto memberDto, List<MultipartFile> files, Long trainerId) {
+    @Builder.Default
+    private List<CompletedExerciseDto> completedExercises = new ArrayList<>();
+
+
+    public static WorkoutHistoryDto create(HistoryAddCommand command, MemberDto memberDto, Long trainerId) {
         return WorkoutHistoryDto.builder()
-                .content(content)
+                .content(command.getContent())
                 .member(memberDto)
-                .multipartFiles(files)
+                .multipartFiles(command.getFiles())
                 .trainerId(trainerId)
-                .build();
-    }
-
-    public static WorkoutHistoryDto from(WorkoutHistory history, List<WorkoutHistoryFileDto> files) {
-        return WorkoutHistoryDto.builder()
-                .workoutHistoryId(history.getWorkoutHistoryId())
-                .content(history.getContent())
-                .member(MemberDto.from(history.getMember()))
-                .files(files)
-                .trainerId(history.getTrainerId())
-                .likeCnt(history.getLikeCnt())
                 .build();
     }
 
@@ -60,4 +55,5 @@ public class WorkoutHistoryDto {
                 .likeCnt(history.getLikeCnt())
                 .build();
     }
+
 }

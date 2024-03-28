@@ -1,5 +1,6 @@
 package com.tobe.healthy.workout.domain.dto.in;
 
+import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ public class HistoryAddCommand {
     private String content;
 
     @NotNull(message = "운동을 추가해 주세요.")
-    private List<WorkoutForm> workoutFormList = new ArrayList<>();
+    private List<CompletedExerciseDto> completedExercises = new ArrayList<>();
 
     @NotEmpty(message = "사진을 추가해 주세요.")
     private List<MultipartFile> files = new ArrayList<>();
