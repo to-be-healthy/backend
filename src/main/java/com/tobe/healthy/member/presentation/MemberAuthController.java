@@ -6,6 +6,7 @@ import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand.MemberFindIdCommandResult;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
+import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,9 +32,10 @@ public class MemberAuthController {
 		@ApiResponse(responseCode = "200", description = "사용 가능한 아이디입니다.")
 	})
 	@GetMapping("/validation/user-id")
-	public ResponseHandler<Boolean> validateUsernameDuplication(@Parameter(description = "아이디") @RequestParam String userId) {
+	public ResponseHandler<Boolean> validateUsernameDuplication(@Parameter(description = "아이디") @RequestParam String userId,
+																@Parameter(description = "회원구분") @RequestParam MemberType memberType) {
 		return ResponseHandler.<Boolean>builder()
-			.data(memberService.validateUserIdDuplication(userId))
+			.data(memberService.validateUserIdDuplication(userId, memberType))
 			.message("사용 가능한 아이디입니다.")
 			.build();
 	}
@@ -114,9 +116,10 @@ public class MemberAuthController {
 	})
 	@PostMapping("/refresh-token")
 	public ResponseHandler<Tokens> refreshToken(@Parameter(description = "아이디") @RequestParam String userId,
+												@Parameter(description = "회원 구분") @RequestParam MemberType memberType,
 												@Parameter(description = "갱신 토큰") @RequestParam String refreshToken) {
 		return ResponseHandler.<Tokens>builder()
-			.data(memberService.refreshToken(userId, refreshToken))
+			.data(memberService.refreshToken(userId, memberType, refreshToken))
 			.message("토큰이 갱신되었습니다.")
 			.build();
 	}

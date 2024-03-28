@@ -1,33 +1,5 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.CONFIRM_PASSWORD_NOT_MATCHED;
-import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.INVITE_LINK_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.KAKAO_CONNECTION_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_LENGTH_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.NAVER_CONNECTION_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.NOT_MATCH_PASSWORD;
-import static com.tobe.healthy.config.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
-import static com.tobe.healthy.config.error.ErrorCode.PROFILE_ACCESS_FAILED;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.SERVER_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.USERID_POLICY_VIOLATION;
-import static com.tobe.healthy.member.domain.entity.SocialType.GOOGLE;
-import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
-import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
-import static java.io.File.separator;
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.util.UUID.randomUUID;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.util.StringUtils.cleanPath;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.RedisKeyPrefix;
@@ -38,44 +10,22 @@ import com.tobe.healthy.config.error.ErrorCode;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
-import com.tobe.healthy.member.domain.dto.in.IdToken;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand.MemberFindIdCommandResult;
-import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
-import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.gym.repository.GymRepository;
 import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.member.domain.dto.in.*;
+import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand.MemberFindIdCommandResult;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
-import com.tobe.healthy.member.domain.dto.in.SocialLoginCommand;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import io.jsonwebtoken.impl.Base64UrlCodec;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -90,6 +40,26 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.regex.Pattern;
+
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.SocialType.*;
+import static java.io.File.separator;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.util.UUID.randomUUID;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.util.StringUtils.cleanPath;
 
 @Service
 @RequiredArgsConstructor
@@ -113,8 +83,8 @@ public class MemberService {
 	@Value("${file.upload.location}")
 	private String uploadDir;
 
-	public boolean validateUserIdDuplication(String memberId) {
-		memberRepository.findByUserId(memberId).ifPresent(m -> {
+	public boolean validateUserIdDuplication(String memberId, MemberType memberType) {
+		memberRepository.findByUserId(memberId, memberType).ifPresent(m -> {
 			throw new CustomException(MEMBER_ID_DUPLICATION);
 		});
 		return true;
@@ -155,7 +125,7 @@ public class MemberService {
 	public MemberJoinCommandResult joinMember(MemberJoinCommand request) {
 		validateName(request.getName());
 		validatePassword(request);
-		validateDuplicationUserId(request.getUserId());
+		validateDuplicationUserId(request.getUserId(), request.getMemberType());
 		validateDuplicationEmail(request.getEmail());
 
 		String password = passwordEncoder.encode(request.getPassword());
@@ -187,13 +157,13 @@ public class MemberService {
 	}
 
 	public Tokens login(MemberLoginCommand request) {
-		return memberRepository.findByUserId(request.getUserId())
+		return memberRepository.findByUserId(request.getUserId(), request.getMemberType())
 			.filter(member -> passwordEncoder.matches(request.getPassword(), member.getPassword()))
 			.map(tokenGenerator::create)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 	}
 
-	public Tokens refreshToken(String userId, String refreshToken) {
+	public Tokens refreshToken(String userId, MemberType memberType, String refreshToken) {
 		String result = redisService.getValues(userId);
 
 		if (isEmpty(result)) {
@@ -204,7 +174,7 @@ public class MemberService {
 			throw new CustomException(REFRESH_TOKEN_NOT_VALID);
 		}
 
-		Member member = memberRepository.findByUserId(userId)
+		Member member = memberRepository.findByUserId(userId, memberType)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(),
@@ -465,7 +435,7 @@ public class MemberService {
 			member = optionalMember.get();
 		}
 
-		return memberRepository.findByUserId(member.getUserId())
+		return memberRepository.findByUserId(member.getUserId(), command.getMemberType())
 			.map(tokenGenerator::create)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 	}
@@ -501,11 +471,11 @@ public class MemberService {
 		return profileImage.substring(profileImage.lastIndexOf("."));
 	}
 
-	private void validateDuplicationUserId(String userId) {
+	private void validateDuplicationUserId(String userId, MemberType memberType) {
 		if (Pattern.matches("^[가-힣]+$", userId)) {
 			throw new CustomException(USERID_POLICY_VIOLATION);
 		}
-		memberRepository.findByUserId(userId).ifPresent(m -> {
+		memberRepository.findByUserId(userId, memberType).ifPresent(m -> {
 			throw new CustomException(MEMBER_ID_DUPLICATION);
 		});
 	}
