@@ -30,7 +30,7 @@ public class GymController {
 	@Operation(summary = "헬스장을 등록한다.", responses = {
 			@ApiResponse(responseCode = "200", description = "헬스장을 등록하였습니다.")
 	})
-	@PostMapping("/gym")
+	@PostMapping
 	public ResponseHandler<Boolean> registerGym(@Parameter(description = "헬스장 이름") @RequestParam String name) {
 		return ResponseHandler.<Boolean>builder()
 				.data(gymService.registerGym(name))
@@ -41,7 +41,7 @@ public class GymController {
 	@Operation(summary = "모든 헬스장을 조회한다.", responses = {
 			@ApiResponse(responseCode = "200", description = "모든 헬스장을 조회한다.")
 	})
-	@GetMapping("/gym")
+	@GetMapping
 	public ResponseHandler<List<GymListCommandResult>> findAllGym() {
 		return ResponseHandler.<List<GymListCommandResult>>builder()
 				.data(gymService.findAllGym())
@@ -54,7 +54,7 @@ public class GymController {
 			@ApiResponse(responseCode = "404", description = "헬스장을 찾을 수 없습니다."),
 			@ApiResponse(responseCode = "200", description = "내 헬스장으로 등록하였습니다.")
 	})
-	@PatchMapping("/gym/{gymId}")
+	@PatchMapping("/{gymId}")
 	public ResponseHandler<Boolean> selectMyGym(@Parameter(description = "헬스장 ID") @PathVariable(name = "gymId") Long gymId,
 												@AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
@@ -63,14 +63,38 @@ public class GymController {
 				.build();
 	}
 
+	@Operation(summary = "내 트레이너로 등록한다.", responses = {
+		@ApiResponse(responseCode = "200", description = "내 트레이너로 등록하였습니다.")
+	})
+	@PatchMapping("/{gymId}/trainer/{trainerId}")
+	public ResponseHandler<Boolean> selectMyTrainer(@Parameter(description = "헬스장 ID") @PathVariable(name = "gymId") Long gymId,
+													@Parameter(description = "트레이너 ID") @PathVariable(name = "trainerId") Long trainerId,
+													@AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<Boolean>builder()
+			.data(gymService.selectMyTrainer(gymId, trainerId, member.getMemberId()))
+			.message("내 트레이너로 등록되었습니다.")
+			.build();
+	}
+
 	@Operation(summary = "헬스장의 트레이너들을 조회한다.", responses = {
 			@ApiResponse(responseCode = "200", description = "헬스장 트레이너 조회완료")
 	})
-	@GetMapping("/gym/{gymId}/trainers")
+	@GetMapping("/{gymId}/trainers")
 	public ResponseHandler<List<TrainerCommandResult>> findAllTrainersByGym(@Parameter(description = "헬스장 ID") @PathVariable(name = "gymId") Long gymId) {
 		return ResponseHandler.<List<TrainerCommandResult>>builder()
 				.data(gymService.findAllTrainersByGym(gymId))
 				.message("헬스장의 트레이너들을 조회하였습니다.")
 				.build();
+	}
+
+	@Operation(summary = "내 회원들을 조회한다.", responses = {
+		@ApiResponse(responseCode = "200", description = "내 회원 조회 완료")
+	})
+	@GetMapping("/members")
+	public ResponseHandler<List<TrainerCommandResult>> findAllMyMemberInTeam(@AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<List<TrainerCommandResult>>builder()
+			.data(null)
+			.message("헬스장의 트레이너들을 조회하였습니다.")
+			.build();
 	}
 }

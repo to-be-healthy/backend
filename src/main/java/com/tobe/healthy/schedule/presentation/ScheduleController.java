@@ -29,7 +29,7 @@ import java.util.TreeMap;
 @RequestMapping("/schedule/v1")
 @Slf4j
 @Valid
-@Tag(name = "03.수업 API", description = "수업 일정 API")
+@Tag(name = "03-01.수업 API", description = "수업 일정 API")
 public class ScheduleController {
 
 	private final ScheduleService scheduleService;
@@ -64,7 +64,7 @@ public class ScheduleController {
 			@ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
 	})
 	@GetMapping("/all")
-	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule(@RequestBody ScheduleSearchCond searchCond) {
+	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule(ScheduleSearchCond searchCond) {
 		return ResponseHandler.<List<ScheduleCommandResult>>builder()
 				.data(scheduleService.findAllSchedule(searchCond))
 				.message("전체 일정을 조회했습니다.")
