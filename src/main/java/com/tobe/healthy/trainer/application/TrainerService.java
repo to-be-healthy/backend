@@ -65,7 +65,7 @@ public class TrainerService {
                 put("trainerId", trainer.getId().toString());
                 put("email", email);
             }};
-            redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), 3 * 24 * 60 * 60 * 1000); // 3days
+            redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), 24 * 60 * 60 * 1000); // 1days
         }
     }
 
