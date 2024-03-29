@@ -26,8 +26,6 @@ public class OAuthInfo {
 	@JsonProperty("refresh_token_expires_in")
 	private int refreshTokenExpiresIn;
 
-	private String id_token;
-
 	@Data
 	public static class NaverUserInfo {
 

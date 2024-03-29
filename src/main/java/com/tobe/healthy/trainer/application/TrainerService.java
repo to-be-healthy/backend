@@ -4,6 +4,7 @@ import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.ErrorCode;
+import com.tobe.healthy.member.application.MailService;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -33,10 +34,10 @@ import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
 @Slf4j
 public class TrainerService {
 
-    private final JavaMailSender mailSender;
     private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final TrainerMemberMappingRepository mappingRepository;
+    private final MailService mailService;
 
     public TrainerMemberMappingDto addMemberOfTrainer(Long trainerId, Long memberId) {
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
@@ -57,32 +58,15 @@ public class TrainerService {
         for(String email : emails){
             memberRepository.findByEmail(email).ifPresent(i -> {throw new CustomException(ErrorCode.MEMBER_ALREADY_MAPPED);});
             String uuid = System.currentTimeMillis() + "_" + UUID.randomUUID();
-            //TODO: 프론트와 상의 후 초대링크 페이지 url 수정하기
             String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
-            String invitationLink = "http://www.temp.com?" + uuid;
-            sendInviteLink(email, trainer, invitationLink);
+            String invitationLink = "https://www.to-be-healthy.site/invite?" + uuid;
+            mailService.sendInviteLink(email, trainer, invitationLink);
             Map<String, String> invitedMapping = new HashMap<>() {{
                 put("trainerId", trainer.getId().toString());
                 put("email", email);
             }};
-            redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), 3 * 24 * 60 * 60 * 1000); // 3days
+            redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), 24 * 60 * 60 * 1000); // 1days
         }
     }
 
-    private void sendInviteLink(String email, Member trainer, String invitationLink) {
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-        try {
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-            mimeMessageHelper.setTo(email);
-            mimeMessageHelper.setSubject("[건강해짐] 안녕하세요. {trainerName}님이 고객님을 초대했습니다.".replace("{trainerName}", trainer.getName())); // 메일 제목
-            String text = "안녕하세요. {trainerName}님이 고객님을 초대했습니다.\n하단 링크를 통해 회원가입을 해주세요.\n{inviteLink}"
-                    .replace("{trainerName}", trainer.getName())
-                    .replace("{inviteLink}", invitationLink);
-            mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
-            mailSender.send(mimeMessage);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new CustomException(MAIL_SEND_ERROR);
-        }
-    }
 }
