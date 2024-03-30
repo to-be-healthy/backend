@@ -179,7 +179,7 @@ public class MemberService {
 		Member member = memberRepository.findByUserId(userId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), member.getMemberType(), refreshToken);
+		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), member.getMemberType(), refreshToken, member.getGym());
 	}
 
 	public MemberFindIdCommandResult findUserId(MemberFindIdCommand request) {
@@ -266,13 +266,13 @@ public class MemberService {
 		return true;
 	}
 
-	public Tokens getKakaoAccessToken(String code, MemberType memberType, String redirectUrl) {
-		IdToken response = getKakaoOAuthAccessToken(code, redirectUrl);
+	public Tokens getKakaoAccessToken(SocialLoginCommand request) {
+		IdToken response = getKakaoOAuthAccessToken(request.getCode(), request.getRedirectUrl());
 		return memberRepository.findKakaoByEmailAndSocialType(response.getEmail())
 			.map(tokenGenerator::create)
 			.orElseGet(() -> {
 				Profile profile = getProfile(response.getPicture());
-				Member member = Member.join(response.getEmail(), response.getNickname(), profile, memberType, KAKAO);
+				Member member = Member.join(response.getEmail(), response.getNickname(), profile, request.getMemberType(), KAKAO);
 				memberRepository.save(member);
 				return tokenGenerator.create(member);
 			});
@@ -324,8 +324,8 @@ public class MemberService {
 		return new String(decode, StandardCharsets.UTF_8);
 	}
 
-	public Tokens getNaverAccessToken(String code, String state, MemberType memberType) {
-		OAuthInfo response = getNaverOAuthAccessToken(code, state);
+	public Tokens getNaverAccessToken(SocialLoginCommand request) {
+		OAuthInfo response = getNaverOAuthAccessToken(request.getCode(), request.getState());
 
 		NaverUserInfo authorization = getNaverUserInfo(response);
 
@@ -334,7 +334,7 @@ public class MemberService {
 			.orElseGet(() -> {
 				Profile profile = getProfile(authorization.getResponse().getProfileImage());
 				Member member =
-					Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), profile, memberType, NAVER);
+					Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), profile, request.getMemberType(), NAVER);
 				memberRepository.save(member);
 				return tokenGenerator.create(member);
 			});
