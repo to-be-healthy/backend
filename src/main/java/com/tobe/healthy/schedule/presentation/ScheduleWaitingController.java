@@ -11,7 +11,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,7 +30,7 @@ public class ScheduleWaitingController {
 	@Operation(summary = "수업 대기 신청을 한다.", responses = {
 			@ApiResponse(responseCode = "200", description = "수업 대기 신청 완료")
 	})
-	@PostMapping("/waiting/{scheduleId}")
+	@PostMapping("/{scheduleId}")
 	public ResponseHandler<Boolean> registerStandBySchedule(@Parameter(description = "일정 아이디") @PathVariable Long scheduleId,
 															@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<Boolean>builder()
@@ -38,7 +42,7 @@ public class ScheduleWaitingController {
 	@Operation(summary = "신청한 수업의 대기를 취소한다.", responses = {
 			@ApiResponse(responseCode = "200", description = "수업 대기 취소 완료")
 	})
-	@DeleteMapping("/waiting/{scheduleId}")
+	@DeleteMapping("/{scheduleId}")
 	public ResponseHandler<Boolean> cancelStandBySchedule(@Parameter(description = "일정 아이디") @PathVariable Long scheduleId,
 														  @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<Boolean>builder()

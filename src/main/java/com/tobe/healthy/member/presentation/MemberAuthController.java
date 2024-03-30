@@ -2,10 +2,15 @@ package com.tobe.healthy.member.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.member.application.MemberService;
-import com.tobe.healthy.member.domain.dto.in.*;
+import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand.MemberFindIdCommandResult;
+import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
+import com.tobe.healthy.member.domain.dto.in.SocialLoginCommand;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
+import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,7 +19,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +41,7 @@ public class MemberAuthController {
 		@ApiResponse(responseCode = "200", description = "사용 가능한 아이디입니다.")
 	})
 	@GetMapping("/validation/user-id")
-	public ResponseHandler<Boolean> validateUsernameDuplication(@Parameter(description = "아이디") @RequestParam String userId) {
+	public ResponseHandler<Boolean> validateUsernameDuplication(@Parameter(description = "아이디") @RequestParam(name = "userId") String userId) {
 		return ResponseHandler.<Boolean>builder()
 			.data(memberService.validateUserIdDuplication(userId))
 			.message("사용 가능한 아이디입니다.")
@@ -178,10 +188,11 @@ public class MemberAuthController {
 		@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
 	})
 	@PostMapping("/access-token/naver")
-	public ResponseHandler<Tokens> getNaverAccessToken(@Parameter(description = "인가코드") @RequestParam String code,
-													   @Parameter(description = "상태코드") @RequestParam String state) {
+	public ResponseHandler<Tokens> getNaverAccessToken(@Parameter(description = "인가코드") @RequestParam(name = "code") String code,
+													   @Parameter(description = "상태코드") @RequestParam(name = "state") String state,
+													   @Parameter(description = "회원구분") @RequestParam(name = "memberType") MemberType memberType) {
 		return ResponseHandler.<Tokens>builder()
-			.data(memberService.getNaverAccessToken(code, state))
+			.data(memberService.getNaverAccessToken(code, state, memberType))
 			.message("요청이 처리되었습니다.")
 			.build();
 	}
@@ -194,9 +205,11 @@ public class MemberAuthController {
 		@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
 	})
 	@PostMapping("/access-token/kakao")
-	public ResponseHandler<Tokens> getKakaoAccessToken(@Parameter(description = "인가코드") @RequestParam String code) {
+	public ResponseHandler<Tokens> getKakaoAccessToken(@Parameter(description = "인가코드") @RequestParam(name = "code") String code,
+													   @Parameter(description = "회원구분") @RequestParam(name = "memberType") MemberType memberType,
+													   @Parameter(description = "리다이렉트 URL") @RequestParam(name = "redirectUrl") String redirectUrl) {
 		return ResponseHandler.<Tokens>builder()
-			.data(memberService.getKakaoAccessToken(code))
+			.data(memberService.getKakaoAccessToken(code, memberType, redirectUrl))
 			.message("요청이 처리되었습니다.")
 			.build();
 	}

@@ -1,38 +1,30 @@
 package com.tobe.healthy.member.domain.entity;
 
-import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
-import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
-import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
-import static jakarta.persistence.CascadeType.ALL;
-import static jakarta.persistence.CascadeType.PERSIST;
-import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.FetchType.LAZY;
-import static jakarta.persistence.GenerationType.IDENTITY;
-import static lombok.AccessLevel.PROTECTED;
-
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
+import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
+import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
+import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
@@ -45,10 +37,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@Column(name = "member_id")
 	private Long id;
 
-	@Column(unique = true)
 	private String userId;
 
-	@Column(unique = true)
 	private String email;
 
 	private String password;
@@ -60,17 +50,18 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private Profile profileId;
 
 	@Enumerated(STRING)
+	@ColumnDefault("'MEMBER'")
 	private MemberType memberType = MEMBER;
 
 	@Enumerated(STRING)
-	@ColumnDefault("ENABLED")
+	@ColumnDefault("'ENABLED'")
 	private AlarmStatus pushAlarmStatus = ENABLED;
 
 	@Enumerated(STRING)
-	@ColumnDefault("ENABLED")
+	@ColumnDefault("'ENABLED'")
 	private AlarmStatus feedbackAlarmStatus = ENABLED;
 
-	@ManyToOne(fetch = LAZY, cascade = PERSIST)
+	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "gym_id")
 	private Gym gym;
 
@@ -84,7 +75,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private final List<StandBySchedule> standBySchedules = new ArrayList<>();
 
 	@Enumerated(STRING)
-	@ColumnDefault("NONE")
+	@ColumnDefault("'NONE'")
 	private SocialType socialType = NONE;
 
 	@ColumnDefault("false")
@@ -114,19 +105,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
 				.build();
 	}
 
-	public static Member join(String email, String name, Profile profile, SocialType socialType) {
-		return Member.builder()
-				.userId(UUID.randomUUID().toString())
-				.email(email)
-				.name(name)
-				.pushAlarmStatus(ENABLED)
-				.profileId(profile)
-				.socialType(socialType)
-				.build();
-	}
-
 	@Builder
-	public Member(String userId, String email, String password, String name, Profile profileId, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, SocialType socialType, boolean delYn) {
+	public Member(String userId, String email, String password, String name, Profile profileId, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, Gym gym, SocialType socialType, boolean delYn) {
 		this.userId = userId;
 		this.email = email;
 		this.password = password;
@@ -135,6 +115,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 		this.memberType = memberType;
 		this.pushAlarmStatus = pushAlarmStatus;
 		this.feedbackAlarmStatus = feedbackAlarmStatus;
+		this.gym = gym;
 		this.socialType = socialType;
 		this.delYn = delYn;
 	}
