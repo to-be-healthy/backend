@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -58,7 +59,8 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "회원 탈퇴한다.", responses = {
+	@Operation(summary = "회원 탈퇴한다.", description = "로그인한 계정의 현재 비밀번호와 일치하다면 회원탈퇴를 시킨다.",
+		responses = {
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 			@ApiResponse(responseCode = "400", description = "확인 비밀번호가 일치하지 않습니다."),
 			@ApiResponse(responseCode = "200", description = "회원 탈퇴 되었습니다.")
@@ -72,13 +74,14 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "비밀번호를 변경한다.", responses = {
+	@Operation(summary = "비밀번호를 변경한다.",
+		responses = {
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 			@ApiResponse(responseCode = "400", description = "확인 비밀번호가 일치하지 않습니다."),
 			@ApiResponse(responseCode = "200", description = "비밀번호 변경이 완료 되었습니다.")
 	})
 	@PatchMapping("/password")
-	public ResponseHandler<Boolean> changePassword(@RequestBody MemberPasswordChangeCommand request,
+	public ResponseHandler<Boolean> changePassword(@ParameterObject @RequestBody MemberPasswordChangeCommand request,
 												   @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberService.changePassword(request, member.getMemberId()))
@@ -86,7 +89,7 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "프로필 사진이 등록되었습니다.", responses = {
+	@Operation(summary = "프로필 사진을 등록한다.", responses = {
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 			@ApiResponse(responseCode = "500", description = "파일 업로드중 에러가 발생하였습니다."),
 			@ApiResponse(responseCode = "200", description = "프로필 사진이 등록되었습니다.")
@@ -100,7 +103,7 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "이름이 변경되었습니다.", responses = {
+	@Operation(summary = "이름을 변경한다.", responses = {
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 			@ApiResponse(responseCode = "200", description = "이름이 변경되었습니다.")
 	})
@@ -113,7 +116,7 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "알림 상태가 변경되었습니다.", responses = {
+	@Operation(summary = "알림 상태를 변경한다.", responses = {
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 			@ApiResponse(responseCode = "200", description = "알림 상태가 변경되었습니다.")
 	})
@@ -126,7 +129,8 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "수업 기록 여부가 변경되었습니다.", responses = {
+	@Operation(summary = "수업 기록 여부를 변경한다.", description = "트레이너가 사용하는 수업기록여부를 변경한다.",
+		responses = {
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 			@ApiResponse(responseCode = "200", description = "수업 기록 여부가 변경되었습니다.")
 	})
@@ -152,5 +156,4 @@ public class MemberController {
 				.message("운동기록이 조회되었습니다.")
 				.build();
 	}
-
 }

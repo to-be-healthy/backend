@@ -78,6 +78,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@ColumnDefault("'NONE'")
 	private SocialType socialType = NONE;
 
+	private String nickname;
+
 	@ColumnDefault("false")
 	private boolean delYn = false;
 

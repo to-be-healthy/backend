@@ -27,7 +27,8 @@ public class ScheduleWaitingController {
 
 	private final ScheduleWaitingService scheduleWaitingService;
 
-	@Operation(summary = "수업 대기 신청을 한다.", responses = {
+	@Operation(summary = "수업 대기 신청을 한다.", description = "신청완료된 수업에 대기 신청을 한다.",
+		responses = {
 			@ApiResponse(responseCode = "200", description = "수업 대기 신청 완료")
 	})
 	@PostMapping("/{scheduleId}")
@@ -39,7 +40,8 @@ public class ScheduleWaitingController {
 				.build();
 	}
 
-	@Operation(summary = "신청한 수업의 대기를 취소한다.", responses = {
+	@Operation(summary = "대기 신청을 취소한다.",
+		responses = {
 			@ApiResponse(responseCode = "200", description = "수업 대기 취소 완료")
 	})
 	@DeleteMapping("/{scheduleId}")

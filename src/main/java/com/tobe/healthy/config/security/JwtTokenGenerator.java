@@ -1,19 +1,21 @@
 package com.tobe.healthy.config.security;
 
-import static io.jsonwebtoken.SignatureAlgorithm.HS256;
-
 import com.tobe.healthy.common.RedisService;
+import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+
+import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 
 @Component
 public class JwtTokenGenerator {
@@ -43,7 +45,7 @@ public class JwtTokenGenerator {
 
         redisService.setValuesWithTimeout(member.getUserId(), refreshToken, getRefreshTokenValid(nowInMilliseconds).getTime());
 
-        return new Tokens(accessToken, refreshToken, member.getUserId(), member.getMemberType());
+        return new Tokens(accessToken, refreshToken, member.getUserId(), member.getMemberType(), member.getGym());
     }
 
     private Date getRefreshTokenValid(long nowInMilliseconds) {
@@ -54,10 +56,10 @@ public class JwtTokenGenerator {
         return new Date(nowInMilliseconds + accessTokenValidSeconds * 1000);
     }
 
-    public Tokens exchangeAccessToken(Long memberId, String userId, MemberType memberType, String refreshToken) {
+    public Tokens exchangeAccessToken(Long memberId, String userId, MemberType memberType, String refreshToken, Gym gym) {
         long nowInMilliseconds = new Date().getTime();
         String changedAccessToken = createAccessToken(memberId, userId, memberType.name(), getAccessTokenValid(nowInMilliseconds));
-        return new Tokens(changedAccessToken, refreshToken, userId, memberType);
+        return new Tokens(changedAccessToken, refreshToken, userId, memberType, gym);
     }
 
     private String createAccessToken(Long memberId, String userId, String memberType, Date expiry) {
