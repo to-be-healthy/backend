@@ -7,9 +7,13 @@ import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
 
 @Entity
 @Table(name = "workout_history")
@@ -48,6 +52,10 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
     private List<WorkoutHistoryComment> historyComments = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
+    private List<CompletedExercise> completedExercises = new ArrayList<>();
+
 
     public static WorkoutHistory create(WorkoutHistoryDto historyDto, Member member) {
         return WorkoutHistory.builder()
@@ -68,8 +76,16 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     public void deleteWorkoutHistory() {
         this.delYn = true;
-        this.historyFiles.forEach(WorkoutHistoryFile::deleteWorkoutHistoryFile);
+        this.deleteFiles();
+        this.deleteComments();
+    }
+
+    public void deleteComments() {
         this.historyComments.forEach(WorkoutHistoryComment::deleteComment);
+    }
+
+    public void deleteFiles() {
+        this.historyFiles.forEach(WorkoutHistoryFile::deleteWorkoutHistoryFile);
     }
 
 }

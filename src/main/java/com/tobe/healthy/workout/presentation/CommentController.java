@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1")
+@RequestMapping("/workout-histories/v1")
 @Tag(name = "06-02. 운동기록 댓글 API", description = "운동기록 댓글 API")
 @Slf4j
 public class CommentController {
@@ -38,7 +38,7 @@ public class CommentController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동기록의 댓글, 페이징을 반환한다.")
     })
-    @GetMapping("/workout-histories/{workoutHistoryId}/comments")
+    @GetMapping("/{workoutHistoryId}/comments")
     public ResponseHandler<List<WorkoutHistoryCommentDto>> getCommentsByHistoryId(@PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                                  Pageable pageable) {
         return ResponseHandler.<List<WorkoutHistoryCommentDto>>builder()
@@ -51,7 +51,7 @@ public class CommentController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동기록 댓글을 반환한다.")
     })
-    @PostMapping("/workout-histories/{workoutHistoryId}/comments")
+    @PostMapping("/{workoutHistoryId}/comments")
     public ResponseHandler<WorkoutHistoryCommentDto> addComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                 @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                 @Valid HistoryCommentAddCommand command) {
@@ -65,7 +65,7 @@ public class CommentController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동기록 댓글을 반환한다.")
     })
-    @PutMapping("/workout-histories/{workoutHistoryId}/comments/{commentId}")
+    @PutMapping("/{workoutHistoryId}/comments/{commentId}")
     public ResponseHandler<WorkoutHistoryCommentDto> updateComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                   @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                   @PathVariable("commentId") Long commentId,
@@ -79,7 +79,7 @@ public class CommentController {
     @Operation(summary = "운동기록 댓글 삭제", responses = {
             @ApiResponse(responseCode = "200", description = "운동기록 댓글 삭제 완료.")
     })
-    @PatchMapping("/workout-histories/{workoutHistoryId}/comments/{commentId}")
+    @PatchMapping("/{workoutHistoryId}/comments/{commentId}")
     public ResponseHandler<Void> deleteComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                            @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                            @PathVariable("commentId") Long commentId) {
