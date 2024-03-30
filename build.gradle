@@ -2,6 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.2'
 	id 'io.spring.dependency-management' version '1.1.4'
+	id 'org.jetbrains.kotlin.jvm' version '1.9.23' // kotlin 추가
+	id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.23' // kotlin 추가
 }
 
 group = 'com.to-be'
@@ -66,6 +68,20 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// kotlin 추가
+compileKotlin {
+	kotlinOptions {
+		jvmTarget = "17"
+	}
+}
+
+// kotlin 추가
+compileTestKotlin {
+	kotlinOptions {
+		jvmTarget = "17"
+	}
 }
 
 clean {

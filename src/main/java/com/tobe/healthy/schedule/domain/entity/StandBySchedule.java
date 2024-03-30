@@ -12,17 +12,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 @Getter
-@Builder
 @DynamicUpdate
 public class StandBySchedule extends BaseTimeEntity<StandBySchedule, Long> {
 	@Id
@@ -43,6 +40,13 @@ public class StandBySchedule extends BaseTimeEntity<StandBySchedule, Long> {
 			.schedule(schedule)
 			.member(member)
 			.build();
+	}
+
+	@Builder
+	public StandBySchedule(Long id, Schedule schedule, Member member) {
+		this.id = id;
+		this.schedule = schedule;
+		this.member = member;
 	}
 
 	public void registerSchedule(Schedule schedule) {

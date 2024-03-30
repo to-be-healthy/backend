@@ -4,6 +4,7 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.gym.application.GymService;
 import com.tobe.healthy.gym.domain.dto.GymListCommandResult;
+import com.tobe.healthy.gym.domain.dto.MemberInTeamCommandResult;
 import com.tobe.healthy.gym.domain.dto.TrainerCommandResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/gym/v1")
+@RequestMapping("/gyms/v1")
 @Slf4j
 @Valid
 @Tag(name = "04.헬스장 API", description = "헬스장 조회 API")
@@ -66,7 +67,7 @@ public class GymController {
 	@Operation(summary = "내 트레이너로 등록한다.", responses = {
 		@ApiResponse(responseCode = "200", description = "내 트레이너로 등록하였습니다.")
 	})
-	@PatchMapping("/{gymId}/trainer/{trainerId}")
+	@PostMapping("/{gymId}/trainer/{trainerId}")
 	public ResponseHandler<Boolean> selectMyTrainer(@Parameter(description = "헬스장 ID") @PathVariable(name = "gymId") Long gymId,
 													@Parameter(description = "트레이너 ID") @PathVariable(name = "trainerId") Long trainerId,
 													@AuthenticationPrincipal CustomMemberDetails member) {
@@ -91,9 +92,9 @@ public class GymController {
 		@ApiResponse(responseCode = "200", description = "내 회원 조회 완료")
 	})
 	@GetMapping("/members")
-	public ResponseHandler<List<TrainerCommandResult>> findAllMyMemberInTeam(@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<List<TrainerCommandResult>>builder()
-			.data(null)
+	public ResponseHandler<List<MemberInTeamCommandResult>> findAllMyMemberInTeam(@AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<List<MemberInTeamCommandResult>>builder()
+			.data(gymService.findAllMyMemberInTeam(member.getMemberId()))
 			.message("헬스장의 트레이너들을 조회하였습니다.")
 			.build();
 	}
