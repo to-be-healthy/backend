@@ -189,7 +189,7 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
 	})
 	@PostMapping("/access-token/naver")
-	public ResponseHandler<Tokens> getNaverAccessToken(@RequestBody SocialLoginCommand request) {
+	public ResponseHandler<Tokens> getNaverAccessToken(@ParameterObject @RequestBody SocialLoginCommand request) {
 		return ResponseHandler.<Tokens>builder()
 			.data(memberService.getNaverAccessToken(request))
 			.message("요청이 처리되었습니다.")
@@ -205,7 +205,7 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
 	})
 	@PostMapping("/access-token/kakao")
-	public ResponseHandler<Tokens> getKakaoAccessToken(@RequestBody SocialLoginCommand request) {
+	public ResponseHandler<Tokens> getKakaoAccessToken(@ParameterObject @RequestBody SocialLoginCommand request) {
 		return ResponseHandler.<Tokens>builder()
 			.data(memberService.getKakaoAccessToken(request))
 			.message("요청이 처리되었습니다.")
