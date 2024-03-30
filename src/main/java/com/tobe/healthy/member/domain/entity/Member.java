@@ -1,5 +1,22 @@
 package com.tobe.healthy.member.domain.entity;
 
+import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.file.domain.entity.Profile;
+import com.tobe.healthy.gym.domain.entity.Gym;
+import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
+import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
+import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
 import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
@@ -9,30 +26,6 @@ import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
-
-import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.file.domain.entity.Profile;
-import com.tobe.healthy.gym.domain.entity.Gym;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
@@ -108,17 +101,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 				.pushAlarmStatus(ENABLED)
 				.profileId(profile)
 				.memberType(memberType)
-				.socialType(socialType)
-				.build();
-	}
-
-	public static Member join(String email, String name, Profile profile, SocialType socialType) {
-		return Member.builder()
-				.userId(UUID.randomUUID().toString())
-				.email(email)
-				.name(name)
-				.pushAlarmStatus(ENABLED)
-				.profileId(profile)
 				.socialType(socialType)
 				.build();
 	}
