@@ -114,8 +114,8 @@ public class MemberService {
 	@Value("${file.upload.location}")
 	private String uploadDir;
 
-	public boolean validateUserIdDuplication(String memberId, MemberType memberType) {
-		memberRepository.findByUserId(memberId, memberType).ifPresent(m -> {
+	public boolean validateUserIdDuplication(String memberId) {
+		memberRepository.findByUserId(memberId).ifPresent(m -> {
 			throw new CustomException(MEMBER_ID_DUPLICATION);
 		});
 		return true;
@@ -296,14 +296,13 @@ public class MemberService {
 		return true;
 	}
 
-	public Tokens getKakaoAccessToken(String code) {
-		IdToken response = getKakaoOAuthAccessToken(code);
+	public Tokens getKakaoAccessToken(String code, String redirectUrl) {
+		IdToken response = getKakaoOAuthAccessToken(code, redirectUrl);
 		return memberRepository.findKakaoByEmailAndSocialType(response.getEmail())
 			.map(tokenGenerator::create)
 			.orElseGet(() -> {
 				Profile profile = getProfile(response.getPicture());
-				Member member = Member.join(response.getEmail(), response.getNickname(), profile,
-					KAKAO);
+				Member member = Member.join(response.getEmail(), response.getNickname(), profile, KAKAO);
 				memberRepository.save(member);
 				return tokenGenerator.create(member);
 			});
@@ -322,11 +321,11 @@ public class MemberService {
 			.block();
 	}
 
-	private IdToken getKakaoOAuthAccessToken(String code) {
+	private IdToken getKakaoOAuthAccessToken(String code, String redirectUrl) {
 		MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
 		request.add("grant_type", oAuthProperties.getKakao().getGrantType());
 		request.add("client_id", oAuthProperties.getKakao().getClientId());
-		request.add("redirect_uri", oAuthProperties.getKakao().getRedirectUri());
+		request.add("redirect_uri", redirectUrl);
 		request.add("code", code);
 		request.add("client_secret", oAuthProperties.getKakao().getClientSecret());
 		OAuthInfo result = webClient.post()
@@ -355,7 +354,7 @@ public class MemberService {
 		return new String(decode, StandardCharsets.UTF_8);
 	}
 
-	public Tokens getNaverAccessToken(String code, String state) {
+	public Tokens getNaverAccessToken(String code, String state, String redirectUrl) {
 		OAuthInfo responseMono = getNaverOAuthAccessToken(code, state);
 
 		NaverUserInfo authorization = getNaverUserInfo(responseMono);

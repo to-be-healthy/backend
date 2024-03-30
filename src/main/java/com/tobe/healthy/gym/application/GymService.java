@@ -68,9 +68,7 @@ public class GymService {
 		return true;
 	}
 
-	public List<TrainerCommandResult> findAllMyMemberInTeam(Long memberId) {
-		List<TrainerMemberMapping> members = trainerMemberMappingRepository.findAllMembers(memberId);
-//		memberRepository.findAll(members.stream().map(Long::longValue));
-		return null;
+	public List<TrainerMemberMapping> findAllMyMemberInTeam(Long memberId) {
+		return trainerMemberMappingRepository.findAllMembers(memberId);
 	}
 }

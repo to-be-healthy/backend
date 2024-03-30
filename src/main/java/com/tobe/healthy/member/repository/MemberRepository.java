@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
-	@Query("select m from Member m where m.email = :email and m.delYn = false")
+	@Query("select m from Member m where m.email = :email and m.socialType = 'NONE' and m.delYn = false")
     Optional<Member> findByEmail(@Param("email") String email);
 
 	@Query("select m from Member m where m.email = :email and m.socialType = 'KAKAO' and m.delYn = false")
@@ -27,6 +27,9 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
 	@Query("select m from Member m where m.userId = :userId and m.memberType = :memberType and m.delYn = false")
 	Optional<Member> findByUserId(@Param("userId") String userId, @Param("memberType") MemberType memberType);
+
+	@Query("select m from Member m where m.userId = :userId and m.delYn = false")
+	Optional<Member> findByUserId(@Param("userId") String userId);
 
 	@Query("select m from Member m where m.email = :email and m.name = :name and m.socialType = 'NONE' and m.delYn = false")
 	Optional<Member> findByEmailAndName(@Param("email") String email, @Param("name") String name);
