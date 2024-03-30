@@ -2,8 +2,8 @@ package com.tobe.healthy.member.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tobe.healthy.common.OAuthError.KakaoError;
-import com.tobe.healthy.common.OAuthError.NaverError;
+import com.tobe.healthy.config.error.OAuthError.KakaoError;
+import com.tobe.healthy.config.error.OAuthError.NaverError;
 import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.OAuthProperties;

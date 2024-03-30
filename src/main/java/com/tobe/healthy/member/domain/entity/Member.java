@@ -21,7 +21,6 @@ import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
 import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
 import static jakarta.persistence.CascadeType.ALL;
-import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -51,17 +50,18 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private Profile profileId;
 
 	@Enumerated(STRING)
+	@ColumnDefault("'MEMBER'")
 	private MemberType memberType = MEMBER;
 
 	@Enumerated(STRING)
-	@ColumnDefault("ENABLED")
+	@ColumnDefault("'ENABLED'")
 	private AlarmStatus pushAlarmStatus = ENABLED;
 
 	@Enumerated(STRING)
-	@ColumnDefault("ENABLED")
+	@ColumnDefault("'ENABLED'")
 	private AlarmStatus feedbackAlarmStatus = ENABLED;
 
-	@ManyToOne(fetch = LAZY, cascade = PERSIST)
+	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "gym_id")
 	private Gym gym;
 
@@ -75,7 +75,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private final List<StandBySchedule> standBySchedules = new ArrayList<>();
 
 	@Enumerated(STRING)
-	@ColumnDefault("NONE")
+	@ColumnDefault("'NONE'")
 	private SocialType socialType = NONE;
 
 	@ColumnDefault("false")
@@ -106,7 +106,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	}
 
 	@Builder
-	public Member(String userId, String email, String password, String name, Profile profileId, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, SocialType socialType, boolean delYn) {
+	public Member(String userId, String email, String password, String name, Profile profileId, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, Gym gym, SocialType socialType, boolean delYn) {
 		this.userId = userId;
 		this.email = email;
 		this.password = password;
@@ -115,6 +115,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 		this.memberType = memberType;
 		this.pushAlarmStatus = pushAlarmStatus;
 		this.feedbackAlarmStatus = feedbackAlarmStatus;
+		this.gym = gym;
 		this.socialType = socialType;
 		this.delYn = delYn;
 	}
