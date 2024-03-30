@@ -2,11 +2,13 @@ package com.tobe.healthy.member.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tobe.healthy.common.OAuthError.KakaoError;
+import com.tobe.healthy.common.OAuthError.NaverError;
 import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.config.error.ErrorCode;
+import com.tobe.healthy.config.error.OAuthException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
@@ -302,9 +304,9 @@ public class MemberService {
 			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
 			.retrieve()
 			.onStatus(HttpStatusCode::isError, response ->
-				response.bodyToMono(String.class).flatMap(error -> {
-					log.error("error => {}", error);
-					return Mono.error(new CustomException(KAKAO_CONNECTION_ERROR));
+				response.bodyToMono(KakaoError.class).flatMap(e -> {
+					log.error("error => {}", e);
+					return Mono.error(new OAuthException(e.getErrorDescription()));
 				}))
 			.bodyToMono(OAuthInfo.class)
 			.share().block();
@@ -313,7 +315,7 @@ public class MemberService {
 			return new ObjectMapper().readValue(token, IdToken.class);
 		} catch (JsonProcessingException e) {
 			log.error("error => {}", e);
-			throw new CustomException(ErrorCode.JSON_PARSING_ERROR);
+			throw new CustomException(JSON_PARSING_ERROR);
 		}
 	}
 
@@ -370,9 +372,9 @@ public class MemberService {
 			)
 			.retrieve()
 			.onStatus(HttpStatusCode::isError, response ->
-				response.bodyToMono(String.class).flatMap(error -> {
-					log.error("error => {}", error);
-					return Mono.error(new CustomException(NAVER_CONNECTION_ERROR));
+				response.bodyToMono(NaverError.class).flatMap(e -> {
+					log.error("error => {}", e);
+					return Mono.error(new OAuthException(e.getMessage()));
 				}))
 			.bodyToMono(NaverUserInfo.class)
 			.share()
@@ -383,19 +385,14 @@ public class MemberService {
 		MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
 		request.add("grant_type", oAuthProperties.getNaver().getGrantType());
 		request.add("client_id", oAuthProperties.getNaver().getClientId());
-		request.add("code", code);
 		request.add("client_secret", oAuthProperties.getNaver().getClientSecret());
+		request.add("code", code);
 		request.add("state", state);
 		return webClient.post()
 			.uri(oAuthProperties.getNaver().getTokenUri())
 			.bodyValue(request)
 			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
 			.retrieve()
-			.onStatus(HttpStatusCode::isError, response ->
-				response.bodyToMono(String.class).flatMap(error -> {
-					log.error("error => {}", error);
-					return Mono.error(new CustomException(NAVER_CONNECTION_ERROR));
-				}))
 			.bodyToMono(OAuthInfo.class)
 			.share()
 			.block();
