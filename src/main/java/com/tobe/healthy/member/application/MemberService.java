@@ -2,12 +2,12 @@ package com.tobe.healthy.member.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tobe.healthy.config.error.OAuthError.KakaoError;
-import com.tobe.healthy.config.error.OAuthError.NaverError;
 import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.config.error.OAuthError.KakaoError;
+import com.tobe.healthy.config.error.OAuthError.NaverError;
 import com.tobe.healthy.config.error.OAuthException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
@@ -21,7 +21,6 @@ import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
@@ -116,7 +115,6 @@ public class MemberService {
 	public Boolean verifyEmailAuthNumber(String authNumber, String email) {
 		String value = redisService.getValues(email);
 
-		// 1. 일치하는 데이터가 없을경우
 		if (isEmpty(value) || !value.equals(authNumber)) {
 			throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
 		}
@@ -127,7 +125,7 @@ public class MemberService {
 	public MemberJoinCommandResult joinMember(MemberJoinCommand request) {
 		validateName(request.getName());
 		validatePassword(request);
-		validateDuplicationUserId(request.getUserId(), request.getMemberType());
+		validateDuplicationUserId(request.getUserId());
 		validateDuplicationEmail(request.getEmail());
 
 		String password = passwordEncoder.encode(request.getPassword());
@@ -179,7 +177,7 @@ public class MemberService {
 		Member member = memberRepository.findByUserId(userId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), member.getMemberType(), refreshToken);
+		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), member.getMemberType(), refreshToken, member.getGym());
 	}
 
 	public MemberFindIdCommandResult findUserId(MemberFindIdCommand request) {
@@ -228,10 +226,13 @@ public class MemberService {
 			String extension = Objects.requireNonNull(file.getOriginalFilename())
 				.substring(file.getOriginalFilename().lastIndexOf("."));
 
-			Path copyOfLocation = Paths.get(
-				uploadDir + separator + cleanPath(savedFileName + extension));
+			Path location = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
+			Path locationParent = location.getParent();
 			try {
-				Files.copy(file.getInputStream(), copyOfLocation, REPLACE_EXISTING);
+				if (!Files.exists(locationParent)) {
+					Files.createDirectories(locationParent);
+				}
+				Files.copy(file.getInputStream(), location, REPLACE_EXISTING);
 			} catch (IOException e) {
 				throw new CustomException(FILE_UPLOAD_ERROR);
 			}
@@ -266,13 +267,13 @@ public class MemberService {
 		return true;
 	}
 
-	public Tokens getKakaoAccessToken(String code, MemberType memberType, String redirectUrl) {
-		IdToken response = getKakaoOAuthAccessToken(code, redirectUrl);
+	public Tokens getKakaoAccessToken(SocialLoginCommand request) {
+		IdToken response = getKakaoOAuthAccessToken(request.getCode(), request.getRedirectUrl());
 		return memberRepository.findKakaoByEmailAndSocialType(response.getEmail())
 			.map(tokenGenerator::create)
 			.orElseGet(() -> {
 				Profile profile = getProfile(response.getPicture());
-				Member member = Member.join(response.getEmail(), response.getNickname(), profile, memberType, KAKAO);
+				Member member = Member.join(response.getEmail(), response.getNickname(), profile, request.getMemberType(), KAKAO);
 				memberRepository.save(member);
 				return tokenGenerator.create(member);
 			});
@@ -324,8 +325,8 @@ public class MemberService {
 		return new String(decode, StandardCharsets.UTF_8);
 	}
 
-	public Tokens getNaverAccessToken(String code, String state, MemberType memberType) {
-		OAuthInfo response = getNaverOAuthAccessToken(code, state);
+	public Tokens getNaverAccessToken(SocialLoginCommand request) {
+		OAuthInfo response = getNaverOAuthAccessToken(request.getCode(), request.getState());
 
 		NaverUserInfo authorization = getNaverUserInfo(response);
 
@@ -334,7 +335,7 @@ public class MemberService {
 			.orElseGet(() -> {
 				Profile profile = getProfile(authorization.getResponse().getProfileImage());
 				Member member =
-					Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), profile, memberType, NAVER);
+					Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), profile, request.getMemberType(), NAVER);
 				memberRepository.save(member);
 				return tokenGenerator.create(member);
 			});
@@ -475,7 +476,7 @@ public class MemberService {
 		return profileImage.substring(profileImage.lastIndexOf("."));
 	}
 
-	private void validateDuplicationUserId(String userId, MemberType memberType) {
+	private void validateDuplicationUserId(String userId) {
 		if (Pattern.matches("^[가-힣]+$", userId)) {
 			throw new CustomException(USERID_POLICY_VIOLATION);
 		}
