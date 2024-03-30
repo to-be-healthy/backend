@@ -2,6 +2,7 @@ package com.tobe.healthy.gym.application;
 
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.gym.domain.dto.GymListCommandResult;
+import com.tobe.healthy.gym.domain.dto.MemberInTeamCommandResult;
 import com.tobe.healthy.gym.domain.dto.TrainerCommandResult;
 import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.gym.repository.GymRepository;
@@ -9,7 +10,6 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -73,21 +73,8 @@ public class GymService {
 		return true;
 	}
 
-	public List<MemberInTeamResult> findAllMyMemberInTeam(Long memberId) {
+	public List<MemberInTeamCommandResult> findAllMyMemberInTeam(Long memberId) {
 		List<Long> members = trainerMemberMappingRepository.findAllMembers(memberId).stream().map(m -> m.getMemberId()).collect(toList());
-		return memberRepository.findAll(members).stream().map(m -> new MemberInTeamResult(m)).collect(Collectors.toList());
-	}
-
-	@Data
-	public static class MemberInTeamResult {
-		private String name;
-		private String userId;
-		private String email;
-
-		public MemberInTeamResult(Member member) {
-			this.name = member.getName();
-			this.userId = member.getUserId();
-			this.email = member.getEmail();
-		}
+		return memberRepository.findAll(members).stream().map(m -> new MemberInTeamCommandResult(m)).collect(Collectors.toList());
 	}
 }

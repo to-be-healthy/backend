@@ -3,8 +3,8 @@ package com.tobe.healthy.gym.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.gym.application.GymService;
-import com.tobe.healthy.gym.application.GymService.MemberInTeamResult;
 import com.tobe.healthy.gym.domain.dto.GymListCommandResult;
+import com.tobe.healthy.gym.domain.dto.MemberInTeamCommandResult;
 import com.tobe.healthy.gym.domain.dto.TrainerCommandResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -92,8 +92,8 @@ public class GymController {
 		@ApiResponse(responseCode = "200", description = "내 회원 조회 완료")
 	})
 	@GetMapping("/members")
-	public ResponseHandler<List<MemberInTeamResult>> findAllMyMemberInTeam(@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<List<MemberInTeamResult>>builder()
+	public ResponseHandler<List<MemberInTeamCommandResult>> findAllMyMemberInTeam(@AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<List<MemberInTeamCommandResult>>builder()
 			.data(gymService.findAllMyMemberInTeam(member.getMemberId()))
 			.message("헬스장의 트레이너들을 조회하였습니다.")
 			.build();
