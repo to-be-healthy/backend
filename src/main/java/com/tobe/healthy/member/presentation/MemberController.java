@@ -16,7 +16,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -126,21 +125,6 @@ public class MemberController {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberService.changeAlarm(alarmStatus, member.getMemberId()))
 				.message("알림 상태가 변경되었습니다.")
-				.build();
-	}
-
-	@Operation(summary = "수업 기록 여부를 변경한다.", description = "트레이너가 사용하는 수업기록여부를 변경한다.",
-		responses = {
-			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
-			@ApiResponse(responseCode = "200", description = "수업 기록 여부가 변경되었습니다.")
-	})
-	@PatchMapping("/trainer-feedback")
-	@PreAuthorize("hasAuthority('TRAINER')")
-	public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태", example = "ENABLED") @RequestParam AlarmStatus alarmStatus,
-														  @AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
-				.data(memberService.changeTrainerFeedback(alarmStatus, member.getMemberId()))
-				.message("수업 기록 여부가 변경되었습니다.")
 				.build();
 	}
 
