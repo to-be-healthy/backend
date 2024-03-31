@@ -27,7 +27,7 @@ public class CustomMemberDetails implements UserDetails {
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> roles = new ArrayList<>();
 		if (member.getMemberType().equals(STUDENT)) {
-			roles.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
+			roles.add(new SimpleGrantedAuthority("ROLE_STUDENT"));
 		} else if (member.getMemberType().equals(TRAINER)) {
 			roles.add(new SimpleGrantedAuthority("ROLE_TRAINER"));
 		}
