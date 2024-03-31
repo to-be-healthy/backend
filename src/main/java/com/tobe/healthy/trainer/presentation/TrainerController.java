@@ -2,6 +2,8 @@ package com.tobe.healthy.trainer.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
+import com.tobe.healthy.gym.application.GymService;
+import com.tobe.healthy.gym.domain.dto.MemberInTeamCommandResult;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
 import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
@@ -28,21 +30,22 @@ public class TrainerController {
 
     private final TrainerService trainerService;
     private final WorkoutHistoryService workoutService;
+    private final GymService gymService;
 
-    @Operation(summary = "회원 초대하기.", responses = {
+    @Operation(summary = "트레이너가 학생 초대하기.", responses = {
 		@ApiResponse(responseCode = "400", description = "등록된 회원이 아닙니다."),
 		@ApiResponse(responseCode = "200", description = "회원초대가 완료 되었습니다.")
     })
     @PostMapping("/invitation")
     public ResponseHandler<Void> inviteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                           @Parameter(description = "이메일") @RequestBody MemberInviteCommand command) {
+                                              @Parameter(description = "이메일") @RequestBody MemberInviteCommand command) {
         trainerService.inviteMember(command, customMemberDetails.getMember());
         return ResponseHandler.<Void>builder()
                 .message("회원초대가 완료 되었습니다.")
                 .build();
     }
 
-    @Operation(summary = "내 회원으로 등록하기", responses = {
+    @Operation(summary = "트레이너가 내 학생으로 등록하기", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "매핑ID, 트레이너ID, 회원ID를 반환한다.")
     })
@@ -51,12 +54,12 @@ public class TrainerController {
                                                                        @PathVariable("memberId") Long memberId) {
         return ResponseHandler.<TrainerMemberMappingDto>builder()
                 .data(trainerService.addMemberOfTrainer(trainerId, memberId))
-                .message("내 회원으로 등록되었습니다.")
+                .message("내 학생으로 등록되었습니다.")
                 .build();
     }
 
 
-    @Operation(summary = "트레이너 회원들의 운동기록 목록 조회", responses = {
+    @Operation(summary = "트레이너 학생들의 운동기록 목록 조회", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
     })
@@ -69,4 +72,15 @@ public class TrainerController {
                 .build();
     }
 
+    @Operation(summary = "트레이너가 관리하는 학생들을 조회한다.", description = "트레이너가 관리하는 학생 전체를 조회한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "트레이너가 관리하는 학생 조회 완료")
+            })
+    @GetMapping("/members")
+    public ResponseHandler<List<MemberInTeamCommandResult>> findAllMyMemberInTeam(@AuthenticationPrincipal CustomMemberDetails member) {
+        return ResponseHandler.<List<MemberInTeamCommandResult>>builder()
+                .data(gymService.findAllMyMemberInTeam(member.getMemberId()))
+                .message("트레이너가 관리하는 학생을 조회하였습니다.")
+                .build();
+    }
 }

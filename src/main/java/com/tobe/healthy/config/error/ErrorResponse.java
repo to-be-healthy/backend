@@ -32,6 +32,6 @@ public class ErrorResponse {
 	}
 
 	public static ErrorResponse of(String errorMessage) {
-		return new ErrorResponse(errorMessage, "500");
+		return new ErrorResponse(errorMessage, "400");
 	}
 }

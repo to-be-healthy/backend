@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,13 +28,13 @@ import java.util.List;
 @RequestMapping("/members/v1")
 @Slf4j
 @Valid
-@Tag(name = "02.회원정보 API", description = "인증이 있어야만 접근 가능한 회원 API")
+@Tag(name = "02. 회원 API", description = "인증이 있어야만 접근 가능한 회원 API")
 public class MemberController {
 
 	private final MemberService memberService;
 	private final WorkoutHistoryService workoutService;
 
-	@Operation(summary = "내 정보조회", responses = {
+	@Operation(summary = "내 정보 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청."),
 			@ApiResponse(responseCode = "200", description = "회원 정보가 조회되었습니다.")
 	})
@@ -52,7 +51,8 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "회원 정보가 조회되었습니다.")
 	})
 	@GetMapping("/{memberId}")
-	public ResponseHandler<MemberDto> getMemberInfo(@PathVariable("memberId") Long memberId) {
+	public ResponseHandler<MemberDto> getMemberInfo(@Parameter(description = "조회할 회원 아이디", example = "1")
+													@PathVariable("memberId") Long memberId) {
 		return ResponseHandler.<MemberDto>builder()
 				.data(memberService.getMemberInfo(memberId))
 				.message("회원정보가 조회 되었습니다.")
@@ -66,22 +66,22 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "회원 탈퇴 되었습니다.")
 	})
 	@PostMapping("/delete")
-	public ResponseHandler<String> deleteMember(@Parameter(description = "비밀번호") @RequestParam String password,
+	public ResponseHandler<String> deleteMember(@Parameter(description = "현재 비밀번호", example = "zxcvbnm11") @RequestParam String password,
 												@AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<String>builder()
 				.data(memberService.deleteMember(password, member.getMemberId()))
-				.message("회원탈퇴 되었습니다.")
+				.message("회원 탈퇴 되었습니다.")
 				.build();
 	}
 
-	@Operation(summary = "비밀번호를 변경한다.",
+	@Operation(summary = "회원이 비밀번호를 변경한다.",
 		responses = {
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 			@ApiResponse(responseCode = "400", description = "확인 비밀번호가 일치하지 않습니다."),
 			@ApiResponse(responseCode = "200", description = "비밀번호 변경이 완료 되었습니다.")
 	})
 	@PatchMapping("/password")
-	public ResponseHandler<Boolean> changePassword(@ParameterObject @RequestBody MemberPasswordChangeCommand request,
+	public ResponseHandler<Boolean> changePassword(@RequestBody MemberPasswordChangeCommand request,
 												   @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberService.changePassword(request, member.getMemberId()))
@@ -103,12 +103,12 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "이름을 변경한다.", responses = {
+	@Operation(summary = "회원이 이름을 변경한다.", responses = {
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 			@ApiResponse(responseCode = "200", description = "이름이 변경되었습니다.")
 	})
 	@PatchMapping("/name")
-	public ResponseHandler<Boolean> changeName(@Parameter(description = "변경할 이름") @RequestParam String name,
+	public ResponseHandler<Boolean> changeName(@Parameter(description = "변경할 이름", example = "홍길동") @RequestParam String name,
 											   @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberService.changeName(name, member.getMemberId()))
@@ -121,7 +121,7 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "알림 상태가 변경되었습니다.")
 	})
 	@PatchMapping("/alarm")
-	public ResponseHandler<Boolean> changeAlarm(@Parameter(description = "변경할 알림 상태") @RequestParam AlarmStatus alarmStatus,
+	public ResponseHandler<Boolean> changeAlarm(@Parameter(description = "변경할 알림 상태", example = "ENABLED") @RequestParam AlarmStatus alarmStatus,
 												@AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberService.changeAlarm(alarmStatus, member.getMemberId()))
@@ -136,7 +136,7 @@ public class MemberController {
 	})
 	@PatchMapping("/trainer-feedback")
 	@PreAuthorize("hasAuthority('TRAINER')")
-	public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태") @RequestParam AlarmStatus alarmStatus,
+	public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태", example = "ENABLED") @RequestParam AlarmStatus alarmStatus,
 														  @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberService.changeTrainerFeedback(alarmStatus, member.getMemberId()))

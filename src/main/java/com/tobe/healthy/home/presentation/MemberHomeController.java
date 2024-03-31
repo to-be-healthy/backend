@@ -1,8 +1,8 @@
 package com.tobe.healthy.home.presentation;
 
-import com.tobe.healthy.common.CommonService;
 import com.tobe.healthy.home.application.MemberHomeService;
 import com.tobe.healthy.home.domain.dto.out.AttendanceResult;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/v1")
 @Slf4j
+@Hidden
 public class MemberHomeController {
 
     private final MemberHomeService memberHomeService;

@@ -21,7 +21,7 @@ public class MemberLoginCommand {
     @NotEmpty(message = "비밀번호를 입력해 주세요.")
     private String password;
 
-    @Schema(description = "회원 구분" , example = "MEMBER")
+    @Schema(description = "회원 구분" , example = "STUDENT")
     @NotNull(message = "회원 구분이 필요합니다.")
     private MemberType memberType;
 }

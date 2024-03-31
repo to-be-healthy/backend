@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
-import static com.tobe.healthy.member.domain.entity.MemberType.MEMBER;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
@@ -50,8 +50,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private Profile profileId;
 
 	@Enumerated(STRING)
-	@ColumnDefault("'MEMBER'")
-	private MemberType memberType = MEMBER;
+	@ColumnDefault("'STUDENT'")
+	private MemberType memberType = STUDENT;
 
 	@Enumerated(STRING)
 	@ColumnDefault("'ENABLED'")

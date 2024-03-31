@@ -1,6 +1,7 @@
 package com.tobe.healthy.file.presentation;
 
 import com.tobe.healthy.file.application.FileService;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/file")
+@Hidden
 public class FileController {
 
 	private final FileService fileService;

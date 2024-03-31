@@ -2,6 +2,7 @@ package com.tobe.healthy.applicationform.presentation;
 import com.tobe.healthy.applicationform.application.ApplicationFormService;
 import com.tobe.healthy.applicationform.domain.dto.in.ApplicationFormAddCommand;
 import com.tobe.healthy.applicationform.domain.dto.out.ApplicationFormAddCommandResult;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/v1/application-forms")
 @Slf4j
+@Hidden
 public class ApplicationFormController {
 
     private final ApplicationFormService applicationFormService;

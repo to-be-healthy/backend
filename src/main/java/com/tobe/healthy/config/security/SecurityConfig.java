@@ -1,7 +1,5 @@
 package com.tobe.healthy.config.security;
 
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +18,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import java.util.Collections;
 import java.util.List;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
 @Slf4j
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -28,6 +28,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
@@ -38,7 +39,10 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-            .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(authenticationEntryPoint)) // 401 에러 예외 처리
+            .exceptionHandling(exceptionHandling -> {
+                exceptionHandling.authenticationEntryPoint(authenticationEntryPoint);
+                exceptionHandling.accessDeniedHandler(accessDeniedHandler);
+            })
             .authorizeHttpRequests(
                 authorize -> authorize.requestMatchers("/auth/v1/**", "/favicon.ico", "/file/**", "/v3/**", "/swagger-ui/**").permitAll()
 									  .anyRequest().authenticated())

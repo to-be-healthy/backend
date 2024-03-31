@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth/v1")
 @Slf4j
 @Valid
-@Tag(name = "01. 사용자 인증 API", description = "인증/권한 없이 접근할 수 있는 사용자 API")
+@Tag(name = "01. 회원 인증 API", description = "인증/권한 없이 접근할 수 있는 회원 API")
 public class MemberAuthController {
 
 	private final MemberService memberService;
