@@ -40,9 +40,9 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 	@Query("select m from Member m where m.gym.id = :gymId and m.memberType = 'TRAINER' and m.delYn = false order by m.id desc")
 	List<Member> findAllTrainerByGym(@Param("gymId") Long gymId);
 
-	@Query("select m from Member m where m.id in(:members) and m.memberType = 'MEMBER' and m.delYn = false")
+	@Query("select m from Member m where m.id in(:members) and m.memberType = 'STUDENT' and m.delYn = false")
 	List<Member> findAll(Long[] members);
 
-	@Query("select m from Member m where m.id in(:members) and m.memberType = 'MEMBER' and m.delYn = false")
+	@Query("select m from Member m where m.id in(:members) and m.memberType = 'STUDENT' and m.delYn = false")
 	List<Member> findAll(List<Long> members);
 }

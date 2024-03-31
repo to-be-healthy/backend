@@ -168,7 +168,6 @@ public class MemberAuthController {
 	}
 
 	@Operation(summary = "초대링크 회원가입", responses = {
-		@ApiResponse(responseCode = "401", description = "이미 등록된 이메일입니다."),
 		@ApiResponse(responseCode = "405", description = "이미 등록된 닉네임입니다."),
 		@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
 	})

@@ -9,6 +9,7 @@ import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
 import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
+import com.tobe.healthy.trainer.domain.dto.out.MemberInviteResultCommand;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,10 +42,10 @@ public class TrainerController {
 		@ApiResponse(responseCode = "200", description = "회원초대가 완료 되었습니다.")
     })
     @PostMapping("/invitation")
-    public ResponseHandler<Void> inviteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                              @Parameter(description = "이메일") @RequestBody MemberInviteCommand command) {
-        trainerService.inviteMember(command, customMemberDetails.getMember());
-        return ResponseHandler.<Void>builder()
+    public ResponseHandler<MemberInviteResultCommand> inviteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                   @RequestBody MemberInviteCommand command) {
+        return ResponseHandler.<MemberInviteResultCommand>builder()
+                .data(trainerService.inviteMember(command, customMemberDetails.getMember()))
                 .message("회원초대가 완료 되었습니다.")
                 .build();
     }
