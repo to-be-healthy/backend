@@ -41,11 +41,11 @@ public class GymService {
 				.collect(toList());
 	}
 
-	public Boolean selectMyGym(Long gymId, Long memberId) {
+	public Boolean selectMyGym(Long gymId, int joinCode, Long memberId) {
 		Member member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		Gym gym = gymRepository.findById(gymId)
+		Gym gym = gymRepository.findByIdAndJoinCode(gymId, joinCode)
 				.orElseThrow(() -> new CustomException(GYM_NOT_FOUND));
 
 		member.registerGym(gym);
