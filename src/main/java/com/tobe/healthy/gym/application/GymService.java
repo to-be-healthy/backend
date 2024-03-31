@@ -17,10 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
-import static com.tobe.healthy.config.error.ErrorCode.GYM_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.*;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -54,10 +54,16 @@ public class GymService {
 	}
 
 	public Boolean registerGym(String name) {
-		Gym gym = Gym.builder()
-				.name(name)
-				.build();
+		gymRepository.findByName(name).ifPresent(gym -> {
+			throw new CustomException(GYM_DUPLICATION);
+		});
+
+		int joinCode = getJoinCode();
+
+		Gym gym = Gym.registerGym(name, joinCode);
+
 		gymRepository.save(gym);
+
 		return true;
 	}
 
@@ -76,5 +82,18 @@ public class GymService {
 	public List<MemberInTeamCommandResult> findAllMyMemberInTeam(Long memberId) {
 		List<Long> members = trainerMemberMappingRepository.findAllMembers(memberId).stream().map(m -> m.getMemberId()).collect(toList());
 		return memberRepository.findAll(members).stream().map(m -> new MemberInTeamCommandResult(m)).collect(Collectors.toList());
+	}
+
+	private int getJoinCode() {
+		Random random = new Random();
+		StringBuilder buffer = new StringBuilder();
+		int num = 0;
+
+		while (buffer.length() < 6) {
+			num = random.nextInt(10);
+			buffer.append(num);
+		}
+
+		return Integer.parseInt(buffer.toString());
 	}
 }
