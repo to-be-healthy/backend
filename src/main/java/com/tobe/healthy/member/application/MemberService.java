@@ -269,14 +269,20 @@ public class MemberService {
 
 	public Tokens getKakaoAccessToken(SocialLoginCommand request) {
 		IdToken response = getKakaoOAuthAccessToken(request.getCode(), request.getRedirectUrl());
-		return memberRepository.findKakaoByEmailAndSocialType(response.getEmail())
-			.map(tokenGenerator::create)
-			.orElseGet(() -> {
-				Profile profile = getProfile(response.getPicture());
-				Member member = Member.join(response.getEmail(), response.getNickname(), profile, request.getMemberType(), KAKAO);
-				memberRepository.save(member);
-				return tokenGenerator.create(member);
-			});
+
+		Optional<Member> findMember = memberRepository.findByEmailAndSocialType(response.getEmail(), KAKAO);
+
+		if (findMember.isPresent()) {
+			if (findMember.get().getMemberType().equals(request.getMemberType())) {
+				return tokenGenerator.create(findMember.get());
+			}
+			throw new CustomException(MEMBER_NOT_FOUND);
+		}
+
+		Profile profile = getProfile(response.getPicture());
+		Member member = Member.join(response.getEmail(), response.getNickname(), profile, request.getMemberType(), KAKAO);
+		memberRepository.save(member);
+		return tokenGenerator.create(member);
 	}
 
 	private byte[] getProfileImage(String imageName) {
@@ -330,15 +336,17 @@ public class MemberService {
 
 		NaverUserInfo authorization = getNaverUserInfo(response);
 
-		return memberRepository.findNaverByEmailAndSocialType(authorization.getResponse().getEmail())
-			.map(tokenGenerator::create)
-			.orElseGet(() -> {
-				Profile profile = getProfile(authorization.getResponse().getProfileImage());
-				Member member =
-					Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), profile, request.getMemberType(), NAVER);
-				memberRepository.save(member);
-				return tokenGenerator.create(member);
-			});
+		Optional<Member> findMember = memberRepository.findByEmailAndSocialType(authorization.getResponse().getEmail(), NAVER);
+		if (findMember.isPresent()) {
+			if (findMember.get().getMemberType().equals(request.getMemberType())) {
+				return tokenGenerator.create(findMember.get());
+			}
+			throw new CustomException(MEMBER_NOT_FOUND);
+		}
+		Profile profile = getProfile(authorization.getResponse().getProfileImage());
+		Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), profile, request.getMemberType(), NAVER);
+		memberRepository.save(member);
+		return tokenGenerator.create(member);
 	}
 
 	private Profile getProfile(String profileImage) {

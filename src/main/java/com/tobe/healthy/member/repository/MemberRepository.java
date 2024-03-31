@@ -2,6 +2,7 @@ package com.tobe.healthy.member.repository;
 
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.member.domain.entity.SocialType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,11 +14,8 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 	@Query("select m from Member m where m.email = :email and m.socialType = 'NONE' and m.delYn = false")
     Optional<Member> findByEmail(@Param("email") String email);
 
-	@Query("select m from Member m where m.email = :email and m.socialType = 'KAKAO' and m.delYn = false")
-	Optional<Member> findKakaoByEmailAndSocialType(@Param("email") String email);
-
-	@Query("select m from Member m where m.email = :email and m.socialType = 'NAVER' and m.delYn = false")
-	Optional<Member> findNaverByEmailAndSocialType(@Param("email") String email);
+	@Query("select m from Member m where m.email = :email and m.socialType = :socialType and m.delYn = false")
+	Optional<Member> findByEmailAndSocialType(@Param("email") String email, SocialType socialType);
 
 	@Query("select m from Member m where m.email = :email and m.socialType = 'GOOGLE' and m.delYn = false")
 	Optional<Member> findGoogleByEmailAndSocialType(@Param("email") String email);

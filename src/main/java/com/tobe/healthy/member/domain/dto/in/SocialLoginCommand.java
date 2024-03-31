@@ -14,7 +14,7 @@ public class SocialLoginCommand {
 	@Schema(description = "인가코드(카카오, 네이버, 구글 소셜 로그인시 필요)")
     private String code;
 
-	@Schema(description = "상태코드(CSRF 방지, 네이버 소셜 로그인시 필요)")
+	@Schema(description = "상태코드(CSRF 방지, 네이버 소셜 로그인시 필요)", example = "STATE_STRING")
 	private String state;
 
 	@Schema(description = "회원구분(모든 소셜 로그인시 필요)", example = "STUDENT")
