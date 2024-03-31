@@ -9,6 +9,7 @@ import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
 import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
+import com.tobe.healthy.trainer.domain.dto.out.MemberInviteResultCommand;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,10 +42,11 @@ public class TrainerController {
 		@ApiResponse(responseCode = "200", description = "회원초대가 완료 되었습니다.")
     })
     @PostMapping("/invitation")
-    public ResponseHandler<Void> inviteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                              @Parameter(description = "이메일") @RequestBody MemberInviteCommand command) {
-        trainerService.inviteMember(command, customMemberDetails.getMember());
-        return ResponseHandler.<Void>builder()
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    public ResponseHandler<MemberInviteResultCommand> inviteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                   @RequestBody MemberInviteCommand command) {
+        return ResponseHandler.<MemberInviteResultCommand>builder()
+                .data(trainerService.inviteMember(command, customMemberDetails.getMember()))
                 .message("회원초대가 완료 되었습니다.")
                 .build();
     }
@@ -54,6 +56,7 @@ public class TrainerController {
             @ApiResponse(responseCode = "200", description = "매핑ID, 트레이너ID, 회원ID를 반환한다.")
     })
     @PostMapping("/{trainerId}/members/{memberId}")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<TrainerMemberMappingDto> addMemberOfTrainer(@PathVariable("trainerId") Long trainerId,
                                                                        @PathVariable("memberId") Long memberId) {
         return ResponseHandler.<TrainerMemberMappingDto>builder()
@@ -94,7 +97,7 @@ public class TrainerController {
                     @ApiResponse(responseCode = "200", description = "수업 기록 여부가 변경되었습니다.")
             })
     @PatchMapping("/trainer-feedback")
-    @PreAuthorize("hasAuthority('TRAINER')")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태", example = "ENABLED") @RequestParam AlarmStatus alarmStatus,
                                                           @AuthenticationPrincipal CustomMemberDetails member) {
         return ResponseHandler.<Boolean>builder()

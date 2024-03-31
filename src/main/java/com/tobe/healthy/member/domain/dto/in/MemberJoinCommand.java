@@ -35,6 +35,6 @@ public class MemberJoinCommand {
     @NotNull(message = "회원 구분이 필요합니다.")
     private MemberType memberType;
 
-    @Schema(description = "초대링크로 가입하는 경우 트레이너 아이디", example = "초대링크로 가입하는 경우 트레이너 아이디")
-    private Long trainerId;
+    @Schema(description = "초대링크로 가입하는 경우 uuid")
+    private String uuid;
 }

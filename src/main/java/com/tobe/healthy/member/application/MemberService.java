@@ -408,6 +408,7 @@ public class MemberService {
 			.block();
 	}
 
+	@Transactional
 	public Tokens getGoogleOAuth(SocialLoginCommand command) {
 		OAuthInfo googleToken = getGoogleAccessToken(command.getCode(), command.getRedirectUrl());
 		String[] check = googleToken.getIdToken().split("\\.");
@@ -520,13 +521,44 @@ public class MemberService {
 		return buffer.toString();
 	}
 
+	@Transactional
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
+		//회원가입
 		MemberJoinCommandResult result = joinMember(request);
-		trainerService.addMemberOfTrainer(request.getTrainerId(), result.getId());
+		Member member = memberRepository.findById(result.getId())
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+		//부가정보 업데이트
+		Map<String, String> map = getInviteMappingData(request.getUuid());
+		Long trainerId = Long.valueOf(map.get("trainerId"));
+		String name = map.get("name");
+		if(!name.equals(request.getName())) throw new CustomException(INVITE_NAME_NOT_VALID);
+		member.changeName(name);
+		member.changeAge(Integer.parseInt(map.get("age")));
+		member.changeHeight(Integer.parseInt(map.get("height")));
+		member.changeWeight(Integer.parseInt(map.get("weight")));
+
+		//TODO: 레슨횟수로 수업권 등록
+		int lessonNum = Integer.parseInt(map.get("lessonNum"));
+
+		//회원&트레이너 매핑
+		trainerService.addMemberOfTrainer(trainerId, member.getId());
 		return result;
 	}
 
 	public InvitationMappingResult getInvitationMapping(String uuid) {
+		Map<String, String> map = getInviteMappingData(uuid);
+		Long trainerId = Long.valueOf(map.get("trainerId"));
+		String name = map.get("name");
+		int lessonNum = Integer.parseInt(map.get("lessonNum"));
+		int age = Integer.parseInt(map.get("age"));
+		int height = Integer.parseInt(map.get("height"));
+		int weight = Integer.parseInt(map.get("weight"));
+		Member member = memberRepository.findByMemberIdWithGym(trainerId);
+		return InvitationMappingResult.create(member, name, lessonNum, age, height, weight);
+	}
+
+	private Map<String, String> getInviteMappingData(String uuid){
 		String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
 		String mappedData = redisService.getValues(invitationKey);
 		if (isEmpty(mappedData)) {
@@ -538,10 +570,7 @@ public class MemberService {
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-		Long trainerId = Long.valueOf(map.get("trainerId"));
-		String email = map.get("email");
-		Member member = memberRepository.findByMemberIdWithGym(trainerId);
-		return InvitationMappingResult.create(member, email);
+		return map;
 	}
 
 	public MemberDto getMemberInfo(Long memberId) {

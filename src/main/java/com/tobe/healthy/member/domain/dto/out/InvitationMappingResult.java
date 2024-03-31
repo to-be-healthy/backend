@@ -13,14 +13,20 @@ import lombok.Data;
 public class InvitationMappingResult {
 
     private MemberDto trainer;
-    private GymDto gym;
-    private String email;
+    private String name;
+    private int lessonNum;
+    private int age;
+    private int height;
+    private int weight;
 
-    public static InvitationMappingResult create(Member member, String email){
+    public static InvitationMappingResult create(Member member, String name, int lessonNum, int age, int height, int weight){
         return InvitationMappingResult.builder()
                 .trainer(MemberDto.from(member))
-                .gym(GymDto.from(member.getGym()))
-                .email(email)
+                .name(name)
+                .lessonNum(lessonNum)
+                .age(age)
+                .height(height)
+                .weight(weight)
                 .build();
     }
 }
