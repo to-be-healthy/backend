@@ -8,6 +8,7 @@ import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.OAuthError.KakaoError;
 import com.tobe.healthy.config.error.OAuthError.NaverError;
+import com.tobe.healthy.config.error.OAuthError.GoogleError;
 import com.tobe.healthy.config.error.OAuthException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
@@ -465,10 +466,11 @@ public class MemberService {
 					.accept(MediaType.APPLICATION_JSON)
 					.bodyValue(requestBody)
 					.retrieve()
-//			.onStatus(HttpStatusCode::is4xxClientError,
-//				response -> Mono.error(RuntimeException::new))
-//			.onStatus(HttpStatusCode::is5xxServerError,
-//				response -> Mono.error(RuntimeException::new))
+					.onStatus(HttpStatusCode::isError, response ->
+							response.bodyToMono(GoogleError.class).flatMap(e -> {
+								log.error("error => {}", e);
+								return Mono.error(new OAuthException(e.getErrorDescription()));
+							}))
 					.bodyToMono(OAuthInfo.class);
 		}catch (Exception e){
 			e.printStackTrace();
