@@ -408,7 +408,7 @@ public class MemberService {
 	}
 
 	public Tokens getGoogleOAuth(SocialLoginCommand command) {
-		OAuthInfo googleToken = getGoogleAccessToken(command.getCode());
+		OAuthInfo googleToken = getGoogleAccessToken(command.getCode(), command.getRedirectUrl());
 		String[] check = googleToken.getIdToken().split("\\.");
 		Base64.Decoder decoder = Base64.getDecoder();
 		String payload = new String(decoder.decode(check[1]));
@@ -449,13 +449,13 @@ public class MemberService {
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 	}
 
-	private OAuthInfo getGoogleAccessToken(String code) {
+	private OAuthInfo getGoogleAccessToken(String code, String redirectUri) {
 		String decode = URLDecoder.decode(code, StandardCharsets.UTF_8);
 		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
 		requestBody.add("client_id", oAuthProperties.getGoogle().getClientId());
 		requestBody.add("client_secret", oAuthProperties.getGoogle().getClientSecret());
 		requestBody.add("grant_type", oAuthProperties.getGoogle().getGrantType());
-		requestBody.add("redirect_uri", oAuthProperties.getGoogle().getRedirectUri());
+		requestBody.add("redirect_uri", redirectUri);
 		requestBody.add("code", decode);
 		Mono<OAuthInfo> responseMono = null;
 		try {
