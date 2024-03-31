@@ -42,6 +42,7 @@ public class TrainerController {
 		@ApiResponse(responseCode = "200", description = "회원초대가 완료 되었습니다.")
     })
     @PostMapping("/invitation")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<MemberInviteResultCommand> inviteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                    @RequestBody MemberInviteCommand command) {
         return ResponseHandler.<MemberInviteResultCommand>builder()
@@ -55,6 +56,7 @@ public class TrainerController {
             @ApiResponse(responseCode = "200", description = "매핑ID, 트레이너ID, 회원ID를 반환한다.")
     })
     @PostMapping("/{trainerId}/members/{memberId}")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<TrainerMemberMappingDto> addMemberOfTrainer(@PathVariable("trainerId") Long trainerId,
                                                                        @PathVariable("memberId") Long memberId) {
         return ResponseHandler.<TrainerMemberMappingDto>builder()
