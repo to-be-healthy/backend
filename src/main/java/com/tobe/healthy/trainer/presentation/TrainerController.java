@@ -38,7 +38,8 @@ public class TrainerController {
     private final MemberService memberService;
 
     @Operation(summary = "트레이너가 학생 초대하기", responses = {
-		@ApiResponse(responseCode = "400", description = "등록된 회원이 아닙니다."),
+		@ApiResponse(responseCode = "400", description = "시작날짜와 종료날짜가 유효하지않습니다."),
+		@ApiResponse(responseCode = "400", description = "회원을 찾을 수 없습니다."),
 		@ApiResponse(responseCode = "200", description = "회원초대가 완료 되었습니다.")
     })
     @PostMapping("/invitation")
