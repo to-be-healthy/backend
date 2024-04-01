@@ -37,7 +37,7 @@ public class TrainerController {
     private final GymService gymService;
     private final MemberService memberService;
 
-    @Operation(summary = "트레이너가 학생 초대하기.", responses = {
+    @Operation(summary = "트레이너가 학생 초대하기", responses = {
 		@ApiResponse(responseCode = "400", description = "등록된 회원이 아닙니다."),
 		@ApiResponse(responseCode = "200", description = "회원초대가 완료 되었습니다.")
     })
@@ -57,8 +57,8 @@ public class TrainerController {
     })
     @PostMapping("/{trainerId}/members/{memberId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<TrainerMemberMappingDto> addMemberOfTrainer(@PathVariable("trainerId") Long trainerId,
-                                                                       @PathVariable("memberId") Long memberId) {
+    public ResponseHandler<TrainerMemberMappingDto> addMemberOfTrainer(@Parameter(description = "트레이너 ID") @PathVariable("trainerId") Long trainerId,
+                                                                       @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
         return ResponseHandler.<TrainerMemberMappingDto>builder()
                 .data(trainerService.addMemberOfTrainer(trainerId, memberId))
                 .message("내 학생으로 등록되었습니다.")
@@ -66,12 +66,12 @@ public class TrainerController {
     }
 
 
-    @Operation(summary = "트레이너 학생들의 운동기록 목록 조회", responses = {
+    @Operation(summary = "트레이너가 관리하는 학생들의 운동기록 목록 조회하기", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
     })
     @GetMapping("/{trainerId}/workout-histories")
-    public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistoryByTrainer(@PathVariable("trainerId") Long trainerId,
+    public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistoryByTrainer(@Parameter(description = "트레이너 ID") @PathVariable("trainerId") Long trainerId,
                                                                                Pageable pageable) {
         return ResponseHandler.<List<WorkoutHistoryDto>>builder()
                 .data(workoutService.getWorkoutHistoryByTrainer(trainerId, pageable))

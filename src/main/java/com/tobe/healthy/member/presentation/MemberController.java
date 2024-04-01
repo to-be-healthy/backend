@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -128,12 +129,12 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "회원 운동기록 목록 조회", responses = {
+	@Operation(summary = "학생의 운동기록 목록 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
 			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/{memberId}/workout-histories")
-	public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistory(@PathVariable("memberId") Long memberId,
+	public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistory(@Parameter(description = "학생 아이디", example = "to-be-healthy") @PathVariable("memberId") Long memberId,
 																	  Pageable pageable) {
 		return ResponseHandler.<List<WorkoutHistoryDto>>builder()
 				.data(workoutService.getWorkoutHistory(memberId, pageable))

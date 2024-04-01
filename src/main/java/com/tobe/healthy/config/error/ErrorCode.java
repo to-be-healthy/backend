@@ -32,6 +32,7 @@ public enum ErrorCode {
 	INVITE_NAME_NOT_VALID(BAD_REQUEST, "C_019", "초대회원 이름이 유효하지 않습니다."),
 	EXERCISE_NOT_FOUND(NOT_FOUND, "C_020", "해당 운동이 존재하지 않습니다."),
 	PASSWORD_NOT_VALID(BAD_REQUEST, "C_019", "비밀번호가 일치하지 않습니다."),
+	DATETIME_NOT_VALID(BAD_REQUEST, "C_019", "시작날짜와 종료날짜가 유효하지 않습니다."),
 
 	MEMBER_NAME_LENGTH_NOT_VALID(BAD_REQUEST, "C_020", "이름의 길이는 2자 이상이여야 합니다."),
 	MEMBER_NAME_NOT_VALID(BAD_REQUEST, "C_021", "이름은 한글 또는 영어만 입력할 수 있습니다."),

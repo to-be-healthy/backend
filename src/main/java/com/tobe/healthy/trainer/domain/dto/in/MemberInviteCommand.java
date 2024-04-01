@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 public class MemberInviteCommand {
 
@@ -14,16 +16,12 @@ public class MemberInviteCommand {
 
     @Schema(description = "수업할 PT 횟수" , example = "10")
     @Positive(message = "양수를 입력해주세요.")
-    private int lessonNum;
+    private int lessonCnt;
 
-    @Schema(description = "나이" , example = "20")
-    private int age = 0;
+    @Schema(description = "헬스장 이용권 시작날짜")
+    private LocalDate gymStartDt;
 
-    @Schema(description = "키" , example = "180")
-    private int height = 0;
-
-    @Schema(description = "몸무게" , example = "60")
-    private int weight = 0;
-
+    @Schema(description = "헬스장 이용권 종료날짜")
+    private LocalDate gymEndDt;
 
 }

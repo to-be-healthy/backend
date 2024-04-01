@@ -22,11 +22,14 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.tobe.healthy.config.error.ErrorCode.DATETIME_NOT_VALID;
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
 
 
@@ -53,14 +56,16 @@ public class TrainerService {
     }
 
     public MemberInviteResultCommand inviteMember(MemberInviteCommand command, Member trainer) {
+        if(command.getGymStartDt().isAfter(command.getGymEndDt())){
+            throw new CustomException(DATETIME_NOT_VALID);
+        }
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), MemberType.TRAINER)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         String name = command.getName();
-        int lessonNum = command.getLessonNum();
-        int age = command.getAge();
-        int height = command.getHeight();
-        int weight = command.getWeight();
+        int lessonCnt = command.getLessonCnt();
+        LocalDate gymStartDt = command.getGymStartDt();
+        LocalDate gymEndDt = command.getGymEndDt();
 
         String uuid = System.currentTimeMillis() + "_" + UUID.randomUUID();
         String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
@@ -69,10 +74,9 @@ public class TrainerService {
         Map<String, String> invitedMapping = new HashMap<>() {{
             put("trainerId", trainer.getId().toString());
             put("name", name);
-            put("lessonNum", String.valueOf(lessonNum));
-            put("age", String.valueOf(age));
-            put("height", String.valueOf(height));
-            put("weight", String.valueOf(weight));
+            put("lessonCnt", String.valueOf(lessonCnt));
+            put("gymStartDt", String.valueOf(gymStartDt));
+            put("gymEndDt", String.valueOf(gymEndDt));
         }};
         redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), 24 * 60 * 60 * 1000); // 1days
         return new MemberInviteResultCommand(uuid, invitationLink);

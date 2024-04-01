@@ -13,6 +13,10 @@ import com.tobe.healthy.config.error.OAuthException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
+import com.tobe.healthy.gym.application.GymMembershipService;
+import com.tobe.healthy.gym.application.GymService;
+import com.tobe.healthy.gym.domain.dto.in.MembershipAddCommand;
+import com.tobe.healthy.gym.repository.GymMembershipRepository;
 import com.tobe.healthy.gym.repository.GymRepository;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.in.*;
@@ -25,6 +29,7 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
+import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import io.jsonwebtoken.impl.Base64UrlCodec;
@@ -51,6 +56,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -81,6 +89,7 @@ public class MemberService {
 	private final TrainerMemberMappingRepository mappingRepository;
 	private final GymRepository gymRepository;
 	private final MailService mailService;
+	private final GymMembershipService gymMembershipService;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -521,7 +530,6 @@ public class MemberService {
 		return buffer.toString();
 	}
 
-	@Transactional
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
 		//회원가입
 		MemberJoinCommandResult result = joinMember(request);
@@ -531,18 +539,21 @@ public class MemberService {
 		//부가정보 업데이트
 		Map<String, String> map = getInviteMappingData(request.getUuid());
 		Long trainerId = Long.valueOf(map.get("trainerId"));
-		String name = map.get("name");
-		if(!name.equals(request.getName())) throw new CustomException(INVITE_NAME_NOT_VALID);
-		member.changeName(name);
-		member.changeAge(Integer.parseInt(map.get("age")));
-		member.changeHeight(Integer.parseInt(map.get("height")));
-		member.changeWeight(Integer.parseInt(map.get("weight")));
-
-		//TODO: 레슨횟수로 수업권 등록
-		int lessonNum = Integer.parseInt(map.get("lessonNum"));
 
 		//회원&트레이너 매핑
 		trainerService.addMemberOfTrainer(trainerId, member.getId());
+
+		String name = map.get("name");
+		if(!name.equals(request.getName())) throw new CustomException(INVITE_NAME_NOT_VALID);
+		member.changeName(name);
+
+		//레슨횟수로 수업권 등록
+		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
+		LocalDate gymStartDt = LocalDate.parse(map.get("gymStartDt"), DateTimeFormatter.ISO_DATE);
+		LocalDate gymEndDt = LocalDate.parse(map.get("gymEndDt"), DateTimeFormatter.ISO_DATE);
+		MembershipAddCommand command = new MembershipAddCommand(member.getGym().getId(),
+				member.getId(), lessonCnt, gymStartDt, gymEndDt);
+		gymMembershipService.registerGymMembership(command);
 		return result;
 	}
 
@@ -550,12 +561,11 @@ public class MemberService {
 		Map<String, String> map = getInviteMappingData(uuid);
 		Long trainerId = Long.valueOf(map.get("trainerId"));
 		String name = map.get("name");
-		int lessonNum = Integer.parseInt(map.get("lessonNum"));
-		int age = Integer.parseInt(map.get("age"));
-		int height = Integer.parseInt(map.get("height"));
-		int weight = Integer.parseInt(map.get("weight"));
+		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
+		LocalDate gymStartDt = LocalDate.parse(map.get("gymStartDt"), DateTimeFormatter.ISO_DATE);
+		LocalDate gymEndDt = LocalDate.parse(map.get("gymEndDt"), DateTimeFormatter.ISO_DATE);
 		Member member = memberRepository.findByMemberIdWithGym(trainerId);
-		return InvitationMappingResult.create(member, name, lessonNum, age, height, weight);
+		return InvitationMappingResult.create(member, name, lessonCnt, gymStartDt, gymEndDt);
 	}
 
 	private Map<String, String> getInviteMappingData(String uuid){

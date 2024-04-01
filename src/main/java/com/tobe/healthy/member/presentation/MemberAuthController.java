@@ -210,6 +210,11 @@ public class MemberAuthController {
 			.build();
 	}
 
+	@Operation(summary = "구글 소셜 로그인", description = "인가코드로 구글에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.",
+			responses = {
+					@ApiResponse(responseCode = "500", description = "구글 소셜서버와 연동중 에러가 발생하였습니다."),
+					@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
+			})
 	@PostMapping("/access-token/google")
 	public ResponseHandler<Tokens> getGoogleOAuth(@RequestBody SocialLoginCommand command) {
 		return ResponseHandler.<Tokens>builder()
