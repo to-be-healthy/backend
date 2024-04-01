@@ -6,7 +6,9 @@ import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,6 +46,15 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private String password;
 
 	private String name;
+
+	@ColumnDefault("0")
+	private int age = 0;
+
+	@ColumnDefault("0")
+	private int height = 0;
+
+	@ColumnDefault("0")
+	private int weight = 0;
 
 	@OneToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "profile_id")
@@ -152,5 +163,17 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	public void changeTrainerFeedback(AlarmStatus alarmStatus) {
 		this.feedbackAlarmStatus = alarmStatus;
+	}
+
+	public void changeAge(int age){
+		this.age = age;
+	}
+
+	public void changeHeight(int height){
+		this.height = height;
+	}
+
+	public void changeWeight(int weight){
+		this.weight = weight;
 	}
 }
