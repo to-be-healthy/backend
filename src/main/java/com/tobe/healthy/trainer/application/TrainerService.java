@@ -4,12 +4,15 @@ import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.ErrorCode;
+import com.tobe.healthy.gym.application.GymMembershipService;
+import com.tobe.healthy.gym.domain.dto.in.MembershipAddCommand;
 import com.tobe.healthy.member.application.MailService;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
 import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
+import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
 import com.tobe.healthy.trainer.domain.dto.out.MemberInviteResultCommand;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
@@ -21,9 +24,11 @@ import org.json.simple.JSONObject;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,14 +40,16 @@ import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 @Slf4j
 public class TrainerService {
 
     private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final TrainerMemberMappingRepository mappingRepository;
+    private final GymMembershipService gymMembershipService;
 
-    public TrainerMemberMappingDto addMemberOfTrainer(Long trainerId, Long memberId) {
+    public TrainerMemberMappingDto addMemberOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         Member member = memberRepository.findById(memberId)
@@ -52,7 +59,17 @@ public class TrainerService {
         TrainerMemberMapping mapping = TrainerMemberMapping.create(trainerId, memberId);
         mappingRepository.save(mapping);
         member.registerGym(trainer.getGym());
+        registerGymMembership(member, command);
         return TrainerMemberMappingDto.from(mapping);
+    }
+
+    private void registerGymMembership(Member member, MemberLessonCommand command) {
+        int lessonCnt = command.getLessonCnt();
+        LocalDate gymStartDt = command.getGymStartDt();
+        LocalDate gymEndDt = command.getGymEndDt();
+        MembershipAddCommand membership = new MembershipAddCommand(member.getGym().getId(),
+                member.getId(), lessonCnt, gymStartDt, gymEndDt);
+        gymMembershipService.registerGymMembership(membership);
     }
 
     public MemberInviteResultCommand inviteMember(MemberInviteCommand command, Member trainer) {

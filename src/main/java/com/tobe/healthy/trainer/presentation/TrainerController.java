@@ -9,6 +9,7 @@ import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
 import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
+import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
 import com.tobe.healthy.trainer.domain.dto.out.MemberInviteResultCommand;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
@@ -59,9 +60,10 @@ public class TrainerController {
     @PostMapping("/{trainerId}/members/{memberId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<TrainerMemberMappingDto> addMemberOfTrainer(@Parameter(description = "트레이너 ID") @PathVariable("trainerId") Long trainerId,
-                                                                       @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
+                                                                       @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId,
+                                                                       @RequestBody MemberLessonCommand command) {
         return ResponseHandler.<TrainerMemberMappingDto>builder()
-                .data(trainerService.addMemberOfTrainer(trainerId, memberId))
+                .data(trainerService.addMemberOfTrainer(trainerId, memberId, command))
                 .message("내 학생으로 등록되었습니다.")
                 .build();
     }
