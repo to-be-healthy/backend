@@ -12,4 +12,6 @@ public interface TrainerMemberMappingRepository extends JpaRepository<TrainerMem
     Optional<TrainerMemberMapping> findTop1ByMemberIdOrderByCreatedAtDesc(Long memberId);
     @Query("select e from TrainerMemberMapping e where e.trainerId = :memberId")
     List<TrainerMemberMapping> findAllMembers(Long memberId);
+
+    void deleteByMemberId(Long memberId);
 }

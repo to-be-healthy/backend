@@ -87,6 +87,7 @@ public class TrainerController {
                     @ApiResponse(responseCode = "200", description = "트레이너가 관리하는 학생 조회 완료")
             })
     @GetMapping("/members")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<List<MemberInTeamCommandResult>> findAllMyMemberInTeam(@AuthenticationPrincipal CustomMemberDetails member) {
         return ResponseHandler.<List<MemberInTeamCommandResult>>builder()
                 .data(gymService.findAllMyMemberInTeam(member.getMemberId()))
