@@ -55,19 +55,20 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
     @Override
     public List<Tuple> findAllMyMemberInTrainer(Long trainerId) {
-        List<Tuple> tuples = queryFactory
-                .select(member, trainerMemberMapping, gymMembership)
-                .from(member)
-                .innerJoin(trainerMemberMapping).fetchJoin()
-                .on(member.id.eq(trainerMemberMapping.memberId))
-                .leftJoin(gymMembership).fetchJoin()
-                .on(member.id.eq(gymMembership.member.id))
-                .where(trainerMemberMapping.trainerId.eq(trainerId)
-                        , member.memberType.eq(MemberType.STUDENT)
-                        , member.delYn.eq(false))
-                .orderBy(member.id.asc())
-                .fetch();
-        return tuples;
+//        List<Tuple> tuples = queryFactory
+//                .select(member, trainerMemberMapping, gymMembership)
+//                .from(member)
+//                .innerJoin(trainerMemberMapping).fetchJoin()
+//                .on(member.id.eq(trainerMemberMapping.memberId))
+//                .leftJoin(gymMembership).fetchJoin()
+//                .on(member.id.eq(gymMembership.member.id))
+//                .where(trainerMemberMapping.trainerId.eq(trainerId)
+//                        , member.memberType.eq(MemberType.STUDENT)
+//                        , member.delYn.eq(false))
+//                .orderBy(member.id.asc())
+//                .fetch();
+//        return tuples;
+        return null;
     }
 
     private BooleanExpression memberIdEq(Long memberId) {

@@ -28,11 +28,9 @@ import static java.util.stream.Collectors.toList;
 @Transactional
 @Slf4j
 public class GymService {
-	private final ModelMapper modelMapper;
 
 	private final MemberRepository memberRepository;
 	private final GymRepository gymRepository;
-	private final TrainerMemberMappingRepository trainerMemberMappingRepository;
 
 	public List<GymListCommandResult> findAllGym() {
 		return gymRepository.findAll()

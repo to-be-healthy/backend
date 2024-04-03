@@ -54,7 +54,7 @@ public class TrainerService {
         mappingRepository.findByTrainerIdAndMemberId(trainerId, memberId)
                 .ifPresent(i -> {throw new CustomException(ErrorCode.MEMBER_ALREADY_MAPPED);});
 
-        TrainerMemberMapping mapping = TrainerMemberMapping.create(trainerId, memberId, command.getLessonCnt(), command.getLessonCnt());
+        TrainerMemberMapping mapping = TrainerMemberMapping.create(trainer, member, command.getLessonCnt(), command.getLessonCnt());
 
         mappingRepository.deleteByMemberId(memberId);
         mappingRepository.flush();

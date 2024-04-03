@@ -589,7 +589,7 @@ public class MemberService {
 		Optional<TrainerMemberMapping> mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId);
 
 		if(mapping.isPresent()){
-			Long trainerId = mapping.map(TrainerMemberMapping::getTrainerId).orElse(null);
+			Long trainerId = mapping.map(m -> m.getTrainer().getId()).orElse(null);
 			Member trainer = memberRepository.findByMemberIdWithGym(trainerId);
 			return MemberDto.create(member, trainer.getGym());
 		}else{
