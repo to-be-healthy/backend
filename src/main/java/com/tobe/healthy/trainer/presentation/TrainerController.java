@@ -3,7 +3,7 @@ package com.tobe.healthy.trainer.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.gym.application.GymService;
-import com.tobe.healthy.gym.domain.dto.MemberInTeamCommandResult;
+import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.trainer.application.TrainerService;
@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -88,11 +89,14 @@ public class TrainerController {
             })
     @GetMapping("/members")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<Void> findAllMyMemberInTrainer(@AuthenticationPrincipal CustomMemberDetails member) {
-//        List<MemberInTeamCommandResult>
-        trainerService.findAllMyMemberInTrainer(member.getMemberId());
-        return ResponseHandler.<Void>builder()
-//                .data()
+    public ResponseHandler<List<MemberInTeamDto>> findAllMyMemberInTrainer(@AuthenticationPrincipal CustomMemberDetails member,
+                                                                           @Parameter(description = "검색할 이름", example = "임채린")
+                                                                           @RequestParam(required = false) String searchValue,
+                                                                           @Parameter(description = "정렬 조건", example = "ranking, memberId")
+                                                                               @RequestParam(required = false, defaultValue = "memberId") String sortValue,
+                                                                           Pageable pageable) {
+        return ResponseHandler.<List<MemberInTeamDto>>builder()
+                .data(trainerService.findAllMyMemberInTeam(member.getMemberId(), searchValue, sortValue, pageable))
                 .message("트레이너가 관리하는 학생을 조회하였습니다.")
                 .build();
     }
@@ -104,7 +108,8 @@ public class TrainerController {
             })
     @PatchMapping("/trainer-feedback")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태", example = "ENABLED") @RequestParam AlarmStatus alarmStatus,
+    public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태", example = "ENABLED")
+                                                              @RequestParam AlarmStatus alarmStatus,
                                                           @AuthenticationPrincipal CustomMemberDetails member) {
         return ResponseHandler.<Boolean>builder()
                 .data(memberService.changeTrainerFeedback(alarmStatus, member.getMemberId()))

@@ -1,13 +1,17 @@
 package com.tobe.healthy.member.repository;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.gym.domain.entity.QGymMembership;
+import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
+import com.tobe.healthy.gym.domain.dto.QMemberInTeamDto;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
-import com.tobe.healthy.trainer.domain.entity.QTrainerMemberMapping;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
@@ -53,22 +57,36 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return m;
     }
 
-    @Override
-    public List<Tuple> findAllMyMemberInTrainer(Long trainerId) {
-//        List<Tuple> tuples = queryFactory
-//                .select(member, trainerMemberMapping, gymMembership)
-//                .from(member)
-//                .innerJoin(trainerMemberMapping).fetchJoin()
-//                .on(member.id.eq(trainerMemberMapping.memberId))
-//                .leftJoin(gymMembership).fetchJoin()
-//                .on(member.id.eq(gymMembership.member.id))
-//                .where(trainerMemberMapping.trainerId.eq(trainerId)
-//                        , member.memberType.eq(MemberType.STUDENT)
-//                        , member.delYn.eq(false))
-//                .orderBy(member.id.asc())
-//                .fetch();
-//        return tuples;
-        return null;
+    public Page<MemberInTeamDto> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
+        Long totalCnt = queryFactory
+                .select(member.count())
+                .from(trainerMemberMapping)
+                .innerJoin(trainerMemberMapping.member, member)
+                .on(trainerMemberMapping.member.id.eq(member.id))
+                .leftJoin(gymMembership)
+                .on(member.id.eq(gymMembership.member.id))
+                .where(trainerMemberMapping.trainer.id.eq(trainerId)
+                        , member.memberType.eq(MemberType.STUDENT)
+                        , member.delYn.eq(false)
+                        , nameLike(searchValue))
+                .fetchOne();
+
+        List<MemberInTeamDto> list = queryFactory
+                .select(new QMemberInTeamDto(member.id, member.name, member.userId, member.email,
+                        trainerMemberMapping.ranking, trainerMemberMapping.lessonCnt, trainerMemberMapping.remainLessonCnt,
+                        gymMembership.gymEndDt))
+                .from(trainerMemberMapping)
+                .innerJoin(trainerMemberMapping.member, member)
+                .on(trainerMemberMapping.member.id.eq(member.id))
+                .leftJoin(gymMembership)
+                .on(member.id.eq(gymMembership.member.id))
+                .where(trainerMemberMapping.trainer.id.eq(trainerId)
+                        , member.memberType.eq(MemberType.STUDENT)
+                        , member.delYn.eq(false)
+                        , nameLike(searchValue))
+                .orderBy(sortBy(sortValue))
+                .fetch();
+        return PageableExecutionUtils.getPage(list, pageable, ()-> totalCnt );
     }
 
     private BooleanExpression memberIdEq(Long memberId) {
@@ -76,5 +94,19 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
             return member.id.eq(memberId);
         }
         return null;
+    }
+
+    private BooleanExpression nameLike(String name) {
+        if (!ObjectUtils.isEmpty(name)) {
+            return member.name.containsIgnoreCase(name);
+        }
+        return null;
+    }
+
+    private OrderSpecifier sortBy(String sortValue) {
+        if (!ObjectUtils.isEmpty(sortValue)) {
+            if("ranking".equals(sortValue)) return trainerMemberMapping.ranking.asc();
+        }
+        return member.id.asc();
     }
 }

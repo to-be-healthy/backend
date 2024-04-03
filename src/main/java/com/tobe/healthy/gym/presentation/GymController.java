@@ -3,8 +3,8 @@ package com.tobe.healthy.gym.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.gym.application.GymService;
-import com.tobe.healthy.gym.domain.dto.GymListCommandResult;
-import com.tobe.healthy.gym.domain.dto.TrainerCommandResult;
+import com.tobe.healthy.gym.domain.dto.out.GymListCommandResult;
+import com.tobe.healthy.gym.domain.dto.out.TrainerCommandResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequestMapping("/gyms/v1")
 @Slf4j
 @Valid
-@Tag(name = "04.헬스장 API", description = "헬스장 조회 API")
+@Tag(name = "04-01.헬스장 API", description = "헬스장 조회 API")
 public class GymController {
 
 	private final GymService gymService;

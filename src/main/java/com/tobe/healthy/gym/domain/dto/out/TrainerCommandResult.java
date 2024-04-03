@@ -1,4 +1,4 @@
-package com.tobe.healthy.gym.domain.dto;
+package com.tobe.healthy.gym.domain.dto.out;
 
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.member.domain.entity.Member;

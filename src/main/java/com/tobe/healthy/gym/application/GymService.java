@@ -1,23 +1,18 @@
 package com.tobe.healthy.gym.application;
 
 import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.gym.domain.dto.GymListCommandResult;
-import com.tobe.healthy.gym.domain.dto.MemberInTeamCommandResult;
-import com.tobe.healthy.gym.domain.dto.TrainerCommandResult;
+import com.tobe.healthy.gym.domain.dto.out.GymListCommandResult;
+import com.tobe.healthy.gym.domain.dto.out.TrainerCommandResult;
 import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.gym.repository.GymRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
-import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.GYM_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
