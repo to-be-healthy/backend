@@ -66,20 +66,6 @@ public class GymController {
 				.build();
 	}
 
-	@Operation(summary = "학생이 내 트레이너로 등록한다.", description = "학생이 내 트레이너로 등록한다.",
-			responses = {
-					@ApiResponse(responseCode = "200", description = "내 트레이너로 등록하였습니다.")
-			})
-	@PostMapping("/{gymId}/trainer/{trainerId}")
-	public ResponseHandler<Boolean> selectMyTrainer(@Parameter(description = "헬스장 ID") @PathVariable(name = "gymId") Long gymId,
-													@Parameter(description = "트레이너 ID") @PathVariable(name = "trainerId") Long trainerId,
-													@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
-				.data(gymService.selectMyTrainer(gymId, trainerId, member.getMemberId()))
-				.message("내 트레이너로 등록되었습니다.")
-				.build();
-	}
-
 	@Operation(summary = "학생이 헬스장의 모든 트레이너들을 조회한다.", description = "학생이 헬스장의 모든 트레이너들을 조회한다.(새로운 트레이너가 상단에 있도록)",
 			responses = {
 					@ApiResponse(responseCode = "200", description = "헬스장에 모든 트레이너 조회완료")

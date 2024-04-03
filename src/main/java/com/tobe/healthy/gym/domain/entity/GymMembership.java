@@ -35,21 +35,13 @@ public class GymMembership extends BaseTimeEntity<GymMembership, Long> {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ColumnDefault("0")
-    private int lessonCnt = 0;
-
-    @ColumnDefault("0")
-    private int remainLessonCnt = 0;
-
     private LocalDate gymStartDt;
     private LocalDate gymEndDt;
 
     @Builder
-    public GymMembership(Gym gym, Member member, int lessonCnt, int remainLessonCnt, LocalDate gymStartDt, LocalDate gymEndDt) {
+    public GymMembership(Gym gym, Member member, LocalDate gymStartDt, LocalDate gymEndDt) {
         this.gym = gym;
         this.member = member;
-        this.lessonCnt = lessonCnt;
-        this.remainLessonCnt = remainLessonCnt;
         this.gymStartDt = gymStartDt;
         this.gymEndDt = gymEndDt;
     }

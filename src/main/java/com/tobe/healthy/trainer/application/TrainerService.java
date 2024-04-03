@@ -29,10 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.tobe.healthy.config.error.ErrorCode.DATETIME_NOT_VALID;
 import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
@@ -56,11 +53,11 @@ public class TrainerService {
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         mappingRepository.findByTrainerIdAndMemberId(trainerId, memberId)
                 .ifPresent(i -> {throw new CustomException(ErrorCode.MEMBER_ALREADY_MAPPED);});
-        TrainerMemberMapping mapping = TrainerMemberMapping.create(trainerId, memberId);
+
+        TrainerMemberMapping mapping = TrainerMemberMapping.create(trainerId, memberId, command.getLessonCnt(), command.getLessonCnt());
 
         mappingRepository.deleteByMemberId(memberId);
         mappingRepository.flush();
-
         mappingRepository.save(mapping);
         member.registerGym(trainer.getGym());
         registerGymMembership(member, command);
@@ -68,11 +65,9 @@ public class TrainerService {
     }
 
     private void registerGymMembership(Member member, MemberLessonCommand command) {
-        int lessonCnt = command.getLessonCnt();
         LocalDate gymStartDt = command.getGymStartDt();
         LocalDate gymEndDt = command.getGymEndDt();
-        MembershipAddCommand membership = new MembershipAddCommand(member.getGym().getId(),
-                member.getId(), lessonCnt, gymStartDt, gymEndDt);
+        MembershipAddCommand membership = new MembershipAddCommand(member.getGym().getId(), member.getId(), gymStartDt, gymEndDt);
         gymMembershipService.registerGymMembership(membership);
     }
 
@@ -103,4 +98,8 @@ public class TrainerService {
         return new MemberInviteResultCommand(uuid, invitationLink);
     }
 
+    public Object findAllMyMemberInTrainer(Long trainerId) {
+        memberRepository.findAllMyMemberInTrainer(trainerId);
+        return new ArrayList<>();
+    }
 }

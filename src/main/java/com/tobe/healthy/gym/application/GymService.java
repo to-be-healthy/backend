@@ -67,14 +67,4 @@ public class GymService {
 			.toList();
 	}
 
-	public Boolean selectMyTrainer(Long gymId, Long trainerId, Long memberId) {
-		TrainerMemberMapping entity = TrainerMemberMapping.create(gymId, trainerId, memberId);
-		trainerMemberMappingRepository.save(entity);
-		return true;
-	}
-
-	public List<MemberInTeamCommandResult> findAllMyMemberInTeam(Long memberId) {
-		List<Long> members = trainerMemberMappingRepository.findAllMembers(memberId).stream().map(m -> m.getMemberId()).collect(toList());
-		return memberRepository.findAll(members).stream().map(m -> new MemberInTeamCommandResult(m)).collect(Collectors.toList());
-	}
 }

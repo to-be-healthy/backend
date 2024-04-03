@@ -88,9 +88,11 @@ public class TrainerController {
             })
     @GetMapping("/members")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<List<MemberInTeamCommandResult>> findAllMyMemberInTeam(@AuthenticationPrincipal CustomMemberDetails member) {
-        return ResponseHandler.<List<MemberInTeamCommandResult>>builder()
-                .data(gymService.findAllMyMemberInTeam(member.getMemberId()))
+    public ResponseHandler<Void> findAllMyMemberInTrainer(@AuthenticationPrincipal CustomMemberDetails member) {
+//        List<MemberInTeamCommandResult>
+        trainerService.findAllMyMemberInTrainer(member.getMemberId());
+        return ResponseHandler.<Void>builder()
+//                .data()
                 .message("트레이너가 관리하는 학생을 조회하였습니다.")
                 .build();
     }

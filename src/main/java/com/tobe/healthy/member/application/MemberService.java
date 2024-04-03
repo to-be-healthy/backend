@@ -540,11 +540,11 @@ public class MemberService {
 		//부가정보 업데이트
 		Map<String, String> map = getInviteMappingData(request.getUuid());
 		Long trainerId = Long.valueOf(map.get("trainerId"));
-		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
 		LocalDate gymStartDt = LocalDate.parse(map.get("gymStartDt"), DateTimeFormatter.ISO_DATE);
 		LocalDate gymEndDt = LocalDate.parse(map.get("gymEndDt"), DateTimeFormatter.ISO_DATE);
+		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
 
-		//회원&트레이너 매핑, 수강권 등록
+		//회원&트레이너 매핑, 헬스장 이용권 등록
 		MemberLessonCommand lessonCommand = new MemberLessonCommand(lessonCnt, gymStartDt, gymEndDt);
 		trainerService.addMemberOfTrainer(trainerId, member.getId(), lessonCommand);
 
