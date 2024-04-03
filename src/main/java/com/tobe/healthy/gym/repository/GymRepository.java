@@ -7,5 +7,4 @@ import java.util.Optional;
 
 public interface GymRepository extends JpaRepository<Gym, Long> {
     Optional<Gym> findByName(String name);
-    Optional<Gym> findByIdAndJoinCode(Long id, int joinCode);
 }

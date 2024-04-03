@@ -21,6 +21,7 @@ import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
 import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -61,7 +62,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@ColumnDefault("'ENABLED'")
 	private AlarmStatus feedbackAlarmStatus = ENABLED;
 
-	@ManyToOne(fetch = LAZY)
+	@ManyToOne(fetch = LAZY, cascade = PERSIST)
 	@JoinColumn(name = "gym_id")
 	private Gym gym;
 
