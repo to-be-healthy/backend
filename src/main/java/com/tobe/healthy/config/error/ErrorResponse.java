@@ -1,10 +1,11 @@
 package com.tobe.healthy.config.error;
 
-import static lombok.AccessLevel.PROTECTED;
-
-import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+import static lombok.AccessLevel.PROTECTED;
 
 @Getter
 @NoArgsConstructor(access = PROTECTED)
@@ -31,6 +32,6 @@ public class ErrorResponse {
 	}
 
 	public static ErrorResponse of(String errorMessage) {
-		return new ErrorResponse(errorMessage, "500");
+		return new ErrorResponse(errorMessage, "400");
 	}
 }

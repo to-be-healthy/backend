@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum MemberType implements EnumMapperType {
-    MEMBER("회원"),
+    STUDENT("학생"),
     TRAINER("트레이너");
 
     private final String description;

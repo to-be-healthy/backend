@@ -1,19 +1,21 @@
 package com.tobe.healthy.config.security;
 
-import static io.jsonwebtoken.SignatureAlgorithm.HS256;
-
 import com.tobe.healthy.common.RedisService;
+import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+
+import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 
 @Component
 public class JwtTokenGenerator {
@@ -37,13 +39,13 @@ public class JwtTokenGenerator {
     public Tokens create(Member member) {
         long nowInMilliseconds = new Date().getTime();
 
-        String accessToken = createAccessToken(member.getId(), member.getUserId(), "ROLE_" + member.getMemberType().name(), getAccessTokenValid(nowInMilliseconds));
+        String accessToken = createAccessToken(member.getId(), member.getUserId(), member.getMemberType().name(), getAccessTokenValid(nowInMilliseconds));
 
-        String refreshToken = createRefreshToken(member.getId(), member.getUserId(), getRefreshTokenValid(nowInMilliseconds));
+        String refreshToken = createRefreshToken(member.getId(), member.getUserId(), getRefreshTokenValid(nowInMilliseconds), member.getMemberType().name());
 
         redisService.setValuesWithTimeout(member.getUserId(), refreshToken, getRefreshTokenValid(nowInMilliseconds).getTime());
 
-        return new Tokens(accessToken, refreshToken, member.getUserId(), member.getMemberType());
+        return new Tokens(accessToken, refreshToken, member.getUserId(), member.getMemberType(), member.getGym());
     }
 
     private Date getRefreshTokenValid(long nowInMilliseconds) {
@@ -54,17 +56,17 @@ public class JwtTokenGenerator {
         return new Date(nowInMilliseconds + accessTokenValidSeconds * 1000);
     }
 
-    public Tokens exchangeAccessToken(Long memberId, String userId, MemberType memberType, String refreshToken) {
+    public Tokens exchangeAccessToken(Long memberId, String userId, MemberType memberType, String refreshToken, Gym gym) {
         long nowInMilliseconds = new Date().getTime();
-        String changedAccessToken = createAccessToken(memberId, userId, "ROLE_" + memberType.name(), getAccessTokenValid(nowInMilliseconds));
-        return new Tokens(changedAccessToken, refreshToken, userId, memberType);
+        String changedAccessToken = createAccessToken(memberId, userId, memberType.name(), getAccessTokenValid(nowInMilliseconds));
+        return new Tokens(changedAccessToken, refreshToken, userId, memberType, gym);
     }
 
-    private String createAccessToken(Long memberId, String userId, String role, Date expiry) {
+    private String createAccessToken(Long memberId, String userId, String memberType, Date expiry) {
         Claims claims = Jwts.claims();
         claims.put("memberId", memberId);
         claims.put("userId", userId);
-        claims.put("role", role);
+        claims.put("memberType", memberType);
         claims.put("uuid", UUID.randomUUID().toString());
         return Jwts.builder()
                 .setClaims(claims)
@@ -74,10 +76,11 @@ public class JwtTokenGenerator {
                 .compact();
     }
 
-    private String createRefreshToken(Long memberId, String userId, Date expiry) {
+    private String createRefreshToken(Long memberId, String userId, Date expiry, String memberType) {
         Claims claims = Jwts.claims();
         claims.put("memberId", memberId);
         claims.put("userId", userId);
+        claims.put("memberType", memberType);
         claims.put("uuid", UUID.randomUUID().toString());
         return Jwts.builder()
                 .setClaims(claims)

@@ -3,9 +3,7 @@ package com.tobe.healthy.gym.domain.entity;
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
@@ -20,8 +18,6 @@ import static lombok.AccessLevel.PROTECTED;
 @Entity
 @NoArgsConstructor(access = PROTECTED)
 @Getter
-@Builder
-@AllArgsConstructor
 @DynamicUpdate
 public class Gym extends BaseTimeEntity<Gym, Long> {
 
@@ -32,12 +28,22 @@ public class Gym extends BaseTimeEntity<Gym, Long> {
 
     private String name;
 
+    private int joinCode;
+
     @OneToMany(fetch = LAZY, mappedBy = "gym")
-    @Default
     private List<Member> member = new ArrayList<>();
 
 	@Builder
-	public Gym(String name) {
+	public Gym(String name, List<Member> member, int joinCode) {
 		this.name = name;
+		this.member = member;
+        this.joinCode = joinCode;
 	}
+
+    public static Gym registerGym(String name, int accessKey) {
+        return Gym.builder()
+                .name(name)
+                .joinCode(accessKey)
+                .build();
+    }
 }

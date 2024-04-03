@@ -17,6 +17,5 @@ public class TrainerCommandResult {
 		this.userId = member.getUserId();
 		this.email = member.getEmail();
 		this.name = member.getName();
-		this.profile = member.getProfileId();
 	}
 }

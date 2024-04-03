@@ -30,6 +30,7 @@ public enum ErrorCode {
 	NOT_MATCH_PASSWORD(BAD_REQUEST, "C_017", "확인 비밀번호가 일치하지 않습니다."),
 	INVITE_LINK_NOT_FOUND(NOT_FOUND, "C_018", "초대링크를 찾을 수 없습니다."),
 	INVITE_LINK_NOT_VALID(BAD_REQUEST, "C_019", "초대링크가 유효하지 않습니다."),
+	EXERCISE_NOT_FOUND(NOT_FOUND, "C_020", "해당 운동이 존재하지 않습니다."),
 	PASSWORD_NOT_VALID(BAD_REQUEST, "C_019", "비밀번호가 일치하지 않습니다."),
 
 	MEMBER_NAME_LENGTH_NOT_VALID(BAD_REQUEST, "C_020", "이름의 길이는 2자 이상이여야 합니다."),
@@ -38,6 +39,7 @@ public enum ErrorCode {
 	USERID_POLICY_VIOLATION(BAD_REQUEST, "C_023", "아이디에 한글을 포함할 수 없습니다."),
 	PASSWORD_POLICY_VIOLATION(BAD_REQUEST, "C_023", "비밀번호는 영어 대/소문자와 숫자로 구성된 8자리 이상 문자여야 합니다."),
 	GYM_NOT_FOUND(NOT_FOUND, "C_024", "등록된 헬스장이 없습니다."),
+	GYM_DUPLICATION(BAD_REQUEST, "C_025", "중복된 헬스장이 존재합니다."),
 
 	SERVER_ERROR(INTERNAL_SERVER_ERROR, "S_001", "서버에서 오류가 발생하였습니다."),
 	FILE_UPLOAD_ERROR(INTERNAL_SERVER_ERROR, "S_002", "파일 업로드중 에러가 발생하였습니다."),

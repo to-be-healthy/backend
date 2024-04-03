@@ -4,10 +4,11 @@ import com.tobe.healthy.member.domain.entity.MemberType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -22,7 +23,7 @@ public class MemberFindIdCommand {
 	@NotEmpty(message = "실명을 입력해 주세요.")
 	private String name;
 
-	@Schema(description = "회원 구분" , example = "MEMBER")
+	@Schema(description = "회원 구분" , example = "STUDENT")
 	@NotNull(message = "회원 구분이 필요합니다.")
 	private MemberType memberType;
 
