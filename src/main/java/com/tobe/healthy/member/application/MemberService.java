@@ -85,6 +85,9 @@ public class MemberService {
 	private String uploadDir;
 
 	public boolean validateUserIdDuplication(String userId) {
+		if (userId.length() < 4) {
+			throw new CustomException(MEMBER_ID_NOT_VALID);
+		}
 		memberRepository.findByUserId(userId).ifPresent(m -> {
 			throw new CustomException(MEMBER_ID_DUPLICATION);
 		});
@@ -183,7 +186,7 @@ public class MemberService {
 	public MemberFindIdCommandResult findUserId(MemberFindIdCommand request) {
 		Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		return new MemberFindIdCommandResult(member.getUserId(), member.getCreatedAt());
+		return new MemberFindIdCommandResult(member.getUserId().substring(member.getUserId().length() - 3) + "**", member.getCreatedAt());
 	}
 
 	public String findMemberPW(MemberFindPWCommand request) {

@@ -5,10 +5,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Schema(description = "회원가입 DTO")
+@Builder
 public class MemberJoinCommand {
     @Schema(description = "아이디", example = "to-be-healthy")
     @NotEmpty(message = "아이디를 입력해 주세요.")
