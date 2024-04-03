@@ -12,6 +12,7 @@ import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -45,8 +47,14 @@ public class GymService {
 		Member member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		Gym gym = gymRepository.findByIdAndJoinCode(gymId, joinCode)
+		Gym gym = gymRepository.findById(gymId)
 				.orElseThrow(() -> new CustomException(GYM_NOT_FOUND));
+
+		if (member.getMemberType().equals(TRAINER)) {
+			if (ObjectUtils.isEmpty(joinCode) || gym.getJoinCode() != joinCode) {
+				throw new CustomException(JOIN_CODE_NOT_VALID);
+			}
+		}
 
 		member.registerGym(gym);
 
