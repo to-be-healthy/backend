@@ -1,5 +1,6 @@
 package com.tobe.healthy.trainer.domain.dto;
 
+import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import lombok.Builder;
 import lombok.Data;
@@ -10,14 +11,14 @@ import lombok.Data;
 public class TrainerMemberMappingDto {
 
     private Long mappingId;
-    private Long trainerId;
-    private Long memberId;
+    private MemberDto trainer;
+    private MemberDto member;
 
     public static TrainerMemberMappingDto from(TrainerMemberMapping mapping){
         return TrainerMemberMappingDto.builder()
                 .mappingId(mapping.getMappingId())
-                .trainerId(mapping.getTrainerId())
-                .memberId(mapping.getMemberId())
+                .trainer(MemberDto.from(mapping.getTrainer()))
+                .member(MemberDto.from(mapping.getMember()))
                 .build();
     }
 

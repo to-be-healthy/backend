@@ -1,17 +1,28 @@
 package com.tobe.healthy.member.repository;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
+import com.tobe.healthy.gym.domain.dto.QMemberInTeamDto;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
 
+import java.util.List;
+
 import static com.tobe.healthy.file.domain.entity.QProfile.profile;
 import static com.tobe.healthy.gym.domain.entity.QGym.gym;
+import static com.tobe.healthy.gym.domain.entity.QGymMembership.gymMembership;
 import static com.tobe.healthy.member.domain.entity.QMember.member;
+import static com.tobe.healthy.trainer.domain.entity.QTrainerMemberMapping.trainerMemberMapping;
 
 
 @Repository
@@ -46,10 +57,56 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return m;
     }
 
+    public Page<MemberInTeamDto> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
+        Long totalCnt = queryFactory
+                .select(member.count())
+                .from(trainerMemberMapping)
+                .innerJoin(trainerMemberMapping.member, member)
+                .on(trainerMemberMapping.member.id.eq(member.id))
+                .leftJoin(gymMembership)
+                .on(member.id.eq(gymMembership.member.id))
+                .where(trainerMemberMapping.trainer.id.eq(trainerId)
+                        , member.memberType.eq(MemberType.STUDENT)
+                        , member.delYn.eq(false)
+                        , nameLike(searchValue))
+                .fetchOne();
+
+        List<MemberInTeamDto> list = queryFactory
+                .select(new QMemberInTeamDto(member.id, member.name, member.userId, member.email,
+                        trainerMemberMapping.ranking, trainerMemberMapping.lessonCnt, trainerMemberMapping.remainLessonCnt,
+                        gymMembership.gymEndDt))
+                .from(trainerMemberMapping)
+                .innerJoin(trainerMemberMapping.member, member)
+                .on(trainerMemberMapping.member.id.eq(member.id))
+                .leftJoin(gymMembership)
+                .on(member.id.eq(gymMembership.member.id))
+                .where(trainerMemberMapping.trainer.id.eq(trainerId)
+                        , member.memberType.eq(MemberType.STUDENT)
+                        , member.delYn.eq(false)
+                        , nameLike(searchValue))
+                .orderBy(sortBy(sortValue))
+                .fetch();
+        return PageableExecutionUtils.getPage(list, pageable, ()-> totalCnt );
+    }
+
     private BooleanExpression memberIdEq(Long memberId) {
         if (!ObjectUtils.isEmpty(memberId)) {
             return member.id.eq(memberId);
         }
         return null;
+    }
+
+    private BooleanExpression nameLike(String name) {
+        if (!ObjectUtils.isEmpty(name)) {
+            return member.name.containsIgnoreCase(name);
+        }
+        return null;
+    }
+
+    private OrderSpecifier sortBy(String sortValue) {
+        if (!ObjectUtils.isEmpty(sortValue)) {
+            if("ranking".equals(sortValue)) return trainerMemberMapping.ranking.asc();
+        }
+        return member.id.asc();
     }
 }

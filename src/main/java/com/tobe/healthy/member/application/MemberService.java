@@ -30,6 +30,7 @@ import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
+import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import io.jsonwebtoken.impl.Base64UrlCodec;
@@ -539,21 +540,17 @@ public class MemberService {
 		//부가정보 업데이트
 		Map<String, String> map = getInviteMappingData(request.getUuid());
 		Long trainerId = Long.valueOf(map.get("trainerId"));
+		LocalDate gymStartDt = LocalDate.parse(map.get("gymStartDt"), DateTimeFormatter.ISO_DATE);
+		LocalDate gymEndDt = LocalDate.parse(map.get("gymEndDt"), DateTimeFormatter.ISO_DATE);
+		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
 
-		//회원&트레이너 매핑
-		trainerService.addMemberOfTrainer(trainerId, member.getId());
+		//회원&트레이너 매핑, 헬스장 이용권 등록
+		MemberLessonCommand lessonCommand = new MemberLessonCommand(lessonCnt, gymStartDt, gymEndDt);
+		trainerService.addMemberOfTrainer(trainerId, member.getId(), lessonCommand);
 
 		String name = map.get("name");
 		if(!name.equals(request.getName())) throw new CustomException(INVITE_NAME_NOT_VALID);
 		member.changeName(name);
-
-		//레슨횟수로 수업권 등록
-		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
-		LocalDate gymStartDt = LocalDate.parse(map.get("gymStartDt"), DateTimeFormatter.ISO_DATE);
-		LocalDate gymEndDt = LocalDate.parse(map.get("gymEndDt"), DateTimeFormatter.ISO_DATE);
-		MembershipAddCommand command = new MembershipAddCommand(member.getGym().getId(),
-				member.getId(), lessonCnt, gymStartDt, gymEndDt);
-		gymMembershipService.registerGymMembership(command);
 		return result;
 	}
 
@@ -592,7 +589,7 @@ public class MemberService {
 		Optional<TrainerMemberMapping> mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId);
 
 		if(mapping.isPresent()){
-			Long trainerId = mapping.map(TrainerMemberMapping::getTrainerId).orElse(null);
+			Long trainerId = mapping.map(m -> m.getTrainer().getId()).orElse(null);
 			Member trainer = memberRepository.findByMemberIdWithGym(trainerId);
 			return MemberDto.create(member, trainer.getGym());
 		}else{

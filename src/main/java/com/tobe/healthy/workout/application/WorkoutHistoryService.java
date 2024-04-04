@@ -48,7 +48,7 @@ public class WorkoutHistoryService {
     @Transactional
     public WorkoutHistoryDto addWorkoutHistory(Member member, HistoryAddCommand command) {
         Optional<TrainerMemberMapping> mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId());
-        Long trainerId = mapping.map(TrainerMemberMapping::getTrainerId).orElse(null);
+        Long trainerId = mapping.map(m -> m.getTrainer().getId()).orElse(null);
         MemberDto memberDto = MemberDto.from(member);
         WorkoutHistoryDto workoutHistoryDto = WorkoutHistoryDto.create(command, memberDto, trainerId);
         WorkoutHistory history = WorkoutHistory.create(workoutHistoryDto, member);
