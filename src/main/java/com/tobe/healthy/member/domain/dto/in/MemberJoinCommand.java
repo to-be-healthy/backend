@@ -6,8 +6,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString(exclude = "password")
 @Schema(description = "회원가입 DTO")
 public class MemberJoinCommand {
     @Schema(description = "아이디", example = "to-be-healthy")
