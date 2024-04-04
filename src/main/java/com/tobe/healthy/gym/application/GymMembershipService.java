@@ -35,7 +35,7 @@ public class GymMembershipService {
             throw new CustomException(DATETIME_NOT_VALID);
         }
         member.registerGym(gym);
-        GymMembership gymMembership = new GymMembership(gym, member, command.getLessonCnt(), command.getGymStartDt(), command.getGymEndDt());
+        GymMembership gymMembership = new GymMembership(gym, member, command.getGymStartDt(), command.getGymEndDt());
         gymMembershipRepository.save(gymMembership);
     }
 

@@ -16,15 +16,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/membership/v1")
 @Slf4j
 @Valid
-@Tag(name = "04-01.헬스장 회원권 API", description = "헬스장 회원권 API")
+@Tag(name = "04-02.헬스장 이용권 API", description = "헬스장 이용권 API")
 public class GymMembershipController {
 
 	private final GymMembershipService gymMembershipService;
 
-	@Operation(summary = "트레이너가 학생의 헬스장 이용권(시작날짜~종료날짜), PT 수업 횟수를 등록한다.",
-			description = "트레이너가 학생의 헬스장 이용권(시작날짜~종료날짜), PT 수업 횟수를 등록한다.",
+	@Operation(summary = "트레이너가 학생의 헬스장 이용권(시작날짜~종료날짜)를 등록한다.",
+			description = "트레이너가 학생의 헬스장 이용권(시작날짜~종료날짜)를 등록한다.",
 			responses = {
-					@ApiResponse(responseCode = "200", description = "헬스장 이용권, 수업권을 등록하였습니다.")
+					@ApiResponse(responseCode = "200", description = "헬스장 이용권을 등록하였습니다.")
 			})
 	@PostMapping
 	public ResponseHandler<Void> registerGymMembership(@RequestBody MembershipAddCommand command) {

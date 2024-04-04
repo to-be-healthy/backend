@@ -3,12 +3,13 @@ package com.tobe.healthy.trainer.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.gym.application.GymService;
-import com.tobe.healthy.gym.domain.dto.MemberInTeamCommandResult;
+import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
 import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
+import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
 import com.tobe.healthy.trainer.domain.dto.out.MemberInviteResultCommand;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
@@ -18,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -59,9 +61,10 @@ public class TrainerController {
     @PostMapping("/{trainerId}/members/{memberId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<TrainerMemberMappingDto> addMemberOfTrainer(@Parameter(description = "트레이너 ID") @PathVariable("trainerId") Long trainerId,
-                                                                       @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
+                                                                       @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId,
+                                                                       @RequestBody MemberLessonCommand command) {
         return ResponseHandler.<TrainerMemberMappingDto>builder()
-                .data(trainerService.addMemberOfTrainer(trainerId, memberId))
+                .data(trainerService.addMemberOfTrainer(trainerId, memberId, command))
                 .message("내 학생으로 등록되었습니다.")
                 .build();
     }
@@ -85,9 +88,15 @@ public class TrainerController {
                     @ApiResponse(responseCode = "200", description = "트레이너가 관리하는 학생 조회 완료")
             })
     @GetMapping("/members")
-    public ResponseHandler<List<MemberInTeamCommandResult>> findAllMyMemberInTeam(@AuthenticationPrincipal CustomMemberDetails member) {
-        return ResponseHandler.<List<MemberInTeamCommandResult>>builder()
-                .data(gymService.findAllMyMemberInTeam(member.getMemberId()))
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    public ResponseHandler<List<MemberInTeamDto>> findAllMyMemberInTrainer(@AuthenticationPrincipal CustomMemberDetails member,
+                                                                           @Parameter(description = "검색할 이름", example = "임채린")
+                                                                           @RequestParam(required = false) String searchValue,
+                                                                           @Parameter(description = "정렬 조건", example = "ranking, memberId")
+                                                                               @RequestParam(required = false, defaultValue = "memberId") String sortValue,
+                                                                           Pageable pageable) {
+        return ResponseHandler.<List<MemberInTeamDto>>builder()
+                .data(trainerService.findAllMyMemberInTeam(member.getMemberId(), searchValue, sortValue, pageable))
                 .message("트레이너가 관리하는 학생을 조회하였습니다.")
                 .build();
     }
@@ -99,7 +108,8 @@ public class TrainerController {
             })
     @PatchMapping("/trainer-feedback")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태", example = "ENABLED") @RequestParam AlarmStatus alarmStatus,
+    public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태", example = "ENABLED")
+                                                              @RequestParam AlarmStatus alarmStatus,
                                                           @AuthenticationPrincipal CustomMemberDetails member) {
         return ResponseHandler.<Boolean>builder()
                 .data(memberService.changeTrainerFeedback(alarmStatus, member.getMemberId()))
