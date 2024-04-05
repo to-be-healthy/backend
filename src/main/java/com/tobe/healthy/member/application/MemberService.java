@@ -6,17 +6,14 @@ import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.config.error.OAuthError.GoogleError;
 import com.tobe.healthy.config.error.OAuthError.KakaoError;
 import com.tobe.healthy.config.error.OAuthError.NaverError;
-import com.tobe.healthy.config.error.OAuthError.GoogleError;
 import com.tobe.healthy.config.error.OAuthException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
 import com.tobe.healthy.gym.application.GymMembershipService;
-import com.tobe.healthy.gym.application.GymService;
-import com.tobe.healthy.gym.domain.dto.in.MembershipAddCommand;
-import com.tobe.healthy.gym.repository.GymMembershipRepository;
 import com.tobe.healthy.gym.repository.GymRepository;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.in.*;
@@ -29,7 +26,6 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
-import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
 import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
@@ -58,7 +54,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -172,9 +167,9 @@ public class MemberService {
 
 	public Tokens login(MemberLoginCommand request) {
 		return memberRepository.findByUserId(request.getUserId(), request.getMemberType())
-			.filter(member -> passwordEncoder.matches(request.getPassword(), member.getPassword()))
-			.map(tokenGenerator::create)
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+				.filter(member -> passwordEncoder.matches(request.getPassword(), member.getPassword()))
+				.map(tokenGenerator::create)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 	}
 
 	public Tokens refreshToken(String userId, String refreshToken) {
@@ -189,28 +184,30 @@ public class MemberService {
 		}
 
 		Member member = memberRepository.findByUserId(userId)
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), member.getMemberType(), refreshToken, member.getGym());
+		return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), member.getMemberType(),
+				refreshToken, member.getGym());
 	}
 
 	public MemberFindIdCommandResult findUserId(MemberFindIdCommand request) {
 		Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		return new MemberFindIdCommandResult(member.getUserId().substring(member.getUserId().length() - 3) + "**", member.getCreatedAt());
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		return new MemberFindIdCommandResult(member.getUserId().substring(member.getUserId().length() - 3) + "**",
+				member.getCreatedAt());
 	}
 
 	public String findMemberPW(MemberFindPWCommand request) {
 		Member member = memberRepository.findByUserIdAndName(request.getUserId(), request.getName())
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		sendResetPassword(member.getEmail(), member);
 		return member.getEmail();
 	}
 
 	public String deleteMember(String password, Long memberId) {
 		Member member = memberRepository.findById(memberId)
-			.filter(m -> passwordEncoder.matches(password, m.getPassword()))
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+				.filter(m -> passwordEncoder.matches(password, m.getPassword()))
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.deleteMember();
 		return member.getUserId();
 	}
@@ -221,8 +218,8 @@ public class MemberService {
 		}
 
 		Member member = memberRepository.findById(memberId)
-			.filter(m -> passwordEncoder.matches(request.getCurrPassword1(), m.getPassword()))
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+				.filter(m -> passwordEncoder.matches(request.getCurrPassword1(), m.getPassword()))
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 		String password = passwordEncoder.encode(request.getChangePassword());
 
@@ -234,11 +231,11 @@ public class MemberService {
 	public Boolean changeProfile(MultipartFile file, Long memberId) {
 		if (!file.isEmpty()) {
 			Member member = memberRepository.findById(memberId)
-				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+					.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 			String savedFileName = System.currentTimeMillis() + "_" + randomUUID();
 			String extension = Objects.requireNonNull(file.getOriginalFilename())
-				.substring(file.getOriginalFilename().lastIndexOf("."));
+					.substring(file.getOriginalFilename().lastIndexOf("."));
 
 			Path location = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
 			Path locationParent = location.getParent();
@@ -252,7 +249,7 @@ public class MemberService {
 			}
 
 			Profile profile = Profile.create(savedFileName, cleanPath(file.getOriginalFilename()),
-				extension, uploadDir + separator, (int) file.getSize());
+					extension, uploadDir + separator, (int) file.getSize());
 
 			member.registerProfile(profile);
 			fileRepository.save(profile);
@@ -262,21 +259,21 @@ public class MemberService {
 
 	public Boolean changeName(String name, Long memberId) {
 		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.changeName(name);
 		return true;
 	}
 
 	public Boolean changeAlarm(AlarmStatus alarmStatus, Long memberId) {
 		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.changeAlarm(alarmStatus);
 		return true;
 	}
 
 	public Boolean changeTrainerFeedback(AlarmStatus alarmStatus, Long memberId) {
 		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.changeTrainerFeedback(alarmStatus);
 		return true;
 	}
@@ -294,22 +291,23 @@ public class MemberService {
 		}
 
 		Profile profile = getProfile(response.getPicture());
-		Member member = Member.join(response.getEmail(), response.getNickname(), profile, request.getMemberType(), KAKAO);
+		Member member = Member.join(response.getEmail(), response.getNickname(), profile, request.getMemberType(),
+				KAKAO);
 		memberRepository.save(member);
 		return tokenGenerator.create(member);
 	}
 
 	private byte[] getProfileImage(String imageName) {
 		return webClient.get().uri(imageName)
-			.retrieve()
-			.onStatus(HttpStatusCode::isError, response ->
-				response.bodyToMono(String.class).flatMap(error -> {
-					log.error("error => {}", error);
-					return Mono.error(new CustomException(PROFILE_ACCESS_FAILED));
-				}))
-			.bodyToMono(byte[].class)
-			.share()
-			.block();
+				.retrieve()
+				.onStatus(HttpStatusCode::isError, response ->
+						response.bodyToMono(String.class).flatMap(error -> {
+							log.error("error => {}", error);
+							return Mono.error(new CustomException(PROFILE_ACCESS_FAILED));
+						}))
+				.bodyToMono(byte[].class)
+				.share()
+				.block();
 	}
 
 	private IdToken getKakaoOAuthAccessToken(String code, String redirectUrl) {
@@ -320,17 +318,17 @@ public class MemberService {
 		request.add("code", code);
 		request.add("client_secret", oAuthProperties.getKakao().getClientSecret());
 		OAuthInfo result = webClient.post()
-			.uri(oAuthProperties.getKakao().getTokenUri())
-			.bodyValue(request)
-			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
-			.retrieve()
-			.onStatus(HttpStatusCode::isError, response ->
-				response.bodyToMono(KakaoError.class).flatMap(e -> {
-					log.error("error => {}", e);
-					return Mono.error(new OAuthException(e.getErrorDescription()));
-				}))
-			.bodyToMono(OAuthInfo.class)
-			.share().block();
+				.uri(oAuthProperties.getKakao().getTokenUri())
+				.bodyValue(request)
+				.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+				.retrieve()
+				.onStatus(HttpStatusCode::isError, response ->
+						response.bodyToMono(KakaoError.class).flatMap(e -> {
+							log.error("error => {}", e);
+							return Mono.error(new OAuthException(e.getErrorDescription()));
+						}))
+				.bodyToMono(OAuthInfo.class)
+				.share().block();
 		try {
 			String token = decordToken(result);
 			return new ObjectMapper().readValue(token, IdToken.class);
@@ -350,7 +348,8 @@ public class MemberService {
 
 		NaverUserInfo authorization = getNaverUserInfo(response);
 
-		Optional<Member> findMember = memberRepository.findByEmailAndSocialType(authorization.getResponse().getEmail(), NAVER);
+		Optional<Member> findMember = memberRepository.findByEmailAndSocialType(authorization.getResponse().getEmail()
+				, NAVER);
 		if (findMember.isPresent()) {
 			if (findMember.get().getMemberType().equals(request.getMemberType())) {
 				return tokenGenerator.create(findMember.get());
@@ -358,7 +357,8 @@ public class MemberService {
 			throw new CustomException(MEMBER_NOT_FOUND);
 		}
 		Profile profile = getProfile(authorization.getResponse().getProfileImage());
-		Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), profile, request.getMemberType(), NAVER);
+		Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(),
+				profile, request.getMemberType(), NAVER);
 		memberRepository.save(member);
 		return tokenGenerator.create(member);
 	}
@@ -381,27 +381,27 @@ public class MemberService {
 		}
 
 		return Profile.create(savedFileName, cleanPath(savedFileName), extension,
-			uploadDir + separator, image.length);
+				uploadDir + separator, image.length);
 	}
 
 	private NaverUserInfo getNaverUserInfo(OAuthInfo oAuthInfo) {
 		return webClient.get()
-			.uri(oAuthProperties.getNaver().getUserInfoUri())
-			.headers(
-				header -> {
-					header.setContentType(APPLICATION_FORM_URLENCODED);
-					header.set("Authorization", "Bearer " + oAuthInfo.getAccessToken());
-				}
-			)
-			.retrieve()
-			.onStatus(HttpStatusCode::isError, response ->
-				response.bodyToMono(NaverError.class).flatMap(e -> {
-					log.error("error => {}", e);
-					return Mono.error(new OAuthException(e.getMessage()));
-				}))
-			.bodyToMono(NaverUserInfo.class)
-			.share()
-			.block();
+				.uri(oAuthProperties.getNaver().getUserInfoUri())
+				.headers(
+						header -> {
+							header.setContentType(APPLICATION_FORM_URLENCODED);
+							header.set("Authorization", "Bearer " + oAuthInfo.getAccessToken());
+						}
+				)
+				.retrieve()
+				.onStatus(HttpStatusCode::isError, response ->
+						response.bodyToMono(NaverError.class).flatMap(e -> {
+							log.error("error => {}", e);
+							return Mono.error(new OAuthException(e.getMessage()));
+						}))
+				.bodyToMono(NaverUserInfo.class)
+				.share()
+				.block();
 	}
 
 	private OAuthInfo getNaverOAuthAccessToken(String code, String state) {
@@ -412,13 +412,13 @@ public class MemberService {
 		request.add("code", code);
 		request.add("state", state);
 		return webClient.post()
-			.uri(oAuthProperties.getNaver().getTokenUri())
-			.bodyValue(request)
-			.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
-			.retrieve()
-			.bodyToMono(OAuthInfo.class)
-			.share()
-			.block();
+				.uri(oAuthProperties.getNaver().getTokenUri())
+				.bodyValue(request)
+				.headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+				.retrieve()
+				.bodyToMono(OAuthInfo.class)
+				.share()
+				.block();
 	}
 
 	@Transactional
@@ -460,8 +460,8 @@ public class MemberService {
 		}
 
 		return memberRepository.findByUserId(member.getUserId(), command.getMemberType())
-			.map(tokenGenerator::create)
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+				.map(tokenGenerator::create)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 	}
 
 	private OAuthInfo getGoogleAccessToken(String code, String redirectUri) {
@@ -486,7 +486,7 @@ public class MemberService {
 								return Mono.error(new OAuthException(e.getErrorDescription()));
 							}))
 					.bodyToMono(OAuthInfo.class);
-		}catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return responseMono.share().block();
@@ -552,7 +552,7 @@ public class MemberService {
 		trainerService.addMemberOfTrainer(trainerId, member.getId(), lessonCommand);
 
 		String name = map.get("name");
-		if(!name.equals(request.getName())) throw new CustomException(INVITE_NAME_NOT_VALID);
+		if (!name.equals(request.getName())) throw new CustomException(INVITE_NAME_NOT_VALID);
 		member.changeName(name);
 		return result;
 	}
@@ -568,7 +568,7 @@ public class MemberService {
 		return InvitationMappingResult.create(member, name, lessonCnt, gymStartDt, gymEndDt);
 	}
 
-	private Map<String, String> getInviteMappingData(String uuid){
+	private Map<String, String> getInviteMappingData(String uuid) {
 		String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
 		String mappedData = redisService.getValues(invitationKey);
 		if (isEmpty(mappedData)) {
@@ -585,17 +585,17 @@ public class MemberService {
 
 	public MemberDto getMemberInfo(Long memberId) {
 		memberRepository.findById(memberId)
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 		Member member = memberRepository.findByMemberIdWithProfile(memberId);
 
 		Optional<TrainerMemberMapping> mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId);
 
-		if(mapping.isPresent()){
+		if (mapping.isPresent()) {
 			Long trainerId = mapping.map(m -> m.getTrainer().getId()).orElse(null);
 			Member trainer = memberRepository.findByMemberIdWithGym(trainerId);
 			return MemberDto.create(member, trainer.getGym());
-		}else{
+		} else {
 			return MemberDto.from(member);
 		}
 	}
