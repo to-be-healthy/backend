@@ -35,7 +35,7 @@ public class MemberAuthController {
 	public ResponseHandler<Boolean> validateUsernameDuplication(@Parameter(description = "아이디") @RequestParam(name = "userId") String userId) {
 		return ResponseHandler.<Boolean>builder()
 			.data(memberService.validateUserIdDuplication(userId))
-			.message("사용 가능한 아이디입니다.")
+			.message("사용할 수 있는 아이디입니다.")
 			.build();
 	}
 
@@ -62,7 +62,7 @@ public class MemberAuthController {
 	public ResponseHandler<String> sendEmailVerification(@Parameter(description = "이메일") @RequestParam String email) {
 		return ResponseHandler.<String>builder()
 			.data(memberService.sendEmailVerification(email))
-			.message("이메일 인증번호가 전송되었습니다.")
+			.message("이메일로 인증번호를 발송중이에요!")
 			.build();
 	}
 
@@ -149,9 +149,10 @@ public class MemberAuthController {
 	})
 	@PostMapping("/find/password")
 	public ResponseHandler<String> findMemberPW(@RequestBody MemberFindPWCommand request) {
+		String email = memberService.findMemberPW(request);
 		return ResponseHandler.<String>builder()
-			.data(memberService.findMemberPW(request))
-			.message("이메일에 초기화 비밀번호가 전송되었습니다.")
+			.data(email)
+			.message(email + "으로 비밀번호 재설정 링크가 발송되었습니다.")
 			.build();
 	}
 

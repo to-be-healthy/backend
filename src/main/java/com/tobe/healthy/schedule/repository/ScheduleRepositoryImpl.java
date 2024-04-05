@@ -1,20 +1,21 @@
 package com.tobe.healthy.schedule.repository;
 
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
-import static com.tobe.healthy.schedule.domain.entity.QStandBySchedule.standBySchedule;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.QMember;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
+
+import java.util.List;
+
+import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
+import static com.tobe.healthy.schedule.domain.entity.QStandBySchedule.standBySchedule;
+import static java.util.stream.Collectors.toList;
 
 @Repository
 @RequiredArgsConstructor
@@ -40,7 +41,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 
 		return fetch.stream()
 			.map(ScheduleCommandResult::from)
-			.collect(Collectors.toList());
+			.collect(toList());
 	}
 
 	private BooleanExpression delYnFalse() {
@@ -60,7 +61,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 			.fetch();
 		return fetch.stream()
 			.map(ScheduleCommandResult::from)
-			.collect(Collectors.toList());
+			.collect(toList());
 	}
 
 	private BooleanExpression lessonDtBetween(ScheduleSearchCond searchCond) {
