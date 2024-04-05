@@ -157,7 +157,7 @@ public class MemberAuthController {
 	}
 
 	@Operation(summary = "초대링크 uuid 데이터 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청"),
+		@ApiResponse(responseCode = "404", description = "초대링크를 찾을 수 없습니다."),
 		@ApiResponse(responseCode = "200", description = "성공")
 	})
 	@GetMapping("/invitation/uuid")
@@ -169,9 +169,15 @@ public class MemberAuthController {
 	}
 
 	@Operation(summary = "초대링크 회원가입", responses = {
-		@ApiResponse(responseCode = "401", description = "이미 등록된 이메일입니다."),
-		@ApiResponse(responseCode = "405", description = "이미 등록된 닉네임입니다."),
-		@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
+			@ApiResponse(responseCode = "400", description = "이름의 길이는 2자 이상이여야 합니다."),
+			@ApiResponse(responseCode = "400", description = "이름은 한글 또는 영어만 입력할 수 있습니다."),
+			@ApiResponse(responseCode = "400", description = "확인 비밀번호가 일치하지 않습니다."),
+			@ApiResponse(responseCode = "400", description = "비밀번호는 영어 대/소문자와 숫자로 구성된 8자리 이상 문자여야 합니다."),
+			@ApiResponse(responseCode = "400", description = "아이디에 한글을 포함할 수 없습니다."),
+			@ApiResponse(responseCode = "400", description = "이미 등록된 아이디입니다."),
+			@ApiResponse(responseCode = "400", description = "이미 등록된 이메일입니다."),
+			@ApiResponse(responseCode = "400", description = "초대가입 회원 이름이 일치하지 않습니다."),
+			@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
 	})
 	@PostMapping("/invitation/join")
 	public ResponseHandler<MemberJoinCommandResult> joinWithInvitation(@RequestBody MemberJoinCommand request) {
@@ -212,6 +218,11 @@ public class MemberAuthController {
 			.build();
 	}
 
+	@Operation(summary = "구글 소셜 로그인", description = "인가코드로 구글에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.",
+			responses = {
+					@ApiResponse(responseCode = "500", description = "구글 소셜서버와 연동중 에러가 발생하였습니다."),
+					@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
+			})
 	@PostMapping("/access-token/google")
 	public ResponseHandler<Tokens> getGoogleOAuth(@RequestBody SocialLoginCommand command) {
 		return ResponseHandler.<Tokens>builder()

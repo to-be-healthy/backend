@@ -19,6 +19,9 @@ public class MemberDto {
 	private String userId;
 	private String email;
 	private String name;
+	private int age;
+	private int height;
+	private int weight;
 	private boolean delYn;
 
 	private ProfileDto profile;
@@ -34,6 +37,9 @@ public class MemberDto {
 			.userId(member.getUserId())
 			.email(member.getEmail())
 			.name(member.getName())
+			.age(member.getAge())
+			.height(member.getHeight())
+			.weight(member.getWeight())
 			.delYn(member.isDelYn())
 			.memberType(member.getMemberType())
 			.pushAlarmStatus(member.getPushAlarmStatus())

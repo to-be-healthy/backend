@@ -23,4 +23,15 @@ public class OAuthError {
 		private String resultcode;
 		private String message;
 	}
+
+	@Data
+	public static class GoogleError {
+		@JsonProperty("error")
+		private String error;
+
+		@JsonProperty("error_description")
+		private String errorDescription;
+
+	}
+
 }

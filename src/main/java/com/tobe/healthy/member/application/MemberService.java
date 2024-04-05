@@ -8,10 +8,15 @@ import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.OAuthError.KakaoError;
 import com.tobe.healthy.config.error.OAuthError.NaverError;
+import com.tobe.healthy.config.error.OAuthError.GoogleError;
 import com.tobe.healthy.config.error.OAuthException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
+import com.tobe.healthy.gym.application.GymMembershipService;
+import com.tobe.healthy.gym.application.GymService;
+import com.tobe.healthy.gym.domain.dto.in.MembershipAddCommand;
+import com.tobe.healthy.gym.repository.GymMembershipRepository;
 import com.tobe.healthy.gym.repository.GymRepository;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.in.*;
@@ -24,6 +29,8 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
+import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
+import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import io.jsonwebtoken.impl.Base64UrlCodec;
@@ -50,6 +57,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -80,6 +90,7 @@ public class MemberService {
 	private final TrainerMemberMappingRepository mappingRepository;
 	private final GymRepository gymRepository;
 	private final MailService mailService;
+	private final GymMembershipService gymMembershipService;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -410,8 +421,9 @@ public class MemberService {
 			.block();
 	}
 
+	@Transactional
 	public Tokens getGoogleOAuth(SocialLoginCommand command) {
-		OAuthInfo googleToken = getGoogleAccessToken(command.getCode());
+		OAuthInfo googleToken = getGoogleAccessToken(command.getCode(), command.getRedirectUrl());
 		String[] check = googleToken.getIdToken().split("\\.");
 		Base64.Decoder decoder = Base64.getDecoder();
 		String payload = new String(decoder.decode(check[1]));
@@ -452,13 +464,13 @@ public class MemberService {
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 	}
 
-	private OAuthInfo getGoogleAccessToken(String code) {
+	private OAuthInfo getGoogleAccessToken(String code, String redirectUri) {
 		String decode = URLDecoder.decode(code, StandardCharsets.UTF_8);
 		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
 		requestBody.add("client_id", oAuthProperties.getGoogle().getClientId());
 		requestBody.add("client_secret", oAuthProperties.getGoogle().getClientSecret());
 		requestBody.add("grant_type", oAuthProperties.getGoogle().getGrantType());
-		requestBody.add("redirect_uri", oAuthProperties.getGoogle().getRedirectUri());
+		requestBody.add("redirect_uri", redirectUri);
 		requestBody.add("code", decode);
 		Mono<OAuthInfo> responseMono = null;
 		try {
@@ -468,10 +480,11 @@ public class MemberService {
 					.accept(MediaType.APPLICATION_JSON)
 					.bodyValue(requestBody)
 					.retrieve()
-//			.onStatus(HttpStatusCode::is4xxClientError,
-//				response -> Mono.error(RuntimeException::new))
-//			.onStatus(HttpStatusCode::is5xxServerError,
-//				response -> Mono.error(RuntimeException::new))
+					.onStatus(HttpStatusCode::isError, response ->
+							response.bodyToMono(GoogleError.class).flatMap(e -> {
+								log.error("error => {}", e);
+								return Mono.error(new OAuthException(e.getErrorDescription()));
+							}))
 					.bodyToMono(OAuthInfo.class);
 		}catch (Exception e){
 			e.printStackTrace();
@@ -522,12 +535,40 @@ public class MemberService {
 	}
 
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
+		//회원가입
 		MemberJoinCommandResult result = joinMember(request);
-		trainerService.addMemberOfTrainer(request.getTrainerId(), result.getId());
+		Member member = memberRepository.findById(result.getId())
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+		//부가정보 업데이트
+		Map<String, String> map = getInviteMappingData(request.getUuid());
+		Long trainerId = Long.valueOf(map.get("trainerId"));
+		LocalDate gymStartDt = LocalDate.parse(map.get("gymStartDt"), DateTimeFormatter.ISO_DATE);
+		LocalDate gymEndDt = LocalDate.parse(map.get("gymEndDt"), DateTimeFormatter.ISO_DATE);
+		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
+
+		//회원&트레이너 매핑, 헬스장 이용권 등록
+		MemberLessonCommand lessonCommand = new MemberLessonCommand(lessonCnt, gymStartDt, gymEndDt);
+		trainerService.addMemberOfTrainer(trainerId, member.getId(), lessonCommand);
+
+		String name = map.get("name");
+		if(!name.equals(request.getName())) throw new CustomException(INVITE_NAME_NOT_VALID);
+		member.changeName(name);
 		return result;
 	}
 
 	public InvitationMappingResult getInvitationMapping(String uuid) {
+		Map<String, String> map = getInviteMappingData(uuid);
+		Long trainerId = Long.valueOf(map.get("trainerId"));
+		String name = map.get("name");
+		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
+		LocalDate gymStartDt = LocalDate.parse(map.get("gymStartDt"), DateTimeFormatter.ISO_DATE);
+		LocalDate gymEndDt = LocalDate.parse(map.get("gymEndDt"), DateTimeFormatter.ISO_DATE);
+		Member member = memberRepository.findByMemberIdWithGym(trainerId);
+		return InvitationMappingResult.create(member, name, lessonCnt, gymStartDt, gymEndDt);
+	}
+
+	private Map<String, String> getInviteMappingData(String uuid){
 		String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
 		String mappedData = redisService.getValues(invitationKey);
 		if (isEmpty(mappedData)) {
@@ -539,10 +580,7 @@ public class MemberService {
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-		Long trainerId = Long.valueOf(map.get("trainerId"));
-		String email = map.get("email");
-		Member member = memberRepository.findByMemberIdWithGym(trainerId);
-		return InvitationMappingResult.create(member, email);
+		return map;
 	}
 
 	public MemberDto getMemberInfo(Long memberId) {
@@ -554,7 +592,7 @@ public class MemberService {
 		Optional<TrainerMemberMapping> mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId);
 
 		if(mapping.isPresent()){
-			Long trainerId = mapping.map(TrainerMemberMapping::getTrainerId).orElse(null);
+			Long trainerId = mapping.map(m -> m.getTrainer().getId()).orElse(null);
 			Member trainer = memberRepository.findByMemberIdWithGym(trainerId);
 			return MemberDto.create(member, trainer.getGym());
 		}else{

@@ -20,6 +20,6 @@ public class SocialLoginCommand {
 	@Schema(description = "회원구분(모든 소셜 로그인시 필요)", example = "STUDENT || TRAINER(모든 소셜 로그인시 필요)")
 	private MemberType memberType;
 
-	@Schema(description = "Redirect URL(카카오 소셜 로그인시 필요)", example = "http://localhost:3000/kakao/callback(카카오 소셜 로그인시 필요)")
+	@Schema(description = "Redirect URL(카카오, 구글 소셜 로그인시 필요)", example = "http://localhost:3000/kakao/callback(카카오, 구글 소셜 로그인시 필요)")
 	private String redirectUrl;
 }
