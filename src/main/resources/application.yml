@@ -32,7 +32,7 @@ spring:
     open-in-view: false
   data:
     redis:
-      host: localhost #local 실행시 localhost
+      host: redis-compose #local 실행시 localhost
       port: 6379
 
 jwt:
