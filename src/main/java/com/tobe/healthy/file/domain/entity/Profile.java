@@ -1,19 +1,16 @@
 package com.tobe.healthy.file.domain.entity;
 
-import static jakarta.persistence.GenerationType.IDENTITY;
-import static lombok.AccessLevel.PROTECTED;
-
 import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.lessonHistory.domain.LessonHistory;
 import com.tobe.healthy.member.domain.entity.Member;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
@@ -28,6 +25,7 @@ public class Profile extends BaseTimeEntity<Profile, Long> {
 	private Long id;
 
 	private String fileName;
+
 	private String originalName;
 
 	@Column(name = "file_ext")
@@ -35,6 +33,10 @@ public class Profile extends BaseTimeEntity<Profile, Long> {
 
 	@OneToOne(mappedBy = "profileId")
 	private Member member;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "lessonHistory")
+	private LessonHistory lessonHistory;
 
 	private String filePath;
 
