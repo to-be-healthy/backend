@@ -74,6 +74,9 @@ dependencies {
     implementation("jakarta.persistence:jakarta.persistence-api")
     implementation("jakarta.annotation:jakarta.annotation-api")
 
+    implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
+    testCompileOnly("io.github.microutils:kotlin-logging-jvm:3.0.5")
+
     kapt("jakarta.annotation:jakarta.annotation-api")
     kapt("jakarta.persistence:jakarta.persistence-api")
     kapt("org.projectlombok:lombok")
