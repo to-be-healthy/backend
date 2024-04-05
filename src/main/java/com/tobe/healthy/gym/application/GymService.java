@@ -1,5 +1,12 @@
 package com.tobe.healthy.gym.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.GYM_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.GYM_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.JOIN_CODE_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
+import static java.util.stream.Collectors.toList;
+
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.gym.domain.dto.out.GymListCommandResult;
 import com.tobe.healthy.gym.domain.dto.out.TrainerCommandResult;
@@ -7,19 +14,13 @@ import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.gym.repository.GymRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.apache.commons.lang3.ObjectUtils;
-import org.modelmapper.ModelMapper;
-
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
-import static java.util.stream.Collectors.toList;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -73,17 +74,6 @@ public class GymService {
 		return memberRepository.findAllTrainerByGym(gymId).stream()
 			.map(TrainerCommandResult::new)
 			.toList();
-	}
-  
-	public Boolean selectMyTrainer(Long gymId, Long trainerId, Long memberId) {
-		TrainerMemberMapping entity = TrainerMemberMapping.create(gymId, trainerId, memberId);
-		trainerMemberMappingRepository.save(entity);
-		return true;
-	}
-
-	public List<MemberInTeamCommandResult> findAllMyMemberInTeam(Long memberId) {
-		List<Long> members = trainerMemberMappingRepository.findAllMembers(memberId).stream().map(m -> m.getMemberId()).collect(toList());
-		return memberRepository.findAll(members).stream().map(m -> new MemberInTeamCommandResult(m)).collect(Collectors.toList());
 	}
 
 	private int getJoinCode() {
