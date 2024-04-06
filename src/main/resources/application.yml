@@ -28,6 +28,8 @@ spring:
 
     properties:
       hibernate:
+        auto_quote_keyword: true
+        globally_quoted_identifiers: true
         dialect: org.hibernate.dialect.MySQLDialect
     open-in-view: false
   data:

@@ -43,6 +43,7 @@ public enum ErrorCode {
 	GYM_DUPLICATION(BAD_REQUEST, "C_025", "중복된 헬스장이 존재합니다."),
 	JOIN_CODE_NOT_VALID(BAD_REQUEST, "C_026", "인증코드가 일치하지 않습니다. 다시 확인해 주세요."),
 	MEMBER_ID_NOT_VALID(BAD_REQUEST, "C_027", "영문 4자리 이상 입력해 주세요."),
+	TRAINER_NOT_FOUND(NOT_FOUND, "C_028", "트레이너가 존재하지 않습니다."),
 
 	SERVER_ERROR(INTERNAL_SERVER_ERROR, "S_001", "서버에서 오류가 발생하였습니다."),
 	FILE_UPLOAD_ERROR(INTERNAL_SERVER_ERROR, "S_002", "파일 업로드중 에러가 발생하였습니다."),

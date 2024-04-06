@@ -1,4 +1,4 @@
-package com.tobe.healthy.lessonHistory.domain
+package com.tobe.healthy.lessonHistory.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
 import com.tobe.healthy.member.domain.entity.Member
@@ -9,7 +9,9 @@ import jakarta.persistence.GenerationType.IDENTITY
 @Entity
 class LessonHistoryComment(
 
-    val parentId: Int? = null,
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "parent_id")
+    val parentId: LessonHistoryComment? = null,
 
     val order: Int,
 
