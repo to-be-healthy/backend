@@ -6,9 +6,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+import static jakarta.persistence.EnumType.STRING;
+
 
 @Entity
-@Table(name = "workout_history")
+@Table(name = "point")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -20,11 +22,19 @@ public class Point extends BaseTimeEntity<Point, Long> {
     @Column(name = "point_id")
     private Long pointId;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
     @ColumnDefault("0")
     private int point;
+
+    @Enumerated(STRING)
+    @ColumnDefault("'PLUS'")
+    private Calculation calculation;
+
+    @Enumerated(STRING)
+    @ColumnDefault("'APPLICATION'")
+    private PointType Type;
 
 }
