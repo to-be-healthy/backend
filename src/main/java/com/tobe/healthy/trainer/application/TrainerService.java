@@ -94,7 +94,7 @@ public class TrainerService {
     }
 
     public List<MemberInTeamDto> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
-        Page<MemberInTeamDto> members = memberRepository.findAllMyMemberInTeam(trainerId, searchValue, sortValue, pageable);
-        return members.isEmpty() ? null : members.stream().toList();
+        List<MemberInTeamDto> members = memberRepository.findAllMyMemberInTeam(trainerId, searchValue, sortValue, pageable);
+        return members.isEmpty() ? null : members;
     }
 }

@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -94,7 +95,7 @@ public class TrainerController {
                                                                            @RequestParam(required = false) String searchValue,
                                                                            @Parameter(description = "정렬 조건", example = "ranking, memberId")
                                                                                @RequestParam(required = false, defaultValue = "memberId") String sortValue,
-                                                                           Pageable pageable) {
+                                                                           @PageableDefault(size = 100) Pageable pageable) {
         return ResponseHandler.<List<MemberInTeamDto>>builder()
                 .data(trainerService.findAllMyMemberInTeam(member.getMemberId(), searchValue, sortValue, pageable))
                 .message("트레이너가 관리하는 학생을 조회하였습니다.")
