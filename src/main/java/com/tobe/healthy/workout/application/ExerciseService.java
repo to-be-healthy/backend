@@ -31,7 +31,7 @@ public class ExerciseService {
         List<Instructions> instructions = exerciseRepository.getInstructions(ids);
         return exerciseDtos.stream().map(e -> {
             List<String> instStr = instructions.stream().map(InstructionsDto::from)
-                    .filter(i -> i.getExerciseId() == e.getExerciseId())
+                    .filter(i -> i.getExerciseId().equals(e.getExerciseId()))
                     .map(InstructionsDto::getInstructions).collect(Collectors.toList());
             e.setInstructions(instStr);
             return e;
