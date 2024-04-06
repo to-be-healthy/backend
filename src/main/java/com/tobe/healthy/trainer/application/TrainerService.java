@@ -39,7 +39,6 @@ public class TrainerService {
     private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final TrainerMemberMappingRepository mappingRepository;
-    private final GymMembershipService gymMembershipService;
 
     public TrainerMemberMappingDto addMemberOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
@@ -55,28 +54,15 @@ public class TrainerService {
         mappingRepository.flush();
         mappingRepository.save(mapping);
         member.registerGym(trainer.getGym());
-        registerGymMembership(member, command);
         return TrainerMemberMappingDto.from(mapping);
     }
 
-    private void registerGymMembership(Member member, MemberLessonCommand command) {
-        LocalDate gymStartDt = command.getGymStartDt();
-        LocalDate gymEndDt = command.getGymEndDt();
-        MembershipAddCommand membership = new MembershipAddCommand(member.getGym().getId(), member.getId(), gymStartDt, gymEndDt);
-        gymMembershipService.registerGymMembership(membership);
-    }
-
     public MemberInviteResultCommand inviteMember(MemberInviteCommand command, Member trainer) {
-        if(command.getGymStartDt().isAfter(command.getGymEndDt())){
-            throw new CustomException(DATETIME_NOT_VALID);
-        }
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), MemberType.TRAINER)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         String name = command.getName();
         int lessonCnt = command.getLessonCnt();
-        LocalDate gymStartDt = command.getGymStartDt();
-        LocalDate gymEndDt = command.getGymEndDt();
 
         String uuid = System.currentTimeMillis() + "_" + UUID.randomUUID();
         String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
@@ -86,8 +72,6 @@ public class TrainerService {
             put("trainerId", trainer.getId().toString());
             put("name", name);
             put("lessonCnt", String.valueOf(lessonCnt));
-            put("gymStartDt", String.valueOf(gymStartDt));
-            put("gymEndDt", String.valueOf(gymEndDt));
         }};
         redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), 24 * 60 * 60 * 1000); // 1days
         return new MemberInviteResultCommand(uuid, invitationLink);

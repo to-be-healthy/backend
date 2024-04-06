@@ -543,12 +543,10 @@ public class MemberService {
 		//부가정보 업데이트
 		Map<String, String> map = getInviteMappingData(request.getUuid());
 		Long trainerId = Long.valueOf(map.get("trainerId"));
-		LocalDate gymStartDt = LocalDate.parse(map.get("gymStartDt"), DateTimeFormatter.ISO_DATE);
-		LocalDate gymEndDt = LocalDate.parse(map.get("gymEndDt"), DateTimeFormatter.ISO_DATE);
 		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
 
-		//회원&트레이너 매핑, 헬스장 이용권 등록
-		MemberLessonCommand lessonCommand = new MemberLessonCommand(lessonCnt, gymStartDt, gymEndDt);
+		//회원&트레이너 매핑
+		MemberLessonCommand lessonCommand = new MemberLessonCommand(lessonCnt);
 		trainerService.addMemberOfTrainer(trainerId, member.getId(), lessonCommand);
 
 		String name = map.get("name");
@@ -562,10 +560,8 @@ public class MemberService {
 		Long trainerId = Long.valueOf(map.get("trainerId"));
 		String name = map.get("name");
 		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
-		LocalDate gymStartDt = LocalDate.parse(map.get("gymStartDt"), DateTimeFormatter.ISO_DATE);
-		LocalDate gymEndDt = LocalDate.parse(map.get("gymEndDt"), DateTimeFormatter.ISO_DATE);
 		Member member = memberRepository.findByMemberIdWithGym(trainerId);
-		return InvitationMappingResult.create(member, name, lessonCnt, gymStartDt, gymEndDt);
+		return InvitationMappingResult.create(member, name, lessonCnt);
 	}
 
 	private Map<String, String> getInviteMappingData(String uuid) {
