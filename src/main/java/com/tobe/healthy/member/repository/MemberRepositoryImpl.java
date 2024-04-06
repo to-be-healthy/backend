@@ -60,13 +60,10 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     public List<MemberInTeamDto> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
         return queryFactory
                 .select(new QMemberInTeamDto(member.id, member.name, member.userId, member.email,
-                        trainerMemberMapping.ranking, trainerMemberMapping.lessonCnt, trainerMemberMapping.remainLessonCnt,
-                        gymMembership.gymEndDt))
+                        trainerMemberMapping.ranking, trainerMemberMapping.lessonCnt, trainerMemberMapping.remainLessonCnt))
                 .from(trainerMemberMapping)
                 .innerJoin(trainerMemberMapping.member, member)
                 .on(trainerMemberMapping.member.id.eq(member.id))
-                .leftJoin(gymMembership)
-                .on(member.id.eq(gymMembership.member.id))
                 .where(trainerMemberMapping.trainer.id.eq(trainerId)
                         , member.memberType.eq(MemberType.STUDENT)
                         , member.delYn.eq(false)

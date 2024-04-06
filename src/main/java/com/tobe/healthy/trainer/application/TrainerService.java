@@ -4,9 +4,7 @@ import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.ErrorCode;
-import com.tobe.healthy.gym.application.GymMembershipService;
 import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
-import com.tobe.healthy.gym.domain.dto.in.MembershipAddCommand;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -19,15 +17,11 @@ import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.*;
-
-import static com.tobe.healthy.config.error.ErrorCode.DATETIME_NOT_VALID;
 
 
 @Service

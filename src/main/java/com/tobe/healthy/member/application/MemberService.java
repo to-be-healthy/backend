@@ -13,7 +13,6 @@ import com.tobe.healthy.config.error.OAuthException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
-import com.tobe.healthy.gym.application.GymMembershipService;
 import com.tobe.healthy.gym.repository.GymRepository;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.in.*;
@@ -53,8 +52,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -85,7 +82,6 @@ public class MemberService {
 	private final TrainerMemberMappingRepository mappingRepository;
 	private final GymRepository gymRepository;
 	private final MailService mailService;
-	private final GymMembershipService gymMembershipService;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;

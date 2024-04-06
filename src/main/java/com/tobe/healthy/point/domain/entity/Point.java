@@ -34,7 +34,7 @@ public class Point extends BaseTimeEntity<Point, Long> {
     private Calculation calculation;
 
     @Enumerated(STRING)
-    @ColumnDefault("'APPLICATION'")
+    @ColumnDefault("'WORKOUT'")
     private PointType Type;
 
 }
