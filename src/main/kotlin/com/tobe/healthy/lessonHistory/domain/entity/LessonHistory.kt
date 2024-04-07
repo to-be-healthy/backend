@@ -8,19 +8,21 @@ import com.tobe.healthy.schedule.domain.entity.Schedule
 import jakarta.persistence.*
 import jakarta.persistence.FetchType.LAZY
 import jakarta.persistence.GenerationType.IDENTITY
+import org.hibernate.annotations.DynamicUpdate
 
 @Entity
+@DynamicUpdate
 class LessonHistory(
 
-    val title: String,
+    var title: String,
 
-    val content: String,
+    var content: String,
 
-    @OneToMany(fetch = LAZY, mappedBy = "lessonHistory")
+    @OneToMany(fetch = LAZY, mappedBy = "lessonHistory", cascade = [CascadeType.ALL])
     val lessonHistoryComment: MutableList<LessonHistoryComment>? = null,
 
     @OneToMany(fetch = LAZY, mappedBy = "lessonHistory")
-    val file: MutableList<Profile>? = null,
+    var file: MutableList<Profile>? = null,
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_id")
@@ -40,7 +42,13 @@ class LessonHistory(
     val id: Long? = null
 ) : BaseTimeEntity<LessonHistory, Long>() {
 
+    fun updateLessonHistory(title: String, content: String) {
+        this.title = title
+        this.content = content
+    }
+
     companion object {
+
         fun register(request: RegisterLessonHistoryCommand, student: Member, trainer: Member, schedule: Schedule): LessonHistory {
             return LessonHistory(
                 title = request.title,

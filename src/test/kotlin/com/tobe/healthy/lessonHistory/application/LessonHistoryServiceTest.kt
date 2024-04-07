@@ -1,9 +1,8 @@
 package com.tobe.healthy.lessonHistory.application
 
 import com.querydsl.jpa.impl.JPAQueryFactory
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode
 import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
+import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryUpdateCommand
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistoryComment
 import com.tobe.healthy.lessonHistory.domain.entity.QLessonHistory
@@ -36,6 +35,8 @@ class LessonHistoryServiceTest @Autowired constructor(
     private val lessonHistoryCommandRepository: LessonHistoryCommentRepository
 ) {
 
+    @Autowired
+    private lateinit var lessonHistoryCommentRepository: LessonHistoryCommentRepository
     lateinit var student: Member
     lateinit var trainer: Member
     lateinit var schedule: Schedule
@@ -147,6 +148,23 @@ class LessonHistoryServiceTest @Autowired constructor(
 
     @Test
     fun `게시글을 수정한다`() {
+        val request = LessonHistoryUpdateCommand(
+            id = lessonHistory.id!!,
+            title = "이걸로 바꿔줘",
+            content = "내용은 이걸로 바꿔줘"
+        )
+        val entity = lessonHistoryRepository.findById(lessonHistory.id!!).orElseThrow()
+        entity.updateLessonHistory(request)
+    }
+
+    @Test
+    fun `댓글을 수정한다`() {
+        val order = lessonHistoryCommandRepository.findTopComment(lessonHistory.id!!) ?: 1
+        val lessonHistoryComment = getLessonHistoryComment(order, "댓글 내용입니다!!", student)
+        em.persist(lessonHistoryComment)
+        val entity = lessonHistoryCommentRepository.findById(lessonHistoryComment.id!!).orElseThrow()
+        entity.updateLessonHistoryComment("댓글 내용은 이걸로 변경")
+        em.flush()
     }
 
     private fun getLessonHistoryComment(order: Int, content: String, writer: Member, parentId: LessonHistoryComment? = null): LessonHistoryComment {

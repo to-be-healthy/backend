@@ -35,7 +35,7 @@ public class Profile extends BaseTimeEntity<Profile, Long> {
 	private Member member;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "lessonHistory")
+	@JoinColumn(name = "lessonHistory_id")
 	private LessonHistory lessonHistory;
 
 	private String filePath;
@@ -49,6 +49,17 @@ public class Profile extends BaseTimeEntity<Profile, Long> {
 			.extension(extension)
 			.filePath(filePath)
 			.fileSize(fileSize)
+			.build();
+	}
+
+	public static Profile create(String savedFileName, String originalName, String extension, String filePath, int fileSize, LessonHistory lessonHistory) {
+		return Profile.builder()
+			.fileName(savedFileName)
+			.originalName(originalName)
+			.extension(extension)
+			.filePath(filePath)
+			.fileSize(fileSize)
+			.lessonHistory(lessonHistory)
 			.build();
 	}
 }

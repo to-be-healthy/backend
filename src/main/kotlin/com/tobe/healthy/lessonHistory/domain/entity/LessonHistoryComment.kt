@@ -5,8 +5,10 @@ import com.tobe.healthy.member.domain.entity.Member
 import jakarta.persistence.*
 import jakarta.persistence.FetchType.LAZY
 import jakarta.persistence.GenerationType.IDENTITY
+import org.hibernate.annotations.DynamicUpdate
 
 @Entity
+@DynamicUpdate
 class LessonHistoryComment(
 
     @ManyToOne(fetch = LAZY)
@@ -15,7 +17,7 @@ class LessonHistoryComment(
 
     val order: Int,
 
-    val content: String,
+    var content: String,
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "writer_id")
@@ -29,4 +31,9 @@ class LessonHistoryComment(
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "lesson_history_comment_id")
     val id: Long? = null
-) : BaseTimeEntity<LessonHistoryComment, Long>()
+) : BaseTimeEntity<LessonHistoryComment, Long>() {
+
+    fun updateLessonHistoryComment(content: String) {
+        this.content = content
+    }
+}
