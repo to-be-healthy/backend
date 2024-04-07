@@ -1,5 +1,7 @@
 package com.tobe.healthy.lessonHistory.application
 
+import com.amazonaws.services.s3.AmazonS3
+import com.amazonaws.services.s3.model.ObjectMetadata
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.file.domain.entity.Profile
@@ -30,7 +32,8 @@ class LessonHistoryService(
     private val memberRepository: MemberRepository,
     private val scheduleRepository: ScheduleRepository,
     private val lessonHistoryCommentRepository: LessonHistoryCommentRepository,
-    private val fileRepository: FileRepository
+    private val fileRepository: FileRepository,
+    private val amazonS3: AmazonS3
 ) {
 
     fun registerLessonHistory(request: RegisterLessonHistoryCommand, uploadFile: MultipartFile, studentId: Long): Boolean {
@@ -53,6 +56,14 @@ class LessonHistoryService(
         val uploadDir = "upload"
 
         uploadFile.let {
+            val originalFileName = uploadFile.originalFilename
+            val objectMetadata = ObjectMetadata()
+            objectMetadata.contentLength = uploadFile.size
+            objectMetadata.contentType = uploadFile.contentType
+            amazonS3.putObject("to-be-healthy-bucket", originalFileName, uploadFile.inputStream, objectMetadata)
+            val fileUrl = amazonS3.getUrl("to-be-healthy-bucket", originalFileName).toString()
+            println("amazonS3 = ${amazonS3.getUrl("to-be-healthy-bucket", originalFileName)}")
+
             val savedFileName = System.currentTimeMillis().toString() + "_" + UUID.randomUUID()
             val extension = Objects.requireNonNull(uploadFile.originalFilename)?.substring(
                 uploadFile.originalFilename!!.lastIndexOf(".")
@@ -67,7 +78,8 @@ class LessonHistoryService(
                 extension,
                 uploadDir + File.separator,
                 uploadFile.size.toInt(),
-                lessonHistory
+                lessonHistory,
+                fileUrl
             )
 
             findMember.registerProfile(profile)

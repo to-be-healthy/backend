@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -31,16 +32,18 @@ public class Profile extends BaseTimeEntity<Profile, Long> {
 	@Column(name = "file_ext")
 	private String extension;
 
-	@OneToOne(mappedBy = "profileId")
+	@OneToOne(mappedBy = "profileId", fetch = LAZY)
 	private Member member;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "lessonHistory_id")
+	@ManyToOne(fetch = LAZY)
+	@JoinColumn(name = "lesson_history_id")
 	private LessonHistory lessonHistory;
 
 	private String filePath;
 
 	private int fileSize;
+
+	private String fileUrl;
 
 	public static Profile create(String savedFileName, String originalName, String extension, String filePath, int fileSize) {
 		return Profile.builder()
@@ -52,7 +55,7 @@ public class Profile extends BaseTimeEntity<Profile, Long> {
 			.build();
 	}
 
-	public static Profile create(String savedFileName, String originalName, String extension, String filePath, int fileSize, LessonHistory lessonHistory) {
+	public static Profile create(String savedFileName, String originalName, String extension, String filePath, int fileSize, LessonHistory lessonHistory, String fileUrl) {
 		return Profile.builder()
 			.fileName(savedFileName)
 			.originalName(originalName)
@@ -60,6 +63,7 @@ public class Profile extends BaseTimeEntity<Profile, Long> {
 			.filePath(filePath)
 			.fileSize(fileSize)
 			.lessonHistory(lessonHistory)
+			.fileUrl(fileUrl)
 			.build();
 	}
 }

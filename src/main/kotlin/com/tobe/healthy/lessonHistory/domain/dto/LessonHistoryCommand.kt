@@ -1,5 +1,6 @@
 package com.tobe.healthy.lessonHistory.domain.dto
 
+import com.tobe.healthy.file.domain.entity.Profile
 import com.tobe.healthy.lessonHistory.domain.entity.AttendanceStatus.ABSENT
 import com.tobe.healthy.lessonHistory.domain.entity.AttendanceStatus.ATTENDED
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
@@ -9,6 +10,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import java.util.stream.Collectors.toList
 
 data class LessonHistoryCommandResult(
     val id: Long,
@@ -20,11 +22,12 @@ data class LessonHistoryCommandResult(
     val trainer: String,
     val lessonDt: String,
     val lessonTime: String,
-    val attendanceStatus: String
+    val attendanceStatus: String,
+    val fileUrl: MutableList<String>
 ) {
 
     companion object {
-        fun from(entity: LessonHistory): LessonHistoryCommandResult {
+        fun from(entity: LessonHistory, files: MutableList<Profile>): LessonHistoryCommandResult {
             return LessonHistoryCommandResult(
                 id = entity.id ?: throw IllegalArgumentException("LessonHistory ID cannot be null"),
                 title = entity.title,
@@ -37,7 +40,8 @@ data class LessonHistoryCommandResult(
                 trainer = "${entity.trainer.name} 트레이너",
                 lessonDt = formatLessonDt(entity.schedule.lessonDt),
                 lessonTime = formatLessonTime(entity.schedule.lessonStartTime, entity.schedule.lessonEndTime),
-                attendanceStatus = validateAttendanceStatus(entity.schedule.lessonDt, entity.schedule.lessonEndTime)
+                attendanceStatus = validateAttendanceStatus(entity.schedule.lessonDt, entity.schedule.lessonEndTime),
+                fileUrl = files.stream().filter { file -> file.lessonHistory.id == entity.id}.map { file -> file.fileUrl }.collect(toList())
             )
         }
 
