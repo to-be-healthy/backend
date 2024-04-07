@@ -36,7 +36,7 @@ class LessonHistoryController(
     }
 
     @GetMapping("/{lessonHistoryId}")
-    fun findOneLessonHistory(@PathVariable lessonHistoryId: Long): KotlinResponseHandler<LessonHistoryCommandResult> {
+    fun findOneLessonHistory(@PathVariable lessonHistoryId: Long): KotlinResponseHandler<List<LessonHistoryCommandResult>> {
         return KotlinResponseHandler(
             message = "수업 내역을 조회하였습니다.",
             data = lessonHistoryService.findOneLessonHistory(lessonHistoryId)

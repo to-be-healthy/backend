@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface FileRepository extends JpaRepository<Profile, Long> {
 	Optional<Profile> findByMemberId(Long memberId);
 	List<Profile> findAllByLessonHistoryIdIn(List<Long> id);
-	List<Profile> findByLessonHistoryId(Long id);
+	Profile findByLessonHistoryId(Long id);
 }

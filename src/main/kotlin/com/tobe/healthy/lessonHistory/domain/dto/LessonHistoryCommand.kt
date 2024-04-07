@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import java.util.stream.Collectors.toList
+import java.util.stream.Collectors
 
 data class LessonHistoryCommandResult(
     val id: Long,
@@ -23,13 +23,13 @@ data class LessonHistoryCommandResult(
     val lessonDt: String,
     val lessonTime: String,
     val attendanceStatus: String,
-    val fileUrl: MutableList<String>
+    val fileUrl: List<String>
 ) {
 
     companion object {
-        fun from(entity: LessonHistory, files: MutableList<Profile>): LessonHistoryCommandResult {
+        fun from(entity: LessonHistory): LessonHistoryCommandResult {
             return LessonHistoryCommandResult(
-                id = entity.id ?: throw IllegalArgumentException("LessonHistory ID cannot be null"),
+                id = entity.id!!,
                 title = entity.title,
                 content = entity.content,
                 comment = entity.lessonHistoryComment?.map { LessonHistoryCommentCommandResult.from(it) }
@@ -41,7 +41,7 @@ data class LessonHistoryCommandResult(
                 lessonDt = formatLessonDt(entity.schedule.lessonDt),
                 lessonTime = formatLessonTime(entity.schedule.lessonStartTime, entity.schedule.lessonEndTime),
                 attendanceStatus = validateAttendanceStatus(entity.schedule.lessonDt, entity.schedule.lessonEndTime),
-                fileUrl = files.stream().filter { file -> file.lessonHistory.id == entity.id}.map { file -> file.fileUrl }.collect(toList())
+                fileUrl = entity.file?.stream()?.map { file -> file.fileUrl }?.collect(Collectors.toList()) ?: emptyList()
             )
         }
 
@@ -81,6 +81,20 @@ data class LessonHistoryCommandResult(
                     writer = entity.writer.id,
                     order = entity.order,
                     parentId = entity.parentId?.id
+                )
+            }
+        }
+    }
+
+    data class LessonHistoryFileResults(
+        val id: Long,
+        val fileUrl: String
+    ) {
+        companion object {
+            fun from(entity: Profile): LessonHistoryFileResults {
+                return LessonHistoryFileResults(
+                    id = entity.id,
+                    fileUrl = entity.fileUrl
                 )
             }
         }

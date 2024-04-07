@@ -31,6 +31,7 @@ spring:
         auto_quote_keyword: true
         globally_quoted_identifiers: true
         dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 100
     open-in-view: false
   data:
     redis:

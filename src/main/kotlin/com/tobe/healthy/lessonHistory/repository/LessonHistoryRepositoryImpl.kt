@@ -29,22 +29,21 @@ class LessonHistoryRepositoryImpl(
             throw CustomException(LESSON_HISTORY_NOT_FOUND)
         }
 
-        val collect = entity.stream().map { e -> e.id }.collect(toList())
+        val files = entity.stream().map { e -> fileRepository.findByLessonHistoryId(e.id) }.collect(toList())
 
-        val files = fileRepository.findAllByLessonHistoryIdIn(collect)
-
-        return entity.stream().map { entity -> LessonHistoryCommandResult.from(entity, files) }.collect(toList())
+        return entity.stream().map { entity -> LessonHistoryCommandResult.from(entity) }.collect(toList())
     }
 
-    override fun findOneLessonHistory(lessonHistoryId: Long): LessonHistoryCommandResult {
+    override fun findOneLessonHistory(lessonHistoryId: Long): List<LessonHistoryCommandResult> {
         val entity = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
             .where(lessonHistory.id.eq(lessonHistoryId))
             .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
-            .fetchOne()
+            .fetch()
 
-        val files = fileRepository.findByLessonHistoryId(entity?.id)
-        return LessonHistoryCommandResult.from(entity!!, files)
+        val files = entity.stream().map { e -> fileRepository.findByLessonHistoryId(e.id!!) }.collect(toList())
+
+        return entity.stream().map { entity -> LessonHistoryCommandResult.from(entity) }.collect(toList())
     }
 }

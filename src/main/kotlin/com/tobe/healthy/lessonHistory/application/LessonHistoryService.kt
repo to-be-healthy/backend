@@ -94,7 +94,7 @@ class LessonHistoryService(
         return lessonHistoryRepository.findAllLessonHistory()
     }
 
-    fun findOneLessonHistory(lessonHistoryId: Long): LessonHistoryCommandResult {
+    fun findOneLessonHistory(lessonHistoryId: Long): List<LessonHistoryCommandResult> {
         val result = lessonHistoryRepository.findById(lessonHistoryId).orElseThrow {
             throw CustomException(LESSON_HISTORY_NOT_FOUND)
         }

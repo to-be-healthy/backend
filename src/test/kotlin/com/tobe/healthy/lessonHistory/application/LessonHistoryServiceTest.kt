@@ -1,6 +1,9 @@
 package com.tobe.healthy.lessonHistory.application
 
 import com.querydsl.jpa.impl.JPAQueryFactory
+import com.tobe.healthy.config.error.CustomException
+import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
+import com.tobe.healthy.file.repository.FileRepository
 import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
 import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryUpdateCommand
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
@@ -32,7 +35,8 @@ class LessonHistoryServiceTest @Autowired constructor(
     private val passwordEncoder: PasswordEncoder,
     private val queryFactory: JPAQueryFactory,
     private val lessonHistoryRepository: LessonHistoryRepository,
-    private val lessonHistoryCommandRepository: LessonHistoryCommentRepository
+    private val lessonHistoryCommandRepository: LessonHistoryCommentRepository,
+    private val fileRepository: FileRepository,
 ) {
 
     @Autowired
@@ -149,12 +153,11 @@ class LessonHistoryServiceTest @Autowired constructor(
     @Test
     fun `게시글을 수정한다`() {
         val request = LessonHistoryUpdateCommand(
-            id = lessonHistory.id!!,
             title = "이걸로 바꿔줘",
             content = "내용은 이걸로 바꿔줘"
         )
         val entity = lessonHistoryRepository.findById(lessonHistory.id!!).orElseThrow()
-        entity.updateLessonHistory(request)
+        entity.updateLessonHistory(request.title, request.content)
     }
 
     @Test
@@ -165,6 +168,23 @@ class LessonHistoryServiceTest @Autowired constructor(
         val entity = lessonHistoryCommentRepository.findById(lessonHistoryComment.id!!).orElseThrow()
         entity.updateLessonHistoryComment("댓글 내용은 이걸로 변경")
         em.flush()
+    }
+
+    @Test
+    fun `첨부 파일을 조회한다`() {
+        val entity = queryFactory
+            .selectDistinct(QLessonHistory.lessonHistory)
+            .from(QLessonHistory.lessonHistory)
+            .innerJoin(QLessonHistory.lessonHistory.trainer).fetchJoin()
+            .innerJoin(QLessonHistory.lessonHistory.student).fetchJoin()
+            .innerJoin(QLessonHistory.lessonHistory.schedule).fetchJoin()
+            .leftJoin(QLessonHistory.lessonHistory.lessonHistoryComment).fetchJoin()
+            .fetch() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+
+        val results = entity.stream().map { e -> LessonHistoryCommandResult.from(e) }
+        for (result in results) {
+            log.info { "result => $result" }
+        }
     }
 
     private fun getLessonHistoryComment(order: Int, content: String, writer: Member, parentId: LessonHistoryComment? = null): LessonHistoryComment {
