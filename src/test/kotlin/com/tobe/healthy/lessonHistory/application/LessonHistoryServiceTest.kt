@@ -1,11 +1,14 @@
 package com.tobe.healthy.lessonHistory.application
 
 import com.querydsl.jpa.impl.JPAQueryFactory
+import com.tobe.healthy.config.error.CustomException
+import com.tobe.healthy.config.error.ErrorCode
 import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistoryComment
 import com.tobe.healthy.lessonHistory.domain.entity.QLessonHistory
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryCommentRepository
+import com.tobe.healthy.lessonHistory.repository.LessonHistoryRepository
 import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.domain.entity.MemberType.STUDENT
@@ -18,7 +21,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.test.annotation.Rollback
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalTime
@@ -30,6 +32,7 @@ class LessonHistoryServiceTest @Autowired constructor(
     private val em: EntityManager,
     private val passwordEncoder: PasswordEncoder,
     private val queryFactory: JPAQueryFactory,
+    private val lessonHistoryRepository: LessonHistoryRepository,
     private val lessonHistoryCommandRepository: LessonHistoryCommentRepository
 ) {
 
@@ -100,7 +103,6 @@ class LessonHistoryServiceTest @Autowired constructor(
     }
 
     @Test
-    @Rollback(false)
     fun `게시글에 대댓글을 등록한다`() {
         val order = lessonHistoryCommandRepository.findTopComment(lessonHistory.id!!) ?: 1
         val lessonHistoryComment = getLessonHistoryComment(order, "댓글 내용입니다!!", student)
@@ -130,12 +132,30 @@ class LessonHistoryServiceTest @Autowired constructor(
         }
     }
 
-    private fun getLessonHistoryComment(order: Int, content: String, writer: Member, parentId: LessonHistoryComment? = null) =
-        LessonHistoryComment(
-        order = order,
-        content = content,
-        writer = writer,
-        lessonHistory = lessonHistory,
-        parentId = parentId
+    @Test
+    fun `게시글을 삭제한다`() {
+        lessonHistoryRepository.delete(lessonHistory)
+    }
+
+    @Test
+    fun `댓글을 삭제한다`() {
+        val order = lessonHistoryCommandRepository.findTopComment(lessonHistory.id!!) ?: 1
+        val lessonHistoryComment = getLessonHistoryComment(order, "댓글 내용입니다!!", student)
+        em.persist(lessonHistoryComment)
+        lessonHistoryCommandRepository.delete(lessonHistoryComment)
+    }
+
+    @Test
+    fun `게시글을 수정한다`() {
+    }
+
+    private fun getLessonHistoryComment(order: Int, content: String, writer: Member, parentId: LessonHistoryComment? = null): LessonHistoryComment {
+       return LessonHistoryComment(
+            order = order,
+            content = content,
+            writer = writer,
+            lessonHistory = lessonHistory,
+            parentId = parentId
         )
+    }
 }
