@@ -1,21 +1,28 @@
 package com.tobe.healthy.lessonHistory.repository
 
+import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
 import com.tobe.healthy.file.repository.FileRepository
 import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
+import com.tobe.healthy.lessonHistory.domain.dto.SearchCondRequest
 import com.tobe.healthy.lessonHistory.domain.entity.QLessonHistory.lessonHistory
 import org.springframework.stereotype.Repository
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.RequestParam
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter.ofPattern
+import java.time.temporal.TemporalAccessor
 import java.util.stream.Collectors.toList
-
 @Repository
 class LessonHistoryRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
     private val fileRepository: FileRepository
 ) : LessonHistoryRepositoryCustom {
 
-    override fun findAllLessonHistory(): List<LessonHistoryCommandResult> {
+    override fun findAllLessonHistory(@ModelAttribute request: SearchCondRequest): List<LessonHistoryCommandResult> {
         val entity = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
@@ -41,3 +48,4 @@ class LessonHistoryRepositoryImpl(
         return entity.stream().map { entity -> LessonHistoryCommandResult.from(entity) }.collect(toList())
     }
 }
+

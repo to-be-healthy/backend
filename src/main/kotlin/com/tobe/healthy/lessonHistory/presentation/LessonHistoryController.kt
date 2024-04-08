@@ -3,10 +3,7 @@ package com.tobe.healthy.lessonHistory.presentation
 import com.tobe.healthy.KotlinResponseHandler
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonHistory.application.LessonHistoryService
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommentUpdateCommand
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryUpdateCommand
-import com.tobe.healthy.lessonHistory.domain.dto.RegisterLessonHistoryCommand
+import com.tobe.healthy.lessonHistory.domain.dto.*
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -28,10 +25,10 @@ class LessonHistoryController(
     }
 
     @GetMapping
-    fun findAllLessonHistory(): KotlinResponseHandler<List<LessonHistoryCommandResult>> {
+    fun findAllLessonHistory(request: SearchCondRequest): KotlinResponseHandler<List<LessonHistoryCommandResult>> {
         return KotlinResponseHandler(
             message = "수업 내역 전체를 조회하였습니다.",
-            data = lessonHistoryService.findAllLessonHistory()
+            data = lessonHistoryService.findAllLessonHistory(request)
         )
     }
 

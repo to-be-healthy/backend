@@ -9,10 +9,7 @@ import com.tobe.healthy.file.domain.entity.AwsS3File
 import com.tobe.healthy.file.domain.entity.Profile
 import com.tobe.healthy.file.repository.AwsS3FileRepository
 import com.tobe.healthy.file.repository.FileRepository
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommentUpdateCommand
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryUpdateCommand
-import com.tobe.healthy.lessonHistory.domain.dto.RegisterLessonHistoryCommand
+import com.tobe.healthy.lessonHistory.domain.dto.*
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryCommentRepository
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryRepository
@@ -76,8 +73,8 @@ class LessonHistoryService(
         return true
     }
 
-    fun findAllLessonHistory(): List<LessonHistoryCommandResult> {
-        return lessonHistoryRepository.findAllLessonHistory()
+    fun findAllLessonHistory(request: SearchCondRequest): List<LessonHistoryCommandResult> {
+        return lessonHistoryRepository.findAllLessonHistory(request)
     }
 
     fun findOneLessonHistory(lessonHistoryId: Long): List<LessonHistoryCommandResult> {
