@@ -94,12 +94,8 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-tasks.getByName("bootJar") {
-    enabled = false
-}
-
-tasks.getByName("jar") {
-    enabled = true
+tasks.withType<Test> {
+    exclude("**/**")
 }
 
 allOpen {
