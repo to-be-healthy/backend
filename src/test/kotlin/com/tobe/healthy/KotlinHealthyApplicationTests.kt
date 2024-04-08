@@ -6,10 +6,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
-val logger = KotlinLogging.logger {}
+val log = KotlinLogging.logger {}
+
 
 @SpringBootTest
-class HealthyApplicationTests @Autowired constructor(
+class KotlinHealthyApplicationTests @Autowired constructor(
     val memberRepository: MemberRepository
 ) {
 
