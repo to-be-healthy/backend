@@ -1,7 +1,6 @@
 package com.tobe.healthy.lessonHistory.domain.dto
 
 import com.tobe.healthy.file.domain.entity.AwsS3File
-import com.tobe.healthy.file.domain.entity.Profile
 import com.tobe.healthy.lessonHistory.domain.entity.AttendanceStatus.ABSENT
 import com.tobe.healthy.lessonHistory.domain.entity.AttendanceStatus.ATTENDED
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
@@ -11,8 +10,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import java.util.stream.Collectors
-import java.util.stream.Collectors.toList
 
 data class LessonHistoryCommandResult(
     val id: Long,
@@ -41,7 +38,7 @@ data class LessonHistoryCommandResult(
                 lessonDt = formatLessonDt(entity.schedule.lessonDt),
                 lessonTime = formatLessonTime(entity.schedule.lessonStartTime, entity.schedule.lessonEndTime),
                 attendanceStatus = validateAttendanceStatus(entity.schedule.lessonDt, entity.schedule.lessonEndTime),
-                fileUrl = entity.file.sortedBy { it.fileOrder }.map { file -> LessonHistoryFileResults.from(file) }.toMutableList()
+                fileUrl = entity.file.map { file -> LessonHistoryFileResults.from(file) }.sortedBy { it.fileOrder }.toMutableList()
             )
         }
 

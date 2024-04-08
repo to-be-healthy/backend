@@ -3,12 +3,9 @@ package com.tobe.healthy.lessonHistory.application
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode
 import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.file.domain.entity.AwsS3File
-import com.tobe.healthy.file.domain.entity.Profile
 import com.tobe.healthy.file.repository.AwsS3FileRepository
-import com.tobe.healthy.file.repository.FileRepository
 import com.tobe.healthy.lessonHistory.domain.dto.*
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryCommentRepository
@@ -18,12 +15,7 @@ import com.tobe.healthy.schedule.repository.ScheduleRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import java.util.*
 
 @Service
@@ -78,8 +70,7 @@ class LessonHistoryService(
     }
 
     fun findOneLessonHistory(lessonHistoryId: Long): List<LessonHistoryCommandResult> {
-        val result: LessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
-        return lessonHistoryRepository.findOneLessonHistory(result.id!!)
+        return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId)
     }
 
     fun updateLessonHistory(lessonHistoryId: Long, request: LessonHistoryUpdateCommand): Boolean {
