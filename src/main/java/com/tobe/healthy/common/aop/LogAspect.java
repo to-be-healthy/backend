@@ -1,9 +1,11 @@
-package com.tobe.healthy.common;
+package com.tobe.healthy.common.aop;
 
 import com.google.common.base.Joiner;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -16,7 +18,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Aspect
 @Component
-public class CommonAspect {
+public class LogAspect {
 
     @Pointcut("bean(*Controller)")
     private void allController() {}

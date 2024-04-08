@@ -586,9 +586,9 @@ public class MemberService {
 		if (mapping.isPresent()) {
 			Long trainerId = mapping.map(m -> m.getTrainer().getId()).orElse(null);
 			Member trainer = memberRepository.findByMemberIdWithGym(trainerId);
-			return MemberDto.create(member, trainer.getGym());
+			return MemberDto.create(member, member.getProfileId(), trainer.getGym());
 		} else {
-			return MemberDto.from(member);
+			return MemberDto.create(member, member.getProfileId());
 		}
 	}
 }

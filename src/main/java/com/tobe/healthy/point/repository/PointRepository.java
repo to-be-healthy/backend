@@ -1,10 +1,17 @@
 package com.tobe.healthy.point.repository;
 
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.point.domain.entity.Point;
+import com.tobe.healthy.point.domain.entity.PointType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 public interface PointRepository extends JpaRepository<Point, Long> {
@@ -20,5 +27,9 @@ public interface PointRepository extends JpaRepository<Point, Long> {
                 "group by p.member_id " +
                 "having p.member_id in(:members)) a", nativeQuery = true)
     List<Object[]> calculateRank(List<Long> members);
+
+//    @Query("select count(p.point_id) from point p where p.member_id = :memberId and p.type = :type " +
+//            " and p.calculation = :calculation and DATE_FORMAT(p.created_at , '%Y-%m-%d') = CURDATE()")
+    long countByMemberIdAndTypeAndCalculationAndCreatedAtBetween(Long memberId, PointType type, Calculation calculation, LocalDateTime start, LocalDateTime end);
 
 }

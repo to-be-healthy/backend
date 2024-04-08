@@ -33,6 +33,7 @@ import static java.io.File.separator;
 
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class WorkoutHistoryService {
@@ -45,7 +46,7 @@ public class WorkoutHistoryService {
     private final ExerciseRepository exerciseRepository;
 
 
-    @Transactional
+
     public WorkoutHistoryDto addWorkoutHistory(Member member, HistoryAddCommand command) {
         Optional<TrainerMemberMapping> mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId());
         Long trainerId = mapping.map(m -> m.getTrainer().getId()).orElse(null);

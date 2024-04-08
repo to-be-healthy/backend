@@ -2,6 +2,8 @@ package com.tobe.healthy.point.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.workout.domain.dto.ExerciseDto;
+import com.tobe.healthy.workout.domain.entity.Exercise;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -35,6 +37,15 @@ public class Point extends BaseTimeEntity<Point, Long> {
 
     @Enumerated(STRING)
     @ColumnDefault("'WORKOUT'")
-    private PointType Type;
+    private PointType type;
+
+    public static Point create(Member member, PointType type, Calculation calculation, int point) {
+        return Point.builder()
+                .member(member)
+                .type(type)
+                .calculation(calculation)
+                .point(point)
+                .build();
+    }
 
 }
