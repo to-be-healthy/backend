@@ -1,5 +1,6 @@
 package com.tobe.healthy.lessonHistory.domain.dto
 
+import com.tobe.healthy.file.domain.entity.AwsS3File
 import com.tobe.healthy.file.domain.entity.Profile
 import com.tobe.healthy.lessonHistory.domain.entity.AttendanceStatus.ABSENT
 import com.tobe.healthy.lessonHistory.domain.entity.AttendanceStatus.ATTENDED
@@ -11,19 +12,20 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.stream.Collectors
+import java.util.stream.Collectors.toList
 
 data class LessonHistoryCommandResult(
     val id: Long,
     val title: String,
     val content: String,
-    val comment: MutableList<LessonHistoryCommentCommandResult>,
+    val comment: MutableList<LessonHistoryCommentCommandResult> = mutableListOf(),
     val createdAt: LocalDateTime,
     val student: String,
     val trainer: String,
     val lessonDt: String,
     val lessonTime: String,
     val attendanceStatus: String,
-    val fileUrl: List<String>
+    val fileUrl: MutableList<LessonHistoryFileResults> = mutableListOf()
 ) {
 
     companion object {
@@ -32,16 +34,14 @@ data class LessonHistoryCommandResult(
                 id = entity.id!!,
                 title = entity.title,
                 content = entity.content,
-                comment = entity.lessonHistoryComment?.map { LessonHistoryCommentCommandResult.from(it) }
-                    ?.toMutableList()
-                    ?: mutableListOf(),
+                comment = entity.lessonHistoryComment.map { comment -> LessonHistoryCommentCommandResult.from(comment) }.toMutableList(),
                 createdAt = entity.createdAt,
                 student = entity.student.name,
                 trainer = "${entity.trainer.name} 트레이너",
                 lessonDt = formatLessonDt(entity.schedule.lessonDt),
                 lessonTime = formatLessonTime(entity.schedule.lessonStartTime, entity.schedule.lessonEndTime),
                 attendanceStatus = validateAttendanceStatus(entity.schedule.lessonDt, entity.schedule.lessonEndTime),
-                fileUrl = entity.file?.stream()?.map { file -> file.fileUrl }?.collect(Collectors.toList()) ?: emptyList()
+                fileUrl = entity.file.sortedBy { it.fileOrder }.map { file -> LessonHistoryFileResults.from(file) }.toMutableList()
             )
         }
 
@@ -87,14 +87,18 @@ data class LessonHistoryCommandResult(
     }
 
     data class LessonHistoryFileResults(
-        val id: Long,
-        val fileUrl: String
+        val originalFileName: String,
+        val fileUrl: String,
+        val fileOrder: Int,
+        val createdAt: LocalDateTime
     ) {
         companion object {
-            fun from(entity: Profile): LessonHistoryFileResults {
+            fun from(entity: AwsS3File): LessonHistoryFileResults {
                 return LessonHistoryFileResults(
-                    id = entity.id,
-                    fileUrl = entity.fileUrl
+                    originalFileName = entity.originalFileName,
+                    fileUrl = entity.fileUrl,
+                    fileOrder = entity.fileOrder,
+                    createdAt = entity.createdAt
                 )
             }
         }

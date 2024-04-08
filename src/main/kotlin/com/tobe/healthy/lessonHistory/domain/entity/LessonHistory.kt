@@ -1,11 +1,13 @@
 package com.tobe.healthy.lessonHistory.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
+import com.tobe.healthy.file.domain.entity.AwsS3File
 import com.tobe.healthy.file.domain.entity.Profile
 import com.tobe.healthy.lessonHistory.domain.dto.RegisterLessonHistoryCommand
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import jakarta.persistence.*
+import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.FetchType.LAZY
 import jakarta.persistence.GenerationType.IDENTITY
 import org.hibernate.annotations.DynamicUpdate
@@ -18,11 +20,11 @@ class LessonHistory(
 
     var content: String,
 
-    @OneToMany(fetch = LAZY, mappedBy = "lessonHistory", cascade = [CascadeType.ALL])
-    val lessonHistoryComment: MutableList<LessonHistoryComment>? = null,
+    @OneToMany(fetch = LAZY, mappedBy = "lessonHistory", cascade = [ALL])
+    val lessonHistoryComment: MutableList<LessonHistoryComment> = mutableListOf(),
 
-    @OneToMany(fetch = LAZY, mappedBy = "lessonHistory")
-    var file: MutableList<Profile>? = null,
+    @OneToMany(fetch = LAZY, mappedBy = "lessonHistory", cascade = [ALL])
+    var file: MutableList<AwsS3File> = mutableListOf(),
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_id")

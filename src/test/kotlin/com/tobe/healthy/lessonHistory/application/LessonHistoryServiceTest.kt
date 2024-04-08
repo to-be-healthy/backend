@@ -77,8 +77,8 @@ class LessonHistoryServiceTest @Autowired constructor(
         lessonHistory = LessonHistory(
             "title",
             "content",
-            null,
-            null,
+            mutableListOf(),
+            mutableListOf(),
             trainer,
             student,
             schedule)

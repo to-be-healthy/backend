@@ -9,21 +9,21 @@ class LessonHistoryCommentRepositoryImpl(
     private val queryFactory: JPAQueryFactory
 ) : LessonHistoryCommentRepositoryCustom {
 
-    override fun findTopComment(lessonHistoryId: Long): Int? {
+    override fun findTopComment(lessonHistoryId: Long): Int {
         val result = queryFactory
             .select(lessonHistoryComment.order.max().add(1))
             .from(lessonHistoryComment)
             .where(lessonHistoryComment.lessonHistory.id.eq(lessonHistoryId))
-            .fetchOne()
+            .fetchOne() ?: 0
         return result;
     }
 
-    override fun findTopComment(lessonHistoryId: Long, lessonHistoryCommentParentId: Long): Int? {
+    override fun findTopComment(lessonHistoryId: Long, lessonHistoryCommentParentId: Long): Int {
         val result = queryFactory
             .select(lessonHistoryComment.order.max().add(1))
             .from(lessonHistoryComment)
             .where(lessonHistoryComment.lessonHistory.id.eq(lessonHistoryId), lessonHistoryComment.parentId.id.eq(lessonHistoryCommentParentId))
-            .fetchOne()
+            .fetchOne() ?: 0
         return result;
     }
 }

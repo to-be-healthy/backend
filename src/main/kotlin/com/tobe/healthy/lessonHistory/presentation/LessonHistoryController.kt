@@ -19,11 +19,11 @@ class LessonHistoryController(
 
     @PostMapping("/register")
     fun registerLessonHistory(@RequestPart request: RegisterLessonHistoryCommand,
-                              @RequestPart(required = false) file: MultipartFile,
+                              @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>,
                               @AuthenticationPrincipal member: CustomMemberDetails): KotlinResponseHandler<Boolean> {
         return KotlinResponseHandler(
             message = "수업 내역을 등록하였습니다.",
-            data = lessonHistoryService.registerLessonHistory(request, file, member.memberId)
+            data = lessonHistoryService.registerLessonHistory(request, uploadFiles, member.memberId)
         )
     }
 

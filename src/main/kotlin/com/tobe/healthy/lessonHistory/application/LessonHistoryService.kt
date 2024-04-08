@@ -3,8 +3,11 @@ package com.tobe.healthy.lessonHistory.application
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.tobe.healthy.config.error.CustomException
+import com.tobe.healthy.config.error.ErrorCode
 import com.tobe.healthy.config.error.ErrorCode.*
+import com.tobe.healthy.file.domain.entity.AwsS3File
 import com.tobe.healthy.file.domain.entity.Profile
+import com.tobe.healthy.file.repository.AwsS3FileRepository
 import com.tobe.healthy.file.repository.FileRepository
 import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
 import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommentUpdateCommand
@@ -15,6 +18,7 @@ import com.tobe.healthy.lessonHistory.repository.LessonHistoryCommentRepository
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryRepository
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.repository.ScheduleRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
@@ -32,59 +36,41 @@ class LessonHistoryService(
     private val memberRepository: MemberRepository,
     private val scheduleRepository: ScheduleRepository,
     private val lessonHistoryCommentRepository: LessonHistoryCommentRepository,
-    private val fileRepository: FileRepository,
+    private val awsS3FileRepository: AwsS3FileRepository,
     private val amazonS3: AmazonS3
 ) {
 
-    fun registerLessonHistory(request: RegisterLessonHistoryCommand, uploadFile: MultipartFile, studentId: Long): Boolean {
-        val findMember = memberRepository.findById(studentId).orElseThrow {
-            throw CustomException(MEMBER_NOT_FOUND)
-        }
+    fun registerLessonHistory(request: RegisterLessonHistoryCommand, uploadFiles: MutableList<MultipartFile>, studentId: Long): Boolean {
+        val findMember = memberRepository.findByIdOrNull(studentId) ?: throw CustomException(MEMBER_NOT_FOUND)
 
-        val findTrainer = memberRepository.findById(request.trainer).orElseThrow {
-            throw CustomException(TRAINER_NOT_FOUND)
-        }
+        val findTrainer = memberRepository.findByIdOrNull(request.trainer) ?: throw CustomException(TRAINER_NOT_FOUND)
 
-        val findSchedule = scheduleRepository.findById(request.schedule).orElseThrow {
-            throw CustomException(SCHEDULE_NOT_FOUND)
-        }
+        val findSchedule = scheduleRepository.findByIdOrNull(request.schedule) ?: throw CustomException(SCHEDULE_NOT_FOUND)
 
         val lessonHistory = LessonHistory.register(request, findMember, findTrainer, findSchedule)
 
         lessonHistoryRepository.save(lessonHistory)
 
-        val uploadDir = "upload"
+        var fileOrder = 1;
+        for (uploadFile in uploadFiles) {
+            uploadFile.let {
+                val originalFileName = uploadFile.originalFilename
+                val objectMetadata = ObjectMetadata()
+                objectMetadata.contentLength = uploadFile.size
+                objectMetadata.contentType = uploadFile.contentType
+                val savedFileName = System.currentTimeMillis().toString() + "_" + UUID.randomUUID()
+                amazonS3.putObject("to-be-healthy-bucket", savedFileName, uploadFile.inputStream, objectMetadata)
+                val fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString()
 
-        uploadFile.let {
-            val originalFileName = uploadFile.originalFilename
-            val objectMetadata = ObjectMetadata()
-            objectMetadata.contentLength = uploadFile.size
-            objectMetadata.contentType = uploadFile.contentType
-            amazonS3.putObject("to-be-healthy-bucket", originalFileName, uploadFile.inputStream, objectMetadata)
-            val fileUrl = amazonS3.getUrl("to-be-healthy-bucket", originalFileName).toString()
-            println("amazonS3 = ${amazonS3.getUrl("to-be-healthy-bucket", originalFileName)}")
-
-            val savedFileName = System.currentTimeMillis().toString() + "_" + UUID.randomUUID()
-            val extension = Objects.requireNonNull(uploadFile.originalFilename)?.substring(
-                uploadFile.originalFilename!!.lastIndexOf(".")
-            )
-
-            val copyOfLocation = Paths.get(uploadDir + File.separator + StringUtils.cleanPath(savedFileName + extension))
-            Files.copy(uploadFile.inputStream, copyOfLocation, StandardCopyOption.REPLACE_EXISTING)
-
-            val profile = Profile.create(
-                savedFileName,
-                StringUtils.cleanPath(uploadFile.originalFilename!!),
-                extension,
-                uploadDir + File.separator,
-                uploadFile.size.toInt(),
-                lessonHistory,
-                fileUrl
-            )
-
-            findMember.registerProfile(profile)
-
-            fileRepository.save(profile)
+                val file = AwsS3File.create(
+                    originalFileName,
+                    findMember,
+                    lessonHistory,
+                    fileUrl,
+                    fileOrder++
+                )
+                awsS3FileRepository.save(file)
+            }
         }
 
         return true
@@ -95,25 +81,18 @@ class LessonHistoryService(
     }
 
     fun findOneLessonHistory(lessonHistoryId: Long): List<LessonHistoryCommandResult> {
-        val result = lessonHistoryRepository.findById(lessonHistoryId).orElseThrow {
-            throw CustomException(LESSON_HISTORY_NOT_FOUND)
-        }
+        val result: LessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
         return lessonHistoryRepository.findOneLessonHistory(result.id!!)
     }
 
     fun updateLessonHistory(lessonHistoryId: Long, request: LessonHistoryUpdateCommand): Boolean {
-        val findEntity = lessonHistoryRepository.findById(lessonHistoryId).orElseThrow {
-            throw CustomException(LESSON_HISTORY_NOT_FOUND)
-        }
+        val findEntity = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
         findEntity.updateLessonHistory(request.title, request.content)
         return true
     }
 
     fun updateLessonHistoryComment(lessonHistoryCommentId: Long, request: LessonHistoryCommentUpdateCommand): Boolean {
-        val findEntity = lessonHistoryCommentRepository.findById(lessonHistoryCommentId)
-            .orElseThrow {
-                throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
-            }
+        val findEntity = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
         findEntity.updateLessonHistoryComment(request.content)
         return true
     }

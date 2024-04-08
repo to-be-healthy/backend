@@ -23,15 +23,9 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
             .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
-            .fetch()
+            .fetch() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
-        entity.ifEmpty {
-            throw CustomException(LESSON_HISTORY_NOT_FOUND)
-        }
-
-        val files = entity.stream().map { e -> fileRepository.findByLessonHistoryId(e.id) }.collect(toList())
-
-        return entity.stream().map { entity -> LessonHistoryCommandResult.from(entity) }.collect(toList())
+        return entity.stream().map { e -> LessonHistoryCommandResult.from(e) }.collect(toList())
     }
 
     override fun findOneLessonHistory(lessonHistoryId: Long): List<LessonHistoryCommandResult> {
@@ -40,9 +34,9 @@ class LessonHistoryRepositoryImpl(
             .from(lessonHistory)
             .where(lessonHistory.id.eq(lessonHistoryId))
             .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
-            .fetch()
+            .fetch() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
-        val files = entity.stream().map { e -> fileRepository.findByLessonHistoryId(e.id!!) }.collect(toList())
+        val files = entity.stream().map { e -> fileRepository.findByLessonHistoryId(e.id) }.collect(toList())
 
         return entity.stream().map { entity -> LessonHistoryCommandResult.from(entity) }.collect(toList())
     }
