@@ -66,13 +66,13 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok")
     testImplementation("io.rest-assured:rest-assured:5.3.0")
 
-    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.696")
+    implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
 
     // kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("javax.xml.bind:jaxb-api:2.3.1")
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
     implementation("jakarta.persistence:jakarta.persistence-api")
     implementation("jakarta.annotation:jakarta.annotation-api")
