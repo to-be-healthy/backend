@@ -102,7 +102,7 @@ public class WorkoutHistoryService {
         completedExerciseRepository.deleteAllInBatch(history.getCompletedExercises());
         workoutHistoryLikeRepository.deleteLikeByWorkoutHistoryId(workoutHistoryId);
         history.getHistoryFiles().forEach(file ->
-            fileService.deleteFile(file.getFilePath() + separator + file.getFileName() + file.getExtension())
+            fileService.deleteFile(file.getFileName())
         );
     }
 
@@ -119,7 +119,7 @@ public class WorkoutHistoryService {
         //파일 수정
         history.deleteFiles();
         history.getHistoryFiles().forEach(file ->
-                fileService.deleteFile(file.getFilePath() + separator + file.getFileName() + file.getExtension())
+                fileService.deleteFile(file.getFileName())
         );
         fileService.uploadWorkoutFiles(history, command.getFiles());
         return setHistoryFile(WorkoutHistoryDto.from(history), List.of(history.getWorkoutHistoryId()));

@@ -20,8 +20,8 @@ public class WorkoutHistoryFileDto {
     private String fileName;
     private String originalName;
     private String extension;
-    private String filePath;
     private Long fileSize;
+    private String fileUrl;
 
 
     public static WorkoutHistoryFileDto from(WorkoutHistoryFile file) {
@@ -31,8 +31,8 @@ public class WorkoutHistoryFileDto {
                 .fileName(file.getFileName())
                 .originalName(file.getOriginalName())
                 .extension(file.getExtension())
-                .filePath(file.getFilePath())
                 .fileSize(file.getFileSize())
+                .fileUrl(file.getFileUrl())
                 .build();
     }
 
