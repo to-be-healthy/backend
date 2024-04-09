@@ -28,8 +28,6 @@ public interface PointRepository extends JpaRepository<Point, Long> {
                 "having p.member_id in(:members)) a", nativeQuery = true)
     List<Object[]> calculateRank(List<Long> members);
 
-//    @Query("select count(p.point_id) from point p where p.member_id = :memberId and p.type = :type " +
-//            " and p.calculation = :calculation and DATE_FORMAT(p.created_at , '%Y-%m-%d') = CURDATE()")
     long countByMemberIdAndTypeAndCalculationAndCreatedAtBetween(Long memberId, PointType type, Calculation calculation, LocalDateTime start, LocalDateTime end);
 
 }

@@ -43,9 +43,6 @@ public class TrainerService {
                 .ifPresent(i -> {throw new CustomException(ErrorCode.MEMBER_ALREADY_MAPPED);});
 
         TrainerMemberMapping mapping = TrainerMemberMapping.create(trainer, member, command.getLessonCnt(), command.getLessonCnt());
-
-        mappingRepository.deleteByMemberId(memberId);
-        mappingRepository.flush();
         mappingRepository.save(mapping);
         member.registerGym(trainer.getGym());
         return TrainerMemberMappingDto.from(mapping);
