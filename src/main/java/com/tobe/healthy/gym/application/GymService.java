@@ -1,5 +1,12 @@
 package com.tobe.healthy.gym.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.GYM_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.GYM_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.JOIN_CODE_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
+import static java.util.stream.Collectors.toList;
+
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.gym.domain.dto.out.GymListCommandResult;
 import com.tobe.healthy.gym.domain.dto.out.TrainerCommandResult;
@@ -7,26 +14,19 @@ import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.gym.repository.GymRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
+import java.util.List;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Random;
-
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
-import static java.util.stream.Collectors.toList;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
 public class GymService {
-	private final TrainerMemberMappingRepository trainerMemberMappingRepository;
 
 	private final MemberRepository memberRepository;
 	private final GymRepository gymRepository;
@@ -38,7 +38,7 @@ public class GymService {
 				.collect(toList());
 	}
 
-	public Boolean selectMyGym(Long gymId, int joinCode, Long memberId) {
+	public Boolean selectMyGym(Long gymId, Integer joinCode, Long memberId) {
 		Member member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 

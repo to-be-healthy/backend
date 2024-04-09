@@ -59,7 +59,7 @@ public class GymController {
 			})
 	@PostMapping("/{gymId}")
 	public ResponseHandler<Boolean> selectMyGym(@Parameter(description = "헬스장 ID") @PathVariable(name = "gymId") Long gymId,
-												@Parameter(description = "6자리 난수로 구성된 헬스장 가입 번호") @RequestParam(name = "joinCode", required = false) int joinCode,
+												@Parameter(description = "6자리 난수로 구성된 헬스장 가입 번호") @RequestParam(name = "joinCode", required = false) Integer joinCode,
 												@AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 				.data(gymService.selectMyGym(gymId, joinCode, member.getMemberId()))
