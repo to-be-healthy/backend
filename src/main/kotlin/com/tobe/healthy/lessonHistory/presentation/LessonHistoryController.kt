@@ -26,18 +26,20 @@ class LessonHistoryController(
 
     // todo: "속한 팀의 정보만 조회하는 기능 추가하기"
     @GetMapping
-    fun findAllLessonHistory(request: SearchCondRequest): KotlinResponseHandler<List<LessonHistoryCommandResult>> {
+    fun findAllLessonHistory(request: SearchCondRequest,
+                             @AuthenticationPrincipal member: CustomMemberDetails): KotlinResponseHandler<List<LessonHistoryCommandResult>> {
         return KotlinResponseHandler(
             message = "수업 내역 전체를 조회하였습니다.",
-            data = lessonHistoryService.findAllLessonHistory(request)
+            data = lessonHistoryService.findAllLessonHistory(request, member.memberId)
         )
     }
 
     @GetMapping("/{lessonHistoryId}")
-    fun findOneLessonHistory(@PathVariable lessonHistoryId: Long): KotlinResponseHandler<List<LessonHistoryCommandResult>> {
+    fun findOneLessonHistory(@PathVariable lessonHistoryId: Long,
+                             @AuthenticationPrincipal member: CustomMemberDetails): KotlinResponseHandler<List<LessonHistoryCommandResult>> {
         return KotlinResponseHandler(
             message = "수업 내역을 조회하였습니다.",
-            data = lessonHistoryService.findOneLessonHistory(lessonHistoryId)
+            data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member.memberId)
         )
     }
 

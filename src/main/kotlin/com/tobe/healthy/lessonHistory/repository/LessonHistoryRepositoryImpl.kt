@@ -9,6 +9,8 @@ import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
 import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
 import com.tobe.healthy.lessonHistory.domain.dto.SearchCondRequest
 import com.tobe.healthy.lessonHistory.domain.entity.QLessonHistory.lessonHistory
+import com.tobe.healthy.member.domain.entity.MemberType
+import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
 import io.micrometer.common.util.StringUtils
 import org.springframework.stereotype.Repository
 import java.util.stream.Collectors.toList
@@ -18,7 +20,7 @@ class LessonHistoryRepositoryImpl(
     private val queryFactory: JPAQueryFactory
 ) : LessonHistoryRepositoryCustom {
 
-    override fun findAllLessonHistory(request: SearchCondRequest): List<LessonHistoryCommandResult> {
+    override fun findAllLessonHistory(request: SearchCondRequest, memberId: Long, memberType: MemberType): List<LessonHistoryCommandResult> {
         val entity = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
@@ -26,10 +28,32 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
             .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
-            .where(convertDateFormat(request.searchDate))
+            .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType))
             .fetch() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
         return entity.stream().map { e -> LessonHistoryCommandResult.from(e) }.collect(toList())
+    }
+
+    override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): List<LessonHistoryCommandResult> {
+        val entity = queryFactory
+            .selectDistinct(lessonHistory)
+            .from(lessonHistory)
+            .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
+            .innerJoin(lessonHistory.trainer).fetchJoin()
+            .innerJoin(lessonHistory.student).fetchJoin()
+            .innerJoin(lessonHistory.schedule).fetchJoin()
+            .where(lessonHistory.id.eq(lessonHistoryId), validateMemberType(memberId, memberType))
+            .fetch() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+
+        return entity.stream().map { entity -> LessonHistoryCommandResult.from(entity) }.collect(toList())
+    }
+
+    private fun validateMemberType(memberId: Long, memberType: MemberType): BooleanExpression {
+        return if (memberType == TRAINER) {
+            lessonHistory.trainer.id.eq(memberId)
+        } else {
+            lessonHistory.student.id.eq(memberId)
+        }
     }
 
     private fun convertDateFormat(searchDate: String?): BooleanExpression? {
@@ -42,20 +66,6 @@ class LessonHistoryRepositoryImpl(
             create("%Y%m")
         )
         return stringTemplate.eq(searchDate)
-    }
-
-    override fun findOneLessonHistory(lessonHistoryId: Long): List<LessonHistoryCommandResult> {
-        val entity = queryFactory
-            .selectDistinct(lessonHistory)
-            .from(lessonHistory)
-            .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
-            .innerJoin(lessonHistory.trainer).fetchJoin()
-            .innerJoin(lessonHistory.student).fetchJoin()
-            .innerJoin(lessonHistory.schedule).fetchJoin()
-            .where(lessonHistory.id.eq(lessonHistoryId))
-            .fetch() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
-
-        return entity.stream().map { entity -> LessonHistoryCommandResult.from(entity) }.collect(toList())
     }
 }
 

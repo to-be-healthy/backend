@@ -71,12 +71,14 @@ class LessonHistoryService(
         return objectMetadata
     }
 
-    fun findAllLessonHistory(request: SearchCondRequest): List<LessonHistoryCommandResult> {
-        return lessonHistoryRepository.findAllLessonHistory(request)
+    fun findAllLessonHistory(request: SearchCondRequest, memberId: Long): List<LessonHistoryCommandResult> {
+        val findMember = memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
+        return lessonHistoryRepository.findAllLessonHistory(request, findMember.id, findMember.memberType)
     }
 
-    fun findOneLessonHistory(lessonHistoryId: Long): List<LessonHistoryCommandResult> {
-        return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId)
+    fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long): List<LessonHistoryCommandResult> {
+        val findMember = memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
+        return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, findMember.id, findMember.memberType)
     }
 
     fun updateLessonHistory(lessonHistoryId: Long, request: LessonHistoryUpdateCommand): Boolean {
@@ -92,11 +94,13 @@ class LessonHistoryService(
     }
 
     fun deleteLessonHistory(lessonHistoryId: Long): Boolean {
+        lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
         lessonHistoryRepository.deleteById(lessonHistoryId)
         return true
     }
 
     fun deleteLessonHistoryComment(lessonHistoryCommentId: Long): Boolean {
+        lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId) ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
         lessonHistoryCommentRepository.deleteById(lessonHistoryCommentId)
         return true
     }
