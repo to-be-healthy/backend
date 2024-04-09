@@ -12,28 +12,28 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 	@Query("select m from Member m where m.email = :email and m.socialType = 'NONE' and m.delYn = false")
-    Optional<Member> findByEmail(@Param("email") String email);
+    Optional<Member> findByEmail(String email);
 
 	@Query("select m from Member m where m.email = :email and m.socialType = :socialType and m.delYn = false")
-	Optional<Member> findByEmailAndSocialType(@Param("email") String email, SocialType socialType);
+	Optional<Member> findByEmailAndSocialType(String email, SocialType socialType);
 
 	@Query("select m from Member m where m.email = :email and m.socialType = 'GOOGLE' and m.delYn = false")
-	Optional<Member> findGoogleByEmailAndSocialType(@Param("email") String email);
+	Optional<Member> findGoogleByEmailAndSocialType(String email);
 
 	@Query("select m from Member m where m.userId = :userId and m.name = :name and m.delYn = false")
-	Optional<Member> findByUserIdAndName(@Param("userId") String userId, @Param("name") String name);
+	Optional<Member> findByUserIdAndName(String userId, String name);
 
 	@Query("select m from Member m where m.userId = :userId and m.memberType = :memberType and m.delYn = false")
-	Optional<Member> findByUserId(@Param("userId") String userId, @Param("memberType") MemberType memberType);
+	Optional<Member> findByUserId(String userId, MemberType memberType);
 
 	@Query("select m from Member m where m.userId = :userId and m.delYn = false")
-	Optional<Member> findByUserId(@Param("userId") String userId);
+	Optional<Member> findByUserId(String userId);
 
 	@Query("select m from Member m where m.email = :email and m.name = :name and m.socialType = 'NONE' and m.delYn = false")
-	Optional<Member> findByEmailAndName(@Param("email") String email, @Param("name") String name);
+	Optional<Member> findByEmailAndName(String email, String name);
 
 	@Query("select m from Member m where m.id = :memberId and m.delYn = false")
-	Optional<Member> findById(@Param("memberId") Long memberId);
+	Optional<Member> findById(Long memberId);
 
 	Optional<Member> findByIdAndMemberTypeAndDelYnFalse(Long memberId, MemberType memberType);
 
