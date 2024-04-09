@@ -2,7 +2,6 @@ package com.tobe.healthy.lessonHistory.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
 import com.tobe.healthy.file.domain.entity.AwsS3File
-import com.tobe.healthy.file.domain.entity.Profile
 import com.tobe.healthy.lessonHistory.domain.dto.RegisterLessonHistoryCommand
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.schedule.domain.entity.Schedule
@@ -50,7 +49,6 @@ class LessonHistory(
     }
 
     companion object {
-
         fun register(request: RegisterLessonHistoryCommand, student: Member, trainer: Member, schedule: Schedule): LessonHistory {
             return LessonHistory(
                 title = request.title,

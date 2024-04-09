@@ -24,6 +24,7 @@ class LessonHistoryController(
         )
     }
 
+    // todo: "속한 팀의 정보만 조회하는 기능 추가하기"
     @GetMapping
     fun findAllLessonHistory(request: SearchCondRequest): KotlinResponseHandler<List<LessonHistoryCommandResult>> {
         return KotlinResponseHandler(

@@ -17,7 +17,6 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
-import java.util.*
 
 @Service
 @Transactional
@@ -45,9 +44,7 @@ class LessonHistoryService(
         for (uploadFile in uploadFiles) {
             uploadFile.let {
                 val originalFileName = uploadFile.originalFilename
-                val objectMetadata = ObjectMetadata()
-                objectMetadata.contentLength = uploadFile.size
-                objectMetadata.contentType = uploadFile.contentType
+                val objectMetadata = getObjectMetadata(uploadFile)
                 val extension = originalFileName?.substring(originalFileName.lastIndexOf("."))
                 val savedFileName = System.currentTimeMillis().toString() + extension
                 amazonS3.putObject("to-be-healthy-bucket", savedFileName, uploadFile.inputStream, objectMetadata)
@@ -64,8 +61,14 @@ class LessonHistoryService(
                 awsS3FileRepository.save(file)
             }
         }
-
         return true
+    }
+
+    private fun getObjectMetadata(uploadFile: MultipartFile): ObjectMetadata {
+        val objectMetadata = ObjectMetadata()
+        objectMetadata.contentLength = uploadFile.size
+        objectMetadata.contentType = uploadFile.contentType
+        return objectMetadata
     }
 
     fun findAllLessonHistory(request: SearchCondRequest): List<LessonHistoryCommandResult> {

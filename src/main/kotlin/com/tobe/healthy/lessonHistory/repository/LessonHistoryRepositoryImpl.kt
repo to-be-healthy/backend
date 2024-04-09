@@ -6,7 +6,6 @@ import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
-import com.tobe.healthy.file.repository.FileRepository
 import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
 import com.tobe.healthy.lessonHistory.domain.dto.SearchCondRequest
 import com.tobe.healthy.lessonHistory.domain.entity.QLessonHistory.lessonHistory
@@ -16,8 +15,7 @@ import java.util.stream.Collectors.toList
 
 @Repository
 class LessonHistoryRepositoryImpl(
-    private val queryFactory: JPAQueryFactory,
-    private val fileRepository: FileRepository
+    private val queryFactory: JPAQueryFactory
 ) : LessonHistoryRepositoryCustom {
 
     override fun findAllLessonHistory(request: SearchCondRequest): List<LessonHistoryCommandResult> {
@@ -36,7 +34,7 @@ class LessonHistoryRepositoryImpl(
 
     private fun convertDateFormat(searchDate: String?): BooleanExpression? {
         if (StringUtils.isEmpty(searchDate)) {
-            return null;
+            return null
         }
         val stringTemplate = stringTemplate(
             "DATE_FORMAT({0}, {1})",

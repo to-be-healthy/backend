@@ -48,4 +48,13 @@ public class AwsS3File extends BaseTimeEntity<AwsS3File, Long> {
 				.fileOrder(fileOrder)
 				.build();
 	}
+
+	public static AwsS3File create(String originalFileName, Member member, String fileUrl, int fileOrder) {
+		return AwsS3File.builder()
+				.originalFileName(originalFileName)
+				.member(member)
+				.fileUrl(fileUrl)
+				.fileOrder(fileOrder)
+				.build();
+	}
 }
