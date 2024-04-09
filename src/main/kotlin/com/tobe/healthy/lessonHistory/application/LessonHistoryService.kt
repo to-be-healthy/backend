@@ -10,6 +10,7 @@ import com.tobe.healthy.lessonHistory.domain.dto.*
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryCommentRepository
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryRepository
+import com.tobe.healthy.log
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.repository.ScheduleRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -47,9 +48,11 @@ class LessonHistoryService(
                 val objectMetadata = ObjectMetadata()
                 objectMetadata.contentLength = uploadFile.size
                 objectMetadata.contentType = uploadFile.contentType
-                val savedFileName = System.currentTimeMillis().toString() + "_" + UUID.randomUUID()
+                val extension = originalFileName?.substring(originalFileName.lastIndexOf("."))
+                val savedFileName = System.currentTimeMillis().toString() + extension
                 amazonS3.putObject("to-be-healthy-bucket", savedFileName, uploadFile.inputStream, objectMetadata)
                 val fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString()
+                log.info { "fileUrl -> ${fileUrl}" }
 
                 val file = AwsS3File.create(
                     originalFileName,
