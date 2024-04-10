@@ -12,11 +12,8 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
-import static com.tobe.healthy.file.domain.entity.QWorkoutHistoryFile.workoutHistoryFile;
 import static com.tobe.healthy.workout.domain.entity.QExercise.exercise;
 import static com.tobe.healthy.workout.domain.entity.QInstructions.instructions1;
-import static com.tobe.healthy.workout.domain.entity.QWorkoutHistory.workoutHistory;
-import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryComment.workoutHistoryComment;
 
 
 @Repository

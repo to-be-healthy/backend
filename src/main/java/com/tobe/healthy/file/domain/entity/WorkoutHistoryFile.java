@@ -28,8 +28,8 @@ public class WorkoutHistoryFile extends BaseTimeEntity<WorkoutHistoryFile, Long>
     @Column(name = "file_ext")
     private String extension;
 
-    private String filePath;
     private Long fileSize;
+    private String fileUrl;
 
     @ColumnDefault("false")
     @Builder.Default
@@ -39,14 +39,14 @@ public class WorkoutHistoryFile extends BaseTimeEntity<WorkoutHistoryFile, Long>
     @JoinColumn(name = "workout_history_id")
     private WorkoutHistory workoutHistory;
 
-    public static WorkoutHistoryFile create(String savedFileName, String originalName, String extension, String filePath, Long fileSize, WorkoutHistory history) {
+    public static WorkoutHistoryFile create(String savedFileName, String originalName, String extension, Long fileSize, WorkoutHistory history, String fileUrl) {
         return WorkoutHistoryFile.builder()
                 .fileName(savedFileName)
                 .originalName(originalName)
                 .extension(extension)
-                .filePath(filePath)
                 .fileSize(fileSize)
                 .workoutHistory(history)
+                .fileUrl(fileUrl)
                 .build();
     }
 

@@ -1,6 +1,7 @@
 package com.tobe.healthy.member.domain.dto;
 
 import com.tobe.healthy.file.domain.dto.ProfileDto;
+import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.gym.domain.dto.GymDto;
 import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
@@ -45,21 +46,34 @@ public class MemberDto {
 			.pushAlarmStatus(member.getPushAlarmStatus())
 			.feedbackAlarmStatus(member.getFeedbackAlarmStatus())
 			.socialType(member.getSocialType());
-
-		if (member.getProfileId() != null) {
-			builder.profile(ProfileDto.from(member.getProfileId()));
-		}
 		return builder.build();
 	}
 
-	public static MemberDto create(Member member, Gym gym) {
+	public static MemberDto create(Member member, Profile profile) {
+		return MemberDto.builder()
+				.id(member.getId())
+				.userId(member.getUserId())
+				.email(member.getEmail())
+				.name(member.getName())
+				.age(member.getAge())
+				.height(member.getHeight())
+				.weight(member.getWeight())
+				.delYn(member.isDelYn())
+				.memberType(member.getMemberType())
+				.pushAlarmStatus(member.getPushAlarmStatus())
+				.feedbackAlarmStatus(member.getFeedbackAlarmStatus())
+				.socialType(member.getSocialType())
+				.profile(ProfileDto.from(profile)).build();
+	}
+
+	public static MemberDto create(Member member, Profile profile, Gym gym) {
 		return MemberDto.builder()
 			.id(member.getId())
 			.userId(member.getUserId())
 			.email(member.getEmail())
 			.name(member.getName())
 			.delYn(member.isDelYn())
-			.profile(ProfileDto.from(member.getProfileId()))
+			.profile(ProfileDto.from(profile))
 			.memberType(member.getMemberType())
 			.pushAlarmStatus(member.getPushAlarmStatus())
 			.feedbackAlarmStatus(member.getFeedbackAlarmStatus())

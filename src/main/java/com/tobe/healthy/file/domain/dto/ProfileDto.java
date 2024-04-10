@@ -14,8 +14,8 @@ public class ProfileDto {
     private String fileName;
     private String originalName;
     private String extension;
-    private String filePath;
     private int fileSize;
+    private String fileUrl;
 
     public static ProfileDto from(Profile profile){
         return ProfileDto.builder()
@@ -23,8 +23,8 @@ public class ProfileDto {
                 .fileName(profile.getFileName())
                 .originalName(profile.getOriginalName())
                 .extension(profile.getExtension())
-                .filePath(profile.getFilePath())
                 .fileSize(profile.getFileSize())
+                .fileUrl(profile.getFileUrl())
                 .build();
     }
 

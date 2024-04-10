@@ -19,18 +19,18 @@ public class MembershipAddCommand {
     @NotEmpty(message = "학생 번호를 입력해주세요.")
     private Long memberId;
 
-    @Schema(description = "헬스장 이용권 시작날짜", example = "2024-02-01")
-    private LocalDate gymStartDt;
-
-    @Schema(description = "헬스장 이용권 종료날짜", example = "2024-05-01")
-    private LocalDate gymEndDt;
+//    @Schema(description = "헬스장 이용권 시작날짜", example = "2024-02-01")
+//    private LocalDate gymStartDt;
+//
+//    @Schema(description = "헬스장 이용권 종료날짜", example = "2024-05-01")
+//    private LocalDate gymEndDt;
 
     @Builder
-    public MembershipAddCommand(Long gymId, Long memberId, LocalDate gymStartDt, LocalDate gymEndDt){
+    public MembershipAddCommand(Long gymId, Long memberId){
         this.gymId = gymId;
         this.memberId = memberId;
-        this.gymStartDt = gymStartDt;
-        this.gymEndDt = gymEndDt;
+//        this.gymStartDt = gymStartDt;
+//        this.gymEndDt = gymEndDt;
     }
 
 }

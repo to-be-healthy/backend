@@ -14,6 +14,8 @@ import static java.util.UUID.randomUUID;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.util.StringUtils.cleanPath;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
@@ -23,7 +25,6 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class FileService {
@@ -49,11 +51,14 @@ public class FileService {
 	private final FileRepository fileRepository;
 	private final WorkoutFileRepository workoutFileRepository;
 	private final MemberRepository memberRepository;
+	private final AmazonS3 amazonS3;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
 
-	@Transactional
+	@Value("${aws.s3.bucket-name}")
+	private String bucketName;
+
 	public Boolean uploadFile(MultipartFile uploadFile, Long memberId) {
 		if (!uploadFile.isEmpty()) {
 			try {
@@ -99,7 +104,6 @@ public class FileService {
 		return true;
 	}
 
-	@Transactional
 	public ResponseEntity<Resource> retrieveFile(Long memberId) {
 		Profile entity = fileRepository.findByMemberId(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("저장된 파일이 없습니다."));
@@ -118,23 +122,24 @@ public class FileService {
 		return new ResponseEntity<>(resource, httpHeaders, OK);
 	}
 
-	@Transactional
 	public void uploadWorkoutFiles(WorkoutHistory history, List<MultipartFile> files) {
 		files.forEach(f -> uploadWorkoutFile(f, history));
 	}
 
-	@Transactional
 	public void uploadWorkoutFile(MultipartFile uploadFile, WorkoutHistory history) {
 		if (!uploadFile.isEmpty()) {
 			try {
 				String savedFileName = System.currentTimeMillis() + "_" + randomUUID();
 				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
-				Path copyOfLocation = get(uploadDir + separator + cleanPath(savedFileName + extension));
-				Files.createDirectories(copyOfLocation.getParent());
-				Files.copy(uploadFile.getInputStream(), copyOfLocation, REPLACE_EXISTING);
+
+				ObjectMetadata objectMetadata = new ObjectMetadata();
+				objectMetadata.setContentLength(uploadFile.getSize());
+				objectMetadata.setContentType(uploadFile.getContentType());
+				amazonS3.putObject(bucketName, savedFileName, uploadFile.getInputStream(), objectMetadata);
+				String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
 
 				WorkoutHistoryFile historyFile = WorkoutHistoryFile.create(savedFileName,
-						cleanPath(uploadFile.getOriginalFilename()), extension, uploadDir + separator, uploadFile.getSize(), history);
+						cleanPath(uploadFile.getOriginalFilename()), extension, uploadFile.getSize(), history, fileUrl);
 				workoutFileRepository.save(historyFile);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -145,8 +150,7 @@ public class FileService {
 
 	public void deleteFile(String fileName){
 		try{
-			File file = new File(fileName);
-			file.delete();
+			amazonS3.deleteObject(bucketName, fileName);
 		}catch (Exception e){
 			e.printStackTrace();
 			throw new CustomException(FILE_REMOVE_ERROR);

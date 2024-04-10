@@ -18,10 +18,4 @@ public class MemberInviteCommand {
     @Positive(message = "양수를 입력해주세요.")
     private int lessonCnt;
 
-    @Schema(description = "헬스장 이용권 시작날짜")
-    private LocalDate gymStartDt;
-
-    @Schema(description = "헬스장 이용권 종료날짜")
-    private LocalDate gymEndDt;
-
 }

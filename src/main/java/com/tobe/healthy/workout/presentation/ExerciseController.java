@@ -3,7 +3,6 @@ package com.tobe.healthy.workout.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.workout.application.ExerciseService;
 import com.tobe.healthy.workout.domain.dto.ExerciseDto;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
 import com.tobe.healthy.workout.domain.entity.PrimaryMuscle;
 import io.swagger.v3.oas.annotations.Operation;
