@@ -57,36 +57,22 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return m;
     }
 
-    public Page<MemberInTeamDto> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
-        Long totalCnt = queryFactory
-                .select(member.count())
-                .from(trainerMemberMapping)
-                .innerJoin(trainerMemberMapping.member, member)
-                .on(trainerMemberMapping.member.id.eq(member.id))
-                .leftJoin(gymMembership)
-                .on(member.id.eq(gymMembership.member.id))
-                .where(trainerMemberMapping.trainer.id.eq(trainerId)
-                        , member.memberType.eq(MemberType.STUDENT)
-                        , member.delYn.eq(false)
-                        , nameLike(searchValue))
-                .fetchOne();
-
-        List<MemberInTeamDto> list = queryFactory
+    public List<MemberInTeamDto> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
+        return queryFactory
                 .select(new QMemberInTeamDto(member.id, member.name, member.userId, member.email,
                         trainerMemberMapping.ranking, trainerMemberMapping.lessonCnt, trainerMemberMapping.remainLessonCnt,
-                        gymMembership.gymEndDt))
+                        member.nickname, profile.fileUrl))
                 .from(trainerMemberMapping)
                 .innerJoin(trainerMemberMapping.member, member)
                 .on(trainerMemberMapping.member.id.eq(member.id))
-                .leftJoin(gymMembership)
-                .on(member.id.eq(gymMembership.member.id))
+                .leftJoin(member.profileId, profile)
+                .on(profile.member.profileId.eq(member.profileId))
                 .where(trainerMemberMapping.trainer.id.eq(trainerId)
                         , member.memberType.eq(MemberType.STUDENT)
                         , member.delYn.eq(false)
                         , nameLike(searchValue))
                 .orderBy(sortBy(sortValue))
                 .fetch();
-        return PageableExecutionUtils.getPage(list, pageable, ()-> totalCnt );
     }
 
     private BooleanExpression memberIdEq(Long memberId) {

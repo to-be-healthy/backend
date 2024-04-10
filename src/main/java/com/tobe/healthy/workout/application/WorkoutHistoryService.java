@@ -33,6 +33,7 @@ import static java.io.File.separator;
 
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class WorkoutHistoryService {
@@ -45,7 +46,7 @@ public class WorkoutHistoryService {
     private final ExerciseRepository exerciseRepository;
 
 
-    @Transactional
+
     public WorkoutHistoryDto addWorkoutHistory(Member member, HistoryAddCommand command) {
         Optional<TrainerMemberMapping> mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId());
         Long trainerId = mapping.map(m -> m.getTrainer().getId()).orElse(null);
@@ -101,7 +102,7 @@ public class WorkoutHistoryService {
         completedExerciseRepository.deleteAllInBatch(history.getCompletedExercises());
         workoutHistoryLikeRepository.deleteLikeByWorkoutHistoryId(workoutHistoryId);
         history.getHistoryFiles().forEach(file ->
-            fileService.deleteFile(file.getFilePath() + separator + file.getFileName() + file.getExtension())
+            fileService.deleteFile(file.getFileName())
         );
     }
 
@@ -118,7 +119,7 @@ public class WorkoutHistoryService {
         //파일 수정
         history.deleteFiles();
         history.getHistoryFiles().forEach(file ->
-                fileService.deleteFile(file.getFilePath() + separator + file.getFileName() + file.getExtension())
+                fileService.deleteFile(file.getFileName())
         );
         fileService.uploadWorkoutFiles(history, command.getFiles());
         return setHistoryFile(WorkoutHistoryDto.from(history), List.of(history.getWorkoutHistoryId()));
@@ -151,7 +152,7 @@ public class WorkoutHistoryService {
         List<WorkoutHistoryFile> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
         return historiesDto.stream().map(h -> {
             List<WorkoutHistoryFileDto> thisFiles = files.stream().map(WorkoutHistoryFileDto::from)
-                    .filter(f -> f.getWorkoutHistoryId() == h.getWorkoutHistoryId()).collect(Collectors.toList());
+                    .filter(f -> f.getWorkoutHistoryId().equals(h.getWorkoutHistoryId())).collect(Collectors.toList());
             h.setFiles(thisFiles);
             return h;
         }).collect(Collectors.toList());
@@ -168,7 +169,7 @@ public class WorkoutHistoryService {
         List<CompletedExercise> exercises = completedExerciseRepository.getCompletedExercise(ids);
         return historiesDto.stream().map(h -> {
             List<CompletedExerciseDto> exerciseDtos = exercises.stream().map(CompletedExerciseDto::from)
-                    .filter(e -> e.getWorkoutHistoryId() == h.getWorkoutHistoryId()).collect(Collectors.toList());
+                    .filter(e -> e.getWorkoutHistoryId().equals(h.getWorkoutHistoryId())).collect(Collectors.toList());
             h.setCompletedExercises(exerciseDtos);
             return h;
         }).collect(Collectors.toList());

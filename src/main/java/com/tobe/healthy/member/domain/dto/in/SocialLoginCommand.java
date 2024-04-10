@@ -22,4 +22,7 @@ public class SocialLoginCommand {
 
 	@Schema(description = "Redirect URL(카카오, 구글 소셜 로그인시 필요)", example = "http://localhost:3000/kakao/callback(카카오, 구글 소셜 로그인시 필요)")
 	private String redirectUrl;
+
+	@Schema(description = "초대링크로 가입하는 경우 uuid")
+	private String uuid;
 }

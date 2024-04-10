@@ -4,9 +4,7 @@ import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.ErrorCode;
-import com.tobe.healthy.gym.application.GymMembershipService;
 import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
-import com.tobe.healthy.gym.domain.dto.in.MembershipAddCommand;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -19,15 +17,13 @@ import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.*;
 
-import static com.tobe.healthy.config.error.ErrorCode.DATETIME_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.*;
 
 
 @Service
@@ -39,44 +35,29 @@ public class TrainerService {
     private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final TrainerMemberMappingRepository mappingRepository;
-    private final GymMembershipService gymMembershipService;
 
     public TrainerMemberMappingDto addMemberOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         mappingRepository.findByTrainerIdAndMemberId(trainerId, memberId)
-                .ifPresent(i -> {throw new CustomException(ErrorCode.MEMBER_ALREADY_MAPPED);});
-
-        TrainerMemberMapping mapping = TrainerMemberMapping.create(trainer, member, command.getLessonCnt(), command.getLessonCnt());
+                .ifPresent(i -> {throw new CustomException(MEMBER_ALREADY_MAPPED);});
 
         mappingRepository.deleteByMemberId(memberId);
         mappingRepository.flush();
+        TrainerMemberMapping mapping = TrainerMemberMapping.create(trainer, member, command.getLessonCnt(), command.getLessonCnt());
         mappingRepository.save(mapping);
         member.registerGym(trainer.getGym());
-        registerGymMembership(member, command);
         return TrainerMemberMappingDto.from(mapping);
     }
 
-    private void registerGymMembership(Member member, MemberLessonCommand command) {
-        LocalDate gymStartDt = command.getGymStartDt();
-        LocalDate gymEndDt = command.getGymEndDt();
-        MembershipAddCommand membership = new MembershipAddCommand(member.getGym().getId(), member.getId(), gymStartDt, gymEndDt);
-        gymMembershipService.registerGymMembership(membership);
-    }
-
     public MemberInviteResultCommand inviteMember(MemberInviteCommand command, Member trainer) {
-        if(command.getGymStartDt().isAfter(command.getGymEndDt())){
-            throw new CustomException(DATETIME_NOT_VALID);
-        }
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), MemberType.TRAINER)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         String name = command.getName();
         int lessonCnt = command.getLessonCnt();
-        LocalDate gymStartDt = command.getGymStartDt();
-        LocalDate gymEndDt = command.getGymEndDt();
 
         String uuid = System.currentTimeMillis() + "_" + UUID.randomUUID();
         String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
@@ -86,15 +67,13 @@ public class TrainerService {
             put("trainerId", trainer.getId().toString());
             put("name", name);
             put("lessonCnt", String.valueOf(lessonCnt));
-            put("gymStartDt", String.valueOf(gymStartDt));
-            put("gymEndDt", String.valueOf(gymEndDt));
         }};
         redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), 24 * 60 * 60 * 1000); // 1days
         return new MemberInviteResultCommand(uuid, invitationLink);
     }
 
     public List<MemberInTeamDto> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
-        Page<MemberInTeamDto> members = memberRepository.findAllMyMemberInTeam(trainerId, searchValue, sortValue, pageable);
-        return members.isEmpty() ? null : members.stream().toList();
+        List<MemberInTeamDto> members = memberRepository.findAllMyMemberInTeam(trainerId, searchValue, sortValue, pageable);
+        return members.isEmpty() ? null : members;
     }
 }

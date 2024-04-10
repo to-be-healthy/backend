@@ -23,11 +23,11 @@ public class TrainerMemberMapping extends BaseTimeEntity {
     @Column(name = "mapping_id")
     private Long mappingId;
 
-    @ManyToOne(fetch = LAZY, cascade = ALL)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_id")
     private Member trainer;
 
-    @ManyToOne(fetch = LAZY, cascade = ALL)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
@@ -53,5 +53,9 @@ public class TrainerMemberMapping extends BaseTimeEntity {
         this.member = member;
         this.lessonCnt = lessonCnt;
         this.remainLessonCnt = remainLessonCnt;
+    }
+
+    public void changeRanking(int ranking){
+        this.ranking = ranking;
     }
 }
