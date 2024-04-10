@@ -76,6 +76,8 @@ dependencies {
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
     implementation("jakarta.persistence:jakarta.persistence-api")
     implementation("jakarta.annotation:jakarta.annotation-api")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
 
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
     testCompileOnly("io.github.microutils:kotlin-logging-jvm:3.0.5")

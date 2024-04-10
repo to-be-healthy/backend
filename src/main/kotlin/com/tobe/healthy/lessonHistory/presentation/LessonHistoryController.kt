@@ -4,6 +4,7 @@ import com.tobe.healthy.KotlinResponseHandler
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonHistory.application.LessonHistoryService
 import com.tobe.healthy.lessonHistory.domain.dto.*
+import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -15,8 +16,8 @@ class LessonHistoryController(
 ) {
 
     @PostMapping("/register")
-    fun registerLessonHistory(@RequestPart request: RegisterLessonHistoryCommand,
-                              @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>,
+    fun registerLessonHistory(@RequestPart @Valid request: RegisterLessonHistoryCommand,
+                              @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
                               @AuthenticationPrincipal member: CustomMemberDetails): KotlinResponseHandler<Boolean> {
         return KotlinResponseHandler(
             message = "수업 내역을 등록하였습니다.",
@@ -30,7 +31,7 @@ class LessonHistoryController(
                              @AuthenticationPrincipal member: CustomMemberDetails): KotlinResponseHandler<List<LessonHistoryCommandResult>> {
         return KotlinResponseHandler(
             message = "수업 내역 전체를 조회하였습니다.",
-            data = lessonHistoryService.findAllLessonHistory(request, member.memberId)
+            data = lessonHistoryService.findAllLessonHistory(request, member.memberId, member.memberType)
         )
     }
 
@@ -39,7 +40,7 @@ class LessonHistoryController(
                              @AuthenticationPrincipal member: CustomMemberDetails): KotlinResponseHandler<List<LessonHistoryCommandResult>> {
         return KotlinResponseHandler(
             message = "수업 내역을 조회하였습니다.",
-            data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member.memberId)
+            data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member.memberId, member.memberType)
         )
     }
 
@@ -54,7 +55,7 @@ class LessonHistoryController(
 
     @PatchMapping("/comment/{lessonHistoryCommentId}")
     fun updateLessonHistoryComment(@PathVariable lessonHistoryCommentId: Long,
-                                   @RequestBody request: LessonHistoryCommentUpdateCommand): KotlinResponseHandler<Boolean> {
+                                   @RequestBody @Valid request: LessonHistoryCommentUpdateCommand): KotlinResponseHandler<Boolean> {
         return KotlinResponseHandler(
             message = "댓글이 수정되었습니다.",
             data = lessonHistoryService.updateLessonHistoryComment(lessonHistoryCommentId, request)

@@ -29,13 +29,13 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.schedule).fetchJoin()
             .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
             .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType))
-            .fetch() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+            .fetch()
 
         return entity.stream().map { e -> LessonHistoryCommandResult.from(e) }.collect(toList())
     }
 
     override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): List<LessonHistoryCommandResult> {
-        val entity = queryFactory
+        val results = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
             .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
@@ -43,9 +43,10 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
             .where(lessonHistory.id.eq(lessonHistoryId), validateMemberType(memberId, memberType))
-            .fetch() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+            .fetch()
 
-        return entity.stream().map { entity -> LessonHistoryCommandResult.from(entity) }.collect(toList())
+        return results.ifEmpty{throw CustomException(LESSON_HISTORY_NOT_FOUND)}
+            .map(LessonHistoryCommandResult::from)
     }
 
     private fun validateMemberType(memberId: Long, memberType: MemberType): BooleanExpression {

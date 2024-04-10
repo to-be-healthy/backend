@@ -51,8 +51,8 @@ class LessonHistory(
     companion object {
         fun register(request: RegisterLessonHistoryCommand, student: Member, trainer: Member, schedule: Schedule): LessonHistory {
             return LessonHistory(
-                title = request.title,
-                content = request.content,
+                title = request.title!!,
+                content = request.content!!,
                 trainer = trainer,
                 student = student,
                 schedule = schedule
