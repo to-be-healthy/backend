@@ -28,7 +28,10 @@ spring:
 
     properties:
       hibernate:
+        auto_quote_keyword: true
+        globally_quoted_identifiers: true
         dialect: org.hibernate.dialect.MySQLDialect
+        default_batch_fetch_size: 100
     open-in-view: false
   data:
     redis:
@@ -76,6 +79,11 @@ oauth:
     token-uri: ${OAUTH_GOOGLE_TOKEN_URI}
     user-info-uri: ${OAUTH_GOOGLE_USER_INFO_URI}
     redirect-uri: ${OAUTH_GOOGLE_REDIRECT_URI}
+
+aws:
+  s3:
+    access-key: ${AWS_S3_ACCESS_KEY}
+    secret-key: ${AWS_S3_SECRET_KEY}
 
 # Spring openapi
 springdoc:

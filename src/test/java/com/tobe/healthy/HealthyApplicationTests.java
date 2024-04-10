@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 @Slf4j
-class KotlinHealthyApplicationTests {
+class HealthyApplicationTests {
 
 	@Test
 	void contextLoads() {
