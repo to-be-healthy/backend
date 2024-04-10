@@ -32,6 +32,7 @@ import io.jsonwebtoken.impl.Base64UrlCodec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -291,6 +292,11 @@ public class MemberService {
 		Member member = Member.join(response.getEmail(), response.getNickname(), profile, request.getMemberType(),
 				KAKAO);
 		memberRepository.save(member);
+
+		//초대가입인 경우
+		if(StringUtils.isNotEmpty(request.getUuid())) {
+			mappingTrainerAndStudent(member, request.getUuid(), response.getNickname(), true);
+		}
 		return tokenGenerator.create(member);
 	}
 
@@ -357,6 +363,11 @@ public class MemberService {
 		Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(),
 				profile, request.getMemberType(), NAVER);
 		memberRepository.save(member);
+
+		//초대가입인 경우
+		if(StringUtils.isNotEmpty(request.getUuid())) {
+			mappingTrainerAndStudent(member, request.getUuid(), authorization.getResponse().getName(), true);
+		}
 		return tokenGenerator.create(member);
 	}
 
@@ -456,6 +467,11 @@ public class MemberService {
 			member = optionalMember.get();
 		}
 
+		//초대가입인 경우
+		if(StringUtils.isNotEmpty(command.getUuid())) {
+			mappingTrainerAndStudent(member, command.getUuid(), name, true);
+		}
+
 		return memberRepository.findByUserId(member.getUserId(), command.getMemberType())
 				.map(tokenGenerator::create)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
@@ -532,26 +548,27 @@ public class MemberService {
 	}
 
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
-		//회원가입
 		MemberJoinCommandResult result = joinMember(request);
 		Member member = memberRepository.findById(result.getId())
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		Map<String, String> map = getInviteMappingData(request.getUuid());
+		mappingTrainerAndStudent(member, request.getUuid(), request.getName(), false);
+		return result;
+	}
+
+	public void mappingTrainerAndStudent(Member member, String uuid, String reqName, boolean isSocial){
+		Map<String, String> map = getInviteMappingData(uuid);
+		String name = map.get("name");
+		if(!isSocial && !name.equals(reqName)) throw new CustomException(INVITE_NAME_NOT_VALID);
+		member.changeName(name);
+
 		Long trainerId = Long.valueOf(map.get("trainerId"));
 		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
-
-		//회원&트레이너 매핑
 		MemberLessonCommand lessonCommand = new MemberLessonCommand(lessonCnt);
 		trainerService.addMemberOfTrainer(trainerId, member.getId(), lessonCommand);
 
-		String name = map.get("name");
-		if (!name.equals(request.getName())) throw new CustomException(INVITE_NAME_NOT_VALID);
-		member.changeName(name);
-
-		String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + request.getUuid();
+		String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
 		redisService.deleteValues(invitationKey);
-		return result;
 	}
 
 	public InvitationMappingResult getInvitationMapping(String uuid) {

@@ -24,4 +24,6 @@ public class IdToken {
 	private String picture;
 
 	private String email;
+
+	private String name;
 }
