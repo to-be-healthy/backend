@@ -15,9 +15,11 @@ public class MemberInTeamDto {
 	private int ranking;
 	private int lessonCnt;
 	private int remainLessonCnt;
+	private String nickName;
+	private String fileUrl;
 
 	@QueryProjection
-	public MemberInTeamDto(Long memberId, String name, String userId, String email, int ranking, int lessonCnt, int remainLessonCnt) {
+	public MemberInTeamDto(Long memberId, String name, String userId, String email, int ranking, int lessonCnt, int remainLessonCnt, String nickName, String fileUrl) {
 		this.memberId = memberId;
 		this.name = name;
 		this.userId = userId;
@@ -25,5 +27,7 @@ public class MemberInTeamDto {
 		this.ranking = ranking;
 		this.lessonCnt = lessonCnt;
 		this.remainLessonCnt = remainLessonCnt;
+		this.nickName = nickName;
+		this.fileUrl = fileUrl;
 	}
 }
