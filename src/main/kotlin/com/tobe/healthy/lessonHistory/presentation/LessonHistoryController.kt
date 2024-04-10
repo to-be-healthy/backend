@@ -5,6 +5,8 @@ import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonHistory.application.LessonHistoryService
 import com.tobe.healthy.lessonHistory.domain.dto.*
 import jakarta.validation.Valid
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -28,10 +30,11 @@ class LessonHistoryController(
     // todo: "속한 팀의 정보만 조회하는 기능 추가하기"
     @GetMapping
     fun findAllLessonHistory(request: SearchCondRequest,
-                             @AuthenticationPrincipal member: CustomMemberDetails): KotlinResponseHandler<List<LessonHistoryCommandResult>> {
+                             pageable: Pageable,
+                             @AuthenticationPrincipal member: CustomMemberDetails): KotlinResponseHandler<Page<LessonHistoryCommandResult>> {
         return KotlinResponseHandler(
             message = "수업 내역 전체를 조회하였습니다.",
-            data = lessonHistoryService.findAllLessonHistory(request, member.memberId, member.memberType)
+            data = lessonHistoryService.findAllLessonHistory(request, pageable, member.memberId, member.memberType)
         )
     }
 
@@ -75,6 +78,29 @@ class LessonHistoryController(
         return KotlinResponseHandler(
             message = "댓글이 삭제되었습니다.",
             data = lessonHistoryService.deleteLessonHistoryComment(lessonHistoryCommentId)
+        )
+    }
+
+    @PostMapping("/comment/{lessonHistoryId}")
+    fun registerLessonHistoryComment(@PathVariable lessonHistoryId: Long,
+                                     @RequestPart @Valid request: CommentRegisterCommand,
+                                     @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
+                                     @AuthenticationPrincipal member: CustomMemberDetails): KotlinResponseHandler<Boolean> {
+        return KotlinResponseHandler(
+            message = "댓글이 등록되었습니다.",
+            data = lessonHistoryService.registerLessonHistoryComment(lessonHistoryId, uploadFiles, request, member.memberId)
+        )
+    }
+
+    @PostMapping("{lessonHistoryId}/comment/{lessonHistoryCommentId}/reply")
+    fun registerLessonHistoryComment(@PathVariable lessonHistoryId: Long,
+                                     @PathVariable lessonHistoryCommentId: Long,
+                                     @RequestPart @Valid request: CommentRegisterCommand,
+                                     @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
+                                     @AuthenticationPrincipal member: CustomMemberDetails): KotlinResponseHandler<Boolean> {
+        return KotlinResponseHandler(
+            message = "대댓글이 등록되었습니다.",
+            data = lessonHistoryService.registerLessonHistoryReply(lessonHistoryId, lessonHistoryCommentId, uploadFiles, request, member.memberId)
         )
     }
 }

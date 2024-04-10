@@ -8,12 +8,15 @@ import com.tobe.healthy.file.domain.entity.AwsS3File
 import com.tobe.healthy.file.repository.AwsS3FileRepository
 import com.tobe.healthy.lessonHistory.domain.dto.*
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
+import com.tobe.healthy.lessonHistory.domain.entity.LessonHistoryComment
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryCommentRepository
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryRepository
 import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.repository.ScheduleRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -58,7 +61,8 @@ class LessonHistoryService(
                         findMember,
                         lessonHistory,
                         fileUrl,
-                        fileOrder++
+                        fileOrder++,
+                        null
                     )
                     awsS3FileRepository.save(file)
                 }
@@ -74,8 +78,8 @@ class LessonHistoryService(
         return objectMetadata
     }
 
-    fun findAllLessonHistory(request: SearchCondRequest, memberId: Long, memberType: MemberType): List<LessonHistoryCommandResult> {
-        return lessonHistoryRepository.findAllLessonHistory(request, memberId, memberType)
+    fun findAllLessonHistory(request: SearchCondRequest, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryCommandResult> {
+        return lessonHistoryRepository.findAllLessonHistory(request, pageable, memberId, memberType)
     }
 
     fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): List<LessonHistoryCommandResult> {
@@ -104,5 +108,85 @@ class LessonHistoryService(
         lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId) ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
         lessonHistoryCommentRepository.deleteById(lessonHistoryCommentId)
         return true
+    }
+
+    fun registerLessonHistoryComment(lessonHistoryId: Long, uploadFiles: MutableList<MultipartFile>?, request: CommentRegisterCommand, memberId: Long): Boolean {
+        val findMember = memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
+        val lessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+        val order = lessonHistoryCommentRepository.findTopComment(lessonHistoryId)
+        val entity = LessonHistoryComment(
+            order = order + 1,
+            content = request.comment!!,
+            writer = findMember,
+            lessonHistory = lessonHistory
+        )
+        val comment = lessonHistoryCommentRepository.save(entity)
+        uploadFiles?.let {
+            var fileOrder = 1;
+            for (uploadFile in it) {
+                if (!uploadFile.isEmpty) {
+                    val originalFileName = uploadFile.originalFilename
+                    val objectMetadata = getObjectMetadata(uploadFile)
+                    val extension = originalFileName?.substring(originalFileName.lastIndexOf("."))
+                    val savedFileName = System.currentTimeMillis().toString() + extension
+                    amazonS3.putObject("to-be-healthy-bucket", savedFileName, uploadFile.inputStream, objectMetadata)
+                    val fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString()
+                    log.info { "fileUrl -> ${fileUrl}" }
+
+                    val file = AwsS3File.create(
+                        originalFileName,
+                        findMember,
+                        lessonHistory,
+                        fileUrl,
+                        fileOrder++,
+                        comment
+                    )
+                    awsS3FileRepository.save(file)
+                }
+            }
+        }
+        return true
+    }
+
+    fun registerLessonHistoryReply(lessonHistoryId: Long, lessonHistoryCommentId: Long, uploadFiles: MutableList<MultipartFile>?,
+                                   request: CommentRegisterCommand, memberId: Long): Boolean {
+        val findMember = memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
+        val lessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+        val order = lessonHistoryCommentRepository.findTopComment(lessonHistoryId, lessonHistoryCommentId)
+        val parentComment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
+        val entity = LessonHistoryComment(
+            order = order + 1,
+            content = request.comment!!,
+            writer = findMember,
+            lessonHistory = lessonHistory,
+            parentId = parentComment
+        )
+        val comment = lessonHistoryCommentRepository.save(entity)
+        uploadFiles?.let {
+            var fileOrder = 1;
+            for (uploadFile in it) {
+                if (!uploadFile.isEmpty) {
+                    val originalFileName = uploadFile.originalFilename
+                    val objectMetadata = getObjectMetadata(uploadFile)
+                    val extension = originalFileName?.substring(originalFileName.lastIndexOf("."))
+                    val savedFileName = System.currentTimeMillis().toString() + extension
+                    amazonS3.putObject("to-be-healthy-bucket", savedFileName, uploadFile.inputStream, objectMetadata)
+                    val fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString()
+                    log.info { "fileUrl -> ${fileUrl}" }
+
+                    val file = AwsS3File.create(
+                        originalFileName,
+                        findMember,
+                        lessonHistory,
+                        fileUrl,
+                        fileOrder++,
+                        comment
+                    )
+                    awsS3FileRepository.save(file)
+                }
+            }
+        }
+        return true
+
     }
 }

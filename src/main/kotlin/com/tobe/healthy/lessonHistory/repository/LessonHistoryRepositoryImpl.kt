@@ -12,6 +12,9 @@ import com.tobe.healthy.lessonHistory.domain.entity.QLessonHistory.lessonHistory
 import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
 import io.micrometer.common.util.StringUtils
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.support.PageableExecutionUtils
 import org.springframework.stereotype.Repository
 import java.util.stream.Collectors.toList
 
@@ -20,18 +23,29 @@ class LessonHistoryRepositoryImpl(
     private val queryFactory: JPAQueryFactory
 ) : LessonHistoryRepositoryCustom {
 
-    override fun findAllLessonHistory(request: SearchCondRequest, memberId: Long, memberType: MemberType): List<LessonHistoryCommandResult> {
+    override fun findAllLessonHistory(request: SearchCondRequest, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryCommandResult> {
         val entity = queryFactory
-            .selectDistinct(lessonHistory)
+            .select(lessonHistory)
             .from(lessonHistory)
             .innerJoin(lessonHistory.trainer).fetchJoin()
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
-            .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
+//            .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
             .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType))
-            .fetch()
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .fetch().stream().map(LessonHistoryCommandResult::from).collect(toList())
 
-        return entity.stream().map { e -> LessonHistoryCommandResult.from(e) }.collect(toList())
+        val totalCount = queryFactory
+            .select(lessonHistory.count())
+            .from(lessonHistory)
+            .innerJoin(lessonHistory.trainer)
+            .innerJoin(lessonHistory.student)
+            .innerJoin(lessonHistory.schedule)
+            .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType))
+
+        return PageableExecutionUtils.getPage(entity, pageable) { totalCount.fetchOne()!! }
+//        return entity.stream().map { e -> LessonHistoryCommandResult.from(e) }.collect(toList())
     }
 
     override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): List<LessonHistoryCommandResult> {

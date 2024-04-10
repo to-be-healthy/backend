@@ -13,7 +13,7 @@ class LessonHistoryCommentRepositoryImpl(
         val result = queryFactory
             .select(lessonHistoryComment.order.max().add(1))
             .from(lessonHistoryComment)
-            .where(lessonHistoryComment.lessonHistory.id.eq(lessonHistoryId))
+            .where(lessonHistoryComment.lessonHistory.id.eq(lessonHistoryId), lessonHistoryComment.parentId.isNull)
             .fetchOne() ?: 0
         return result;
     }
