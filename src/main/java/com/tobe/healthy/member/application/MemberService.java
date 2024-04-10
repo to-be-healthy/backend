@@ -205,6 +205,7 @@ public class MemberService {
 				.filter(m -> passwordEncoder.matches(password, m.getPassword()))
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.deleteMember();
+		mappingRepository.deleteByMemberId(memberId);
 		return member.getUserId();
 	}
 
@@ -536,7 +537,6 @@ public class MemberService {
 		Member member = memberRepository.findById(result.getId())
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		//부가정보 업데이트
 		Map<String, String> map = getInviteMappingData(request.getUuid());
 		Long trainerId = Long.valueOf(map.get("trainerId"));
 		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
@@ -548,6 +548,9 @@ public class MemberService {
 		String name = map.get("name");
 		if (!name.equals(request.getName())) throw new CustomException(INVITE_NAME_NOT_VALID);
 		member.changeName(name);
+
+		String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + request.getUuid();
+		redisService.deleteValues(invitationKey);
 		return result;
 	}
 

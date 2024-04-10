@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static com.tobe.healthy.config.error.ErrorCode.*;
+
 
 @Service
 @RequiredArgsConstructor
@@ -36,12 +38,14 @@ public class TrainerService {
 
     public TrainerMemberMappingDto addMemberOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         mappingRepository.findByTrainerIdAndMemberId(trainerId, memberId)
-                .ifPresent(i -> {throw new CustomException(ErrorCode.MEMBER_ALREADY_MAPPED);});
+                .ifPresent(i -> {throw new CustomException(MEMBER_ALREADY_MAPPED);});
 
+        mappingRepository.deleteByMemberId(memberId);
+        mappingRepository.flush();
         TrainerMemberMapping mapping = TrainerMemberMapping.create(trainer, member, command.getLessonCnt(), command.getLessonCnt());
         mappingRepository.save(mapping);
         member.registerGym(trainer.getGym());
@@ -50,7 +54,7 @@ public class TrainerService {
 
     public MemberInviteResultCommand inviteMember(MemberInviteCommand command, Member trainer) {
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), MemberType.TRAINER)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         String name = command.getName();
         int lessonCnt = command.getLessonCnt();
