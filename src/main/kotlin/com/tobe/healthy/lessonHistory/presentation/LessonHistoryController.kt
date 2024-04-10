@@ -7,6 +7,7 @@ import com.tobe.healthy.lessonHistory.domain.dto.*
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -18,6 +19,7 @@ class LessonHistoryController(
 ) {
 
     @PostMapping("/register")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun registerLessonHistory(@RequestPart @Valid request: RegisterLessonHistoryCommand,
                               @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
                               @AuthenticationPrincipal member: CustomMemberDetails): KotlinResponseHandler<Boolean> {
@@ -27,7 +29,6 @@ class LessonHistoryController(
         )
     }
 
-    // todo: "속한 팀의 정보만 조회하는 기능 추가하기"
     @GetMapping
     fun findAllLessonHistory(request: SearchCondRequest,
                              pageable: Pageable,
@@ -48,6 +49,7 @@ class LessonHistoryController(
     }
 
     @PatchMapping("/{lessonHistoryId}")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun updateLessonHistory(@PathVariable lessonHistoryId: Long,
                             @RequestBody lessonHistoryUpdateCommand: LessonHistoryUpdateCommand): KotlinResponseHandler<Boolean> {
         return KotlinResponseHandler(
@@ -65,6 +67,7 @@ class LessonHistoryController(
         )
     }
 
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @DeleteMapping("/{lessonHistoryId}")
     fun deleteLessonHistory(@PathVariable lessonHistoryId: Long): KotlinResponseHandler<Boolean> {
         return KotlinResponseHandler(

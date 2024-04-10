@@ -11,6 +11,7 @@ import com.tobe.healthy.lessonHistory.domain.dto.SearchCondRequest
 import com.tobe.healthy.lessonHistory.domain.entity.QLessonHistory.lessonHistory
 import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
+import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository
 import io.micrometer.common.util.StringUtils
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -20,7 +21,8 @@ import java.util.stream.Collectors.toList
 
 @Repository
 class LessonHistoryRepositoryImpl(
-    private val queryFactory: JPAQueryFactory
+    private val queryFactory: JPAQueryFactory,
+    private val trainerMemberMappingRepository: TrainerMemberMappingRepository
 ) : LessonHistoryRepositoryCustom {
 
     override fun findAllLessonHistory(request: SearchCondRequest, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryCommandResult> {
@@ -31,7 +33,7 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
 //            .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
-            .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType))
+            .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType, request.searchMyHistory))
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
             .fetch().stream().map(LessonHistoryCommandResult::from).collect(toList())
@@ -42,7 +44,7 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.trainer)
             .innerJoin(lessonHistory.student)
             .innerJoin(lessonHistory.schedule)
-            .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType))
+            .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType, request.searchMyHistory))
 
         return PageableExecutionUtils.getPage(entity, pageable) { totalCount.fetchOne()!! }
 //        return entity.stream().map { e -> LessonHistoryCommandResult.from(e) }.collect(toList())
@@ -56,18 +58,25 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.trainer).fetchJoin()
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
-            .where(lessonHistory.id.eq(lessonHistoryId), validateMemberType(memberId, memberType))
+            .where(lessonHistory.id.eq(lessonHistoryId), validateMemberType(memberId, memberType, null))
             .fetch()
 
         return results.ifEmpty{throw CustomException(LESSON_HISTORY_NOT_FOUND)}
             .map(LessonHistoryCommandResult::from)
     }
 
-    private fun validateMemberType(memberId: Long, memberType: MemberType): BooleanExpression {
-        return if (memberType == TRAINER) {
-            lessonHistory.trainer.id.eq(memberId)
+    private fun validateMemberType(memberId: Long, memberType: MemberType, searchMyHistory: String?): BooleanExpression {
+        if (memberType == TRAINER) {
+            return lessonHistory.trainer.id.eq(memberId)
         } else {
-            lessonHistory.student.id.eq(memberId)
+            val mappingEntity = trainerMemberMappingRepository.findByMemberId(memberId)
+                .orElseThrow { throw CustomException(LESSON_HISTORY_NOT_FOUND) }
+            searchMyHistory.let {
+                if (it.equals("Y")) {
+                    lessonHistory.student.id.eq(memberId)
+                }
+                return lessonHistory.trainer.id.eq(mappingEntity.trainer.id)
+            }
         }
     }
 
