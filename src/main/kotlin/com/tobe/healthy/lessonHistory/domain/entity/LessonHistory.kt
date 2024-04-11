@@ -40,7 +40,7 @@ class LessonHistory(
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "lesson_history_id")
-    val id: Long? = null
+    val id: Long = 0
 ) : BaseTimeEntity<LessonHistory, Long>() {
 
     fun updateLessonHistory(title: String, content: String) {

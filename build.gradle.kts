@@ -99,10 +99,6 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-tasks.withType<Test> {
-    exclude("**/**")
-}
-
 allOpen {
     annotation("jakarta.persistence.Entity")
     annotation("jakarta.persistence.Embeddable")
