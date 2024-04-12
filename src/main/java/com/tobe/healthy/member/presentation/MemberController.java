@@ -5,6 +5,7 @@ import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
+import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
@@ -39,8 +40,8 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "회원 정보가 조회되었습니다.")
 	})
 	@GetMapping("/me")
-	public ResponseHandler<MemberDto> getMemberInfo(@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<MemberDto>builder()
+	public ResponseHandler<MemberInfoResult> getMemberInfo(@AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<MemberInfoResult>builder()
 				.data(memberService.getMemberInfo(member.getMemberId()))
 				.message("회원정보가 조회 되었습니다.")
 				.build();
@@ -51,9 +52,9 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "회원 정보가 조회되었습니다.")
 	})
 	@GetMapping("/{memberId}")
-	public ResponseHandler<MemberDto> getMemberInfo(@Parameter(description = "조회할 회원 아이디", example = "1")
+	public ResponseHandler<MemberInfoResult> getMemberInfo(@Parameter(description = "조회할 회원 아이디", example = "1")
 													@PathVariable("memberId") Long memberId) {
-		return ResponseHandler.<MemberDto>builder()
+		return ResponseHandler.<MemberInfoResult>builder()
 				.data(memberService.getMemberInfo(memberId))
 				.message("회원정보가 조회 되었습니다.")
 				.build();

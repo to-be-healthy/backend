@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.file.domain.entity.QWorkoutHistoryFile;
 import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
+import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.QWorkoutHistory;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
@@ -46,16 +47,16 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     }
 
     @Override
-    public Page<WorkoutHistory> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable) {
+    public Page<WorkoutHistory> getWorkoutHistoryByTrainer(Member trainer, Pageable pageable) {
         Long totalCnt = queryFactory
                 .select(workoutHistory.count())
                 .from(workoutHistory)
-                .where(workoutHistory.trainerId.eq(trainerId), historyDeYnEq(false))
+                .where(workoutHistory.trainer.id.eq(trainer.getId()), historyDeYnEq(false))
                 .fetchOne();
         List<WorkoutHistory> workoutHistories =  queryFactory
                 .select(workoutHistory)
                 .from(workoutHistory)
-                .where(workoutHistory.trainerId.eq(trainerId), historyDeYnEq(false))
+                .where(workoutHistory.trainer.id.eq(trainer.getId()), historyDeYnEq(false))
                 .orderBy(workoutHistory.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())

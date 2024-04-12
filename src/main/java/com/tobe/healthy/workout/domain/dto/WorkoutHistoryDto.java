@@ -3,6 +3,7 @@ package com.tobe.healthy.workout.domain.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,7 @@ public class WorkoutHistoryDto {
 
     private Long workoutHistoryId;
     private String content;
-    private Long trainerId;
+    private MemberDto trainer;
     private MemberDto member;
     private Long likeCnt;
 
@@ -37,13 +38,12 @@ public class WorkoutHistoryDto {
     private List<CompletedExerciseDto> completedExercises = new ArrayList<>();
 
 
-    public static WorkoutHistoryDto create(HistoryAddCommand command, MemberDto memberDto, Long trainerId) {
-        return WorkoutHistoryDto.builder()
+    public static WorkoutHistoryDto create(HistoryAddCommand command, MemberDto memberDto) {
+        WorkoutHistoryDtoBuilder builder = WorkoutHistoryDto.builder()
                 .content(command.getContent())
                 .member(memberDto)
-                .multipartFiles(command.getFiles())
-                .trainerId(trainerId)
-                .build();
+                .multipartFiles(command.getFiles());
+                return builder.build();
     }
 
     public static WorkoutHistoryDto from(WorkoutHistory history) {
@@ -51,7 +51,6 @@ public class WorkoutHistoryDto {
                 .workoutHistoryId(history.getWorkoutHistoryId())
                 .content(history.getContent())
                 .member(MemberDto.from(history.getMember()))
-                .trainerId(history.getTrainerId())
                 .likeCnt(history.getLikeCnt())
                 .build();
     }

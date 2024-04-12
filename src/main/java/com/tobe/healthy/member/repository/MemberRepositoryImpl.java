@@ -2,10 +2,16 @@ package com.tobe.healthy.member.repository;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.DateTimeTemplate;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
-import com.tobe.healthy.gym.domain.dto.QMemberInTeamDto;
+import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
+import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
+import com.tobe.healthy.member.domain.dto.out.QMemberDetailResult;
+import com.tobe.healthy.member.domain.dto.out.QMemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import lombok.RequiredArgsConstructor;
@@ -13,15 +19,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
 import org.springframework.util.ObjectUtils;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import static com.tobe.healthy.file.domain.entity.QProfile.profile;
 import static com.tobe.healthy.gym.domain.entity.QGym.gym;
-import static com.tobe.healthy.gym.domain.entity.QGymMembership.gymMembership;
 import static com.tobe.healthy.member.domain.entity.QMember.member;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
 import static com.tobe.healthy.trainer.domain.entity.QTrainerMemberMapping.trainerMemberMapping;
 
 
@@ -57,9 +67,24 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return m;
     }
 
-    public List<MemberInTeamDto> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
+    @Override
+    public Member findByMemberIdWithProfileAndGym(Long memberId) {
+        Tuple tuple = queryFactory
+                .select(member, profile, gym)
+                .from(member)
+                .leftJoin(member.profileId, profile).fetchJoin()
+                .leftJoin(member.gym, gym).fetchJoin()
+                .where(memberIdEq(memberId), member.delYn.eq(false))
+                .fetchOne();
+        Member m = tuple.get(member);
+        m.registerProfile(tuple.get(profile));
+        m.registerGym(tuple.get(gym));
+        return m;
+    }
+
+    public List<MemberInTeamResult> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
         return queryFactory
-                .select(new QMemberInTeamDto(member.id, member.name, member.userId, member.email,
+                .select(new QMemberInTeamResult(member.id, member.name, member.userId, member.email,
                         trainerMemberMapping.ranking, trainerMemberMapping.lessonCnt, trainerMemberMapping.remainLessonCnt,
                         member.nickname, profile.fileUrl))
                 .from(trainerMemberMapping)
@@ -73,6 +98,60 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                         , nameLike(searchValue))
                 .orderBy(sortBy(sortValue))
                 .fetch();
+    }
+
+    @Override
+    public Page<Member> findAllUnattachedMembers(String searchValue, String sortValue, Pageable pageable) {
+        Long totalCnt = queryFactory
+                .select(member.count())
+                .from(member)
+                .where(member.memberType.eq(MemberType.STUDENT)
+                        , member.delYn.eq(false)
+                        , nameLike(searchValue)
+                        , JPAExpressions.selectFrom(trainerMemberMapping)
+                                .where(trainerMemberMapping.member.eq(member))
+                                .notExists())
+                .fetchOne();
+        List<Member> members = queryFactory
+                .select(member)
+                .from(member)
+                .where(member.memberType.eq(MemberType.STUDENT)
+                        , member.delYn.eq(false)
+                        , nameLike(searchValue)
+                        , JPAExpressions.selectFrom(trainerMemberMapping)
+                                .where(trainerMemberMapping.member.eq(member))
+                                .notExists())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+        return PageableExecutionUtils.getPage(members, pageable, ()-> totalCnt );
+    }
+
+    @Override
+    public MemberDetailResult getMemberOfTrainer(Long memberId) {
+        return queryFactory
+                .select(new QMemberDetailResult(member.id, member.name, member.nickname, profile.fileUrl
+                        , trainerMemberMapping.memo, trainerMemberMapping.ranking, trainerMemberMapping.lessonCnt
+                        , trainerMemberMapping.remainLessonCnt, schedule.lessonDt, schedule.lessonStartTime))
+                .from(member)
+                .leftJoin(profile)
+                .on(member.profileId.id.eq(profile.id))
+                .leftJoin(trainerMemberMapping)
+                .on(member.id.eq(trainerMemberMapping.member.id))
+                .leftJoin(schedule)
+                .on(member.id.eq(schedule.applicant.id)
+                        , schedule.delYn.eq(false)
+                        , schedule.reservationStatus.eq(COMPLETED)
+                        , lessonDateTimeAfterToday())
+                .where(memberIdEq(memberId), member.delYn.eq(false))
+                .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+                .limit(1)
+                .fetchOne();
+    }
+
+    private Predicate lessonDateTimeAfterToday() {
+        return schedule.lessonDt.after(LocalDate.now())
+                .or(schedule.lessonDt.goe(LocalDate.now()).and(schedule.lessonStartTime.after(LocalTime.now())));
     }
 
     private BooleanExpression memberIdEq(Long memberId) {
@@ -95,4 +174,5 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         }
         return member.id.asc();
     }
+
 }

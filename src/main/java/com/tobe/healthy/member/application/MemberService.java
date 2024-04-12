@@ -19,6 +19,7 @@ import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand.MemberFindIdCommandResult;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
+import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
@@ -595,20 +596,10 @@ public class MemberService {
 		return map;
 	}
 
-	public MemberDto getMemberInfo(Long memberId) {
+	public MemberInfoResult getMemberInfo(Long memberId) {
 		memberRepository.findById(memberId)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-
-		Member member = memberRepository.findByMemberIdWithProfile(memberId);
-
-		Optional<TrainerMemberMapping> mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId);
-
-		if (mapping.isPresent()) {
-			Long trainerId = mapping.map(m -> m.getTrainer().getId()).orElse(null);
-			Member trainer = memberRepository.findByMemberIdWithGym(trainerId);
-			return MemberDto.create(member, member.getProfileId(), trainer.getGym());
-		} else {
-			return MemberDto.create(member, member.getProfileId());
-		}
+		Member member = memberRepository.findByMemberIdWithProfileAndGym(memberId);
+		return MemberInfoResult.create(member);
 	}
 }
