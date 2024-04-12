@@ -57,7 +57,9 @@ public class TrainerController {
     }
 
     @Operation(summary = "트레이너가 내 학생으로 등록하기", responses = {
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "400", description = "이미 등록된 회원입니다."),
+            @ApiResponse(responseCode = "404", description = "트레이너가 존재하지 않습니다."),
+            @ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
             @ApiResponse(responseCode = "200", description = "매핑ID, 트레이너ID, 회원ID를 반환한다.")
     })
     @PostMapping("/{trainerId}/members/{memberId}")
@@ -70,7 +72,6 @@ public class TrainerController {
                 .message("내 학생으로 등록되었습니다.")
                 .build();
     }
-
 
     @Operation(summary = "트레이너가 관리하는 학생들의 운동기록 목록 조회하기", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),

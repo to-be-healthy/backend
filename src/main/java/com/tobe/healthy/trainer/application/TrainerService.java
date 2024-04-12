@@ -85,4 +85,5 @@ public class TrainerService {
         List<MemberDto> memberDtos = members.stream().map(MemberDto::from).collect(Collectors.toList());
         return memberDtos.isEmpty() ? null : memberDtos;
     }
+
 }
