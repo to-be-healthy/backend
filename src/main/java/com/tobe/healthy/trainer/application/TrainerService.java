@@ -42,7 +42,7 @@ public class TrainerService {
     public TrainerMemberMappingDto addMemberOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
-        Member member = memberRepository.findById(memberId)
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         mappingRepository.findByTrainerIdAndMemberId(trainerId, memberId)
                 .ifPresent(i -> {throw new CustomException(MEMBER_ALREADY_MAPPED);});
