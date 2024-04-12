@@ -3,9 +3,13 @@ package com.tobe.healthy.trainer.application;
 import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.config.error.ErrorCode;
-import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
+import com.tobe.healthy.diet.domain.dto.DietDto;
+import com.tobe.healthy.diet.repository.DietRepository;
+import com.tobe.healthy.file.domain.dto.DietFileDto;
+import com.tobe.healthy.file.domain.entity.DietFile;
+import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -23,6 +27,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,6 +45,8 @@ public class TrainerService {
     private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final TrainerMemberMappingRepository mappingRepository;
+    private final DietRepository repository;
+
 
     public TrainerMemberMappingDto addMemberOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
@@ -75,8 +84,8 @@ public class TrainerService {
         return new MemberInviteResultCommand(uuid, invitationLink);
     }
 
-    public List<MemberInTeamDto> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
-        List<MemberInTeamDto> members = memberRepository.findAllMyMemberInTeam(trainerId, searchValue, sortValue, pageable);
+    public List<MemberInTeamResult> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
+        List<MemberInTeamResult> members = memberRepository.findAllMyMemberInTeam(trainerId, searchValue, sortValue, pageable);
         return members.isEmpty() ? null : members;
     }
 
@@ -86,4 +95,19 @@ public class TrainerService {
         return memberDtos.isEmpty() ? null : memberDtos;
     }
 
+    public MemberDetailResult getMemberOfTrainer(Long trainerId, Long memberId) {
+        memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+        memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
+        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+        List<DietFile> dietFiles = repository.findAllCreateAtToday(memberId, start, end);
+        List<DietFileDto> fileDtos = dietFiles.stream().map(DietFileDto::from).collect(Collectors.toList());
+
+        MemberDetailResult result = memberRepository.getMemberOfTrainer(memberId);
+        if(!dietFiles.isEmpty()) result.setDiet(DietDto.create(dietFiles.get(0).getDiet().getDietId(), fileDtos));
+        return result;
+    }
 }

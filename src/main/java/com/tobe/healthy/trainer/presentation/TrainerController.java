@@ -3,9 +3,10 @@ package com.tobe.healthy.trainer.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.gym.application.GymService;
-import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
+import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
@@ -20,7 +21,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -73,6 +73,21 @@ public class TrainerController {
                 .build();
     }
 
+    @Operation(summary = "트레이너가 학생 상세 조회", responses = {
+            @ApiResponse(responseCode = "404", description = "트레이너가 존재하지 않습니다."),
+            @ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
+            @ApiResponse(responseCode = "200", description = "학생 상세를 반환한다.")
+    })
+    @GetMapping("/{trainerId}/members/{memberId}")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    public ResponseHandler<MemberDetailResult> getMemberOfTrainer(@Parameter(description = "트레이너 ID") @PathVariable("trainerId") Long trainerId,
+                                                                       @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
+        return ResponseHandler.<MemberDetailResult>builder()
+                .data(trainerService.getMemberOfTrainer(trainerId, memberId))
+                .message("학생 상세가 조회되었습니다.")
+                .build();
+    }
+
     @Operation(summary = "트레이너가 관리하는 학생들의 운동기록 목록 조회하기", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
@@ -92,13 +107,13 @@ public class TrainerController {
             })
     @GetMapping("/members")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<List<MemberInTeamDto>> findAllMyMemberInTrainer(@AuthenticationPrincipal CustomMemberDetails member,
+    public ResponseHandler<List<MemberInTeamResult>> findAllMyMemberInTrainer(@AuthenticationPrincipal CustomMemberDetails member,
                                                                            @Parameter(description = "검색할 이름", example = "임채린")
                                                                            @RequestParam(required = false) String searchValue,
                                                                            @Parameter(description = "정렬 조건", example = "ranking, memberId")
                                                                                @RequestParam(required = false, defaultValue = "memberId") String sortValue,
                                                                            @PageableDefault(size = 100) Pageable pageable) {
-        return ResponseHandler.<List<MemberInTeamDto>>builder()
+        return ResponseHandler.<List<MemberInTeamResult>>builder()
                 .data(trainerService.findAllMyMemberInTeam(member.getMemberId(), searchValue, sortValue, pageable))
                 .message("트레이너가 관리하는 학생을 조회하였습니다.")
                 .build();

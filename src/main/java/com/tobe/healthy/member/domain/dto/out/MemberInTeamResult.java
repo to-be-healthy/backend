@@ -1,13 +1,11 @@
-package com.tobe.healthy.gym.domain.dto;
+package com.tobe.healthy.member.domain.dto.out;
 
 import com.querydsl.core.annotations.QueryProjection;
-import com.tobe.healthy.member.domain.entity.Member;
 import lombok.Data;
 
-import java.time.LocalDate;
 
 @Data
-public class MemberInTeamDto {
+public class MemberInTeamResult {
 	private Long memberId;
 	private String name;
 	private String userId;
@@ -19,7 +17,7 @@ public class MemberInTeamDto {
 	private String fileUrl;
 
 	@QueryProjection
-	public MemberInTeamDto(Long memberId, String name, String userId, String email, int ranking, int lessonCnt, int remainLessonCnt, String nickName, String fileUrl) {
+	public MemberInTeamResult(Long memberId, String name, String userId, String email, int ranking, int lessonCnt, int remainLessonCnt, String nickName, String fileUrl) {
 		this.memberId = memberId;
 		this.name = name;
 		this.userId = userId;

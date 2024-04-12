@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -43,6 +44,8 @@ public class DietFile extends BaseTimeEntity<DietFile, Long> {
     @JoinColumn(name = "diet_id")
     private Diet diet;
 
+    @Enumerated(STRING)
+    @ColumnDefault("'BREAKFAST'")
     private DietType type;
 
 }
