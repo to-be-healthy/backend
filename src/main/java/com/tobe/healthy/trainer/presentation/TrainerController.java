@@ -5,6 +5,7 @@ import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.gym.application.GymService;
 import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
 import com.tobe.healthy.member.application.MemberService;
+import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -98,6 +100,23 @@ public class TrainerController {
         return ResponseHandler.<List<MemberInTeamDto>>builder()
                 .data(trainerService.findAllMyMemberInTeam(member.getMemberId(), searchValue, sortValue, pageable))
                 .message("트레이너가 관리하는 학생을 조회하였습니다.")
+                .build();
+    }
+
+    @Operation(summary = "트레이너가 가입된(매핑 안 된) 학생들을 조회한다.", description = "트레이너가 가입된(매핑 안 된) 학생들을 조회한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "트레이너가 가입된 학생 조회 완료")
+            })
+    @GetMapping("unattached-members")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    public ResponseHandler<List<MemberDto>> findAllUnattachedMembers(@Parameter(description = "검색할 이름", example = "임채린")
+                                                                           @RequestParam(required = false) String searchValue,
+                                                                     @Parameter(description = "정렬 조건", example = "memberId")
+                                                                           @RequestParam(required = false, defaultValue = "memberId") String sortValue,
+                                                                     Pageable pageable) {
+        return ResponseHandler.<List<MemberDto>>builder()
+                .data(trainerService.findAllUnattachedMembers(searchValue, sortValue, pageable))
+                .message("트레이너가 가입된 학생을 조회하였습니다.")
                 .build();
     }
 

@@ -3,6 +3,7 @@ package com.tobe.healthy.member.repository;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
 import com.tobe.healthy.gym.domain.dto.QMemberInTeamDto;
@@ -20,7 +21,6 @@ import java.util.List;
 
 import static com.tobe.healthy.file.domain.entity.QProfile.profile;
 import static com.tobe.healthy.gym.domain.entity.QGym.gym;
-import static com.tobe.healthy.gym.domain.entity.QGymMembership.gymMembership;
 import static com.tobe.healthy.member.domain.entity.QMember.member;
 import static com.tobe.healthy.trainer.domain.entity.QTrainerMemberMapping.trainerMemberMapping;
 
@@ -73,6 +73,33 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                         , nameLike(searchValue))
                 .orderBy(sortBy(sortValue))
                 .fetch();
+    }
+
+    @Override
+    public Page<Member> findAllUnattachedMembers(String searchValue, String sortValue, Pageable pageable) {
+        Long totalCnt = queryFactory
+                .select(member.count())
+                .from(member)
+                .where(member.memberType.eq(MemberType.STUDENT)
+                        , member.delYn.eq(false)
+                        , nameLike(searchValue)
+                        , JPAExpressions.selectFrom(trainerMemberMapping)
+                                .where(trainerMemberMapping.member.eq(member))
+                                .notExists())
+                .fetchOne();
+        List<Member> members = queryFactory
+                .select(member)
+                .from(member)
+                .where(member.memberType.eq(MemberType.STUDENT)
+                        , member.delYn.eq(false)
+                        , nameLike(searchValue)
+                        , JPAExpressions.selectFrom(trainerMemberMapping)
+                                .where(trainerMemberMapping.member.eq(member))
+                                .notExists())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+        return PageableExecutionUtils.getPage(members, pageable, ()-> totalCnt );
     }
 
     private BooleanExpression memberIdEq(Long memberId) {

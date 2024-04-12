@@ -5,6 +5,7 @@ import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.ErrorCode;
 import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
+import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -17,11 +18,13 @@ import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
 
@@ -75,5 +78,11 @@ public class TrainerService {
     public List<MemberInTeamDto> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
         List<MemberInTeamDto> members = memberRepository.findAllMyMemberInTeam(trainerId, searchValue, sortValue, pageable);
         return members.isEmpty() ? null : members;
+    }
+
+    public List<MemberDto> findAllUnattachedMembers(String searchValue, String sortValue, Pageable pageable) {
+        Page<Member> members = memberRepository.findAllUnattachedMembers(searchValue, sortValue, pageable);
+        List<MemberDto> memberDtos = members.stream().map(MemberDto::from).collect(Collectors.toList());
+        return memberDtos.isEmpty() ? null : memberDtos;
     }
 }
