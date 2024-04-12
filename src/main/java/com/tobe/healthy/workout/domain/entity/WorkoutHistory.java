@@ -34,7 +34,9 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private Long trainerId;
+    @ManyToOne
+    @JoinColumn(name = "trainer_id")
+    private Member trainer;
 
     @ColumnDefault("false")
     @Builder.Default
@@ -57,12 +59,12 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     private List<CompletedExercise> completedExercises = new ArrayList<>();
 
 
-    public static WorkoutHistory create(WorkoutHistoryDto historyDto, Member member) {
+    public static WorkoutHistory create(WorkoutHistoryDto historyDto, Member member, Member trainer) {
         return WorkoutHistory.builder()
                 .workoutHistoryId(historyDto.getWorkoutHistoryId())
                 .content(historyDto.getContent())
                 .member(member)
-                .trainerId(historyDto.getTrainerId())
+                .trainer(trainer)
                 .build();
     }
 

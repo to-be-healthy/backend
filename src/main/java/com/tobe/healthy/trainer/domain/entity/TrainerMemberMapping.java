@@ -37,6 +37,8 @@ public class TrainerMemberMapping extends BaseTimeEntity {
     @ColumnDefault("999")
     private int ranking = 999;
 
+    private String memo;
+
 
     public static TrainerMemberMapping create(Member trainer, Member member, int lessonCnt, int remainLessonCnt) {
         return TrainerMemberMapping.builder()
@@ -48,11 +50,12 @@ public class TrainerMemberMapping extends BaseTimeEntity {
     }
 
     @Builder
-    public TrainerMemberMapping(Member trainer, Member member, int lessonCnt, int remainLessonCnt) {
+    public TrainerMemberMapping(Member trainer, Member member, int lessonCnt, int remainLessonCnt, String memo) {
         this.trainer = trainer;
         this.member = member;
         this.lessonCnt = lessonCnt;
         this.remainLessonCnt = remainLessonCnt;
+        this.memo = memo;
     }
 
     public void changeRanking(int ranking){
