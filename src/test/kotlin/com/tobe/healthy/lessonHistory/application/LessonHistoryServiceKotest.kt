@@ -48,7 +48,7 @@ class LessonHistoryServiceKotest(
         val trainer = createTrainer(passwordEncoder.encode("pass123"))
         val schedule = createSchedule(trainer, student)
         val lessonHistory = createLessonHistory("테스트 게시글 제목", "테스트 게시글 내용", trainer, student, schedule)
-        createLessonHistoryComment()
+//        createLessonHistoryComment()
         em.persist(student)
         em.persist(trainer)
         em.persist(schedule)

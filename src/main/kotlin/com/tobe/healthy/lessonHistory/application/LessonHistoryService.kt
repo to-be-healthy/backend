@@ -3,10 +3,20 @@ package com.tobe.healthy.lessonHistory.application
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.*
+import com.tobe.healthy.config.error.ErrorCode.EXCEED_MAXIMUM_NUMBER_OF_FILES
+import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_COMMENT_NOT_FOUND
+import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
+import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
+import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND
+import com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_FOUND
 import com.tobe.healthy.file.domain.entity.AwsS3File
 import com.tobe.healthy.file.repository.AwsS3FileRepository
-import com.tobe.healthy.lessonHistory.domain.dto.*
+import com.tobe.healthy.lessonHistory.domain.dto.CommentRegisterCommand
+import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
+import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommentUpdateCommand
+import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryUpdateCommand
+import com.tobe.healthy.lessonHistory.domain.dto.RegisterLessonHistoryCommand
+import com.tobe.healthy.lessonHistory.domain.dto.SearchCondRequest
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistoryComment
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryCommentRepository
@@ -46,6 +56,10 @@ class LessonHistoryService(
 
         uploadFiles?.let {
             var fileOrder = 1;
+            if (uploadFiles.size > 3) {
+                throw CustomException(EXCEED_MAXIMUM_NUMBER_OF_FILES)
+            }
+
             for (uploadFile in it) {
                 if (!uploadFile.isEmpty) {
                     val originalFileName = uploadFile.originalFilename

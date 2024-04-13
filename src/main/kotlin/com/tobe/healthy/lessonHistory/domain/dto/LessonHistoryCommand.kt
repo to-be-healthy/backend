@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Locale
 import java.util.stream.Collectors.toList
 
 data class LessonHistoryCommandResult(
@@ -29,10 +29,10 @@ data class LessonHistoryCommandResult(
     companion object {
         fun from(entity: LessonHistory): LessonHistoryCommandResult {
             return LessonHistoryCommandResult(
-                id = entity.id!!,
+                id = entity.id,
                 title = entity.title,
                 content = entity.content,
-                comments = entity.lessonHistoryComment.map(LessonHistoryCommentCommandResult::from).sortedBy { it.order }.toMutableList(),
+                comments = sortLessonHistoryComment(entity.lessonHistoryComment),
                 createdAt = entity.createdAt,
                 student = entity.student.name,
                 trainer = "${entity.trainer.name} 트레이너",
@@ -41,6 +41,19 @@ data class LessonHistoryCommandResult(
                 attendanceStatus = validateAttendanceStatus(entity.schedule.lessonDt, entity.schedule.lessonEndTime),
                 files = entity.file.map(LessonHistoryFileResults::from).sortedBy { it.fileOrder }.toMutableList()
             )
+        }
+
+        fun sortLessonHistoryComment(comment: List<LessonHistoryComment>): MutableList<LessonHistoryCommentCommandResult> {
+            val (topLevelComments, replies) = comment.sortedBy{ it.order }.partition { it.parentId == null }
+
+            topLevelComments.forEach { parent ->
+                parent.replies = replies.filter { child ->
+                    child.parentId?.id == parent.id
+                }.sortedBy { it.order }.toMutableList()
+            }
+
+            return topLevelComments.map { LessonHistoryCommentCommandResult.from(it) }.toMutableList()
+
         }
 
         private fun validateAttendanceStatus(lessonDt: LocalDate, lessonEndTime: LocalTime): String {
@@ -69,7 +82,7 @@ data class LessonHistoryCommandResult(
         val content: String,
         val writer: Long,
         val order: Int,
-        val parentId: Long?,
+        val replies: MutableList<LessonHistoryComment> = mutableListOf(),
         val files: MutableList<LessonHistoryFileResults> = mutableListOf()
     ) {
         companion object {
@@ -79,7 +92,7 @@ data class LessonHistoryCommandResult(
                     content = entity.content,
                     writer = entity.writer.id,
                     order = entity.order,
-                    parentId = entity.parentId?.id,
+                    replies = entity.replies,
                     files = entity.files.stream().map(LessonHistoryFileResults::from).collect(toList())
                 )
             }
