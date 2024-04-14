@@ -3,6 +3,9 @@ package com.tobe.healthy.trainer.application;
 import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.course.application.CourseService;
+import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
+import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.file.domain.dto.DietFileDto;
@@ -46,9 +49,16 @@ public class TrainerService {
     private final MemberRepository memberRepository;
     private final TrainerMemberMappingRepository mappingRepository;
     private final DietRepository repository;
+    private final CourseService courseService;
 
 
     public TrainerMemberMappingDto addMemberOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
+        TrainerMemberMappingDto mappingDto = mappingMemberAndTrainer(trainerId, memberId);
+        courseService.addCourse(trainerId, CourseAddCommand.create(memberId, command.getLessonCnt()));
+        return mappingDto;
+    }
+
+    public TrainerMemberMappingDto mappingMemberAndTrainer(Long trainerId, Long memberId) {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
         Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
@@ -58,7 +68,7 @@ public class TrainerService {
 
         mappingRepository.deleteByMemberId(memberId);
         mappingRepository.flush();
-        TrainerMemberMapping mapping = TrainerMemberMapping.create(trainer, member, command.getLessonCnt(), command.getLessonCnt());
+        TrainerMemberMapping mapping = TrainerMemberMapping.create(trainer, member);
         mappingRepository.save(mapping);
         member.registerGym(trainer.getGym());
         return TrainerMemberMappingDto.from(mapping);

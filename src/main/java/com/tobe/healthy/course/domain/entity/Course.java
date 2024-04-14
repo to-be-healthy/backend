@@ -5,6 +5,8 @@ import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 
 @Entity
 @Table(name = "course")
@@ -17,11 +19,11 @@ public class Course extends BaseTimeEntity<Course, Long> {
     @Column(name = "course_id")
     private Long courseId;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_id")
     private Member trainer;
 

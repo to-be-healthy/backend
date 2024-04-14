@@ -27,12 +27,12 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final TrainerMemberMappingRepository mappingRepository;
 
-    public void addCourse(Member trainer, CourseAddCommand command) {
-        memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), TRAINER)
+    public void addCourse(Long trainerId, CourseAddCommand command) {
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
         Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(command.getMemberId(), STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        mappingRepository.findByTrainerIdAndMemberId(trainer.getId(), member.getId())
+        mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
 
         Long cnt = courseRepository.countByMemberIdAndTrainerIdAndRemainLessonCntGreaterThan(member.getId(), trainer.getId(), 0);

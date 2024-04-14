@@ -11,10 +11,11 @@ import com.tobe.healthy.config.error.OAuthError.KakaoError;
 import com.tobe.healthy.config.error.OAuthError.NaverError;
 import com.tobe.healthy.config.error.OAuthException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
+import com.tobe.healthy.course.application.CourseService;
+import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.FileRepository;
 import com.tobe.healthy.gym.repository.GymRepository;
-import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand.MemberFindIdCommandResult;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
@@ -26,8 +27,6 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
-import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import io.jsonwebtoken.impl.Base64UrlCodec;
 import lombok.RequiredArgsConstructor;
@@ -84,6 +83,8 @@ public class MemberService {
 	private final TrainerMemberMappingRepository mappingRepository;
 	private final GymRepository gymRepository;
 	private final MailService mailService;
+	private final CourseService courseService;
+
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -563,10 +564,13 @@ public class MemberService {
 		if(!isSocial && !name.equals(reqName)) throw new CustomException(INVITE_NAME_NOT_VALID);
 		member.changeName(name);
 
+		//트레이너 학생 매핑
 		Long trainerId = Long.valueOf(map.get("trainerId"));
+		trainerService.mappingMemberAndTrainer(trainerId, member.getId());
+
+		//수강권 등록
 		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
-		MemberLessonCommand lessonCommand = new MemberLessonCommand(lessonCnt);
-		trainerService.addMemberOfTrainer(trainerId, member.getId(), lessonCommand);
+		courseService.addCourse(trainerId, CourseAddCommand.create(member.getId(), lessonCnt));
 
 		String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
 		redisService.deleteValues(invitationKey);

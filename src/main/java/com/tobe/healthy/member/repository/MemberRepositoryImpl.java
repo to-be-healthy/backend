@@ -8,6 +8,7 @@ import com.querydsl.core.types.dsl.DateTimeTemplate;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tobe.healthy.course.domain.entity.QCourse;
 import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.dto.out.QMemberDetailResult;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
+
+import static com.tobe.healthy.course.domain.entity.QCourse.course;
 import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
 import org.springframework.util.ObjectUtils;
 
@@ -85,13 +88,15 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     public List<MemberInTeamResult> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
         return queryFactory
                 .select(new QMemberInTeamResult(member.id, member.name, member.userId, member.email,
-                        trainerMemberMapping.ranking, trainerMemberMapping.lessonCnt, trainerMemberMapping.remainLessonCnt,
+                        trainerMemberMapping.ranking, course.lessonCnt, course.remainLessonCnt,
                         member.nickname, profile.fileUrl))
                 .from(trainerMemberMapping)
                 .innerJoin(trainerMemberMapping.member, member)
                 .on(trainerMemberMapping.member.id.eq(member.id))
                 .leftJoin(member.profileId, profile)
                 .on(profile.member.profileId.eq(member.profileId))
+                .leftJoin(course)
+                .on(course.member.id.eq(member.id), course.remainLessonCnt.gt(0))
                 .where(trainerMemberMapping.trainer.id.eq(trainerId)
                         , member.memberType.eq(MemberType.STUDENT)
                         , member.delYn.eq(false)
@@ -131,8 +136,9 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     public MemberDetailResult getMemberOfTrainer(Long memberId) {
         return queryFactory
                 .select(new QMemberDetailResult(member.id, member.name, member.nickname, profile.fileUrl
-                        , trainerMemberMapping.memo, trainerMemberMapping.ranking, trainerMemberMapping.lessonCnt
-                        , trainerMemberMapping.remainLessonCnt, schedule.lessonDt, schedule.lessonStartTime))
+                        , trainerMemberMapping.memo, trainerMemberMapping.ranking
+                        , course.lessonCnt, course.remainLessonCnt
+                        , schedule.lessonDt, schedule.lessonStartTime))
                 .from(member)
                 .leftJoin(profile)
                 .on(member.profileId.id.eq(profile.id))
@@ -143,6 +149,8 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                         , schedule.delYn.eq(false)
                         , schedule.reservationStatus.eq(COMPLETED)
                         , lessonDateTimeAfterToday())
+                .leftJoin(course)
+                .on(course.member.id.eq(member.id), course.remainLessonCnt.gt(0))
                 .where(memberIdEq(memberId), member.delYn.eq(false))
                 .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
                 .limit(1)

@@ -41,7 +41,7 @@ public class CourseController {
     @PostMapping
     public ResponseHandler<Void> addCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                            @RequestBody @Valid CourseAddCommand command) {
-        courseService.addCourse(customMemberDetails.getMember(), command);
+        courseService.addCourse(customMemberDetails.getMember().getId(), command);
         return ResponseHandler.<Void>builder()
                 .message("수강권이 등록되었습니다.")
                 .build();

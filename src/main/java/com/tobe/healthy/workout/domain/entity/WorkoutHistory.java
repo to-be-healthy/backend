@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
+import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "workout_history")
@@ -30,11 +31,11 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     private String content;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_id")
     private Member trainer;
 
