@@ -12,6 +12,8 @@ import java.util.List;
 public class DietDto {
 
     private Long dietId;
+
+    @Builder.Default
     private List<DietFileDto> dietFiles = new ArrayList<>();
 
     public static DietDto create(Long dietId, List<DietFileDto> dietFiles) {
