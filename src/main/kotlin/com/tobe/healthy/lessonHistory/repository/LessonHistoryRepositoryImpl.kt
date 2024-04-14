@@ -32,7 +32,6 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.trainer).fetchJoin()
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
-//            .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
             .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType, request.searchMyHistory))
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
@@ -47,7 +46,6 @@ class LessonHistoryRepositoryImpl(
             .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType, request.searchMyHistory))
 
         return PageableExecutionUtils.getPage(entity, pageable) { totalCount.fetchOne()!! }
-//        return entity.stream().map { e -> LessonHistoryCommandResult.from(e) }.collect(toList())
     }
 
     override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): List<LessonHistoryCommandResult> {
@@ -61,22 +59,15 @@ class LessonHistoryRepositoryImpl(
             .where(lessonHistory.id.eq(lessonHistoryId), validateMemberType(memberId, memberType, null))
             .fetch()
 
-        return results.ifEmpty{throw CustomException(LESSON_HISTORY_NOT_FOUND)}
-            .map(LessonHistoryCommandResult::from)
+        return results.map(LessonHistoryCommandResult::detailFrom)
     }
 
     private fun validateMemberType(memberId: Long, memberType: MemberType, searchMyHistory: String?): BooleanExpression {
         if (memberType == TRAINER) {
             return lessonHistory.trainer.id.eq(memberId)
         } else {
-            val mappingEntity = trainerMemberMappingRepository.findByMemberId(memberId)
-                .orElseThrow { throw CustomException(LESSON_HISTORY_NOT_FOUND) }
-            searchMyHistory.let {
-                if (it.equals("Y")) {
-                    lessonHistory.student.id.eq(memberId)
-                }
-                return lessonHistory.trainer.id.eq(mappingEntity.trainer.id)
-            }
+            val result = trainerMemberMappingRepository.findByMemberId(memberId).orElseThrow { throw CustomException(LESSON_HISTORY_NOT_FOUND) }
+            return lessonHistory.trainer.id.eq(result.trainer.id)
         }
     }
 

@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -36,24 +37,13 @@ public class AwsS3File extends BaseTimeEntity<AwsS3File, Long> {
 	@JoinColumn(name = "lesson_history_id")
 	private LessonHistory lessonHistory;
 
-	@ManyToOne(fetch = LAZY)
+	@ManyToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "lesson_history_comment_id")
 	private LessonHistoryComment lessonHistoryComment;
 
 	private String fileUrl;
 
 	private int fileOrder;
-
-	public static AwsS3File create(String originalFileName, Member member, LessonHistory lessonHistory, String fileUrl, int fileOrder, LessonHistoryComment lessonHistoryComment) {
-		return AwsS3File.builder()
-				.originalFileName(originalFileName)
-				.member(member)
-				.lessonHistory(lessonHistory)
-				.fileUrl(fileUrl)
-				.fileOrder(fileOrder)
-				.lessonHistoryComment(lessonHistoryComment)
-				.build();
-	}
 
 	public static AwsS3File create(String originalFileName, Member member, String fileUrl, int fileOrder) {
 		return AwsS3File.builder()

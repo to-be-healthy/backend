@@ -14,7 +14,7 @@ class LessonHistoryCommentRepositoryImpl(
             .select(lessonHistoryComment.order.max().add(1))
             .from(lessonHistoryComment)
             .where(lessonHistoryComment.lessonHistory.id.eq(lessonHistoryId), lessonHistoryComment.parentId.isNull)
-            .fetchOne() ?: 0
+            .fetchOne() ?: 1
         return result;
     }
 
@@ -23,7 +23,7 @@ class LessonHistoryCommentRepositoryImpl(
             .select(lessonHistoryComment.order.max().add(1))
             .from(lessonHistoryComment)
             .where(lessonHistoryComment.lessonHistory.id.eq(lessonHistoryId), lessonHistoryComment.parentId.id.eq(lessonHistoryCommentParentId))
-            .fetchOne() ?: 0
+            .fetchOne() ?: 1
         return result;
     }
 }

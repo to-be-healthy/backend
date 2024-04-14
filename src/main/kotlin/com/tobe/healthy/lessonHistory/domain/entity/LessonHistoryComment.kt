@@ -3,6 +3,7 @@ package com.tobe.healthy.lessonHistory.domain.entity
 import com.tobe.healthy.common.BaseTimeEntity
 import com.tobe.healthy.file.domain.entity.AwsS3File
 import com.tobe.healthy.member.domain.entity.Member
+import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType.LAZY
@@ -34,8 +35,8 @@ class LessonHistoryComment(
     @JoinColumn(name = "lesson_history_id")
     val lessonHistory: LessonHistory,
 
-    @OneToMany(fetch = LAZY, mappedBy = "lessonHistoryComment")
-    val files: MutableList<AwsS3File> = mutableListOf(),
+    @OneToMany(fetch = LAZY, mappedBy = "lessonHistoryComment", cascade = [ALL])
+    var files: MutableList<AwsS3File> = mutableListOf(),
 
     @Id
     @GeneratedValue(strategy = IDENTITY)

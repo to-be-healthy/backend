@@ -43,12 +43,12 @@ class LessonHistoryService(
     private val amazonS3: AmazonS3
 ) {
 
-    fun registerLessonHistory(request: RegisterLessonHistoryCommand, uploadFiles: MutableList<MultipartFile>?, studentId: Long): Boolean {
-        val findMember = memberRepository.findByIdOrNull(studentId) ?: throw CustomException(MEMBER_NOT_FOUND)
+    fun registerLessonHistory(request: RegisterLessonHistoryCommand, uploadFiles: MutableList<MultipartFile>?, trainerId: Long): Boolean {
+        val findMember = memberRepository.findByIdOrNull(request.studentId) ?: throw CustomException(MEMBER_NOT_FOUND)
 
-        val findTrainer = memberRepository.findByIdOrNull(request.trainer) ?: throw CustomException(TRAINER_NOT_FOUND)
+        val findTrainer = memberRepository.findByIdOrNull(trainerId) ?: throw CustomException(TRAINER_NOT_FOUND)
 
-        val findSchedule = scheduleRepository.findByIdOrNull(request.schedule) ?: throw CustomException(SCHEDULE_NOT_FOUND)
+        val findSchedule = scheduleRepository.findByIdOrNull(request.scheduleId) ?: throw CustomException(SCHEDULE_NOT_FOUND)
 
         val lessonHistory = LessonHistory.register(request, findMember, findTrainer, findSchedule)
 
@@ -70,14 +70,14 @@ class LessonHistoryService(
                     val fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString()
                     log.info { "fileUrl -> ${fileUrl}" }
 
-                    val file = AwsS3File.create(
-                        originalFileName,
-                        findMember,
-                        lessonHistory,
-                        fileUrl,
-                        fileOrder++,
-                        null
-                    )
+                    val file = AwsS3File.builder()
+                        .originalFileName(originalFileName)
+                        .member(findMember)
+                        .lessonHistory(lessonHistory)
+                        .fileUrl(fileUrl)
+                        .fileOrder(fileOrder++)
+                        .build()
+
                     awsS3FileRepository.save(file)
                 }
             }
@@ -129,13 +129,15 @@ class LessonHistoryService(
         val lessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
         val order = lessonHistoryCommentRepository.findTopComment(lessonHistoryId)
         val entity = LessonHistoryComment(
-            order = order + 1,
+            order = order,
             content = request.comment!!,
             writer = findMember,
             lessonHistory = lessonHistory
         )
-        val comment = lessonHistoryCommentRepository.save(entity)
         uploadFiles?.let {
+            if (uploadFiles.size > 3) {
+                throw CustomException(EXCEED_MAXIMUM_NUMBER_OF_FILES)
+            }
             var fileOrder = 1;
             for (uploadFile in it) {
                 if (!uploadFile.isEmpty) {
@@ -147,14 +149,14 @@ class LessonHistoryService(
                     val fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString()
                     log.info { "fileUrl -> ${fileUrl}" }
 
-                    val file = AwsS3File.create(
-                        originalFileName,
-                        findMember,
-                        lessonHistory,
-                        fileUrl,
-                        fileOrder++,
-                        comment
-                    )
+                    val file = AwsS3File.builder()
+                        .originalFileName(originalFileName)
+                        .member(findMember)
+                        .lessonHistory(lessonHistory)
+                        .fileUrl(fileUrl)
+                        .fileOrder(fileOrder++)
+                        .lessonHistoryComment(entity)
+                        .build()
                     awsS3FileRepository.save(file)
                 }
             }
@@ -169,14 +171,16 @@ class LessonHistoryService(
         val order = lessonHistoryCommentRepository.findTopComment(lessonHistoryId, lessonHistoryCommentId)
         val parentComment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
         val entity = LessonHistoryComment(
-            order = order + 1,
+            order = order,
             content = request.comment!!,
             writer = findMember,
             lessonHistory = lessonHistory,
             parentId = parentComment
         )
-        val comment = lessonHistoryCommentRepository.save(entity)
         uploadFiles?.let {
+            if (uploadFiles.size > 3) {
+                throw CustomException(EXCEED_MAXIMUM_NUMBER_OF_FILES)
+            }
             var fileOrder = 1;
             for (uploadFile in it) {
                 if (!uploadFile.isEmpty) {
@@ -188,14 +192,14 @@ class LessonHistoryService(
                     val fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString()
                     log.info { "fileUrl -> ${fileUrl}" }
 
-                    val file = AwsS3File.create(
-                        originalFileName,
-                        findMember,
-                        lessonHistory,
-                        fileUrl,
-                        fileOrder++,
-                        comment
-                    )
+                    val file = AwsS3File.builder()
+                        .originalFileName(originalFileName)
+                        .member(findMember)
+                        .lessonHistory(lessonHistory)
+                        .fileUrl(fileUrl)
+                        .fileOrder(fileOrder++)
+                        .lessonHistoryComment(entity)
+                        .build()
                     awsS3FileRepository.save(file)
                 }
             }
