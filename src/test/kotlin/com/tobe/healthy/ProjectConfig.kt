@@ -1,10 +1,9 @@
 package com.tobe.healthy
 
 import io.kotest.core.config.AbstractProjectConfig
-import io.kotest.core.extensions.Extension
-import io.kotest.extensions.spring.SpringAutowireConstructorExtension
+import io.kotest.extensions.spring.SpringTestExtension
+import io.kotest.extensions.spring.SpringTestLifecycleMode
 
 class ProjectConfig: AbstractProjectConfig() {
-    override fun extensions(): List<Extension> = listOf(SpringAutowireConstructorExtension)
-        //override val isolationMode = IsolationMode.InstancePerLeaf
+    override fun extensions() = listOf(SpringTestExtension(SpringTestLifecycleMode.Root))
 }
