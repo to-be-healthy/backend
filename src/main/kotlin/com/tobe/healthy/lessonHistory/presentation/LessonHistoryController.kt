@@ -97,7 +97,7 @@ class LessonHistoryController(
         )
     }
 
-    @PostMapping("/comment/{lessonHistoryId}")
+    @PostMapping("/{lessonHistoryId}/comment/")
     fun registerLessonHistoryComment(@PathVariable lessonHistoryId: Long,
                                      @RequestPart @Valid request: CommentRegisterCommand,
                                      @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
