@@ -5,6 +5,9 @@ import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static jakarta.persistence.FetchType.LAZY;
 
 
@@ -29,6 +32,9 @@ public class Course extends BaseTimeEntity<Course, Long> {
 
     private int lessonCnt;
     private int remainLessonCnt;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    private List<CourseHistory> courseHistories = new ArrayList<>();
 
     @Builder
     public Course(Member member, Member trainer, int lessonCnt, int remainLessonCnt) {

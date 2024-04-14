@@ -4,6 +4,7 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
+import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
@@ -144,14 +145,16 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "학생의 현재 사용중인 수강권 조회", responses = {
+	@Operation(summary = "학생의 수강권 조회", responses = {
 			@ApiResponse(responseCode = "404", description = "존재하지 않는 학생"),
 			@ApiResponse(responseCode = "200", description = "수강권 정보를 반환한다.")
 	})
-	@GetMapping("/{memberId}/using-course")
-	public ResponseHandler<CourseDto> getUsingCourse(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId) {
-		return ResponseHandler.<CourseDto>builder()
-				.data(courseService.getUsingCourse(memberId))
+	@GetMapping("/{memberId}/course")
+	public ResponseHandler<CourseGetResult> getCourse(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
+													  @AuthenticationPrincipal CustomMemberDetails loginMember,
+													  Pageable pageable) {
+		return ResponseHandler.<CourseGetResult>builder()
+				.data(courseService.getCourse(memberId, loginMember.getMember(), pageable))
 				.message("수강권이 조회되었습니다.")
 				.build();
 	}
