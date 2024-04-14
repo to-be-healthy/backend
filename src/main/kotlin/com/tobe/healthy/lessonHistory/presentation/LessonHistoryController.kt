@@ -71,15 +71,6 @@ class LessonHistoryController(
         )
     }
 
-    @PatchMapping("/comment/{lessonHistoryCommentId}")
-    fun updateLessonHistoryComment(@PathVariable lessonHistoryCommentId: Long,
-                                   @RequestBody @Valid request: LessonHistoryCommentUpdateCommand): KotlinResponseHandler<Boolean> {
-        return KotlinResponseHandler(
-            message = "댓글이 수정되었습니다.",
-            data = lessonHistoryService.updateLessonHistoryComment(lessonHistoryCommentId, request)
-        )
-    }
-
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @DeleteMapping("/{lessonHistoryId}")
     fun deleteLessonHistory(@PathVariable lessonHistoryId: Long): KotlinResponseHandler<Boolean> {
@@ -89,15 +80,7 @@ class LessonHistoryController(
         )
     }
 
-    @DeleteMapping("/comment/{lessonHistoryCommentId}")
-    fun deleteLessonHistoryComment(@PathVariable lessonHistoryCommentId: Long): KotlinResponseHandler<Boolean> {
-        return KotlinResponseHandler(
-            message = "댓글이 삭제되었습니다.",
-            data = lessonHistoryService.deleteLessonHistoryComment(lessonHistoryCommentId)
-        )
-    }
-
-    @PostMapping("/{lessonHistoryId}/comment/")
+    @PostMapping("/{lessonHistoryId}/comment")
     fun registerLessonHistoryComment(@PathVariable lessonHistoryId: Long,
                                      @RequestPart @Valid request: CommentRegisterCommand,
                                      @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
@@ -117,6 +100,23 @@ class LessonHistoryController(
         return KotlinResponseHandler(
             message = "대댓글이 등록되었습니다.",
             data = lessonHistoryService.registerLessonHistoryReply(lessonHistoryId, lessonHistoryCommentId, uploadFiles, request, member.memberId)
+        )
+    }
+
+    @PatchMapping("/comment/{lessonHistoryCommentId}")
+    fun updateLessonHistoryComment(@PathVariable lessonHistoryCommentId: Long,
+                                   @RequestBody @Valid request: LessonHistoryCommentUpdateCommand): KotlinResponseHandler<Boolean> {
+        return KotlinResponseHandler(
+            message = "댓글이 수정되었습니다.",
+            data = lessonHistoryService.updateLessonHistoryComment(lessonHistoryCommentId, request)
+        )
+    }
+
+    @DeleteMapping("/comment/{lessonHistoryCommentId}")
+    fun deleteLessonHistoryComment(@PathVariable lessonHistoryCommentId: Long): KotlinResponseHandler<Boolean> {
+        return KotlinResponseHandler(
+            message = "댓글이 삭제되었습니다.",
+            data = lessonHistoryService.deleteLessonHistoryComment(lessonHistoryCommentId)
         )
     }
 }
