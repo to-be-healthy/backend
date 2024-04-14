@@ -134,6 +134,7 @@ class LessonHistoryService(
             writer = findMember,
             lessonHistory = lessonHistory
         )
+        lessonHistoryCommentRepository.save(entity)
         uploadFiles?.let {
             if (uploadFiles.size > 3) {
                 throw CustomException(EXCEED_MAXIMUM_NUMBER_OF_FILES)
@@ -177,6 +178,7 @@ class LessonHistoryService(
             lessonHistory = lessonHistory,
             parentId = parentComment
         )
+        lessonHistoryCommentRepository.save(entity)
         uploadFiles?.let {
             if (uploadFiles.size > 3) {
                 throw CustomException(EXCEED_MAXIMUM_NUMBER_OF_FILES)
