@@ -1,0 +1,58 @@
+package com.tobe.healthy.course.repository;
+
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tobe.healthy.course.domain.entity.CourseHistory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.stereotype.Repository;
+import org.springframework.util.ObjectUtils;
+
+import java.util.List;
+
+import static com.tobe.healthy.course.domain.entity.QCourse.course;
+import static com.tobe.healthy.course.domain.entity.QCourseHistory.courseHistory;
+
+@Repository
+@RequiredArgsConstructor
+public class CourseHistoryRepositoryCustomImpl implements CourseHistoryRepositoryCustom {
+
+    private final JPAQueryFactory queryFactory;
+
+    @Override
+    public Page<CourseHistory> getCourseHistory(Long memberId, Long trainerId, Pageable pageable) {
+        Long totalCnt = queryFactory
+                .select(courseHistory.count())
+                .from(courseHistory)
+                .leftJoin(courseHistory.course, course)
+                .where(courseMemberIdEq(memberId))
+                .fetchOne();
+        List<CourseHistory> courseHistories =  queryFactory
+                .select(courseHistory)
+                .from(courseHistory)
+                .leftJoin(courseHistory.course, course)
+                .where(courseMemberIdEq(memberId), courseTrainerIdEq(trainerId))
+                .orderBy(courseHistory.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+        return PageableExecutionUtils.getPage(courseHistories, pageable, ()-> totalCnt );
+    }
+
+    private BooleanExpression courseMemberIdEq(Long memberId) {
+        if (!ObjectUtils.isEmpty(memberId)){
+            return course.member.id.eq(memberId);
+        }
+        return null;
+    }
+
+    private BooleanExpression courseTrainerIdEq(Long trainerId) {
+        if (!ObjectUtils.isEmpty(trainerId)){
+            return courseHistory.trainer.id.eq(trainerId);
+        }
+        return null;
+    }
+
+}
