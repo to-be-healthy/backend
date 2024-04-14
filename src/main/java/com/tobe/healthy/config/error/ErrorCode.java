@@ -23,6 +23,7 @@ public enum ErrorCode {
 	REFRESH_TOKEN_NOT_VALID(BAD_REQUEST, "C_011", "갱신 토큰이 유효하지 않습니다."),
 	MEMBER_ID_DUPLICATION(BAD_REQUEST, "C_012", "사용할 수 없는 아이디입니다."),
 	MEMBER_ALREADY_MAPPED(BAD_REQUEST, "C_013", "이미 등록된 회원입니다."),
+	MEMBER_NOT_MAPPED(BAD_REQUEST, "C_013", "내 학생이 아닙니다."),
 	NOT_STAND_BY_SCHEDULE(BAD_REQUEST, "C_014", "대기할 수 없는 일정입니다."),
 	SCHEDULE_NOT_FOUND(NOT_FOUND, "C_015", "일정을 찾을 수 없습니다."),
 	WORKOUT_HISTORY_COMMENT_NOT_FOUND(NOT_FOUND, "C_016", "댓글이 존재하지 않습니다."),
@@ -33,6 +34,7 @@ public enum ErrorCode {
 	EXERCISE_NOT_FOUND(NOT_FOUND, "C_020", "해당 운동이 존재하지 않습니다."),
 	PASSWORD_NOT_VALID(BAD_REQUEST, "C_019", "비밀번호가 일치하지 않습니다."),
 	DATETIME_NOT_VALID(BAD_REQUEST, "C_019", "시작날짜와 종료날짜가 유효하지 않습니다."),
+	COURSE_ALREADY_EXISTS(BAD_REQUEST, "C_020", "잔여 수강권이 존재합니다."),
 
 	MEMBER_NAME_LENGTH_NOT_VALID(BAD_REQUEST, "C_020", "이름은 최소 2자 이상 입력해 주세요."),
 	MEMBER_NAME_NOT_VALID(BAD_REQUEST, "C_021", "이름은 한글 또는 영어만 입력할 수 있습니다."),
