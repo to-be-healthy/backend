@@ -598,4 +598,11 @@ public class MemberService {
 		objectMetadata.setContentType(contentType);
 		return objectMetadata;
 	}
+
+	public Boolean assignNickname(String nickname, Long studentId) {
+		Member member = memberRepository.findById(studentId)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		member.assignNickname(nickname);
+		return true;
+	}
 }

@@ -186,4 +186,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	public void changeWeight(int weight){
 		this.weight = weight;
 	}
+
+	public void assignNickname(String nickname) {
+		this.nickname = nickname;
+	}
 }
