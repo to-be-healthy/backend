@@ -9,37 +9,70 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Locale
 
 data class LessonHistoryCommandResult(
     val id: Long,
     val title: String,
     val content: String,
-    val comment: MutableList<LessonHistoryCommentCommandResult> = mutableListOf(),
+    val comments: MutableList<LessonHistoryCommentCommandResult> = mutableListOf(),
+    val commentCount: Int,
     val createdAt: LocalDateTime,
     val student: String,
     val trainer: String,
     val lessonDt: String,
     val lessonTime: String,
     val attendanceStatus: String,
-    val fileUrl: MutableList<LessonHistoryFileResults> = mutableListOf()
+    val files: MutableList<LessonHistoryFileResults> = mutableListOf()
 ) {
 
     companion object {
         fun from(entity: LessonHistory): LessonHistoryCommandResult {
             return LessonHistoryCommandResult(
-                id = entity.id!!,
+                id = entity.id,
                 title = entity.title,
                 content = entity.content,
-                comment = entity.lessonHistoryComment.map { comment -> LessonHistoryCommentCommandResult.from(comment) }.toMutableList(),
+                commentCount = entity.lessonHistoryComment.count(),
                 createdAt = entity.createdAt,
                 student = entity.student.name,
                 trainer = "${entity.trainer.name} 트레이너",
                 lessonDt = formatLessonDt(entity.schedule.lessonDt),
                 lessonTime = formatLessonTime(entity.schedule.lessonStartTime, entity.schedule.lessonEndTime),
                 attendanceStatus = validateAttendanceStatus(entity.schedule.lessonDt, entity.schedule.lessonEndTime),
-                fileUrl = entity.file.map { file -> LessonHistoryFileResults.from(file) }.sortedBy { it.fileOrder }.toMutableList()
+                files = entity.file.map(LessonHistoryFileResults::from).sortedBy { it.fileOrder }.toMutableList()
             )
+        }
+
+        fun detailFrom(entity: LessonHistory): LessonHistoryCommandResult {
+            val comments = sortLessonHistoryComment(entity.lessonHistoryComment)
+            return LessonHistoryCommandResult(
+                id = entity.id,
+                title = entity.title,
+                content = entity.content,
+                comments = comments,
+                commentCount = entity.lessonHistoryComment.count(),
+                createdAt = entity.createdAt,
+                student = entity.student.name,
+                trainer = "${entity.trainer.name} 트레이너",
+                lessonDt = formatLessonDt(entity.schedule.lessonDt),
+                lessonTime = formatLessonTime(entity.schedule.lessonStartTime, entity.schedule.lessonEndTime),
+                attendanceStatus = validateAttendanceStatus(entity.schedule.lessonDt, entity.schedule.lessonEndTime),
+                files = entity.file.filter { it.lessonHistoryComment == null }
+                                   .map(LessonHistoryFileResults::from).sortedBy { it.fileOrder }
+                                   .toMutableList()
+            )
+        }
+
+        private fun sortLessonHistoryComment(comment: List<LessonHistoryComment>): MutableList<LessonHistoryCommentCommandResult> {
+            val (comments, replies) = comment.sortedBy{ it.order }.partition { it.parentId == null }
+
+            comments.forEach { parent ->
+                parent.replies = replies.filter { child -> child.parentId?.id == parent.id }
+                                        .sortedBy { it.order }
+                                        .toMutableList()
+            }
+
+            return comment.map { LessonHistoryCommentCommandResult.from(it) }.toMutableList()
         }
 
         private fun validateAttendanceStatus(lessonDt: LocalDate, lessonEndTime: LocalTime): String {
@@ -68,16 +101,18 @@ data class LessonHistoryCommandResult(
         val content: String,
         val writer: Long,
         val order: Int,
-        val parentId: Long?
+        val replies: MutableList<LessonHistoryCommentCommandResult>?,
+        val files: MutableList<LessonHistoryFileResults> = mutableListOf()
     ) {
         companion object {
             fun from(entity: LessonHistoryComment): LessonHistoryCommentCommandResult {
                 return LessonHistoryCommentCommandResult(
-                    id = entity.id ?: throw IllegalArgumentException("Comment ID cannot be null"),
+                    id = entity.id,
                     content = entity.content,
                     writer = entity.writer.id,
                     order = entity.order,
-                    parentId = entity.parentId?.id
+                    replies = entity.replies?.let { it -> it.map { from(it) } }?.toMutableList(),
+                    files = entity.files.map { LessonHistoryFileResults.from(it) }.toMutableList()
                 )
             }
         }

@@ -76,6 +76,8 @@ dependencies {
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
     implementation("jakarta.persistence:jakarta.persistence-api")
     implementation("jakarta.annotation:jakarta.annotation-api")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
 
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
     testCompileOnly("io.github.microutils:kotlin-logging-jvm:3.0.5")
@@ -85,6 +87,9 @@ dependencies {
     kapt("org.projectlombok:lombok")
     kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
+    implementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
+    testImplementation("io.kotest:kotest-assertions-core:5.8.1")
+    testImplementation("io.kotest:kotest-runner-junit5:5.8.1")
 }
 
 tasks.withType<KotlinCompile> {
@@ -92,10 +97,6 @@ tasks.withType<KotlinCompile> {
         freeCompilerArgs += "-Xjsr305=strict"
         jvmTarget = "17"
     }
-}
-
-tasks.withType<Test> {
-    exclude("**/**")
 }
 
 allOpen {

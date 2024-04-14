@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import static com.tobe.healthy.config.error.ErrorResponse.of;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @RestControllerAdvice
@@ -28,12 +29,12 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(response, BAD_REQUEST);
 	}
 
-//    @ExceptionHandler(Exception.class)
-//    protected ResponseEntity<ErrorResponse> handleException(final Exception e) {
-//        log.error("handleException => {}", e.getMessage());
-//        final ErrorResponse response = of(e.getMessage());
-//        return new ResponseEntity<>(response, BAD_REQUEST);
-//    }
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<ErrorResponse> handleException(final Exception e) {
+        log.error("handleException => {}", e.getMessage());
+        final ErrorResponse response = of(e.getMessage());
+        return new ResponseEntity<>(response, INTERNAL_SERVER_ERROR);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException e){

@@ -6,9 +6,7 @@ import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -119,6 +117,17 @@ public class Member extends BaseTimeEntity<Member, Long> {
 				.build();
 	}
 
+	public static Member join(String email, String name, MemberType memberType, SocialType socialType) {
+		return Member.builder()
+				.userId(UUID.randomUUID().toString())
+				.email(email)
+				.name(name)
+				.pushAlarmStatus(ENABLED)
+				.memberType(memberType)
+				.socialType(socialType)
+				.build();
+	}
+
 	@Builder
 	public Member(String userId, String email, String password, String name, Profile profileId, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, Gym gym, SocialType socialType, boolean delYn) {
 		this.userId = userId;
@@ -176,5 +185,9 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	public void changeWeight(int weight){
 		this.weight = weight;
+	}
+
+	public void assignNickname(String nickname) {
+		this.nickname = nickname;
 	}
 }
