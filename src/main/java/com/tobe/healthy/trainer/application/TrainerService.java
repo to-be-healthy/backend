@@ -5,7 +5,6 @@ import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
-import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.file.domain.dto.DietFileDto;

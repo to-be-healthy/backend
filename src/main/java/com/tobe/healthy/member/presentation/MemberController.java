@@ -2,8 +2,9 @@ package com.tobe.healthy.member.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
+import com.tobe.healthy.course.application.CourseService;
+import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.member.application.MemberService;
-import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
@@ -17,7 +18,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,6 +34,7 @@ public class MemberController {
 
 	private final MemberService memberService;
 	private final WorkoutHistoryService workoutService;
+	private final CourseService courseService;
 
 	@Operation(summary = "내 정보 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청."),
@@ -135,11 +136,24 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/{memberId}/workout-histories")
-	public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistory(@Parameter(description = "학생 아이디", example = "to-be-healthy") @PathVariable("memberId") Long memberId,
+	public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistory(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
 																	  Pageable pageable) {
 		return ResponseHandler.<List<WorkoutHistoryDto>>builder()
 				.data(workoutService.getWorkoutHistory(memberId, pageable))
 				.message("운동기록이 조회되었습니다.")
 				.build();
 	}
+
+	@Operation(summary = "학생의 현재 사용중인 수강권 조회", responses = {
+			@ApiResponse(responseCode = "404", description = "존재하지 않는 학생"),
+			@ApiResponse(responseCode = "200", description = "수강권 정보를 반환한다.")
+	})
+	@GetMapping("/{memberId}/using-course")
+	public ResponseHandler<CourseDto> getUsingCourse(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId) {
+		return ResponseHandler.<CourseDto>builder()
+				.data(courseService.getUsingCourse(memberId))
+				.message("수강권이 조회되었습니다.")
+				.build();
+	}
+
 }
