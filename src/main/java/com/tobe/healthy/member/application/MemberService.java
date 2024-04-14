@@ -2,6 +2,8 @@ package com.tobe.healthy.member.application;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.RedisKeyPrefix;
@@ -16,12 +18,15 @@ import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.file.domain.entity.AwsS3File;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.repository.AwsS3FileRepository;
+import com.tobe.healthy.file.repository.AwsS3FileRepository;
 import com.tobe.healthy.file.repository.FileRepository;
+import com.tobe.healthy.gym.repository.GymRepository;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand.MemberFindIdCommandResult;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
+import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
@@ -35,6 +40,7 @@ import io.jsonwebtoken.impl.Base64UrlCodec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -85,9 +91,10 @@ public class MemberService {
 	private final OAuthProperties oAuthProperties;
 	private final FileRepository fileRepository;
 	private final TrainerMemberMappingRepository mappingRepository;
-	private final AmazonS3 amazonS3;
+	private final GymRepository gymRepository;
+    private final AmazonS3 amazonS3;
 	private final MailService mailService;
-	private final AwsS3FileRepository awsS3FileRepository;
+    private final AwsS3FileRepository awsS3FileRepository;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -211,6 +218,7 @@ public class MemberService {
 				.filter(m -> passwordEncoder.matches(password, m.getPassword()))
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.deleteMember();
+		mappingRepository.deleteByMemberId(memberId);
 		return member.getUserId();
 	}
 
@@ -290,6 +298,11 @@ public class MemberService {
 		Member member = Member.join(response.getEmail(), response.getNickname(), request.getMemberType(), KAKAO);
 		memberRepository.save(member);
 		getProfile(response.getPicture(), member);
+
+		//초대가입인 경우
+		if(StringUtils.isNotEmpty(request.getUuid())) {
+			mappingTrainerAndStudent(member, request.getUuid(), response.getNickname(), true);
+		}
 		return tokenGenerator.create(member);
 	}
 
@@ -357,6 +370,11 @@ public class MemberService {
 		Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), request.getMemberType(), NAVER);
 		memberRepository.save(member);
 		getProfile(authorization.getResponse().getProfileImage(), member);
+
+		//초대가입인 경우
+		if(StringUtils.isNotEmpty(request.getUuid())) {
+			mappingTrainerAndStudent(member, request.getUuid(), authorization.getResponse().getName(), true);
+		}
 		return tokenGenerator.create(member);
 	}
 
@@ -451,6 +469,11 @@ public class MemberService {
 			member = optionalMember.get();
 		}
 
+		//초대가입인 경우
+		if(StringUtils.isNotEmpty(command.getUuid())) {
+			mappingTrainerAndStudent(member, command.getUuid(), name, true);
+		}
+
 		return memberRepository.findByUserId(member.getUserId(), command.getMemberType())
 				.map(tokenGenerator::create)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
@@ -527,26 +550,27 @@ public class MemberService {
 	}
 
 	public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {
-		//회원가입
 		MemberJoinCommandResult result = joinMember(request);
 		Member member = memberRepository.findById(result.getId())
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		//부가정보 업데이트
-		Map<String, String> map = getInviteMappingData(request.getUuid());
-		Long trainerId = Long.valueOf(map.get("trainerId"));
-		LocalDate gymStartDt = LocalDate.parse(map.get("gymStartDt"), DateTimeFormatter.ISO_DATE);
-		LocalDate gymEndDt = LocalDate.parse(map.get("gymEndDt"), DateTimeFormatter.ISO_DATE);
-		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
+		mappingTrainerAndStudent(member, request.getUuid(), request.getName(), false);
+		return result;
+	}
 
-		//회원&트레이너 매핑, 헬스장 이용권 등록
-		MemberLessonCommand lessonCommand = new MemberLessonCommand(lessonCnt, gymStartDt, gymEndDt);
+	public void mappingTrainerAndStudent(Member member, String uuid, String reqName, boolean isSocial){
+		Map<String, String> map = getInviteMappingData(uuid);
+		String name = map.get("name");
+		if(!isSocial && !name.equals(reqName)) throw new CustomException(INVITE_NAME_NOT_VALID);
+		member.changeName(name);
+
+		Long trainerId = Long.valueOf(map.get("trainerId"));
+		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
+		MemberLessonCommand lessonCommand = new MemberLessonCommand(lessonCnt);
 		trainerService.addMemberOfTrainer(trainerId, member.getId(), lessonCommand);
 
-		String name = map.get("name");
-		if (!name.equals(request.getName())) throw new CustomException(INVITE_NAME_NOT_VALID);
-		member.changeName(name);
-		return result;
+		String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
+		redisService.deleteValues(invitationKey);
 	}
 
 	public InvitationMappingResult getInvitationMapping(String uuid) {
@@ -554,10 +578,8 @@ public class MemberService {
 		Long trainerId = Long.valueOf(map.get("trainerId"));
 		String name = map.get("name");
 		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
-		LocalDate gymStartDt = LocalDate.parse(map.get("gymStartDt"), DateTimeFormatter.ISO_DATE);
-		LocalDate gymEndDt = LocalDate.parse(map.get("gymEndDt"), DateTimeFormatter.ISO_DATE);
 		Member member = memberRepository.findByMemberIdWithGym(trainerId);
-		return InvitationMappingResult.create(member, name, lessonCnt, gymStartDt, gymEndDt);
+		return InvitationMappingResult.create(member, name, lessonCnt);
 	}
 
 	private Map<String, String> getInviteMappingData(String uuid) {
@@ -575,21 +597,11 @@ public class MemberService {
 		return map;
 	}
 
-	public MemberDto getMemberInfo(Long memberId) {
+	public MemberInfoResult getMemberInfo(Long memberId) {
 		memberRepository.findById(memberId)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-
-		Member member = memberRepository.findByMemberIdWithProfile(memberId);
-
-		Optional<TrainerMemberMapping> mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId);
-
-		if (mapping.isPresent()) {
-			Long trainerId = mapping.map(m -> m.getTrainer().getId()).orElse(null);
-			Member trainer = memberRepository.findByMemberIdWithGym(trainerId);
-			return MemberDto.create(member, trainer.getGym());
-		} else {
-			return MemberDto.from(member);
-		}
+		Member member = memberRepository.findByMemberIdWithProfileAndGym(memberId);
+		return MemberInfoResult.create(member);
 	}
 
 	private ObjectMetadata getObjectMetadata(Long fileSize, String contentType) {

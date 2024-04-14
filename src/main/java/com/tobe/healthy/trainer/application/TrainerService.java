@@ -3,10 +3,13 @@ package com.tobe.healthy.trainer.application;
 import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.config.error.ErrorCode;
-import com.tobe.healthy.gym.application.GymMembershipService;
-import com.tobe.healthy.gym.domain.dto.MemberInTeamDto;
-import com.tobe.healthy.gym.domain.dto.in.MembershipAddCommand;
+import com.tobe.healthy.diet.domain.dto.DietDto;
+import com.tobe.healthy.diet.repository.DietRepository;
+import com.tobe.healthy.file.domain.dto.DietFileDto;
+import com.tobe.healthy.file.domain.entity.DietFile;
+import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
+import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -25,9 +28,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static com.tobe.healthy.config.error.ErrorCode.DATETIME_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.*;
 
 
 @Service
@@ -39,44 +45,31 @@ public class TrainerService {
     private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final TrainerMemberMappingRepository mappingRepository;
-    private final GymMembershipService gymMembershipService;
+    private final DietRepository repository;
+
 
     public TrainerMemberMappingDto addMemberOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         mappingRepository.findByTrainerIdAndMemberId(trainerId, memberId)
-                .ifPresent(i -> {throw new CustomException(ErrorCode.MEMBER_ALREADY_MAPPED);});
-
-        TrainerMemberMapping mapping = TrainerMemberMapping.create(trainer, member, command.getLessonCnt(), command.getLessonCnt());
+                .ifPresent(i -> {throw new CustomException(MEMBER_ALREADY_MAPPED);});
 
         mappingRepository.deleteByMemberId(memberId);
         mappingRepository.flush();
+        TrainerMemberMapping mapping = TrainerMemberMapping.create(trainer, member, command.getLessonCnt(), command.getLessonCnt());
         mappingRepository.save(mapping);
         member.registerGym(trainer.getGym());
-        registerGymMembership(member, command);
         return TrainerMemberMappingDto.from(mapping);
     }
 
-    private void registerGymMembership(Member member, MemberLessonCommand command) {
-        LocalDate gymStartDt = command.getGymStartDt();
-        LocalDate gymEndDt = command.getGymEndDt();
-        MembershipAddCommand membership = new MembershipAddCommand(member.getGym().getId(), member.getId(), gymStartDt, gymEndDt);
-        gymMembershipService.registerGymMembership(membership);
-    }
-
     public MemberInviteResultCommand inviteMember(MemberInviteCommand command, Member trainer) {
-        if(command.getGymStartDt().isAfter(command.getGymEndDt())){
-            throw new CustomException(DATETIME_NOT_VALID);
-        }
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), MemberType.TRAINER)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         String name = command.getName();
         int lessonCnt = command.getLessonCnt();
-        LocalDate gymStartDt = command.getGymStartDt();
-        LocalDate gymEndDt = command.getGymEndDt();
 
         String uuid = System.currentTimeMillis() + "_" + UUID.randomUUID();
         String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
@@ -86,15 +79,35 @@ public class TrainerService {
             put("trainerId", trainer.getId().toString());
             put("name", name);
             put("lessonCnt", String.valueOf(lessonCnt));
-            put("gymStartDt", String.valueOf(gymStartDt));
-            put("gymEndDt", String.valueOf(gymEndDt));
         }};
         redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), 24 * 60 * 60 * 1000); // 1days
         return new MemberInviteResultCommand(uuid, invitationLink);
     }
 
-    public List<MemberInTeamDto> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
-        Page<MemberInTeamDto> members = memberRepository.findAllMyMemberInTeam(trainerId, searchValue, sortValue, pageable);
-        return members.isEmpty() ? null : members.stream().toList();
+    public List<MemberInTeamResult> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
+        List<MemberInTeamResult> members = memberRepository.findAllMyMemberInTeam(trainerId, searchValue, sortValue, pageable);
+        return members.isEmpty() ? null : members;
+    }
+
+    public List<MemberDto> findAllUnattachedMembers(String searchValue, String sortValue, Pageable pageable) {
+        Page<Member> members = memberRepository.findAllUnattachedMembers(searchValue, sortValue, pageable);
+        List<MemberDto> memberDtos = members.stream().map(MemberDto::from).collect(Collectors.toList());
+        return memberDtos.isEmpty() ? null : memberDtos;
+    }
+
+    public MemberDetailResult getMemberOfTrainer(Long trainerId, Long memberId) {
+        memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+        memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
+        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+        List<DietFile> dietFiles = repository.findAllCreateAtToday(memberId, start, end);
+        List<DietFileDto> fileDtos = dietFiles.stream().map(DietFileDto::from).collect(Collectors.toList());
+
+        MemberDetailResult result = memberRepository.getMemberOfTrainer(memberId);
+        if(!dietFiles.isEmpty()) result.setDiet(DietDto.create(dietFiles.get(0).getDiet().getDietId(), fileDtos));
+        return result;
     }
 }

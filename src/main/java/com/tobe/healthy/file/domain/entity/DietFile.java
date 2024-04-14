@@ -1,21 +1,26 @@
 package com.tobe.healthy.file.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor
-@Table(name = "workout_history_file")
+@Table(name = "diet_file")
 @Builder
 @Getter
-public class WorkoutHistoryFile extends BaseTimeEntity<WorkoutHistoryFile, Long> {
+public class DietFile extends BaseTimeEntity<DietFile, Long> {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -36,22 +41,11 @@ public class WorkoutHistoryFile extends BaseTimeEntity<WorkoutHistoryFile, Long>
     private Boolean delYn = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workout_history_id")
-    private WorkoutHistory workoutHistory;
+    @JoinColumn(name = "diet_id")
+    private Diet diet;
 
-    public static WorkoutHistoryFile create(String savedFileName, String originalName, String extension, Long fileSize, WorkoutHistory history, String fileUrl) {
-        return WorkoutHistoryFile.builder()
-                .fileName(savedFileName)
-                .originalName(originalName)
-                .extension(extension)
-                .fileSize(fileSize)
-                .workoutHistory(history)
-                .fileUrl(fileUrl)
-                .build();
-    }
-
-    public void deleteWorkoutHistoryFile() {
-        this.delYn = true;
-    }
+    @Enumerated(STRING)
+    @ColumnDefault("'BREAKFAST'")
+    private DietType type;
 
 }
