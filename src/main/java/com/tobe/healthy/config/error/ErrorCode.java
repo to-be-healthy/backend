@@ -50,6 +50,7 @@ public enum ErrorCode {
 	TRAINER_NOT_FOUND(NOT_FOUND, "C_028", "트레이너가 존재하지 않습니다."),
 	LESSON_HISTORY_NOT_FOUND(NOT_FOUND, "C_029", "수업 내역이 존재하지 않습니다."),
 	LESSON_HISTORY_COMMENT_NOT_FOUND(NOT_FOUND, "C_030", "수업 내역 댓글이 존재하지 않습니다."),
+	EXCEED_MAXIMUM_NUMBER_OF_FILES(BAD_REQUEST, "C_031", "파일 업로드는 최대 3개까지 가능합니다."),
 
 	SERVER_ERROR(INTERNAL_SERVER_ERROR, "S_001", "서버에서 오류가 발생하였습니다."),
 	FILE_UPLOAD_ERROR(INTERNAL_SERVER_ERROR, "S_002", "파일 업로드중 에러가 발생하였습니다."),

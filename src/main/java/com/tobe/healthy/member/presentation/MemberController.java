@@ -159,4 +159,17 @@ public class MemberController {
 				.build();
 	}
 
+
+	@Operation(summary = "트레이너가 학생의 닉네임을 지정한다.", responses = {
+			@ApiResponse(responseCode = "404", description = "등록된 학생이 아닙니다."),
+			@ApiResponse(responseCode = "200", description = "닉네임이 설정되었습니다.")
+	})
+	@PostMapping("/nickname/{studentId}")
+	public ResponseHandler<Boolean> assignNickname(@PathVariable Long studentId,
+												   @Parameter(description = "등록할 닉네임", example = "홍박사") @RequestParam String nickname) {
+		return ResponseHandler.<Boolean>builder()
+				.data(memberService.assignNickname(nickname, studentId))
+				.message("닉네임을 지정하였습니다.")
+				.build();
+	}
 }

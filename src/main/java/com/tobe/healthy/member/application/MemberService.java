@@ -1,5 +1,9 @@
 package com.tobe.healthy.member.application;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.RedisKeyPrefix;
@@ -13,7 +17,9 @@ import com.tobe.healthy.config.error.OAuthException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
+import com.tobe.healthy.file.domain.entity.AwsS3File;
 import com.tobe.healthy.file.domain.entity.Profile;
+import com.tobe.healthy.file.repository.AwsS3FileRepository;
 import com.tobe.healthy.file.repository.FileRepository;
 import com.tobe.healthy.gym.repository.GymRepository;
 import com.tobe.healthy.member.domain.dto.in.*;
@@ -53,6 +59,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -60,9 +68,9 @@ import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.member.domain.entity.SocialType.*;
 import static java.io.File.separator;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static java.util.UUID.randomUUID;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.http.MediaType.*;
 import static org.springframework.util.StringUtils.cleanPath;
 
 @Service
@@ -82,9 +90,11 @@ public class MemberService {
 	private final FileRepository fileRepository;
 	private final TrainerMemberMappingRepository mappingRepository;
 	private final GymRepository gymRepository;
+    private final AmazonS3 amazonS3;
 	private final MailService mailService;
 	private final CourseService courseService;
 
+    private final AwsS3FileRepository awsS3FileRepository;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -228,31 +238,26 @@ public class MemberService {
 		return true;
 	}
 
-	public Boolean changeProfile(MultipartFile file, Long memberId) {
-		if (!file.isEmpty()) {
-			Member member = memberRepository.findById(memberId)
-					.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+	public Boolean changeProfile(MultipartFile uploadFile, Long memberId) {
+		Member member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-			String savedFileName = System.currentTimeMillis() + "_" + randomUUID();
-			String extension = Objects.requireNonNull(file.getOriginalFilename())
-					.substring(file.getOriginalFilename().lastIndexOf("."));
+		if (!uploadFile.isEmpty()) {
+			String originalFileName = uploadFile.getOriginalFilename();
+			ObjectMetadata objectMetadata = getObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
+			String extension = requireNonNull(originalFileName).substring(originalFileName.lastIndexOf("."));
 
-			Path location = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
-			Path locationParent = location.getParent();
-			try {
-				if (!Files.exists(locationParent)) {
-					Files.createDirectories(locationParent);
-				}
-				Files.copy(file.getInputStream(), location, REPLACE_EXISTING);
+			String savedFileName = System.currentTimeMillis() + extension;
+
+			try (InputStream inputStream = uploadFile.getInputStream()) {
+				amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
+				String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+				AwsS3File file = AwsS3File.create(originalFileName, member, fileUrl, 1);
+				awsS3FileRepository.save(file);
 			} catch (IOException e) {
+				log.error("error => {}", e);
 				throw new CustomException(FILE_UPLOAD_ERROR);
 			}
-
-			Profile profile = Profile.create(savedFileName, cleanPath(file.getOriginalFilename()),
-					extension, uploadDir + separator, (int) file.getSize());
-
-			member.registerProfile(profile);
-			fileRepository.save(profile);
 		}
 		return true;
 	}
@@ -290,10 +295,9 @@ public class MemberService {
 			throw new CustomException(MEMBER_NOT_FOUND);
 		}
 
-		Profile profile = getProfile(response.getPicture());
-		Member member = Member.join(response.getEmail(), response.getNickname(), profile, request.getMemberType(),
-				KAKAO);
+		Member member = Member.join(response.getEmail(), response.getNickname(), request.getMemberType(), KAKAO);
 		memberRepository.save(member);
+		getProfile(response.getPicture(), member);
 
 		//초대가입인 경우
 		if(StringUtils.isNotEmpty(request.getUuid())) {
@@ -353,18 +357,19 @@ public class MemberService {
 
 		NaverUserInfo authorization = getNaverUserInfo(response);
 
-		Optional<Member> findMember = memberRepository.findByEmailAndSocialType(authorization.getResponse().getEmail()
-				, NAVER);
+		Optional<Member> findMember =
+				memberRepository.findByEmailAndSocialType(authorization.getResponse().getEmail(), NAVER);
+
 		if (findMember.isPresent()) {
 			if (findMember.get().getMemberType().equals(request.getMemberType())) {
 				return tokenGenerator.create(findMember.get());
 			}
 			throw new CustomException(MEMBER_NOT_FOUND);
 		}
-		Profile profile = getProfile(authorization.getResponse().getProfileImage());
-		Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(),
-				profile, request.getMemberType(), NAVER);
+
+		Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), request.getMemberType(), NAVER);
 		memberRepository.save(member);
+		getProfile(authorization.getResponse().getProfileImage(), member);
 
 		//초대가입인 경우
 		if(StringUtils.isNotEmpty(request.getUuid())) {
@@ -373,25 +378,20 @@ public class MemberService {
 		return tokenGenerator.create(member);
 	}
 
-	private Profile getProfile(String profileImage) {
+	private void getProfile(String profileImage, Member member) {
 		byte[] image = getProfileImage(profileImage);
-		String savedFileName = createFileUUID();
 		String extension = getImageExtension(profileImage);
-
+		String savedFileName = System.currentTimeMillis() + extension;
+		ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
 		try (InputStream inputStream = new ByteArrayInputStream(image)) {
-			Path location = Paths.get(uploadDir + separator + cleanPath(savedFileName + extension));
-			Path locationParent = location.getParent();
-			if (!Files.exists(locationParent)) {
-				Files.createDirectories(locationParent);
-			}
-			Files.copy(inputStream, location, REPLACE_EXISTING);
+			amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
+			String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+			AwsS3File file = AwsS3File.create(savedFileName + extension, member, fileUrl, 1);
+			awsS3FileRepository.save(file);
 		} catch (IOException e) {
 			log.error("error => {}", e);
 			throw new CustomException(FILE_UPLOAD_ERROR);
 		}
-
-		return Profile.create(savedFileName, cleanPath(savedFileName), extension,
-				uploadDir + separator, image.length);
 	}
 
 	private NaverUserInfo getNaverUserInfo(OAuthInfo oAuthInfo) {
@@ -605,5 +605,19 @@ public class MemberService {
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		Member member = memberRepository.findByMemberIdWithProfileAndGym(memberId);
 		return MemberInfoResult.create(member);
+	}
+
+	private ObjectMetadata getObjectMetadata(Long fileSize, String contentType) {
+		ObjectMetadata objectMetadata = new ObjectMetadata();
+		objectMetadata.setContentLength(fileSize);
+		objectMetadata.setContentType(contentType);
+		return objectMetadata;
+	}
+
+	public Boolean assignNickname(String nickname, Long studentId) {
+		Member member = memberRepository.findById(studentId)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		member.assignNickname(nickname);
+		return true;
 	}
 }
