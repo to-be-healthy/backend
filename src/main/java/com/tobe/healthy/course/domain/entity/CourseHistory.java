@@ -38,7 +38,7 @@ public class CourseHistory extends BaseTimeEntity<CourseHistory, Long> {
     private Calculation calculation;
 
     @Enumerated(STRING)
-    @ColumnDefault("'RESERVATION'")
+    @ColumnDefault("'COURSE_CREATE'")
     private CourseHistoryType type;
 
     @ManyToOne(fetch = LAZY)

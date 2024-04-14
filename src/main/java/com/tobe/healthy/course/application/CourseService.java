@@ -4,6 +4,7 @@ import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.CourseHistoryDto;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
+import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
 import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.domain.entity.CourseHistory;
@@ -27,9 +28,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.course.domain.entity.CourseHistoryType.CREATE;
+import static com.tobe.healthy.course.domain.entity.CourseHistoryType.COURSE_CREATE;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 
 
@@ -55,7 +57,7 @@ public class CourseService {
         Long cnt = courseRepository.countByMemberIdAndRemainLessonCntGreaterThan(member.getId(), 0);
         if(0 < cnt) throw new CustomException(COURSE_ALREADY_EXISTS);
         Course course = courseRepository.save(Course.create(member, trainer, command.getLessonCnt(), command.getLessonCnt()));
-        courseHistoryRepository.save(CourseHistory.create(course, course.getLessonCnt(), PLUS, CREATE, trainer));
+        courseHistoryRepository.save(CourseHistory.create(course, course.getLessonCnt(), PLUS, COURSE_CREATE, trainer));
     }
 
     public void deleteCourse(Long trainerId, Long courseId) {
@@ -75,4 +77,20 @@ public class CourseService {
         List<CourseHistoryDto> courseHistoryDtos = histories.map(CourseHistoryDto::from).stream().toList();
         return CourseGetResult.create(usingCourse, courseHistoryDtos);
     }
+
+    public void updateCourse(Long trainerId, Long courseId, CourseUpdateCommand command) {
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(command.getMemberId(), STUDENT)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
+
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
+        int result = command.getCalculation().apply(course.getRemainLessonCnt(), command.getUpdateCnt());
+        if(result < 0) throw new CustomException(LESSON_CNT_NOT_VALID);
+        course.updateLessonCnt(command);
+        courseHistoryRepository.save(CourseHistory.create(course, command.getUpdateCnt(), command.getCalculation(), command.getType(), trainer));
+    }
+
 }

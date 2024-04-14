@@ -1,6 +1,7 @@
 package com.tobe.healthy.course.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -52,4 +53,10 @@ public class Course extends BaseTimeEntity<Course, Long> {
                 .remainLessonCnt(remainLessonCnt)
                 .build();
     }
+
+    public void updateLessonCnt(CourseUpdateCommand command){
+        this.lessonCnt = command.getCalculation().apply(lessonCnt, command.getUpdateCnt());
+        this.remainLessonCnt = command.getCalculation().apply(remainLessonCnt, command.getUpdateCnt());
+    }
+
 }
