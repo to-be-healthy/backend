@@ -58,19 +58,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     }
 
     @Override
-    public Member findByMemberIdWithProfile(Long memberId) {
-        Tuple tuple = queryFactory
-                .select(member, profile)
-                .from(member)
-                .leftJoin(member.profileId, profile).fetchJoin()
-                .where(memberIdEq(memberId), member.delYn.eq(false))
-                .fetchOne();
-        Member m = tuple.get(member);
-        m.registerProfile(tuple.get(profile));
-        return m;
-    }
-
-    @Override
     public Member findByMemberIdWithProfileAndGym(Long memberId) {
         Tuple tuple = queryFactory
                 .select(member, profile, gym)
