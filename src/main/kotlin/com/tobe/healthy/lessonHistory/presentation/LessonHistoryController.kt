@@ -3,13 +3,26 @@ package com.tobe.healthy.lessonHistory.presentation
 import com.tobe.healthy.KotlinResponseHandler
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonHistory.application.LessonHistoryService
-import com.tobe.healthy.lessonHistory.domain.dto.*
+import com.tobe.healthy.lessonHistory.domain.dto.CommentRegisterCommand
+import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
+import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommentUpdateCommand
+import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryUpdateCommand
+import com.tobe.healthy.lessonHistory.domain.dto.RegisterLessonHistoryCommand
+import com.tobe.healthy.lessonHistory.domain.dto.SearchCondRequest
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
@@ -95,7 +108,7 @@ class LessonHistoryController(
         )
     }
 
-    @PostMapping("{lessonHistoryId}/comment/{lessonHistoryCommentId}/reply")
+    @PostMapping("/{lessonHistoryId}/comment/{lessonHistoryCommentId}")
     fun registerLessonHistoryComment(@PathVariable lessonHistoryId: Long,
                                      @PathVariable lessonHistoryCommentId: Long,
                                      @RequestPart @Valid request: CommentRegisterCommand,

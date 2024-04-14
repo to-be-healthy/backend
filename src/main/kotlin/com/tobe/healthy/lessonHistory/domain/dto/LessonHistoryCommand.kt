@@ -10,7 +10,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import java.util.stream.Collectors.toList
 
 data class LessonHistoryCommandResult(
     val id: Long,
@@ -43,7 +42,7 @@ data class LessonHistoryCommandResult(
             )
         }
 
-        fun sortLessonHistoryComment(comment: List<LessonHistoryComment>): MutableList<LessonHistoryCommentCommandResult> {
+        private fun sortLessonHistoryComment(comment: List<LessonHistoryComment>): MutableList<LessonHistoryCommentCommandResult> {
             val (topLevelComments, replies) = comment.sortedBy{ it.order }.partition { it.parentId == null }
 
             topLevelComments.forEach { parent ->
@@ -53,7 +52,6 @@ data class LessonHistoryCommandResult(
             }
 
             return topLevelComments.map { LessonHistoryCommentCommandResult.from(it) }.toMutableList()
-
         }
 
         private fun validateAttendanceStatus(lessonDt: LocalDate, lessonEndTime: LocalTime): String {
@@ -82,7 +80,7 @@ data class LessonHistoryCommandResult(
         val content: String,
         val writer: Long,
         val order: Int,
-        val replies: MutableList<LessonHistoryComment> = mutableListOf(),
+        val replies: MutableList<LessonHistoryCommentCommandResult>?,
         val files: MutableList<LessonHistoryFileResults> = mutableListOf()
     ) {
         companion object {
@@ -92,8 +90,8 @@ data class LessonHistoryCommandResult(
                     content = entity.content,
                     writer = entity.writer.id,
                     order = entity.order,
-                    replies = entity.replies,
-                    files = entity.files.stream().map(LessonHistoryFileResults::from).collect(toList())
+                    replies = entity.replies?.let { it -> it.map { from(it) } }?.toMutableList(),
+                    files = entity.files.map { LessonHistoryFileResults.from(it) }.toMutableList()
                 )
             }
         }
