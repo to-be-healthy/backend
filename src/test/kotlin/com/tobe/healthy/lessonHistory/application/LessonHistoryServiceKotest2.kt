@@ -29,7 +29,7 @@ class LessonHistoryServiceKotest2(
 ) : BehaviorSpec({
     extensions(SpringTestExtension(SpringTestLifecycleMode.Root)) // https://kth990303.tistory.com/374
 
-    Given("회원 가입을 하고") {
+    Given("회원 가입을 한 뒤에") {
         val member = MemberJoinCommand.builder()
             .userId("laborlawseon2")
             .email("laborlawseon2@gmail.com")
@@ -40,15 +40,16 @@ class LessonHistoryServiceKotest2(
             .build()
         val joinMember = memberService.joinMember(member)
 
-        When("로그인을 할 경우") {
+        When("로그인을 했을 때") {
             Then("토큰을 반환한다") {
                 val login = MemberLoginCommand("laborlawseon2", "123456789", MemberType.STUDENT)
                 val tokens = memberService.login(login)
                 tokens.userId shouldBe "laborlawseon2"
+                tokens.memberType shouldBe STUDENT
             }
         }
 
-        When("비밀번호를 변경하고") {
+        When("비밀번호를 변경했을 때") {
             val request = MemberPasswordChangeCommand("123456789", "123456789", "987654321")
             Then("비밀번호가 변경되었는지 검증한다") {
                 val result = memberService.changePassword(request, joinMember.id)
