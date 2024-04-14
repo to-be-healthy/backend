@@ -40,4 +40,9 @@ public class CourseService {
         courseRepository.save(Course.create(member, trainer, command.getLessonCnt(), command.getLessonCnt()));
     }
 
+    public void deleteCourse(Long trainerId, Long courseId) {
+        memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+        courseRepository.deleteByCourseIdAndTrainerId(courseId, trainerId);
+    }
 }

@@ -6,5 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface CourseRepository extends JpaRepository<Course, Long> {
 
     Long countByMemberIdAndTrainerIdAndRemainLessonCntGreaterThan(Long memberId, Long trainerId, int remainLessonCnt);
+    void deleteByCourseIdAndTrainerId(Long courseId, Long trainerId);
 
 }
