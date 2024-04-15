@@ -62,13 +62,13 @@ public class TrainerController {
             @ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
             @ApiResponse(responseCode = "200", description = "매핑ID, 트레이너ID, 회원ID를 반환한다.")
     })
-    @PostMapping("/{trainerId}/members/{memberId}")
+    @PostMapping("/members/{memberId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<TrainerMemberMappingDto> addMemberOfTrainer(@Parameter(description = "트레이너 ID") @PathVariable("trainerId") Long trainerId,
+    public ResponseHandler<TrainerMemberMappingDto> addMemberOfTrainer(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                        @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId,
                                                                        @RequestBody MemberLessonCommand command) {
         return ResponseHandler.<TrainerMemberMappingDto>builder()
-                .data(trainerService.addMemberOfTrainer(trainerId, memberId, command))
+                .data(trainerService.addMemberOfTrainer(customMemberDetails.getMember().getId(), memberId, command))
                 .message("내 학생으로 등록되었습니다.")
                 .build();
     }
@@ -78,12 +78,12 @@ public class TrainerController {
             @ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
             @ApiResponse(responseCode = "200", description = "학생 상세를 반환한다.")
     })
-    @GetMapping("/{trainerId}/members/{memberId}")
+    @GetMapping("/members/{memberId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<MemberDetailResult> getMemberOfTrainer(@Parameter(description = "트레이너 ID") @PathVariable("trainerId") Long trainerId,
-                                                                       @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
+    public ResponseHandler<MemberDetailResult> getMemberOfTrainer(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                  @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
         return ResponseHandler.<MemberDetailResult>builder()
-                .data(trainerService.getMemberOfTrainer(trainerId, memberId))
+                .data(trainerService.getMemberOfTrainer(customMemberDetails.getMember().getId(), memberId))
                 .message("학생 상세가 조회되었습니다.")
                 .build();
     }
