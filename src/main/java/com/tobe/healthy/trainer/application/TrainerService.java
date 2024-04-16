@@ -98,8 +98,8 @@ public class TrainerService {
         return members.isEmpty() ? null : members;
     }
 
-    public List<MemberDto> findAllUnattachedMembers(String searchValue, String sortValue, Pageable pageable) {
-        Page<Member> members = memberRepository.findAllUnattachedMembers(searchValue, sortValue, pageable);
+    public List<MemberDto> findAllUnattachedMembers(Member trainer, String searchValue, String sortValue, Pageable pageable) {
+        Page<Member> members = memberRepository.findAllUnattachedMembers(trainer.getGym().getId(), searchValue, sortValue, pageable);
         List<MemberDto> memberDtos = members.stream().map(MemberDto::from).collect(Collectors.toList());
         return memberDtos.isEmpty() ? null : memberDtos;
     }

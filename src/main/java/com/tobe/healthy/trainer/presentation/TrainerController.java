@@ -125,13 +125,14 @@ public class TrainerController {
             })
     @GetMapping("unattached-members")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<List<MemberDto>> findAllUnattachedMembers(@Parameter(description = "검색할 이름", example = "임채린")
+    public ResponseHandler<List<MemberDto>> findAllUnattachedMembers(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                     @Parameter(description = "검색할 이름", example = "임채린")
                                                                            @RequestParam(required = false) String searchValue,
                                                                      @Parameter(description = "정렬 조건", example = "memberId")
                                                                            @RequestParam(required = false, defaultValue = "memberId") String sortValue,
                                                                      Pageable pageable) {
         return ResponseHandler.<List<MemberDto>>builder()
-                .data(trainerService.findAllUnattachedMembers(searchValue, sortValue, pageable))
+                .data(trainerService.findAllUnattachedMembers(customMemberDetails.getMember(), searchValue, sortValue, pageable))
                 .message("트레이너가 가입된 학생을 조회하였습니다.")
                 .build();
     }
