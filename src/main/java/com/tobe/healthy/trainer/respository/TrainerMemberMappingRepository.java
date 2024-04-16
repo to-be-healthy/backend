@@ -13,5 +13,6 @@ public interface TrainerMemberMappingRepository extends JpaRepository<TrainerMem
     Optional<TrainerMemberMapping> findByMemberId(Long memberId);
     void deleteByMemberId(Long memberId);
     List<TrainerMemberMapping> findAllByTrainerId(Long trainerId);
+    void deleteByTrainerIdAndMemberId(Long trainerId, Long memberId);
 
 }

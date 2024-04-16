@@ -51,7 +51,7 @@ public class TrainerService {
     private final CourseService courseService;
 
 
-    public TrainerMemberMappingDto addMemberOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
+    public TrainerMemberMappingDto addStudentOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
         TrainerMemberMappingDto mappingDto = mappingMemberAndTrainer(trainerId, memberId);
         courseService.addCourse(trainerId, CourseAddCommand.create(memberId, command.getLessonCnt()));
         return mappingDto;
@@ -118,5 +118,11 @@ public class TrainerService {
         MemberDetailResult result = memberRepository.getMemberOfTrainer(memberId);
         if(!dietFiles.isEmpty()) result.setDiet(DietDto.create(dietFiles.get(0).getDiet().getDietId(), fileDtos));
         return result;
+    }
+
+    public void deleteStudentOfTrainer(Member trainer, Long memberId) {
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        mappingRepository.deleteByTrainerIdAndMemberId(trainer.getId(), member.getId());
     }
 }
