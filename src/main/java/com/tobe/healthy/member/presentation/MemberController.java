@@ -7,8 +7,10 @@ import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
+import com.tobe.healthy.member.domain.dto.in.MemoCommand;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
+import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +21,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -159,12 +162,27 @@ public class MemberController {
 				.build();
 	}
 
+	@Operation(summary = "트레이너가 학생의 메모를 수정한다.", responses = {
+			@ApiResponse(responseCode = "404", description = "등록된 학생이 아닙니다."),
+			@ApiResponse(responseCode = "200", description = "메모가 수정되었습니다.")
+	})
+	@PutMapping("/{memberId}/memo")
+	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
+	public ResponseHandler<Void> updateMemo(@AuthenticationPrincipal CustomMemberDetails trainer,
+											   @PathVariable Long memberId,
+											   @RequestBody MemoCommand command) {
+		memberService.updateMemo(trainer.getMemberId(), memberId, command);
+		return ResponseHandler.<Void>builder()
+				.message("메모가 수정되었습니다.")
+				.build();
+	}
 
 	@Operation(summary = "트레이너가 학생의 닉네임을 지정한다.", responses = {
 			@ApiResponse(responseCode = "404", description = "등록된 학생이 아닙니다."),
 			@ApiResponse(responseCode = "200", description = "닉네임이 설정되었습니다.")
 	})
 	@PostMapping("/nickname/{studentId}")
+	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ResponseHandler<Boolean> assignNickname(@PathVariable Long studentId,
 												   @Parameter(description = "등록할 닉네임", example = "홍박사") @RequestParam String nickname) {
 		return ResponseHandler.<Boolean>builder()
@@ -172,4 +190,5 @@ public class MemberController {
 				.message("닉네임을 지정하였습니다.")
 				.build();
 	}
+
 }

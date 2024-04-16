@@ -64,12 +64,26 @@ public class TrainerController {
     })
     @PostMapping("/members/{memberId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<TrainerMemberMappingDto> addMemberOfTrainer(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                       @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId,
-                                                                       @RequestBody MemberLessonCommand command) {
+    public ResponseHandler<TrainerMemberMappingDto> addStudentOfTrainer(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                        @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId,
+                                                                        @RequestBody MemberLessonCommand command) {
         return ResponseHandler.<TrainerMemberMappingDto>builder()
-                .data(trainerService.addMemberOfTrainer(customMemberDetails.getMember().getId(), memberId, command))
+                .data(trainerService.addStudentOfTrainer(customMemberDetails.getMember().getId(), memberId, command))
                 .message("내 학생으로 등록되었습니다.")
+                .build();
+    }
+
+    @Operation(summary = "트레이너가 내 학생을 삭제한다.", responses = {
+            @ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
+            @ApiResponse(responseCode = "200", description = "내 학생에서 삭제되었습니다.")
+    })
+    @DeleteMapping("/members/{memberId}")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    public ResponseHandler<TrainerMemberMappingDto> deleteStudentOfTrainer(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                           @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
+        trainerService.deleteStudentOfTrainer(customMemberDetails.getMember(), memberId);
+        return ResponseHandler.<TrainerMemberMappingDto>builder()
+                .message("내 학생에서 삭제되었습니다.")
                 .build();
     }
 
@@ -125,13 +139,14 @@ public class TrainerController {
             })
     @GetMapping("unattached-members")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<List<MemberDto>> findAllUnattachedMembers(@Parameter(description = "검색할 이름", example = "임채린")
+    public ResponseHandler<List<MemberDto>> findAllUnattachedMembers(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                     @Parameter(description = "검색할 이름", example = "임채린")
                                                                            @RequestParam(required = false) String searchValue,
                                                                      @Parameter(description = "정렬 조건", example = "memberId")
                                                                            @RequestParam(required = false, defaultValue = "memberId") String sortValue,
                                                                      Pageable pageable) {
         return ResponseHandler.<List<MemberDto>>builder()
-                .data(trainerService.findAllUnattachedMembers(searchValue, sortValue, pageable))
+                .data(trainerService.findAllUnattachedMembers(customMemberDetails.getMember(), searchValue, sortValue, pageable))
                 .message("트레이너가 가입된 학생을 조회하였습니다.")
                 .build();
     }

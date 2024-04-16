@@ -93,13 +93,14 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     }
 
     @Override
-    public Page<Member> findAllUnattachedMembers(String searchValue, String sortValue, Pageable pageable) {
+    public Page<Member> findAllUnattachedMembers(Long gymId, String searchValue, String sortValue, Pageable pageable) {
         Long totalCnt = queryFactory
                 .select(member.count())
                 .from(member)
                 .where(member.memberType.eq(MemberType.STUDENT)
                         , member.delYn.eq(false)
                         , nameLike(searchValue)
+                        , member.gym.id.eq(gymId)
                         , JPAExpressions.selectFrom(trainerMemberMapping)
                                 .where(trainerMemberMapping.member.eq(member))
                                 .notExists())
@@ -110,6 +111,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .where(member.memberType.eq(MemberType.STUDENT)
                         , member.delYn.eq(false)
                         , nameLike(searchValue)
+                        , member.gym.id.eq(gymId)
                         , JPAExpressions.selectFrom(trainerMemberMapping)
                                 .where(trainerMemberMapping.member.eq(member))
                                 .notExists())

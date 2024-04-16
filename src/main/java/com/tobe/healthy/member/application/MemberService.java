@@ -33,6 +33,7 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
+import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import io.jsonwebtoken.impl.Base64UrlCodec;
 import lombok.RequiredArgsConstructor;
@@ -619,5 +620,13 @@ public class MemberService {
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		member.assignNickname(nickname);
 		return true;
+	}
+
+	public void updateMemo(Long trainerId, Long mmeberId, MemoCommand command) {
+		memberRepository.findById(mmeberId)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		TrainerMemberMapping mapping = mappingRepository.findByTrainerIdAndMemberId(trainerId, mmeberId)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
+		mapping.changeMemo(command.getMemo());
 	}
 }

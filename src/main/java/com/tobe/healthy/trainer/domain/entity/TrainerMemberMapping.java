@@ -54,4 +54,7 @@ public class TrainerMemberMapping extends BaseTimeEntity {
     public void changeRanking(int ranking){
         this.ranking = ranking;
     }
+    public void changeMemo(String memo){
+        this.memo = memo;
+    }
 }
