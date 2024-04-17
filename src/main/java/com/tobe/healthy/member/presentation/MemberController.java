@@ -152,12 +152,12 @@ public class MemberController {
 			@ApiResponse(responseCode = "404", description = "존재하지 않는 학생"),
 			@ApiResponse(responseCode = "200", description = "수강권 정보를 반환한다.")
 	})
-	@GetMapping("/{memberId}/course")
-	public ResponseHandler<CourseGetResult> getCourse(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
+	@GetMapping("/course")
+	public ResponseHandler<CourseGetResult> getCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 													  @AuthenticationPrincipal CustomMemberDetails loginMember,
 													  Pageable pageable) {
 		return ResponseHandler.<CourseGetResult>builder()
-				.data(courseService.getCourse(memberId, loginMember.getMember(), pageable))
+				.data(courseService.getCourse(customMemberDetails.getMemberId(), loginMember.getMember(), pageable))
 				.message("수강권이 조회되었습니다.")
 				.build();
 	}
