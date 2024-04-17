@@ -16,7 +16,7 @@ public class CourseGetResult {
     private String gymName;
 
     @Builder.Default
-    private List<CourseHistoryDto> courseHistories = new ArrayList<>();
+    private List<CourseHistoryDto> courseHistories = null;
 
     public static CourseGetResult create(CourseDto courseDto, List<CourseHistoryDto> courseHistoryDtos, String gymName) {
         return CourseGetResult.builder()

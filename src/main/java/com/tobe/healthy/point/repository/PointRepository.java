@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface PointRepository extends JpaRepository<Point, Long> {
+public interface PointRepository extends JpaRepository<Point, Long>, PointRepositoryCustom {
 
     @Query(value = "select RANK() OVER (ORDER BY a.point_sum desc) AS ranking, a.member_id, a.point_sum " +
             "from (" +
