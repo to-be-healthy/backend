@@ -139,7 +139,9 @@ public class WorkoutHistoryService {
     public void likeWorkoutHistory(Member member, Long workoutHistoryId) {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndDelYnFalse(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
-        workoutHistoryLikeRepository.save(WorkoutHistoryLike.from(WorkoutHistoryLikePK.create(history, member)));
+        WorkoutHistoryLikePK likePk = WorkoutHistoryLikePK.create(history, member);
+        workoutHistoryLikeRepository.findById(likePk).ifPresent(i -> {throw new CustomException(LIKE_ALREADY_EXISTS);});
+        workoutHistoryLikeRepository.save(WorkoutHistoryLike.from(likePk));
         history.updateLikeCnt(workoutHistoryLikeRepository.getLikeCnt(history.getWorkoutHistoryId()));
     }
 

@@ -1,6 +1,8 @@
 package com.tobe.healthy.workout.domain.dto;
 
+import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistoryComment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Data
@@ -17,7 +20,6 @@ import java.time.LocalDateTime;
 public class WorkoutHistoryCommentDto {
 
     private Long commentId;
-    private WorkoutHistoryDto workoutHistory;
     private MemberDto member;
     private String content;
     private LocalDateTime createdAt;
@@ -28,12 +30,13 @@ public class WorkoutHistoryCommentDto {
     private Long orderNum;
     private boolean delYn;
 
-    private String name;
+    @Builder.Default
+    private List<WorkoutHistoryCommentDto> reply = null;
+
 
     public static WorkoutHistoryCommentDto from(WorkoutHistoryComment comment) {
         return WorkoutHistoryCommentDto.builder()
                 .commentId(comment.getCommentId())
-                .workoutHistory(WorkoutHistoryDto.from(comment.getWorkoutHistory()))
                 .member(MemberDto.from(comment.getMember()))
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
@@ -42,7 +45,20 @@ public class WorkoutHistoryCommentDto {
                 .depth(comment.getDepth())
                 .orderNum(comment.getOrderNum())
                 .delYn(comment.getDelYn())
-                .name(comment.getMember().getName())
+                .build();
+    }
+
+    public static WorkoutHistoryCommentDto create(WorkoutHistoryComment comment, Profile profile) {
+        return WorkoutHistoryCommentDto.builder()
+                .commentId(comment.getCommentId())
+                .member(MemberDto.create(comment.getMember(), profile))
+                .content(comment.getContent())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .parentCommentId(comment.getParentCommentId())
+                .depth(comment.getDepth())
+                .orderNum(comment.getOrderNum())
+                .delYn(comment.getDelYn())
                 .build();
     }
 }

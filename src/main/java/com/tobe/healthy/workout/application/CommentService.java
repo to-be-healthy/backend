@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,7 @@ public class CommentService {
     private final WorkoutHistoryCommentRepository commentRepository;
 
     @Transactional
-    public WorkoutHistoryCommentDto addComment(Long workoutHistoryId, HistoryCommentAddCommand command, Member member) {
+    public void addComment(Long workoutHistoryId, HistoryCommentAddCommand command, Member member) {
         WorkoutHistory history = workoutHistoryRepository.findById(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         Long depth = 0L, orderNum = 0L;
@@ -45,7 +46,6 @@ public class CommentService {
         }
         WorkoutHistoryComment comment = WorkoutHistoryComment.create(history, member, command, depth, orderNum);
         commentRepository.save(comment);
-        return WorkoutHistoryCommentDto.from(comment);
     }
 
     @Transactional
@@ -58,7 +58,18 @@ public class CommentService {
 
     public List<WorkoutHistoryCommentDto> getCommentsByWorkoutHistoryId(Long workoutHistoryId, Pageable pageable) {
         List<WorkoutHistoryComment> comments = commentRepository.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable).stream().toList();
-        return comments.stream().map(WorkoutHistoryCommentDto::from).collect(Collectors.toList());
+        if(comments.isEmpty()) return null;
+
+        List<WorkoutHistoryCommentDto> dtos = comments.stream()
+                .map(c -> WorkoutHistoryCommentDto.create(c, c.getMember().getProfileId())).toList();
+        Map<Boolean, List<WorkoutHistoryCommentDto>> dtos2 = dtos.stream()
+                .collect(Collectors.partitioningBy(c -> c.getParentCommentId() == null));
+        List<WorkoutHistoryCommentDto> parent = dtos2.get(true);
+        List<WorkoutHistoryCommentDto> child = dtos2.get(false);
+
+        Map<Long, List<WorkoutHistoryCommentDto>> childByGroupList = child.stream()
+                .collect(Collectors.groupingBy(WorkoutHistoryCommentDto::getParentCommentId, Collectors.toList()));
+        return parent.stream().peek(p -> p.setReply(childByGroupList.get(p.getCommentId()))).toList();
     }
 
     @Transactional

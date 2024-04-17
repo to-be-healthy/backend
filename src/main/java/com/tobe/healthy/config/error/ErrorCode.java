@@ -37,6 +37,7 @@ public enum ErrorCode {
 	COURSE_ALREADY_EXISTS(BAD_REQUEST, "C_020", "잔여 수강권이 존재합니다."),
 	COURSE_NOT_FOUND(NOT_FOUND, "C_020", "수강권이 존재하지 않습니다."),
 	LESSON_CNT_NOT_VALID(BAD_REQUEST, "C_020", "수강권 횟수가 유효하지 않습니다."),
+	LIKE_ALREADY_EXISTS(BAD_REQUEST, "C_020", "이미 좋아요 하였습니다."),
 
 	MEMBER_NAME_LENGTH_NOT_VALID(BAD_REQUEST, "C_020", "이름은 최소 2자 이상 입력해 주세요."),
 	MEMBER_NAME_NOT_VALID(BAD_REQUEST, "C_021", "이름은 한글 또는 영어만 입력할 수 있습니다."),
