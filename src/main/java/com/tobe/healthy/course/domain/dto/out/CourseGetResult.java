@@ -13,14 +13,16 @@ import java.util.List;
 public class CourseGetResult {
 
     private CourseDto course;
+    private String gymName;
 
     @Builder.Default
     private List<CourseHistoryDto> courseHistories = new ArrayList<>();
 
-    public static CourseGetResult create(CourseDto courseDto, List<CourseHistoryDto> courseHistoryDtos) {
+    public static CourseGetResult create(CourseDto courseDto, List<CourseHistoryDto> courseHistoryDtos, String gymName) {
         return CourseGetResult.builder()
                 .course(courseDto)
                 .courseHistories(courseHistoryDtos)
+                .gymName(gymName)
                 .build();
     }
 }

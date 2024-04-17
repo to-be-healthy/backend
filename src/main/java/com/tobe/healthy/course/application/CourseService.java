@@ -75,7 +75,8 @@ public class CourseService {
         Long trainerId = MemberType.TRAINER.equals(loginMember.getMemberType()) ? loginMember.getId() : null;
         Page<CourseHistory> histories = courseHistoryRepository.getCourseHistory(memberId, trainerId, pageable);
         List<CourseHistoryDto> courseHistoryDtos = histories.map(CourseHistoryDto::from).stream().toList();
-        return CourseGetResult.create(usingCourse, courseHistoryDtos);
+        Member member = memberRepository.findByMemberIdWithGym(memberId);
+        return CourseGetResult.create(usingCourse, courseHistoryDtos, member.getGym().getName());
     }
 
     public void updateCourse(Long trainerId, Long courseId, CourseUpdateCommand command) {
