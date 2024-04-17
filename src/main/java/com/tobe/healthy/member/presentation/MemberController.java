@@ -21,11 +21,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -141,9 +143,10 @@ public class MemberController {
 	})
 	@GetMapping("/{memberId}/workout-histories")
 	public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistory(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
+																	  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 																	  Pageable pageable) {
 		return ResponseHandler.<List<WorkoutHistoryDto>>builder()
-				.data(workoutService.getWorkoutHistory(memberId, pageable))
+				.data(workoutService.getWorkoutHistory(memberId, pageable, searchDate))
 				.message("운동기록이 조회되었습니다.")
 				.build();
 	}
