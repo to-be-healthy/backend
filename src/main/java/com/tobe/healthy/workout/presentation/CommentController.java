@@ -16,13 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -53,11 +47,11 @@ public class CommentController {
             @ApiResponse(responseCode = "200", description = "운동기록 댓글을 반환한다.")
     })
     @PostMapping("/{workoutHistoryId}/comments")
-    public ResponseHandler<WorkoutHistoryCommentDto> addComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    public ResponseHandler<Void> addComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                 @Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId,
-                                                                @Valid HistoryCommentAddCommand command) {
-        return ResponseHandler.<WorkoutHistoryCommentDto>builder()
-                .data(commentService.addComment(workoutHistoryId, command, customMemberDetails.getMember()))
+                                                                @Valid @RequestBody HistoryCommentAddCommand command) {
+        commentService.addComment(workoutHistoryId, command, customMemberDetails.getMember());
+        return ResponseHandler.<Void>builder()
                 .message("댓글이 등록되었습니다.")
                 .build();
     }
@@ -66,11 +60,11 @@ public class CommentController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동기록 댓글을 반환한다.")
     })
-    @PutMapping("/{workoutHistoryId}/comments/{commentId}")
+    @PatchMapping("/{workoutHistoryId}/comments/{commentId}")
     public ResponseHandler<WorkoutHistoryCommentDto> updateComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                    @Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                    @Parameter(description = "운동기록의 댓글 ID") @PathVariable("commentId") Long commentId,
-                                                                  @Valid HistoryCommentAddCommand command) {
+                                                                  @Valid @RequestBody HistoryCommentAddCommand command) {
         return ResponseHandler.<WorkoutHistoryCommentDto>builder()
                 .data(commentService.updateComment(customMemberDetails.getMember(), workoutHistoryId, commentId, command))
                 .message("댓글이 수정되었습니다.")
@@ -80,7 +74,7 @@ public class CommentController {
     @Operation(summary = "운동기록의 댓글을 삭제한다.", responses = {
             @ApiResponse(responseCode = "200", description = "운동기록 댓글 삭제 완료.")
     })
-    @PatchMapping("/{workoutHistoryId}/comments/{commentId}")
+    @DeleteMapping("/{workoutHistoryId}/comments/{commentId}")
     public ResponseHandler<Void> deleteComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                @Parameter(description = "운동기록 ID")@PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                @Parameter(description = "운동기록의 댓글 ID")@PathVariable("commentId") Long commentId) {

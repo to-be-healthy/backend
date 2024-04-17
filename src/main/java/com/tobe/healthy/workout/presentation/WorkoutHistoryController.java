@@ -16,14 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -63,7 +56,7 @@ public class WorkoutHistoryController {
     @Operation(summary = "운동기록 삭제", responses = {
             @ApiResponse(responseCode = "200", description = "운동기록 삭제 완료.")
     })
-    @PatchMapping("/{workoutHistoryId}")
+    @DeleteMapping("/{workoutHistoryId}")
     public ResponseHandler<Void> deleteWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                       @Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         workoutService.deleteWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
@@ -76,7 +69,7 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동기록ID, 회원ID, 운동기록 내용을 반환한다.")
     })
-    @PutMapping("/{workoutHistoryId}")
+    @PatchMapping("/{workoutHistoryId}")
     public ResponseHandler<WorkoutHistoryDto> updateWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                    @Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                   @Valid HistoryAddCommand command) {
