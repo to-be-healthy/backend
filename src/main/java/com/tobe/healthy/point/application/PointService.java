@@ -75,9 +75,9 @@ public class PointService {
         Long memberId = member.getId();
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        Page<Point> histories = pointRepository.getPoint(member.getId(), searchDate, pageable);
+        Page<Point> histories = pointRepository.getPoint(memberId, searchDate, pageable);
+        int point = pointRepository.getSumPoint(memberId, searchDate);
         List<PointDto> pointHistoryDtos = histories.map(PointDto::from).stream().toList();
-        int point = pointHistoryDtos.stream().mapToInt(p -> p.getCalculation() == MINUS ? p.getPoint()*(-1) : p.getPoint()).sum();
         return PointGetResult.create(point, pointHistoryDtos.isEmpty() ? null : pointHistoryDtos);
     }
 }

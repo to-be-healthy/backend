@@ -30,4 +30,9 @@ public interface PointRepository extends JpaRepository<Point, Long>, PointReposi
 
     long countByMemberIdAndTypeAndCalculationAndCreatedAtBetween(Long memberId, PointType type, Calculation calculation, LocalDateTime start, LocalDateTime end);
 
+    @Query(value = "select ifnull(sum(case when p.calculation = 'PLUS' then p.point " +
+            "when p.calculation = 'MINUS' then p.point*(-1) end), 0) AS point_sum " +
+            "from point p where member_id = :memberId " +
+            "and date_format(p.created_at, '%Y-%m') = :searchDate", nativeQuery = true)
+    int getSumPoint(Long memberId, String searchDate);
 }
