@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
-import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 
 
@@ -76,8 +75,9 @@ public class PointService {
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         Page<Point> histories = pointRepository.getPoint(memberId, searchDate, pageable);
-        int point = pointRepository.getSumPoint(memberId, searchDate);
+        int monthPoint = pointRepository.getPointOfSearchMonth(memberId, searchDate);
+        int totalPoint = pointRepository.getTotalPoint(memberId);
         List<PointDto> pointHistoryDtos = histories.map(PointDto::from).stream().toList();
-        return PointGetResult.create(point, pointHistoryDtos.isEmpty() ? null : pointHistoryDtos);
+        return PointGetResult.create(monthPoint, totalPoint, pointHistoryDtos.isEmpty() ? null : pointHistoryDtos);
     }
 }

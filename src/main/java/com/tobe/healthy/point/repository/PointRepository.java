@@ -34,5 +34,11 @@ public interface PointRepository extends JpaRepository<Point, Long>, PointReposi
             "when p.calculation = 'MINUS' then p.point*(-1) end), 0) AS point_sum " +
             "from point p where member_id = :memberId " +
             "and date_format(p.created_at, '%Y-%m') = :searchDate", nativeQuery = true)
-    int getSumPoint(Long memberId, String searchDate);
+    int getPointOfSearchMonth(Long memberId, String searchDate);
+
+    @Query(value = "select ifnull(sum(case when p.calculation = 'PLUS' then p.point " +
+            "when p.calculation = 'MINUS' then p.point*(-1) end), 0) AS point_sum " +
+            "from point p where member_id = :memberId", nativeQuery = true)
+    int getTotalPoint(Long memberId);
+
 }
