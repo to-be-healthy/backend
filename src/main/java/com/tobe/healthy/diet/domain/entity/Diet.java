@@ -27,8 +27,6 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     @Column(name = "diet_id")
     private Long dietId;
 
-    private String content;
-
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
@@ -44,6 +42,18 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     @ColumnDefault("0")
     @Builder.Default
     private Long likeCnt = 0L;
+
+    @ColumnDefault("false")
+    @Builder.Default
+    private Boolean fastBreakfast = false;
+
+    @ColumnDefault("false")
+    @Builder.Default
+    private Boolean fastLunch = false;
+
+    @ColumnDefault("false")
+    @Builder.Default
+    private Boolean fastDinner = false;
 
     @Builder.Default
     @OneToMany(mappedBy = "diet", cascade = CascadeType.ALL)

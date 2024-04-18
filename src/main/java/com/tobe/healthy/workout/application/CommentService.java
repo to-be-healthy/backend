@@ -23,6 +23,7 @@ import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_COMMENT_NO
 import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_NOT_FOUND;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class CommentService {
@@ -30,7 +31,6 @@ public class CommentService {
     private final WorkoutHistoryRepository workoutHistoryRepository;
     private final WorkoutHistoryCommentRepository commentRepository;
 
-    @Transactional
     public void addComment(Long workoutHistoryId, HistoryCommentAddCommand command, Member member) {
         WorkoutHistory history = workoutHistoryRepository.findById(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
@@ -48,7 +48,6 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
-    @Transactional
     public WorkoutHistoryCommentDto updateComment(Member member, Long workoutHistoryId, Long commentId, HistoryCommentAddCommand command) {
         WorkoutHistoryComment comment = commentRepository.findByCommentIdAndMemberIdAndDelYnFalse(commentId, member.getId())
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_COMMENT_NOT_FOUND));
@@ -72,7 +71,6 @@ public class CommentService {
         return parent.stream().peek(p -> p.setReply(childByGroupList.get(p.getCommentId()))).toList();
     }
 
-    @Transactional
     public void deleteComment(Member member, Long workoutHistoryId, Long commentId) {
         WorkoutHistoryComment comment = commentRepository.findByCommentIdAndMemberIdAndDelYnFalse(commentId, member.getId())
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_COMMENT_NOT_FOUND));

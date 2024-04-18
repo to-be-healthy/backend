@@ -4,6 +4,8 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
+import com.tobe.healthy.diet.application.DietService;
+import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemoCommand;
@@ -42,6 +44,7 @@ public class MemberController {
 	private final WorkoutHistoryService workoutService;
 	private final CourseService courseService;
 	private final PointService pointService;
+	private final DietService dietService;
 
 	@Operation(summary = "내 정보 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청."),
@@ -149,6 +152,20 @@ public class MemberController {
 		return ResponseHandler.<List<WorkoutHistoryDto>>builder()
 				.data(workoutService.getWorkoutHistory(memberId, pageable, searchDate))
 				.message("운동기록이 조회되었습니다.")
+				.build();
+	}
+
+	@Operation(summary = "학생의 식단기록 목록 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
+	})
+	@GetMapping("/{memberId}/diets")
+	public ResponseHandler<List<DietDto>> getDiet(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
+																	  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+																	  Pageable pageable) {
+		return ResponseHandler.<List<DietDto>>builder()
+				.data(dietService.getDiet(memberId, pageable, searchDate))
+				.message("식단기록 조회되었습니다.")
 				.build();
 	}
 
