@@ -43,6 +43,10 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     @Builder.Default
     private Long likeCnt = 0L;
 
+    @ColumnDefault("0")
+    @Builder.Default
+    private Long commentCnt = 0L;
+
     @ColumnDefault("false")
     @Builder.Default
     private Boolean fastBreakfast = false;

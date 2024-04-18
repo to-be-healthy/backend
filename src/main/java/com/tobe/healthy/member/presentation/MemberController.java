@@ -29,7 +29,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -169,15 +168,30 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "학생의 수강권 조회", responses = {
+	@Operation(summary = "학생이 본인의 수강권 조회", responses = {
 			@ApiResponse(responseCode = "404", description = "존재하지 않는 학생"),
 			@ApiResponse(responseCode = "200", description = "수강권 정보를 반환한다.")
 	})
 	@GetMapping("/course")
-	public ResponseHandler<CourseGetResult> getCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-													  Pageable pageable) {
+	public ResponseHandler<CourseGetResult> getMyCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+														Pageable pageable) {
 		return ResponseHandler.<CourseGetResult>builder()
-				.data(courseService.getCourse(customMemberDetails.getMember(), pageable))
+				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, customMemberDetails.getMemberId()))
+				.message("수강권이 조회되었습니다.")
+				.build();
+	}
+
+	@Operation(summary = "트레이너가 학생의 수강권 조회", responses = {
+			@ApiResponse(responseCode = "404", description = "존재하지 않는 학생"),
+			@ApiResponse(responseCode = "200", description = "수강권 정보를 반환한다.")
+	})
+	@GetMapping("/{memberId}/course")
+	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
+	public ResponseHandler<CourseGetResult> getCourse(@Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId,
+														@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+														Pageable pageable) {
+		return ResponseHandler.<CourseGetResult>builder()
+				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, memberId))
 				.message("수강권이 조회되었습니다.")
 				.build();
 	}

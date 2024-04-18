@@ -1,16 +1,10 @@
 package com.tobe.healthy.diet.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.file.domain.dto.DietFileDto;
-import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.member.domain.dto.MemberDto;
-import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import lombok.Builder;
 import lombok.Data;
-import org.hibernate.annotations.ColumnDefault;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +16,7 @@ public class DietDto {
     private Long dietId;
     private MemberDto member;
     private Long likeCnt;
+    private Long commentCnt;
 
     @Builder.Default
     private Boolean fastBreakfast = false;
@@ -47,6 +42,7 @@ public class DietDto {
                 .dietId(diet.getDietId())
                 .member(MemberDto.from(diet.getMember()))
                 .likeCnt(diet.getLikeCnt())
+                .commentCnt(diet.getCommentCnt())
                 .fastBreakfast(diet.getFastBreakfast())
                 .fastLunch(diet.getFastLunch())
                 .fastDinner(diet.getFastDinner())

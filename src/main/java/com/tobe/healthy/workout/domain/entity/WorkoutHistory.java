@@ -47,6 +47,10 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     @Builder.Default
     private Long likeCnt = 0L;
 
+    @ColumnDefault("0")
+    @Builder.Default
+    private Long commentCnt = 0L;
+
     @Builder.Default
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
     private List<WorkoutHistoryFile> historyFiles = new ArrayList<>();
@@ -75,6 +79,10 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     public void updateLikeCnt(Long likeCnt){
         this.likeCnt = likeCnt;
+    }
+
+    public void updateCommentCnt(Long commentCnt){
+        this.commentCnt = commentCnt;
     }
 
     public void deleteWorkoutHistory() {
