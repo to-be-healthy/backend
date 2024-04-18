@@ -13,7 +13,8 @@ public interface WorkoutHistoryCommentRepository extends JpaRepository<WorkoutHi
 
     Long countByWorkoutHistoryAndParentCommentIdAndDelYnFalse(WorkoutHistory history, Long parentCommentId);
 
-    Long countByWorkoutHistoryAndDelYnFalse(WorkoutHistory history);
+    Long countByWorkoutHistory(WorkoutHistory history);
 
     Optional<WorkoutHistoryComment> findByCommentIdAndDelYnFalse(@Param("commentId") Long parentCommentId);
+
 }

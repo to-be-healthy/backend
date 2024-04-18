@@ -4,6 +4,8 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
+import com.tobe.healthy.diet.application.DietService;
+import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemoCommand;
@@ -27,7 +29,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -42,6 +43,7 @@ public class MemberController {
 	private final WorkoutHistoryService workoutService;
 	private final CourseService courseService;
 	private final PointService pointService;
+	private final DietService dietService;
 
 	@Operation(summary = "내 정보 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청."),
@@ -152,15 +154,44 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "학생의 수강권 조회", responses = {
+	@Operation(summary = "학생의 식단기록 목록 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
+	})
+	@GetMapping("/{memberId}/diets")
+	public ResponseHandler<List<DietDto>> getDiet(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
+																	  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+																	  Pageable pageable) {
+		return ResponseHandler.<List<DietDto>>builder()
+				.data(dietService.getDiet(memberId, pageable, searchDate))
+				.message("식단기록 조회되었습니다.")
+				.build();
+	}
+
+	@Operation(summary = "학생이 본인의 수강권 조회", responses = {
 			@ApiResponse(responseCode = "404", description = "존재하지 않는 학생"),
 			@ApiResponse(responseCode = "200", description = "수강권 정보를 반환한다.")
 	})
 	@GetMapping("/course")
-	public ResponseHandler<CourseGetResult> getCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-													  Pageable pageable) {
+	public ResponseHandler<CourseGetResult> getMyCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+														Pageable pageable) {
 		return ResponseHandler.<CourseGetResult>builder()
-				.data(courseService.getCourse(customMemberDetails.getMember(), pageable))
+				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, customMemberDetails.getMemberId()))
+				.message("수강권이 조회되었습니다.")
+				.build();
+	}
+
+	@Operation(summary = "트레이너가 학생의 수강권 조회", responses = {
+			@ApiResponse(responseCode = "404", description = "존재하지 않는 학생"),
+			@ApiResponse(responseCode = "200", description = "수강권 정보를 반환한다.")
+	})
+	@GetMapping("/{memberId}/course")
+	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
+	public ResponseHandler<CourseGetResult> getCourse(@Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId,
+														@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+														Pageable pageable) {
+		return ResponseHandler.<CourseGetResult>builder()
+				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, memberId))
 				.message("수강권이 조회되었습니다.")
 				.build();
 	}

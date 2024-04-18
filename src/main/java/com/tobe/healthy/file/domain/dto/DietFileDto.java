@@ -10,6 +10,7 @@ import lombok.Data;
 public class DietFileDto {
 
     private Long id;
+    private Long dietId;
     private String fileName;
     private String originalName;
     private String extension;
@@ -26,6 +27,7 @@ public class DietFileDto {
                 .fileSize(dietFile.getFileSize())
                 .fileUrl(dietFile.getFileUrl())
                 .type(dietFile.getType())
+                .dietId(dietFile.getDiet().getDietId())
                 .build();
     }
 }

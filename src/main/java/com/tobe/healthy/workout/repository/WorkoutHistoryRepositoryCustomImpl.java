@@ -1,17 +1,12 @@
 package com.tobe.healthy.workout.repository;
 
 import com.querydsl.core.types.ConstantImpl;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
-import com.tobe.healthy.file.domain.entity.QWorkoutHistoryFile;
 import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.entity.QWorkoutHistory;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,7 +15,6 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static com.tobe.healthy.file.domain.entity.QWorkoutHistoryFile.workoutHistoryFile;

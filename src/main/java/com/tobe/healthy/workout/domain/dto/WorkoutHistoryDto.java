@@ -23,9 +23,9 @@ public class WorkoutHistoryDto {
 
     private Long workoutHistoryId;
     private String content;
-    private MemberDto trainer;
     private MemberDto member;
     private Long likeCnt;
+    private Long commentCnt;
 
     @Builder.Default
     @JsonIgnore
@@ -52,6 +52,7 @@ public class WorkoutHistoryDto {
                 .content(history.getContent())
                 .member(MemberDto.from(history.getMember()))
                 .likeCnt(history.getLikeCnt())
+                .commentCnt(history.getCommentCnt())
                 .build();
     }
 
