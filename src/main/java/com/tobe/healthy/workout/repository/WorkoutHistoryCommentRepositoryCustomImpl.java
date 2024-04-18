@@ -3,6 +3,7 @@ package com.tobe.healthy.workout.repository;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tobe.healthy.file.domain.entity.QProfile;
 import com.tobe.healthy.member.domain.entity.QMember;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryCommentDto;
 import com.tobe.healthy.workout.domain.entity.QWorkoutHistoryComment;
@@ -16,6 +17,8 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
+import static com.tobe.healthy.member.domain.entity.QMember.member;
+import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
 import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryComment.workoutHistoryComment;
 
 
@@ -27,14 +30,19 @@ public class WorkoutHistoryCommentRepositoryCustomImpl implements WorkoutHistory
 
     @Override
     public Page<WorkoutHistoryComment> getCommentsByWorkoutHistoryId(Long workoutHistoryId, Pageable pageable) {
+        QProfile profileId = new QProfile("profileId");
         Long totalCnt = queryFactory
                 .select(workoutHistoryComment.count())
                 .from(workoutHistoryComment)
+                .leftJoin(workoutHistoryComment.member, member)
+                .leftJoin(member.profileId, profileId)
                 .where(historyIdEq(workoutHistoryId))
                 .fetchOne();
         List<WorkoutHistoryComment> comments =  queryFactory
                 .select(workoutHistoryComment)
                 .from(workoutHistoryComment)
+                .leftJoin(workoutHistoryComment.member, member).fetchJoin()
+                .leftJoin(member.profileId, profileId).fetchJoin()
                 .where(historyIdEq(workoutHistoryId))
                 .orderBy(workoutHistoryComment.orderNum.asc(), workoutHistoryComment.createdAt.asc())
                 .offset(pageable.getOffset())
