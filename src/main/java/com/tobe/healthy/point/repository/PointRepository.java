@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface PointRepository extends JpaRepository<Point, Long> {
+public interface PointRepository extends JpaRepository<Point, Long>, PointRepositoryCustom {
 
     @Query(value = "select RANK() OVER (ORDER BY a.point_sum desc) AS ranking, a.member_id, a.point_sum " +
             "from (" +
@@ -29,5 +29,16 @@ public interface PointRepository extends JpaRepository<Point, Long> {
     List<Object[]> calculateRank(List<Long> members);
 
     long countByMemberIdAndTypeAndCalculationAndCreatedAtBetween(Long memberId, PointType type, Calculation calculation, LocalDateTime start, LocalDateTime end);
+
+    @Query(value = "select ifnull(sum(case when p.calculation = 'PLUS' then p.point " +
+            "when p.calculation = 'MINUS' then p.point*(-1) end), 0) AS point_sum " +
+            "from point p where member_id = :memberId " +
+            "and date_format(p.created_at, '%Y-%m') = :searchDate", nativeQuery = true)
+    int getPointOfSearchMonth(Long memberId, String searchDate);
+
+    @Query(value = "select ifnull(sum(case when p.calculation = 'PLUS' then p.point " +
+            "when p.calculation = 'MINUS' then p.point*(-1) end), 0) AS point_sum " +
+            "from point p where member_id = :memberId", nativeQuery = true)
+    int getTotalPoint(Long memberId);
 
 }

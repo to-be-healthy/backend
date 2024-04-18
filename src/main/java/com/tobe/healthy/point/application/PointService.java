@@ -3,7 +3,9 @@ package com.tobe.healthy.point.application;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.point.domain.dto.PointDto;
 import com.tobe.healthy.point.domain.dto.RankDto;
+import com.tobe.healthy.point.domain.dto.out.PointGetResult;
 import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.point.domain.entity.Point;
 import com.tobe.healthy.point.domain.entity.PointType;
@@ -12,6 +14,8 @@ import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +23,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 
 
 @Service
@@ -56,7 +61,7 @@ public class PointService {
     public void updatePoint(Long memberId, PointType type, Calculation calculation, int point){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        if(Calculation.PLUS == calculation){
+        if(PLUS == calculation){
             LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
             LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
             long cnt = pointRepository.countByMemberIdAndTypeAndCalculationAndCreatedAtBetween(memberId, type, calculation, start, end);
@@ -65,4 +70,14 @@ public class PointService {
         pointRepository.save(Point.create(member, type, calculation, point));
     }
 
+    public PointGetResult getPoint(Member member, String searchDate, Pageable pageable) {
+        Long memberId = member.getId();
+        memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        Page<Point> histories = pointRepository.getPoint(memberId, searchDate, pageable);
+        int monthPoint = pointRepository.getPointOfSearchMonth(memberId, searchDate);
+        int totalPoint = pointRepository.getTotalPoint(memberId);
+        List<PointDto> pointHistoryDtos = histories.map(PointDto::from).stream().toList();
+        return PointGetResult.create(monthPoint, totalPoint, pointHistoryDtos.isEmpty() ? null : pointHistoryDtos);
+    }
 }

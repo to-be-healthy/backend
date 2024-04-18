@@ -7,11 +7,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface WorkoutHistoryRepositoryCustom {
 
-    Page<WorkoutHistory> getWorkoutHistory(@Param("memberId") Long memberId, Pageable pageable);
+    Page<WorkoutHistory> getWorkoutHistoryOfMonth(@Param("memberId") Long memberId, Pageable pageable, String searchDate);
     Page<WorkoutHistory> getWorkoutHistoryByTrainer(Member trainer, Pageable pageable);
     List<WorkoutHistoryFile> getWorkoutHistoryFile(@Param("ids") List<Long> ids);
 }

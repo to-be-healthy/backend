@@ -66,7 +66,8 @@ public class CourseService {
         courseRepository.deleteByCourseIdAndTrainerId(courseId, trainerId);
     }
 
-    public CourseGetResult getCourse(Long memberId, Member loginMember, Pageable pageable) {
+    public CourseGetResult getCourse(Member loginMember, Pageable pageable) {
+        Long memberId = loginMember.getId();
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, 0);
@@ -75,7 +76,8 @@ public class CourseService {
         Long trainerId = MemberType.TRAINER.equals(loginMember.getMemberType()) ? loginMember.getId() : null;
         Page<CourseHistory> histories = courseHistoryRepository.getCourseHistory(memberId, trainerId, pageable);
         List<CourseHistoryDto> courseHistoryDtos = histories.map(CourseHistoryDto::from).stream().toList();
-        return CourseGetResult.create(usingCourse, courseHistoryDtos);
+        Member member = memberRepository.findByMemberIdWithGym(memberId);
+        return CourseGetResult.create(usingCourse, courseHistoryDtos.isEmpty() ? null : courseHistoryDtos, member.getGym().getName());
     }
 
     public void updateCourse(Long trainerId, Long courseId, CourseUpdateCommand command) {

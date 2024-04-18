@@ -1,7 +1,10 @@
 package com.tobe.healthy.workout.repository;
 
+import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.file.domain.entity.QWorkoutHistoryFile;
@@ -17,6 +20,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static com.tobe.healthy.file.domain.entity.QWorkoutHistoryFile.workoutHistoryFile;
@@ -29,16 +33,16 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<WorkoutHistory> getWorkoutHistory(Long memberId, Pageable pageable) {
+    public Page<WorkoutHistory> getWorkoutHistoryOfMonth(Long memberId, Pageable pageable, String searchDate) {
         Long totalCnt = queryFactory
                 .select(workoutHistory.count())
                 .from(workoutHistory)
-                .where(workoutHistory.member.id.eq(memberId), historyDeYnEq(false))
+                .where(workoutHistory.member.id.eq(memberId), historyDeYnEq(false), convertDateFormat(searchDate))
                 .fetchOne();
         List<WorkoutHistory> workoutHistories =  queryFactory
                 .select(workoutHistory)
                 .from(workoutHistory)
-                .where(workoutHistory.member.id.eq(memberId), historyDeYnEq(false))
+                .where(workoutHistory.member.id.eq(memberId), historyDeYnEq(false), convertDateFormat(searchDate))
                 .orderBy(workoutHistory.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -79,6 +83,15 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
 
     private BooleanExpression historyFileDeYnEq(boolean bool) {
         return workoutHistoryFile.delYn.eq(bool);
+    }
+
+    private BooleanExpression convertDateFormat(String searchDate) {
+        if (ObjectUtils.isEmpty(searchDate)) return null;
+        StringTemplate stringTemplate = Expressions.stringTemplate(
+                "DATE_FORMAT({0}, {1})"
+                , workoutHistory.createdAt
+                , ConstantImpl.create("%Y-%m"));
+        return stringTemplate.eq(searchDate);
     }
 
 }

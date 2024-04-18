@@ -3,14 +3,14 @@ package com.tobe.healthy.member.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.course.application.CourseService;
-import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemoCommand;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
-import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
+import com.tobe.healthy.point.application.PointService;
+import com.tobe.healthy.point.domain.dto.out.PointGetResult;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,11 +21,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -39,6 +41,7 @@ public class MemberController {
 	private final MemberService memberService;
 	private final WorkoutHistoryService workoutService;
 	private final CourseService courseService;
+	private final PointService pointService;
 
 	@Operation(summary = "내 정보 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청."),
@@ -141,9 +144,10 @@ public class MemberController {
 	})
 	@GetMapping("/{memberId}/workout-histories")
 	public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistory(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
+																	  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 																	  Pageable pageable) {
 		return ResponseHandler.<List<WorkoutHistoryDto>>builder()
-				.data(workoutService.getWorkoutHistory(memberId, pageable))
+				.data(workoutService.getWorkoutHistory(memberId, pageable, searchDate))
 				.message("운동기록이 조회되었습니다.")
 				.build();
 	}
@@ -154,11 +158,24 @@ public class MemberController {
 	})
 	@GetMapping("/course")
 	public ResponseHandler<CourseGetResult> getCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-													  @AuthenticationPrincipal CustomMemberDetails loginMember,
 													  Pageable pageable) {
 		return ResponseHandler.<CourseGetResult>builder()
-				.data(courseService.getCourse(customMemberDetails.getMemberId(), loginMember.getMember(), pageable))
+				.data(courseService.getCourse(customMemberDetails.getMember(), pageable))
 				.message("수강권이 조회되었습니다.")
+				.build();
+	}
+
+	@Operation(summary = "학생의 포인트 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "포인트 및 히스토리를 반환한다.")
+	})
+	@GetMapping("/point")
+	public ResponseHandler<PointGetResult> getPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+													@Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+													Pageable pageable) {
+		return ResponseHandler.<PointGetResult>builder()
+				.data(pointService.getPoint(customMemberDetails.getMember(), searchDate, pageable))
+				.message("포인트가 조회되었습니다.")
 				.build();
 	}
 
