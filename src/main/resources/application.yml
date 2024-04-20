@@ -30,12 +30,11 @@ spring:
       hibernate:
         auto_quote_keyword: true
         globally_quoted_identifiers: true
-        dialect: org.hibernate.dialect.MySQLDialect
         default_batch_fetch_size: 100
     open-in-view: false
   data:
     redis:
-      host: redis-compose #local 실행시 localhost
+      host: localhost #local 실행시 localhost
       port: 6379
 
 jwt:
@@ -84,7 +83,7 @@ aws:
   s3:
     access-key: ${AWS_S3_ACCESS_KEY}
     secret-key: ${AWS_S3_SECRET_KEY}
-    bucket-name: ${AWS_S3_BUCKET_NAME}
+    bucket-name: to-be-healthy-bucket
 
 # Spring openapi
 springdoc:
