@@ -68,6 +68,7 @@ dependencies {
 
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.696")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
+    implementation("com.google.firebase:firebase-admin:9.2.0")
 
     // kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
@@ -77,7 +78,6 @@ dependencies {
     implementation("jakarta.persistence:jakarta.persistence-api")
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-
 
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
     testCompileOnly("io.github.microutils:kotlin-logging-jvm:3.0.5")
