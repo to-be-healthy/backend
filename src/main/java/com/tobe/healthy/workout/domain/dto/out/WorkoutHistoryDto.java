@@ -1,9 +1,11 @@
-package com.tobe.healthy.workout.domain.dto;
+package com.tobe.healthy.workout.domain.dto.out;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.querydsl.core.annotations.QueryProjection;
 import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.AllArgsConstructor;
@@ -24,6 +26,7 @@ public class WorkoutHistoryDto {
     private Long workoutHistoryId;
     private String content;
     private MemberDto member;
+    private boolean isLiked;
     private Long likeCnt;
     private Long commentCnt;
 
@@ -54,6 +57,16 @@ public class WorkoutHistoryDto {
                 .likeCnt(history.getLikeCnt())
                 .commentCnt(history.getCommentCnt())
                 .build();
+    }
+
+    @QueryProjection
+    public WorkoutHistoryDto(Long workoutHistoryId, String content, Member member, boolean isLiked, Long likeCnt, Long commentCnt) {
+        this.workoutHistoryId = workoutHistoryId;
+        this.content = content;
+        this.member = MemberDto.from(member);
+        this.isLiked = isLiked;
+        this.likeCnt = likeCnt;
+        this.commentCnt = commentCnt;
     }
 
 }

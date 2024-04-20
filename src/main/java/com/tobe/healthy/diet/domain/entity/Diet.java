@@ -2,11 +2,7 @@ package com.tobe.healthy.diet.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.file.domain.entity.DietFile;
-import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.entity.CompletedExercise;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistoryComment;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;

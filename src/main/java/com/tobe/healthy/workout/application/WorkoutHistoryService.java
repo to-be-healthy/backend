@@ -10,7 +10,7 @@ import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
+import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
 import com.tobe.healthy.workout.domain.entity.*;
 import com.tobe.healthy.workout.repository.CompletedExerciseRepository;
@@ -24,7 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -75,9 +74,9 @@ public class WorkoutHistoryService {
         completedExerciseRepository.saveAll(completedExercises);
     }
 
-    public List<WorkoutHistoryDto> getWorkoutHistory(Long memberId, Pageable pageable, String searchDate) {
-        Page<WorkoutHistory> histories = workoutHistoryRepository.getWorkoutHistoryOfMonth(memberId, pageable, searchDate);
-        List<WorkoutHistoryDto> historiesDto = histories.map(WorkoutHistoryDto::from).stream().toList();
+    public List<WorkoutHistoryDto> getWorkoutHistory(Member loginMember, Long memberId, Pageable pageable, String searchDate) {
+        List<WorkoutHistoryDto> historiesDto =
+                workoutHistoryRepository.getWorkoutHistoryOfMonth(loginMember.getId(), memberId, pageable, searchDate).stream().toList();
         List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
         historiesDto = setHistoryListFile(historiesDto, ids);
         List<WorkoutHistoryDto> result = setHistoryListExercise(historiesDto, ids);

@@ -8,15 +8,11 @@ import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
 import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.domain.entity.CourseHistory;
-import com.tobe.healthy.course.domain.entity.CourseHistoryType;
 import com.tobe.healthy.course.repository.CourseHistoryRepository;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,7 +27,6 @@ import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.COURSE_CREATE;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
-import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 
 
