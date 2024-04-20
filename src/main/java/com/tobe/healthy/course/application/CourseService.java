@@ -52,7 +52,7 @@ public class CourseService {
         Long cnt = courseRepository.countByMemberIdAndRemainLessonCntGreaterThan(member.getId(), 0);
         if(0 < cnt) throw new CustomException(COURSE_ALREADY_EXISTS);
         Course course = courseRepository.save(Course.create(member, trainer, command.getLessonCnt(), command.getLessonCnt()));
-        courseHistoryRepository.save(CourseHistory.create(course, course.getLessonCnt(), PLUS, COURSE_CREATE, trainer));
+        courseHistoryRepository.save(CourseHistory.create(course, course.getTotalLessonCnt(), PLUS, COURSE_CREATE, trainer));
     }
 
     public void deleteCourse(Long trainerId, Long courseId) {

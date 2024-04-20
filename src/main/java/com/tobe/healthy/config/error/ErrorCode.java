@@ -19,6 +19,7 @@ public enum ErrorCode {
 	NOT_RESERVABLE_SCHEDULE(BAD_REQUEST, "C_007", "신청할 수 없는 일정입니다."),
 	APPLICATION_FORM_NOT_FOUND(NOT_FOUND, "C_008", "해당 수업이 존재하지 않습니다."),
 	WORKOUT_HISTORY_NOT_FOUND(NOT_FOUND, "C_009", "운동기록이 존재하지 않습니다."),
+	DIET_NOT_FOUND(NOT_FOUND, "C_009", "식단기록이 존재하지 않습니다."),
 	MAIL_AUTH_CODE_NOT_VALID(BAD_REQUEST, "C_010", "인증번호가 일치하지 않습니다.다시 확인해 주세요."),
 	REFRESH_TOKEN_NOT_VALID(BAD_REQUEST, "C_011", "갱신 토큰이 유효하지 않습니다."),
 	MEMBER_ID_DUPLICATION(BAD_REQUEST, "C_012", "사용할 수 없는 아이디입니다."),

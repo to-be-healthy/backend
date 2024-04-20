@@ -59,4 +59,8 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     @OneToMany(mappedBy = "diet", cascade = CascadeType.ALL)
     private List<DietFile> dietFiles = new ArrayList<>();
 
+    public void updateLikeCnt(Long likeCnt){
+        this.likeCnt = likeCnt;
+    }
+
 }
