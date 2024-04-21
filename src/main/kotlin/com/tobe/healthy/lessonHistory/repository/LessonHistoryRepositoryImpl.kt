@@ -8,6 +8,8 @@ import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
 import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
 import com.tobe.healthy.lessonHistory.domain.dto.SearchCondRequest
+import com.tobe.healthy.lessonHistory.domain.entity.FeedbackCheckStatus.READ
+import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonHistory.domain.entity.QLessonHistory.lessonHistory
 import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
@@ -57,9 +59,20 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
             .where(lessonHistory.id.eq(lessonHistoryId), validateMemberType(memberId, memberType, null))
-            .fetch()
+            .fetch() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+
+        updateFeedbackCheckStatus(results.get(0), memberId)
 
         return results.map(LessonHistoryCommandResult::detailFrom)
+    }
+
+    private fun updateFeedbackCheckStatus(
+        results: LessonHistory,
+        memberId: Long,
+    ) {
+        if (results.student.id.equals(memberId)) {
+            results.updateFeedbackStatus(READ)
+        }
     }
 
     private fun validateMemberType(memberId: Long, memberType: MemberType, searchMyHistory: String?): BooleanExpression {
