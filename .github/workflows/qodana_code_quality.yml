@@ -7,7 +7,6 @@ on:
       - main
       - develop
       - master
-      - feature/JSW/TBH-171
 
 jobs:
   qodana:
