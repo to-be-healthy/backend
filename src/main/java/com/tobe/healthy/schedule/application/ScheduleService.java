@@ -115,12 +115,15 @@ public class ScheduleService {
 	}
 
 	public Boolean cancelMemberSchedule(Long scheduleId, Long memberId) {
-		Schedule entity = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
+		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
 				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
 		// 대기 테이블에 인원이 있으면 수정하기
+		standByScheduleRepository.findByScheduleId(scheduleId).ifPresentOrElse(
+			standBySchedule -> schedule.changeApplicantInSchedule(standBySchedule.getMember()),
+			() -> schedule.cancelMemberSchedule()
+		);
 
-		entity.cancelMemberSchedule();
 		return true;
 	}
 
