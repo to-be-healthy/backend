@@ -118,6 +118,8 @@ public class ScheduleService {
 		Schedule entity = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
 				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
+		// 대기 테이블에 인원이 있으면 수정하기
+
 		entity.cancelMemberSchedule();
 		return true;
 	}
