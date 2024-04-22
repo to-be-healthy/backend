@@ -175,9 +175,10 @@ public class MemberController {
 	})
 	@GetMapping("/course")
 	public ResponseHandler<CourseGetResult> getMyCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+														@Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 														Pageable pageable) {
 		return ResponseHandler.<CourseGetResult>builder()
-				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, customMemberDetails.getMemberId()))
+				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, customMemberDetails.getMemberId(), searchDate))
 				.message("수강권이 조회되었습니다.")
 				.build();
 	}
@@ -190,9 +191,10 @@ public class MemberController {
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ResponseHandler<CourseGetResult> getCourse(@Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId,
 														@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+													  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 														Pageable pageable) {
 		return ResponseHandler.<CourseGetResult>builder()
-				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, memberId))
+				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, memberId, searchDate))
 				.message("수강권이 조회되었습니다.")
 				.build();
 	}

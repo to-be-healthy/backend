@@ -3,9 +3,9 @@ HELP.md
 build/
 src/main/generated/
 src/test/generated_tests/
+src/main/resources/serviceAccountKey.json
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
-!**/src/main/**/resources/serviceAccountKey.json
 !**/src/test/**/build/
 
 ### STS ###
