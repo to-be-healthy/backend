@@ -5,6 +5,7 @@ src/main/generated/
 src/test/generated_tests/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
+!**/src/main/**/resources/serviceAccountKey.json
 !**/src/test/**/build/
 
 ### STS ###

@@ -97,7 +97,7 @@ public class TrainerController {
     public ResponseHandler<MemberDetailResult> getMemberOfTrainer(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                   @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
         return ResponseHandler.<MemberDetailResult>builder()
-                .data(trainerService.getMemberOfTrainer(customMemberDetails.getMember().getId(), memberId))
+                .data(trainerService.getMemberOfTrainer(customMemberDetails.getMember(), memberId))
                 .message("학생 상세가 조회되었습니다.")
                 .build();
     }

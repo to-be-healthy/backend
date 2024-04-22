@@ -4,7 +4,10 @@ import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
+import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
+import com.tobe.healthy.course.domain.entity.Course;
+import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.file.domain.dto.DietFileDto;
@@ -49,6 +52,7 @@ public class TrainerService {
     private final TrainerMemberMappingRepository mappingRepository;
     private final DietRepository repository;
     private final CourseService courseService;
+    private final CourseRepository courseRepository;
 
 
     public TrainerMemberMappingDto addStudentOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
@@ -104,8 +108,8 @@ public class TrainerService {
         return memberDtos.isEmpty() ? null : memberDtos;
     }
 
-    public MemberDetailResult getMemberOfTrainer(Long trainerId, Long memberId) {
-        memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
+    public MemberDetailResult getMemberOfTrainer(Member trainer, Long memberId) {
+        memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), MemberType.TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
@@ -117,6 +121,9 @@ public class TrainerService {
 
         MemberDetailResult result = memberRepository.getMemberOfTrainer(memberId);
         if(!dietFiles.isEmpty()) result.setDiet(DietDto.create(dietFiles.get(0).getDiet().getDietId(), fileDtos));
+
+        Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, 0);
+        result.setCourse(optCourse.map(CourseDto::from).orElse(null));
         return result;
     }
 
