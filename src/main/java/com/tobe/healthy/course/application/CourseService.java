@@ -8,15 +8,11 @@ import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
 import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.domain.entity.CourseHistory;
-import com.tobe.healthy.course.domain.entity.CourseHistoryType;
 import com.tobe.healthy.course.repository.CourseHistoryRepository;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,7 +27,6 @@ import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.COURSE_CREATE;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
-import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 
 
@@ -57,7 +52,7 @@ public class CourseService {
         Long cnt = courseRepository.countByMemberIdAndRemainLessonCntGreaterThan(member.getId(), 0);
         if(0 < cnt) throw new CustomException(COURSE_ALREADY_EXISTS);
         Course course = courseRepository.save(Course.create(member, trainer, command.getLessonCnt(), command.getLessonCnt()));
-        courseHistoryRepository.save(CourseHistory.create(course, course.getLessonCnt(), PLUS, COURSE_CREATE, trainer));
+        courseHistoryRepository.save(CourseHistory.create(course, course.getTotalLessonCnt(), PLUS, COURSE_CREATE, trainer));
     }
 
     public void deleteCourse(Long trainerId, Long courseId) {
@@ -66,14 +61,14 @@ public class CourseService {
         courseRepository.deleteByCourseIdAndTrainerId(courseId, trainerId);
     }
 
-    public CourseGetResult getCourse(Member loginMember, Pageable pageable, Long memberId) {
+    public CourseGetResult getCourse(Member loginMember, Pageable pageable, Long memberId, String searchDate) {
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, 0);
         CourseDto usingCourse = optCourse.map(CourseDto::from).orElse(null);
 
         Long trainerId = TRAINER.equals(loginMember.getMemberType()) ? loginMember.getId() : null;
-        Page<CourseHistory> histories = courseHistoryRepository.getCourseHistory(memberId, trainerId, pageable);
+        Page<CourseHistory> histories = courseHistoryRepository.getCourseHistory(memberId, trainerId, pageable, searchDate);
         List<CourseHistoryDto> courseHistoryDtos = histories.map(CourseHistoryDto::from).stream().toList();
         Member member = memberRepository.findByMemberIdWithGym(memberId);
         return CourseGetResult.create(usingCourse, courseHistoryDtos.isEmpty() ? null : courseHistoryDtos, member.getGym().getName());
@@ -87,7 +82,8 @@ public class CourseService {
         mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
 
-        Course course = courseRepository.findById(courseId).orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
+        Course course = courseRepository.findByCourseIdAndMemberIdAndTrainerId(courseId, member.getId(), trainerId)
+                .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
         int result = command.getCalculation().apply(course.getRemainLessonCnt(), command.getUpdateCnt());
         if(result < 0) throw new CustomException(LESSON_CNT_NOT_VALID);
         course.updateLessonCnt(command);

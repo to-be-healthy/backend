@@ -1,8 +1,6 @@
 package com.tobe.healthy.workout.domain.entity;
 
-import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.ExerciseDto;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
 import jakarta.persistence.*;
 import lombok.*;
 

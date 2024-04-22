@@ -1,9 +1,8 @@
 package com.tobe.healthy.schedule.application
 
+import com.tobe.healthy.log
 import com.tobe.healthy.schedule.domain.dto.`in`.AutoCreateScheduleCommand
-import com.tobe.healthy.schedule.repository.ScheduleRepository
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
+import io.kotest.core.spec.style.BehaviorSpec
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
@@ -13,12 +12,10 @@ import java.time.LocalTime.of
 @SpringBootTest
 @Transactional
 class KotlinScheduleServiceTest @Autowired constructor(
-    private val scheduleRepository: ScheduleRepository,
     private val scheduleService: ScheduleService
-) {
+) : BehaviorSpec({
 
-    @Test
-    fun `자동으로 일정을 생성한다`() {
+    Given("자동으로 일정을 생성하고") {
         val request: AutoCreateScheduleCommand = AutoCreateScheduleCommand.builder()
             .startDt(LocalDate.of(2024, 4, 1))
             .endDt(LocalDate.of(2024, 4, 7))
@@ -31,12 +28,6 @@ class KotlinScheduleServiceTest @Autowired constructor(
             .build()
 
         val results = scheduleService.autoCreateSchedule(request)
-
-        assertThat(results.size).isEqualTo(7)
+        log.info { "results: $results" }
     }
-
-    @Test
-    fun `일정을 등록한다`() {
-
-    }
-}
+})

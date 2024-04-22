@@ -14,7 +14,7 @@ import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
 import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
 import com.tobe.healthy.trainer.domain.dto.out.MemberInviteResultCommand;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
+import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -97,7 +97,7 @@ public class TrainerController {
     public ResponseHandler<MemberDetailResult> getMemberOfTrainer(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                   @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
         return ResponseHandler.<MemberDetailResult>builder()
-                .data(trainerService.getMemberOfTrainer(customMemberDetails.getMember().getId(), memberId))
+                .data(trainerService.getMemberOfTrainer(customMemberDetails.getMember(), memberId))
                 .message("학생 상세가 조회되었습니다.")
                 .build();
     }

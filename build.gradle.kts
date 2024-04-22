@@ -68,6 +68,7 @@ dependencies {
 
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.696")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
+    implementation("com.google.firebase:firebase-admin:9.2.0")
 
     // kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
@@ -78,7 +79,6 @@ dependencies {
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
     testCompileOnly("io.github.microutils:kotlin-logging-jvm:3.0.5")
 
@@ -87,7 +87,7 @@ dependencies {
     kapt("org.projectlombok:lombok")
     kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
-    implementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
+    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
     testImplementation("io.kotest:kotest-assertions-core:5.8.1")
     testImplementation("io.kotest:kotest-runner-junit5:5.8.1")
 }
@@ -105,6 +105,6 @@ allOpen {
     annotation("jakarta.persistence.MappedSuperclass")
 }
 
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
