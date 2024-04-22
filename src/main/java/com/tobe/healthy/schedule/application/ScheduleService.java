@@ -7,6 +7,8 @@ import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleRegisterCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleRegisterCommand.ScheduleRegister;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
+import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
+import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
@@ -135,5 +137,13 @@ public class ScheduleService {
 
 	private boolean isHoliday(LocalDate startDt) {
 		return startDt.getDayOfWeek().equals(SUNDAY) || startDt.getDayOfWeek().equals(SATURDAY);
+	}
+
+	public List<MyReservationResponse> findAllMyReservation(Long memberId) {
+		return scheduleRepository.findAllMyReservation(memberId);
+	}
+
+	public List<MyStandbyScheduleResponse> findAllMyStandbySchedule(Long memberId) {
+		return scheduleRepository.findAllMyStandbySchedule(memberId);
 	}
 }

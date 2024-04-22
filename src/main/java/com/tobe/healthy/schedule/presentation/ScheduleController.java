@@ -6,6 +6,8 @@ import com.tobe.healthy.schedule.application.ScheduleService;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleRegisterCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
+import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
+import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleInfo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -129,6 +131,32 @@ public class ScheduleController {
 		return ResponseHandler.<Boolean>builder()
 				.data(scheduleService.cancelTrainerSchedule(scheduleId, customMemberDetails.getMemberId()))
 				.message("일정을 취소하였습니다.")
+				.build();
+	}
+
+	@Operation(summary = "학생이 내 예약을 조회한다.", description = "학생이 내 예약을 조회한다.",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "학생이 내 예약을 조회하였습니다.")
+			})
+	@GetMapping("/my-reservation")
+	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
+	public ResponseHandler<List<MyReservationResponse>> findAllMyReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<List<MyReservationResponse>>builder()
+				.data(scheduleService.findAllMyReservation(customMemberDetails.getMemberId()))
+				.message("학생이 내 예약을 조회하였습니다.")
+				.build();
+	}
+
+	@Operation(summary = "학생이 대기중인 예약을 조회한다.", description = "학생이 대기중인 예약을 조회한다.",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "학생이 대기중인 예약을 조회하였습니다.")
+			})
+	@GetMapping("/my-standby")
+	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
+	public ResponseHandler<List<MyStandbyScheduleResponse>> findAllMyStandbySchedule(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<List<MyStandbyScheduleResponse>>builder()
+				.data(scheduleService.findAllMyStandbySchedule(customMemberDetails.getMemberId()))
+				.message("학생이 대기중인 예약을 조회하였습니다.")
 				.build();
 	}
 }
