@@ -2,11 +2,14 @@ package com.tobe.healthy.workout.repository;
 
 import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.workout.domain.dto.out.QWorkoutHistoryDto;
+import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +22,7 @@ import java.util.List;
 
 import static com.tobe.healthy.file.domain.entity.QWorkoutHistoryFile.workoutHistoryFile;
 import static com.tobe.healthy.workout.domain.entity.QWorkoutHistory.workoutHistory;
+import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryLike.workoutHistoryLike;
 
 @Repository
 @RequiredArgsConstructor
@@ -27,15 +31,20 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<WorkoutHistory> getWorkoutHistoryOfMonth(Long memberId, Pageable pageable, String searchDate) {
+    public Page<WorkoutHistoryDto> getWorkoutHistoryOfMonth(Long loginMemberId, Long memberId, Pageable pageable, String searchDate) {
         Long totalCnt = queryFactory
                 .select(workoutHistory.count())
                 .from(workoutHistory)
                 .where(workoutHistory.member.id.eq(memberId), historyDeYnEq(false), convertDateFormat(searchDate))
                 .fetchOne();
-        List<WorkoutHistory> workoutHistories =  queryFactory
-                .select(workoutHistory)
+        List<WorkoutHistoryDto> workoutHistories = queryFactory
+                .select(new QWorkoutHistoryDto(workoutHistory.workoutHistoryId, workoutHistory.content, workoutHistory.member
+                        , isLiked()
+                        , workoutHistory.likeCnt, workoutHistory.commentCnt))
                 .from(workoutHistory)
+                .leftJoin(workoutHistoryLike)
+                .on(workoutHistory.workoutHistoryId.eq(workoutHistoryLike.workoutHistoryLikePK.workoutHistory.workoutHistoryId)
+                        , workoutHistoryLike.workoutHistoryLikePK.member.id.eq(loginMemberId))
                 .where(workoutHistory.member.id.eq(memberId), historyDeYnEq(false), convertDateFormat(searchDate))
                 .orderBy(workoutHistory.createdAt.desc())
                 .offset(pageable.getOffset())
@@ -69,6 +78,13 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
                 .where(workoutHistoryFile.workoutHistory.workoutHistoryId.in(ids), historyFileDeYnEq(false))
                 .orderBy(workoutHistoryFile.createdAt.desc())
                 .fetch();
+    }
+
+    private BooleanExpression isLiked() {
+        return new CaseBuilder()
+                .when(workoutHistoryLike.workoutHistoryLikePK.member.id.isNotNull())
+                .then(true)
+                .otherwise(false).as("is_liked");
     }
 
     private BooleanExpression historyDeYnEq(boolean bool) {

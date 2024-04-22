@@ -1,6 +1,9 @@
 package com.tobe.healthy.course.repository;
 
+import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.course.domain.entity.CourseHistory;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,7 @@ import java.util.List;
 
 import static com.tobe.healthy.course.domain.entity.QCourse.course;
 import static com.tobe.healthy.course.domain.entity.QCourseHistory.courseHistory;
+import static com.tobe.healthy.point.domain.entity.QPoint.point1;
 
 @Repository
 @RequiredArgsConstructor
@@ -22,18 +26,18 @@ public class CourseHistoryRepositoryCustomImpl implements CourseHistoryRepositor
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<CourseHistory> getCourseHistory(Long memberId, Long trainerId, Pageable pageable) {
+    public Page<CourseHistory> getCourseHistory(Long memberId, Long trainerId, Pageable pageable, String searchDate) {
         Long totalCnt = queryFactory
                 .select(courseHistory.count())
                 .from(courseHistory)
                 .leftJoin(courseHistory.course, course)
-                .where(courseMemberIdEq(memberId))
+                .where(courseMemberIdEq(memberId), convertDateFormat(searchDate))
                 .fetchOne();
         List<CourseHistory> courseHistories =  queryFactory
                 .select(courseHistory)
                 .from(courseHistory)
                 .leftJoin(courseHistory.course, course)
-                .where(courseMemberIdEq(memberId), courseTrainerIdEq(trainerId))
+                .where(courseMemberIdEq(memberId), courseTrainerIdEq(trainerId), convertDateFormat(searchDate))
                 .orderBy(courseHistory.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -53,6 +57,15 @@ public class CourseHistoryRepositoryCustomImpl implements CourseHistoryRepositor
             return courseHistory.trainer.id.eq(trainerId);
         }
         return null;
+    }
+
+    private BooleanExpression convertDateFormat(String searchDate) {
+        if (ObjectUtils.isEmpty(searchDate)) return null;
+        StringTemplate stringTemplate = Expressions.stringTemplate(
+                "DATE_FORMAT({0}, {1})"
+                , courseHistory.createdAt
+                , ConstantImpl.create("%Y-%m"));
+        return stringTemplate.eq(searchDate);
     }
 
 }

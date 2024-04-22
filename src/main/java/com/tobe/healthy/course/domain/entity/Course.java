@@ -31,31 +31,31 @@ public class Course extends BaseTimeEntity<Course, Long> {
     @JoinColumn(name = "trainer_id")
     private Member trainer;
 
-    private int lessonCnt;
+    private int totalLessonCnt;
     private int remainLessonCnt;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private List<CourseHistory> courseHistories = new ArrayList<>();
 
     @Builder
-    public Course(Member member, Member trainer, int lessonCnt, int remainLessonCnt) {
+    public Course(Member member, Member trainer, int totalLessonCnt, int remainLessonCnt) {
         this.member = member;
         this.trainer = trainer;
-        this.lessonCnt = lessonCnt;
+        this.totalLessonCnt = totalLessonCnt;
         this.remainLessonCnt = remainLessonCnt;
     }
 
-    public static Course create(Member member, Member trainer, int lessonCnt, int remainLessonCnt) {
+    public static Course create(Member member, Member trainer, int totalLessonCnt, int remainLessonCnt) {
         return Course.builder()
                 .member(member)
                 .trainer(trainer)
-                .lessonCnt(lessonCnt)
+                .totalLessonCnt(totalLessonCnt)
                 .remainLessonCnt(remainLessonCnt)
                 .build();
     }
 
     public void updateLessonCnt(CourseUpdateCommand command){
-        this.lessonCnt = command.getCalculation().apply(lessonCnt, command.getUpdateCnt());
+        this.totalLessonCnt = command.getCalculation().apply(totalLessonCnt, command.getUpdateCnt());
         this.remainLessonCnt = command.getCalculation().apply(remainLessonCnt, command.getUpdateCnt());
     }
 

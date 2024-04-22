@@ -44,7 +44,7 @@ public class SecurityConfig {
                 exceptionHandling.accessDeniedHandler(accessDeniedHandler);
             })
             .authorizeHttpRequests(
-                authorize -> authorize.requestMatchers("/auth/v1/**", "/favicon.ico", "/file/**", "/v3/**", "/swagger-ui/**").permitAll()
+                authorize -> authorize.requestMatchers("/auth/v1/**", "/favicon.ico", "/file/**", "/v3/**", "/swagger-ui/**", "/fcm", "/firebase-messaging-sw.js").permitAll()
 									  .anyRequest().authenticated())
             .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
             .build();
@@ -60,7 +60,7 @@ public class SecurityConfig {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedHeaders(Collections.singletonList("*"));
             config.setAllowedMethods(Collections.singletonList("*"));
-            config.setAllowedOriginPatterns(List.of("http://localhost:3000", "https://api.to-be-healthy.site", "https://to-be-healthy.site"));
+            config.setAllowedOriginPatterns(List.of("http://localhost:3000", "https://api.to-be-healthy.site", "https://to-be-healthy.site", "https://www.to-be-healthy.site"));
             config.setAllowCredentials(true);
             return config;
         };

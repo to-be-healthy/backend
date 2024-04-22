@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class CourseDto {
 
     private Long courseId;
-    private int lessonCnt;
+    private int totalLessonCnt;
     private int remainLessonCnt;
     private LocalDateTime createdAt;
 
@@ -20,7 +20,7 @@ public class CourseDto {
     public static CourseDto from(Course course) {
         return CourseDto.builder()
                 .courseId(course.getCourseId())
-                .lessonCnt(course.getLessonCnt())
+                .totalLessonCnt(course.getTotalLessonCnt())
                 .remainLessonCnt(course.getRemainLessonCnt())
                 .createdAt(course.getCreatedAt())
                 .build();
