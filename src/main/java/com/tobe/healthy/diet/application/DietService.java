@@ -1,10 +1,18 @@
 package com.tobe.healthy.diet.application;
 
+import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.entity.Diet;
+import com.tobe.healthy.diet.domain.entity.DietLike;
+import com.tobe.healthy.diet.domain.entity.DietLikePK;
+import com.tobe.healthy.diet.repository.DietLikeRepository;
 import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.file.domain.dto.DietFileDto;
 import com.tobe.healthy.file.domain.entity.DietFile;
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistoryLike;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistoryLikePK;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -15,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.tobe.healthy.config.error.ErrorCode.*;
+
 
 @Service
 @Transactional
@@ -23,6 +33,7 @@ import java.util.stream.Collectors;
 public class DietService {
 
     private final DietRepository dietRepository;
+    private final DietLikeRepository dietLikeRepository;
 
     public List<DietDto> getDiet(Long memberId, Pageable pageable, String searchDate) {
         Page<Diet> diets = dietRepository.getDietOfMonth(memberId, pageable, searchDate);
@@ -43,4 +54,19 @@ public class DietService {
     }
 
 
+    public void likeDiet(Member member, Long dietId) {
+        Diet diet = dietRepository.findByDietIdAndDelYnFalse(dietId)
+                .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
+        DietLikePK likePk = DietLikePK.create(diet, member);
+        dietLikeRepository.findById(likePk).ifPresent(i -> {throw new CustomException(LIKE_ALREADY_EXISTS);});
+        dietLikeRepository.save(DietLike.from(likePk));
+        diet.updateLikeCnt(dietLikeRepository.getLikeCnt(diet.getDietId()));
+    }
+
+    public void deleteLikeDiet(Member member, Long dietId) {
+        Diet diet = dietRepository.findByDietIdAndDelYnFalse(dietId)
+                .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
+        dietLikeRepository.delete(DietLike.from(DietLikePK.create(diet, member)));
+        diet.updateLikeCnt(dietLikeRepository.getLikeCnt(diet.getDietId()));
+    }
 }

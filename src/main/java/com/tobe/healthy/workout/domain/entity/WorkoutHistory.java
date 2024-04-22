@@ -3,17 +3,14 @@ package com.tobe.healthy.workout.domain.entity;
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
+import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
-import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
 import static jakarta.persistence.FetchType.LAZY;
 
 @Entity

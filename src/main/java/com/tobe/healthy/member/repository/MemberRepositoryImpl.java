@@ -75,7 +75,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     public List<MemberInTeamResult> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
         return queryFactory
                 .select(new QMemberInTeamResult(member.id, member.name, member.userId, member.email,
-                        trainerMemberMapping.ranking, course.lessonCnt, course.remainLessonCnt,
+                        trainerMemberMapping.ranking, course.totalLessonCnt, course.remainLessonCnt,
                         member.nickname, profile.fileUrl))
                 .from(trainerMemberMapping)
                 .innerJoin(trainerMemberMapping.member, member)
@@ -126,7 +126,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return queryFactory
                 .select(new QMemberDetailResult(member.id, member.name, member.nickname, profile.fileUrl
                         , trainerMemberMapping.memo, trainerMemberMapping.ranking
-                        , course.lessonCnt, course.remainLessonCnt
                         , schedule.lessonDt, schedule.lessonStartTime))
                 .from(member)
                 .leftJoin(profile)
@@ -138,8 +137,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                         , schedule.delYn.eq(false)
                         , schedule.reservationStatus.eq(COMPLETED)
                         , lessonDateTimeAfterToday())
-                .leftJoin(course)
-                .on(course.member.id.eq(member.id), course.remainLessonCnt.gt(0))
                 .where(memberIdEq(memberId), member.delYn.eq(false))
                 .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
                 .limit(1)
