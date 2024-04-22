@@ -117,7 +117,7 @@ public class ScheduleService {
 
 	public Boolean cancelMemberSchedule(Long scheduleId, Long memberId) {
 		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
-				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
 		// 대기 테이블에 인원이 있으면 수정하기
 		standByScheduleRepository.findByScheduleId(scheduleId).ifPresentOrElse(

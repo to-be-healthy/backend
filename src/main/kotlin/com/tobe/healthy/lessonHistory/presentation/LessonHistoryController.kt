@@ -52,6 +52,18 @@ class LessonHistoryController(
         )
     }
 
+    @GetMapping("/detail/{studentId}")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    fun findAllLessonHistoryByMemberId(@PathVariable studentId: Long,
+                                       request: SearchCondRequest,
+                                       pageable: Pageable,
+                                       @AuthenticationPrincipal member: CustomMemberDetails): ApiResponse<Page<LessonHistoryCommandResult>> {
+        return ApiResponse(
+            message = "학생의 수업 내역 전체를 조회하였습니다.",
+            data = lessonHistoryService.findAllLessonHistoryByMemberId(studentId, request, pageable)
+        )
+    }
+
     @GetMapping("/{lessonHistoryId}")
     fun findOneLessonHistory(@PathVariable lessonHistoryId: Long,
                              @AuthenticationPrincipal member: CustomMemberDetails): ApiResponse<List<LessonHistoryCommandResult>> {

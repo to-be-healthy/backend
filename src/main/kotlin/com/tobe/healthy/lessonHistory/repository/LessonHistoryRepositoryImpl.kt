@@ -66,6 +66,29 @@ class LessonHistoryRepositoryImpl(
         return results.map(LessonHistoryCommandResult::detailFrom)
     }
 
+    override fun findAllLessonHistoryByMemberId(studentId: Long, request: SearchCondRequest, pageable: Pageable): Page<LessonHistoryCommandResult> {
+        val entity = queryFactory
+            .select(lessonHistory)
+            .from(lessonHistory)
+            .innerJoin(lessonHistory.trainer).fetchJoin()
+            .innerJoin(lessonHistory.student).fetchJoin()
+            .innerJoin(lessonHistory.schedule).fetchJoin()
+            .where(convertDateFormat(request.searchDate), lessonHistory.student.id.eq(studentId))
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .fetch().stream().map(LessonHistoryCommandResult::from).collect(toList())
+
+        val totalCount = queryFactory
+            .select(lessonHistory.count())
+            .from(lessonHistory)
+            .innerJoin(lessonHistory.trainer)
+            .innerJoin(lessonHistory.student)
+            .innerJoin(lessonHistory.schedule)
+            .where(convertDateFormat(request.searchDate), lessonHistory.student.id.eq(studentId))
+
+        return PageableExecutionUtils.getPage(entity, pageable) { totalCount.fetchOne()!! }
+    }
+
     private fun updateFeedbackCheckStatus(
         results: LessonHistory,
         memberId: Long,
