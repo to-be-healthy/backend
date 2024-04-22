@@ -35,13 +35,17 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.leftJoin(schedule.trainer, trainer).fetchJoin()
 				.leftJoin(schedule.applicant, applicant).fetchJoin()
 				.leftJoin(schedule.standBySchedule, standBySchedule).fetchJoin()
-				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse())
+				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), standByScheduleDelYnFalse())
 				.orderBy(schedule.lessonDt.asc(), schedule.round.asc())
 				.fetch();
 
 		return fetch.stream()
 			.map(ScheduleCommandResult::from)
 			.collect(toList());
+	}
+
+	private BooleanExpression standByScheduleDelYnFalse() {
+		return standBySchedule.delYn.isFalse();
 	}
 
 	private BooleanExpression delYnFalse() {
@@ -56,12 +60,16 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 			.from(schedule)
 			.leftJoin(schedule.trainer, trainer).fetchJoin()
 			.leftJoin(schedule.standBySchedule, standBySchedule).fetchJoin()
-			.where(schedule.applicant.id.eq(memberId))
+			.where(schedule.applicant.id.eq(memberId), scheduleDelYnFalse(), standByScheduleDelYnFalse())
 			.orderBy(schedule.lessonDt.desc(), schedule.round.desc())
 			.fetch();
 		return fetch.stream()
 			.map(ScheduleCommandResult::from)
 			.collect(toList());
+	}
+
+	private BooleanExpression scheduleDelYnFalse() {
+		return schedule.delYn.isFalse();
 	}
 
 	private BooleanExpression lessonDtBetween(ScheduleSearchCond searchCond) {

@@ -215,4 +215,12 @@ class LessonHistoryService(
             throw CustomException(EXCEED_MAXIMUM_NUMBER_OF_FILES)
         }
     }
+
+    fun findAllLessonHistoryByMemberId(
+        studentId: Long,
+        request: SearchCondRequest,
+        pageable: Pageable
+    ): Page<LessonHistoryCommandResult> {
+        return lessonHistoryRepository.findAllLessonHistoryByMemberId(studentId, request, pageable)
+    }
 }

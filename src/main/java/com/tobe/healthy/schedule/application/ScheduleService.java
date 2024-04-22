@@ -10,6 +10,7 @@ import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -115,11 +116,21 @@ public class ScheduleService {
 	}
 
 	public Boolean cancelMemberSchedule(Long scheduleId, Long memberId) {
-		Schedule entity = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
-				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
+			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
-		entity.cancelMemberSchedule();
+		// 대기 테이블에 인원이 있으면 수정하기
+		standByScheduleRepository.findByScheduleId(scheduleId).ifPresentOrElse(
+			standBySchedule -> changeApplicantAndDeleteStandBy(standBySchedule, schedule),
+			() -> schedule.cancelMemberSchedule()
+		);
+
 		return true;
+	}
+
+	private void changeApplicantAndDeleteStandBy(StandBySchedule standBySchedule, Schedule schedule) {
+		schedule.changeApplicantInSchedule(standBySchedule.getMember());
+		standBySchedule.deleteStandBy();
 	}
 
 	private boolean isHoliday(LocalDate startDt) {
