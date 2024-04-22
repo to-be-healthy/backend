@@ -1,6 +1,5 @@
 package com.tobe.healthy.schedule.application
 
-import com.tobe.healthy.log
 import com.tobe.healthy.schedule.domain.dto.`in`.AutoCreateScheduleCommand
 import io.kotest.core.spec.style.BehaviorSpec
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,8 +25,9 @@ class KotlinScheduleServiceTest @Autowired constructor(
             .lessonTime(50)
             .breakTime(10)
             .build()
-
         val results = scheduleService.autoCreateSchedule(request)
-        log.info { "results: $results" }
+        When("일정을 등록한 뒤에") {
+
+        }
     }
 })

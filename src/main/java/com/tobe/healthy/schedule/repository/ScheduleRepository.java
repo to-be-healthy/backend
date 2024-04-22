@@ -1,9 +1,10 @@
 package com.tobe.healthy.schedule.repository;
 
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.Optional;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long>, ScheduleRepositoryCustom {
 
