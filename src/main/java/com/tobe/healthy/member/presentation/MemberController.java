@@ -14,7 +14,7 @@ import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.dto.out.PointGetResult;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryDto;
+import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -145,11 +145,12 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/{memberId}/workout-histories")
-	public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistory(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
+	public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails loginMember,
+																	  @Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
 																	  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 																	  Pageable pageable) {
 		return ResponseHandler.<List<WorkoutHistoryDto>>builder()
-				.data(workoutService.getWorkoutHistory(memberId, pageable, searchDate))
+				.data(workoutService.getWorkoutHistory(loginMember.getMember(), memberId, pageable, searchDate))
 				.message("운동기록이 조회되었습니다.")
 				.build();
 	}
@@ -174,9 +175,10 @@ public class MemberController {
 	})
 	@GetMapping("/course")
 	public ResponseHandler<CourseGetResult> getMyCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+														@Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 														Pageable pageable) {
 		return ResponseHandler.<CourseGetResult>builder()
-				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, customMemberDetails.getMemberId()))
+				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, customMemberDetails.getMemberId(), searchDate))
 				.message("수강권이 조회되었습니다.")
 				.build();
 	}
@@ -189,9 +191,10 @@ public class MemberController {
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ResponseHandler<CourseGetResult> getCourse(@Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId,
 														@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+													  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 														Pageable pageable) {
 		return ResponseHandler.<CourseGetResult>builder()
-				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, memberId))
+				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, memberId, searchDate))
 				.message("수강권이 조회되었습니다.")
 				.build();
 	}
