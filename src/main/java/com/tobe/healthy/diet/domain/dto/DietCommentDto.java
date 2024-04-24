@@ -24,13 +24,13 @@ public class DietCommentDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private Long parentCommentId;
+    private Long parentId;
     private Long depth;
     private Long orderNum;
     private boolean delYn;
 
     @Builder.Default
-    private List<DietCommentDto> reply = null;
+    private List<DietCommentDto> replies = null;
 
 
     public static DietCommentDto from(DietComment comment) {
@@ -40,7 +40,7 @@ public class DietCommentDto {
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
-                .parentCommentId(comment.getParentCommentId())
+                .parentId(comment.getParentCommentId())
                 .depth(comment.getDepth())
                 .orderNum(comment.getOrderNum())
                 .delYn(comment.getDelYn())
@@ -54,7 +54,7 @@ public class DietCommentDto {
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
-                .parentCommentId(comment.getParentCommentId())
+                .parentId(comment.getParentCommentId())
                 .depth(comment.getDepth())
                 .orderNum(comment.getOrderNum())
                 .delYn(comment.getDelYn())
