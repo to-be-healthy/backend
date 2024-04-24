@@ -64,7 +64,7 @@ public class CourseService {
     public CourseGetResult getCourse(Member loginMember, Pageable pageable, Long memberId, String searchDate) {
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, 0);
+        Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
         CourseDto usingCourse = optCourse.map(CourseDto::from).orElse(null);
 
         Long trainerId = TRAINER.equals(loginMember.getMemberType()) ? loginMember.getId() : null;
