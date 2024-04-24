@@ -27,7 +27,7 @@ public enum ErrorCode {
 	MEMBER_NOT_MAPPED(BAD_REQUEST, "C_013", "내 학생이 아닙니다."),
 	NOT_STAND_BY_SCHEDULE(BAD_REQUEST, "C_014", "대기할 수 없는 일정입니다."),
 	SCHEDULE_NOT_FOUND(NOT_FOUND, "C_015", "일정을 찾을 수 없습니다."),
-	WORKOUT_HISTORY_COMMENT_NOT_FOUND(NOT_FOUND, "C_016", "댓글이 존재하지 않습니다."),
+	COMMENT_NOT_FOUND(NOT_FOUND, "C_016", "댓글이 존재하지 않습니다."),
 	STAND_BY_SCHEDULE_NOT_FOUND(NOT_FOUND, "C_016", "대기한 일정을 찾을 수 없습니다."),
 	NOT_MATCH_PASSWORD(BAD_REQUEST, "C_017", "확인 비밀번호가 일치하지 않습니다."),
 	INVITE_LINK_NOT_FOUND(NOT_FOUND, "C_018", "초대링크를 찾을 수 없습니다."),

@@ -68,9 +68,9 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     @Builder.Default
     private List<DietFile> dietFiles = new ArrayList<>();
 
-//    @Builder.Default
-//    @OneToMany(mappedBy = "diet", cascade = CascadeType.ALL)
-//    private List<DietComment> dietComments = new ArrayList<>();
+    @Builder.Default
+    @OneToMany(mappedBy = "diet", cascade = CascadeType.ALL)
+    private List<DietComment> dietComments = new ArrayList<>();
 
 
     public static Diet create(Member member, Member trainer){
@@ -102,15 +102,18 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     public void deleteDiet() {
         this.delYn = true;
         this.deleteFiles();
-//        this.deleteComments();
+        this.deleteComments();
     }
 
-//    public void deleteComments() {
-//        this.dietComments.forEach(WorkoutHistoryComment::deleteComment);
-//    }
+    public void deleteComments() {
+        this.dietComments.forEach(DietComment::deleteComment);
+    }
 
     public void deleteFiles() {
         this.dietFiles.forEach(DietFile::deleteDietFile);
     }
 
+    public void updateCommentCnt(Long commentCnt) {
+        this.commentCnt = commentCnt;
+    }
 }
