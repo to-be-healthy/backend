@@ -18,6 +18,7 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -121,4 +122,11 @@ public class DietService {
         }).collect(Collectors.toList());
     }
 
+    public void deleteDiet(Member member, Long dietId) {
+        Diet diet = dietRepository.findByDietIdAndMemberIdAndDelYnFalse(dietId, member.getId())
+                .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
+        diet.deleteDiet();
+        dietLikeRepository.deleteLikeByDietId(dietId);
+        diet.getDietFiles().forEach(file -> fileService.deleteFile(file.getFileName()));
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
 import static com.tobe.healthy.diet.domain.entity.QDietLike.dietLike;
+import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryLike.workoutHistoryLike;
 
 
 @Repository
@@ -22,6 +23,13 @@ public class DietLikeRepositoryCustomImpl implements DietLikeRepositoryCustom {
                 .from(dietLike)
                 .where(dietIdEq(dietId))
                 .fetchOne();
+    }
+
+    @Override
+    public void deleteLikeByDietId(Long dietId) {
+        queryFactory.delete(dietLike)
+                .where(dietIdEq(dietId))
+                .execute();
     }
 
     private BooleanExpression dietIdEq(Long dietId) {

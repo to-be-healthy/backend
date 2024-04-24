@@ -97,19 +97,15 @@ public class WorkoutHistoryService {
         return setHistoryExercise(historyDto, ids);
     }
 
-    @Transactional
     public void deleteWorkoutHistory(Member member, Long workoutHistoryId) {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndMemberIdAndDelYnFalse(workoutHistoryId, member.getId())
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         history.deleteWorkoutHistory();
         completedExerciseRepository.deleteAllInBatch(history.getCompletedExercises());
         workoutHistoryLikeRepository.deleteLikeByWorkoutHistoryId(workoutHistoryId);
-        history.getHistoryFiles().forEach(file ->
-            fileService.deleteFile(file.getFileName())
-        );
+        history.getHistoryFiles().forEach(file -> fileService.deleteFile(file.getFileName()));
     }
 
-    @Transactional
     public WorkoutHistoryDto updateWorkoutHistory(Member member, Long workoutHistoryId, HistoryAddCommand command) {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndMemberIdAndDelYnFalse(workoutHistoryId, member.getId())
             .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
@@ -126,7 +122,6 @@ public class WorkoutHistoryService {
         return setHistoryFile(WorkoutHistoryDto.from(history), List.of(history.getWorkoutHistoryId()));
     }
 
-    @Transactional
     public void likeWorkoutHistory(Member member, Long workoutHistoryId) {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndDelYnFalse(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
@@ -136,7 +131,6 @@ public class WorkoutHistoryService {
         history.updateLikeCnt(workoutHistoryLikeRepository.getLikeCnt(history.getWorkoutHistoryId()));
     }
 
-    @Transactional
     public void deleteLikeWorkoutHistory(Member member, Long workoutHistoryId) {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndDelYnFalse(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));

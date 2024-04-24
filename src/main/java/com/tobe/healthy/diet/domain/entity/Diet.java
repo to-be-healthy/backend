@@ -4,7 +4,9 @@ import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
 import com.tobe.healthy.file.domain.entity.DietFile;
 import com.tobe.healthy.file.domain.entity.DietType;
+import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistoryComment;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -66,6 +68,11 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     @Builder.Default
     private List<DietFile> dietFiles = new ArrayList<>();
 
+//    @Builder.Default
+//    @OneToMany(mappedBy = "diet", cascade = CascadeType.ALL)
+//    private List<DietComment> dietComments = new ArrayList<>();
+
+
     public static Diet create(Member member, Member trainer){
         return Diet.builder()
                 .member(member)
@@ -91,4 +98,19 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
                     .forEach(DietFile::deleteDietFile);
         }
     }
+
+    public void deleteDiet() {
+        this.delYn = true;
+        this.deleteFiles();
+//        this.deleteComments();
+    }
+
+//    public void deleteComments() {
+//        this.dietComments.forEach(WorkoutHistoryComment::deleteComment);
+//    }
+
+    public void deleteFiles() {
+        this.dietFiles.forEach(DietFile::deleteDietFile);
+    }
+
 }

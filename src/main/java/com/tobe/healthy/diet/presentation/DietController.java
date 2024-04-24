@@ -76,4 +76,16 @@ public class DietController {
                 .build();
     }
 
+    @Operation(summary = "식단기록 삭제", responses = {
+            @ApiResponse(responseCode = "200", description = "식단기록 삭제 완료.")
+    })
+    @DeleteMapping("/{dietId}")
+    public ResponseHandler<Void> deleteDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                            @Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
+        dietService.deleteDiet(customMemberDetails.getMember(), dietId);
+        return ResponseHandler.<Void>builder()
+                .message("식단기록이 삭제되었습니다.")
+                .build();
+    }
+
 }
