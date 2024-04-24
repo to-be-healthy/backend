@@ -8,6 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 public class DietAddCommand {
 
-
+    private DietType type;
+    private MultipartFile file;
+    private boolean fast;
 
 }
