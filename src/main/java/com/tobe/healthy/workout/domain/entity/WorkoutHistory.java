@@ -7,6 +7,7 @@ import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @AllArgsConstructor
 @Builder
 @Getter
+@DynamicUpdate
 public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     @Id

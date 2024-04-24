@@ -13,5 +13,6 @@ public interface DietRepositoryCustom {
     List<DietFile> findAllCreateAtToday(Long memberId, LocalDateTime start, LocalDateTime end);
     Page<Diet> getDietOfMonth(Long memberId, Pageable pageable, String searchDate);
     List<DietFile> getDietFile(List<Long> ids);
+    Diet findTop1ByCreateAtToday(Long memberId, LocalDateTime start, LocalDateTime end);
 
 }

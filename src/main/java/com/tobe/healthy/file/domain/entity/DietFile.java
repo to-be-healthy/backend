@@ -48,4 +48,20 @@ public class DietFile extends BaseTimeEntity<DietFile, Long> {
     @ColumnDefault("'BREAKFAST'")
     private DietType type;
 
+    public static DietFile create(String savedFileName, String originalName, String extension, long fileSize, Diet diet, String fileUrl, DietType type) {
+        return DietFile.builder()
+                .fileName(savedFileName)
+                .originalName(originalName)
+                .extension(extension)
+                .fileSize(fileSize)
+                .fileUrl(fileUrl)
+                .diet(diet)
+                .type(type)
+                .build();
+    }
+
+    public void deleteDietFile() {
+        this.delYn = true;
+    }
+
 }

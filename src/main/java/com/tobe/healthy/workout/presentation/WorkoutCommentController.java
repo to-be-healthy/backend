@@ -1,9 +1,8 @@
 package com.tobe.healthy.workout.presentation;
 
-import com.tobe.healthy.common.CommonService;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
-import com.tobe.healthy.workout.application.CommentService;
+import com.tobe.healthy.workout.application.WorkoutCommentService;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryCommentDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryCommentAddCommand;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,10 +23,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/workout-histories/v1")
 @Tag(name = "06-02. 운동기록 댓글 API", description = "운동기록 댓글 API")
 @Slf4j
-public class CommentController {
+public class WorkoutCommentController {
 
-    private final CommonService commonService;
-    private final CommentService commentService;
+    private final WorkoutCommentService commentService;
 
     @Operation(summary = "운동기록의 댓글을 조회한다.", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),

@@ -18,14 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_COMMENT_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.COMMENT_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_NOT_FOUND;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
-public class CommentService {
+public class WorkoutCommentService {
 
     private final WorkoutHistoryRepository workoutHistoryRepository;
     private final WorkoutHistoryCommentRepository commentRepository;
@@ -40,18 +40,17 @@ public class CommentService {
             orderNum = commentCnt;
         }else{ //대댓글
             WorkoutHistoryComment parentComment = commentRepository.findByCommentIdAndDelYnFalse(command.getParentCommentId())
-                    .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_COMMENT_NOT_FOUND));
+                    .orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
             depth = parentComment.getDepth()+1;
             orderNum = parentComment.getOrderNum();
         }
-        WorkoutHistoryComment comment = WorkoutHistoryComment.create(history, member, command, depth, orderNum);
-        commentRepository.save(comment);
-        history.updateCommentCnt(commentCnt);
+        commentRepository.save(WorkoutHistoryComment.create(history, member, command, depth, orderNum));
+        history.updateCommentCnt(++commentCnt);
     }
 
     public WorkoutHistoryCommentDto updateComment(Member member, Long workoutHistoryId, Long commentId, HistoryCommentAddCommand command) {
         WorkoutHistoryComment comment = commentRepository.findByCommentIdAndMemberIdAndDelYnFalse(commentId, member.getId())
-                .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_COMMENT_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
         comment.updateContent(command.getContent());
         return WorkoutHistoryCommentDto.from(comment);
     }
@@ -74,7 +73,7 @@ public class CommentService {
 
     public void deleteComment(Member member, Long workoutHistoryId, Long commentId) {
         WorkoutHistoryComment comment = commentRepository.findByCommentIdAndMemberIdAndDelYnFalse(commentId, member.getId())
-                .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_COMMENT_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
         comment.deleteComment();
     }
 }

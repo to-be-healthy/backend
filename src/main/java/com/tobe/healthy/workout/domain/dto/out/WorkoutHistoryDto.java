@@ -26,7 +26,7 @@ public class WorkoutHistoryDto {
     private Long workoutHistoryId;
     private String content;
     private MemberDto member;
-    private boolean isLiked;
+    private boolean liked;
     private Long likeCnt;
     private Long commentCnt;
 
@@ -60,11 +60,11 @@ public class WorkoutHistoryDto {
     }
 
     @QueryProjection
-    public WorkoutHistoryDto(Long workoutHistoryId, String content, Member member, boolean isLiked, Long likeCnt, Long commentCnt) {
+    public WorkoutHistoryDto(Long workoutHistoryId, String content, Member member, boolean liked, Long likeCnt, Long commentCnt) {
         this.workoutHistoryId = workoutHistoryId;
         this.content = content;
         this.member = MemberDto.from(member);
-        this.isLiked = isLiked;
+        this.liked = liked;
         this.likeCnt = likeCnt;
         this.commentCnt = commentCnt;
     }
