@@ -10,6 +10,7 @@ import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.file.domain.entity.DietFile;
 import com.tobe.healthy.file.domain.entity.QDietFile;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -71,6 +72,18 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 .where(dietFile.diet.dietId.in(ids), dietFileDeYnEq(false))
                 .orderBy(dietFile.createdAt.desc())
                 .fetch();
+    }
+
+    @Override
+    public Diet findTop1ByCreateAtToday(Long memberId, LocalDateTime start, LocalDateTime end) {
+        return queryFactory.select(diet)
+                .from(diet)
+                .where(createdAtBetween(start, end)
+                        , delYnEq(false)
+                        , memberIdEq(memberId))
+                .orderBy(diet.createdAt.desc())
+                .limit(1)
+                .fetchOne();
     }
 
     private BooleanExpression dietFileDeYnEq(boolean bool) {

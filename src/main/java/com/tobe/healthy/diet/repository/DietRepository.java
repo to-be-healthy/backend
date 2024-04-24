@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface DietRepository extends JpaRepository<Diet, Long>, DietRepositoryCustom {
     Optional<Diet> findByDietIdAndDelYnFalse(Long dietId);
+    Optional<Diet> findByDietIdAndMemberIdAndDelYnFalse(Long dietId, Long memberId);
+
 }

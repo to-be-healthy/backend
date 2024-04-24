@@ -17,8 +17,13 @@ import static org.springframework.util.StringUtils.cleanPath;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.diet.domain.entity.Diet;
+import com.tobe.healthy.diet.repository.DietRepository;
+import com.tobe.healthy.file.domain.entity.DietFile;
+import com.tobe.healthy.file.domain.entity.DietType;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
+import com.tobe.healthy.file.repository.DietFileRepository;
 import com.tobe.healthy.file.repository.FileRepository;
 import com.tobe.healthy.file.repository.WorkoutFileRepository;
 import com.tobe.healthy.member.domain.entity.Member;
@@ -51,6 +56,7 @@ public class FileService {
 	private final FileRepository fileRepository;
 	private final WorkoutFileRepository workoutFileRepository;
 	private final MemberRepository memberRepository;
+	private final DietFileRepository dietFileRepository;
 	private final AmazonS3 amazonS3;
 
 	@Value("${file.upload.location}")
@@ -69,7 +75,7 @@ public class FileService {
 				Files.copy(uploadFile.getInputStream(), copyOfLocation, REPLACE_EXISTING);
 
 				Profile profile = Profile.create(savedFileName, cleanPath(uploadFile.getOriginalFilename()), extension, uploadDir + separator, (int) uploadFile.getSize());
-				
+
 				Member member = memberRepository.findById(memberId)
 					.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
@@ -154,6 +160,28 @@ public class FileService {
 		}catch (Exception e){
 			e.printStackTrace();
 			throw new CustomException(FILE_REMOVE_ERROR);
+		}
+	}
+
+	public void uploadDietFile(Diet diet, DietType type, MultipartFile uploadFile) {
+		if (!uploadFile.isEmpty()) {
+			try {
+				String savedFileName = System.currentTimeMillis() + "_" + randomUUID();
+				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
+
+				ObjectMetadata objectMetadata = new ObjectMetadata();
+				objectMetadata.setContentLength(uploadFile.getSize());
+				objectMetadata.setContentType(uploadFile.getContentType());
+				amazonS3.putObject(bucketName, savedFileName, uploadFile.getInputStream(), objectMetadata);
+				String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+
+				DietFile dietFile = DietFile.create(savedFileName, cleanPath(uploadFile.getOriginalFilename())
+						, extension, uploadFile.getSize(), diet, fileUrl, type);
+				dietFileRepository.save(dietFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new CustomException(FILE_UPLOAD_ERROR);
+			}
 		}
 	}
 }

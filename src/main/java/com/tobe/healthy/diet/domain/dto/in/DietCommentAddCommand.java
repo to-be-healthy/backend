@@ -1,4 +1,4 @@
-package com.tobe.healthy.workout.domain.dto.in;
+package com.tobe.healthy.diet.domain.dto.in;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
@@ -6,11 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HistoryCommentAddCommand {
+public class DietCommentAddCommand {
 
     @Schema(description = "부모 댓글 아이디", example = "1")
     private Long parentCommentId;
