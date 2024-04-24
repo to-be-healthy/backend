@@ -4,13 +4,17 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.QMember;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
+import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
+import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
@@ -35,13 +39,17 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.leftJoin(schedule.trainer, trainer).fetchJoin()
 				.leftJoin(schedule.applicant, applicant).fetchJoin()
 				.leftJoin(schedule.standBySchedule, standBySchedule).fetchJoin()
-				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse())
+				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), standByScheduleDelYnFalse())
 				.orderBy(schedule.lessonDt.asc(), schedule.round.asc())
 				.fetch();
 
 		return fetch.stream()
 			.map(ScheduleCommandResult::from)
 			.collect(toList());
+	}
+
+	private BooleanExpression standByScheduleDelYnFalse() {
+		return standBySchedule.delYn.isFalse();
 	}
 
 	private BooleanExpression delYnFalse() {
@@ -56,12 +64,40 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 			.from(schedule)
 			.leftJoin(schedule.trainer, trainer).fetchJoin()
 			.leftJoin(schedule.standBySchedule, standBySchedule).fetchJoin()
-			.where(schedule.applicant.id.eq(memberId))
+			.where(schedule.applicant.id.eq(memberId), scheduleDelYnFalse(), standByScheduleDelYnFalse())
 			.orderBy(schedule.lessonDt.desc(), schedule.round.desc())
 			.fetch();
 		return fetch.stream()
 			.map(ScheduleCommandResult::from)
 			.collect(toList());
+	}
+
+	@Override
+	public List<MyReservationResponse> findAllMyReservation(Long memberId) {
+		List<Schedule> schedules = queryFactory.select(schedule)
+				.from(schedule)
+				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
+				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
+				.where(schedule.applicant.id.eq(memberId), schedule.lessonDt.goe(LocalDate.now()))
+				.fetch();
+		return schedules.stream().map(MyReservationResponse::from).collect(toList());
+	}
+
+	@Override
+	public List<MyStandbyScheduleResponse> findAllMyStandbySchedule(Long memberId) {
+		List<StandBySchedule> results = queryFactory.select(standBySchedule)
+				.from(standBySchedule)
+				.innerJoin(standBySchedule.schedule, schedule).fetchJoin()
+				.innerJoin(standBySchedule.member, new QMember("member")).fetchJoin()
+				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
+				.where(standBySchedule.member.id.eq(memberId), standBySchedule.delYn.isFalse())
+				.orderBy(standBySchedule.schedule.lessonDt.asc(), standBySchedule.schedule.round.asc())
+				.fetch();
+		return results.stream().map(MyStandbyScheduleResponse::from).collect(toList());
+	}
+
+	private BooleanExpression scheduleDelYnFalse() {
+		return schedule.delYn.isFalse();
 	}
 
 	private BooleanExpression lessonDtBetween(ScheduleSearchCond searchCond) {
