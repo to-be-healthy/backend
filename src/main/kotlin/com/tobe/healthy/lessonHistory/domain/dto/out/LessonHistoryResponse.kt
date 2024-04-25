@@ -13,27 +13,27 @@ import java.util.Locale
 
 @Schema(description = "수업 일지")
 data class LessonHistoryResponse(
-    @Schema(name = "수업 일지 ID", example = "1")
+    @Schema(description = "수업 일지 ID", example = "1")
     val id: Long,
-    @Schema(name = "수업 일지 제목", example = "홍길동님 수업 일지입니다!")
+    @Schema(description = "수업 일지 제목", example = "홍길동님 수업 일지입니다!")
     val title: String,
-    @Schema(name = "수업 일지 내용", example = "오늘도 고생하셨습니다^^ 처음보다~")
+    @Schema(description = "수업 일지 내용", example = "오늘도 고생하셨습니다^^ 처음보다~")
     val content: String,
-    @Schema(name = "수업 일지 총 댓글 수", example = "30")
+    @Schema(description = "수업 일지 총 댓글 수", example = "30")
     val commentTotalCount: Int,
-    @Schema(name = "수업 일지 등록일")
+    @Schema(description = "수업 일지 등록일")
     val createdAt: LocalDateTime,
-    @Schema(name = "수업 일지 대상 학생", example = "아무개")
+    @Schema(description = "수업 일지 대상 학생", example = "아무개")
     val student: String,
-    @Schema(name = "수업 일지 작성한 트레이너", example = "홍길동")
+    @Schema(description = "수업 일지 작성한 트레이너", example = "홍길동")
     val trainer: String,
-    @Schema(name = "수업 일자", example = "yy:mm:dd")
+    @Schema(description = "수업 일자", example = "yy:mm:dd")
     val lessonDt: String,
-    @Schema(name = "수업 시간", example = "10:00 ~ 10:50")
+    @Schema(description = "수업 시간", example = "10:00 ~ 10:50")
     val lessonTime: String,
-    @Schema(name = "수업 참석 여부", example = "참석/미참석")
+    @Schema(description = "수업 참석 여부", example = "참석/미참석")
     val attendanceStatus: String,
-    @Schema(name = "수업 일지 첨부파일")
+    @Schema(description = "수업 일지 첨부파일")
     val files: MutableList<LessonHistoryFileResults> = mutableListOf(),
 ) {
 
