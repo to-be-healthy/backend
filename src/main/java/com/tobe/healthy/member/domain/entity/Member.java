@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -57,6 +58,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	@OneToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "profile_id")
+	@Nullable
 	private Profile profileId;
 
 	@Enumerated(STRING)

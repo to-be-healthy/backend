@@ -11,12 +11,13 @@ import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND
 import com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_FOUND
 import com.tobe.healthy.file.domain.entity.AwsS3File
 import com.tobe.healthy.file.repository.AwsS3FileRepository
-import com.tobe.healthy.lessonHistory.domain.dto.CommentRegisterCommand
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommentUpdateCommand
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryUpdateCommand
-import com.tobe.healthy.lessonHistory.domain.dto.RegisterLessonHistoryCommand
-import com.tobe.healthy.lessonHistory.domain.dto.SearchCondRequest
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.CommentRegisterCommand
+import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryResponse
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.LessonHistoryCommentCommand
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.LessonHistoryCommand
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.RegisterLessonHistoryCommand
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.SearchCondRequest
+import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryDetailResponse
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistoryComment
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryCommentRepository
@@ -54,15 +55,15 @@ class LessonHistoryService(
         return true
     }
 
-    fun findAllLessonHistory(request: SearchCondRequest, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryCommandResult> {
+    fun findAllLessonHistory(request: SearchCondRequest, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryResponse> {
         return lessonHistoryRepository.findAllLessonHistory(request, pageable, memberId, memberType)
     }
 
-    fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): List<LessonHistoryCommandResult> {
+    fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): List<LessonHistoryDetailResponse> {
         return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, memberId, memberType)
     }
 
-    fun updateLessonHistory(lessonHistoryId: Long, request: LessonHistoryUpdateCommand): Boolean {
+    fun updateLessonHistory(lessonHistoryId: Long, request: LessonHistoryCommand): Boolean {
         val findEntity = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
         findEntity.updateLessonHistory(request.title, request.content)
         return true
@@ -101,7 +102,7 @@ class LessonHistoryService(
         return true
     }
 
-    fun updateLessonHistoryComment(lessonHistoryCommentId: Long, request: LessonHistoryCommentUpdateCommand): Boolean {
+    fun updateLessonHistoryComment(lessonHistoryCommentId: Long, request: LessonHistoryCommentCommand): Boolean {
         val comment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId) ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
         comment.updateLessonHistoryComment(request.content!!)
         return true
@@ -220,7 +221,7 @@ class LessonHistoryService(
         studentId: Long,
         request: SearchCondRequest,
         pageable: Pageable
-    ): Page<LessonHistoryCommandResult> {
+    ): Page<LessonHistoryResponse> {
         return lessonHistoryRepository.findAllLessonHistoryByMemberId(studentId, request, pageable)
     }
 }

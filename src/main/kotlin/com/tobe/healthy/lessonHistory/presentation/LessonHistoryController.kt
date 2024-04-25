@@ -1,14 +1,18 @@
 package com.tobe.healthy.lessonHistory.presentation
 
-import com.tobe.healthy.ApiResponse
+import com.tobe.healthy.ApiResult
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonHistory.application.LessonHistoryService
-import com.tobe.healthy.lessonHistory.domain.dto.CommentRegisterCommand
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommentUpdateCommand
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryUpdateCommand
-import com.tobe.healthy.lessonHistory.domain.dto.RegisterLessonHistoryCommand
-import com.tobe.healthy.lessonHistory.domain.dto.SearchCondRequest
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.CommentRegisterCommand
+import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryResponse
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.LessonHistoryCommentCommand
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.LessonHistoryCommand
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.RegisterLessonHistoryCommand
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.SearchCondRequest
+import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryDetailResponse
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -27,106 +31,161 @@ import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/lessonhistory/v1")
+@Tag(name = "07. 수업 일지")
 class LessonHistoryController(
     private val lessonHistoryService: LessonHistoryService
 ) {
 
     @PostMapping("/register")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    @Operation(summary = "수업 일지를 등록한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "수업 일지를 등록하였습니다."),
+            ApiResponse(responseCode = "404(1)", description = "학생을 찾을 수 없습니다."),
+            ApiResponse(responseCode = "404(2)", description = "트레이너를 찾을 수 없습니다."),
+            ApiResponse(responseCode = "404(3)", description = "일정을 찾을 수 없습니다."),
+    ])
     fun registerLessonHistory(@RequestPart @Valid request: RegisterLessonHistoryCommand,
                               @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
-                              @AuthenticationPrincipal member: CustomMemberDetails): ApiResponse<Boolean> {
-        return ApiResponse(
-            message = "수업 내역을 등록하였습니다.",
+                              @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Boolean> {
+        return ApiResult(
+            message = "수업 일지를 등록하였습니다.",
             data = lessonHistoryService.registerLessonHistory(request, uploadFiles, member.memberId)
         )
     }
 
+    @Operation(summary = "전체 수업 일지를 조회한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "전체 수업 일지를 조회하였습니다.")
+        ])
     @GetMapping
     fun findAllLessonHistory(request: SearchCondRequest,
                              pageable: Pageable,
-                             @AuthenticationPrincipal member: CustomMemberDetails): ApiResponse<Page<LessonHistoryCommandResult>> {
-        return ApiResponse(
-            message = "수업 내역 전체를 조회하였습니다.",
+                             @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Page<LessonHistoryResponse>> {
+        return ApiResult(
+            message = "전체 수업 일지를 조회하였습니다.",
             data = lessonHistoryService.findAllLessonHistory(request, pageable, member.memberId, member.memberType)
         )
     }
 
+    @Operation(summary = "학생의 수업일지 전체를 조회한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "학생의 전체 수업 일지를 조회하였습니다.")
+        ])
     @GetMapping("/detail/{studentId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun findAllLessonHistoryByMemberId(@PathVariable studentId: Long,
                                        request: SearchCondRequest,
                                        pageable: Pageable,
-                                       @AuthenticationPrincipal member: CustomMemberDetails): ApiResponse<Page<LessonHistoryCommandResult>> {
-        return ApiResponse(
-            message = "학생의 수업 내역 전체를 조회하였습니다.",
+                                       @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Page<LessonHistoryResponse>> {
+        return ApiResult(
+            message = "학생의 수업 일지 전체를 조회하였습니다.",
             data = lessonHistoryService.findAllLessonHistoryByMemberId(studentId, request, pageable)
         )
     }
 
+    @Operation(summary = "수업일지 단건을 조회한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "학생의 전체 수업 일지를 조회하였습니다."),
+            ApiResponse(responseCode = "404", description = "수업 일지를 찾을 수 없습니다."),
+        ])
     @GetMapping("/{lessonHistoryId}")
     fun findOneLessonHistory(@PathVariable lessonHistoryId: Long,
-                             @AuthenticationPrincipal member: CustomMemberDetails): ApiResponse<List<LessonHistoryCommandResult>> {
-        return ApiResponse(
-            message = "수업 내역을 조회하였습니다.",
+                             @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<List<LessonHistoryDetailResponse>> {
+        return ApiResult(
+            message = "수업 일지 단건을 조회하였습니다.",
             data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member.memberId, member.memberType)
         )
     }
 
+    @Operation(summary = "수업일지를 수정한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "수업 일지를 수정하였습니다."),
+            ApiResponse(responseCode = "404", description = "수업 일지를 찾을 수 없습니다."),
+        ])
     @PatchMapping("/{lessonHistoryId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun updateLessonHistory(@PathVariable lessonHistoryId: Long,
-                            @RequestBody lessonHistoryUpdateCommand: LessonHistoryUpdateCommand): ApiResponse<Boolean> {
-        return ApiResponse(
-            message = "수업 내역이 수정되었습니다.",
-            data = lessonHistoryService.updateLessonHistory(lessonHistoryId, lessonHistoryUpdateCommand)
+                            @RequestBody lessonHistoryCommand: LessonHistoryCommand
+    ): ApiResult<Boolean> {
+        return ApiResult(
+            message = "수업 일지가 수정되었습니다.",
+            data = lessonHistoryService.updateLessonHistory(lessonHistoryId, lessonHistoryCommand)
         )
     }
 
+    @Operation(summary = "수업일지를 삭제한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "수업 일지를 삭제하였습니다."),
+            ApiResponse(responseCode = "404", description = "수업 일지를 찾을 수 없습니다."),
+        ])
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @DeleteMapping("/{lessonHistoryId}")
-    fun deleteLessonHistory(@PathVariable lessonHistoryId: Long): ApiResponse<Boolean> {
-        return ApiResponse(
-            message = "수업 내역이 삭제되었습니다.",
+    fun deleteLessonHistory(@PathVariable lessonHistoryId: Long): ApiResult<Boolean> {
+        return ApiResult(
+            message = "수업 일지가 삭제되었습니다.",
             data = lessonHistoryService.deleteLessonHistory(lessonHistoryId)
         )
     }
 
+    @Operation(summary = "수업일지에 댓글을 등록한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "수업 일지에 댓글이 등록되었습니다."),
+            ApiResponse(responseCode = "404(1)", description = "회원을 찾을 수 없습니다."),
+            ApiResponse(responseCode = "404(2)", description = "수업 일지를 찾을 수 없습니다."),
+        ])
     @PostMapping("/{lessonHistoryId}/comment")
     fun registerLessonHistoryComment(@PathVariable lessonHistoryId: Long,
                                      @RequestPart @Valid request: CommentRegisterCommand,
                                      @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
-                                     @AuthenticationPrincipal member: CustomMemberDetails): ApiResponse<Boolean> {
-        return ApiResponse(
+                                     @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Boolean> {
+        return ApiResult(
             message = "댓글이 등록되었습니다.",
             data = lessonHistoryService.registerLessonHistoryComment(lessonHistoryId, uploadFiles, request, member.memberId)
         )
     }
 
+    @Operation(summary = "수업일지에 대댓글을 등록한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "수업 일지에 대댓글이 등록되었습니다."),
+            ApiResponse(responseCode = "404(1)", description = "회원을 찾을 수 없습니다."),
+            ApiResponse(responseCode = "404(2)", description = "수업 일지를 찾을 수 없습니다."),
+        ])
     @PostMapping("/{lessonHistoryId}/comment/{lessonHistoryCommentId}")
     fun registerLessonHistoryComment(@PathVariable lessonHistoryId: Long,
                                      @PathVariable lessonHistoryCommentId: Long,
                                      @RequestPart @Valid request: CommentRegisterCommand,
                                      @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
-                                     @AuthenticationPrincipal member: CustomMemberDetails): ApiResponse<Boolean> {
-        return ApiResponse(
+                                     @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Boolean> {
+        return ApiResult(
             message = "대댓글이 등록되었습니다.",
             data = lessonHistoryService.registerLessonHistoryReply(lessonHistoryId, lessonHistoryCommentId, uploadFiles, request, member.memberId)
         )
     }
 
+    @Operation(summary = "수업일지에 댓글을 수정한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "수업 일지에 댓글이 수정되었습니다."),
+            ApiResponse(responseCode = "404", description = "수업 일지에 댓글을 찾을 수 없습니다.")
+        ])
     @PatchMapping("/comment/{lessonHistoryCommentId}")
     fun updateLessonHistoryComment(@PathVariable lessonHistoryCommentId: Long,
-                                   @RequestBody @Valid request: LessonHistoryCommentUpdateCommand): ApiResponse<Boolean> {
-        return ApiResponse(
+                                   @RequestBody @Valid request: LessonHistoryCommentCommand
+    ): ApiResult<Boolean> {
+        return ApiResult(
             message = "댓글이 수정되었습니다.",
             data = lessonHistoryService.updateLessonHistoryComment(lessonHistoryCommentId, request)
         )
     }
 
+    @Operation(summary = "수업일지에 댓글을 삭제한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "수업 일지에 댓글이 삭제되었습니다."),
+            ApiResponse(responseCode = "404", description = "수업 일지에 댓글을 찾을 수 없습니다.")
+        ])
     @DeleteMapping("/comment/{lessonHistoryCommentId}")
-    fun deleteLessonHistoryComment(@PathVariable lessonHistoryCommentId: Long): ApiResponse<Boolean> {
-        return ApiResponse(
+    fun deleteLessonHistoryComment(@PathVariable lessonHistoryCommentId: Long): ApiResult<Boolean> {
+        return ApiResult(
             message = "댓글이 삭제되었습니다.",
             data = lessonHistoryService.deleteLessonHistoryComment(lessonHistoryCommentId)
         )

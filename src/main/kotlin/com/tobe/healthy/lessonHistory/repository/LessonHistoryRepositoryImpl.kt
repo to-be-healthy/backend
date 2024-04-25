@@ -6,8 +6,9 @@ import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
-import com.tobe.healthy.lessonHistory.domain.dto.SearchCondRequest
+import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryResponse
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.SearchCondRequest
+import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryDetailResponse
 import com.tobe.healthy.lessonHistory.domain.entity.FeedbackCheckStatus.READ
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonHistory.domain.entity.QLessonHistory.lessonHistory
@@ -27,7 +28,7 @@ class LessonHistoryRepositoryImpl(
     private val trainerMemberMappingRepository: TrainerMemberMappingRepository
 ) : LessonHistoryRepositoryCustom {
 
-    override fun findAllLessonHistory(request: SearchCondRequest, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryCommandResult> {
+    override fun findAllLessonHistory(request: SearchCondRequest, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryResponse> {
         val entity = queryFactory
             .select(lessonHistory)
             .from(lessonHistory)
@@ -37,7 +38,7 @@ class LessonHistoryRepositoryImpl(
             .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType, request.searchMyHistory))
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
-            .fetch().stream().map(LessonHistoryCommandResult::from).collect(toList())
+            .fetch().stream().map(LessonHistoryResponse::from).collect(toList())
 
         val totalCount = queryFactory
             .select(lessonHistory.count())
@@ -50,7 +51,7 @@ class LessonHistoryRepositoryImpl(
         return PageableExecutionUtils.getPage(entity, pageable) { totalCount.fetchOne()!! }
     }
 
-    override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): List<LessonHistoryCommandResult> {
+    override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): List<LessonHistoryDetailResponse> {
         val results = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
@@ -63,10 +64,10 @@ class LessonHistoryRepositoryImpl(
 
         updateFeedbackCheckStatus(results.get(0), memberId)
 
-        return results.map(LessonHistoryCommandResult::detailFrom)
+        return results.map(LessonHistoryDetailResponse::detailFrom)
     }
 
-    override fun findAllLessonHistoryByMemberId(studentId: Long, request: SearchCondRequest, pageable: Pageable): Page<LessonHistoryCommandResult> {
+    override fun findAllLessonHistoryByMemberId(studentId: Long, request: SearchCondRequest, pageable: Pageable): Page<LessonHistoryResponse> {
         val entity = queryFactory
             .select(lessonHistory)
             .from(lessonHistory)
@@ -76,7 +77,7 @@ class LessonHistoryRepositoryImpl(
             .where(convertDateFormat(request.searchDate), lessonHistory.student.id.eq(studentId))
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
-            .fetch().stream().map(LessonHistoryCommandResult::from).collect(toList())
+            .fetch().stream().map(LessonHistoryResponse::from).collect(toList())
 
         val totalCount = queryFactory
             .select(lessonHistory.count())
