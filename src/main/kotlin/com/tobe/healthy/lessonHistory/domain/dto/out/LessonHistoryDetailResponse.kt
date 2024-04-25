@@ -6,17 +6,24 @@ import com.tobe.healthy.lessonHistory.domain.entity.AttendanceStatus.ATTENDED
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistoryComment
 import com.tobe.healthy.member.domain.entity.Member
+import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+@Schema(description = "수업 일지 상세 조회 응답 DTO")
 data class LessonHistoryDetailResponse(
+    @Schema(description = "수업일지 ID", example = "1")
     val id: Long,
+    @Schema(description = "조회한 수업일지 제목", example = "홍홍홍홍홍ㅋㅋ")
     val title: String,
+    @Schema(description = "조회한 수업일지 내용", example = "홍박사 댕꿀잼ㅋㅋ")
     val content: String,
+    @Schema(description = "조회한 수업일지 댓글", example = "유튜브 이즈 갓")
     val comments: MutableList<LessonHistoryCommentCommandResult> = mutableListOf(),
+    @Schema(description = "조회한 수업일지 댓글", example = "유튜브 이즈 갓")
     val commentTotalCount: Int,
     val createdAt: LocalDateTime,
     val student: String,

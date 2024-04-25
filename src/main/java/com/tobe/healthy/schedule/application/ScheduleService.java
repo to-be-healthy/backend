@@ -146,4 +146,11 @@ public class ScheduleService {
 	public List<MyStandbyScheduleResponse> findAllMyStandbySchedule(Long memberId) {
 		return scheduleRepository.findAllMyStandbySchedule(memberId);
 	}
+
+	public Boolean updateReservationStatusToNoShow(Long scheduleId, Long memberId) {
+		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
+			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+		schedule.updateReservationStatusToNoShow();
+		return true;
+	}
 }

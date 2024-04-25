@@ -11,9 +11,12 @@ import com.tobe.healthy.lessonHistory.domain.dto.`in`.RegisterLessonHistoryComma
 import com.tobe.healthy.lessonHistory.domain.dto.`in`.SearchCondRequest
 import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryDetailResponse
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.Parameters
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
@@ -45,7 +48,7 @@ class LessonHistoryController(
             ApiResponse(responseCode = "404(2)", description = "트레이너를 찾을 수 없습니다."),
             ApiResponse(responseCode = "404(3)", description = "일정을 찾을 수 없습니다."),
     ])
-    fun registerLessonHistory(@RequestPart @Valid request: RegisterLessonHistoryCommand,
+    fun registerLessonHistory(@ParameterObject @RequestPart @Valid request: RegisterLessonHistoryCommand,
                               @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
                               @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Boolean> {
         return ApiResult(
@@ -59,7 +62,7 @@ class LessonHistoryController(
             ApiResponse(responseCode = "200", description = "전체 수업 일지를 조회하였습니다.")
         ])
     @GetMapping
-    fun findAllLessonHistory(request: SearchCondRequest,
+    fun findAllLessonHistory(@ParameterObject request: SearchCondRequest,
                              pageable: Pageable,
                              @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Page<LessonHistoryResponse>> {
         return ApiResult(
@@ -75,7 +78,7 @@ class LessonHistoryController(
     @GetMapping("/detail/{studentId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun findAllLessonHistoryByMemberId(@PathVariable studentId: Long,
-                                       request: SearchCondRequest,
+                                       @ParameterObject request: SearchCondRequest,
                                        pageable: Pageable,
                                        @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Page<LessonHistoryResponse>> {
         return ApiResult(

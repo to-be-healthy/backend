@@ -9,6 +9,8 @@ import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -101,7 +103,8 @@ public class MemberAuthController {
 
 	@Operation(summary = "로그인", description = "로그인에 성공하면, Access/Refresh token, userId, memberType, gymId를 반환한다.",
 		responses = {
-			@ApiResponse(responseCode = "400", description = "아이디 또는 비밀번호가 잘못되었습니다."),
+			@ApiResponse(responseCode = "400", description = "아이디 또는 비밀번호가 잘못되었습니다.",
+				content = {@Content(schema = @Schema(implementation = Tokens.class))}),
 			@ApiResponse(responseCode = "200", description = "로그인에 성공하고, Access Token, Refresh Token, userId, Role을 반환한다.")
 	})
 	@PostMapping("/login")

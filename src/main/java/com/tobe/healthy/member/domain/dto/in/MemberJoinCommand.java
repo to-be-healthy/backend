@@ -11,7 +11,7 @@ import lombok.ToString;
 
 @Data
 @ToString(exclude = "password")
-@Schema(description = "회원가입 DTO")
+@Schema(title = "MemberJoinCommand", description = "회원가입 DTO")
 @Builder
 public class MemberJoinCommand {
     @Schema(description = "아이디", example = "to-be-healthy")
