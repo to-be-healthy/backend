@@ -1,5 +1,6 @@
 package com.tobe.healthy.common.aop;
 
+import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.point.domain.entity.PointType;
@@ -30,23 +31,23 @@ public class PointAspect {
     @Pointcut("execution(* com.tobe.healthy.workout.application.WorkoutHistoryService.addWorkoutHistory(..))")
     private void addWorkoutHistory() {}
 
-    @AfterReturning(value = "addWorkoutHistory()", returning = "returnValue")
-    public void plusPoint(JoinPoint joinPoint, Object returnValue) {
-        Long memberId;
-        PointType type;
+    @Pointcut("execution(* com.tobe.healthy.diet.application.DietService.addDiet(..))")
+    private void addDiet() {}
 
-        switch (joinPoint.getSignature().getName()) {
-            case "addWorkoutHistory" -> {
-                memberId = ((WorkoutHistoryDto) returnValue).getMember().getId();
-                type = PointType.WORKOUT;
-            }
-//            case "addDiet" -> {
-//                //TODO: 식단기록 등록 개발 후 수정필요
-//                memberId = ((WorkoutHistoryDto) returnValue).getMember().getId();
-//                type = PointType.DIET;
-//            }
-            default -> throw new IllegalStateException("Unexpected value: " + joinPoint.getSignature().getName());
-        }
+    @AfterReturning(value = "addWorkoutHistory()", returning = "returnValue")
+    public void plusPointByWorkout(JoinPoint joinPoint, Object returnValue) {
+        Long memberId = ((WorkoutHistoryDto) returnValue).getMember().getId();
+        PointType type = PointType.WORKOUT;
+
+        //메서드가 호출되는 시점에 스프링 컨테이너에 등록된 Bean을 조회 (지연조회)
+        PointService pointService = pointServiceProvider.getObject();
+        pointService.updatePoint(memberId, type, Calculation.PLUS, ONE_POINT);
+    }
+
+    @AfterReturning(value = "addDiet()", returning = "returnValue")
+    public void plusPointByDiet(JoinPoint joinPoint, Object returnValue) {
+        Long memberId = ((DietDto) returnValue).getMember().getId();
+        PointType type = PointType.DIET;
 
         //메서드가 호출되는 시점에 스프링 컨테이너에 등록된 Bean을 조회 (지연조회)
         PointService pointService = pointServiceProvider.getObject();
