@@ -46,7 +46,7 @@ class LessonHistoryService(
     private val amazonS3: AmazonS3
 ) {
 
-    fun registerLessonHistory(request: RegisterLessonHistoryCommand, uploadFiles: MutableList<MultipartFile>?, trainerId: Long): Boolean {
+    fun registerLessonHistory(request: RegisterLessonHistoryCommand, uploadFiles: MutableList<MultipartFile?>?, trainerId: Long): Boolean {
         val (findMember, findTrainer, findSchedule) = checkLessonHistoryRequirements(request, trainerId)
 
         val lessonHistory = registerLessonHistory(request, findMember, findTrainer, findSchedule)
@@ -59,36 +59,37 @@ class LessonHistoryService(
         return lessonHistoryRepository.findAllLessonHistory(request, pageable, memberId, memberType)
     }
 
-    fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): List<LessonHistoryDetailResponse> {
+    fun findOneLessonHistory(lessonHistoryId: Long?, memberId: Long, memberType: MemberType): LessonHistoryDetailResponse {
         return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, memberId, memberType)
     }
 
-    fun updateLessonHistory(lessonHistoryId: Long, request: LessonHistoryCommand): Boolean {
+    fun updateLessonHistory(lessonHistoryId: Long?, request: LessonHistoryCommand): Boolean {
         val findEntity = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
-        findEntity.updateLessonHistory(request.title, request.content)
+        findEntity.updateLessonHistory(request.title!!, request.content!!)
         return true
     }
 
-    fun deleteLessonHistory(lessonHistoryId: Long): Boolean {
-        lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
-        lessonHistoryRepository.deleteById(lessonHistoryId)
+    fun deleteLessonHistory(lessonHistoryId: Long?): Boolean {
+        val findLessonhistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
+        findLessonhistory ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+        lessonHistoryRepository.deleteById(findLessonhistory.id)
         return true
     }
 
-    fun registerLessonHistoryComment(lessonHistoryId: Long, uploadFiles: MutableList<MultipartFile>?, request: CommentRegisterCommand, memberId: Long): Boolean {
+    fun registerLessonHistoryComment(lessonHistoryId: Long?, uploadFiles: MutableList<MultipartFile>?, request: CommentRegisterCommand, memberId: Long): Boolean {
         val findMember = memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
         val lessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
-        val order = lessonHistoryCommentRepository.findTopComment(lessonHistoryId)
+        val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id)
         val entity = registerComment(order, request, findMember, lessonHistory)
         registerFile(uploadFiles, findMember, lessonHistory, entity)
         return true
     }
 
-    fun registerLessonHistoryReply(lessonHistoryId: Long, lessonHistoryCommentId: Long, uploadFiles: MutableList<MultipartFile>?,
+    fun registerLessonHistoryReply(lessonHistoryId: Long?, lessonHistoryCommentId: Long?, uploadFiles: MutableList<MultipartFile>?,
                                    request: CommentRegisterCommand, memberId: Long): Boolean {
         val findMember = memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
         val lessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
-        val order = lessonHistoryCommentRepository.findTopComment(lessonHistoryId, lessonHistoryCommentId)
+        val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id, lessonHistoryCommentId!!)
         val parentComment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
         val entity = LessonHistoryComment(
             order = order,
@@ -102,25 +103,25 @@ class LessonHistoryService(
         return true
     }
 
-    fun updateLessonHistoryComment(lessonHistoryCommentId: Long, request: LessonHistoryCommentCommand): Boolean {
+    fun updateLessonHistoryComment(lessonHistoryCommentId: Long?, request: LessonHistoryCommentCommand): Boolean {
         val comment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId) ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
         comment.updateLessonHistoryComment(request.content!!)
         return true
     }
 
-    fun deleteLessonHistoryComment(lessonHistoryCommentId: Long): Boolean {
-        lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId) ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
-        lessonHistoryCommentRepository.deleteById(lessonHistoryCommentId)
+    fun deleteLessonHistoryComment(lessonHistoryCommentId: Long?): Boolean {
+        val findLessonHistoryComment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId) ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
+        lessonHistoryCommentRepository.deleteById(findLessonHistoryComment.id)
         return true
     }
 
-    private fun registerFiles(uploadFiles: MutableList<MultipartFile>?, findMember: Member, lessonHistory: LessonHistory) {
+    private fun registerFiles(uploadFiles: MutableList<MultipartFile?>?, findMember: Member, lessonHistory: LessonHistory) {
         uploadFiles?.let {
             var fileOrder = 1;
-            checkMaximumFileSize(uploadFiles)
+            checkMaximumFileSize(uploadFiles.size)
 
             for (uploadFile in it) {
-                if (!uploadFile.isEmpty) {
+                if (uploadFile?.isEmpty == false) {
                     val (originalFileName, fileUrl) = putFile(uploadFile)
 
                     val file = AwsS3File.builder()
@@ -180,7 +181,7 @@ class LessonHistoryService(
         entity: LessonHistoryComment,
     ) {
         uploadFiles?.let {
-            checkMaximumFileSize(uploadFiles)
+            checkMaximumFileSize(it.size)
             var fileOrder = 1;
             for (uploadFile in it) {
                 if (!uploadFile.isEmpty) {
@@ -211,17 +212,19 @@ class LessonHistoryService(
         return Pair(originalFileName, fileUrl)
     }
 
-    private fun checkMaximumFileSize(uploadFiles: MutableList<MultipartFile>) {
-        if (uploadFiles.size > 3) {
+    private fun checkMaximumFileSize(uploadFilesSize: Int) {
+        if (uploadFilesSize > 3) {
             throw CustomException(EXCEED_MAXIMUM_NUMBER_OF_FILES)
         }
     }
 
     fun findAllLessonHistoryByMemberId(
-        studentId: Long,
+        studentId: Long?,
         request: SearchCondRequest,
         pageable: Pageable
     ): Page<LessonHistoryResponse> {
-        return lessonHistoryRepository.findAllLessonHistoryByMemberId(studentId, request, pageable)
+        val findMember =
+            memberRepository.findByIdOrNull(studentId) ?: throw CustomException(MEMBER_NOT_FOUND)
+        return lessonHistoryRepository.findAllLessonHistoryByMemberId(findMember.id, request, pageable)
     }
 }

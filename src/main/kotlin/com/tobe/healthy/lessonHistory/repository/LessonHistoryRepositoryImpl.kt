@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.support.PageableExecutionUtils
 import org.springframework.stereotype.Repository
+import java.util.stream.Collectors
 import java.util.stream.Collectors.toList
 
 @Repository
@@ -38,7 +39,9 @@ class LessonHistoryRepositoryImpl(
             .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType, request.searchMyHistory))
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
-            .fetch().stream().map(LessonHistoryResponse::from).collect(toList())
+            .fetch()
+
+        val contents = entity.map {e -> LessonHistoryResponse.from(e) }.toMutableList()
 
         val totalCount = queryFactory
             .select(lessonHistory.count())
@@ -48,10 +51,10 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.schedule)
             .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType, request.searchMyHistory))
 
-        return PageableExecutionUtils.getPage(entity, pageable) { totalCount.fetchOne()!! }
+        return PageableExecutionUtils.getPage(contents, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
-    override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): List<LessonHistoryDetailResponse> {
+    override fun findOneLessonHistory(lessonHistoryId: Long?, memberId: Long, memberType: MemberType): LessonHistoryDetailResponse {
         val results = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
@@ -60,11 +63,10 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
             .where(lessonHistory.id.eq(lessonHistoryId), validateMemberType(memberId, memberType, null))
-            .fetch() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+            .fetchOne() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
-        updateFeedbackCheckStatus(results.get(0), memberId)
-
-        return results.map(LessonHistoryDetailResponse::detailFrom)
+        updateFeedbackCheckStatus(results, memberId)
+        return LessonHistoryDetailResponse.detailFrom(results)
     }
 
     override fun findAllLessonHistoryByMemberId(studentId: Long, request: SearchCondRequest, pageable: Pageable): Page<LessonHistoryResponse> {
@@ -77,7 +79,9 @@ class LessonHistoryRepositoryImpl(
             .where(convertDateFormat(request.searchDate), lessonHistory.student.id.eq(studentId))
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
-            .fetch().stream().map(LessonHistoryResponse::from).collect(toList())
+            .fetch()
+
+        val results = entity.map {LessonHistoryResponse.from(it)}.toMutableList()
 
         val totalCount = queryFactory
             .select(lessonHistory.count())
@@ -87,7 +91,7 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.schedule)
             .where(convertDateFormat(request.searchDate), lessonHistory.student.id.eq(studentId))
 
-        return PageableExecutionUtils.getPage(entity, pageable) { totalCount.fetchOne()!! }
+        return PageableExecutionUtils.getPage(results, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
     private fun updateFeedbackCheckStatus(

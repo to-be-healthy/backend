@@ -119,7 +119,7 @@ data class LessonHistoryDetailResponse(
             fun from(entity: LessonHistoryComment): LessonHistoryCommentCommandResult {
                 return LessonHistoryCommentCommandResult(
                     id = entity.id,
-                    content = entity.content,
+                    content = if (entity.delYn) "삭제된 댓글입니다." else entity.content,
                     member = LessonHistoryCommentMemberResult.from(entity.writer),
                     orderNum = entity.order,
                     replies = entity.replies?.let { it -> it.map { from(it) } }?.toMutableList(),
