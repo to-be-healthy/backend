@@ -53,7 +53,7 @@ class LessonHistoryRepositoryImpl(
     }
 
     override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): LessonHistoryDetailResponse {
-        val entities = queryFactory
+        val entity = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
             .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
@@ -61,10 +61,12 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
             .where(lessonHistory.id.eq(lessonHistoryId), validateMemberType(memberId, memberType))
-            .fetchOne() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+            .fetchOne()
 
-        updateFeedbackCheckStatus(entities, memberId)
-        return LessonHistoryDetailResponse.detailFrom(entities)
+        entity?.let {
+            updateFeedbackCheckStatus(entity, memberId)
+        }
+        return LessonHistoryDetailResponse.detailFrom(entity)
     }
 
     override fun findAllLessonHistoryByMemberId(studentId: Long, request: SearchCondRequest, pageable: Pageable): Page<LessonHistoryResponse> {

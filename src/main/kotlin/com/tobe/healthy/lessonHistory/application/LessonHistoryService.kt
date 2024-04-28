@@ -39,7 +39,7 @@ class LessonHistoryService(
 
     fun registerLessonHistory(
         request: RegisterLessonHistoryCommand,
-        uploadFiles: MutableList<MultipartFile?>?,
+        uploadFiles: MutableList<MultipartFile>?,
         trainerId: Long
     ): Boolean {
         val (findMember, findTrainer, findSchedule) = checkLessonHistoryRequirements(
@@ -90,7 +90,7 @@ class LessonHistoryService(
 
     fun registerLessonHistoryComment(
         lessonHistoryId: Long,
-        uploadFiles: MutableList<MultipartFile?>?,
+        uploadFiles: MutableList<MultipartFile>?,
         request: CommentRegisterCommand,
         memberId: Long
     ): Boolean {
@@ -109,7 +109,7 @@ class LessonHistoryService(
     fun registerLessonHistoryReply(
         lessonHistoryId: Long,
         lessonHistoryCommentId: Long,
-        uploadFiles: MutableList<MultipartFile?>?,
+        uploadFiles: MutableList<MultipartFile>?,
         request: CommentRegisterCommand,
         memberId: Long
     ): Boolean {
@@ -155,7 +155,7 @@ class LessonHistoryService(
     }
 
     private fun registerFiles(
-        uploadFiles: MutableList<MultipartFile?>?,
+        uploadFiles: MutableList<MultipartFile>?,
         findMember: Member,
         lessonHistory: LessonHistory
     ) {
@@ -164,7 +164,7 @@ class LessonHistoryService(
             checkMaximumFileSize(uploadFiles.size)
 
             for (uploadFile in it) {
-                if (uploadFile?.isEmpty == false) {
+                if (!uploadFile.isEmpty) {
                     val (originalFileName, fileUrl) = putFile(uploadFile)
 
                     val file = AwsS3File.builder()
@@ -233,7 +233,7 @@ class LessonHistoryService(
     }
 
     private fun registerFile(
-        uploadFiles: MutableList<MultipartFile?>?,
+        uploadFiles: MutableList<MultipartFile>?,
         findMember: Member,
         lessonHistory: LessonHistory,
         entity: LessonHistoryComment,
@@ -242,7 +242,7 @@ class LessonHistoryService(
             checkMaximumFileSize(it.size)
             var fileOrder = 1;
             for (uploadFile in it) {
-                if (uploadFile?.isEmpty == false) {
+                if (!uploadFile.isEmpty) {
                     val (originalFileName, fileUrl) = putFile(uploadFile)
 
                     val file = AwsS3File.builder()
@@ -271,7 +271,7 @@ class LessonHistoryService(
             objectMetadata
         )
         val fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString()
-        log.info { "fileUrl -> ${fileUrl}" }
+        log.info { "등록된 S3 파일 URL => ${fileUrl}" }
         return Pair(originalFileName, fileUrl)
     }
 

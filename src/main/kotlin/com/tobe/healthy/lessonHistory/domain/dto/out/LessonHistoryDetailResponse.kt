@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
+import java.util.*
 
 @Schema(description = "수업 일지 상세 조회 응답 DTO")
 data class LessonHistoryDetailResponse(
@@ -22,7 +22,7 @@ data class LessonHistoryDetailResponse(
     @Schema(description = "조회한 수업일지 내용", example = "홍박사 댕꿀잼ㅋㅋ")
     val content: String,
     @Schema(description = "조회한 수업일지 댓글", example = "유튜브 이즈 갓")
-    val comments: MutableList<LessonHistoryCommentCommandResult> = mutableListOf(),
+    val comments: MutableList<LessonHistoryCommentCommandResult?> = mutableListOf(),
     @Schema(description = "조회한 수업일지 댓글", example = "유튜브 이즈 갓")
     val commentTotalCount: Int,
     val createdAt: LocalDateTime,
@@ -53,33 +53,38 @@ data class LessonHistoryDetailResponse(
             )
         }
 
-        fun detailFrom(entity: LessonHistory): LessonHistoryDetailResponse {
-            val comments = sortLessonHistoryComment(entity.lessonHistoryComment)
-            return LessonHistoryDetailResponse(
-                id = entity.id,
-                title = entity.title,
-                content = entity.content,
-                comments = comments,
-                commentTotalCount = entity.lessonHistoryComment.count(),
-                createdAt = entity.createdAt,
-                student = entity.student.name,
-                trainer = "${entity.trainer.name} 트레이너",
-                scheduleId = entity.schedule.id,
-                lessonDt = formatLessonDt(entity.schedule.lessonDt),
-                lessonTime = formatLessonTime(entity.schedule.lessonStartTime, entity.schedule.lessonEndTime),
-                attendanceStatus = validateAttendanceStatus(entity.schedule.lessonDt, entity.schedule.lessonEndTime),
-                files = entity.file.filter { it.lessonHistoryComment == null }
-                                   .map(LessonHistoryFileResults.Companion::from).sortedBy { it.fileOrder }
-                                   .toMutableList()
-            )
+        fun detailFrom(entity: LessonHistory?): LessonHistoryDetailResponse? {
+            var comments: MutableList<LessonHistoryCommentCommandResult?> = mutableListOf()
+            entity?.lessonHistoryComment?.let {
+                comments = sortLessonHistoryComment(it)
+            }
+            return entity?.let {
+                LessonHistoryDetailResponse(
+                    id = entity.id,
+                    title = entity.title,
+                    content = entity.content,
+                    comments = comments,
+                    commentTotalCount = entity.lessonHistoryComment.count(),
+                    createdAt = entity.createdAt,
+                    student = entity.student.name,
+                    trainer = "${entity.trainer.name} 트레이너",
+                    scheduleId = entity.schedule.id,
+                    lessonDt = formatLessonDt(entity.schedule.lessonDt),
+                    lessonTime = formatLessonTime(entity.schedule.lessonStartTime, entity.schedule.lessonEndTime),
+                    attendanceStatus = validateAttendanceStatus(entity.schedule.lessonDt, entity.schedule.lessonEndTime),
+                    files = entity.file.filter { it.lessonHistoryComment == null }
+                        .map(LessonHistoryFileResults.Companion::from).sortedBy { it.fileOrder }
+                        .toMutableList()
+                )
+            } ?: null
         }
 
-        private fun sortLessonHistoryComment(comment: List<LessonHistoryComment>): MutableList<LessonHistoryCommentCommandResult> {
-            val (comments, replies) = comment.sortedBy{ it.order }.partition { it.parentId == null }
+        private fun sortLessonHistoryComment(comment: List<LessonHistoryComment?>): MutableList<LessonHistoryCommentCommandResult?> {
+            val (comments, replies) = comment.sortedBy{ it?.order }.partition { it?.parentId == null }
 
             comments.forEach { parent ->
-                parent.replies = replies.filter { child -> child.parentId?.id == parent.id }
-                                        .sortedBy { it.order }
+                parent?.replies = replies.filter { child -> child?.parentId?.id == parent?.id }
+                                        .sortedBy { it?.order }
                                         .toMutableList()
             }
 
@@ -112,25 +117,27 @@ data class LessonHistoryDetailResponse(
         val content: String,
         val member: LessonHistoryCommentMemberResult,
         val orderNum: Int,
-        val replies: MutableList<LessonHistoryCommentCommandResult>?,
+        val replies: MutableList<LessonHistoryCommentCommandResult?>?,
         val files: MutableList<LessonHistoryFileResults> = mutableListOf(),
         val delYn: Boolean,
         val createdAt: LocalDateTime,
         val updatedAt: LocalDateTime
     ) {
         companion object {
-            fun from(entity: LessonHistoryComment): LessonHistoryCommentCommandResult {
-                return LessonHistoryCommentCommandResult(
-                    id = entity.id,
-                    content = if (entity.delYn) "삭제된 댓글입니다." else entity.content,
-                    member = LessonHistoryCommentMemberResult.from(entity.writer),
-                    orderNum = entity.order,
-                    replies = entity.replies?.let { it -> it.map { from(it) } }?.toMutableList(),
-                    files = entity.files.map { LessonHistoryFileResults.from(it) }.toMutableList(),
-                    delYn = entity.delYn,
-                    createdAt = entity.createdAt,
-                    updatedAt = entity.updatedAt
-                )
+            fun from(entity: LessonHistoryComment?): LessonHistoryCommentCommandResult? {
+                return entity?.let {
+                    return LessonHistoryCommentCommandResult(
+                        id = entity.id,
+                        content = if (entity.delYn == true) "삭제된 댓글입니다." else entity.content,
+                        member = LessonHistoryCommentMemberResult.from(entity.writer),
+                        orderNum = entity.order,
+                        replies = entity.replies?.let { it -> it.map { from(it) } }?.toMutableList(),
+                        files = entity.files.map { LessonHistoryFileResults.from(it) }.toMutableList(),
+                        delYn = entity.delYn,
+                        createdAt = entity.createdAt,
+                        updatedAt = entity.updatedAt
+                    )
+                }
             }
         }
     }

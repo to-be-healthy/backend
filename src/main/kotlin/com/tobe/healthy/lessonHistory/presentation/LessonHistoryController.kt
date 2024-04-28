@@ -50,7 +50,7 @@ class LessonHistoryController(
             ),
     ])
     fun registerLessonHistory(@Parameter(content = [Content(schema = Schema(implementation = RegisterLessonHistoryCommand::class))]) @RequestPart @Valid request: RegisterLessonHistoryCommand,
-                              @RequestPart(required = false) uploadFiles: MutableList<MultipartFile?>?,
+                              @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
                               @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Boolean> {
         return ApiResult(
             message = "수업 일지를 등록하였습니다.",
@@ -141,7 +141,7 @@ class LessonHistoryController(
     @PostMapping("/{lessonHistoryId}/comment")
     fun registerLessonHistoryComment(@Parameter(description = "수업일지 ID", example = "1") @PathVariable lessonHistoryId: Long,
                                      @Parameter(content = [Content(schema = Schema(implementation = CommentRegisterCommand::class))]) @RequestPart @Valid request: CommentRegisterCommand,
-                                     @RequestPart(required = false) uploadFiles: MutableList<MultipartFile?>?,
+                                     @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
                                      @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Boolean> {
         return ApiResult(
             message = "댓글이 등록되었습니다.",
@@ -159,7 +159,7 @@ class LessonHistoryController(
     fun registerLessonHistoryComment(@Parameter(description = "수업일지 ID", example = "1") @PathVariable lessonHistoryId: Long,
                                      @Parameter(description = "수업일지 댓글 ID", example = "1") @PathVariable lessonHistoryCommentId: Long,
                                      @Parameter(content = [Content(schema = Schema(implementation = CommentRegisterCommand::class))]) @RequestPart @Valid request: CommentRegisterCommand,
-                                     @RequestPart(required = false) uploadFiles: MutableList<MultipartFile?>?,
+                                     @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
                                      @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Boolean> {
         return ApiResult(
             message = "대댓글이 등록되었습니다.",
