@@ -86,7 +86,7 @@ class LessonHistoryController(
         ])
     @GetMapping("/detail/{studentId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findAllLessonHistoryByMemberId(@Parameter(description = "학생 ID", example = "1") @PathVariable studentId: Long?,
+    fun findAllLessonHistoryByMemberId(@Parameter(description = "학생 ID", example = "1") @PathVariable studentId: Long,
                                        @Parameter(content = [Content(schema = Schema(implementation = SearchCondRequest::class))]) request: SearchCondRequest,
                                        @ParameterObject pageable: Pageable,
                                        @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Page<LessonHistoryResponse>> {
