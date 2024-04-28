@@ -2,7 +2,6 @@ package com.tobe.healthy.lessonHistory.domain.dto.`in`
 
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotEmpty
 
 data class LessonHistoryCommand(
     @Schema(description = "수정할 수업일지 제목")
