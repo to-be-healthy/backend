@@ -52,7 +52,7 @@ class LessonHistoryRepositoryImpl(
         return PageableExecutionUtils.getPage(contents, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
-    override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): LessonHistoryDetailResponse {
+    override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): LessonHistoryDetailResponse? {
         val entity = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
