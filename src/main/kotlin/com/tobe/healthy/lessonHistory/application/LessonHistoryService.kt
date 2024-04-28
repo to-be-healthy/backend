@@ -59,24 +59,24 @@ class LessonHistoryService(
         return lessonHistoryRepository.findAllLessonHistory(request, pageable, memberId, memberType)
     }
 
-    fun findOneLessonHistory(lessonHistoryId: Long?, memberId: Long, memberType: MemberType): LessonHistoryDetailResponse {
+    fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): LessonHistoryDetailResponse {
         return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, memberId, memberType)
     }
 
-    fun updateLessonHistory(lessonHistoryId: Long?, request: LessonHistoryCommand): Boolean {
+    fun updateLessonHistory(lessonHistoryId: Long, request: LessonHistoryCommand): Boolean {
         val findEntity = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
         findEntity.updateLessonHistory(request.title!!, request.content!!)
         return true
     }
 
-    fun deleteLessonHistory(lessonHistoryId: Long?): Boolean {
-        val findLessonhistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
-        findLessonhistory ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
-        lessonHistoryRepository.deleteById(findLessonhistory.id)
+    fun deleteLessonHistory(lessonHistoryId: Long): Boolean {
+        val findLessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
+        findLessonHistory ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+        lessonHistoryRepository.deleteById(findLessonHistory.id)
         return true
     }
 
-    fun registerLessonHistoryComment(lessonHistoryId: Long?, uploadFiles: MutableList<MultipartFile>?, request: CommentRegisterCommand, memberId: Long): Boolean {
+    fun registerLessonHistoryComment(lessonHistoryId: Long, uploadFiles: MutableList<MultipartFile>?, request: CommentRegisterCommand, memberId: Long): Boolean {
         val findMember = memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
         val lessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
         val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id)
@@ -85,7 +85,7 @@ class LessonHistoryService(
         return true
     }
 
-    fun registerLessonHistoryReply(lessonHistoryId: Long?, lessonHistoryCommentId: Long?, uploadFiles: MutableList<MultipartFile>?,
+    fun registerLessonHistoryReply(lessonHistoryId: Long, lessonHistoryCommentId: Long, uploadFiles: MutableList<MultipartFile>?,
                                    request: CommentRegisterCommand, memberId: Long): Boolean {
         val findMember = memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
         val lessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
@@ -103,15 +103,15 @@ class LessonHistoryService(
         return true
     }
 
-    fun updateLessonHistoryComment(lessonHistoryCommentId: Long?, request: LessonHistoryCommentCommand): Boolean {
+    fun updateLessonHistoryComment(lessonHistoryCommentId: Long, request: LessonHistoryCommentCommand): Boolean {
         val comment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId) ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
         comment.updateLessonHistoryComment(request.content!!)
         return true
     }
 
-    fun deleteLessonHistoryComment(lessonHistoryCommentId: Long?): Boolean {
+    fun deleteLessonHistoryComment(lessonHistoryCommentId: Long): Boolean {
         val findLessonHistoryComment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId) ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
-        lessonHistoryCommentRepository.deleteById(findLessonHistoryComment.id)
+        findLessonHistoryComment.deleteComment()
         return true
     }
 
