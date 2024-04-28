@@ -45,7 +45,7 @@ class LessonHistoryComment(
     val id: Long = 0,
 
     @ColumnDefault("false")
-    val delYn: Boolean = false,
+    var delYn: Boolean = false,
 
     @Transient
     var replies: MutableList<LessonHistoryComment> = mutableListOf(),
@@ -54,5 +54,9 @@ class LessonHistoryComment(
 
     fun updateLessonHistoryComment(content: String) {
         this.content = content
+    }
+
+    fun deleteComment() {
+        this.delYn = true
     }
 }
