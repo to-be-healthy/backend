@@ -27,6 +27,8 @@ data class LessonHistoryResponse(
     val student: String,
     @Schema(description = "수업 일지 작성한 트레이너", example = "홍길동")
     val trainer: String,
+    @Schema(description = "일정 ID", example = "1")
+    val scheduleId: Long,
     @Schema(description = "수업 일자", example = "yy:mm:dd")
     val lessonDt: String,
     @Schema(description = "수업 시간", example = "10:00 ~ 10:50")
@@ -47,6 +49,7 @@ data class LessonHistoryResponse(
                 createdAt = entity.createdAt,
                 student = entity.student.name,
                 trainer = "${entity.trainer.name} 트레이너",
+                scheduleId = entity.schedule.id,
                 lessonDt = formatLessonDt(entity.schedule.lessonDt),
                 lessonTime = formatLessonTime(entity.schedule.lessonStartTime, entity.schedule.lessonEndTime),
                 attendanceStatus = validateAttendanceStatus(entity.schedule.lessonDt, entity.schedule.lessonEndTime),
