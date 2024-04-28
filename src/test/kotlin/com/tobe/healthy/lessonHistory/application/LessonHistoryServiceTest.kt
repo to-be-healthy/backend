@@ -58,7 +58,8 @@ class LessonHistoryServiceTest(
         }
     }
 })
-{ companion object {
+{
+    companion object {
         private fun createLessonHistoryComment(lessonHistory: LessonHistory): LessonHistoryComment {
         return LessonHistoryComment(
             order = 1,

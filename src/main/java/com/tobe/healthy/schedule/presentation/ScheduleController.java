@@ -159,4 +159,19 @@ public class ScheduleController {
 				.message("학생이 대기중인 예약을 조회하였습니다.")
 				.build();
 	}
+
+	@Operation(summary = "트레이너가 학생 노쇼 처리를 한다.", description = "트레이너가 학생 노쇼 처리를 한다.",
+		responses = {
+			@ApiResponse(responseCode = "200", description = "노쇼 처리가 되었습니다."),
+			@ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
+		})
+	@DeleteMapping("/no-show/{scheduleId}")
+	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
+	public ResponseHandler<Boolean> updateReservationStatusToNoShow(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
+		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<Boolean>builder()
+			.data(scheduleService.updateReservationStatusToNoShow(scheduleId, customMemberDetails.getMemberId()))
+			.message("노쇼 처리되었습니다.")
+			.build();
+	}
 }

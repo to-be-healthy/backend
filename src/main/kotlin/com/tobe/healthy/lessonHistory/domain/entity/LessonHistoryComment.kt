@@ -13,6 +13,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.DynamicUpdate
 
 @Entity
@@ -43,10 +44,13 @@ class LessonHistoryComment(
     @Column(name = "lesson_history_comment_id")
     val id: Long = 0,
 
-    @Transient
-    var replies: MutableList<LessonHistoryComment> = mutableListOf()
+    @ColumnDefault("false")
+    val delYn: Boolean = false,
 
-) : BaseTimeEntity<LessonHistoryComment, Long>() {
+    @Transient
+    var replies: MutableList<LessonHistoryComment> = mutableListOf(),
+
+    ) : BaseTimeEntity<LessonHistoryComment, Long>() {
 
     fun updateLessonHistoryComment(content: String) {
         this.content = content
