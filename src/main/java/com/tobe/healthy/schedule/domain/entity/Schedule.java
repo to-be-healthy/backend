@@ -18,6 +18,7 @@ import java.util.List;
 
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.NO_SHOW;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
@@ -71,6 +72,10 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 			reserve.reservationStatus(COMPLETED);
 		}
 		return reserve.build();
+	}
+
+	public void updateReservationStatusToNoShow() {
+		this.reservationStatus = NO_SHOW;
 	}
 
 	public void registerSchedule(Member member) {

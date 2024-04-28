@@ -2,7 +2,7 @@ package com.tobe.healthy.lessonHistory.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
 import com.tobe.healthy.file.domain.entity.AwsS3File
-import com.tobe.healthy.lessonHistory.domain.dto.RegisterLessonHistoryCommand
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.RegisterLessonHistoryCommand
 import com.tobe.healthy.lessonHistory.domain.entity.FeedbackCheckStatus.UNREAD
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.schedule.domain.entity.Schedule
