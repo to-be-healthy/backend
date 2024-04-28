@@ -8,7 +8,6 @@ import com.tobe.healthy.schedule.domain.dto.in.RegisterClosedDayCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
-import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -152,19 +151,6 @@ public class ScheduleController {
 		return ResponseHandler.<List<MyReservationResponse>>builder()
 				.data(scheduleService.findAllMyReservation(customMemberDetails.getMemberId()))
 				.message("학생이 내 예약을 조회하였습니다.")
-				.build();
-	}
-
-	@Operation(summary = "학생이 대기중인 예약을 조회한다.", description = "학생이 대기중인 예약을 조회한다.",
-			responses = {
-					@ApiResponse(responseCode = "200", description = "학생이 대기중인 예약을 조회하였습니다.")
-			})
-	@GetMapping("/my-standby")
-	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<List<MyStandbyScheduleResponse>> findAllMyStandbySchedule(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<List<MyStandbyScheduleResponse>>builder()
-				.data(scheduleService.findAllMyStandbySchedule(customMemberDetails.getMemberId()))
-				.message("학생이 대기중인 예약을 조회하였습니다.")
 				.build();
 	}
 

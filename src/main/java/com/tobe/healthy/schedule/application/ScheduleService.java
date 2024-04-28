@@ -74,93 +74,16 @@ public class ScheduleService {
 		return true;
 	}
 
-	private void validateSchduleDate(AutoCreateScheduleCommand request) {
-		if (request.getStartDt().isAfter(request.getEndDt())) {
-			throw new CustomException(START_DATE_AFTER_END_DATE);
-		}
-		if (request.getStartTime().isAfter(request.getEndTime())) {
-			throw new CustomException(DATETIME_NOT_VALID);
-		}
-		if (request.getLunchStartTime().isAfter(request.getLunchEndTime())) {
-			throw new CustomException(LUNCH_TIME_INVALID);
-		}
-		if (ChronoUnit.DAYS.between(request.getStartDt(), request.getEndDt()) > 30) {
-			throw new CustomException(SCHEDULE_LESS_THAN_30_DAYS);
-		}
-	}
-
-	public List<ScheduleCommandResult> findAllByApplicantId(Long memberId) {
-		return scheduleRepository.findAllByApplicantId(memberId);
-	}
-
-	public Boolean reserveSchedule(Long scheduleId, Long memberId) {
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-
-		Schedule schedule = scheduleRepository.findAvailableScheduleById(scheduleId)
-			.orElseThrow(() -> new CustomException(NOT_RESERVABLE_SCHEDULE));
-
-		schedule.registerSchedule(member);
-
-		return true;
-	}
-
-	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Long trainerId) {
-		return scheduleRepository.findAllSchedule(searchCond, trainerId);
-	}
-
-	public Boolean cancelTrainerSchedule(Long scheduleId, Long memberId) {
-		Schedule entity = scheduleRepository.findScheduleByTrainerId(memberId, scheduleId)
-			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
-
-		entity.cancelTrainerSchedule();
-
-		return true;
-	}
-
-	public Boolean cancelMemberSchedule(Long scheduleId, Long memberId) {
-		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
-			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
-
-		// 대기 테이블에 인원이 있으면 수정하기
-		standByScheduleRepository.findByScheduleId(scheduleId).ifPresentOrElse(
-			standBySchedule -> changeApplicantAndDeleteStandBy(standBySchedule, schedule),
-			() -> schedule.cancelMemberSchedule()
-		);
-
-		return true;
-	}
-
-	private void changeApplicantAndDeleteStandBy(StandBySchedule standBySchedule, Schedule schedule) {
-		schedule.changeApplicantInSchedule(standBySchedule.getMember());
-		standBySchedule.deleteStandBy();
-	}
-
-	public List<MyReservationResponse> findAllMyReservation(Long memberId) {
-		return scheduleRepository.findAllMyReservation(memberId);
-	}
-
-	public List<MyStandbyScheduleResponse> findAllMyStandbySchedule(Long memberId) {
-		return scheduleRepository.findAllMyStandbySchedule(memberId);
-	}
-
-	public Boolean updateReservationStatusToNoShow(Long scheduleId, Long memberId) {
-		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
-			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
-		schedule.updateReservationStatusToNoShow();
-		return true;
-	}
-
 	public Boolean registerIndividualSchedule(RegisterScheduleCommand request, Long trainerId) {
 		scheduleRepository.findAvailableRegisterSchedule(request, trainerId).ifPresentOrElse(
 				schedule -> {
+					throw new CustomException(SCHEDULE_ALREADY_EXISTS);
+				},
+				() -> {
 					Member trainer = memberRepository.findById(trainerId)
 							.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 					Schedule entity = Schedule.registerSchedule(request.getLessonDt(), trainer, request.getLessonStartTime(), request.getLessonEndTime(), 0, AVAILABLE);
 					scheduleRepository.save(entity);
-				},
-				() -> {
-					throw new CustomException(SCHEDULE_ALREADY_EXISTS);
 				}
 		);
 		return true;
@@ -178,5 +101,82 @@ public class ScheduleService {
 				}
 		);
 		return true;
+	}
+
+	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Long trainerId) {
+		return scheduleRepository.findAllSchedule(searchCond, trainerId);
+	}
+
+	public List<ScheduleCommandResult> findAllByApplicantId(Long memberId) {
+		return scheduleRepository.findAllByApplicantId(memberId);
+	}
+
+	public Boolean reserveSchedule(Long scheduleId, Long memberId) {
+		Member member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+		Schedule schedule = scheduleRepository.findAvailableScheduleById(scheduleId)
+				.orElseThrow(() -> new CustomException(NOT_RESERVABLE_SCHEDULE));
+
+		schedule.registerSchedule(member);
+
+		return true;
+	}
+
+	public Boolean cancelMemberSchedule(Long scheduleId, Long memberId) {
+		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
+				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+
+		// 대기 테이블에 인원이 있으면 수정하기
+		standByScheduleRepository.findByScheduleId(scheduleId).ifPresentOrElse(
+				standBySchedule -> changeApplicantAndDeleteStandBy(standBySchedule, schedule),
+				() -> schedule.cancelMemberSchedule()
+		);
+
+		return true;
+	}
+
+	public Boolean cancelTrainerSchedule(Long scheduleId, Long memberId) {
+		Schedule entity = scheduleRepository.findScheduleByTrainerId(memberId, scheduleId)
+				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+
+		entity.cancelTrainerSchedule();
+
+		return true;
+	}
+
+	public List<MyReservationResponse> findAllMyReservation(Long memberId) {
+		return scheduleRepository.findAllMyReservation(memberId);
+	}
+
+	public List<MyStandbyScheduleResponse> findAllMyStandbySchedule(Long memberId) {
+		return scheduleRepository.findAllMyStandbySchedule(memberId);
+	}
+
+	public Boolean updateReservationStatusToNoShow(Long scheduleId, Long memberId) {
+		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
+				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+		schedule.updateReservationStatusToNoShow();
+		return true;
+	}
+
+	private void validateSchduleDate(AutoCreateScheduleCommand request) {
+		if (request.getStartDt().isAfter(request.getEndDt())) {
+			throw new CustomException(START_DATE_AFTER_END_DATE);
+		}
+		if (request.getStartTime().isAfter(request.getEndTime())) {
+			throw new CustomException(DATETIME_NOT_VALID);
+		}
+		if (request.getLunchStartTime().isAfter(request.getLunchEndTime())) {
+			throw new CustomException(LUNCH_TIME_INVALID);
+		}
+		if (ChronoUnit.DAYS.between(request.getStartDt(), request.getEndDt()) > 30) {
+			throw new CustomException(SCHEDULE_LESS_THAN_30_DAYS);
+		}
+	}
+
+	private void changeApplicantAndDeleteStandBy(StandBySchedule standBySchedule, Schedule schedule) {
+		schedule.changeApplicantInSchedule(standBySchedule.getMember());
+		standBySchedule.deleteStandBy();
 	}
 }

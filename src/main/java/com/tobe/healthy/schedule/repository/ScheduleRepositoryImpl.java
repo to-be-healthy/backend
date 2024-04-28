@@ -102,12 +102,11 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 		Schedule entity = queryFactory
 				.select(schedule)
 				.from(schedule)
-				.where(schedule.lessonDt.eq(request.getLessonDt())
-				.and(schedule.lessonStartTime.eq(request.getLessonStartTime()))
-				.and(schedule.lessonEndTime.eq(request.getLessonEndTime()))
-				.and(schedule.trainer.id.eq(trainerId)))
+				.where(schedule.lessonDt.eq(request.getLessonDt()),
+						schedule.lessonStartTime.eq(request.getLessonStartTime()),
+						schedule.lessonEndTime.eq(request.getLessonEndTime()), schedule.trainer.id.eq(trainerId))
 				.fetchOne();
-		return Optional.of(entity);
+		return Optional.ofNullable(entity);
 	}
 
 	private BooleanExpression scheduleDelYnFalse() {
