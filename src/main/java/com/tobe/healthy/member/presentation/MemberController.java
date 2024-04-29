@@ -242,4 +242,16 @@ public class MemberController {
 				.build();
 	}
 
+	@Operation(summary = "FCM 토큰을 등록한다.", responses = {
+			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
+			@ApiResponse(responseCode = "200", description = "토큰이 등록되었습니다.")
+	})
+	@PostMapping("/fcm-token")
+	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
+	public ResponseHandler<String> registerFcmToken(@RequestParam String fcmToken, @AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<String>builder()
+				.data(memberService.registerFcmToken(fcmToken, member.getMemberId()))
+				.message("토큰을 저장하였습니다.")
+				.build();
+	}
 }

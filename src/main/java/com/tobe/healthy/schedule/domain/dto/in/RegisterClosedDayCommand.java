@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,5 +18,5 @@ import java.time.LocalDate;
 public class RegisterClosedDayCommand {
     @Schema(description = "등록할 수업 일자", example = "2024-04-01")
     @NotNull(message = "등록할 수업 일자를 입력해 주세요.")
-    private LocalDate lessonDt;
+    private List<LocalDate> lessonDt;
 }

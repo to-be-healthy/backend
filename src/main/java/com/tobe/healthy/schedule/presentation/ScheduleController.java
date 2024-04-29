@@ -8,7 +8,7 @@ import com.tobe.healthy.schedule.domain.dto.in.RegisterClosedDayCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
-import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
+import com.tobe.healthy.schedule.domain.dto.out.NoShowCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -155,19 +155,6 @@ public class ScheduleController {
 				.build();
 	}
 
-	@Operation(summary = "학생이 대기중인 예약을 조회한다.", description = "학생이 대기중인 예약을 조회한다.",
-			responses = {
-					@ApiResponse(responseCode = "200", description = "학생이 대기중인 예약을 조회하였습니다.")
-			})
-	@GetMapping("/my-standby")
-	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<List<MyStandbyScheduleResponse>> findAllMyStandbySchedule(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<List<MyStandbyScheduleResponse>>builder()
-				.data(scheduleService.findAllMyStandbySchedule(customMemberDetails.getMemberId()))
-				.message("학생이 대기중인 예약을 조회하였습니다.")
-				.build();
-	}
-
 	@Operation(summary = "트레이너가 학생 노쇼 처리를 한다.", description = "트레이너가 학생 노쇼 처리를 한다.",
 		responses = {
 			@ApiResponse(responseCode = "200", description = "노쇼 처리가 되었습니다."),
@@ -175,9 +162,9 @@ public class ScheduleController {
 		})
 	@DeleteMapping("/no-show/{scheduleId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<Boolean> updateReservationStatusToNoShow(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
+	public ResponseHandler<NoShowCommandResponse> updateReservationStatusToNoShow(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<Boolean>builder()
+		return ResponseHandler.<NoShowCommandResponse>builder()
 			.data(scheduleService.updateReservationStatusToNoShow(scheduleId, customMemberDetails.getMemberId()))
 			.message("노쇼 처리되었습니다.")
 			.build();
