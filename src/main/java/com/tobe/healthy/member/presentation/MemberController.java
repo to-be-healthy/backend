@@ -247,7 +247,6 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "토큰이 등록되었습니다.")
 	})
 	@PostMapping("/fcm-token")
-	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ResponseHandler<String> registerFcmToken(@RequestParam String fcmToken, @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<String>builder()
 				.data(memberService.registerFcmToken(fcmToken, member.getMemberId()))
