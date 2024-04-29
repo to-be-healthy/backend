@@ -1,6 +1,10 @@
 package com.tobe.healthy.schedule.application;
 
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.course.application.CourseService;
+import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
+import com.tobe.healthy.course.domain.entity.Course;
+import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
@@ -9,6 +13,7 @@ import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
+import com.tobe.healthy.schedule.domain.dto.out.NoShowCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
@@ -25,6 +30,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
+import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
 
 @Service
@@ -135,11 +142,6 @@ public class ScheduleService {
 		return true;
 	}
 
-	private void changeApplicantAndDeleteStandBy(StandBySchedule standBySchedule, Schedule schedule) {
-		schedule.changeApplicantInSchedule(standBySchedule.getMember());
-		standBySchedule.deleteStandBy();
-	}
-
 	public List<MyReservationResponse> findAllMyReservation(Long memberId) {
 		return scheduleRepository.findAllMyReservation(memberId);
 	}
@@ -148,11 +150,11 @@ public class ScheduleService {
 		return scheduleRepository.findAllMyStandbySchedule(memberId);
 	}
 
-	public Boolean updateReservationStatusToNoShow(Long scheduleId, Long memberId) {
+	public NoShowCommandResponse updateReservationStatusToNoShow(Long scheduleId, Long memberId) {
 		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
 			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 		schedule.updateReservationStatusToNoShow();
-		return true;
+		return NoShowCommandResponse.from(schedule);
 	}
 
 	public Boolean registerIndividualSchedule(RegisterScheduleCommand request, Long trainerId) {
@@ -172,15 +174,15 @@ public class ScheduleService {
 
 	public Boolean registerClosedDay(RegisterClosedDayCommand request, Long trainerId) {
 		Member trainer = memberRepository.findById(trainerId).orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		scheduleRepository.findScheduleByLessonDt(request.getLessonDt()).ifPresentOrElse(
+		request.getLessonDt().stream().forEach(lessonDt -> scheduleRepository.findScheduleByLessonDt(lessonDt).ifPresentOrElse(
 				schedule -> {
 					throw new CustomException(SCHEDULE_ALREADY_EXISTS);
 				},
 				() -> {
-					Schedule entity = Schedule.builder().lessonDt(request.getLessonDt()).trainer(trainer).reservationStatus(CLOSED_DAY).build();
+					Schedule entity = Schedule.builder().lessonDt(lessonDt).trainer(trainer).reservationStatus(CLOSED_DAY).build();
 					scheduleRepository.save(entity);
 				}
-		);
+		));
 		return true;
 	}
 
