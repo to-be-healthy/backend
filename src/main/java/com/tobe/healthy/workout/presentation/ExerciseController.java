@@ -1,10 +1,20 @@
 package com.tobe.healthy.workout.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.member.application.MemberService;
+import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.trainer.application.TrainerService;
+import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
+import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.workout.application.ExerciseService;
+import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.ExerciseDto;
 import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
 import com.tobe.healthy.workout.domain.entity.PrimaryMuscle;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -33,6 +43,8 @@ public class ExerciseController {
     public ResponseHandler<List<ExerciseDto>> getExercise(@Parameter(description = "운동 카테고리") @RequestParam(required = false) ExerciseCategory category,
                                                           @Parameter(description = "사용하는 근육") @RequestParam(required = false) PrimaryMuscle primaryMuscle,
                                                           Pageable pageable) {
+
+
         return ResponseHandler.<List<ExerciseDto>>builder()
                 .data(exerciseService.getExercise(category, primaryMuscle, pageable))
                 .message("운동 종류가 조회되었습니다.")

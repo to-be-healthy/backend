@@ -1,8 +1,15 @@
 package com.tobe.healthy.schedule.application;
 
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.course.application.CourseService;
+import com.tobe.healthy.course.domain.dto.CourseDto;
+import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
+import com.tobe.healthy.course.domain.entity.Course;
+import com.tobe.healthy.course.domain.entity.CourseHistoryType;
+import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterClosedDayCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
@@ -13,8 +20,10 @@ import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +34,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
+import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
+import static java.time.DayOfWeek.SATURDAY;
+import static java.time.DayOfWeek.SUNDAY;
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
 
 @Service
@@ -34,10 +47,10 @@ import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
 public class ScheduleService {
 
 	private final MemberRepository memberRepository;
-
 	private final ScheduleRepository scheduleRepository;
-
 	private final StandByScheduleRepository standByScheduleRepository;
+	private final CourseRepository courseRepository;
+	private final CourseService courseService;
 
 	public Boolean registerSchedule(AutoCreateScheduleCommand request, Long trainerId) {
 		validateSchduleDate(request);
@@ -97,11 +110,15 @@ public class ScheduleService {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
+		Course course = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, 0)
+				.orElseThrow(() -> new CustomException(LESSON_CNT_NOT_VALID));
+
 		Schedule schedule = scheduleRepository.findAvailableScheduleById(scheduleId)
 			.orElseThrow(() -> new CustomException(NOT_RESERVABLE_SCHEDULE));
 
 		schedule.registerSchedule(member);
-
+		CourseUpdateCommand command = CourseUpdateCommand.create(memberId, MINUS, RESERVATION, 1);
+		courseService.updateCourse(schedule.getTrainer().getId(), course.getCourseId(), command);
 		return true;
 	}
 

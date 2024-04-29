@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -16,6 +17,10 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.time.LocalDate.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,6 +83,34 @@ class ScheduleServiceTest {
             TreeMap<LocalDate, ArrayList<ScheduleInfo>> result = scheduleService.autoCreateSchedule(request);
 
 
+        }
+
+        @Test
+        @DisplayName("수업신청 테스트")
+        void reserveScheduleForMultiThreadTest() throws InterruptedException {
+            AtomicInteger successCount = new AtomicInteger();
+            int numberOfExcute = 5;
+            ExecutorService service = Executors.newFixedThreadPool(10);
+            CountDownLatch latch = new CountDownLatch(numberOfExcute);
+
+            Long memberId = 739L;
+            for (int i=0; i<numberOfExcute; i++) {
+                service.execute(() -> {
+                    try {
+                        scheduleService.reserveSchedule(1512L, memberId);
+                        successCount.getAndIncrement();
+                        System.out.println("성공");
+                    } catch (ObjectOptimisticLockingFailureException oe) {
+                        System.out.println("충돌감지");
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                    latch.countDown();
+                });
+            }
+            latch.await();
+
+            assertThat(successCount.get()).isEqualTo(1);
         }
     }
 }
