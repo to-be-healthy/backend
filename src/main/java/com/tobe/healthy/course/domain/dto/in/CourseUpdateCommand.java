@@ -5,9 +5,11 @@ import com.tobe.healthy.point.domain.entity.Calculation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class CourseUpdateCommand {
 
     @Schema(description = "학생 ID" , example = "1")
@@ -25,5 +27,14 @@ public class CourseUpdateCommand {
     @Schema(description = "추가 및 차감 할 횟수" , example = "10")
     @Positive(message = "양수를 입력해주세요.")
     private int updateCnt;
+
+    public static CourseUpdateCommand create(Long memberId, Calculation calculation, CourseHistoryType type, int updateCnt){
+        return CourseUpdateCommand.builder()
+                .memberId(memberId)
+                .calculation(calculation)
+                .type(type)
+                .updateCnt(updateCnt)
+                .build();
+    }
 
 }

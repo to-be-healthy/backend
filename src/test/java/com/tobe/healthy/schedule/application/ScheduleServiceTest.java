@@ -85,11 +85,11 @@ class ScheduleServiceTest {
 
         }
 
-        /*@Test
+        @Test
         @DisplayName("수업신청 테스트")
         void reserveScheduleForMultiThreadTest() throws InterruptedException {
             AtomicInteger successCount = new AtomicInteger();
-            int numberOfExcute = 100;
+            int numberOfExcute = 5;
             ExecutorService service = Executors.newFixedThreadPool(10);
             CountDownLatch latch = new CountDownLatch(numberOfExcute);
 
@@ -111,6 +111,6 @@ class ScheduleServiceTest {
             latch.await();
 
             assertThat(successCount.get()).isEqualTo(1);
-        }*/
+        }
     }
 }

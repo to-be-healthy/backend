@@ -54,8 +54,11 @@ public class Course extends BaseTimeEntity<Course, Long> {
                 .build();
     }
 
-    public void updateLessonCnt(CourseUpdateCommand command){
+    public void updateTotalLessonCnt(CourseUpdateCommand command){
         this.totalLessonCnt = command.getCalculation().apply(totalLessonCnt, command.getUpdateCnt());
+    }
+
+    public void updateRemainLessonCnt(CourseUpdateCommand command){
         this.remainLessonCnt = command.getCalculation().apply(remainLessonCnt, command.getUpdateCnt());
     }
 
