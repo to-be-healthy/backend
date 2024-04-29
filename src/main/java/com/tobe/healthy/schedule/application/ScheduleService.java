@@ -9,7 +9,6 @@ import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
-import com.tobe.healthy.schedule.domain.dto.out.NoShowCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
@@ -35,10 +34,10 @@ import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
 public class ScheduleService {
 
 	private final MemberRepository memberRepository;
-
 	private final ScheduleRepository scheduleRepository;
-
 	private final StandByScheduleRepository standByScheduleRepository;
+	private final CourseRepository courseRepository;
+	private final CourseService courseService;
 
 	public Boolean registerSchedule(AutoCreateScheduleCommand request, Long trainerId) {
 		validateSchduleDate(request);
@@ -75,92 +74,6 @@ public class ScheduleService {
 		return true;
 	}
 
-	public Boolean registerIndividualSchedule(RegisterScheduleCommand request, Long trainerId) {
-		scheduleRepository.findAvailableRegisterSchedule(request, trainerId).ifPresentOrElse(
-				schedule -> {
-					throw new CustomException(SCHEDULE_ALREADY_EXISTS);
-				},
-				() -> {
-					Member trainer = memberRepository.findById(trainerId)
-							.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-					Schedule entity = Schedule.registerSchedule(request.getLessonDt(), trainer, request.getLessonStartTime(), request.getLessonEndTime(), 0, AVAILABLE);
-					scheduleRepository.save(entity);
-				}
-		);
-		return true;
-	}
-
-	public Boolean registerClosedDay(RegisterClosedDayCommand request, Long trainerId) {
-		Member trainer = memberRepository.findById(trainerId).orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		request.getLessonDt().stream().forEach(lessonDt -> scheduleRepository.findScheduleByLessonDt(lessonDt).ifPresentOrElse(
-                schedule -> {
-                    throw new CustomException(SCHEDULE_ALREADY_EXISTS);
-                },
-                () -> {
-                    Schedule entity = Schedule.builder().lessonDt(lessonDt).trainer(trainer).reservationStatus(CLOSED_DAY).build();
-                    scheduleRepository.save(entity);
-                }
-        ));
-		return true;
-	}
-
-	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Long trainerId) {
-		return scheduleRepository.findAllSchedule(searchCond, trainerId);
-	}
-
-	public List<ScheduleCommandResult> findAllByApplicantId(Long memberId) {
-		return scheduleRepository.findAllByApplicantId(memberId);
-	}
-
-	public Boolean reserveSchedule(Long scheduleId, Long memberId) {
-		Member member = memberRepository.findById(memberId)
-				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-
-		Schedule schedule = scheduleRepository.findAvailableScheduleById(scheduleId)
-				.orElseThrow(() -> new CustomException(NOT_RESERVABLE_SCHEDULE));
-
-		schedule.registerSchedule(member);
-
-		return true;
-	}
-
-	public Boolean cancelMemberSchedule(Long scheduleId, Long memberId) {
-		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
-				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
-
-		// 대기 테이블에 인원이 있으면 수정하기
-		standByScheduleRepository.findByScheduleId(scheduleId).ifPresentOrElse(
-				standBySchedule -> changeApplicantAndDeleteStandBy(standBySchedule, schedule),
-				() -> schedule.cancelMemberSchedule()
-		);
-
-		return true;
-	}
-
-	public Boolean cancelTrainerSchedule(Long scheduleId, Long memberId) {
-		Schedule entity = scheduleRepository.findScheduleByTrainerId(memberId, scheduleId)
-				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
-
-		entity.cancelTrainerSchedule();
-
-		return true;
-	}
-
-	public List<MyReservationResponse> findAllMyReservation(Long memberId) {
-		return scheduleRepository.findAllMyReservation(memberId);
-	}
-
-	public List<MyStandbyScheduleResponse> findAllMyStandbySchedule(Long memberId) {
-		return scheduleRepository.findAllMyStandbySchedule(memberId);
-	}
-
-	public NoShowCommandResponse updateReservationStatusToNoShow(Long scheduleId, Long memberId) {
-		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
-				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
-		schedule.updateReservationStatusToNoShow();
-		return NoShowCommandResponse.from(schedule);
-	}
-
 	private void validateSchduleDate(AutoCreateScheduleCommand request) {
 		if (request.getStartDt().isAfter(request.getEndDt())) {
 			throw new CustomException(START_DATE_AFTER_END_DATE);
@@ -174,6 +87,101 @@ public class ScheduleService {
 		if (ChronoUnit.DAYS.between(request.getStartDt(), request.getEndDt()) > 30) {
 			throw new CustomException(SCHEDULE_LESS_THAN_30_DAYS);
 		}
+	}
+
+	public List<ScheduleCommandResult> findAllByApplicantId(Long memberId) {
+		return scheduleRepository.findAllByApplicantId(memberId);
+	}
+
+	public Boolean reserveSchedule(Long scheduleId, Long memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+		Course course = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, 0)
+				.orElseThrow(() -> new CustomException(LESSON_CNT_NOT_VALID));
+
+		Schedule schedule = scheduleRepository.findAvailableScheduleById(scheduleId)
+			.orElseThrow(() -> new CustomException(NOT_RESERVABLE_SCHEDULE));
+
+		schedule.registerSchedule(member);
+		CourseUpdateCommand command = CourseUpdateCommand.create(memberId, MINUS, RESERVATION, 1);
+		courseService.updateCourse(schedule.getTrainer().getId(), course.getCourseId(), command);
+		return true;
+	}
+
+	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Long trainerId) {
+		return scheduleRepository.findAllSchedule(searchCond, trainerId);
+	}
+
+	public Boolean cancelTrainerSchedule(Long scheduleId, Long memberId) {
+		Schedule entity = scheduleRepository.findScheduleByTrainerId(memberId, scheduleId)
+			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+
+		entity.cancelTrainerSchedule();
+
+		return true;
+	}
+
+	public Boolean cancelMemberSchedule(Long scheduleId, Long memberId) {
+		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
+			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+
+		// 대기 테이블에 인원이 있으면 수정하기
+		standByScheduleRepository.findByScheduleId(scheduleId).ifPresentOrElse(
+			standBySchedule -> changeApplicantAndDeleteStandBy(standBySchedule, schedule),
+			() -> schedule.cancelMemberSchedule()
+		);
+
+		return true;
+	}
+
+	private void changeApplicantAndDeleteStandBy(StandBySchedule standBySchedule, Schedule schedule) {
+		schedule.changeApplicantInSchedule(standBySchedule.getMember());
+		standBySchedule.deleteStandBy();
+	}
+
+	public List<MyReservationResponse> findAllMyReservation(Long memberId) {
+		return scheduleRepository.findAllMyReservation(memberId);
+	}
+
+	public List<MyStandbyScheduleResponse> findAllMyStandbySchedule(Long memberId) {
+		return scheduleRepository.findAllMyStandbySchedule(memberId);
+	}
+
+	public Boolean updateReservationStatusToNoShow(Long scheduleId, Long memberId) {
+		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
+			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+		schedule.updateReservationStatusToNoShow();
+		return true;
+	}
+
+	public Boolean registerIndividualSchedule(RegisterScheduleCommand request, Long trainerId) {
+		scheduleRepository.findAvailableRegisterSchedule(request, trainerId).ifPresentOrElse(
+				schedule -> {
+					Member trainer = memberRepository.findById(trainerId)
+							.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+					Schedule entity = Schedule.registerSchedule(request.getLessonDt(), trainer, request.getLessonStartTime(), request.getLessonEndTime(), 0, AVAILABLE);
+					scheduleRepository.save(entity);
+				},
+				() -> {
+					throw new CustomException(SCHEDULE_ALREADY_EXISTS);
+				}
+		);
+		return true;
+	}
+
+	public Boolean registerClosedDay(RegisterClosedDayCommand request, Long trainerId) {
+		Member trainer = memberRepository.findById(trainerId).orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		scheduleRepository.findScheduleByLessonDt(request.getLessonDt()).ifPresentOrElse(
+				schedule -> {
+					throw new CustomException(SCHEDULE_ALREADY_EXISTS);
+				},
+				() -> {
+					Schedule entity = Schedule.builder().lessonDt(request.getLessonDt()).trainer(trainer).reservationStatus(CLOSED_DAY).build();
+					scheduleRepository.save(entity);
+				}
+		);
+		return true;
 	}
 
 	private void changeApplicantAndDeleteStandBy(StandBySchedule standBySchedule, Schedule schedule) {

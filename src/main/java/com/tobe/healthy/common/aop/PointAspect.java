@@ -1,5 +1,6 @@
 package com.tobe.healthy.common.aop;
 
+import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.point.domain.entity.PointType;
@@ -11,6 +12,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
+
+import static com.tobe.healthy.point.domain.entity.PointType.*;
 
 
 @Slf4j
@@ -30,45 +33,37 @@ public class PointAspect {
     @Pointcut("execution(* com.tobe.healthy.workout.application.WorkoutHistoryService.addWorkoutHistory(..))")
     private void addWorkoutHistory() {}
 
-    @AfterReturning(value = "addWorkoutHistory()", returning = "returnValue")
-    public void plusPoint(JoinPoint joinPoint, Object returnValue) {
-        Long memberId;
-        PointType type;
+    @Pointcut("execution(* com.tobe.healthy.diet.application.DietService.addDiet(..))")
+    private void addDiet() {}
 
-        switch (joinPoint.getSignature().getName()) {
-            case "addWorkoutHistory" -> {
-                memberId = ((WorkoutHistoryDto) returnValue).getMember().getId();
-                type = PointType.WORKOUT;
-            }
-//            case "addDiet" -> {
-//                //TODO: 식단기록 등록 개발 후 수정필요
-//                memberId = ((WorkoutHistoryDto) returnValue).getMember().getId();
-//                type = PointType.DIET;
-//            }
-            default -> throw new IllegalStateException("Unexpected value: " + joinPoint.getSignature().getName());
-        }
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.ScheduleService.updateReservationStatusToNoShow(..))")
+    private void updateReservationStatusToNoShow() {}
+
+    @AfterReturning(value = "addWorkoutHistory()", returning = "returnValue")
+    public void plusPointWhenPostWorkout(JoinPoint joinPoint, Object returnValue) {
+        Long memberId = ((WorkoutHistoryDto) returnValue).getMember().getId();
 
         //메서드가 호출되는 시점에 스프링 컨테이너에 등록된 Bean을 조회 (지연조회)
         PointService pointService = pointServiceProvider.getObject();
-        pointService.updatePoint(memberId, type, Calculation.PLUS, ONE_POINT);
+        pointService.updatePoint(memberId, WORKOUT, Calculation.PLUS, ONE_POINT);
     }
 
-    //TODO: 포인트 차감 메소드 종류 (No Show)
-    public void minusPoint(JoinPoint joinPoint, Object returnValue) {
-        Long memberId;
-        PointType type;
-
-        switch (joinPoint.getSignature().getName()) {
-            case "addWorkoutHistory" -> {
-                memberId = ((WorkoutHistoryDto) returnValue).getMember().getId();
-                type = PointType.WORKOUT;
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + joinPoint.getSignature().getName());
-        }
+    @AfterReturning(value = "addDiet()", returning = "returnValue")
+    public void plusPointWhenPostDiet(JoinPoint joinPoint, Object returnValue) {
+        Long memberId = ((DietDto) returnValue).getMember().getId();
 
         //메서드가 호출되는 시점에 스프링 컨테이너에 등록된 Bean을 조회 (지연조회)
         PointService pointService = pointServiceProvider.getObject();
-        pointService.updatePoint(memberId, type, Calculation.MINUS, THREE_POINT);
+        pointService.updatePoint(memberId, DIET, Calculation.PLUS, ONE_POINT);
+    }
+
+    @AfterReturning(value = "updateReservationStatusToNoShow()", returning = "returnValue")
+    public void minusPointWhenNoShow(JoinPoint joinPoint, Object returnValue) {
+        /*Long memberId = ((DietDto) returnValue).getMember().getId();
+
+        //메서드가 호출되는 시점에 스프링 컨테이너에 등록된 Bean을 조회 (지연조회)
+        PointService pointService = pointServiceProvider.getObject();
+        pointService.updatePoint(memberId, NO_SHOW, Calculation.MINUS, THREE_POINT);*/
     }
 
 }

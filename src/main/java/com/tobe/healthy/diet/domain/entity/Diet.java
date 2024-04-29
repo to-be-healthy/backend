@@ -84,12 +84,24 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
         this.likeCnt = likeCnt;
     }
 
-    public void changeFast(DietAddCommand command){
-        switch (command.getType()) {
-            case BREAKFAST -> fastBreakfast = command.isFast();
-            case LUNCH -> fastLunch = command.isFast();
-            case DINNER -> fastDinner = command.isFast();
+    public void changeFast(DietType type, boolean isFast){
+        switch (type) {
+            case BREAKFAST -> this.changeFastBreakfast(isFast);
+            case LUNCH -> this.changeFastLunch(isFast);
+            case DINNER -> this.changeFastDinner(isFast);
         }
+    }
+
+    public void changeFastBreakfast(boolean isFast){
+        this.fastBreakfast = isFast;
+    }
+
+    public void changeFastLunch(boolean isFast){
+        this.fastLunch = isFast;
+    }
+
+    public void changeFastDinner(boolean isFast){
+        this.fastDinner = isFast;
     }
 
     public void deleteFile(DietType type) {

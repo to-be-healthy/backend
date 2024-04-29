@@ -62,13 +62,13 @@ public class WorkoutCommentService {
         List<WorkoutHistoryCommentDto> dtos = comments.stream()
                 .map(c -> WorkoutHistoryCommentDto.create(c, c.getMember().getProfileId())).toList();
         Map<Boolean, List<WorkoutHistoryCommentDto>> dtos2 = dtos.stream()
-                .collect(Collectors.partitioningBy(c -> c.getParentCommentId() == null));
+                .collect(Collectors.partitioningBy(c -> c.getParentId() == null));
         List<WorkoutHistoryCommentDto> parent = dtos2.get(true);
         List<WorkoutHistoryCommentDto> child = dtos2.get(false);
 
         Map<Long, List<WorkoutHistoryCommentDto>> childByGroupList = child.stream()
-                .collect(Collectors.groupingBy(WorkoutHistoryCommentDto::getParentCommentId, Collectors.toList()));
-        return parent.stream().peek(p -> p.setReply(childByGroupList.get(p.getCommentId()))).toList();
+                .collect(Collectors.groupingBy(WorkoutHistoryCommentDto::getParentId, Collectors.toList()));
+        return parent.stream().peek(p -> p.setReplies(childByGroupList.get(p.getCommentId()))).toList();
     }
 
     public void deleteComment(Member member, Long workoutHistoryId, Long commentId) {
