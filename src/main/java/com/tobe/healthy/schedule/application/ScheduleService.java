@@ -162,8 +162,8 @@ public class ScheduleService {
 		return true;
 	}
 
-	public List<MyReservationResponse> findAllMyReservation(Long memberId) {
-		return scheduleRepository.findAllMyReservation(memberId);
+	public List<MyReservationResponse> findAllMyReservation(Long memberId, ScheduleSearchCond searchCond) {
+		return scheduleRepository.findAllMyReservation(memberId, searchCond);
 	}
 
 	public List<MyStandbyScheduleResponse> findAllMyStandbySchedule(Long memberId) {

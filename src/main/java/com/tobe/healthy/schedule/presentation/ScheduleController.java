@@ -150,9 +150,10 @@ public class ScheduleController {
 			})
 	@GetMapping("/my-reservation")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<List<MyReservationResponse>> findAllMyReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+	public ResponseHandler<List<MyReservationResponse>> findAllMyReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+																			 @ParameterObject ScheduleSearchCond searchCond) {
 		return ResponseHandler.<List<MyReservationResponse>>builder()
-				.data(scheduleService.findAllMyReservation(customMemberDetails.getMemberId()))
+				.data(scheduleService.findAllMyReservation(customMemberDetails.getMemberId(), searchCond))
 				.message("학생이 내 예약을 조회하였습니다.")
 				.build();
 	}
