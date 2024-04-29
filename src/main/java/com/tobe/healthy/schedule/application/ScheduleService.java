@@ -1,17 +1,5 @@
 package com.tobe.healthy.schedule.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.DATETIME_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.LUNCH_TIME_INVALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.NOT_RESERVABLE_SCHEDULE;
-import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_ALREADY_EXISTS;
-import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_LESS_THAN_30_DAYS;
-import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.CLOSED_DAY;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.LUNCH_TIME;
-
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -26,15 +14,19 @@ import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -100,15 +92,15 @@ public class ScheduleService {
 
 	public Boolean registerClosedDay(RegisterClosedDayCommand request, Long trainerId) {
 		Member trainer = memberRepository.findById(trainerId).orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		scheduleRepository.findScheduleByLessonDt(request.getLessonDt()).ifPresentOrElse(
-				schedule -> {
-					throw new CustomException(SCHEDULE_ALREADY_EXISTS);
-				},
-				() -> {
-					Schedule entity = Schedule.builder().lessonDt(request.getLessonDt()).trainer(trainer).reservationStatus(CLOSED_DAY).build();
-					scheduleRepository.save(entity);
-				}
-		);
+		request.getLessonDt().stream().forEach(lessonDt -> scheduleRepository.findScheduleByLessonDt(lessonDt).ifPresentOrElse(
+                schedule -> {
+                    throw new CustomException(SCHEDULE_ALREADY_EXISTS);
+                },
+                () -> {
+                    Schedule entity = Schedule.builder().lessonDt(lessonDt).trainer(trainer).reservationStatus(CLOSED_DAY).build();
+                    scheduleRepository.save(entity);
+                }
+        ));
 		return true;
 	}
 
