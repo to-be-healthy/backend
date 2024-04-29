@@ -1,12 +1,14 @@
 package com.tobe.healthy.schedule.domain.dto.in;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
 @Schema(description = "일정 조회 조건 DTO")
+@Builder
 public class ScheduleSearchCond {
 	@Schema(description = "조회할 수업 일자", example = "202404")
 	private String lessonDt;
