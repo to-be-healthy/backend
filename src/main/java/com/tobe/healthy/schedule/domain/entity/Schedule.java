@@ -2,23 +2,19 @@ package com.tobe.healthy.schedule.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.schedule.domain.dto.in.ScheduleRegisterCommand.ScheduleRegister;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.NO_SHOW;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
@@ -58,19 +54,15 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@ColumnDefault("false")
 	private boolean delYn = false;
 
-	public static Schedule registerSchedule(LocalDate date, Member trainer, Member member, ScheduleRegister request) {
+	public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, int round, ReservationStatus reservationStatus) {
 		ScheduleBuilder reserve = Schedule.builder()
 			.lessonDt(date)
-			.round(request.getRound())
-			.lessonStartTime(request.getStartTime())
-			.lessonEndTime(request.getEndTime())
+			.round(round)
+			.lessonStartTime(startTime)
+			.lessonEndTime(endTime)
 			.trainer(trainer)
-			.reservationStatus(AVAILABLE);
+			.reservationStatus(reservationStatus);
 
-		if (!ObjectUtils.isEmpty(member)) {
-			reserve.applicant(member);
-			reserve.reservationStatus(COMPLETED);
-		}
 		return reserve.build();
 	}
 

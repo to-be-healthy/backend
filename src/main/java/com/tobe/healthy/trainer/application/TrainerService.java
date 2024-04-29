@@ -122,7 +122,7 @@ public class TrainerService {
         MemberDetailResult result = memberRepository.getMemberOfTrainer(memberId);
         if(!dietFiles.isEmpty()) result.setDiet(DietDto.create(dietFiles.get(0).getDiet().getDietId(), fileDtos));
 
-        Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, 0);
+        Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
         result.setCourse(optCourse.map(CourseDto::from).orElse(null));
         return result;
     }

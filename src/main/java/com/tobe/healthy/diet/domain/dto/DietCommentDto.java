@@ -1,8 +1,11 @@
 package com.tobe.healthy.diet.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tobe.healthy.diet.domain.entity.DietComment;
 import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.workout.domain.dto.CommentMemberDto;
+import com.tobe.healthy.workout.domain.dto.WorkoutHistoryCommentDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,29 +22,29 @@ import java.util.List;
 public class DietCommentDto {
 
     private Long commentId;
-    private MemberDto member;
+    private CommentMemberDto member;
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private Long parentCommentId;
-    private Long depth;
+    @JsonIgnore
+    private Long parentId;
     private Long orderNum;
     private boolean delYn;
 
     @Builder.Default
-    private List<DietCommentDto> reply = null;
+    private List<DietCommentDto> replies = null;
+
 
 
     public static DietCommentDto from(DietComment comment) {
         return DietCommentDto.builder()
                 .commentId(comment.getCommentId())
-                .member(MemberDto.from(comment.getMember()))
-                .content(comment.getContent())
+                .member(CommentMemberDto.from(comment.getMember()))
+                .content(comment.getDelYn() ? "삭제된 댓글입니다." : comment.getContent())
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
-                .parentCommentId(comment.getParentCommentId())
-                .depth(comment.getDepth())
+                .parentId(comment.getParentCommentId())
                 .orderNum(comment.getOrderNum())
                 .delYn(comment.getDelYn())
                 .build();
@@ -50,12 +53,11 @@ public class DietCommentDto {
     public static DietCommentDto create(DietComment comment, Profile profile) {
         return DietCommentDto.builder()
                 .commentId(comment.getCommentId())
-                .member(MemberDto.create(comment.getMember(), profile))
-                .content(comment.getContent())
+                .member(CommentMemberDto.create(comment.getMember(), profile))
+                .content(comment.getDelYn() ? "삭제된 댓글입니다." : comment.getContent())
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
-                .parentCommentId(comment.getParentCommentId())
-                .depth(comment.getDepth())
+                .parentId(comment.getParentCommentId())
                 .orderNum(comment.getOrderNum())
                 .delYn(comment.getDelYn())
                 .build();

@@ -8,9 +8,11 @@ import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
 import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.domain.entity.CourseHistory;
+import com.tobe.healthy.course.domain.entity.CourseHistoryType;
 import com.tobe.healthy.course.repository.CourseHistoryRepository;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
@@ -86,7 +88,11 @@ public class CourseService {
                 .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
         int result = command.getCalculation().apply(course.getRemainLessonCnt(), command.getUpdateCnt());
         if(result < 0) throw new CustomException(LESSON_CNT_NOT_VALID);
-        course.updateLessonCnt(command);
+
+        course.updateRemainLessonCnt(command);
+        if(CourseHistoryType.getEnumByGroup(TRAINER).contains(command.getType())){
+            course.updateTotalLessonCnt(command);
+        }
         courseHistoryRepository.save(CourseHistory.create(course, command.getUpdateCnt(), command.getCalculation(), command.getType(), trainer));
     }
 
