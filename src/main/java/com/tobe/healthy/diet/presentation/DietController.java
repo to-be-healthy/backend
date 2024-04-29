@@ -5,6 +5,9 @@ import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
+import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
+import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
+import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -84,6 +87,20 @@ public class DietController {
         dietService.deleteDiet(customMemberDetails.getMember(), dietId);
         return ResponseHandler.<Void>builder()
                 .message("식단기록이 삭제되었습니다.")
+                .build();
+    }
+
+    @Operation(summary = "식단기록 수정", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
+    })
+    @PatchMapping("/{dietId}")
+    public ResponseHandler<DietDto> updateDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                   @Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
+                                                                   @Valid DietUpdateCommand command) {
+        return ResponseHandler.<DietDto>builder()
+                .data(dietService.updateDiet(customMemberDetails.getMember(), dietId, command))
+                .message("식단기록이 수정되었습니다.")
                 .build();
     }
 

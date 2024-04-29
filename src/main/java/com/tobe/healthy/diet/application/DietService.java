@@ -3,6 +3,7 @@ package com.tobe.healthy.diet.application;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
+import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietLike;
 import com.tobe.healthy.diet.domain.entity.DietLikePK;
@@ -10,15 +11,11 @@ import com.tobe.healthy.diet.repository.DietLikeRepository;
 import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.file.application.FileService;
 import com.tobe.healthy.file.domain.dto.DietFileDto;
-import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.file.domain.entity.DietFile;
 import com.tobe.healthy.file.domain.entity.DietType;
-import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,10 +29,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.file.domain.entity.DietType.*;
 
 
 @Service
@@ -95,7 +92,7 @@ public class DietService {
             fileService.uploadDietFile(diet, requestType, requestFile);
         }
 
-        diet.changeFast(command);
+        diet.changeFast(command.getType(), command.isFast());
         return setDietFile(DietDto.from(diet), List.of(diet.getDietId()));
     }
 
@@ -128,5 +125,22 @@ public class DietService {
         diet.deleteDiet();
         dietLikeRepository.deleteLikeByDietId(dietId);
         diet.getDietFiles().forEach(file -> fileService.deleteFile(file.getFileName()));
+    }
+
+    public DietDto updateDiet(Member member, Long dietId, DietUpdateCommand command) {
+        Diet diet = dietRepository.findByDietIdAndMemberIdAndDelYnFalse(dietId, member.getId())
+                .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
+
+        diet.changeFastBreakfast(command.isBreakfastFast());
+        diet.changeFastLunch(command.isLunchFast());
+        diet.changeFastDinner(command.isDinnerFast());
+
+        diet.deleteFiles();
+        diet.getDietFiles().forEach(file -> fileService.deleteFile(file.getFileName()));
+        if(!ObjectUtils.isEmpty(command.getBreakfastFile())) fileService.uploadDietFile(diet, BREAKFAST, command.getBreakfastFile());
+        if(!ObjectUtils.isEmpty(command.getLunchFile())) fileService.uploadDietFile(diet, LUNCH, command.getLunchFile());
+        if(!ObjectUtils.isEmpty(command.getDinnerFile())) fileService.uploadDietFile(diet, DINNER, command.getDinnerFile());
+
+        return setDietFile(DietDto.from(diet), List.of(diet.getDietId()));
     }
 }
