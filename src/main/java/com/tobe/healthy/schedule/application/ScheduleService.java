@@ -6,18 +6,18 @@ import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterClosedDayCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
-import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
-import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
-import com.tobe.healthy.schedule.domain.dto.out.NoShowCommandResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.domain.dto.out.*;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
+import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,11 +28,16 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
+import static java.time.LocalTime.NOON;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +50,7 @@ public class ScheduleService {
 	private final StandByScheduleRepository standByScheduleRepository;
 	private final CourseRepository courseRepository;
 	private final CourseService courseService;
+	private final TrainerMemberMappingRepository mappingRepository;
 
 	public Boolean registerSchedule(AutoCreateScheduleCommand request, Long trainerId) {
 		validateSchduleDate(request);
@@ -116,8 +122,22 @@ public class ScheduleService {
 		return true;
 	}
 
-	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Long trainerId) {
-		return scheduleRepository.findAllSchedule(searchCond, trainerId);
+	public ScheduleCommandResponse findAllSchedule(ScheduleSearchCond searchCond, Member loginMember) {
+		Long trainerId;
+		if(STUDENT.equals(loginMember.getMemberType())){
+			TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(loginMember.getId())
+					.orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
+			trainerId = mapping.getTrainer().getId();
+		}else{
+			trainerId = loginMember.getId();
+		}
+		List<ScheduleCommandResult> schedule = scheduleRepository.findAllSchedule(searchCond, trainerId);
+
+		List<ScheduleCommandResult> morning = schedule.stream()
+				.filter(s -> NOON.isAfter(s.getLessonStartTime())).collect(Collectors.toList());
+		List<ScheduleCommandResult> afternoon = schedule.stream()
+				.filter(s -> NOON.isBefore(s.getLessonStartTime())).collect(Collectors.toList());
+		return ScheduleCommandResponse.create(morning, afternoon);
 	}
 
 	public Boolean cancelTrainerSchedule(Long scheduleId, Long memberId) {

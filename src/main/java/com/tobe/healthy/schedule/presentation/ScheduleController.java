@@ -9,6 +9,7 @@ import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.NoShowCommandResponse;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -78,9 +79,10 @@ public class ScheduleController {
 			@ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
 	})
 	@GetMapping("/all")
-	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule(@ParameterObject ScheduleSearchCond searchCond, @AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<List<ScheduleCommandResult>>builder()
-				.data(scheduleService.findAllSchedule(searchCond, member.getMemberId()))
+	public ResponseHandler<ScheduleCommandResponse> findAllSchedule(@ParameterObject ScheduleSearchCond searchCond,
+																	@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<ScheduleCommandResponse>builder()
+				.data(scheduleService.findAllSchedule(searchCond, customMemberDetails.getMember()))
 				.message("전체 일정을 조회했습니다.")
 				.build();
 	}
