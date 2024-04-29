@@ -1,8 +1,10 @@
 package com.tobe.healthy.schedule.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.QMember;
+import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
@@ -16,7 +18,9 @@ import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
+import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
 import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
 import static com.tobe.healthy.schedule.domain.entity.QStandBySchedule.standBySchedule;
 import static java.util.stream.Collectors.toList;
@@ -29,17 +33,14 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond) {
-		QMember trainer = new QMember("trainer");
-		QMember applicant = new QMember("applicant");
-
+	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Long trainerId) {
 		List<Schedule> fetch = queryFactory
 				.select(schedule)
 				.from(schedule)
-				.leftJoin(schedule.trainer, trainer).fetchJoin()
-				.leftJoin(schedule.applicant, applicant).fetchJoin()
-				.leftJoin(schedule.standBySchedule, standBySchedule).fetchJoin()
-				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), standByScheduleDelYnFalse())
+				.leftJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
+				.leftJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
+				.leftJoin(schedule.standBySchedule, standBySchedule).on(standBySchedule.delYn.isFalse())
+				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), schedule.trainer.id.eq(trainerId))
 				.orderBy(schedule.lessonDt.asc(), schedule.round.asc())
 				.fetch();
 
@@ -96,6 +97,19 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 		return results.stream().map(MyStandbyScheduleResponse::from).collect(toList());
 	}
 
+	@Override
+	public Optional<Schedule> findAvailableRegisterSchedule(RegisterScheduleCommand request, Long trainerId) {
+		Schedule entity = queryFactory
+				.select(schedule)
+				.from(schedule)
+				.where(schedule.lessonDt.eq(request.getLessonDt())
+				.and(schedule.lessonStartTime.eq(request.getLessonStartTime()))
+				.and(schedule.lessonEndTime.eq(request.getLessonEndTime()))
+				.and(schedule.trainer.id.eq(trainerId)))
+				.fetchOne();
+		return Optional.of(entity);
+	}
+
 	private BooleanExpression scheduleDelYnFalse() {
 		return schedule.delYn.isFalse();
 	}
@@ -109,7 +123,8 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 
 	private BooleanExpression lessonDtEq(ScheduleSearchCond searchCond) {
 		if (!ObjectUtils.isEmpty(searchCond.getLessonDt())) {
-			return schedule.lessonDt.eq(searchCond.getLessonDt());
+			StringExpression formattedDate = stringTemplate("DATE_FORMAT({0}, '%Y%m')", schedule.lessonDt);
+			return formattedDate.eq(searchCond.getLessonDt());
 		}
 		return null;
 	}

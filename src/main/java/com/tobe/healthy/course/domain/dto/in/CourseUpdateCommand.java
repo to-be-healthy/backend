@@ -5,11 +5,13 @@ import com.tobe.healthy.point.domain.entity.Calculation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
+@AllArgsConstructor
 public class CourseUpdateCommand {
 
     @Schema(description = "학생 ID" , example = "1")

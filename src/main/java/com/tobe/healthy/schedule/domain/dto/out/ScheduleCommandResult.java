@@ -2,13 +2,14 @@ package com.tobe.healthy.schedule.domain.dto.out;
 
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.util.ObjectUtils;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 @NoArgsConstructor
@@ -36,7 +37,7 @@ public class ScheduleCommandResult {
 			.round(entity.getRound());
 
 		if (!ObjectUtils.isEmpty(entity.getTrainer())) {
-			builder.trainerName(entity.getTrainer().getName());
+			builder.trainerName(entity.getTrainer().getName() + "트레이너");
 		}
 
 		if (!ObjectUtils.isEmpty(entity.getApplicant())) {

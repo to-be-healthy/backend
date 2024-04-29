@@ -8,7 +8,10 @@ import lombok.Getter;
 @Getter
 public enum ReservationStatus implements EnumMapperType {
 	COMPLETED("예약완료"),
-	AVAILABLE("예약가능");
+	AVAILABLE("예약가능"),
+	NO_SHOW("노쇼"),
+	LUNCH_TIME("점심시간"),
+	CLOSED_DAY("휴무");
 
 	private final String description;
 

@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.annotation.Nullable;
+
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -43,6 +45,7 @@ public class Profile extends BaseTimeEntity<Profile, Long> {
 
 	private int fileSize;
 
+	@Nullable
 	private String fileUrl;
 
 	public static Profile create(String savedFileName, String originalName, String extension, String filePath, int fileSize) {

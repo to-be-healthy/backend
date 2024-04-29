@@ -4,12 +4,12 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.ScheduleService;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
-import com.tobe.healthy.schedule.domain.dto.in.ScheduleRegisterCommand;
+import com.tobe.healthy.schedule.domain.dto.in.RegisterClosedDayCommand;
+import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,10 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,31 +34,42 @@ public class ScheduleController {
 
 	private final ScheduleService scheduleService;
 
-	@Operation(summary = "트레이너가 자동으로 수업 일정을 생성한다.", description = "트레이너가 자동으로 수업 일정을 생성한다.",
+	@Operation(summary = "트레이너가 일정을 등록한다.", description = "트레이너가 일정을 등록한다.",
 		responses = {
-			@ApiResponse(responseCode = "200", description = "자동 수업 일정 생성 완료")
+			@ApiResponse(responseCode = "200", description = "일정 등록 성공")
 	})
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	@PostMapping
-	public ResponseHandler<TreeMap<LocalDate, ArrayList<ScheduleInfo>>> createSchedule(@RequestBody AutoCreateScheduleCommand request) {
-		return ResponseHandler.<TreeMap<LocalDate, ArrayList<ScheduleInfo>>>builder()
-				.data(scheduleService.autoCreateSchedule(request))
-				.message("자동으로 일정을 생성하였습니다.")
+	public ResponseHandler<Boolean> registerSchedule(@RequestBody AutoCreateScheduleCommand request, @AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<Boolean>builder()
+				.data(scheduleService.registerSchedule(request, member.getMemberId()))
+				.message("일정 등록에 성공하였습니다.")
 				.build();
 	}
 
-	@Operation(summary = "트레이너가 일정을 등록한다.", description = "트레이너가 수업 일정을 등록한다. 사전 등록할 회원이 있으면 포함해서 등록한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업 일정 등록 완료"),
-			@ApiResponse(responseCode = "404", description = "트레이너를 찾을 수 없습니다.")
-	})
-	@PostMapping("/register")
+	@Operation(summary = "트레이너가 일정을 개별 등록한다.", description = "트레이너가 일정을 개별 등록한다.",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "일정 등록 성공")
+			})
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<Boolean> registerSchedule(@RequestBody ScheduleRegisterCommand request,
-													 @AuthenticationPrincipal CustomMemberDetails member) {
+	@PostMapping("/individual")
+	public ResponseHandler<Boolean> registerIndividualSchedule(@RequestBody RegisterScheduleCommand request, @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
-				.data(scheduleService.registerSchedule(request, member.getMemberId()))
-				.message("일정 등록이 완료되었습니다.")
+				.data(scheduleService.registerIndividualSchedule(request, member.getMemberId()))
+				.message("개별 일정 등록에 성공하였습니다.")
+				.build();
+	}
+
+	@Operation(summary = "트레이너가 휴무일로 지정한다.", description = "트레이너가 휴무일로 지정한다.",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "휴무일로 지정 성공")
+			})
+	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
+	@PostMapping("/register/closed-day")
+	public ResponseHandler<Boolean> registerClosedDay(@RequestBody RegisterClosedDayCommand request, @AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<Boolean>builder()
+				.data(scheduleService.registerClosedDay(request, member.getMemberId()))
+				.message("휴무일로 지정하였습니다.")
 				.build();
 	}
 
@@ -70,9 +78,9 @@ public class ScheduleController {
 			@ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
 	})
 	@GetMapping("/all")
-	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule(@ParameterObject ScheduleSearchCond searchCond) {
+	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule(@ParameterObject ScheduleSearchCond searchCond, @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<List<ScheduleCommandResult>>builder()
-				.data(scheduleService.findAllSchedule(searchCond))
+				.data(scheduleService.findAllSchedule(searchCond, member.getMemberId()))
 				.message("전체 일정을 조회했습니다.")
 				.build();
 	}
@@ -90,11 +98,12 @@ public class ScheduleController {
 				.build();
 	}
 
-	@Operation(summary = "학생이 수업을 신청한다.", description = "학생이 수업을 신청한다.",
+	@Operation(summary = "트레이너 또는 학생이 수업을 신청한다.", description = "트레이너 또는 학생이 수업을 신청한다.",
 		responses = {
-			@ApiResponse(responseCode = "200", description = "수업 신청 완료")
+			@ApiResponse(responseCode = "200", description = "수업 신청 완료"),
+			@ApiResponse(responseCode = "404(1)", description = "해당 수업이 존재하지 않습니다."),
+			@ApiResponse(responseCode = "404(2)", description = "신청 할 수 없는 수업입니다.")
 	})
-	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	@PostMapping("/{scheduleId}")
 	public ResponseHandler<Boolean> reserveSchedule(@Parameter(description = "수업 일정 아이디") @PathVariable Long scheduleId,
 													@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
@@ -104,12 +113,11 @@ public class ScheduleController {
 				.build();
 	}
 
-	@Operation(summary = "학생이 수업을 취소한다.", description = "학생이 등록한 수업을 취소한다.",
+	@Operation(summary = "트레이너 또는 학생이 수업을 취소한다.", description = "트레이너 또는 학생이 등록한 수업을 취소한다.",
 		responses = {
 			@ApiResponse(responseCode = "200", description = "해당 수업을 취소하였습니다."),
 			@ApiResponse(responseCode = "404", description = "해당 수업이 존재하지 않습니다.")
 	})
-	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	@DeleteMapping("/{scheduleId}")
 	public ResponseHandler<Boolean> cancelScheduleForMember(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
 															@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
@@ -158,5 +166,20 @@ public class ScheduleController {
 				.data(scheduleService.findAllMyStandbySchedule(customMemberDetails.getMemberId()))
 				.message("학생이 대기중인 예약을 조회하였습니다.")
 				.build();
+	}
+
+	@Operation(summary = "트레이너가 학생 노쇼 처리를 한다.", description = "트레이너가 학생 노쇼 처리를 한다.",
+		responses = {
+			@ApiResponse(responseCode = "200", description = "노쇼 처리가 되었습니다."),
+			@ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
+		})
+	@DeleteMapping("/no-show/{scheduleId}")
+	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
+	public ResponseHandler<Boolean> updateReservationStatusToNoShow(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
+		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<Boolean>builder()
+			.data(scheduleService.updateReservationStatusToNoShow(scheduleId, customMemberDetails.getMemberId()))
+			.message("노쇼 처리되었습니다.")
+			.build();
 	}
 }

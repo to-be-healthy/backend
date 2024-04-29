@@ -6,8 +6,9 @@ import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
-import com.tobe.healthy.lessonHistory.domain.dto.LessonHistoryCommandResult
-import com.tobe.healthy.lessonHistory.domain.dto.SearchCondRequest
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.SearchCondRequest
+import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryDetailResponse
+import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryResponse
 import com.tobe.healthy.lessonHistory.domain.entity.FeedbackCheckStatus.READ
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonHistory.domain.entity.QLessonHistory.lessonHistory
@@ -19,7 +20,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.support.PageableExecutionUtils
 import org.springframework.stereotype.Repository
-import java.util.stream.Collectors.toList
 
 @Repository
 class LessonHistoryRepositoryImpl(
@@ -27,17 +27,19 @@ class LessonHistoryRepositoryImpl(
     private val trainerMemberMappingRepository: TrainerMemberMappingRepository
 ) : LessonHistoryRepositoryCustom {
 
-    override fun findAllLessonHistory(request: SearchCondRequest, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryCommandResult> {
-        val entity = queryFactory
+    override fun findAllLessonHistory(request: SearchCondRequest, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryResponse> {
+        val entities = queryFactory
             .select(lessonHistory)
             .from(lessonHistory)
             .innerJoin(lessonHistory.trainer).fetchJoin()
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
-            .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType, request.searchMyHistory))
+            .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType))
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
-            .fetch().stream().map(LessonHistoryCommandResult::from).collect(toList())
+            .fetch()
+
+        val contents = entities.map { e -> LessonHistoryResponse.from(e) }.toMutableList()
 
         val totalCount = queryFactory
             .select(lessonHistory.count())
@@ -45,29 +47,30 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.trainer)
             .innerJoin(lessonHistory.student)
             .innerJoin(lessonHistory.schedule)
-            .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType, request.searchMyHistory))
+            .where(convertDateFormat(request.searchDate), validateMemberType(memberId, memberType))
 
-        return PageableExecutionUtils.getPage(entity, pageable) { totalCount.fetchOne()!! }
+        return PageableExecutionUtils.getPage(contents, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
-    override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): List<LessonHistoryCommandResult> {
-        val results = queryFactory
+    override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): LessonHistoryDetailResponse? {
+        val entity = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
             .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
             .innerJoin(lessonHistory.trainer).fetchJoin()
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
-            .where(lessonHistory.id.eq(lessonHistoryId), validateMemberType(memberId, memberType, null))
-            .fetch() ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+            .where(lessonHistory.id.eq(lessonHistoryId), validateMemberType(memberId, memberType))
+            .fetchOne()
 
-        updateFeedbackCheckStatus(results.get(0), memberId)
-
-        return results.map(LessonHistoryCommandResult::detailFrom)
+        entity?.let {
+            updateFeedbackCheckStatus(entity, memberId)
+        }
+        return LessonHistoryDetailResponse.detailFrom(entity)
     }
 
-    override fun findAllLessonHistoryByMemberId(studentId: Long, request: SearchCondRequest, pageable: Pageable): Page<LessonHistoryCommandResult> {
-        val entity = queryFactory
+    override fun findAllLessonHistoryByMemberId(studentId: Long, request: SearchCondRequest, pageable: Pageable): Page<LessonHistoryResponse> {
+        val entities = queryFactory
             .select(lessonHistory)
             .from(lessonHistory)
             .innerJoin(lessonHistory.trainer).fetchJoin()
@@ -76,7 +79,9 @@ class LessonHistoryRepositoryImpl(
             .where(convertDateFormat(request.searchDate), lessonHistory.student.id.eq(studentId))
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
-            .fetch().stream().map(LessonHistoryCommandResult::from).collect(toList())
+            .fetch()
+
+        val contents = entities.map {LessonHistoryResponse.from(it)}.toMutableList()
 
         val totalCount = queryFactory
             .select(lessonHistory.count())
@@ -86,7 +91,7 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.schedule)
             .where(convertDateFormat(request.searchDate), lessonHistory.student.id.eq(studentId))
 
-        return PageableExecutionUtils.getPage(entity, pageable) { totalCount.fetchOne()!! }
+        return PageableExecutionUtils.getPage(contents, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
     private fun updateFeedbackCheckStatus(
@@ -98,7 +103,7 @@ class LessonHistoryRepositoryImpl(
         }
     }
 
-    private fun validateMemberType(memberId: Long, memberType: MemberType, searchMyHistory: String?): BooleanExpression {
+    private fun validateMemberType(memberId: Long, memberType: MemberType): BooleanExpression {
         if (memberType == TRAINER) {
             return lessonHistory.trainer.id.eq(memberId)
         } else {
