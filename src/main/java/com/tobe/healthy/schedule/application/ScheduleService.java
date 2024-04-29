@@ -151,7 +151,7 @@ public class ScheduleService {
 	}
 
 	public NoShowCommandResponse updateReservationStatusToNoShow(Long scheduleId, Long memberId) {
-		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
+		Schedule schedule = scheduleRepository.findScheduleByTrainerId(memberId, scheduleId)
 			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 		schedule.updateReservationStatusToNoShow();
 		return NoShowCommandResponse.from(schedule);
