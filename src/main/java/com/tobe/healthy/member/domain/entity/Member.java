@@ -92,6 +92,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	private String nickname;
 
+	private String fcmToken;
+
 	@ColumnDefault("false")
 	private boolean delYn = false;
 
@@ -191,5 +193,9 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	public void assignNickname(String nickname) {
 		this.nickname = nickname;
+	}
+
+	public void registerFcmToken(String fcmToken) {
+		this.fcmToken = fcmToken;
 	}
 }

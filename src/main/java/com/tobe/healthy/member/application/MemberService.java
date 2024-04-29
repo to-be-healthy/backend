@@ -2,8 +2,6 @@ package com.tobe.healthy.member.application;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.RedisKeyPrefix;
@@ -60,8 +58,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -71,7 +67,8 @@ import static java.io.File.separator;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.*;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 import static org.springframework.util.StringUtils.cleanPath;
 
 @Service
@@ -628,5 +625,12 @@ public class MemberService {
 		TrainerMemberMapping mapping = mappingRepository.findByTrainerIdAndMemberId(trainerId, mmeberId)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
 		mapping.changeMemo(command.getMemo());
+	}
+
+	public String registerFcmToken(String fcmToken, Long memberId) {
+		Member findMember = memberRepository.findById(memberId)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		findMember.registerFcmToken(fcmToken);
+		return fcmToken;
 	}
 }
