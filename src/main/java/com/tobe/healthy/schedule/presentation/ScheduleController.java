@@ -8,6 +8,7 @@ import com.tobe.healthy.schedule.domain.dto.in.RegisterClosedDayCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
+import com.tobe.healthy.schedule.domain.dto.out.NoShowCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -161,9 +162,9 @@ public class ScheduleController {
 		})
 	@DeleteMapping("/no-show/{scheduleId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<Boolean> updateReservationStatusToNoShow(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
+	public ResponseHandler<NoShowCommandResponse> updateReservationStatusToNoShow(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<Boolean>builder()
+		return ResponseHandler.<NoShowCommandResponse>builder()
 			.data(scheduleService.updateReservationStatusToNoShow(scheduleId, customMemberDetails.getMemberId()))
 			.message("노쇼 처리되었습니다.")
 			.build();

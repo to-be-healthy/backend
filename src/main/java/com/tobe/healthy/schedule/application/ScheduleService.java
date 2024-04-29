@@ -1,5 +1,17 @@
 package com.tobe.healthy.schedule.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.DATETIME_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.LUNCH_TIME_INVALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.NOT_RESERVABLE_SCHEDULE;
+import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_ALREADY_EXISTS;
+import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_LESS_THAN_30_DAYS;
+import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.CLOSED_DAY;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.LUNCH_TIME;
+
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -9,23 +21,20 @@ import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
+import com.tobe.healthy.schedule.domain.dto.out.NoShowCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -153,11 +162,11 @@ public class ScheduleService {
 		return scheduleRepository.findAllMyStandbySchedule(memberId);
 	}
 
-	public Boolean updateReservationStatusToNoShow(Long scheduleId, Long memberId) {
+	public NoShowCommandResponse updateReservationStatusToNoShow(Long scheduleId, Long memberId) {
 		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
 				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 		schedule.updateReservationStatusToNoShow();
-		return true;
+		return NoShowCommandResponse.from(schedule);
 	}
 
 	private void validateSchduleDate(AutoCreateScheduleCommand request) {
