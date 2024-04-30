@@ -3,8 +3,7 @@ package com.tobe.healthy.common.aop;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.entity.Calculation;
-import com.tobe.healthy.point.domain.entity.PointType;
-import com.tobe.healthy.schedule.domain.dto.out.NoShowCommandResponse;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -57,7 +56,7 @@ public class PointAspect {
 
     @AfterReturning(value = "updateReservationStatusToNoShow()", returning = "returnValue")
     public void minusPointWhenNoShow(JoinPoint joinPoint, Object returnValue) {
-        Long memberId = ((NoShowCommandResponse) returnValue).getStudentId();
+        Long memberId = ((ScheduleIdInfo) returnValue).getStudentId();
         PointService pointService = pointServiceProvider.getObject();
         pointService.updatePoint(memberId, NO_SHOW, Calculation.MINUS, THREE_POINT);
     }

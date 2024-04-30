@@ -84,8 +84,14 @@ public class CourseService {
         mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
 
-        Course course = courseRepository.findByCourseIdAndMemberIdAndTrainerId(courseId, member.getId(), trainerId)
-                .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
+        Course course;
+        if(courseId == null){
+            course = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(member.getId(), 0)
+                    .orElseThrow(() -> new CustomException(LESSON_CNT_NOT_VALID));
+        }else{
+            course = courseRepository.findByCourseIdAndMemberIdAndTrainerId(courseId, member.getId(), trainerId)
+                    .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
+        }
         int result = command.getCalculation().apply(course.getRemainLessonCnt(), command.getUpdateCnt());
         if(result < 0) throw new CustomException(LESSON_CNT_NOT_VALID);
 
