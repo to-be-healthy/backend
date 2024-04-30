@@ -1,25 +1,33 @@
 package com.tobe.healthy.schedule.domain.entity;
 
-import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.member.domain.entity.Member;
-import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.DynamicUpdate;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.NO_SHOW;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
+
+import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.member.domain.entity.Member;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
@@ -38,8 +46,6 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@Enumerated(STRING)
 	private ReservationStatus reservationStatus = AVAILABLE;
 
-	private int round;
-
 	@ManyToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "trainer_id")
 	private Member trainer;
@@ -54,10 +60,9 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@ColumnDefault("false")
 	private boolean delYn = false;
 
-	public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, int round, ReservationStatus reservationStatus) {
+	public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, ReservationStatus reservationStatus) {
 		ScheduleBuilder reserve = Schedule.builder()
 			.lessonDt(date)
-			.round(round)
 			.lessonStartTime(startTime)
 			.lessonEndTime(endTime)
 			.trainer(trainer)
@@ -91,14 +96,13 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@Builder
 	public Schedule(Long id, LocalDate lessonDt, LocalTime lessonStartTime, LocalTime lessonEndTime,
-		ReservationStatus reservationStatus, int round, Member trainer, Member applicant,
+		ReservationStatus reservationStatus, Member trainer, Member applicant,
 		List<StandBySchedule> standBySchedule, boolean delYn) {
 		this.id = id;
 		this.lessonDt = lessonDt;
 		this.lessonStartTime = lessonStartTime;
 		this.lessonEndTime = lessonEndTime;
 		this.reservationStatus = reservationStatus;
-		this.round = round;
 		this.trainer = trainer;
 		this.applicant = applicant;
 		this.standBySchedule = standBySchedule;

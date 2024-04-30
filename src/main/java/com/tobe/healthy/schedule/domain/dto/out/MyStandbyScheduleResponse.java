@@ -15,7 +15,6 @@ public class MyStandbyScheduleResponse {
     private LocalDate lessonDt;
     private LocalTime lessonStartTime;
     private LocalTime lessonEndTime;
-    private int round;
     private String reservationStatus;
 
     public static MyStandbyScheduleResponse from(StandBySchedule standBySchedule) {
@@ -25,7 +24,6 @@ public class MyStandbyScheduleResponse {
                 .lessonDt(standBySchedule.getSchedule().getLessonDt())
                 .lessonStartTime(standBySchedule.getSchedule().getLessonStartTime())
                 .lessonEndTime(standBySchedule.getSchedule().getLessonEndTime())
-                .round(standBySchedule.getSchedule().getRound())
                 .build();
     }
 }

@@ -49,7 +49,7 @@ class ScheduleServiceTest @Autowired constructor(
                         .lessonStartDt(LocalDate.of(2024, 4, 15))
                         .lessonEndDt(LocalDate.of(2024, 4, 15))
                         .build()
-                    scheduleService.findAllSchedule(request, 741L) shouldNotBe emptyList<ScheduleCommandResult>()
+                    scheduleService.findAllSchedule(request, null) shouldNotBe emptyList<ScheduleCommandResult>()
                 }
             }
             Then("예외가 발생한다") {

@@ -22,7 +22,6 @@ public class ScheduleCommandResult {
 	private LocalTime lessonStartTime;
 	private LocalTime lessonEndTime;
 	private ReservationStatus reservationStatus;
-	private int round;
 	private String trainerName;
 	private String applicantName;
 	private String standByName;
@@ -33,8 +32,7 @@ public class ScheduleCommandResult {
 			.lessonDt(entity.getLessonDt())
 			.lessonStartTime(entity.getLessonStartTime())
 			.lessonEndTime(entity.getLessonEndTime())
-			.reservationStatus(entity.getReservationStatus())
-			.round(entity.getRound());
+			.reservationStatus(entity.getReservationStatus());
 
 		if (!ObjectUtils.isEmpty(entity.getTrainer())) {
 			builder.trainerName(entity.getTrainer().getName() + "트레이너");

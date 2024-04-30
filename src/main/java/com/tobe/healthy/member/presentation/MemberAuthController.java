@@ -225,7 +225,7 @@ public class MemberAuthController {
 			responses = {
 					@ApiResponse(responseCode = "500", description = "구글 소셜서버와 연동중 에러가 발생하였습니다."),
 					@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
-			})
+	})
 	@PostMapping("/access-token/google")
 	public ResponseHandler<Tokens> getGoogleOAuth(@RequestBody SocialLoginCommand command) {
 		return ResponseHandler.<Tokens>builder()

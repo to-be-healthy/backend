@@ -14,7 +14,6 @@ public class MyReservationResponse {
     private LocalDate lessonDt;
     private LocalTime lessonStartTime;
     private LocalTime lessonEndTime;
-    private int round;
     private String trainerName;
     private String reservationStatus;
 
@@ -23,7 +22,6 @@ public class MyReservationResponse {
                 .lessonDt(schedule.getLessonDt())
                 .lessonStartTime(schedule.getLessonStartTime())
                 .lessonEndTime(schedule.getLessonEndTime())
-                .round(schedule.getRound())
                 .trainerName(schedule.getTrainer().getName() + " 트레이너")
                 .reservationStatus(schedule.getReservationStatus().name())
                 .build();
