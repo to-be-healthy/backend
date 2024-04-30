@@ -46,9 +46,7 @@ public class ScheduleWaitingService {
 	public Boolean cancelStandBySchedule(Long scheduleId, Long memberId) {
 		StandBySchedule standBySchedule = standByScheduleRepository.findByScheduleIdAndMemberId(scheduleId, memberId)
 				.orElseThrow(() -> new CustomException(STAND_BY_SCHEDULE_NOT_FOUND));
-
 		standByScheduleRepository.delete(standBySchedule);
-
 		return true;
 	}
 }

@@ -18,8 +18,8 @@ public class ScheduleCommandResponse {
 
 	public static ScheduleCommandResponse create(List<ScheduleCommandResult> morning, List<ScheduleCommandResult> afternoon) {
 		return ScheduleCommandResponse.builder()
-				.morning(morning)
-				.afternoon(afternoon)
+				.morning(morning.isEmpty() ? null : morning)
+				.afternoon(afternoon.isEmpty() ? null : afternoon)
 				.build();
 	}
 }

@@ -97,7 +97,8 @@ public class ScheduleService {
 	}
 
 	public List<ScheduleCommandResult> findAllByApplicantId(Long memberId) {
-		return scheduleRepository.findAllByApplicantId(memberId);
+		List<ScheduleCommandResult> result = scheduleRepository.findAllByApplicantId(memberId);
+		return result.isEmpty() ? null : result;
 	}
 
 	public ScheduleIdInfo reserveSchedule(Long scheduleId, Long memberId) {
@@ -155,11 +156,13 @@ public class ScheduleService {
 	}
 
 	public List<MyReservationResponse> findAllMyReservation(Long memberId, ScheduleSearchCond searchCond) {
-		return scheduleRepository.findAllMyReservation(memberId, searchCond);
+		List<MyReservationResponse> result = scheduleRepository.findAllMyReservation(memberId, searchCond);
+		return result.isEmpty() ? null : result;
 	}
 
 	public List<MyStandbyScheduleResponse> findAllMyStandbySchedule(Long memberId) {
-		return scheduleRepository.findAllMyStandbySchedule(memberId);
+		List<MyStandbyScheduleResponse> result = scheduleRepository.findAllMyStandbySchedule(memberId);
+		return result.isEmpty() ? null : result;
 	}
 
 	public ScheduleIdInfo updateReservationStatusToNoShow(Long scheduleId, Long memberId) {
