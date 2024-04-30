@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface ScheduleRepositoryCustom {
 	List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Long trainerId);
 	List<ScheduleCommandResult> findAllByApplicantId(Long memberId);
-	List<MyReservationResponse> findAllMyReservation(Long memberId);
+	List<MyReservationResponse> findAllMyReservation(Long memberId, ScheduleSearchCond searchCond);
 	List<MyStandbyScheduleResponse> findAllMyStandbySchedule(Long memberId);
 	Optional<Schedule> findAvailableRegisterSchedule(RegisterScheduleCommand request, Long trainerId);
 }

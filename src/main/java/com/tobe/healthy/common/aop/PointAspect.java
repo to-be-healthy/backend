@@ -3,7 +3,7 @@ package com.tobe.healthy.common.aop;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.entity.Calculation;
-import com.tobe.healthy.point.domain.entity.PointType;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -42,7 +42,6 @@ public class PointAspect {
     @AfterReturning(value = "addWorkoutHistory()", returning = "returnValue")
     public void plusPointWhenPostWorkout(JoinPoint joinPoint, Object returnValue) {
         Long memberId = ((WorkoutHistoryDto) returnValue).getMember().getId();
-
         //메서드가 호출되는 시점에 스프링 컨테이너에 등록된 Bean을 조회 (지연조회)
         PointService pointService = pointServiceProvider.getObject();
         pointService.updatePoint(memberId, WORKOUT, Calculation.PLUS, ONE_POINT);
@@ -51,19 +50,15 @@ public class PointAspect {
     @AfterReturning(value = "addDiet()", returning = "returnValue")
     public void plusPointWhenPostDiet(JoinPoint joinPoint, Object returnValue) {
         Long memberId = ((DietDto) returnValue).getMember().getId();
-
-        //메서드가 호출되는 시점에 스프링 컨테이너에 등록된 Bean을 조회 (지연조회)
         PointService pointService = pointServiceProvider.getObject();
         pointService.updatePoint(memberId, DIET, Calculation.PLUS, ONE_POINT);
     }
 
     @AfterReturning(value = "updateReservationStatusToNoShow()", returning = "returnValue")
     public void minusPointWhenNoShow(JoinPoint joinPoint, Object returnValue) {
-        /*Long memberId = ((DietDto) returnValue).getMember().getId();
-
-        //메서드가 호출되는 시점에 스프링 컨테이너에 등록된 Bean을 조회 (지연조회)
+        Long memberId = ((ScheduleIdInfo) returnValue).getStudentId();
         PointService pointService = pointServiceProvider.getObject();
-        pointService.updatePoint(memberId, NO_SHOW, Calculation.MINUS, THREE_POINT);*/
+        pointService.updatePoint(memberId, NO_SHOW, Calculation.MINUS, THREE_POINT);
     }
 
 }

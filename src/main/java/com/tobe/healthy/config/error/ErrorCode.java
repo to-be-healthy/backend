@@ -25,6 +25,7 @@ public enum ErrorCode {
 	MEMBER_ID_DUPLICATION(BAD_REQUEST, "C_012", "사용할 수 없는 아이디입니다."),
 	MEMBER_ALREADY_MAPPED(BAD_REQUEST, "C_013", "이미 등록된 회원입니다."),
 	MEMBER_NOT_MAPPED(BAD_REQUEST, "C_013", "내 학생이 아닙니다."),
+	TRAINER_NOT_MAPPED(BAD_REQUEST, "C_013", "매핑된 트레이너가 없습니다."),
 	NOT_STAND_BY_SCHEDULE(BAD_REQUEST, "C_014", "대기할 수 없는 일정입니다."),
 	SCHEDULE_NOT_FOUND(NOT_FOUND, "C_015", "일정을 찾을 수 없습니다."),
 	COMMENT_NOT_FOUND(NOT_FOUND, "C_016", "댓글이 존재하지 않습니다."),
