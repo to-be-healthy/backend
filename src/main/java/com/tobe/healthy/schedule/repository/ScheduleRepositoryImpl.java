@@ -80,6 +80,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
 				.where(schedule.applicant.id.eq(memberId), schedule.lessonDt.goe(LocalDate.now()), lessonDtEq(searchCond))
+				.orderBy(schedule.lessonDt.asc(), schedule.round.asc())
 				.fetch();
 		return schedules.stream().map(MyReservationResponse::from).collect(toList());
 	}
@@ -91,7 +92,8 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.innerJoin(standBySchedule.schedule, schedule).fetchJoin()
 				.innerJoin(standBySchedule.member, new QMember("member")).fetchJoin()
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.where(standBySchedule.member.id.eq(memberId), standBySchedule.delYn.isFalse())
+				.where(standBySchedule.member.id.eq(memberId), standBySchedule.delYn.isFalse(),
+						standBySchedule.schedule.lessonDt.goe(LocalDate.now()))
 				.orderBy(standBySchedule.schedule.lessonDt.asc(), standBySchedule.schedule.round.asc())
 				.fetch();
 		return results.stream().map(MyStandbyScheduleResponse::from).collect(toList());
