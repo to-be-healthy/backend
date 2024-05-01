@@ -20,7 +20,6 @@ import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.repository.ScheduleRepository
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -59,8 +58,16 @@ class LessonHistoryService(
         pageable: Pageable,
         memberId: Long,
         memberType: MemberType
-    ): Page<LessonHistoryResponse> {
-        return lessonHistoryRepository.findAllLessonHistory(request, pageable, memberId, memberType)
+    ): CustomPagingResponse<LessonHistoryResponse> {
+        val results = lessonHistoryRepository.findAllLessonHistory(request, pageable, memberId, memberType)
+        return CustomPagingResponse(
+            content = results.content,
+            pageNumber = results.pageable.pageNumber,
+            pageSize = results.pageable.pageSize,
+            totalPages = results.totalPages,
+            totalElements = results.totalElements,
+            isLast = results.isLast
+        )
     }
 
     fun findOneLessonHistory(
