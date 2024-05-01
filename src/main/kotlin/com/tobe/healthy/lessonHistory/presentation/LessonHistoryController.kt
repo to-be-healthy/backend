@@ -139,7 +139,8 @@ class LessonHistoryController(
         ])
     @PostMapping("/{lessonHistoryId}/comment")
     fun registerLessonHistoryComment(@Parameter(description = "수업일지 ID", example = "1") @PathVariable lessonHistoryId: Long,
-                                     @Parameter(content = [Content(schema = Schema(implementation = CommentRegisterCommand::class))]) @RequestPart @Valid request: CommentRegisterCommand,
+                                     @Parameter(content = [Content(schema = Schema(implementation = CommentRegisterCommand::class))])
+                                     @RequestPart @Valid request: CommentRegisterCommand,
                                      @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
                                      @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Boolean> {
         return ApiResult(
