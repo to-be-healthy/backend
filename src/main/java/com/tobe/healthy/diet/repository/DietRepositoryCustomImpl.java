@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.tobe.healthy.diet.domain.entity.QDiet.diet;
-import static com.tobe.healthy.file.domain.entity.QDietFile.dietFile;
+import static com.tobe.healthy.diet.domain.entity.QDietFile.dietFile;
 
 
 @Repository

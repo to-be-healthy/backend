@@ -20,8 +20,8 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
-import static com.tobe.healthy.file.domain.entity.QWorkoutHistoryFile.workoutHistoryFile;
 import static com.tobe.healthy.workout.domain.entity.QWorkoutHistory.workoutHistory;
+import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryFile.workoutHistoryFile;
 import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryLike.workoutHistoryLike;
 
 @Repository
