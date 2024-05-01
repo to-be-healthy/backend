@@ -2,20 +2,12 @@ package com.tobe.healthy.lessonHistory.application
 
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ObjectMetadata
+import com.tobe.healthy.common.CustomPagingResponse
 import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.EXCEED_MAXIMUM_NUMBER_OF_FILES
-import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_COMMENT_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_FOUND
+import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.file.domain.entity.AwsS3File
 import com.tobe.healthy.file.repository.AwsS3FileRepository
-import com.tobe.healthy.lessonHistory.domain.dto.`in`.CommentRegisterCommand
-import com.tobe.healthy.lessonHistory.domain.dto.`in`.LessonHistoryCommand
-import com.tobe.healthy.lessonHistory.domain.dto.`in`.LessonHistoryCommentCommand
-import com.tobe.healthy.lessonHistory.domain.dto.`in`.RegisterLessonHistoryCommand
-import com.tobe.healthy.lessonHistory.domain.dto.`in`.SearchCondRequest
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.*
 import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryDetailResponse
 import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryResponse
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
@@ -294,15 +286,21 @@ class LessonHistoryService(
         studentId: Long?,
         request: SearchCondRequest,
         pageable: Pageable
-    ): Page<LessonHistoryResponse> {
-        val findMember =
-            memberRepository.findByIdOrNull(studentId) ?: throw CustomException(MEMBER_NOT_FOUND)
-        return lessonHistoryRepository.findAllLessonHistoryByMemberId(
-            findMember.id,
-            request,
-            pageable
+    ): CustomPagingResponse<LessonHistoryResponse> {
+        val findMember = memberRepository.findByIdOrNull(studentId) ?: throw CustomException(MEMBER_NOT_FOUND)
+        val results = lessonHistoryRepository.findAllLessonHistoryByMemberId(findMember.id, request, pageable)
+        return CustomPagingResponse(
+            findMember.name,
+            results.content,
+            results.pageable.pageNumber,
+            results.pageable.pageSize,
+            results.totalPages,
+            results.totalElements,
+            results.isLast
         )
     }
+
+
 
     companion object {
         const val FILE_MAXIMUM_UPLOAD_SIZE = 3

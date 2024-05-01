@@ -1,5 +1,10 @@
 package com.tobe.healthy.schedule.repository;
 
+import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
+import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
+import static com.tobe.healthy.schedule.domain.entity.QStandBySchedule.standBySchedule;
+import static java.util.stream.Collectors.toList;
+
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -11,19 +16,13 @@ import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
-import static com.tobe.healthy.schedule.domain.entity.QStandBySchedule.standBySchedule;
-import static java.util.stream.Collectors.toList;
 
 @Repository
 @RequiredArgsConstructor
@@ -41,7 +40,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.leftJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.leftJoin(schedule.standBySchedule, standBySchedule).on(standBySchedule.delYn.isFalse())
 				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), schedule.trainer.id.eq(trainerId))
-				.orderBy(schedule.lessonDt.asc(), schedule.round.asc())
+				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
 
 		return fetch.stream()
@@ -66,7 +65,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 			.leftJoin(schedule.trainer, trainer).fetchJoin()
 			.leftJoin(schedule.standBySchedule, standBySchedule).fetchJoin()
 			.where(schedule.applicant.id.eq(memberId), scheduleDelYnFalse(), standByScheduleDelYnFalse())
-			.orderBy(schedule.lessonDt.desc(), schedule.round.desc())
+			.orderBy(schedule.lessonDt.desc(), schedule.lessonStartTime.asc())
 			.fetch();
 		return fetch.stream()
 			.map(ScheduleCommandResult::from)
@@ -80,7 +79,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
 				.where(schedule.applicant.id.eq(memberId), schedule.lessonDt.goe(LocalDate.now()), lessonDtEq(searchCond))
-				.orderBy(schedule.lessonDt.asc(), schedule.round.asc())
+				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
 		return schedules.stream().map(MyReservationResponse::from).collect(toList());
 	}
@@ -94,7 +93,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
 				.where(standBySchedule.member.id.eq(memberId), standBySchedule.delYn.isFalse(),
 						standBySchedule.schedule.lessonDt.goe(LocalDate.now()))
-				.orderBy(standBySchedule.schedule.lessonDt.asc(), standBySchedule.schedule.round.asc())
+				.orderBy(standBySchedule.schedule.lessonDt.asc(), standBySchedule.schedule.lessonStartTime.asc())
 				.fetch();
 		return results.stream().map(MyStandbyScheduleResponse::from).collect(toList());
 	}

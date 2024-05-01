@@ -1,25 +1,36 @@
 package com.tobe.healthy.schedule.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.DATETIME_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.LUNCH_TIME_INVALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.NOT_RESERVABLE_SCHEDULE;
+import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_ALREADY_EXISTS;
+import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_LESS_THAN_30_DAYS;
+import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE;
+import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_MAPPED;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
+import static java.time.LocalTime.NOON;
+
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
-import com.tobe.healthy.schedule.domain.dto.in.RegisterClosedDayCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
-import com.tobe.healthy.schedule.domain.dto.out.*;
+import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
+import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -27,11 +38,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
-import static java.time.LocalTime.NOON;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -47,33 +57,27 @@ public class ScheduleService {
 	private final TrainerMemberMappingRepository mappingRepository;
 
 	public Boolean registerSchedule(AutoCreateScheduleCommand request, Long trainerId) {
-		validateSchduleDate(request);
+		validateScheduleDate(request);
 
 		Member trainer = memberRepository.findById(trainerId).orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		LocalDate startDt = request.getStartDt();
 		while (!startDt.isAfter(request.getEndDt())) {
-			int round = 1;
-
             LocalTime startTime = request.getStartTime();
             while (!startTime.isAfter(request.getEndTime())) {
 				if (request.getClosedDt() != null && request.getClosedDt().equals(startDt)) {
-					Schedule entity = Schedule.builder().reservationStatus(CLOSED_DAY).build();
-					scheduleRepository.save(entity);
 					startDt = startDt.plusDays(1);
 					continue;
 				}
                 if (startTime.equals(request.getLunchStartTime())) {
                     Duration duration = Duration.between(request.getLunchStartTime(), request.getLunchEndTime());
                     startTime = startTime.plusMinutes(duration.toMinutes());
-					Schedule entity = Schedule.registerSchedule(startDt, trainer, startTime, startTime.plusMinutes(request.getSessionTime().getDescription()), 0, LUNCH_TIME);
-					scheduleRepository.save(entity);
                     continue;
                 }
                 startTime = startTime.plusMinutes(request.getSessionTime().getDescription());
 				if (startTime.equals(request.getEndTime())) {
 					break;
 				}
-				Schedule entity = Schedule.registerSchedule(startDt, trainer, startTime, startTime.plusMinutes(request.getSessionTime().getDescription()), round++, AVAILABLE);
+				Schedule entity = Schedule.registerSchedule(startDt, trainer, startTime, startTime.plusMinutes(request.getSessionTime().getDescription()), AVAILABLE);
 				scheduleRepository.save(entity);
 			}
 			startDt = startDt.plusDays(1);
@@ -81,7 +85,7 @@ public class ScheduleService {
 		return true;
 	}
 
-	private void validateSchduleDate(AutoCreateScheduleCommand request) {
+	private void validateScheduleDate(AutoCreateScheduleCommand request) {
 		if (request.getStartDt().isAfter(request.getEndDt())) {
 			throw new CustomException(START_DATE_AFTER_END_DATE);
 		}
@@ -177,7 +181,7 @@ public class ScheduleService {
 				schedule -> {
 					Member trainer = memberRepository.findById(trainerId)
 							.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-					Schedule entity = Schedule.registerSchedule(request.getLessonDt(), trainer, request.getLessonStartTime(), request.getLessonEndTime(), 0, AVAILABLE);
+					Schedule entity = Schedule.registerSchedule(request.getLessonDt(), trainer, request.getLessonStartTime(), request.getLessonEndTime(), AVAILABLE);
 					scheduleRepository.save(entity);
 				},
 				() -> {
@@ -187,19 +191,19 @@ public class ScheduleService {
 		return true;
 	}
 
-	public Boolean registerClosedDay(RegisterClosedDayCommand request, Long trainerId) {
-		Member trainer = memberRepository.findById(trainerId).orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		request.getLessonDt().stream().forEach(lessonDt -> scheduleRepository.findScheduleByLessonDt(lessonDt).ifPresentOrElse(
-				schedule -> {
-					throw new CustomException(SCHEDULE_ALREADY_EXISTS);
-				},
-				() -> {
-					Schedule entity = Schedule.builder().lessonDt(lessonDt).trainer(trainer).reservationStatus(CLOSED_DAY).build();
-					scheduleRepository.save(entity);
-				}
-		));
-		return true;
-	}
+//	public Boolean registerClosedDay(RegisterClosedDayCommand request, Long trainerId) {
+//		Member trainer = memberRepository.findById(trainerId).orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+//		request.getLessonDt().stream().forEach(lessonDt -> scheduleRepository.findScheduleByLessonDt(lessonDt).ifPresentOrElse(
+//				schedule -> {
+//					throw new CustomException(SCHEDULE_ALREADY_EXISTS);
+//				},
+//				() -> {
+//					Schedule entity = Schedule.builder().lessonDt(lessonDt).trainer(trainer).build();
+//					scheduleRepository.save(entity);
+//				}
+//		));
+//		return true;
+//	}
 
 	private void changeApplicantAndDeleteStandBy(StandBySchedule standBySchedule, Schedule schedule) {
 		schedule.changeApplicantInSchedule(standBySchedule.getMember());

@@ -4,26 +4,30 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.ScheduleService;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
-import com.tobe.healthy.schedule.domain.dto.in.RegisterClosedDayCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,19 +62,6 @@ public class ScheduleController {
 		return ResponseHandler.<Boolean>builder()
 				.data(scheduleService.registerIndividualSchedule(request, member.getMemberId()))
 				.message("개별 일정 등록에 성공하였습니다.")
-				.build();
-	}
-
-	@Operation(summary = "트레이너가 휴무일로 지정한다.", description = "트레이너가 휴무일로 지정한다.",
-			responses = {
-					@ApiResponse(responseCode = "200", description = "휴무일로 지정 성공")
-			})
-	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	@PostMapping("/register/closed-day")
-	public ResponseHandler<Boolean> registerClosedDay(@RequestBody RegisterClosedDayCommand request, @AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
-				.data(scheduleService.registerClosedDay(request, member.getMemberId()))
-				.message("휴무일로 지정하였습니다.")
 				.build();
 	}
 

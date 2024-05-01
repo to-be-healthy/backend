@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
+import java.util.*
 
 @Schema(description = "수업 일지 상세 조회 응답 DTO")
 data class LessonHistoryDetailResponse(
@@ -112,6 +112,7 @@ data class LessonHistoryDetailResponse(
         val content: String,
         val member: LessonHistoryCommentMemberResult,
         val orderNum: Int,
+        val parentId: Long?,
         val replies: MutableList<LessonHistoryCommentCommandResult?>?,
         val files: MutableList<LessonHistoryFileResults> = mutableListOf(),
         val delYn: Boolean,
@@ -127,6 +128,7 @@ data class LessonHistoryDetailResponse(
                         member = LessonHistoryCommentMemberResult.from(entity.writer),
                         orderNum = entity.order,
                         replies = entity.replies?.let { it -> it.map { from(it) } }?.toMutableList(),
+                        parentId = entity?.let { it?.parentId?.id },
                         files = entity.files.map { LessonHistoryFileResults.from(it) }.toMutableList(),
                         delYn = entity.delYn,
                         createdAt = entity.createdAt,

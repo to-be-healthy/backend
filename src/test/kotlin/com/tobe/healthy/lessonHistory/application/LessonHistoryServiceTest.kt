@@ -86,7 +86,6 @@ class LessonHistoryServiceTest(
             .lessonStartTime(LocalTime.of(10, 0))
             .lessonEndTime(LocalTime.of(11, 0))
             .reservationStatus(COMPLETED)
-            .round(1)
             .trainer(trainer)
             .applicant(student)
             .build()
