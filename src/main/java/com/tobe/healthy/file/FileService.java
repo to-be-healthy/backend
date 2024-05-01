@@ -1,16 +1,18 @@
-package com.tobe.healthy.file.application;
+package com.tobe.healthy.file;
 
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.entity.Diet;
+import com.tobe.healthy.diet.domain.entity.DietFile;
+import com.tobe.healthy.diet.domain.entity.DietType;
 import com.tobe.healthy.diet.repository.DietFileRepository;
-import com.tobe.healthy.file.domain.entity.*;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.workout.repository.WorkoutFileRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;

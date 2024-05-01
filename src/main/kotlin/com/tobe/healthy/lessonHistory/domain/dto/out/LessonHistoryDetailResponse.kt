@@ -1,6 +1,6 @@
 package com.tobe.healthy.lessonHistory.domain.dto.out
 
-import com.tobe.healthy.file.domain.entity.AwsS3File
+import com.tobe.healthy.file.AwsS3File
 import com.tobe.healthy.lessonHistory.domain.entity.AttendanceStatus.ABSENT
 import com.tobe.healthy.lessonHistory.domain.entity.AttendanceStatus.ATTENDED
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory

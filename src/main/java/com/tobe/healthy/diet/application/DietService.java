@@ -5,14 +5,10 @@ import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.DietFileDto;
 import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
 import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
-import com.tobe.healthy.diet.domain.entity.Diet;
-import com.tobe.healthy.diet.domain.entity.DietLike;
-import com.tobe.healthy.diet.domain.entity.DietLikePK;
+import com.tobe.healthy.diet.domain.entity.*;
 import com.tobe.healthy.diet.repository.DietLikeRepository;
 import com.tobe.healthy.diet.repository.DietRepository;
-import com.tobe.healthy.file.application.FileService;
-import com.tobe.healthy.file.domain.entity.DietFile;
-import com.tobe.healthy.file.domain.entity.DietType;
+import com.tobe.healthy.file.FileService;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
@@ -33,7 +29,7 @@ import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.DIET_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.LIKE_ALREADY_EXISTS;
-import static com.tobe.healthy.file.domain.entity.DietType.*;
+import static com.tobe.healthy.diet.domain.entity.DietType.*;
 
 
 @Service

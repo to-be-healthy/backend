@@ -1,8 +1,7 @@
 package com.tobe.healthy.workout.application;
 
 import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.file.application.FileService;
-import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
+import com.tobe.healthy.file.FileService;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;

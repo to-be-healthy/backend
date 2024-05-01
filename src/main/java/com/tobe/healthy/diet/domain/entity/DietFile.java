@@ -1,21 +1,24 @@
-package com.tobe.healthy.file.domain.entity;
+package com.tobe.healthy.diet.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor
-@Table(name = "workout_history_file")
+@Table(name = "diet_file")
 @Builder
 @Getter
-public class WorkoutHistoryFile extends BaseTimeEntity<WorkoutHistoryFile, Long> {
+public class DietFile extends BaseTimeEntity<DietFile, Long> {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -36,21 +39,26 @@ public class WorkoutHistoryFile extends BaseTimeEntity<WorkoutHistoryFile, Long>
     private Boolean delYn = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workout_history_id")
-    private WorkoutHistory workoutHistory;
+    @JoinColumn(name = "diet_id")
+    private Diet diet;
 
-    public static WorkoutHistoryFile create(String savedFileName, String originalName, String extension, Long fileSize, WorkoutHistory history, String fileUrl) {
-        return WorkoutHistoryFile.builder()
+    @Enumerated(STRING)
+    @ColumnDefault("'BREAKFAST'")
+    private DietType type;
+
+    public static DietFile create(String savedFileName, String originalName, String extension, long fileSize, Diet diet, String fileUrl, DietType type) {
+        return DietFile.builder()
                 .fileName(savedFileName)
                 .originalName(originalName)
                 .extension(extension)
                 .fileSize(fileSize)
-                .workoutHistory(history)
                 .fileUrl(fileUrl)
+                .diet(diet)
+                .type(type)
                 .build();
     }
 
-    public void deleteWorkoutHistoryFile() {
+    public void deleteDietFile() {
         this.delYn = true;
     }
 

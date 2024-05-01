@@ -7,10 +7,8 @@ import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.diet.domain.entity.Diet;
-import com.tobe.healthy.file.domain.entity.DietFile;
-import com.tobe.healthy.file.domain.entity.QDietFile;
+import com.tobe.healthy.diet.domain.entity.DietFile;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -22,8 +20,6 @@ import java.util.List;
 
 import static com.tobe.healthy.diet.domain.entity.QDiet.diet;
 import static com.tobe.healthy.file.domain.entity.QDietFile.dietFile;
-import static com.tobe.healthy.file.domain.entity.QWorkoutHistoryFile.workoutHistoryFile;
-import static com.tobe.healthy.workout.domain.entity.QWorkoutHistory.workoutHistory;
 
 
 @Repository

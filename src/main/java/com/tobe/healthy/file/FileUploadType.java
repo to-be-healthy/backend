@@ -1,4 +1,4 @@
-package com.tobe.healthy.file.domain.entity;
+package com.tobe.healthy.file;
 
 import com.tobe.healthy.common.EnumMapperType;
 import lombok.AllArgsConstructor;
