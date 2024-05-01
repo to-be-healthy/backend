@@ -13,15 +13,15 @@ class FirebaseConfig {
 
     @PostConstruct
     fun initializeFCM() {
-//        FileInputStream("src/main/resources/firebase-adminsdk.json").use {
-//            val options = FirebaseOptions.builder()
-//                .setCredentials(GoogleCredentials.fromStream(it))
-//                .build()
-//            log.info { "options => ${options}" }
-//            if (FirebaseApp.getApps().isEmpty()) {
-//                FirebaseApp.initializeApp(options)
-//                log.info { "Firebase application has been initialized"}
-//            }
-//        }
+        FileInputStream("src/main/resources/firebase-adminsdk.json").use {
+            val options = FirebaseOptions.builder()
+                .setCredentials(GoogleCredentials.fromStream(it))
+                .build()
+            log.info { "options => ${options}" }
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options)
+                log.info { "Firebase application has been initialized"}
+            }
+        }
     }
 }

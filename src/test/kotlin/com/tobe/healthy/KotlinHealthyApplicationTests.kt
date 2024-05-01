@@ -7,4 +7,5 @@ val log = KotlinLogging.logger {}
 
 
 @SpringBootTest
-class KotlinHealthyApplicationTests()
+class KotlinHealthyApplicationTests() {
+}
