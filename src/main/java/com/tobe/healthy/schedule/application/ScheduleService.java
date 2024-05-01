@@ -11,6 +11,7 @@ import static com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE;
 import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_MAPPED;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
 import static java.time.LocalTime.NOON;
 
 import com.tobe.healthy.config.error.CustomException;
@@ -26,6 +27,7 @@ import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
@@ -128,9 +130,13 @@ public class ScheduleService {
 		List<ScheduleCommandResult> schedule = scheduleRepository.findAllSchedule(searchCond, trainerId);
 
 		List<ScheduleCommandResult> morning = schedule.stream()
-				.filter(s -> NOON.isAfter(s.getLessonStartTime())).collect(Collectors.toList());
+				.filter(s -> NOON.isAfter(s.getLessonStartTime()))
+				.peek(s -> { if(s.getStandByName()!=null) s.setReservationStatus(SOLD_OUT); })
+				.collect(Collectors.toList());
 		List<ScheduleCommandResult> afternoon = schedule.stream()
-				.filter(s -> NOON.isBefore(s.getLessonStartTime())).collect(Collectors.toList());
+				.filter(s -> NOON.isBefore(s.getLessonStartTime()))
+				.peek(s -> { if(s.getStandByName()!=null) s.setReservationStatus(SOLD_OUT); })
+				.collect(Collectors.toList());
 		return ScheduleCommandResponse.create(morning, afternoon);
 	}
 
