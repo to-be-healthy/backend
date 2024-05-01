@@ -245,7 +245,7 @@ public class MemberService {
 			try (InputStream inputStream = uploadFile.getInputStream()) {
 				amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
 				String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
-				MemberProfile memberProfile = MemberProfile.create(originalFileName, uploadFile.getSize(), fileUrl, member);
+				MemberProfile memberProfile = MemberProfile.create(fileUrl, member);
 				memberProfileRepository.save(memberProfile);
 			} catch (IOException e) {
 				log.error("error => {}", e);
@@ -379,11 +379,7 @@ public class MemberService {
 		try (InputStream inputStream = new ByteArrayInputStream(image)) {
 			amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
 			String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
-			MemberProfile file = MemberProfile.create(
-					profileImage.substring(profileImage.lastIndexOf("/")),
-					objectMetadata.getContentLength(),
-					fileUrl
-			);
+			MemberProfile file = MemberProfile.create(fileUrl, member);
 			memberProfileRepository.save(file);
 		} catch (IOException e) {
 			log.error("error => {}", e);

@@ -20,9 +20,6 @@ public class ProfileDto {
     public static ProfileDto from(MemberProfile memberProfile){
         return ProfileDto.builder()
                 .id(memberProfile.getId())
-                .fileName(memberProfile.getFileName())
-                .originalName(memberProfile.getOriginalName())
-                .fileSize(Long.valueOf(memberProfile.getFileSize()))
                 .fileUrl(memberProfile.getFileUrl())
                 .build();
     }

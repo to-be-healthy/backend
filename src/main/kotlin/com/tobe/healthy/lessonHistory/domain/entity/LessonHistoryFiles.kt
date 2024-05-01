@@ -16,10 +16,6 @@ import jakarta.persistence.ManyToOne
 class LessonHistoryFiles(
     val fileUrl: String,
 
-    val originalFileName: String,
-
-    val fileOrder: Int,
-
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
     val member: Member? = null,
@@ -39,12 +35,10 @@ class LessonHistoryFiles(
 ) : BaseTimeEntity<LessonHistoryFiles, Long>() {
 
     companion object {
-        fun create(originalFileName: String?, member: Member?, fileUrl: String?, fileOrder: Int): LessonHistoryFiles {
+        fun create(member: Member, fileUrl: String): LessonHistoryFiles {
             return LessonHistoryFiles(
-                originalFileName = originalFileName!!,
                 member = member,
-                fileUrl = fileUrl!!,
-                fileOrder = fileOrder
+                fileUrl = fileUrl,
             )
         }
     }

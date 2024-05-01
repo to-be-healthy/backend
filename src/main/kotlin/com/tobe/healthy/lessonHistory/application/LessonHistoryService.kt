@@ -178,19 +178,16 @@ class LessonHistoryService(
         lessonHistory: LessonHistory
     ) {
         uploadFiles?.let {
-            var fileOrder = 1;
             checkMaximumFileSize(it.size)
 
             for (uploadFile in it) {
                 if (!uploadFile.isEmpty) {
-                    val (originalFileName, fileUrl) = putFile(uploadFile)
+                    val fileUrl = putFile(uploadFile)
 
                     val file = LessonHistoryFiles(
-                        originalFileName = originalFileName!!,
                         member = findMember,
                         lessonHistory = lessonHistory,
                         fileUrl = fileUrl,
-                        fileOrder = fileOrder++
                     )
 
                     lessonHistoryFilesRepository.save(file)
@@ -258,18 +255,14 @@ class LessonHistoryService(
     ) {
         uploadFiles?.let {
             checkMaximumFileSize(it.size)
-            var fileOrder = 1;
             for (uploadFile in it) {
                 if (!uploadFile.isEmpty) {
-                    val (originalFileName, fileUrl) = putFile(uploadFile)
-
+                    val fileUrl = putFile(uploadFile)
 
                     val file = LessonHistoryFiles(
-                        originalFileName = originalFileName!!,
                         member = findMember,
                         lessonHistory = lessonHistory,
                         fileUrl = fileUrl,
-                        fileOrder = fileOrder++,
                         lessonHistoryComment = entity
                     )
 
@@ -279,11 +272,9 @@ class LessonHistoryService(
         }
     }
 
-    private fun putFile(uploadFile: MultipartFile): Pair<String?, String> {
-        val originalFileName = uploadFile.originalFilename
+    private fun putFile(uploadFile: MultipartFile): String {
         val objectMetadata = getObjectMetadata(uploadFile)
-        val extension = originalFileName?.substring(originalFileName.lastIndexOf("."))
-        val savedFileName = "lesson-history/" + System.currentTimeMillis().toString() + extension
+        val savedFileName = "lesson-history/" + System.currentTimeMillis().toString()
         amazonS3.putObject(
             "to-be-healthy-bucket",
             savedFileName,
@@ -292,7 +283,7 @@ class LessonHistoryService(
         )
         val fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString()
         log.info { "등록된 S3 파일 URL => ${fileUrl}" }
-        return Pair(originalFileName, fileUrl)
+        return fileUrl
     }
 
     private fun checkMaximumFileSize(uploadFilesSize: Int) {

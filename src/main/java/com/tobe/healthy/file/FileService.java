@@ -68,7 +68,7 @@ public class FileService {
 				Member member = memberRepository.findById(memberId)
 					.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-				MemberProfile memberProfile = MemberProfile.create(savedFileName, Long.valueOf(uploadFile.getSize()), "", member);
+				MemberProfile memberProfile = MemberProfile.create("", member);
 
 				member.registerProfile(memberProfile);
 
