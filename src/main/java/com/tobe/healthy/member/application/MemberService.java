@@ -15,11 +15,6 @@ import com.tobe.healthy.config.error.OAuthException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
-import com.tobe.healthy.file.domain.entity.AwsS3File;
-import com.tobe.healthy.file.domain.entity.Profile;
-import com.tobe.healthy.file.repository.AwsS3FileRepository;
-import com.tobe.healthy.file.repository.FileRepository;
-import com.tobe.healthy.gym.repository.GymRepository;
 import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand.MemberFindIdCommandResult;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
@@ -28,7 +23,9 @@ import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.member.repository.MemberProfileRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
@@ -62,14 +59,14 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.SocialType.*;
+import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
+import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
 import static java.io.File.separator;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
-import static org.springframework.util.StringUtils.cleanPath;
 
 @Service
 @RequiredArgsConstructor
@@ -85,14 +82,12 @@ public class MemberService {
 	private final TrainerService trainerService;
 	private final ObjectMapper objectMapper;
 	private final OAuthProperties oAuthProperties;
-	private final FileRepository fileRepository;
 	private final TrainerMemberMappingRepository mappingRepository;
-	private final GymRepository gymRepository;
     private final AmazonS3 amazonS3;
 	private final MailService mailService;
 	private final CourseService courseService;
 
-    private final AwsS3FileRepository awsS3FileRepository;
+    private final MemberProfileRepository memberProfileRepository;
 
 	@Value("${file.upload.location}")
 	private String uploadDir;
@@ -245,13 +240,13 @@ public class MemberService {
 			ObjectMetadata objectMetadata = getObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
 			String extension = requireNonNull(originalFileName).substring(originalFileName.lastIndexOf("."));
 
-			String savedFileName = System.currentTimeMillis() + extension;
+			String savedFileName = "profile/" + System.currentTimeMillis() + extension;
 
 			try (InputStream inputStream = uploadFile.getInputStream()) {
 				amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
 				String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
-				AwsS3File file = AwsS3File.create(originalFileName, member, fileUrl, 1);
-				awsS3FileRepository.save(file);
+				MemberProfile memberProfile = MemberProfile.create(originalFileName, uploadFile.getSize(), fileUrl, member);
+				memberProfileRepository.save(memberProfile);
 			} catch (IOException e) {
 				log.error("error => {}", e);
 				throw new CustomException(FILE_UPLOAD_ERROR);
@@ -379,13 +374,17 @@ public class MemberService {
 	private void getProfile(String profileImage, Member member) {
 		byte[] image = getProfileImage(profileImage);
 		String extension = getImageExtension(profileImage);
-		String savedFileName = System.currentTimeMillis() + extension;
+		String savedFileName = "profile/" + System.currentTimeMillis() + extension;
 		ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
 		try (InputStream inputStream = new ByteArrayInputStream(image)) {
 			amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
 			String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
-			AwsS3File file = AwsS3File.create(savedFileName + extension, member, fileUrl, 1);
-			awsS3FileRepository.save(file);
+			MemberProfile file = MemberProfile.create(
+					profileImage.substring(profileImage.lastIndexOf("/")),
+					objectMetadata.getContentLength(),
+					fileUrl
+			);
+			memberProfileRepository.save(file);
 		} catch (IOException e) {
 			log.error("error => {}", e);
 			throw new CustomException(FILE_UPLOAD_ERROR);
@@ -451,10 +450,10 @@ public class MemberService {
 		Optional<Member> optionalMember = memberRepository.findGoogleByEmailAndSocialType(email);
 		Member member;
 		if (optionalMember.isEmpty()) { //회원가입
-			Profile profile = Profile.create(savedFileName, cleanPath(savedFileName), extension,
-					uploadDir + separator, image.length);
-			member = Member.join(email, name, profile, command.getMemberType(), GOOGLE);
-			memberRepository.save(member);
+//			MemberProfile memberProfile = MemberProfile.create(savedFileName,
+//					uploadDir + separator, image.length);
+//			member = Member.join(email, name, memberProfile, command.getMemberType(), GOOGLE);
+//			memberRepository.save(member);
 			try {
 				Path copyOfLocation = Paths.get(uploadDir + separator + savedFileName + extension);
 				Files.createDirectories(copyOfLocation.getParent());
@@ -469,12 +468,13 @@ public class MemberService {
 
 		//초대가입인 경우
 		if(StringUtils.isNotEmpty(command.getUuid())) {
-			mappingTrainerAndStudent(member, command.getUuid(), name, true);
+//			mappingTrainerAndStudent(member, command.getUuid(), name, true);
 		}
 
-		return memberRepository.findByUserId(member.getUserId(), command.getMemberType())
-				.map(tokenGenerator::create)
-				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+//		return memberRepository.findByUserId(member.getUserId(), command.getMemberType())
+//				.map(tokenGenerator::create)
+//				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+		return null;
 	}
 
 	private OAuthInfo getGoogleAccessToken(String code, String redirectUri) {

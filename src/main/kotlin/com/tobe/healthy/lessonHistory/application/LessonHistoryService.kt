@@ -4,15 +4,24 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.tobe.healthy.common.CustomPagingResponse
 import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.*
-import com.tobe.healthy.file.domain.entity.AwsS3File
-import com.tobe.healthy.file.repository.AwsS3FileRepository
-import com.tobe.healthy.lessonHistory.domain.dto.`in`.*
+import com.tobe.healthy.config.error.ErrorCode.EXCEED_MAXIMUM_NUMBER_OF_FILES
+import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_COMMENT_NOT_FOUND
+import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
+import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
+import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND
+import com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_FOUND
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.CommentRegisterCommand
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.LessonHistoryCommand
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.LessonHistoryCommentCommand
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.RegisterLessonHistoryCommand
+import com.tobe.healthy.lessonHistory.domain.dto.`in`.SearchCondRequest
 import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryDetailResponse
 import com.tobe.healthy.lessonHistory.domain.dto.out.LessonHistoryResponse
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistoryComment
+import com.tobe.healthy.lessonHistory.domain.entity.LessonHistoryFiles
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryCommentRepository
+import com.tobe.healthy.lessonHistory.repository.LessonHistoryFilesRepository
 import com.tobe.healthy.lessonHistory.repository.LessonHistoryRepository
 import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.entity.Member
@@ -30,10 +39,10 @@ import org.springframework.web.multipart.MultipartFile
 @Transactional
 class LessonHistoryService(
     private val lessonHistoryRepository: LessonHistoryRepository,
+    private val lessonHistoryFilesRepository: LessonHistoryFilesRepository,
     private val memberRepository: MemberRepository,
     private val scheduleRepository: ScheduleRepository,
     private val lessonHistoryCommentRepository: LessonHistoryCommentRepository,
-    private val awsS3FileRepository: AwsS3FileRepository,
     private val amazonS3: AmazonS3
 ) {
 
@@ -50,6 +59,7 @@ class LessonHistoryService(
         val lessonHistory = registerLessonHistory(request, findMember, findTrainer, findSchedule)
 
         registerFiles(uploadFiles, findMember, lessonHistory)
+
         return true
     }
 
@@ -169,21 +179,21 @@ class LessonHistoryService(
     ) {
         uploadFiles?.let {
             var fileOrder = 1;
-            checkMaximumFileSize(uploadFiles.size)
+            checkMaximumFileSize(it.size)
 
             for (uploadFile in it) {
                 if (!uploadFile.isEmpty) {
                     val (originalFileName, fileUrl) = putFile(uploadFile)
 
-                    val file = AwsS3File.builder()
-                        .originalFileName(originalFileName)
-                        .member(findMember)
-                        .lessonHistory(lessonHistory)
-                        .fileUrl(fileUrl)
-                        .fileOrder(fileOrder++)
-                        .build()
+                    val file = LessonHistoryFiles(
+                        originalFileName = originalFileName!!,
+                        member = findMember,
+                        lessonHistory = lessonHistory,
+                        fileUrl = fileUrl,
+                        fileOrder = fileOrder++
+                    )
 
-                    awsS3FileRepository.save(file)
+                    lessonHistoryFilesRepository.save(file)
                 }
             }
         }
@@ -253,15 +263,17 @@ class LessonHistoryService(
                 if (!uploadFile.isEmpty) {
                     val (originalFileName, fileUrl) = putFile(uploadFile)
 
-                    val file = AwsS3File.builder()
-                        .originalFileName(originalFileName)
-                        .member(findMember)
-                        .lessonHistory(lessonHistory)
-                        .fileUrl(fileUrl)
-                        .fileOrder(fileOrder++)
-                        .lessonHistoryComment(entity)
-                        .build()
-                    awsS3FileRepository.save(file)
+
+                    val file = LessonHistoryFiles(
+                        originalFileName = originalFileName!!,
+                        member = findMember,
+                        lessonHistory = lessonHistory,
+                        fileUrl = fileUrl,
+                        fileOrder = fileOrder++,
+                        lessonHistoryComment = entity
+                    )
+
+                    lessonHistoryFilesRepository.save(file)
                 }
             }
         }
@@ -271,7 +283,7 @@ class LessonHistoryService(
         val originalFileName = uploadFile.originalFilename
         val objectMetadata = getObjectMetadata(uploadFile)
         val extension = originalFileName?.substring(originalFileName.lastIndexOf("."))
-        val savedFileName = System.currentTimeMillis().toString() + extension
+        val savedFileName = "lesson-history/" + System.currentTimeMillis().toString() + extension
         amazonS3.putObject(
             "to-be-healthy-bucket",
             savedFileName,

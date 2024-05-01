@@ -1,4 +1,4 @@
-package com.tobe.healthy.file.domain.dto;
+package com.tobe.healthy.workout.domain.dto;
 
 import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import lombok.AllArgsConstructor;

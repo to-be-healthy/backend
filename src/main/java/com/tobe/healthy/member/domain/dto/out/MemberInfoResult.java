@@ -1,10 +1,7 @@
 package com.tobe.healthy.member.domain.dto.out;
 
-import com.tobe.healthy.file.domain.dto.ProfileDto;
-import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.gym.domain.dto.GymDto;
-import com.tobe.healthy.gym.domain.entity.Gym;
-import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.member.domain.dto.ProfileDto;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
@@ -47,8 +44,8 @@ public class MemberInfoResult {
 				.feedbackAlarmStatus(member.getFeedbackAlarmStatus())
 				.socialType(member.getSocialType());
 
-		if(member.getProfileId() != null){
-			builder.profile(ProfileDto.from(member.getProfileId()));
+		if(member.getMemberProfile() != null){
+			builder.profile(ProfileDto.from(member.getMemberProfile()));
 		}
 		if(member.getGym() != null){
 			builder.gym(GymDto.from(member.getGym()));

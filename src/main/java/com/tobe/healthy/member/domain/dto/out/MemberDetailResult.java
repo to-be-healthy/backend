@@ -3,13 +3,10 @@ package com.tobe.healthy.member.domain.dto.out;
 import com.querydsl.core.annotations.QueryProjection;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.diet.domain.dto.DietDto;
-import com.tobe.healthy.file.domain.dto.DietFileDto;
 import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 public class MemberDetailResult {

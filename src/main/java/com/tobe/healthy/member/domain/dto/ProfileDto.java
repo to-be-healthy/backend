@@ -1,0 +1,30 @@
+package com.tobe.healthy.member.domain.dto;
+
+
+import com.tobe.healthy.member.domain.entity.MemberProfile;
+import lombok.Builder;
+import lombok.Data;
+
+
+@Data
+@Builder
+public class ProfileDto {
+
+    private Long id;
+    private String fileName;
+    private String originalName;
+    private String extension;
+    private Long fileSize;
+    private String fileUrl;
+
+    public static ProfileDto from(MemberProfile memberProfile){
+        return ProfileDto.builder()
+                .id(memberProfile.getId())
+                .fileName(memberProfile.getFileName())
+                .originalName(memberProfile.getOriginalName())
+                .fileSize(Long.valueOf(memberProfile.getFileSize()))
+                .fileUrl(memberProfile.getFileUrl())
+                .build();
+    }
+
+}

@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Locale
 
 @Schema(description = "수업 일지 상세 조회 응답 DTO")
 data class LessonHistoryDetailResponse(
@@ -149,7 +149,7 @@ data class LessonHistoryDetailResponse(
                 return LessonHistoryCommentMemberResult(
                     memberId = entity.id,
                     name = entity.name,
-                    fileUrl = entity.profileId?.fileUrl?.let { it }
+                    fileUrl = entity.memberProfile?.fileUrl?.let { it }
                 )
             }
         }

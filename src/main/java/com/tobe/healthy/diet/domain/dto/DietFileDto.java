@@ -1,4 +1,4 @@
-package com.tobe.healthy.file.domain.dto;
+package com.tobe.healthy.diet.domain.dto;
 
 import com.tobe.healthy.file.domain.entity.DietFile;
 import com.tobe.healthy.file.domain.entity.DietType;

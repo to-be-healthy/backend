@@ -8,9 +8,6 @@ import com.tobe.healthy.diet.domain.entity.DietComment;
 import com.tobe.healthy.diet.repository.DietCommentRepository;
 import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryCommentDto;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistoryComment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.config.error.ErrorCode.COMMENT_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.DIET_NOT_FOUND;
 
 
 @Service
@@ -39,7 +37,7 @@ public class DietCommentService {
         if(comments.isEmpty()) return null;
 
         List<DietCommentDto> dtos = comments.stream()
-                .map(c -> DietCommentDto.create(c, c.getMember().getProfileId())).toList();
+                .map(c -> DietCommentDto.create(c, c.getMember().getMemberProfile())).toList();
         Map<Boolean, List<DietCommentDto>> dtos2 = dtos.stream()
                 .collect(Collectors.partitioningBy(c -> c.getParentId() == null));
         List<DietCommentDto> parent = dtos2.get(true);

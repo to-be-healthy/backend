@@ -1,4 +1,4 @@
-package com.tobe.healthy.file.repository;
+package com.tobe.healthy.workout.repository;
 
 import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import org.springframework.data.jpa.repository.JpaRepository;
