@@ -6,10 +6,7 @@ import com.tobe.healthy.schedule.application.ScheduleService;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
-import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
+import com.tobe.healthy.schedule.domain.dto.out.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -141,9 +138,9 @@ public class ScheduleController {
 			})
 	@GetMapping("/my-reservation")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<List<MyReservationResponse>> findAllMyReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-																			 @ParameterObject ScheduleSearchCond searchCond) {
-		return ResponseHandler.<List<MyReservationResponse>>builder()
+	public ResponseHandler<MyReservationResponse> findAllMyReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+																	   @ParameterObject ScheduleSearchCond searchCond) {
+		return ResponseHandler.<MyReservationResponse>builder()
 				.data(scheduleService.findAllMyReservation(customMemberDetails.getMemberId(), searchCond))
 				.message("학생이 내 예약을 조회하였습니다.")
 				.build();

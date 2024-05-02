@@ -1,29 +1,24 @@
 package com.tobe.healthy.schedule.domain.dto.out;
 
-import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.course.domain.dto.CourseDto;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.util.ObjectUtils;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @Builder
 public class MyReservationResponse {
-    private Long scheduleId;
-    private LocalDate lessonDt;
-    private LocalTime lessonStartTime;
-    private LocalTime lessonEndTime;
-    private String trainerName;
-    private String reservationStatus;
 
-    public static MyReservationResponse from(Schedule schedule) {
-        return MyReservationResponse.builder().scheduleId(schedule.getId())
-                .lessonDt(schedule.getLessonDt())
-                .lessonStartTime(schedule.getLessonStartTime())
-                .lessonEndTime(schedule.getLessonEndTime())
-                .trainerName(schedule.getTrainer().getName() + " 트레이너")
-                .reservationStatus(schedule.getReservationStatus().name())
+    private final CourseDto course;
+    private final List<MyReservation> reservations;
+
+    public static MyReservationResponse create(CourseDto course, List<MyReservation> reservations) {
+        return MyReservationResponse.builder()
+                .course(course)
+                .reservations(ObjectUtils.isEmpty(reservations) ? null : reservations)
                 .build();
     }
+
 }

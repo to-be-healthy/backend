@@ -11,8 +11,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.QMember;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
-import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
-import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
+import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
+import com.tobe.healthy.schedule.domain.dto.out.MyStandbySchedule;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
@@ -73,7 +73,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 	}
 
 	@Override
-	public List<MyReservationResponse> findAllMyReservation(Long memberId, ScheduleSearchCond searchCond) {
+	public List<MyReservation> findAllMyReservation(Long memberId, ScheduleSearchCond searchCond) {
 		List<Schedule> schedules = queryFactory.select(schedule)
 				.from(schedule)
 				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
@@ -81,11 +81,11 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.where(schedule.applicant.id.eq(memberId), schedule.lessonDt.goe(LocalDate.now()), lessonDtEq(searchCond))
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
-		return schedules.stream().map(MyReservationResponse::from).collect(toList());
+		return schedules.stream().map(MyReservation::from).collect(toList());
 	}
 
 	@Override
-	public List<MyStandbyScheduleResponse> findAllMyStandbySchedule(Long memberId) {
+	public List<MyStandbySchedule> findAllMyStandbySchedule(Long memberId) {
 		List<StandBySchedule> results = queryFactory.select(standBySchedule)
 				.from(standBySchedule)
 				.innerJoin(standBySchedule.schedule, schedule).fetchJoin()
@@ -95,7 +95,7 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 						standBySchedule.schedule.lessonDt.goe(LocalDate.now()))
 				.orderBy(standBySchedule.schedule.lessonDt.asc(), standBySchedule.schedule.lessonStartTime.asc())
 				.fetch();
-		return results.stream().map(MyStandbyScheduleResponse::from).collect(toList());
+		return results.stream().map(MyStandbySchedule::from).collect(toList());
 	}
 
 	@Override

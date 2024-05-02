@@ -4,6 +4,7 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.ScheduleService;
 import com.tobe.healthy.schedule.application.ScheduleWaitingService;
+import com.tobe.healthy.schedule.domain.dto.out.MyStandbySchedule;
 import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -63,8 +64,8 @@ public class ScheduleWaitingController {
 			})
 	@GetMapping("/my-standby")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<List<MyStandbyScheduleResponse>> findAllMyStandbySchedule(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<List<MyStandbyScheduleResponse>>builder()
+	public ResponseHandler<MyStandbyScheduleResponse> findAllMyStandbySchedule(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<MyStandbyScheduleResponse>builder()
 				.data(scheduleService.findAllMyStandbySchedule(customMemberDetails.getMemberId()))
 				.message("학생이 대기중인 예약을 조회하였습니다.")
 				.build();
