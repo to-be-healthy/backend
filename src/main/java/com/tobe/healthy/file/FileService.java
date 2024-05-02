@@ -5,14 +5,14 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.entity.Diet;
-import com.tobe.healthy.diet.domain.entity.DietFile;
+import com.tobe.healthy.diet.domain.entity.DietFiles;
 import com.tobe.healthy.diet.domain.entity.DietType;
 import com.tobe.healthy.diet.repository.DietFileRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistoryFile;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistoryFiles;
 import com.tobe.healthy.workout.repository.WorkoutFileRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -96,7 +96,7 @@ public class FileService {
 				amazonS3.putObject(bucketName, savedFileName, uploadFile.getInputStream(), objectMetadata);
 				String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
 
-				WorkoutHistoryFile historyFile = WorkoutHistoryFile.create(savedFileName,
+				WorkoutHistoryFiles historyFile = WorkoutHistoryFiles.create(savedFileName,
 						cleanPath(uploadFile.getOriginalFilename()), extension, uploadFile.getSize(), history, fileUrl);
 				workoutFileRepository.save(historyFile);
 			} catch (IOException e) {
@@ -177,7 +177,7 @@ public class FileService {
 				amazonS3.putObject(bucketName, savedFileName, uploadFile.getInputStream(), objectMetadata);
 				String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
 
-				DietFile dietFile = DietFile.create(savedFileName, cleanPath(uploadFile.getOriginalFilename())
+				DietFiles dietFile = DietFiles.create(savedFileName, cleanPath(uploadFile.getOriginalFilename())
 						, extension, uploadFile.getSize(), diet, fileUrl, type);
 				dietFileRepository.save(dietFile);
 			} catch (IOException e) {

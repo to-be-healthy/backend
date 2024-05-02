@@ -10,7 +10,7 @@ import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.DietFileDto;
-import com.tobe.healthy.diet.domain.entity.DietFile;
+import com.tobe.healthy.diet.domain.entity.DietFiles;
 import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
@@ -116,7 +116,7 @@ public class TrainerService {
 
         LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
         LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
-        List<DietFile> dietFiles = repository.findAllCreateAtToday(memberId, start, end);
+        List<DietFiles> dietFiles = repository.findAllCreateAtToday(memberId, start, end);
         List<DietFileDto> fileDtos = dietFiles.stream().map(DietFileDto::from).collect(Collectors.toList());
 
         MemberDetailResult result = memberRepository.getMemberOfTrainer(memberId);

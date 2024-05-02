@@ -59,8 +59,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
-import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
+import static com.tobe.healthy.member.domain.entity.SocialType.*;
 import static java.io.File.separator;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Objects.requireNonNull;
@@ -381,6 +380,24 @@ public class MemberService {
 			String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
 			MemberProfile file = MemberProfile.create(fileUrl, member);
 			memberProfileRepository.save(file);
+			member.registerProfile(file);
+		} catch (IOException e) {
+			log.error("error => {}", e);
+			throw new CustomException(FILE_UPLOAD_ERROR);
+		}
+	}
+
+	private void getGoogleProfile(String profileImage, Member member) {
+		byte[] image = getProfileImage(profileImage);
+		String extension = ".jpg";
+		String savedFileName = "profile/" + System.currentTimeMillis() + extension;
+		ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
+		try (InputStream inputStream = new ByteArrayInputStream(image)) {
+			amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
+			String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+			MemberProfile file = MemberProfile.create(fileUrl, member);
+			memberProfileRepository.save(file);
+			member.registerProfile(file);
 		} catch (IOException e) {
 			log.error("error => {}", e);
 			throw new CustomException(FILE_UPLOAD_ERROR);
@@ -425,8 +442,8 @@ public class MemberService {
 	}
 
 	@Transactional
-	public Tokens getGoogleOAuth(SocialLoginCommand command) {
-		OAuthInfo googleToken = getGoogleAccessToken(command.getCode(), command.getRedirectUrl());
+	public Tokens getGoogleOAuth(SocialLoginCommand request) {
+		OAuthInfo googleToken = getGoogleAccessToken(request.getCode(), request.getRedirectUrl());
 		String[] check = googleToken.getIdToken().split("\\.");
 		Base64.Decoder decoder = Base64.getDecoder();
 		String payload = new String(decoder.decode(check[1]));
@@ -438,39 +455,25 @@ public class MemberService {
 		}
 		String email = idToken.get("email");
 		String name = idToken.get("name");
-		String imageName = idToken.get("picture");
-		byte[] image = getProfileImage(imageName);
-		String savedFileName = createFileUUID();
-		String extension = ".jpg";
+		String picture = idToken.get("picture");
 
-		Optional<Member> optionalMember = memberRepository.findGoogleByEmailAndSocialType(email);
-		Member member;
-		if (optionalMember.isEmpty()) { //회원가입
-//			MemberProfile memberProfile = MemberProfile.create(savedFileName,
-//					uploadDir + separator, image.length);
-//			member = Member.join(email, name, memberProfile, command.getMemberType(), GOOGLE);
-//			memberRepository.save(member);
-			try {
-				Path copyOfLocation = Paths.get(uploadDir + separator + savedFileName + extension);
-				Files.createDirectories(copyOfLocation.getParent());
-				Files.copy(new ByteArrayInputStream(image), copyOfLocation, REPLACE_EXISTING);
-			} catch (IOException e) {
-				e.printStackTrace();
-				throw new CustomException(SERVER_ERROR);
+		Optional<Member> findMember = memberRepository.findByEmailAndSocialType(email, GOOGLE);
+		if (findMember.isPresent()) {
+			if (findMember.get().getMemberType().equals(request.getMemberType())) {
+				return tokenGenerator.create(findMember.get());
 			}
-		} else {
-			member = optionalMember.get();
+			throw new CustomException(MEMBER_NOT_FOUND);
 		}
+
+		Member member = Member.join(email, name, request.getMemberType(), GOOGLE);
+		memberRepository.save(member);
+		getGoogleProfile(picture, member);
 
 		//초대가입인 경우
-		if(StringUtils.isNotEmpty(command.getUuid())) {
-//			mappingTrainerAndStudent(member, command.getUuid(), name, true);
+		if(StringUtils.isNotEmpty(request.getUuid())) {
+			mappingTrainerAndStudent(member, request.getUuid(), name, true);
 		}
-
-//		return memberRepository.findByUserId(member.getUserId(), command.getMemberType())
-//				.map(tokenGenerator::create)
-//				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		return null;
+		return tokenGenerator.create(member);
 	}
 
 	private OAuthInfo getGoogleAccessToken(String code, String redirectUri) {

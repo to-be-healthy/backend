@@ -51,7 +51,7 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     @Builder.Default
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
-    private List<WorkoutHistoryFile> historyFiles = new ArrayList<>();
+    private List<WorkoutHistoryFiles> historyFiles = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
@@ -94,7 +94,7 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     }
 
     public void deleteFiles() {
-        this.historyFiles.forEach(WorkoutHistoryFile::deleteWorkoutHistoryFile);
+        this.historyFiles.forEach(WorkoutHistoryFiles::deleteWorkoutHistoryFile);
     }
 
 }
