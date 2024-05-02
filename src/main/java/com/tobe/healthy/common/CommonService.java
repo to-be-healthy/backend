@@ -27,5 +27,4 @@ public class CommonService {
         member.orElseThrow(()-> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         return member.get();
     }
-
 }

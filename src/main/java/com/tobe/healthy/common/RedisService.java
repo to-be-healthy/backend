@@ -1,11 +1,11 @@
 package com.tobe.healthy.common;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Service
 @Transactional
@@ -14,7 +14,7 @@ public class RedisService {
 
 	private final RedisTemplate<String, String> redisTemplate;
 
-	public void setValues(String key, String value){
+	public void setValues(String key, String value) {
 		redisTemplate.opsForValue().set(key, value);
 	}
 
