@@ -58,15 +58,15 @@ class LessonHistoryController(
         )
     }
 
-//    @PostMapping("/file")
-//    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-//    fun registerFilesOfLessonHistory(uploadFiles: MutableList<MultipartFile>,
-//                                     @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Boolean> {
-//        return ApiResult(
-//            message = "수업 일지를 등록하였습니다.",
-//            data = lessonHistoryService.registerFilesOfLessonHistory(uploadFiles, member.memberId)
-//        )
-//    }
+    @PostMapping("/file")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    fun registerFilesOfLessonHistory(uploadFiles: MutableList<MultipartFile>,
+                                     @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Boolean> {
+        return ApiResult(
+            message = "수업 일지를 등록하였습니다.",
+            data = lessonHistoryService.registerFilesOfLessonHistory(uploadFiles, member.memberId)
+        )
+    }
 
     @Operation(summary = "전체 수업 일지를 조회한다.",
         responses = [

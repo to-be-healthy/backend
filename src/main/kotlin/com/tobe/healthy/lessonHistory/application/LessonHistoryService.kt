@@ -178,6 +178,8 @@ class LessonHistoryService(
         lessonHistory: LessonHistory
     ) {
         uploadFiles?.let {
+            val uploadFileResponse: MutableList<UploadFileResponse> = mutableListOf()
+            var fileOrder = 1
             checkMaximumFileSize(it.size)
 
             for (uploadFile in it) {
@@ -191,10 +193,21 @@ class LessonHistoryService(
                     )
 
                     lessonHistoryFilesRepository.save(file)
+                    uploadFileResponse.add(
+                        UploadFileResponse(
+                            fileUrl = fileUrl,
+                            fileOrder = fileOrder++
+                        )
+                    )
                 }
             }
         }
     }
+
+    data class UploadFileResponse(
+        val fileUrl: String,
+        val fileOrder: Int
+    )
 
     private fun checkLessonHistoryRequirements(
         request: RegisterLessonHistoryCommand,
@@ -308,6 +321,21 @@ class LessonHistoryService(
             results.totalElements,
             results.isLast
         )
+    }
+
+    fun registerFilesOfLessonHistory(uploadFiles: MutableList<MultipartFile>, memberId: Long?): Boolean {
+        uploadFiles?.let {
+            checkMaximumFileSize(it.size)
+
+            for (uploadFile in it) {
+                if (!uploadFile.isEmpty) {
+                    val fileUrl = putFile(uploadFile)
+                    val file = LessonHistoryFiles(fileUrl = fileUrl)
+                    lessonHistoryFilesRepository.save(file)
+                }
+            }
+        }
+
     }
 
     companion object {
