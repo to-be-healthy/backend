@@ -335,7 +335,7 @@ class LessonHistoryService(
                 }
             }
         }
-
+        return true
     }
 
     companion object {
