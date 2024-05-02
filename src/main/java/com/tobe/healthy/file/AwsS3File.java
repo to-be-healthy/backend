@@ -1,4 +1,4 @@
-package com.tobe.healthy.file.domain.entity;
+package com.tobe.healthy.file;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory;
@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -44,6 +45,11 @@ public class AwsS3File extends BaseTimeEntity<AwsS3File, Long> {
 	private String fileUrl;
 
 	private int fileOrder;
+
+	@Enumerated(STRING)
+	private FileUploadType fileUploadType;
+
+	private Long fileUploadTypeId;
 
 	public static AwsS3File create(String originalFileName, Member member, String fileUrl, int fileOrder) {
 		return AwsS3File.builder()

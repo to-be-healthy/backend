@@ -1,22 +1,14 @@
 package com.tobe.healthy.diet.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
-import com.tobe.healthy.file.domain.entity.DietFile;
-import com.tobe.healthy.file.domain.entity.DietType;
-import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistoryComment;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.tobe.healthy.file.domain.entity.DietType.BREAKFAST;
 
 @Entity
 @Table(name = "diet")

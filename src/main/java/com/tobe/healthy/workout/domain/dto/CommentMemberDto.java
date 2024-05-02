@@ -1,7 +1,7 @@
 package com.tobe.healthy.workout.domain.dto;
 
-import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberProfile;
 import lombok.Builder;
 import lombok.Data;
 
@@ -20,11 +20,11 @@ public class CommentMemberDto {
                 .build();
     }
 
-    public static CommentMemberDto create(Member member, Profile profile) {
+    public static CommentMemberDto create(Member member, MemberProfile memberProfile) {
         return CommentMemberDto.builder()
                 .id(member.getId())
                 .name(member.getName())
-                .fileUrl(profile.getFileUrl())
+                .fileUrl(memberProfile.getFileUrl())
                 .build();
     }
 }

@@ -2,10 +2,8 @@ package com.tobe.healthy.diet.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tobe.healthy.diet.domain.entity.DietComment;
-import com.tobe.healthy.file.domain.entity.Profile;
-import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.workout.domain.dto.CommentMemberDto;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryCommentDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -48,10 +46,10 @@ public class DietCommentDto {
                 .build();
     }
 
-    public static DietCommentDto create(DietComment comment, Profile profile) {
+    public static DietCommentDto create(DietComment comment, MemberProfile memberProfile) {
         return DietCommentDto.builder()
                 .commentId(comment.getCommentId())
-                .member(CommentMemberDto.create(comment.getMember(), profile))
+                .member(CommentMemberDto.create(comment.getMember(), memberProfile))
                 .content(comment.getDelYn() ? "삭제된 댓글입니다." : comment.getContent())
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())

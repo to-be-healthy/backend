@@ -1,17 +1,16 @@
 package com.tobe.healthy.workout.application;
 
 import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.file.application.FileService;
-import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
-import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
+import com.tobe.healthy.file.FileService;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
+import com.tobe.healthy.workout.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
+import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.*;
 import com.tobe.healthy.workout.repository.CompletedExerciseRepository;
 import com.tobe.healthy.workout.repository.ExerciseRepository;
@@ -27,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;

@@ -1,6 +1,6 @@
 package com.tobe.healthy.diet.domain.dto.in;
 
-import com.tobe.healthy.file.domain.entity.DietType;
+import com.tobe.healthy.diet.domain.entity.DietType;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 

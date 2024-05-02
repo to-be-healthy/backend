@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -66,7 +65,7 @@ class LessonHistoryController(
     @GetMapping
     fun findAllLessonHistory(@Parameter(content = [Content(schema = Schema(implementation = SearchCondRequest::class))]) request: SearchCondRequest,
                              @ParameterObject pageable: Pageable,
-                             @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Page<LessonHistoryResponse>> {
+                             @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<CustomPagingResponse<LessonHistoryResponse>> {
         return ApiResult(
             message = "전체 수업 일지를 조회하였습니다.",
             data = lessonHistoryService.findAllLessonHistory(request, pageable, member.memberId, member.memberType)
@@ -87,8 +86,6 @@ class LessonHistoryController(
             data = lessonHistoryService.findAllLessonHistoryByMemberId(studentId, request, pageable)
         )
     }
-
-
 
     @Operation(summary = "수업일지 단건을 조회한다.",
         responses = [
@@ -142,7 +139,8 @@ class LessonHistoryController(
         ])
     @PostMapping("/{lessonHistoryId}/comment")
     fun registerLessonHistoryComment(@Parameter(description = "수업일지 ID", example = "1") @PathVariable lessonHistoryId: Long,
-                                     @Parameter(content = [Content(schema = Schema(implementation = CommentRegisterCommand::class))]) @RequestPart @Valid request: CommentRegisterCommand,
+                                     @Parameter(content = [Content(schema = Schema(implementation = CommentRegisterCommand::class))])
+                                     @RequestPart @Valid request: CommentRegisterCommand,
                                      @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
                                      @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Boolean> {
         return ApiResult(
@@ -151,7 +149,7 @@ class LessonHistoryController(
         )
     }
 
-    @Operation(summary = "수업일지에 대댓글을 등록한다.",
+    @Operation(summary = "수업일지에 답글을 등록한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "수업 일지에 대댓글이 등록되었습니다."),
             ApiResponse(responseCode = "404(1)", description = "회원을 찾을 수 없습니다."),
@@ -169,7 +167,7 @@ class LessonHistoryController(
         )
     }
 
-    @Operation(summary = "수업일지에 댓글을 수정한다.",
+    @Operation(summary = "수업일지에 댓글/답글을 수정한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "수업 일지에 댓글이 수정되었습니다."),
             ApiResponse(responseCode = "404", description = "수업 일지에 댓글을 찾을 수 없습니다.")
@@ -184,7 +182,7 @@ class LessonHistoryController(
         )
     }
 
-    @Operation(summary = "수업일지에 댓글을 삭제한다.",
+    @Operation(summary = "수업일지에 댓글/답글을 삭제한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "수업 일지에 댓글이 삭제되었습니다."),
             ApiResponse(responseCode = "404", description = "수업 일지에 댓글을 찾을 수 없습니다.")
