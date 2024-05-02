@@ -1,12 +1,12 @@
 package com.tobe.healthy.config;
 
+import com.p6spy.engine.logging.Category;
 import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Stack;
 
-import static com.p6spy.engine.logging.Category.STATEMENT;
 import static com.p6spy.engine.spy.P6SpyOptions.getActiveInstance;
 import static java.util.Locale.ROOT;
 import static org.hibernate.engine.jdbc.internal.FormatStyle.BASIC;
@@ -22,15 +22,19 @@ public class P6SpySqlFormatConfig implements MessageFormattingStrategy {
 	}
 
 	@Override
-	public String formatMessage(int connectionId, String now, long elapsed, String category,
-								String prepared, String sql, String url) {
+	public String formatMessage(int connectionId, String now, long elapsed, String category, String prepared,
+								String sql, String url) {
 		sql = formatSql(category, sql);
+
+		if (!hasText(sql)) {
+			return "";
+		}
 
 		return String.format("[%s] | %d ms | %s", category, elapsed, sql + createStack(connectionId, elapsed));
 	}
 
 	private String formatSql(String category, String sql) {
-		if (hasText(sql) && STATEMENT.getName().equals(category)) {
+		if (hasText(sql) && Category.STATEMENT.getName().equals(category)) {
 			String trimmedSQL = sql.trim().toLowerCase(ROOT);
 			if (trimmedSQL.startsWith("create") || trimmedSQL.startsWith("alter") || trimmedSQL.startsWith("comment")) {
 				sql = DDL.getFormatter().format(sql);
@@ -39,10 +43,10 @@ public class P6SpySqlFormatConfig implements MessageFormattingStrategy {
 			}
 			return sql;
 		}
-
-		return hasText(sql) ? sql : "";
+		return sql;
 	}
 
+	// stack 콘솔 표기
 	private String createStack(int connectionId, long elapsed) {
 		Stack<String> callStack = new Stack<>();
 		StackTraceElement[] stackTrace = new Throwable().getStackTrace();
@@ -54,9 +58,9 @@ public class P6SpySqlFormatConfig implements MessageFormattingStrategy {
 			}
 		}
 
-		return new StringBuffer()
-				.append("\n\n\tConnection ID:").append(connectionId)
-				.append(" | Execution Time:").append(elapsed).append(" ms\n")
+		return new StringBuilder()
+				.append("\n\n\tConnection ID: ").append(connectionId)
+				.append(" | Execution Time: ").append(elapsed).append(" ms\n")
 				.append("\n--------------------------------------\n").toString();
 	}
 }
