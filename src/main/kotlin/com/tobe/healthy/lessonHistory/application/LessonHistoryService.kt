@@ -300,8 +300,6 @@ class LessonHistoryService(
         )
     }
 
-
-
     companion object {
         const val FILE_MAXIMUM_UPLOAD_SIZE = 3
     }

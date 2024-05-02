@@ -88,8 +88,6 @@ class LessonHistoryController(
         )
     }
 
-
-
     @Operation(summary = "수업일지 단건을 조회한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "학생의 전체 수업 일지를 조회하였습니다."),
