@@ -130,7 +130,7 @@ public class FileService {
 					ObjectMetadata objectMetadata = new ObjectMetadata();
 					objectMetadata.setContentLength(file.getSize());
 					objectMetadata.setContentType(file.getContentType());
-					String savedFileName = "custom/" + System.currentTimeMillis() + extension;
+					String savedFileName = "custom/" + System.currentTimeMillis() + "_" + randomUUID() + extension;
 					amazonS3.putObject(
 						"to-be-healthy-bucket",
 						savedFileName,

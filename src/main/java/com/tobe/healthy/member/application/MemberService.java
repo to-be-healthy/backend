@@ -63,6 +63,7 @@ import static com.tobe.healthy.member.domain.entity.SocialType.*;
 import static java.io.File.separator;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Objects.requireNonNull;
+import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
@@ -239,7 +240,8 @@ public class MemberService {
 			ObjectMetadata objectMetadata = getObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
 			String extension = requireNonNull(originalFileName).substring(originalFileName.lastIndexOf("."));
 
-			String savedFileName = "profile/" + System.currentTimeMillis() + extension;
+			String savedFileName = "profile/" + System.currentTimeMillis() + "_" + randomUUID() + extension;
+			String savedFileName = "profile/" + createFileUUID() + extension;
 
 			try (InputStream inputStream = uploadFile.getInputStream()) {
 				amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
@@ -373,7 +375,7 @@ public class MemberService {
 	private void getProfile(String profileImage, Member member) {
 		byte[] image = getProfileImage(profileImage);
 		String extension = getImageExtension(profileImage);
-		String savedFileName = "profile/" + System.currentTimeMillis() + extension;
+		String savedFileName = "profile/" + createFileUUID() + extension;
 		ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
 		try (InputStream inputStream = new ByteArrayInputStream(image)) {
 			amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
@@ -390,7 +392,7 @@ public class MemberService {
 	private void getGoogleProfile(String profileImage, Member member) {
 		byte[] image = getProfileImage(profileImage);
 		String extension = ".jpg";
-		String savedFileName = "profile/" + System.currentTimeMillis() + extension;
+		String savedFileName = "profile/" + createFileUUID() + extension;
 		ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
 		try (InputStream inputStream = new ByteArrayInputStream(image)) {
 			amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
