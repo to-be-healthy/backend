@@ -1,14 +1,6 @@
 package com.tobe.healthy.schedule.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.DATETIME_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.LUNCH_TIME_INVALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.NOT_RESERVABLE_SCHEDULE;
-import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_ALREADY_EXISTS;
-import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_LESS_THAN_30_DAYS;
-import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE;
-import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_MAPPED;
+import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
@@ -35,6 +27,7 @@ import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -114,6 +107,9 @@ public class ScheduleService {
 		Schedule schedule = scheduleRepository.findAvailableScheduleById(scheduleId)
 			.orElseThrow(() -> new CustomException(NOT_RESERVABLE_SCHEDULE));
 
+		LocalTime before24Hour = schedule.getLessonStartTime().minusMinutes(30);
+		if(LocalTime.now().isAfter(before24Hour)) throw new CustomException(RESERVATION_NOT_VALID);
+
 		schedule.registerSchedule(member);
 		return ScheduleIdInfo.from(schedule);
 	}
@@ -153,6 +149,10 @@ public class ScheduleService {
 		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
 			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
+		LocalDateTime now = LocalDateTime.of(LocalDate.now(), LocalTime.now());
+		LocalDateTime before24Hour = LocalDateTime.of(schedule.getLessonDt().minusDays(1), schedule.getLessonStartTime());
+		if(now.isAfter(before24Hour)) throw new CustomException(RESERVATION_CANCEL_NOT_VALID);
+
 		// 대기 테이블에 인원이 있으면 수정하기
 		Optional<StandBySchedule> standByScheduleOpt = standByScheduleRepository.findByScheduleId(scheduleId);
 		if(standByScheduleOpt.isPresent()){
@@ -160,8 +160,9 @@ public class ScheduleService {
 			changeApplicantAndDeleteStandBy(standBySchedule, schedule);
 			return ScheduleIdInfo.create(memberId, schedule, standBySchedule.getMember().getId());
 		}else{
+			ScheduleIdInfo idInfo = ScheduleIdInfo.from(schedule);
 			schedule.cancelMemberSchedule();
-			return ScheduleIdInfo.from(schedule);
+			return idInfo;
 		}
 	}
 
