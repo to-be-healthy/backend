@@ -15,6 +15,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long>, Sched
 	@Query("select s from Schedule s where s.trainer.id = :userId and s.id = :scheduleId and s.delYn = false")
 	Optional<Schedule> findScheduleByTrainerId(Long userId, Long scheduleId);
 
+	@EntityGraph(attributePaths = {"applicant"})
 	@Query("select s from Schedule s where s.applicant.id = :userId and s.id = :scheduleId and s.delYn = false")
 	Optional<Schedule> findScheduleByApplicantId(Long userId, Long scheduleId);
 
