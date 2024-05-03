@@ -33,9 +33,10 @@ public class CommonScheduleController {
     @PostMapping("/{scheduleId}")
     public ResponseHandler<ScheduleIdInfo> reserveSchedule(@Parameter(description = "수업 일정 아이디") @PathVariable Long scheduleId,
                                                            @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+        ScheduleIdInfo result = commonScheduleService.reserveSchedule(scheduleId, customMemberDetails.getMemberId());
         return ResponseHandler.<ScheduleIdInfo>builder()
-                .data(commonScheduleService.reserveSchedule(scheduleId, customMemberDetails.getMemberId()))
-                .message("일정 신청되었습니다.")
+                .data(result)
+                .message(result.getScheduleTime() + " 수업이 예약되었습니다.")
                 .build();
     }
 
@@ -47,9 +48,10 @@ public class CommonScheduleController {
     @DeleteMapping("/{scheduleId}")
     public ResponseHandler<ScheduleIdInfo> cancelScheduleForMember(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
                                                                    @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+        ScheduleIdInfo result = commonScheduleService.cancelMemberSchedule(scheduleId, customMemberDetails.getMemberId());
         return ResponseHandler.<ScheduleIdInfo>builder()
-                .data(commonScheduleService.cancelMemberSchedule(scheduleId, customMemberDetails.getMemberId()))
-                .message("수업을 취소하였습니다.")
+                .data(result)
+                .message(result.getScheduleTime() + " 수업이 취소되었습니다.")
                 .build();
     }
 }

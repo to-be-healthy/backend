@@ -33,9 +33,10 @@ public class ScheduleWaitingController {
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
     public ResponseHandler<Boolean> registerStandBySchedule(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
                                                             @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+        String scheduleTime = scheduleWaitingService.registerStandBySchedule(scheduleId, customMemberDetails.getMemberId());
         return ResponseHandler.<Boolean>builder()
-                .data(scheduleWaitingService.registerStandBySchedule(scheduleId, customMemberDetails.getMemberId()))
-                .message("대기 신청 되었습니다.")
+                .data(true)
+                .message(scheduleTime + " 수업 대기가 예약되었습니다.")
                 .build();
     }
 
@@ -47,9 +48,10 @@ public class ScheduleWaitingController {
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
     public ResponseHandler<Boolean> cancelStandBySchedule(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
                                                           @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+        String scheduleTime = scheduleWaitingService.cancelStandBySchedule(scheduleId, customMemberDetails.getMemberId());
         return ResponseHandler.<Boolean>builder()
-                .data(scheduleWaitingService.cancelStandBySchedule(scheduleId, customMemberDetails.getMemberId()))
-                .message("대기 신청이 취소되었습니다.")
+                .data(true)
+                .message(scheduleTime + " 수업 대기가 취소되었습니다.")
                 .build();
     }
 
