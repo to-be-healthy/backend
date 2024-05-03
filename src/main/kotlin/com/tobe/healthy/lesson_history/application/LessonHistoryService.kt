@@ -55,7 +55,7 @@ class LessonHistoryService(
     private val bucketName: String,
 ) {
 
-    fun registerLessonHistory(request: RegisterLessonHistoryCommand, trainerId: Long, ): Boolean {
+    fun registerLessonHistory(request: RegisterLessonHistoryCommand, trainerId: Long): Boolean {
         val (findMember, findTrainer, findSchedule) = checkLessonHistoryRequirements(
             request,
             trainerId,
@@ -72,7 +72,7 @@ class LessonHistoryService(
         request: SearchCondRequest,
         pageable: Pageable,
         memberId: Long,
-        memberType: MemberType,
+        memberType: MemberType
     ): CustomPagingResponse<LessonHistoryResponse> {
         val results = lessonHistoryRepository.findAllLessonHistory(request, pageable, memberId, memberType)
         return CustomPagingResponse(
@@ -88,7 +88,7 @@ class LessonHistoryService(
     fun findOneLessonHistory(
         lessonHistoryId: Long,
         memberId: Long,
-        memberType: MemberType,
+        memberType: MemberType
     ): LessonHistoryDetailResponse? {
         return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, memberId, memberType)
     }
@@ -152,7 +152,7 @@ class LessonHistoryService(
             content = request.comment!!,
             writer = findMember,
             lessonHistory = lessonHistory,
-            parentId = parentComment,
+            parentId = parentComment
         )
 
         lessonHistoryCommentRepository.save(entity)
@@ -162,7 +162,7 @@ class LessonHistoryService(
 
     fun updateLessonHistoryComment(
         lessonHistoryCommentId: Long,
-        request: LessonHistoryCommentCommand,
+        request: LessonHistoryCommentCommand
     ): Boolean {
         val comment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
             ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
@@ -181,7 +181,7 @@ class LessonHistoryService(
     private fun registerFiles(
         uploadFiles: MutableList<UploadFileResponse>?,
         findMember: Member,
-        lessonHistory: LessonHistory,
+        lessonHistory: LessonHistory
     ) {
         uploadFiles?.let {
             checkMaximumFileSize(it.size)
@@ -201,7 +201,7 @@ class LessonHistoryService(
 
     private fun checkLessonHistoryRequirements(
         request: RegisterLessonHistoryCommand,
-        trainerId: Long,
+        trainerId: Long
     ): Triple<Member, Member, Schedule> {
         val findMember =
             memberRepository.findByIdOrNull(request.studentId) ?: throw CustomException(
@@ -220,7 +220,7 @@ class LessonHistoryService(
         request: RegisterLessonHistoryCommand,
         findMember: Member,
         findTrainer: Member,
-        findSchedule: Schedule,
+        findSchedule: Schedule
     ): LessonHistory {
         val lessonHistory = LessonHistory.register(request, findMember, findTrainer, findSchedule)
         lessonHistoryRepository.save(lessonHistory)
@@ -238,7 +238,7 @@ class LessonHistoryService(
         order: Int,
         request: CommentRegisterCommand,
         findMember: Member,
-        lessonHistory: LessonHistory,
+        lessonHistory: LessonHistory
     ): LessonHistoryComment {
         val entity = LessonHistoryComment(
             order = order,
@@ -254,7 +254,7 @@ class LessonHistoryService(
         uploadFiles: MutableList<UploadFileResponse>?,
         findMember: Member,
         lessonHistory: LessonHistory?,
-        lessonHistoryComment: LessonHistoryComment?,
+        lessonHistoryComment: LessonHistoryComment?
     ) {
 
         uploadFiles?.let {
@@ -295,7 +295,7 @@ class LessonHistoryService(
     fun findAllLessonHistoryByMemberId(
         studentId: Long?,
         request: SearchCondRequest,
-        pageable: Pageable,
+        pageable: Pageable
     ): CustomPagingResponse<LessonHistoryResponse> {
         val findMember = memberRepository.findByIdOrNull(studentId) ?: throw CustomException(MEMBER_NOT_FOUND)
         val results = lessonHistoryRepository.findAllLessonHistoryByMemberId(findMember.id, request, pageable)
@@ -312,7 +312,7 @@ class LessonHistoryService(
 
     fun registerFilesOfLessonHistory(
         uploadFiles: MutableList<MultipartFile>,
-        memberId: Long?,
+        memberId: Long?
     ): List<UploadFileResponse> {
         val uploadFileResponse: MutableList<UploadFileResponse> = mutableListOf()
         var fileOrder = 1

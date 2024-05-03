@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController
 @Slf4j
 @Tag(name = "03-01.수업 API", description = "수업 일정 API")
 class TrainerScheduleController(
-    private val trainerScheduleService: TrainerScheduleService,
+    private val trainerScheduleService: TrainerScheduleService
 ) {
     @Operation(
         summary = "트레이너가 일정을 등록한다.", description = "트레이너가 일정을 등록한다.", responses = [ApiResponse(responseCode = "200", description = "일정 등록 성공")]
@@ -41,7 +41,7 @@ class TrainerScheduleController(
     fun registerSchedule(@RequestBody request: RegisterScheduleRequest, @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "일정 등록에 성공하였습니다.",
-            data = trainerScheduleService.registerSchedule(request, member.memberId),
+            data = trainerScheduleService.registerSchedule(request, member.memberId)
         )
     }
 
@@ -53,19 +53,19 @@ class TrainerScheduleController(
     fun registerIndividualSchedule(@RequestBody request: RegisterScheduleCommand, @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "개별 일정 등록에 성공하였습니다.",
-            data = trainerScheduleService.registerIndividualSchedule(request, member.memberId),
+            data = trainerScheduleService.registerIndividualSchedule(request, member.memberId)
         )
     }
 
     @Operation(
-        summary = "트레이너가 전체 일정을 조회한다.", description = "트레이너가 전체 일정을 조회한다. 특정 일자나 기간으로 조회하고 싶으면 DTO를 활용한다.", responses = [ApiResponse(responseCode = "200", description = "트레이너가 전체 일정 조회 완료")],
+        summary = "트레이너가 전체 일정을 조회한다.", description = "트레이너가 전체 일정을 조회한다. 특정 일자나 기간으로 조회하고 싶으면 DTO를 활용한다.", responses = [ApiResponse(responseCode = "200", description = "트레이너가 전체 일정 조회 완료")]
     )
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun findAllSchedule(@ParameterObject searchCond: ScheduleSearchCond, @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<List<ScheduleCommandResult?>> {
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
-            data = trainerScheduleService.findAllSchedule(searchCond, customMemberDetails.member),
+            data = trainerScheduleService.findAllSchedule(searchCond, customMemberDetails.member)
         )
     }
 
@@ -77,27 +77,27 @@ class TrainerScheduleController(
     )
     @DeleteMapping("/trainer/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun cancelScheduleForTrainer(@Parameter(description = "일정 아이디", example = "1") @PathVariable scheduleId: Long, @AuthenticationPrincipal customMemberDetails: CustomMemberDetails,
+    fun cancelScheduleForTrainer(@Parameter(description = "일정 아이디", example = "1") @PathVariable scheduleId: Long, @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "일정을 취소하였습니다.",
-            data = trainerScheduleService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId),
+            data = trainerScheduleService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId)
         )
     }
 
     @Operation(summary = "트레이너가 학생 노쇼 처리를 한다.", description = "트레이너가 학생 노쇼 처리를 한다.", responses = [
             ApiResponse(responseCode = "200", description = "노쇼 처리가 되었습니다."),
-            ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다."),
+            ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
         ]
     )
     @DeleteMapping("/no-show/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun updateReservationStatusToNoShow(
-        @Parameter(description = "일정 아이디", example = "1") @PathVariable scheduleId: Long, @AuthenticationPrincipal customMemberDetails: CustomMemberDetails,
+        @Parameter(description = "일정 아이디", example = "1") @PathVariable scheduleId: Long, @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<ScheduleIdInfo> {
         return ApiResultResponse(
             message = "노쇼 처리되었습니다.",
-            data = trainerScheduleService.updateReservationStatusToNoShow(scheduleId, customMemberDetails.memberId),
+            data = trainerScheduleService.updateReservationStatusToNoShow(scheduleId, customMemberDetails.memberId)
         )
     }
 }
