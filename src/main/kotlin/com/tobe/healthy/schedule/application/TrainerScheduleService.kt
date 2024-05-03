@@ -63,11 +63,11 @@ class TrainerScheduleService(
                     continue
                 }
 
-                val isDuplicateSchedule = trainerScheduleRepository.validateRegisterSchedule(lessonDt, startTime, endTime, trainerId)
-
-                if (isDuplicateSchedule) {
-                    throw CustomException(SCHEDULE_ALREADY_EXISTS)
-                }
+//                val isDuplicateSchedule = trainerScheduleRepository.validateRegisterSchedule(lessonDt, startTime, endTime, trainerId)
+//
+//                if (isDuplicateSchedule) {
+//                    throw CustomException(SCHEDULE_ALREADY_EXISTS)
+//                }
 
                 val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, AVAILABLE)
                 trainerScheduleRepository.save(schedule)

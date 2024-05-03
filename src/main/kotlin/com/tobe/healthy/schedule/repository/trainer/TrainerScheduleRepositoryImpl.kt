@@ -75,22 +75,22 @@ class TrainerScheduleRepositoryImpl(
         return Optional.ofNullable(entity)
     }
 
-    override fun validateRegisterSchedule(
-        lessonDt: LocalDate?,
-        startTime: LocalTime?,
-        endTime: LocalTime?,
-        trainerId: Long?,
-    ): Boolean? {
-        return queryFactory.select(schedule.count().gt(0).`as`("isScheduleRegisterd"))
-            .from(schedule)
-            .where(
-                schedule.lessonDt.eq(lessonDt),
-                schedule.trainer.id.eq(trainerId),
-                (schedule.lessonStartTime.between(startTime, endTime)
-                    .or(schedule.lessonEndTime.between(startTime, endTime))),
-            )
-            .fetchOne()
-    }
+//    override fun validateRegisterSchedule(
+//        lessonDt: LocalDate?,
+//        startTime: LocalTime?,
+//        endTime: LocalTime?,
+//        trainerId: Long?,
+//    ): Boolean? {
+//        return queryFactory.select(schedule.count().gt(0).`as`("isScheduleRegisterd"))
+//            .from(schedule)
+//            .where(
+//                schedule.lessonDt.eq(lessonDt),
+//                schedule.trainer.id.eq(trainerId),
+//                (schedule.lessonStartTime.between(startTime, endTime)
+//                    .or(schedule.lessonEndTime.between(startTime, endTime))),
+//            )
+//            .fetchOne()
+//    }
 
     private fun lessonDtBetween(searchCond: ScheduleSearchCond): BooleanExpression? {
         if (!ObjectUtils.isEmpty(searchCond.lessonStartDt) && !ObjectUtils.isEmpty(searchCond.lessonEndDt)) {
