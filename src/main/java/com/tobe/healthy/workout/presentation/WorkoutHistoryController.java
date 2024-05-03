@@ -1,7 +1,11 @@
 package com.tobe.healthy.workout.presentation;
 
+import com.google.firebase.internal.FirebaseService;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
+import com.tobe.healthy.file.FileService;
+import com.tobe.healthy.file.FileUploadType;
+import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
@@ -27,6 +31,20 @@ import java.util.List;
 public class WorkoutHistoryController {
 
     private final WorkoutHistoryService workoutService;
+    private final FileService fileService;
+
+    @Operation(summary = "운동기록 첨부파일 등록", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "운동기록ID, 회원ID, 운동기록 내용을 반환한다.")
+    })
+    @PostMapping("/file")
+    public ResponseHandler<WorkoutHistoryDto> addWorkoutHistoryFile(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                    @Valid List<MultipartFile> files) {
+        return ResponseHandler.<WorkoutHistoryDto>builder()
+                .data(fileService.uploadFiles(FileUploadType.WORKOUT_HISTORY, files, customMemberDetails.getMember()))
+                .message("운동기록이 등록되었습니다.")
+                .build();
+    }
 
     @Operation(summary = "운동기록 등록", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),

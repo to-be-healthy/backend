@@ -5,8 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class RegisterFileResponse {
+public class RegisterFile {
     private String fileUrl;
-    private String fileName;
     private int fileOrder;
 }
