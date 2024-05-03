@@ -28,7 +28,7 @@ public class ScheduleCommandResult {
 	private ReservationStatus reservationStatus;
 	private String trainerName;
 	private String applicantName;
-	private String standByName;
+	private String waitingByName;
 
 	public static ScheduleCommandResult from(Schedule entity, Member member) {
 		ScheduleCommandResultBuilder builder = ScheduleCommandResult.builder()
@@ -54,8 +54,8 @@ public class ScheduleCommandResult {
 			builder.applicantName(entity.getApplicant().getName());
 		}
 
-		if (!ObjectUtils.isEmpty(entity.getStandBySchedule())) {
-			builder.standByName(entity.getStandBySchedule().get(0).getMember().getName());
+		if (!ObjectUtils.isEmpty(entity.getScheduleWaiting())) {
+			builder.waitingByName(entity.getScheduleWaiting().get(0).getMember().getName());
 		}
 
 		return builder.build();
@@ -81,8 +81,8 @@ public class ScheduleCommandResult {
 			builder.applicantName(entity.getApplicant().getName());
 		}
 
-		if (!ObjectUtils.isEmpty(entity.getStandBySchedule())) {
-			builder.standByName(entity.getStandBySchedule().get(0).getMember().getName());
+		if (!ObjectUtils.isEmpty(entity.getScheduleWaiting())) {
+			builder.waitingByName(entity.getScheduleWaiting().get(0).getMember().getName());
 		}
 
 		return builder.build();

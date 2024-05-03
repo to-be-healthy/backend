@@ -7,10 +7,8 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.QMember;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
-import com.tobe.healthy.schedule.domain.dto.out.MyStandbySchedule;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -21,7 +19,7 @@ import java.util.List;
 
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
 import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
-import static com.tobe.healthy.schedule.domain.entity.QStandBySchedule.standBySchedule;
+import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting;
 import static java.util.stream.Collectors.toList;
 
 @Repository
@@ -38,7 +36,7 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.from(schedule)
 				.leftJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
 				.leftJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
-				.leftJoin(schedule.standBySchedule, standBySchedule).on(standBySchedule.delYn.isFalse())
+				.leftJoin(schedule.scheduleWaiting, scheduleWaiting).on(scheduleWaiting.delYn.isFalse())
 				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), schedule.trainer.id.eq(trainerId))
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
@@ -48,8 +46,8 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.collect(toList());
 	}
 
-	private BooleanExpression standByScheduleDelYnFalse() {
-		return standBySchedule.delYn.isFalse();
+	private BooleanExpression scheduleWaitingDelYnFalse() {
+		return scheduleWaiting.delYn.isFalse();
 	}
 
 	private BooleanExpression delYnFalse() {
@@ -63,8 +61,8 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 			.select(schedule)
 			.from(schedule)
 			.leftJoin(schedule.trainer, trainer).fetchJoin()
-			.leftJoin(schedule.standBySchedule, standBySchedule).fetchJoin()
-			.where(schedule.applicant.id.eq(memberId), scheduleDelYnFalse(), standByScheduleDelYnFalse())
+			.leftJoin(schedule.scheduleWaiting, scheduleWaiting).fetchJoin()
+			.where(schedule.applicant.id.eq(memberId), scheduleDelYnFalse(), scheduleWaitingDelYnFalse())
 			.orderBy(schedule.lessonDt.desc(), schedule.lessonStartTime.asc())
 			.fetch();
 		return fetch.stream()

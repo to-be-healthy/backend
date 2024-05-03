@@ -6,12 +6,11 @@ import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.schedule.domain.dto.out.MyStandbySchedule;
-import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
+import com.tobe.healthy.schedule.domain.dto.out.MyScheduleWaiting;
+import com.tobe.healthy.schedule.domain.dto.out.MyScheduleWaitingResponse;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
-import com.tobe.healthy.schedule.repository.student.StandByScheduleRepository;
+import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
+import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository;
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,38 +33,38 @@ public class ScheduleWaitingService {
 
 	private final MemberRepository memberRepository;
 	private final TrainerScheduleRepository trainerScheduleRepository;
-	private final StandByScheduleRepository standByScheduleRepository;
+	private final ScheduleWaitingRepository scheduleWaitingRepository;
 	private final CourseRepository courseRepository;
 
-	public String registerStandBySchedule(Long scheduleId, Long memberId) {
+	public String registerScheduleWaiting(Long scheduleId, Long memberId) {
 
 		Member member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		Schedule schedule = trainerScheduleRepository.findAvailableStandById(scheduleId)
-				.orElseThrow(() -> new CustomException(NOT_STAND_BY_SCHEDULE));
+		Schedule schedule = trainerScheduleRepository.findAvailableWaitingId(scheduleId)
+				.orElseThrow(() -> new CustomException(NOT_SCHEDULE_WAITING));
 
-		if (!ObjectUtils.isEmpty(schedule.getStandBySchedule())) {
-			throw new CustomException(NOT_STAND_BY_SCHEDULE);
+		if (!ObjectUtils.isEmpty(schedule.getScheduleWaiting())) {
+			throw new CustomException(NOT_SCHEDULE_WAITING);
 		}
 
-		StandBySchedule standBySchedule = StandBySchedule.register(member, schedule);
-		standByScheduleRepository.save(standBySchedule);
+		ScheduleWaiting scheduleWaiting = ScheduleWaiting.register(member, schedule);
+		scheduleWaitingRepository.save(scheduleWaiting);
 		return getScheduleTimeText(schedule.getLessonStartTime());
 	}
 
-	public String cancelStandBySchedule(Long scheduleId, Long memberId) {
-		StandBySchedule standBySchedule = standByScheduleRepository.findByScheduleIdAndMemberId(scheduleId, memberId)
-				.orElseThrow(() -> new CustomException(STAND_BY_SCHEDULE_NOT_FOUND));
-		standByScheduleRepository.delete(standBySchedule);
-		return getScheduleTimeText(standBySchedule.getSchedule().getLessonStartTime());
+	public String cancelScheduleWaiting(Long scheduleId, Long memberId) {
+		ScheduleWaiting scheduleWaiting = scheduleWaitingRepository.findByScheduleIdAndMemberId(scheduleId, memberId)
+				.orElseThrow(() -> new CustomException(SCHEDULE_WAITING_NOT_FOUND));
+		scheduleWaitingRepository.delete(scheduleWaiting);
+		return getScheduleTimeText(scheduleWaiting.getSchedule().getLessonStartTime());
 	}
 
-	public MyStandbyScheduleResponse findAllMyStandbySchedule(Long memberId) {
+	public MyScheduleWaitingResponse findAllMyScheduleWaiting(Long memberId) {
 		Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
 		CourseDto course = optCourse.map(CourseDto::from).orElse(null);
-		List<MyStandbySchedule> result = standByScheduleRepository.findAllMyStandbySchedule(memberId);
-		return MyStandbyScheduleResponse.create(course, result);
+		List<MyScheduleWaiting> result = scheduleWaitingRepository.findAllMyScheduleWaiting(memberId);
+		return MyScheduleWaitingResponse.create(course, result);
 	}
 
 	private String getScheduleTimeText(LocalTime lessonStartTime){

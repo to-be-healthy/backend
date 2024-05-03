@@ -52,12 +52,12 @@ public class StudentScheduleService {
 
 		List<ScheduleCommandResult> morning = schedule.stream()
 				.filter(s -> NOON.isAfter(s.getLessonStartTime()))
-				.peek(s -> { if(s.getStandByName()!=null) s.setReservationStatus(SOLD_OUT); })
+				.peek(s -> { if(s.getWaitingByName()!=null) s.setReservationStatus(SOLD_OUT); })
 				.collect(Collectors.toList());
 
 		List<ScheduleCommandResult> afternoon = schedule.stream()
 				.filter(s -> NOON.isBefore(s.getLessonStartTime()))
-				.peek(s -> { if(s.getStandByName()!=null) s.setReservationStatus(SOLD_OUT); })
+				.peek(s -> { if(s.getWaitingByName()!=null) s.setReservationStatus(SOLD_OUT); })
 				.collect(Collectors.toList());
 
 		return ScheduleCommandResponse.create(morning, afternoon);

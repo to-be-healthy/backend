@@ -47,7 +47,7 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	private Member applicant;
 
 	@OneToMany(fetch = LAZY, mappedBy = "schedule")
-	private List<StandBySchedule> standBySchedule = new ArrayList<>();
+	private List<ScheduleWaiting> scheduleWaiting = new ArrayList<>();
 
 	@ColumnDefault("false")
 	private boolean delYn = false;
@@ -89,7 +89,7 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@Builder
 	public Schedule(Long id, LocalDate lessonDt, LocalTime lessonStartTime, LocalTime lessonEndTime,
 					ReservationStatus reservationStatus, Member trainer, Member applicant,
-					List<StandBySchedule> standBySchedule, boolean delYn) {
+					List<ScheduleWaiting> scheduleWaiting, boolean delYn) {
 		this.id = id;
 		this.lessonDt = lessonDt;
 		this.lessonStartTime = lessonStartTime;
@@ -97,7 +97,7 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 		this.reservationStatus = reservationStatus;
 		this.trainer = trainer;
 		this.applicant = applicant;
-		this.standBySchedule = standBySchedule;
+		this.scheduleWaiting = scheduleWaiting;
 		this.delYn = delYn;
 	}
 }

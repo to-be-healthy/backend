@@ -10,7 +10,7 @@ public class ScheduleIdInfo {
 	private Long studentId;
 	private Long trainerId;
 	private Long scheduleId;
-	private Long standbyStudentId;
+	private Long waitingStudentId;
 	private String scheduleTime;
 
 	public static ScheduleIdInfo from(Schedule schedule) {
@@ -30,12 +30,12 @@ public class ScheduleIdInfo {
 				.build();
 	}
 
-	public static ScheduleIdInfo create(Long memberId, Schedule schedule, Long standbyStudentId, String scheduleTime) {
+	public static ScheduleIdInfo create(Long memberId, Schedule schedule, Long waitingStudentId, String scheduleTime) {
 		return ScheduleIdInfo.builder()
 				.studentId(memberId)
 				.trainerId(schedule.getTrainer().getId())
 				.scheduleId(schedule.getId())
-				.standbyStudentId(standbyStudentId)
+				.waitingStudentId(waitingStudentId)
 				.scheduleTime(scheduleTime)
 				.build();
 	}

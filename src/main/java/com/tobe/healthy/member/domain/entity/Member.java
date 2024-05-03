@@ -4,7 +4,7 @@ import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
+import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -83,7 +83,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private final List<Schedule> applicantSchedules = new ArrayList<>();
 
 	@OneToMany(mappedBy = "member")
-	private final List<StandBySchedule> standBySchedules = new ArrayList<>();
+	private final List<ScheduleWaiting> scheduleWaitings = new ArrayList<>();
 
 	@Enumerated(STRING)
 	@ColumnDefault("'NONE'")
