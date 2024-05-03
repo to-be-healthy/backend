@@ -3,6 +3,7 @@ package com.tobe.healthy.schedule.repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.QMember;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
@@ -33,8 +34,8 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Long trainerId) {
-		List<Schedule> fetch = queryFactory
+	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Long trainerId, Member member) {
+		List<Schedule> results = queryFactory
 				.select(schedule)
 				.from(schedule)
 				.leftJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
@@ -44,9 +45,9 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
 
-		return fetch.stream()
-			.map(ScheduleCommandResult::from)
-			.collect(toList());
+		return results.stream()
+				.map(result -> ScheduleCommandResult.from(result, member))
+				.collect(toList());
 	}
 
 	private BooleanExpression standByScheduleDelYnFalse() {

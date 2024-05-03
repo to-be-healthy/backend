@@ -94,11 +94,15 @@ class LessonHistoryService(
     }
 
     fun updateLessonHistory(lessonHistoryId: Long, request: LessonHistoryCommand): Boolean {
-        val findEntity =
-            lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(
-                LESSON_HISTORY_NOT_FOUND,
-            )
-        findEntity.updateLessonHistory(request.title!!, request.content!!)
+        val findLessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
+            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND,)
+        findLessonHistory.updateLessonHistory(request.title!!, request.content!!)
+        registerFile(
+            uploadFiles = request.uploadFileResponse,
+            findMember = findLessonHistory.trainer,
+            lessonHistory = findLessonHistory,
+            lessonHistoryComment = null,
+        )
         return true
     }
 
@@ -123,8 +127,8 @@ class LessonHistoryService(
                 LESSON_HISTORY_NOT_FOUND,
             )
         val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id)
-        val entity = registerComment(order, request, findMember, lessonHistory)
-        registerFile(request.uploadFileResponse, findMember, lessonHistory, entity)
+        val lessonHistoryComment = registerComment(order, request, findMember, lessonHistory)
+        registerFile(request.uploadFileResponse, findMember, lessonHistory, lessonHistoryComment)
         return true
     }
 
@@ -249,8 +253,8 @@ class LessonHistoryService(
     private fun registerFile(
         uploadFiles: MutableList<UploadFileResponse>?,
         findMember: Member,
-        lessonHistory: LessonHistory,
-        entity: LessonHistoryComment,
+        lessonHistory: LessonHistory?,
+        lessonHistoryComment: LessonHistoryComment?,
     ) {
 
         uploadFiles?.let {
@@ -259,7 +263,7 @@ class LessonHistoryService(
                 val file = LessonHistoryFiles(
                     member = findMember,
                     lessonHistory = lessonHistory,
-                    lessonHistoryComment = entity,
+                    lessonHistoryComment = lessonHistoryComment,
                     fileUrl = uploadFile.fileUrl,
                     fileOrder = uploadFile.fileOrder,
                 )

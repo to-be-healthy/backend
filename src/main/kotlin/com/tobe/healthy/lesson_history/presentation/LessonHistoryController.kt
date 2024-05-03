@@ -132,7 +132,8 @@ class LessonHistoryController(
     @PatchMapping("/{lessonHistoryId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun updateLessonHistory(@Parameter(description = "수업일지 ID", example = "1") @PathVariable lessonHistoryId: Long,
-                            @RequestBody @Valid lessonHistoryCommand: LessonHistoryCommand
+                            @RequestBody @Valid lessonHistoryCommand: LessonHistoryCommand,
+                            @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "수업 일지가 수정되었습니다.",

@@ -1,11 +1,5 @@
 package com.tobe.healthy.schedule.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
-import static java.time.LocalTime.NOON;
-
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.entity.Course;
@@ -21,6 +15,11 @@ import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,10 +28,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
+import static java.time.LocalTime.NOON;
 
 @Service
 @RequiredArgsConstructor
@@ -129,23 +129,28 @@ public class ScheduleService {
 	}
 
 	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Member trainer) {
-		return scheduleRepository.findAllSchedule(searchCond, trainer.getId());
+		return scheduleRepository.findAllSchedule(searchCond, trainer.getId(), trainer);
 	}
 
 	public ScheduleCommandResponse findAllScheduleOfTrainer(ScheduleSearchCond searchCond, Member member) {
+
 		TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId())
 				.orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
+
 		Long trainerId = mapping.getTrainer().getId();
-		List<ScheduleCommandResult> schedule = scheduleRepository.findAllSchedule(searchCond, trainerId);
+
+		List<ScheduleCommandResult> schedule = scheduleRepository.findAllSchedule(searchCond, trainerId, member);
 
 		List<ScheduleCommandResult> morning = schedule.stream()
 				.filter(s -> NOON.isAfter(s.getLessonStartTime()))
 				.peek(s -> { if(s.getStandByName()!=null) s.setReservationStatus(SOLD_OUT); })
 				.collect(Collectors.toList());
+
 		List<ScheduleCommandResult> afternoon = schedule.stream()
 				.filter(s -> NOON.isBefore(s.getLessonStartTime()))
 				.peek(s -> { if(s.getStandByName()!=null) s.setReservationStatus(SOLD_OUT); })
 				.collect(Collectors.toList());
+
 		return ScheduleCommandResponse.create(morning, afternoon);
 	}
 

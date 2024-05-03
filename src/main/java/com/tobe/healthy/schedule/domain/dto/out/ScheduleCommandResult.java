@@ -1,5 +1,6 @@
 package com.tobe.healthy.schedule.domain.dto.out;
 
+import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,9 @@ import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
 
 @Data
 @NoArgsConstructor
@@ -26,16 +30,51 @@ public class ScheduleCommandResult {
 	private String applicantName;
 	private String standByName;
 
-	public static ScheduleCommandResult from(Schedule entity) {
+	public static ScheduleCommandResult from(Schedule entity, Member member) {
 		ScheduleCommandResultBuilder builder = ScheduleCommandResult.builder()
 			.scheduleId(entity.getId())
 			.lessonDt(entity.getLessonDt())
 			.lessonStartTime(entity.getLessonStartTime())
-			.lessonEndTime(entity.getLessonEndTime())
-			.reservationStatus(entity.getReservationStatus());
+			.lessonEndTime(entity.getLessonEndTime());
+
+		if (!ObjectUtils.isEmpty(entity.getReservationStatus())) {
+			builder.reservationStatus(entity.getReservationStatus());
+		}
 
 		if (!ObjectUtils.isEmpty(entity.getTrainer())) {
-			builder.trainerName(entity.getTrainer().getName() + "트레이너");
+			builder.trainerName(entity.getTrainer().getName() + " 트레이너");
+		}
+
+		if (!ObjectUtils.isEmpty(entity.getApplicant())) {
+			if (entity.getApplicant().getId().equals(member.getId()) && entity.getReservationStatus().equals(COMPLETED)) {
+				builder.reservationStatus(SOLD_OUT);
+			} else {
+				builder.reservationStatus(entity.getReservationStatus());
+			}
+			builder.applicantName(entity.getApplicant().getName());
+		}
+
+		if (!ObjectUtils.isEmpty(entity.getStandBySchedule())) {
+			builder.standByName(entity.getStandBySchedule().get(0).getMember().getName());
+		}
+
+		return builder.build();
+	}
+
+	public static ScheduleCommandResult from(Schedule entity) {
+		ScheduleCommandResultBuilder builder = ScheduleCommandResult.builder()
+				.scheduleId(entity.getId())
+				.lessonDt(entity.getLessonDt())
+				.lessonStartTime(entity.getLessonStartTime())
+				.lessonEndTime(entity.getLessonEndTime())
+				.reservationStatus(entity.getReservationStatus());
+
+		if (!ObjectUtils.isEmpty(entity.getReservationStatus())) {
+			builder.reservationStatus(entity.getReservationStatus());
+		}
+
+		if (!ObjectUtils.isEmpty(entity.getTrainer())) {
+			builder.trainerName(entity.getTrainer().getName() + " 트레이너");
 		}
 
 		if (!ObjectUtils.isEmpty(entity.getApplicant())) {
