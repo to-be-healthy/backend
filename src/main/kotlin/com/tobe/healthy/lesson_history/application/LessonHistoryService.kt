@@ -31,6 +31,7 @@ import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.repository.ScheduleRepository
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -47,6 +48,8 @@ class LessonHistoryService(
     private val lessonHistoryCommentRepository: LessonHistoryCommentRepository,
     private val amazonS3: AmazonS3,
     private val redisService: RedisService,
+    @Value("\${aws.s3.bucket-name}")
+    private val bucketName: String
 ) {
 
     fun registerLessonHistory(
@@ -110,7 +113,6 @@ class LessonHistoryService(
 
     fun registerLessonHistoryComment(
         lessonHistoryId: Long,
-        uploadFiles: MutableList<MultipartFile>?,
         request: CommentRegisterCommand,
         memberId: Long,
     ): Boolean {
@@ -122,28 +124,25 @@ class LessonHistoryService(
             )
         val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id)
         val entity = registerComment(order, request, findMember, lessonHistory)
-        registerFile(uploadFiles, findMember, lessonHistory, entity)
+        registerFile(request.uploadFileResponse, findMember, lessonHistory, entity)
         return true
     }
 
     fun registerLessonHistoryReply(
         lessonHistoryId: Long,
         lessonHistoryCommentId: Long,
-        uploadFiles: MutableList<MultipartFile>?,
         request: CommentRegisterCommand,
         memberId: Long,
     ): Boolean {
-        val findMember =
-            memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
-        val lessonHistory =
-            lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(
-                LESSON_HISTORY_NOT_FOUND,
-            )
+        val findMember = memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
+        val lessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?:
+            throw CustomException(LESSON_HISTORY_NOT_FOUND)
         val order = lessonHistoryCommentRepository.findTopComment(
             lessonHistory.id,
             lessonHistoryCommentId!!,
         )
         val parentComment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
+
         val entity = LessonHistoryComment(
             order = order,
             content = request.comment!!,
@@ -151,8 +150,9 @@ class LessonHistoryService(
             lessonHistory = lessonHistory,
             parentId = parentComment,
         )
+
         lessonHistoryCommentRepository.save(entity)
-        registerFile(uploadFiles, findMember, lessonHistory, entity)
+        registerFile(request.uploadFileResponse, findMember, lessonHistory, entity)
         return true
     }
 
@@ -162,7 +162,7 @@ class LessonHistoryService(
     ): Boolean {
         val comment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
             ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
-        comment.updateLessonHistoryComment(request.content!!)
+        comment.updateLessonHistoryComment(request.comment!!)
         return true
     }
 
@@ -247,28 +247,23 @@ class LessonHistoryService(
     }
 
     private fun registerFile(
-        uploadFiles: MutableList<MultipartFile>?,
+        uploadFiles: MutableList<UploadFileResponse>?,
         findMember: Member,
         lessonHistory: LessonHistory,
         entity: LessonHistoryComment,
     ) {
-        var fileOrder = 0
+
         uploadFiles?.let {
             checkMaximumFileSize(it.size)
             for (uploadFile in it) {
-                if (!uploadFile.isEmpty) {
-                    val fileUrl = putFile(uploadFile)
-
-                    val file = LessonHistoryFiles(
-                        member = findMember,
-                        lessonHistory = lessonHistory,
-                        fileUrl = fileUrl,
-                        lessonHistoryComment = entity,
-                        fileOrder = ++fileOrder,
-                    )
-
-                    lessonHistoryFilesRepository.save(file)
-                }
+                val file = LessonHistoryFiles(
+                    member = findMember,
+                    lessonHistory = lessonHistory,
+                    lessonHistoryComment = entity,
+                    fileUrl = uploadFile.fileUrl,
+                    fileOrder = uploadFile.fileOrder,
+                )
+                lessonHistoryFilesRepository.save(file)
             }
         }
     }
@@ -277,12 +272,12 @@ class LessonHistoryService(
         val objectMetadata = getObjectMetadata(uploadFile)
         val savedFileName = "lesson-history/" + System.currentTimeMillis().toString()
         amazonS3.putObject(
-            "to-be-healthy-bucket",
+            bucketName,
             savedFileName,
             uploadFile.inputStream,
             objectMetadata,
         )
-        val fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString()
+        val fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString()
         log.info { "등록된 S3 파일 URL => ${fileUrl}" }
         return fileUrl
     }
@@ -329,7 +324,7 @@ class LessonHistoryService(
                             fileOrder = fileOrder++,
                         ),
                     )
-                    redisService.setValuesWithTimeout(fileUrl, memberId.toString(), (30 * 60 * 1000).toLong()) // 30분
+                    redisService.setValuesWithTimeout(fileUrl, memberId.toString(), FILE_TEMP_UPLOAD_TIMEOUT) // 30분
                 }
             }
         }
@@ -338,5 +333,6 @@ class LessonHistoryService(
 
     companion object {
         const val FILE_MAXIMUM_UPLOAD_SIZE = 3
+        const val FILE_TEMP_UPLOAD_TIMEOUT: Long = 30 * 60 * 1000 // 30분
     }
 }

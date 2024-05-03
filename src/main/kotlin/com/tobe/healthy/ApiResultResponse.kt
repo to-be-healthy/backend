@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus.OK
 
 val log = KotlinLogging.logger { }
 
-data class ApiResult<T>(
+data class ApiResultResponse<T>(
     val status: HttpStatus = OK,
     val message: String,
     val data: T
