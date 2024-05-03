@@ -81,30 +81,30 @@ public class FileService {
 		return false;
 	}
 
-	public void uploadWorkoutFiles(WorkoutHistory history, List<MultipartFile> files) {
-		files.forEach(f -> uploadWorkoutFile(f, history));
+	public void uploadWorkoutFiles(WorkoutHistory history, List<String> fileUrls) {
+		fileUrls.forEach(u -> uploadWorkoutFile(u, history));
 	}
 
-	public void uploadWorkoutFile(MultipartFile uploadFile, WorkoutHistory history) {
-		if (!uploadFile.isEmpty()) {
-			try {
-				String savedFileName = System.currentTimeMillis() + "_" + randomUUID();
-				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
-
-				ObjectMetadata objectMetadata = new ObjectMetadata();
-				objectMetadata.setContentLength(uploadFile.getSize());
-				objectMetadata.setContentType(uploadFile.getContentType());
-				amazonS3.putObject(bucketName, savedFileName, uploadFile.getInputStream(), objectMetadata);
-				String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
-
-				WorkoutHistoryFiles historyFile = WorkoutHistoryFiles.create(savedFileName,
-						cleanPath(uploadFile.getOriginalFilename()), extension, uploadFile.getSize(), history, fileUrl);
-				workoutFileRepository.save(historyFile);
-			} catch (IOException e) {
-				e.printStackTrace();
-				throw new CustomException(FILE_UPLOAD_ERROR);
-			}
-		}
+	public void uploadWorkoutFile(String fileUrl, WorkoutHistory history) {
+//		if (!fileUrl.isEmpty()) {
+//			try {
+//				String savedFileName = System.currentTimeMillis() + "_" + randomUUID();
+//				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
+//
+//				ObjectMetadata objectMetadata = new ObjectMetadata();
+//				objectMetadata.setContentLength(uploadFile.getSize());
+//				objectMetadata.setContentType(uploadFile.getContentType());
+//				amazonS3.putObject(bucketName, savedFileName, uploadFile.getInputStream(), objectMetadata);
+//				String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+//
+//				WorkoutHistoryFiles historyFile = WorkoutHistoryFiles.create(savedFileName,
+//						cleanPath(uploadFile.getOriginalFilename()), extension, uploadFile.getSize(), history, fileUrl);
+//				workoutFileRepository.save(historyFile);
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//				throw new CustomException(FILE_UPLOAD_ERROR);
+//			}
+//		}
 	}
 
 	public void deleteFile(String fileName){
@@ -129,7 +129,7 @@ public class FileService {
 					ObjectMetadata objectMetadata = new ObjectMetadata();
 					objectMetadata.setContentLength(file.getSize());
 					objectMetadata.setContentType(file.getContentType());
-					String savedFileName = fileUploadType.getCode() + separator + System.currentTimeMillis() + "_" + randomUUID() + extension;
+					String savedFileName = fileUploadType.getCode() + "/" + System.currentTimeMillis() + "_" + randomUUID() + extension;
 					amazonS3.putObject(
 						"to-be-healthy-bucket",
 						savedFileName,
@@ -137,13 +137,7 @@ public class FileService {
 						objectMetadata
 					);
 					String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
-//					AwsS3File awsS3File = AwsS3File.builder()
-//						.originalFileName(originalFileName)
-//						.member(member)
-//						.fileUploadType(fileUploadType)
-//						.fileUrl(fileUrl)
-//						.fileOrder(++fileOrder)
-//						.build();
+					//TODO: Redis에 저장
 					uploadFile.add(new RegisterFileResponse(fileUrl, originalFileName, fileOrder));
 				} catch (IOException e) {
 					e.printStackTrace();

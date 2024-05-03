@@ -162,13 +162,6 @@ public class TrainerScheduleService {
         }
     }
 
-    public MyStandbyScheduleResponse findAllMyStandbySchedule(Long memberId) {
-        Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
-        CourseDto course = optCourse.map(CourseDto::from).orElse(null);
-        List<MyStandbySchedule> result = trainerScheduleRepository.findAllMyStandbySchedule(memberId);
-        return MyStandbyScheduleResponse.create(course, result);
-    }
-
     public ScheduleIdInfo updateReservationStatusToNoShow(Long scheduleId, Long memberId) {
         Schedule schedule = trainerScheduleRepository.findScheduleByTrainerId(memberId, scheduleId)
                 .orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));

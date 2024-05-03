@@ -32,7 +32,7 @@ public class FileController {
                                                           @Valid FileAddCommand command) {
         return ResponseHandler.<List<RegisterFileResponse>>builder()
                 .data(fileService.uploadFiles(command.getFileUploadType(), command.getUploadFiles(), customMemberDetails.getMember()))
-                .message("운동기록이 등록되었습니다.")
+                .message("첨부파일이 등록되었습니다.")
                 .build();
     }
 
