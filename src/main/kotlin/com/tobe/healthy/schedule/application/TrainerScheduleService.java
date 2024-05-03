@@ -45,7 +45,7 @@ public class TrainerScheduleService {
 
         LocalDate lessonDt = request.getStartDt();
 
-        while (islessonDtBeforeOrEqualsEndDt(request, lessonDt)) {
+        while (isLessonDtBeforeOrEqualsEndDt(request, lessonDt)) {
             LocalTime startTime = request.getStartTime();
             while (startTimeIsBefore(request, startTime)) {
                 LocalTime endTime = startTime.plusMinutes(request.getSessionTime().getDescription());
@@ -89,7 +89,7 @@ public class TrainerScheduleService {
         return startTime.isBefore(request.getEndTime());
     }
 
-    private boolean islessonDtBeforeOrEqualsEndDt(RegisterScheduleRequest request, LocalDate lessonDt) {
+    private boolean isLessonDtBeforeOrEqualsEndDt(RegisterScheduleRequest request, LocalDate lessonDt) {
         return !lessonDt.isAfter(request.getEndDt());
     }
 
