@@ -10,6 +10,7 @@ import com.tobe.healthy.schedule.domain.dto.out.MyStandbySchedule;
 import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
+import com.tobe.healthy.schedule.repository.student.StandByScheduleRepository;
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +63,7 @@ public class ScheduleWaitingService {
 	public MyStandbyScheduleResponse findAllMyStandbySchedule(Long memberId) {
 		Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
 		CourseDto course = optCourse.map(CourseDto::from).orElse(null);
-		List<MyStandbySchedule> result = trainerScheduleRepository.findAllMyStandbySchedule(memberId);
+		List<MyStandbySchedule> result = standByScheduleRepository.findAllMyStandbySchedule(memberId);
 		return MyStandbyScheduleResponse.create(course, result);
 	}
 }
