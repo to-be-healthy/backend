@@ -128,9 +128,7 @@ class TrainerScheduleService(
 
     fun cancelTrainerSchedule(scheduleId: Long?, memberId: Long?): Boolean {
         val entity = trainerScheduleRepository.findScheduleByTrainerId(memberId, scheduleId) ?: throw CustomException(SCHEDULE_NOT_FOUND)
-
         entity.cancelTrainerSchedule()
-
         return true
     }
 }
