@@ -45,9 +45,7 @@ class LessonHistoryController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @Operation(summary = "수업 일지를 등록한다.",
         responses = [
-            ApiResponse(
-                responseCode = "200", description = "수업 일지를 등록하였습니다."
-            ),
+            ApiResponse(responseCode = "200", description = "수업 일지를 등록하였습니다."),
             ApiResponse(
                 responseCode = "404(1)", description = "학생을 찾을 수 없습니다.",
                 content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
@@ -70,6 +68,10 @@ class LessonHistoryController(
         )
     }
 
+    @Operation(summary = "게시글/댓글 작성 전에 파일을 첨부한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "게시글/댓글 작성 전에 파일을 첨부한다.")
+        ])
     @PostMapping("/file")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun registerFilesOfLessonHistory(uploadFiles: MutableList<MultipartFile>,

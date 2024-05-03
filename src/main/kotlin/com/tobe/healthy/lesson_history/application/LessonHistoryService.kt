@@ -293,7 +293,7 @@ class LessonHistoryService(
     }
 
     fun findAllLessonHistoryByMemberId(
-        studentId: Long?,
+        studentId: Long,
         request: SearchCondRequest,
         pageable: Pageable
     ): CustomPagingResponse<LessonHistoryResponse> {
@@ -312,7 +312,7 @@ class LessonHistoryService(
 
     fun registerFilesOfLessonHistory(
         uploadFiles: MutableList<MultipartFile>,
-        memberId: Long?
+        memberId: Long
     ): List<UploadFileResponse> {
         val uploadFileResponse: MutableList<UploadFileResponse> = mutableListOf()
         var fileOrder = 1
