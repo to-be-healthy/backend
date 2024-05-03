@@ -506,7 +506,7 @@ public class MemberService {
 	}
 
 	private String createFileUUID() {
-		return System.currentTimeMillis() + "_" + UUID.randomUUID();
+		return System.currentTimeMillis() + "-" + UUID.randomUUID();
 	}
 
 	private String getImageExtension(String profileImage) {

@@ -54,7 +54,7 @@ public class FileService {
 
 
 	// 1. 파일을 AWS S3에 업로드 후 업로드 주소 반환
-	public List<RegisterFile> uploadFiles(FileUploadType fileUploadType, List<MultipartFile> uploadFiles, Member member) {
+	public List<RegisterFile> uploadFiles(String folder, List<MultipartFile> uploadFiles, Member member) {
 		List<RegisterFile> uploadFile = new ArrayList<>();
 		int fileOrder = 0;
 		for (MultipartFile file: uploadFiles) {
@@ -65,7 +65,7 @@ public class FileService {
 					ObjectMetadata objectMetadata = new ObjectMetadata();
 					objectMetadata.setContentLength(file.getSize());
 					objectMetadata.setContentType(file.getContentType());
-					String savedFileName = fileUploadType.getCode() + "/" + System.currentTimeMillis() + "_" + randomUUID() + extension;
+					String savedFileName = folder + "/" + System.currentTimeMillis() + "-" + randomUUID() + extension;
 					amazonS3.putObject(
 						"to-be-healthy-bucket",
 						savedFileName,
@@ -74,7 +74,7 @@ public class FileService {
 					);
 					String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
 					redisService.setValuesWithTimeout(TEMP_FILE_URI.getDescription() + fileUrl, member.getId().toString(), FILE_TEMP_UPLOAD_TIMEOUT); // 30분
-					uploadFile.add(new RegisterFile(fileUrl, fileOrder));
+					uploadFile.add(new RegisterFile(fileUrl, ++fileOrder));
 				} catch (IOException e) {
 					e.printStackTrace();
 					log.error("error => {}", e.getMessage());
@@ -96,7 +96,7 @@ public class FileService {
 	public void uploadDietFile(Diet diet, DietType type, MultipartFile uploadFile) {
 		if (!uploadFile.isEmpty()) {
 			try {
-				String savedFileName = System.currentTimeMillis() + "_" + randomUUID();
+				String savedFileName = System.currentTimeMillis() + "-" + randomUUID();
 				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
 
 				ObjectMetadata objectMetadata = new ObjectMetadata();

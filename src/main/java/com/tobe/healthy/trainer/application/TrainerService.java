@@ -84,7 +84,7 @@ public class TrainerService {
         String name = command.getName();
         int lessonCnt = command.getLessonCnt();
 
-        String uuid = System.currentTimeMillis() + "_" + UUID.randomUUID();
+        String uuid = System.currentTimeMillis() + "-" + UUID.randomUUID();
         String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
         String invitationLink = "https://www.to-be-healthy.site/invite?uuid=" + uuid;
 

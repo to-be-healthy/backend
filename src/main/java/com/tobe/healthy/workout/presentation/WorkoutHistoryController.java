@@ -5,6 +5,7 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.file.FileService;
 import com.tobe.healthy.file.FileUploadType;
+import com.tobe.healthy.file.RegisterFile;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
@@ -22,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static com.tobe.healthy.file.FileUploadType.WORKOUT_HISTORY;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -38,11 +41,11 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "운동기록ID, 회원ID, 운동기록 내용을 반환한다.")
     })
     @PostMapping("/file")
-    public ResponseHandler<WorkoutHistoryDto> addWorkoutHistoryFile(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    public ResponseHandler<List<RegisterFile>> addWorkoutHistoryFile(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                     @Valid List<MultipartFile> files) {
-        return ResponseHandler.<WorkoutHistoryDto>builder()
-                .data(fileService.uploadFiles(FileUploadType.WORKOUT_HISTORY, files, customMemberDetails.getMember()))
-                .message("운동기록이 등록되었습니다.")
+        return ResponseHandler.<List<RegisterFile>>builder()
+                .data(fileService.uploadFiles("workout-history", files, customMemberDetails.getMember()))
+                .message("첨부파일이 등록되었습니다.")
                 .build();
     }
 
@@ -52,7 +55,7 @@ public class WorkoutHistoryController {
     })
     @PostMapping
     public ResponseHandler<WorkoutHistoryDto> addWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                @Valid HistoryAddCommand request) {
+                                                                @RequestBody @Valid HistoryAddCommand request) {
         return ResponseHandler.<WorkoutHistoryDto>builder()
                 .data(workoutService.addWorkoutHistory(customMemberDetails.getMember(), request))
                 .message("운동기록이 등록되었습니다.")
@@ -90,7 +93,7 @@ public class WorkoutHistoryController {
     @PatchMapping("/{workoutHistoryId}")
     public ResponseHandler<WorkoutHistoryDto> updateWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                    @Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId,
-                                                                  @Valid HistoryAddCommand command) {
+                                                                   @RequestBody @Valid HistoryAddCommand command) {
         return ResponseHandler.<WorkoutHistoryDto>builder()
                 .data(workoutService.updateWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId, command))
                 .message("운동기록이 수정되었습니다.")
