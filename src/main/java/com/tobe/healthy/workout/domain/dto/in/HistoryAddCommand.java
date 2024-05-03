@@ -26,6 +26,6 @@ public class HistoryAddCommand {
     private List<CompletedExerciseDto> completedExercises = new ArrayList<>();
 
     @NotEmpty(message = "사진을 추가해 주세요.")
-    private List<MultipartFile> files = new ArrayList<>();
+    private List<String> fileUrls = new ArrayList<>();
 
 }

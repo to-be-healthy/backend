@@ -54,7 +54,7 @@ public class WorkoutHistoryService {
 
         workoutHistoryRepository.save(history);
         saveCompletedExercises(history, command);
-        fileService.uploadWorkoutFiles(history, command.getFiles());
+        fileService.uploadWorkoutFiles(history, command.getFileUrls());
         return WorkoutHistoryDto.from(history);
     }
 
@@ -116,7 +116,7 @@ public class WorkoutHistoryService {
         //파일 수정
         history.deleteFiles();
         history.getHistoryFiles().forEach(file -> fileService.deleteFile(file.getFileName()));
-        fileService.uploadWorkoutFiles(history, command.getFiles());
+//        fileService.uploadWorkoutFiles(history, command.getFiles());
         return setHistoryFile(WorkoutHistoryDto.from(history), List.of(history.getWorkoutHistoryId()));
     }
 

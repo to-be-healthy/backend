@@ -7,6 +7,7 @@ import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.student.CommonScheduleRepository;
+import com.tobe.healthy.schedule.repository.student.StandByScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.time.LocalTime;
 import java.util.Optional;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
+import static java.time.LocalTime.NOON;
 
 @Service
 @RequiredArgsConstructor
@@ -35,29 +37,28 @@ public class CommonScheduleService {
         Schedule schedule = commonScheduleRepository.findAvailableScheduleById(scheduleId)
                 .orElseThrow(() -> new CustomException(NOT_RESERVABLE_SCHEDULE));
 
-        LocalTime before24Hour = schedule.getLessonStartTime().minusMinutes(30);
-        if (LocalTime.now().isAfter(before24Hour)) throw new CustomException(RESERVATION_NOT_VALID);
+        LocalDateTime before30Minutes = LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime().minusMinutes(30));
+        if (LocalDateTime.now().isAfter(before30Minutes)) throw new CustomException(RESERVATION_NOT_VALID);
 
         schedule.registerSchedule(member);
-        return ScheduleIdInfo.from(schedule);
+        return ScheduleIdInfo.create(schedule, getScheduleTimeText(schedule.getLessonStartTime()));
     }
 
     public ScheduleIdInfo cancelMemberSchedule(Long scheduleId, Long memberId) {
         Schedule schedule = commonScheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
                 .orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
-        LocalDateTime now = LocalDateTime.of(LocalDate.now(), LocalTime.now());
         LocalDateTime before24Hour = LocalDateTime.of(schedule.getLessonDt().minusDays(1), schedule.getLessonStartTime());
-        if (now.isAfter(before24Hour)) throw new CustomException(RESERVATION_CANCEL_NOT_VALID);
+        if (LocalDateTime.now().isAfter(before24Hour)) throw new CustomException(RESERVATION_CANCEL_NOT_VALID);
 
         // 대기 테이블에 인원이 있으면 수정하기
         Optional<StandBySchedule> standByScheduleOpt = standByScheduleRepository.findByScheduleId(scheduleId);
         if (standByScheduleOpt.isPresent()) {
             StandBySchedule standBySchedule = standByScheduleOpt.get();
             changeApplicantAndDeleteStandBy(standBySchedule, schedule);
-            return ScheduleIdInfo.create(memberId, schedule, standBySchedule.getMember().getId());
+            return ScheduleIdInfo.create(memberId, schedule, standBySchedule.getMember().getId(), getScheduleTimeText(schedule.getLessonStartTime()));
         } else {
-            ScheduleIdInfo idInfo = ScheduleIdInfo.from(schedule);
+            ScheduleIdInfo idInfo = ScheduleIdInfo.create(schedule, getScheduleTimeText(schedule.getLessonStartTime()));
             schedule.cancelMemberSchedule();
             return idInfo;
         }
@@ -66,5 +67,9 @@ public class CommonScheduleService {
     private void changeApplicantAndDeleteStandBy(StandBySchedule standBySchedule, Schedule schedule) {
         schedule.changeApplicantInSchedule(standBySchedule.getMember());
         standByScheduleRepository.delete(standBySchedule);
+    }
+
+    private String getScheduleTimeText(LocalTime lessonStartTime){
+        return NOON.isAfter(lessonStartTime) ? "오전 " + lessonStartTime : "오후 " + lessonStartTime;
     }
 }
