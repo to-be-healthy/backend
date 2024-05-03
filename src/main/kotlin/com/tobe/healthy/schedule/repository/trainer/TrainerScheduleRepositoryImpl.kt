@@ -9,7 +9,7 @@ import com.tobe.healthy.member.domain.entity.QMember
 import com.tobe.healthy.schedule.domain.dto.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.domain.dto.`in`.ScheduleSearchCond
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
-import com.tobe.healthy.schedule.domain.entity.QSchedule
+import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
 import com.tobe.healthy.schedule.domain.entity.QStandBySchedule
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import lombok.extern.slf4j.Slf4j
@@ -32,19 +32,19 @@ class TrainerScheduleRepositoryImpl(
         member: Member?,
     ): List<ScheduleCommandResult> {
         val results = queryFactory
-            .select(QSchedule.schedule)
-            .from(QSchedule.schedule)
-            .leftJoin(QSchedule.schedule.trainer, QMember("trainer")).fetchJoin()
-            .leftJoin(QSchedule.schedule.applicant, QMember("applicant")).fetchJoin()
-            .leftJoin(QSchedule.schedule.standBySchedule, QStandBySchedule.standBySchedule)
+            .select(schedule)
+            .from(schedule)
+            .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
+            .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
+            .leftJoin(schedule.standBySchedule, QStandBySchedule.standBySchedule)
             .on(QStandBySchedule.standBySchedule.delYn.isFalse())
             .where(
                 lessonDtEq(searchCond),
                 lessonDtBetween(searchCond),
                 delYnFalse(),
-                QSchedule.schedule.trainer.id.eq(trainerId),
+                schedule.trainer.id.eq(trainerId),
             )
-            .orderBy(QSchedule.schedule.lessonDt.asc(), QSchedule.schedule.lessonStartTime.asc())
+            .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
 
         return results.stream()
@@ -58,18 +58,18 @@ class TrainerScheduleRepositoryImpl(
     }
 
     private fun delYnFalse(): BooleanExpression {
-        return QSchedule.schedule.delYn.eq(false)
+        return schedule.delYn.eq(false)
     }
 
     override fun findAvailableRegisterSchedule(request: RegisterScheduleCommand, trainerId: Long?): Optional<Schedule> {
         val entity = queryFactory
-            .select(QSchedule.schedule)
-            .from(QSchedule.schedule)
+            .select(schedule)
+            .from(schedule)
             .where(
-                QSchedule.schedule.lessonDt.eq(request.lessonDt),
-                QSchedule.schedule.lessonStartTime.between(request.lessonStartTime, request.lessonEndTime),
-                QSchedule.schedule.lessonEndTime.between(request.lessonStartTime, request.lessonEndTime),
-                QSchedule.schedule.trainer.id.eq(trainerId),
+                schedule.lessonDt.eq(request.lessonDt),
+                schedule.lessonStartTime.between(request.lessonStartTime, request.lessonEndTime),
+                schedule.lessonEndTime.between(request.lessonStartTime, request.lessonEndTime),
+                schedule.trainer.id.eq(trainerId),
             )
             .fetchOne()
         return Optional.ofNullable(entity)
@@ -81,20 +81,20 @@ class TrainerScheduleRepositoryImpl(
         endTime: LocalTime?,
         trainerId: Long?,
     ): Boolean? {
-        return queryFactory.select(QSchedule.schedule.count().gt(0).`as`("isScheduleRegisterd"))
-            .from(QSchedule.schedule)
+        return queryFactory.select(schedule.count().gt(0).`as`("isScheduleRegisterd"))
+            .from(schedule)
             .where(
-                QSchedule.schedule.lessonDt.eq(lessonDt),
-                QSchedule.schedule.trainer.id.eq(trainerId),
-                (QSchedule.schedule.lessonStartTime.between(startTime, endTime)
-                    .or(QSchedule.schedule.lessonEndTime.between(startTime, endTime))),
+                schedule.lessonDt.eq(lessonDt),
+                schedule.trainer.id.eq(trainerId),
+                (schedule.lessonStartTime.between(startTime, endTime)
+                    .or(schedule.lessonEndTime.between(startTime, endTime))),
             )
             .fetchOne()
     }
 
     private fun lessonDtBetween(searchCond: ScheduleSearchCond): BooleanExpression? {
         if (!ObjectUtils.isEmpty(searchCond.lessonStartDt) && !ObjectUtils.isEmpty(searchCond.lessonEndDt)) {
-            return QSchedule.schedule.lessonDt.between(searchCond.lessonStartDt, searchCond.lessonEndDt)
+            return schedule.lessonDt.between(searchCond.lessonStartDt, searchCond.lessonEndDt)
         }
         return null
     }
@@ -102,7 +102,7 @@ class TrainerScheduleRepositoryImpl(
     private fun lessonDtEq(searchCond: ScheduleSearchCond): BooleanExpression? {
         if (!ObjectUtils.isEmpty(searchCond.lessonDt)) {
             val formattedDate: StringExpression =
-                Expressions.stringTemplate("DATE_FORMAT({0}, '%Y%m')", QSchedule.schedule.lessonDt)
+                Expressions.stringTemplate("DATE_FORMAT({0}, '%Y%m')", schedule.lessonDt)
             return formattedDate.eq(searchCond.lessonDt)
         }
         return null
