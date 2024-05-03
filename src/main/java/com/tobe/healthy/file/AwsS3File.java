@@ -1,8 +1,8 @@
 package com.tobe.healthy.file;
 
 import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.lessonHistory.domain.entity.LessonHistory;
-import com.tobe.healthy.lessonHistory.domain.entity.LessonHistoryComment;
+import com.tobe.healthy.lesson_history.domain.entity.LessonHistory;
+import com.tobe.healthy.lesson_history.domain.entity.LessonHistoryComment;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
