@@ -120,11 +120,13 @@ class TrainerScheduleService(
 
     fun registerIndividualSchedule(request: RegisterScheduleCommand, trainerId: Long): Boolean {
         trainerScheduleRepository.findAvailableRegisterSchedule(request, trainerId)?.let {
+            throw CustomException(SCHEDULE_ALREADY_EXISTS)
+        } ?: run {
             val trainer = memberRepository.findByIdOrNull(trainerId) ?: throw CustomException(MEMBER_NOT_FOUND)
             val entity = Schedule.registerSchedule(request.lessonDt, trainer, request.lessonStartTime, request.lessonEndTime, AVAILABLE)
             trainerScheduleRepository.save(entity)
             return true
-        } ?: throw CustomException(SCHEDULE_ALREADY_EXISTS)
+        }
     }
 
     fun cancelTrainerSchedule(scheduleId: Long, memberId: Long): Boolean {

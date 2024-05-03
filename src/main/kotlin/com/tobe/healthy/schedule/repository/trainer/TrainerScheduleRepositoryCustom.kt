@@ -7,7 +7,6 @@ import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import java.time.LocalDate
 import java.time.LocalTime
-import java.util.Optional
 
 interface TrainerScheduleRepositoryCustom {
     fun findAllSchedule(searchCond: ScheduleSearchCond, trainerId: Long, member: Member): List<ScheduleCommandResult?>
