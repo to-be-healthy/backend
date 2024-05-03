@@ -1,26 +1,21 @@
-package com.tobe.healthy.schedule.repository;
+package com.tobe.healthy.schedule.repository.student;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.QMember;
-import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
-import com.tobe.healthy.schedule.domain.dto.out.MyStandbySchedule;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
 import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
@@ -30,7 +25,7 @@ import static java.util.stream.Collectors.toList;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
+public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryCustom {
 
 	private final JPAQueryFactory queryFactory;
 
@@ -85,47 +80,6 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
 		return schedules.stream().map(MyReservation::from).collect(toList());
-	}
-
-	@Override
-	public List<MyStandbySchedule> findAllMyStandbySchedule(Long memberId) {
-		List<StandBySchedule> results = queryFactory.select(standBySchedule)
-				.from(standBySchedule)
-				.innerJoin(standBySchedule.schedule, schedule).fetchJoin()
-				.innerJoin(standBySchedule.member, new QMember("member")).fetchJoin()
-				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.where(standBySchedule.member.id.eq(memberId), standBySchedule.delYn.isFalse(),
-						standBySchedule.schedule.lessonDt.goe(LocalDate.now()))
-				.orderBy(standBySchedule.schedule.lessonDt.asc(), standBySchedule.schedule.lessonStartTime.asc())
-				.fetch();
-		return results.stream().map(MyStandbySchedule::from).collect(toList());
-	}
-
-	@Override
-	public Optional<Schedule> findAvailableRegisterSchedule(RegisterScheduleCommand request, Long trainerId) {
-		Schedule entity = queryFactory
-				.select(schedule)
-				.from(schedule)
-				.where(
-						schedule.lessonDt.eq(request.getLessonDt()),
-						schedule.lessonStartTime.eq(request.getLessonStartTime()),
-						schedule.lessonEndTime.eq(request.getLessonEndTime()),
-						schedule.trainer.id.eq(trainerId)
-				)
-				.fetchOne();
-		return Optional.ofNullable(entity);
-	}
-
-	@Override
-	public Boolean validateRegisterSchedule(LocalDate lessonDt, LocalTime startTime, LocalTime endTime, Long trainerId) {
-		return queryFactory.select(schedule.count().gt(0).as("isScheduleRegisterd"))
-				.from(schedule)
-				.where(
-						schedule.lessonDt.eq(lessonDt),
-						schedule.trainer.id.eq(trainerId),
-						(schedule.lessonStartTime.between(startTime, endTime).or(schedule.lessonEndTime.between(startTime, endTime)))
-				)
-				.fetchOne();
 	}
 
 	private BooleanExpression scheduleDelYnFalse() {

@@ -5,7 +5,7 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
-import com.tobe.healthy.schedule.repository.ScheduleRepository;
+import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import static com.tobe.healthy.config.error.ErrorCode.*;
 public class ScheduleWaitingService {
 
 	private final MemberRepository memberRepository;
-	private final ScheduleRepository scheduleRepository;
+	private final TrainerScheduleRepository trainerScheduleRepository;
 	private final StandByScheduleRepository standByScheduleRepository;
 
 	public Boolean registerStandBySchedule(Long scheduleId, Long memberId) {
@@ -29,7 +29,7 @@ public class ScheduleWaitingService {
 		Member member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		Schedule schedule = scheduleRepository.findAvailableStandById(scheduleId)
+		Schedule schedule = trainerScheduleRepository.findAvailableStandById(scheduleId)
 				.orElseThrow(() -> new CustomException(NOT_STAND_BY_SCHEDULE));
 
 		if (!ObjectUtils.isEmpty(schedule.getStandBySchedule())) {

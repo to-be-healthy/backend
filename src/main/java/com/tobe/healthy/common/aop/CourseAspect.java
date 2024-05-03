@@ -31,10 +31,10 @@ public class CourseAspect {
         this.courseServiceObjectProvider = courseServiceObjectProvider;
     }
 
-    @Pointcut("execution(* com.tobe.healthy.schedule.application.ScheduleService.cancelMemberSchedule(..))")
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleService.cancelMemberSchedule(..))")
     private void cancelMemberSchedule() {}
 
-    @Pointcut("execution(* com.tobe.healthy.schedule.application.ScheduleService.reserveSchedule(..))")
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleService.reserveSchedule(..))")
     private void reserveSchedule() {}
 
     @AfterReturning(value = "cancelMemberSchedule()", returning = "returnValue")

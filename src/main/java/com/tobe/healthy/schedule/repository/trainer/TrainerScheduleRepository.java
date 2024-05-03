@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.repository;
+package com.tobe.healthy.schedule.repository.trainer;
 
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import jakarta.persistence.LockModeType;
@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
-public interface ScheduleRepository extends JpaRepository<Schedule, Long>, ScheduleRepositoryCustom {
+public interface TrainerScheduleRepository extends JpaRepository<Schedule, Long>, TrainerScheduleRepositoryCustom {
 
 	@Query("select s from Schedule s where s.trainer.id = :userId and s.id = :scheduleId and s.delYn = false")
 	Optional<Schedule> findScheduleByTrainerId(Long userId, Long scheduleId);
