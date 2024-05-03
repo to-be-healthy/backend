@@ -58,7 +58,7 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
 
     @OneToMany(mappedBy = "diet", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<DietFile> dietFiles = new ArrayList<>();
+    private List<DietFiles> dietFiles = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "diet", cascade = CascadeType.ALL)
@@ -99,7 +99,7 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     public void deleteFile(DietType type) {
         if(dietFiles != null){
             this.dietFiles.stream().filter(f -> type.equals(f.getType()))
-                    .forEach(DietFile::deleteDietFile);
+                    .forEach(DietFiles::deleteDietFile);
         }
     }
 
@@ -114,7 +114,7 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     }
 
     public void deleteFiles() {
-        this.dietFiles.forEach(DietFile::deleteDietFile);
+        this.dietFiles.forEach(DietFiles::deleteDietFile);
     }
 
     public void updateCommentCnt(Long commentCnt) {

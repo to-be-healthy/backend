@@ -100,14 +100,14 @@ public class DietService {
     }
 
     private DietDto setDietFile(DietDto dietDto, List<Long> ids) {
-        List<DietFile> files = dietRepository.getDietFile(ids);
+        List<DietFiles> files = dietRepository.getDietFile(ids);
         List<DietFileDto> filesDto = files.stream().map(DietFileDto::from).collect(Collectors.toList());
         dietDto.setDietFiles(filesDto);
         return dietDto;
     }
 
     private List<DietDto> setDietFile(List<DietDto> dietDtos, List<Long> ids) {
-        List<DietFile> files = dietRepository.getDietFile(ids);
+        List<DietFiles> files = dietRepository.getDietFile(ids);
         return dietDtos.stream().map(d -> {
             List<DietFileDto> thisFiles = files.stream().map(DietFileDto::from)
                     .filter(f -> f.getDietId().equals(d.getDietId())).collect(Collectors.toList());

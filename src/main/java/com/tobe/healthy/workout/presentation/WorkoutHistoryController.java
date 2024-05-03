@@ -14,6 +14,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 
 @RestController
@@ -31,9 +34,9 @@ public class WorkoutHistoryController {
     })
     @PostMapping
     public ResponseHandler<WorkoutHistoryDto> addWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                @Valid HistoryAddCommand command) {
+                                                                @Valid HistoryAddCommand request) {
         return ResponseHandler.<WorkoutHistoryDto>builder()
-                .data(workoutService.addWorkoutHistory(customMemberDetails.getMember(), command))
+                .data(workoutService.addWorkoutHistory(customMemberDetails.getMember(), request))
                 .message("운동기록이 등록되었습니다.")
                 .build();
     }

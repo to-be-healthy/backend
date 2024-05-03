@@ -1,4 +1,4 @@
-package com.tobe.healthy.diet.domain.entity;
+package com.tobe.healthy.workout.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -8,17 +8,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
-import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor
-@Table(name = "diet_file")
+@Table(name = "workout_history_files")
 @Builder
 @Getter
-public class DietFile extends BaseTimeEntity<DietFile, Long> {
+public class WorkoutHistoryFiles extends BaseTimeEntity<WorkoutHistoryFiles, Long> {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -39,26 +38,21 @@ public class DietFile extends BaseTimeEntity<DietFile, Long> {
     private Boolean delYn = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "diet_id")
-    private Diet diet;
+    @JoinColumn(name = "workout_history_id")
+    private WorkoutHistory workoutHistory;
 
-    @Enumerated(STRING)
-    @ColumnDefault("'BREAKFAST'")
-    private DietType type;
-
-    public static DietFile create(String savedFileName, String originalName, String extension, long fileSize, Diet diet, String fileUrl, DietType type) {
-        return DietFile.builder()
+    public static WorkoutHistoryFiles create(String savedFileName, String originalName, String extension, Long fileSize, WorkoutHistory history, String fileUrl) {
+        return WorkoutHistoryFiles.builder()
                 .fileName(savedFileName)
                 .originalName(originalName)
                 .extension(extension)
                 .fileSize(fileSize)
+                .workoutHistory(history)
                 .fileUrl(fileUrl)
-                .diet(diet)
-                .type(type)
                 .build();
     }
 
-    public void deleteDietFile() {
+    public void deleteWorkoutHistoryFile() {
         this.delYn = true;
     }
 

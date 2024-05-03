@@ -1,6 +1,6 @@
 package com.tobe.healthy.workout.domain.dto;
 
-import com.tobe.healthy.workout.domain.entity.WorkoutHistoryFile;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistoryFiles;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +21,7 @@ public class WorkoutHistoryFileDto {
     private String fileUrl;
 
 
-    public static WorkoutHistoryFileDto from(WorkoutHistoryFile file) {
+    public static WorkoutHistoryFileDto from(WorkoutHistoryFiles file) {
         return WorkoutHistoryFileDto.builder()
                 .id(file.getId())
                 .workoutHistoryId(file.getWorkoutHistory().getWorkoutHistoryId())

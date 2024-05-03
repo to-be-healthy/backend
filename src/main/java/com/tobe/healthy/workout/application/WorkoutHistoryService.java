@@ -137,14 +137,14 @@ public class WorkoutHistoryService {
     }
 
     private WorkoutHistoryDto setHistoryFile(WorkoutHistoryDto historyDto, List<Long> ids) {
-        List<WorkoutHistoryFile> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
+        List<WorkoutHistoryFiles> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
         List<WorkoutHistoryFileDto> filesDto = files.stream().map(WorkoutHistoryFileDto::from).collect(Collectors.toList());
         historyDto.setFiles(filesDto);
         return historyDto;
     }
 
     private List<WorkoutHistoryDto> setHistoryListFile(List<WorkoutHistoryDto> historiesDto, List<Long> ids) {
-        List<WorkoutHistoryFile> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
+        List<WorkoutHistoryFiles> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
         return historiesDto.stream().map(h -> {
             List<WorkoutHistoryFileDto> thisFiles = files.stream().map(WorkoutHistoryFileDto::from)
                     .filter(f -> f.getWorkoutHistoryId().equals(h.getWorkoutHistoryId())).collect(Collectors.toList());

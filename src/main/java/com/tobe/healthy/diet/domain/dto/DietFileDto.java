@@ -1,6 +1,6 @@
 package com.tobe.healthy.diet.domain.dto;
 
-import com.tobe.healthy.diet.domain.entity.DietFile;
+import com.tobe.healthy.diet.domain.entity.DietFiles;
 import com.tobe.healthy.diet.domain.entity.DietType;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +18,7 @@ public class DietFileDto {
     private String fileUrl;
     private DietType type;
 
-    public static DietFileDto from(DietFile dietFile) {
+    public static DietFileDto from(DietFiles dietFile) {
         return DietFileDto.builder()
                 .id(dietFile.getId())
                 .fileName(dietFile.getFileName())

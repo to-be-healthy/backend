@@ -6,10 +6,7 @@ import com.tobe.healthy.schedule.application.ScheduleService;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
-import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
+import com.tobe.healthy.schedule.domain.dto.out.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -67,10 +64,23 @@ public class ScheduleController {
 			@ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
 	})
 	@GetMapping("/all")
-	public ResponseHandler<ScheduleCommandResponse> findAllSchedule(@ParameterObject ScheduleSearchCond searchCond,
+	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule(@ParameterObject ScheduleSearchCond searchCond,
+																	@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<List<ScheduleCommandResult>>builder()
+				.data(scheduleService.findAllSchedule(searchCond, customMemberDetails.getMember()))
+				.message("전체 일정을 조회했습니다.")
+				.build();
+	}
+
+	@Operation(summary = "학생이 트레이너의 전체 일정을 조회한다.", description = "전체 일정을 조회한다. 특정 일자나 기간으로 조회하고 싶으면 DTO를 활용한다.",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
+			})
+	@GetMapping("/trainer/all")
+	public ResponseHandler<ScheduleCommandResponse> findAllScheduleOfTrainer(@ParameterObject ScheduleSearchCond searchCond,
 																	@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<ScheduleCommandResponse>builder()
-				.data(scheduleService.findAllSchedule(searchCond, customMemberDetails.getMember()))
+				.data(scheduleService.findAllScheduleOfTrainer(searchCond, customMemberDetails.getMember()))
 				.message("전체 일정을 조회했습니다.")
 				.build();
 	}
@@ -138,9 +148,9 @@ public class ScheduleController {
 			})
 	@GetMapping("/my-reservation")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<List<MyReservationResponse>> findAllMyReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-																			 @ParameterObject ScheduleSearchCond searchCond) {
-		return ResponseHandler.<List<MyReservationResponse>>builder()
+	public ResponseHandler<MyReservationResponse> findAllMyReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+																	   @ParameterObject ScheduleSearchCond searchCond) {
+		return ResponseHandler.<MyReservationResponse>builder()
 				.data(scheduleService.findAllMyReservation(customMemberDetails.getMemberId(), searchCond))
 				.message("학생이 내 예약을 조회하였습니다.")
 				.build();

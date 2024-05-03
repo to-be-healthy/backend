@@ -58,6 +58,8 @@ public enum ErrorCode {
 	SCHEDULE_LESS_THAN_30_DAYS(BAD_REQUEST, "C_033", "일정 등록은 30일을 넘을 수 없습니다."),
 	START_DATE_AFTER_END_DATE(BAD_REQUEST, "C_034", "수업 시작일은 종료일보다 빨라야 합니다."),
 	SCHEDULE_ALREADY_EXISTS(BAD_REQUEST, "C_035", "이미 등록된 일정이 존재합니다."),
+	RESERVATION_NOT_VALID(BAD_REQUEST, "C_035", "예약 가능한 시간이 아닙니다."),
+	RESERVATION_CANCEL_NOT_VALID(BAD_REQUEST, "C_035", "취소 가능한 시간이 아닙니다."),
 
 	SERVER_ERROR(INTERNAL_SERVER_ERROR, "S_001", "서버에서 오류가 발생하였습니다."),
 	FILE_UPLOAD_ERROR(INTERNAL_SERVER_ERROR, "S_002", "파일 업로드중 에러가 발생하였습니다."),

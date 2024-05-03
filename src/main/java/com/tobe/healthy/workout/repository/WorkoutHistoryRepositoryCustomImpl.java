@@ -10,7 +10,7 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.out.QWorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistoryFile;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistoryFiles;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +21,7 @@ import org.springframework.util.ObjectUtils;
 import java.util.List;
 
 import static com.tobe.healthy.workout.domain.entity.QWorkoutHistory.workoutHistory;
-import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryFile.workoutHistoryFile;
+import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryFiles.workoutHistoryFiles;
 import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryLike.workoutHistoryLike;
 
 @Repository
@@ -72,11 +72,11 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     }
 
     @Override
-    public List<WorkoutHistoryFile> getWorkoutHistoryFile(List<Long> ids) {
-        return queryFactory.select(workoutHistoryFile)
-                .from(workoutHistoryFile)
-                .where(workoutHistoryFile.workoutHistory.workoutHistoryId.in(ids), historyFileDeYnEq(false))
-                .orderBy(workoutHistoryFile.createdAt.desc())
+    public List<WorkoutHistoryFiles> getWorkoutHistoryFile(List<Long> ids) {
+        return queryFactory.select(workoutHistoryFiles)
+                .from(workoutHistoryFiles)
+                .where(workoutHistoryFiles.workoutHistory.workoutHistoryId.in(ids), historyFileDeYnEq(false))
+                .orderBy(workoutHistoryFiles.createdAt.desc())
                 .fetch();
     }
 
@@ -92,7 +92,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     }
 
     private BooleanExpression historyFileDeYnEq(boolean bool) {
-        return workoutHistoryFile.delYn.eq(bool);
+        return workoutHistoryFiles.delYn.eq(bool);
     }
 
     private BooleanExpression convertDateFormat(String searchDate) {

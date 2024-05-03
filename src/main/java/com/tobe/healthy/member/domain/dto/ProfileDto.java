@@ -11,10 +11,6 @@ import lombok.Data;
 public class ProfileDto {
 
     private Long id;
-    private String fileName;
-    private String originalName;
-    private String extension;
-    private Long fileSize;
     private String fileUrl;
 
     public static ProfileDto from(MemberProfile memberProfile){

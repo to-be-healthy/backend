@@ -1,7 +1,14 @@
 package com.tobe.healthy.schedule.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
+import static java.time.LocalTime.NOON;
+
 import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.course.application.CourseService;
+import com.tobe.healthy.course.domain.dto.CourseDto;
+import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -14,23 +21,18 @@ import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
-import static java.time.LocalTime.NOON;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +44,6 @@ public class ScheduleService {
 	private final ScheduleRepository scheduleRepository;
 	private final StandByScheduleRepository standByScheduleRepository;
 	private final CourseRepository courseRepository;
-	private final CourseService courseService;
 	private final TrainerMemberMappingRepository mappingRepository;
 
 	public Boolean registerSchedule(AutoCreateScheduleCommand request, Long trainerId) {
@@ -120,25 +121,31 @@ public class ScheduleService {
 		Schedule schedule = scheduleRepository.findAvailableScheduleById(scheduleId)
 			.orElseThrow(() -> new CustomException(NOT_RESERVABLE_SCHEDULE));
 
+		LocalTime before24Hour = schedule.getLessonStartTime().minusMinutes(30);
+		if(LocalTime.now().isAfter(before24Hour)) throw new CustomException(RESERVATION_NOT_VALID);
+
 		schedule.registerSchedule(member);
 		return ScheduleIdInfo.from(schedule);
 	}
 
-	public ScheduleCommandResponse findAllSchedule(ScheduleSearchCond searchCond, Member loginMember) {
-		Long trainerId;
-		if(STUDENT.equals(loginMember.getMemberType())){
-			TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(loginMember.getId())
-					.orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
-			trainerId = mapping.getTrainer().getId();
-		}else{
-			trainerId = loginMember.getId();
-		}
+	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Member trainer) {
+		return scheduleRepository.findAllSchedule(searchCond, trainer.getId());
+	}
+
+	public ScheduleCommandResponse findAllScheduleOfTrainer(ScheduleSearchCond searchCond, Member member) {
+		TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId())
+				.orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
+		Long trainerId = mapping.getTrainer().getId();
 		List<ScheduleCommandResult> schedule = scheduleRepository.findAllSchedule(searchCond, trainerId);
 
 		List<ScheduleCommandResult> morning = schedule.stream()
-				.filter(s -> NOON.isAfter(s.getLessonStartTime())).collect(Collectors.toList());
+				.filter(s -> NOON.isAfter(s.getLessonStartTime()))
+				.peek(s -> { if(s.getStandByName()!=null) s.setReservationStatus(SOLD_OUT); })
+				.collect(Collectors.toList());
 		List<ScheduleCommandResult> afternoon = schedule.stream()
-				.filter(s -> NOON.isBefore(s.getLessonStartTime())).collect(Collectors.toList());
+				.filter(s -> NOON.isBefore(s.getLessonStartTime()))
+				.peek(s -> { if(s.getStandByName()!=null) s.setReservationStatus(SOLD_OUT); })
+				.collect(Collectors.toList());
 		return ScheduleCommandResponse.create(morning, afternoon);
 	}
 
@@ -155,6 +162,10 @@ public class ScheduleService {
 		Schedule schedule = scheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
 			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
+		LocalDateTime now = LocalDateTime.of(LocalDate.now(), LocalTime.now());
+		LocalDateTime before24Hour = LocalDateTime.of(schedule.getLessonDt().minusDays(1), schedule.getLessonStartTime());
+		if(now.isAfter(before24Hour)) throw new CustomException(RESERVATION_CANCEL_NOT_VALID);
+
 		// 대기 테이블에 인원이 있으면 수정하기
 		Optional<StandBySchedule> standByScheduleOpt = standByScheduleRepository.findByScheduleId(scheduleId);
 		if(standByScheduleOpt.isPresent()){
@@ -162,19 +173,24 @@ public class ScheduleService {
 			changeApplicantAndDeleteStandBy(standBySchedule, schedule);
 			return ScheduleIdInfo.create(memberId, schedule, standBySchedule.getMember().getId());
 		}else{
+			ScheduleIdInfo idInfo = ScheduleIdInfo.from(schedule);
 			schedule.cancelMemberSchedule();
-			return ScheduleIdInfo.from(schedule);
+			return idInfo;
 		}
 	}
 
-	public List<MyReservationResponse> findAllMyReservation(Long memberId, ScheduleSearchCond searchCond) {
-		List<MyReservationResponse> result = scheduleRepository.findAllMyReservation(memberId, searchCond);
-		return result.isEmpty() ? null : result;
+	public MyReservationResponse findAllMyReservation(Long memberId, ScheduleSearchCond searchCond) {
+		Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
+		CourseDto course = optCourse.map(CourseDto::from).orElse(null);
+		List<MyReservation> result = scheduleRepository.findAllMyReservation(memberId, searchCond);
+		return MyReservationResponse.create(course, result);
 	}
 
-	public List<MyStandbyScheduleResponse> findAllMyStandbySchedule(Long memberId) {
-		List<MyStandbyScheduleResponse> result = scheduleRepository.findAllMyStandbySchedule(memberId);
-		return result.isEmpty() ? null : result;
+	public MyStandbyScheduleResponse findAllMyStandbySchedule(Long memberId) {
+		Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
+		CourseDto course = optCourse.map(CourseDto::from).orElse(null);
+		List<MyStandbySchedule> result = scheduleRepository.findAllMyStandbySchedule(memberId);
+		return MyStandbyScheduleResponse.create(course, result);
 	}
 
 	public ScheduleIdInfo updateReservationStatusToNoShow(Long scheduleId, Long memberId) {

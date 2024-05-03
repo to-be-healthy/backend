@@ -23,8 +23,6 @@ public class WorkoutHistoryCommentDto {
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    @JsonIgnore
     private Long parentId;
     private Long orderNum;
     private boolean delYn;
