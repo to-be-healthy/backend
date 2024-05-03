@@ -40,7 +40,9 @@ class TrainerScheduleController(
     )
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping
-    fun registerSchedule(@RequestBody request: RegisterScheduleRequest, @AuthenticationPrincipal member: CustomMemberDetails,
+    fun registerSchedule(
+        @RequestBody request: RegisterScheduleRequest,
+        @AuthenticationPrincipal member: CustomMemberDetails,
     ): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "일정 등록에 성공하였습니다.",
@@ -59,9 +61,9 @@ class TrainerScheduleController(
         @RequestBody request: RegisterScheduleCommand,
         @AuthenticationPrincipal member: CustomMemberDetails,
     ): ApiResultResponse<Boolean> {
-        return ApiResultResponse (
-            message = ("개별 일정 등록에 성공하였습니다."),
-            data = trainerScheduleService.registerIndividualSchedule(request, member.memberId)
+        return ApiResultResponse(
+            message = "개별 일정 등록에 성공하였습니다.",
+            data = trainerScheduleService.registerIndividualSchedule(request, member.memberId),
         )
     }
 
@@ -77,7 +79,7 @@ class TrainerScheduleController(
     ): ApiResultResponse<List<ScheduleCommandResult>> {
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
-            data = trainerScheduleService.findAllSchedule(searchCond, customMemberDetails.member)
+            data = trainerScheduleService.findAllSchedule(searchCond, customMemberDetails.member),
         )
     }
 
@@ -100,7 +102,7 @@ class TrainerScheduleController(
     ): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "일정을 취소하였습니다.",
-            data = trainerScheduleService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId)
+            data = trainerScheduleService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId),
         )
     }
 
@@ -109,11 +111,8 @@ class TrainerScheduleController(
         description = "트레이너가 학생 노쇼 처리를 한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "노쇼 처리가 되었습니다."),
-            ApiResponse(
-                responseCode = "404",
-                description = "해당 일정이 존재하지 않습니다.",
-            ),
-        ],
+            ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다."),
+        ]
     )
     @DeleteMapping("/no-show/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
@@ -123,7 +122,7 @@ class TrainerScheduleController(
     ): ApiResultResponse<ScheduleIdInfo> {
         return ApiResultResponse(
             message = "노쇼 처리되었습니다.",
-            data = trainerScheduleService.updateReservationStatusToNoShow(scheduleId, customMemberDetails.memberId)
+            data = trainerScheduleService.updateReservationStatusToNoShow(scheduleId, customMemberDetails.memberId),
         )
     }
 }
