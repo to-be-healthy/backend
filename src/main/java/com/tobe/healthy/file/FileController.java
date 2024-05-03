@@ -31,7 +31,7 @@ public class FileController {
     public ResponseHandler<List<RegisterFileResponse>> uploadFiles(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                           @Valid FileAddCommand command) {
         return ResponseHandler.<List<RegisterFileResponse>>builder()
-                .data(fileService.uploadFiles(command.getFileUploadType(), command.getUploadFiles()))
+                .data(fileService.uploadFiles(command.getFileUploadType(), command.getUploadFiles(), customMemberDetails.getMember()))
                 .message("운동기록이 등록되었습니다.")
                 .build();
     }

@@ -118,40 +118,38 @@ public class FileService {
 
 	// 1. 파일을 AWS S3에 업로드 후 업로드 주소 반환
 	// 2.
-	public List<RegisterFileResponse> uploadFiles(FileUploadType fileUploadType, List<MultipartFile> uploadFiles) {
+	public List<RegisterFileResponse> uploadFiles(FileUploadType fileUploadType, List<MultipartFile> uploadFiles, Member member) {
 		List<RegisterFileResponse> uploadFile = new ArrayList<>();
 		int fileOrder = 0;
 		for (MultipartFile file: uploadFiles) {
-//			if (!file.isEmpty()) {
-//				try (InputStream inputStream = file.getInputStream()) {
-//					String originalFileName = file.getOriginalFilename();
-//					String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-//					ObjectMetadata objectMetadata = new ObjectMetadata();
-//					objectMetadata.setContentLength(file.getSize());
-//					objectMetadata.setContentType(file.getContentType());
-//					String savedFileName = fileUploadType.getCode() + separator + System.currentTimeMillis() + "_" + randomUUID() + extension;
-//					amazonS3.putObject(
-//						"to-be-healthy-bucket",
-//						savedFileName,
-//						inputStream,
-//						objectMetadata
-//					);
-//					String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+			if (!file.isEmpty()) {
+				try (InputStream inputStream = file.getInputStream()) {
+					String originalFileName = file.getOriginalFilename();
+					String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+					ObjectMetadata objectMetadata = new ObjectMetadata();
+					objectMetadata.setContentLength(file.getSize());
+					objectMetadata.setContentType(file.getContentType());
+					String savedFileName = fileUploadType.getCode() + separator + System.currentTimeMillis() + "_" + randomUUID() + extension;
+					amazonS3.putObject(
+						"to-be-healthy-bucket",
+						savedFileName,
+						inputStream,
+						objectMetadata
+					);
+					String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
 //					AwsS3File awsS3File = AwsS3File.builder()
 //						.originalFileName(originalFileName)
 //						.member(member)
 //						.fileUploadType(fileUploadType)
-//						.fileUploadTypeId(fileUploadTypeId)
 //						.fileUrl(fileUrl)
 //						.fileOrder(++fileOrder)
 //						.build();
-//
-//					uploadFile.add(new RegisterFileResponse(fileUrl, originalFileName, fileOrder));
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//					log.error("error => {}", e.getMessage());
-//				}
-//			}
+					uploadFile.add(new RegisterFileResponse(fileUrl, originalFileName, fileOrder));
+				} catch (IOException e) {
+					e.printStackTrace();
+					log.error("error => {}", e.getMessage());
+				}
+			}
 		}
 		return uploadFile;
 	}
