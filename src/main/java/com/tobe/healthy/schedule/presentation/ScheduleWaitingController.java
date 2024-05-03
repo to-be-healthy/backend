@@ -4,6 +4,7 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.ScheduleService;
 import com.tobe.healthy.schedule.application.ScheduleWaitingService;
+import com.tobe.healthy.schedule.domain.dto.out.MyStandbySchedule;
 import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,6 +17,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/schedule/waiting/v1")
@@ -25,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 public class ScheduleWaitingController {
 
 	private final ScheduleWaitingService scheduleWaitingService;
-	private final ScheduleService scheduleService;
 
 	@Operation(summary = "학생이 수업 대기 신청을 한다.", description = "학생이 신청완료된 수업에 대기 신청을 한다.",
 		responses = {
@@ -55,16 +57,16 @@ public class ScheduleWaitingController {
 				.build();
 	}
 
-	@Operation(summary = "학생이 대기중인 예약을 조회한다.", description = "학생이 대기중인 예약을 조회한다.",
-			responses = {
-					@ApiResponse(responseCode = "200", description = "학생이 대기중인 예약을 조회하였습니다.")
-			})
-	@GetMapping("/my-standby")
-	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<MyStandbyScheduleResponse> findAllMyStandbySchedule(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<MyStandbyScheduleResponse>builder()
-				.data(scheduleService.findAllMyStandbySchedule(customMemberDetails.getMemberId()))
-				.message("학생이 대기중인 예약을 조회하였습니다.")
-				.build();
-	}
+//	@Operation(summary = "학생이 대기중인 예약을 조회한다.", description = "학생이 대기중인 예약을 조회한다.",
+//			responses = {
+//					@ApiResponse(responseCode = "200", description = "학생이 대기중인 예약을 조회하였습니다.")
+//			})
+//	@GetMapping("/my-standby")
+//	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
+//	public ResponseHandler<MyStandbyScheduleResponse> findAllMyStandbySchedule(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+//		return ResponseHandler.<MyStandbyScheduleResponse>builder()
+//				.data(scheduleService.findAllMyStandbySchedule(customMemberDetails.getMemberId()))
+//				.message("학생이 대기중인 예약을 조회하였습니다.")
+//				.build();
+//	}
 }

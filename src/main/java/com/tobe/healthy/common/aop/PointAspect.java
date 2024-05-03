@@ -36,7 +36,7 @@ public class PointAspect {
     @Pointcut("execution(* com.tobe.healthy.diet.application.DietService.addDiet(..))")
     private void addDiet() {}
 
-    @Pointcut("execution(* com.tobe.healthy.schedule.application.ScheduleService.updateReservationStatusToNoShow(..))")
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleService.updateReservationStatusToNoShow(..))")
     private void updateReservationStatusToNoShow() {}
 
     @AfterReturning(value = "addWorkoutHistory()", returning = "returnValue")

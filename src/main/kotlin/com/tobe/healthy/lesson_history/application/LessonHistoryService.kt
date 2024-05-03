@@ -30,7 +30,7 @@ import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.entity.Schedule
-import com.tobe.healthy.schedule.repository.ScheduleRepository
+import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -44,7 +44,7 @@ class LessonHistoryService(
     private val lessonHistoryRepository: LessonHistoryRepository,
     private val lessonHistoryFilesRepository: LessonHistoryFilesRepository,
     private val memberRepository: MemberRepository,
-    private val scheduleRepository: ScheduleRepository,
+    private val trainerScheduleRepository: TrainerScheduleRepository,
     private val lessonHistoryCommentRepository: LessonHistoryCommentRepository,
     private val amazonS3: AmazonS3,
     private val redisService: RedisService,
@@ -210,7 +210,7 @@ class LessonHistoryService(
         val findTrainer =
             memberRepository.findByIdOrNull(trainerId) ?: throw CustomException(TRAINER_NOT_FOUND)
         val findSchedule =
-            scheduleRepository.findByIdOrNull(request.scheduleId) ?: throw CustomException(
+            trainerScheduleRepository.findByIdOrNull(request.scheduleId) ?: throw CustomException(
                 SCHEDULE_NOT_FOUND,
             )
         return Triple(findMember, findTrainer, findSchedule)
