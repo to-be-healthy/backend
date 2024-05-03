@@ -1,33 +1,29 @@
 package com.tobe.healthy.workout.application;
 
 import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.file.application.FileService;
-import com.tobe.healthy.file.domain.dto.WorkoutHistoryFileDto;
-import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
+import com.tobe.healthy.file.FileService;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
+import com.tobe.healthy.workout.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
+import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.*;
 import com.tobe.healthy.workout.repository.CompletedExerciseRepository;
 import com.tobe.healthy.workout.repository.ExerciseRepository;
 import com.tobe.healthy.workout.repository.WorkoutHistoryLikeRepository;
 import com.tobe.healthy.workout.repository.WorkoutHistoryRepository;
-import jakarta.mail.Multipart;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
@@ -141,14 +137,14 @@ public class WorkoutHistoryService {
     }
 
     private WorkoutHistoryDto setHistoryFile(WorkoutHistoryDto historyDto, List<Long> ids) {
-        List<WorkoutHistoryFile> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
+        List<WorkoutHistoryFiles> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
         List<WorkoutHistoryFileDto> filesDto = files.stream().map(WorkoutHistoryFileDto::from).collect(Collectors.toList());
         historyDto.setFiles(filesDto);
         return historyDto;
     }
 
     private List<WorkoutHistoryDto> setHistoryListFile(List<WorkoutHistoryDto> historiesDto, List<Long> ids) {
-        List<WorkoutHistoryFile> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
+        List<WorkoutHistoryFiles> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
         return historiesDto.stream().map(h -> {
             List<WorkoutHistoryFileDto> thisFiles = files.stream().map(WorkoutHistoryFileDto::from)
                     .filter(f -> f.getWorkoutHistoryId().equals(h.getWorkoutHistoryId())).collect(Collectors.toList());

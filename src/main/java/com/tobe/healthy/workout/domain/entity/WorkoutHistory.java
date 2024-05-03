@@ -1,7 +1,6 @@
 package com.tobe.healthy.workout.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.file.domain.entity.WorkoutHistoryFile;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import jakarta.persistence.*;
@@ -52,7 +51,7 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     @Builder.Default
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
-    private List<WorkoutHistoryFile> historyFiles = new ArrayList<>();
+    private List<WorkoutHistoryFiles> historyFiles = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
@@ -95,7 +94,7 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     }
 
     public void deleteFiles() {
-        this.historyFiles.forEach(WorkoutHistoryFile::deleteWorkoutHistoryFile);
+        this.historyFiles.forEach(WorkoutHistoryFiles::deleteWorkoutHistoryFile);
     }
 
 }

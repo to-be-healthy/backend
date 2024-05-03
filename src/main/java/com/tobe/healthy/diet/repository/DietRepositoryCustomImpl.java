@@ -7,10 +7,8 @@ import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.diet.domain.entity.Diet;
-import com.tobe.healthy.file.domain.entity.DietFile;
-import com.tobe.healthy.file.domain.entity.QDietFile;
+import com.tobe.healthy.diet.domain.entity.DietFiles;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -21,9 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.tobe.healthy.diet.domain.entity.QDiet.diet;
-import static com.tobe.healthy.file.domain.entity.QDietFile.dietFile;
-import static com.tobe.healthy.file.domain.entity.QWorkoutHistoryFile.workoutHistoryFile;
-import static com.tobe.healthy.workout.domain.entity.QWorkoutHistory.workoutHistory;
+import static com.tobe.healthy.diet.domain.entity.QDietFiles.dietFiles;
 
 
 @Repository
@@ -33,11 +29,11 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<DietFile> findAllCreateAtToday(Long memberId, LocalDateTime start, LocalDateTime end) {
-        return queryFactory.select(dietFile)
-                .from(dietFile)
+    public List<DietFiles> findAllCreateAtToday(Long memberId, LocalDateTime start, LocalDateTime end) {
+        return queryFactory.select(dietFiles)
+                .from(dietFiles)
                 .where(JPAExpressions.selectFrom(diet)
-                        .where(diet.dietId.eq(dietFile.diet.dietId)
+                        .where(diet.dietId.eq(dietFiles.diet.dietId)
                         , createdAtBetween(start, end)
                         , delYnEq(false)
                         , memberIdEq(memberId))
@@ -66,11 +62,11 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
     }
 
     @Override
-    public List<DietFile> getDietFile(List<Long> ids) {
-        return queryFactory.select(dietFile)
-                .from(dietFile)
-                .where(dietFile.diet.dietId.in(ids), dietFileDeYnEq(false))
-                .orderBy(dietFile.createdAt.desc())
+    public List<DietFiles> getDietFile(List<Long> ids) {
+        return queryFactory.select(dietFiles)
+                .from(dietFiles)
+                .where(dietFiles.diet.dietId.in(ids), dietFileDeYnEq(false))
+                .orderBy(dietFiles.createdAt.desc())
                 .fetch();
     }
 
@@ -87,7 +83,7 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
     }
 
     private BooleanExpression dietFileDeYnEq(boolean bool) {
-        return dietFile.delYn.eq(bool);
+        return dietFiles.delYn.eq(bool);
     }
 
     private BooleanExpression convertDateFormat(String searchDate) {

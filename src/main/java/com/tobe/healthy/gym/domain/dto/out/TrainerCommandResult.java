@@ -1,7 +1,7 @@
 package com.tobe.healthy.gym.domain.dto.out;
 
-import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberProfile;
 import lombok.Data;
 
 @Data
@@ -10,7 +10,7 @@ public class TrainerCommandResult {
 	private String userId;
 	private String email;
 	private String name;
-	private Profile profile;
+	private MemberProfile memberProfile;
 
 	public TrainerCommandResult(Member member) {
 		this.id = member.getId();

@@ -60,7 +60,7 @@ public class WorkoutCommentService {
         if(comments.isEmpty()) return null;
 
         List<WorkoutHistoryCommentDto> dtos = comments.stream()
-                .map(c -> WorkoutHistoryCommentDto.create(c, c.getMember().getProfileId())).toList();
+                .map(c -> WorkoutHistoryCommentDto.create(c, c.getMember().getMemberProfile())).toList();
         Map<Boolean, List<WorkoutHistoryCommentDto>> dtos2 = dtos.stream()
                 .collect(Collectors.partitioningBy(c -> c.getParentId() == null));
         List<WorkoutHistoryCommentDto> parent = dtos2.get(true);

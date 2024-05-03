@@ -67,10 +67,23 @@ public class ScheduleController {
 			@ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
 	})
 	@GetMapping("/all")
-	public ResponseHandler<ScheduleCommandResponse> findAllSchedule(@ParameterObject ScheduleSearchCond searchCond,
+	public ResponseHandler<List<ScheduleCommandResult>> findAllSchedule(@ParameterObject ScheduleSearchCond searchCond,
+																	@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<List<ScheduleCommandResult>>builder()
+				.data(scheduleService.findAllSchedule(searchCond, customMemberDetails.getMember()))
+				.message("전체 일정을 조회했습니다.")
+				.build();
+	}
+
+	@Operation(summary = "학생이 트레이너의 전체 일정을 조회한다.", description = "전체 일정을 조회한다. 특정 일자나 기간으로 조회하고 싶으면 DTO를 활용한다.",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
+			})
+	@GetMapping("/trainer/all")
+	public ResponseHandler<ScheduleCommandResponse> findAllScheduleOfTrainer(@ParameterObject ScheduleSearchCond searchCond,
 																	@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<ScheduleCommandResponse>builder()
-				.data(scheduleService.findAllSchedule(searchCond, customMemberDetails.getMember()))
+				.data(scheduleService.findAllScheduleOfTrainer(searchCond, customMemberDetails.getMember()))
 				.message("전체 일정을 조회했습니다.")
 				.build();
 	}

@@ -1,7 +1,6 @@
 package com.tobe.healthy.member.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.file.domain.entity.Profile;
 import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
@@ -57,9 +56,9 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private int weight = 0;
 
 	@OneToOne(fetch = LAZY, cascade = ALL)
-	@JoinColumn(name = "profile_id")
+	@JoinColumn(name = "member_profile_id")
 	@Nullable
-	private Profile profileId;
+	private MemberProfile memberProfile;
 
 	@Enumerated(STRING)
 	@ColumnDefault("'STUDENT'")
@@ -109,18 +108,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 				.build();
 	}
 
-	public static Member join(String email, String name, Profile profile, MemberType memberType, SocialType socialType) {
-		return Member.builder()
-				.userId(UUID.randomUUID().toString())
-				.email(email)
-				.name(name)
-				.pushAlarmStatus(ENABLED)
-				.profileId(profile)
-				.memberType(memberType)
-				.socialType(socialType)
-				.build();
-	}
-
 	public static Member join(String email, String name, MemberType memberType, SocialType socialType) {
 		return Member.builder()
 				.userId(UUID.randomUUID().toString())
@@ -133,12 +120,12 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	}
 
 	@Builder
-	public Member(String userId, String email, String password, String name, Profile profileId, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, Gym gym, SocialType socialType, boolean delYn) {
+	public Member(String userId, String email, String password, String name, MemberProfile memberProfile, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, Gym gym, SocialType socialType, boolean delYn) {
 		this.userId = userId;
 		this.email = email;
 		this.password = password;
 		this.name = name;
-		this.profileId = profileId;
+		this.memberProfile = memberProfile;
 		this.memberType = memberType;
 		this.pushAlarmStatus = pushAlarmStatus;
 		this.feedbackAlarmStatus = feedbackAlarmStatus;
@@ -147,8 +134,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
 		this.delYn = delYn;
 	}
 
-	public void registerProfile(Profile profileId) {
-		this.profileId = profileId;
+	public void registerProfile(MemberProfile memberProfileId) {
+		this.memberProfile = memberProfileId;
 	}
 
 	public void resetPassword(String password) {

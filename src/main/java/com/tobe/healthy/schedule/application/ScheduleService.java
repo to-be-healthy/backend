@@ -54,25 +54,44 @@ public class ScheduleService {
 		while (!startDt.isAfter(request.getEndDt())) {
             LocalTime startTime = request.getStartTime();
             while (!startTime.isAfter(request.getEndTime())) {
-				if (request.getClosedDt() != null && request.getClosedDt().equals(startDt)) {
+				if (isEqualsClosedDt(request, startDt)) {
 					startDt = startDt.plusDays(1);
 					continue;
 				}
-                if (startTime.equals(request.getLunchStartTime())) {
+                if (isEqualsLunchTime(request, startTime)) {
                     Duration duration = Duration.between(request.getLunchStartTime(), request.getLunchEndTime());
                     startTime = startTime.plusMinutes(duration.toMinutes());
                     continue;
                 }
                 startTime = startTime.plusMinutes(request.getSessionTime().getDescription());
-				if (startTime.equals(request.getEndTime())) {
+				if (startDtIsEqualsEndDt(request, startTime)) {
 					break;
 				}
-				Schedule entity = Schedule.registerSchedule(startDt, trainer, startTime, startTime.plusMinutes(request.getSessionTime().getDescription()), AVAILABLE);
+				Schedule entity =
+					Schedule.registerSchedule(
+						startDt,
+						trainer,
+						startTime,
+						startTime.plusMinutes(request.getSessionTime().getDescription()),
+						AVAILABLE
+					);
 				scheduleRepository.save(entity);
 			}
 			startDt = startDt.plusDays(1);
 		}
 		return true;
+	}
+
+	private boolean startDtIsEqualsEndDt(AutoCreateScheduleCommand request, LocalTime startTime) {
+		return startTime.equals(request.getEndTime());
+	}
+
+	private boolean isEqualsLunchTime(AutoCreateScheduleCommand request, LocalTime startTime) {
+		return startTime.equals(request.getLunchStartTime());
+	}
+
+	private boolean isEqualsClosedDt(AutoCreateScheduleCommand request, LocalDate startDt) {
+		return request.getClosedDt() != null && request.getClosedDt().equals(startDt);
 	}
 
 	private void validateScheduleDate(AutoCreateScheduleCommand request) {
@@ -109,15 +128,14 @@ public class ScheduleService {
 		return ScheduleIdInfo.from(schedule);
 	}
 
-	public ScheduleCommandResponse findAllSchedule(ScheduleSearchCond searchCond, Member loginMember) {
-		Long trainerId;
-		if(STUDENT.equals(loginMember.getMemberType())){
-			TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(loginMember.getId())
-					.orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
-			trainerId = mapping.getTrainer().getId();
-		}else{
-			trainerId = loginMember.getId();
-		}
+	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Member trainer) {
+		return scheduleRepository.findAllSchedule(searchCond, trainer.getId());
+	}
+
+	public ScheduleCommandResponse findAllScheduleOfTrainer(ScheduleSearchCond searchCond, Member member) {
+		TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId())
+				.orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
+		Long trainerId = mapping.getTrainer().getId();
 		List<ScheduleCommandResult> schedule = scheduleRepository.findAllSchedule(searchCond, trainerId);
 
 		List<ScheduleCommandResult> morning = schedule.stream()
@@ -196,20 +214,6 @@ public class ScheduleService {
 		);
 		return true;
 	}
-
-//	public Boolean registerClosedDay(RegisterClosedDayCommand request, Long trainerId) {
-//		Member trainer = memberRepository.findById(trainerId).orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-//		request.getLessonDt().stream().forEach(lessonDt -> scheduleRepository.findScheduleByLessonDt(lessonDt).ifPresentOrElse(
-//				schedule -> {
-//					throw new CustomException(SCHEDULE_ALREADY_EXISTS);
-//				},
-//				() -> {
-//					Schedule entity = Schedule.builder().lessonDt(lessonDt).trainer(trainer).build();
-//					scheduleRepository.save(entity);
-//				}
-//		));
-//		return true;
-//	}
 
 	private void changeApplicantAndDeleteStandBy(StandBySchedule standBySchedule, Schedule schedule) {
 		schedule.changeApplicantInSchedule(standBySchedule.getMember());
