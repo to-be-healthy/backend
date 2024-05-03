@@ -38,6 +38,8 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import java.lang.System.currentTimeMillis
+import java.util.UUID
 
 @Service
 @Transactional
@@ -50,13 +52,10 @@ class LessonHistoryService(
     private val amazonS3: AmazonS3,
     private val redisService: RedisService,
     @Value("\${aws.s3.bucket-name}")
-    private val bucketName: String
+    private val bucketName: String,
 ) {
 
-    fun registerLessonHistory(
-        request: RegisterLessonHistoryCommand,
-        trainerId: Long,
-    ): Boolean {
+    fun registerLessonHistory(request: RegisterLessonHistoryCommand, trainerId: Long, ): Boolean {
         val (findMember, findTrainer, findSchedule) = checkLessonHistoryRequirements(
             request,
             trainerId,
@@ -96,7 +95,7 @@ class LessonHistoryService(
 
     fun updateLessonHistory(lessonHistoryId: Long, request: LessonHistoryCommand): Boolean {
         val findLessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
-            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND,)
+            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
         findLessonHistory.updateLessonHistory(request.title!!, request.content!!)
         registerFile(
             uploadFiles = request.uploadFileResponse,
@@ -275,7 +274,7 @@ class LessonHistoryService(
 
     private fun putFile(uploadFile: MultipartFile): String {
         val objectMetadata = getObjectMetadata(uploadFile)
-        val savedFileName = "lesson-history/" + System.currentTimeMillis().toString()
+        val savedFileName = "lesson-history/" + currentTimeMillis().toString() + "-" + UUID.randomUUID().toString()
         amazonS3.putObject(
             bucketName,
             savedFileName,
