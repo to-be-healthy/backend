@@ -1,9 +1,9 @@
 package com.tobe.healthy.lesson_history.domain.dto.out
 
-import com.tobe.healthy.file.AwsS3File
 import com.tobe.healthy.lesson_history.domain.entity.AttendanceStatus.ABSENT
 import com.tobe.healthy.lesson_history.domain.entity.AttendanceStatus.ATTENDED
 import com.tobe.healthy.lesson_history.domain.entity.LessonHistory
+import com.tobe.healthy.lesson_history.domain.entity.LessonHistoryFiles
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -81,8 +81,6 @@ data class LessonHistoryResponse(
 
     @Schema(description = "수업 일지 첨부파일")
     data class LessonHistoryFileResults(
-        @Schema(description = "첨부한 파일 이름", example = "정선우 학생 운동 사진")
-        val originalFileName: String,
         @Schema(description = "첨부한 파일 URL(AWS S3)", example = "https://~~~")
         val fileUrl: String,
         @Schema(description = "첨부한 파일 순서", example = "0")
@@ -91,12 +89,11 @@ data class LessonHistoryResponse(
         val createdAt: LocalDateTime,
     ) {
         companion object {
-            fun from(entity: AwsS3File): LessonHistoryFileResults {
+            fun from(entity: LessonHistoryFiles): LessonHistoryFileResults {
                 return LessonHistoryFileResults(
-                    originalFileName = entity.originalFileName,
                     fileUrl = entity.fileUrl,
                     fileOrder = entity.fileOrder,
-                    createdAt = entity.createdAt,
+                    createdAt = entity.createdAt
                 )
             }
         }

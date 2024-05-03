@@ -1,7 +1,6 @@
 package com.tobe.healthy.lesson_history.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
-import com.tobe.healthy.file.AwsS3File
 import com.tobe.healthy.member.domain.entity.Member
 import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.Column
@@ -37,7 +36,7 @@ class LessonHistoryComment(
     val lessonHistory: LessonHistory,
 
     @OneToMany(fetch = LAZY, mappedBy = "lessonHistoryComment", cascade = [ALL])
-    var files: MutableList<AwsS3File> = mutableListOf(),
+    var files: MutableList<LessonHistoryFiles> = mutableListOf(),
 
     @Id
     @GeneratedValue(strategy = IDENTITY)

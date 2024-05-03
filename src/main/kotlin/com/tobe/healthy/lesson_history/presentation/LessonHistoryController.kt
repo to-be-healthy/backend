@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
@@ -164,7 +163,7 @@ class LessonHistoryController(
     @PostMapping("/{lessonHistoryId}/comment")
     fun registerLessonHistoryComment(@Parameter(description = "수업일지 ID", example = "1") @PathVariable lessonHistoryId: Long,
                                      @Parameter(content = [Content(schema = Schema(implementation = CommentRegisterCommand::class))])
-                                     @RequestPart @Valid request: CommentRegisterCommand,
+                                     @RequestBody @Valid request: CommentRegisterCommand,
                                      @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "댓글이 등록되었습니다.",
@@ -182,7 +181,7 @@ class LessonHistoryController(
     fun registerLessonHistoryComment(@Parameter(description = "수업일지 ID", example = "1") @PathVariable lessonHistoryId: Long,
                                      @Parameter(description = "수업일지 댓글 ID", example = "1") @PathVariable lessonHistoryCommentId: Long,
                                      @Parameter(content = [Content(schema = Schema(implementation = CommentRegisterCommand::class))])
-                                     @RequestPart @Valid request: CommentRegisterCommand,
+                                     @RequestBody @Valid request: CommentRegisterCommand,
                                      @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "대댓글이 등록되었습니다.",

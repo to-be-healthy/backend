@@ -1,7 +1,6 @@
 package com.tobe.healthy.lesson_history.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
-import com.tobe.healthy.file.AwsS3File
 import com.tobe.healthy.lesson_history.domain.dto.`in`.RegisterLessonHistoryCommand
 import com.tobe.healthy.lesson_history.domain.entity.FeedbackCheckStatus.UNREAD
 import com.tobe.healthy.member.domain.entity.Member
@@ -32,7 +31,7 @@ class LessonHistory(
     val lessonHistoryComment: MutableList<LessonHistoryComment> = mutableListOf(),
 
     @OneToMany(fetch = LAZY, mappedBy = "lessonHistory", cascade = [ALL])
-    var file: MutableList<AwsS3File> = mutableListOf(),
+    var file: MutableList<LessonHistoryFiles> = mutableListOf(),
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_id")

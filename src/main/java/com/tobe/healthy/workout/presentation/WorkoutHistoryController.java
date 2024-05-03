@@ -1,15 +1,12 @@
 package com.tobe.healthy.workout.presentation;
 
-import com.google.firebase.internal.FirebaseService;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.file.FileService;
-import com.tobe.healthy.file.FileUploadType;
 import com.tobe.healthy.file.RegisterFile;
-import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
+import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-
-import static com.tobe.healthy.file.FileUploadType.WORKOUT_HISTORY;
 
 
 @RestController

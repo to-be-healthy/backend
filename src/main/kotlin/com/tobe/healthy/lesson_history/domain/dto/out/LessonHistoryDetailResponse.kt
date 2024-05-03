@@ -1,10 +1,10 @@
 package com.tobe.healthy.lesson_history.domain.dto.out
 
-import com.tobe.healthy.file.AwsS3File
 import com.tobe.healthy.lesson_history.domain.entity.AttendanceStatus.ABSENT
 import com.tobe.healthy.lesson_history.domain.entity.AttendanceStatus.ATTENDED
 import com.tobe.healthy.lesson_history.domain.entity.LessonHistory
 import com.tobe.healthy.lesson_history.domain.entity.LessonHistoryComment
+import com.tobe.healthy.lesson_history.domain.entity.LessonHistoryFiles
 import com.tobe.healthy.member.domain.entity.Member
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
@@ -156,15 +156,13 @@ data class LessonHistoryDetailResponse(
     }
 
     data class LessonHistoryFileResults(
-        val originalFileName: String,
         val fileUrl: String,
         val fileOrder: Int,
         val createdAt: LocalDateTime
     ) {
         companion object {
-            fun from(entity: AwsS3File): LessonHistoryFileResults {
+            fun from(entity: LessonHistoryFiles): LessonHistoryFileResults {
                 return LessonHistoryFileResults(
-                    originalFileName = entity.originalFileName,
                     fileUrl = entity.fileUrl,
                     fileOrder = entity.fileOrder,
                     createdAt = entity.createdAt
