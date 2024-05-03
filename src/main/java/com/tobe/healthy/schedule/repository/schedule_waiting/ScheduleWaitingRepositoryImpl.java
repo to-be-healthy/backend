@@ -35,5 +35,4 @@ public class ScheduleWaitingRepositoryImpl implements ScheduleWaitingRepositoryC
 				.fetch();
 		return results.stream().map(MyScheduleWaiting::from).collect(toList());
 	}
-
 }

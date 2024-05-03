@@ -108,11 +108,11 @@ class TrainerScheduleService(
     }
 
     fun findAllSchedule(searchCond: ScheduleSearchCond, trainer: Member): List<ScheduleCommandResult?> {
-        return trainerScheduleRepository.findAllSchedule(searchCond, trainer.id, trainer)
+        return trainerScheduleRepository.findAllSchedule(searchCond, trainer)
     }
 
-    fun updateReservationStatusToNoShow(scheduleId: Long, memberId: Long): ScheduleIdInfo {
-        val schedule = trainerScheduleRepository.findScheduleByTrainerId(memberId, scheduleId)
+    fun updateReservationStatusToNoShow(scheduleId: Long, trainerId: Long): ScheduleIdInfo {
+        val schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
         schedule.updateReservationStatusToNoShow()
         return ScheduleIdInfo.from(schedule)
@@ -129,8 +129,8 @@ class TrainerScheduleService(
         }
     }
 
-    fun cancelTrainerSchedule(scheduleId: Long, memberId: Long): Boolean {
-        val entity = trainerScheduleRepository.findScheduleByTrainerId(memberId, scheduleId) ?: throw CustomException(SCHEDULE_NOT_FOUND)
+    fun cancelTrainerSchedule(scheduleId: Long, trainerId: Long): Boolean {
+        val entity = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, trainerId) ?: throw CustomException(SCHEDULE_NOT_FOUND)
         entity.cancelTrainerSchedule()
         return true
     }

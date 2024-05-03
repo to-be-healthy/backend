@@ -35,7 +35,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,7 +56,6 @@ import java.util.regex.Pattern;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.member.domain.entity.SocialType.*;
-import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
@@ -80,11 +78,7 @@ public class MemberService {
     private final AmazonS3 amazonS3;
     private final MailService mailService;
     private final CourseService courseService;
-
     private final MemberProfileRepository memberProfileRepository;
-
-    @Value("${file.upload.location}")
-    private String uploadDir;
 
     public boolean validateUserIdDuplication(String userId) {
         if (userId.length() < 4) {
@@ -230,14 +224,16 @@ public class MemberService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         if (!uploadFile.isEmpty()) {
-            String originalFileName = uploadFile.getOriginalFilename();
             ObjectMetadata objectMetadata = getObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
-            String extension = requireNonNull(originalFileName).substring(originalFileName.lastIndexOf("."));
-
-            String savedFileName = "profile/" + createFileUUID() + extension;
+            String savedFileName = "profile/" + createFileUUID();
 
             try (InputStream inputStream = uploadFile.getInputStream()) {
-                amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
+                amazonS3.putObject(
+                        "to-be-healthy-bucket",
+                        savedFileName,
+                        inputStream,
+                        objectMetadata
+                );
                 String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
                 MemberProfile memberProfile = MemberProfile.create(fileUrl, member);
                 memberProfileRepository.save(memberProfile);
@@ -283,8 +279,9 @@ public class MemberService {
         }
 
         Member member = Member.join(response.getEmail(), response.getNickname(), request.getMemberType(), KAKAO);
+        MemberProfile profile = getProfile(response.getPicture(), member);
+        member.setMemberProfile(profile);
         memberRepository.save(member);
-        getProfile(response.getPicture(), member);
 
         //초대가입인 경우
         if (StringUtils.isNotEmpty(request.getUuid())) {
@@ -355,8 +352,9 @@ public class MemberService {
         }
 
         Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), request.getMemberType(), NAVER);
+        MemberProfile profile = getProfile(authorization.getResponse().getProfileImage(), member);
+        member.setMemberProfile(profile);
         memberRepository.save(member);
-        getProfile(authorization.getResponse().getProfileImage(), member);
 
         //초대가입인 경우
         if (StringUtils.isNotEmpty(request.getUuid())) {
@@ -365,24 +363,26 @@ public class MemberService {
         return tokenGenerator.create(member);
     }
 
-    private void getProfile(String profileImage, Member member) {
+    private MemberProfile getProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
-        String extension = getImageExtension(profileImage);
-        String savedFileName = "profile/" + createFileUUID() + extension;
+        String savedFileName = "profile/" + createFileUUID();
         ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
-            amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
+            amazonS3.putObject(
+                    "to-be-healthy-bucket",
+                    savedFileName,
+                    inputStream,
+                    objectMetadata
+            );
             String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
-            MemberProfile file = MemberProfile.create(fileUrl, member);
-            memberProfileRepository.save(file);
-            member.registerProfile(file);
+            return MemberProfile.create(fileUrl, member);
         } catch (IOException e) {
             log.error("error => {}", e);
             throw new CustomException(FILE_UPLOAD_ERROR);
         }
     }
 
-    private void getGoogleProfile(String profileImage, Member member) {
+    private MemberProfile getGoogleProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
         String extension = ".jpg";
         String savedFileName = "profile/" + createFileUUID() + extension;
@@ -390,9 +390,7 @@ public class MemberService {
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
             String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
-            MemberProfile file = MemberProfile.create(fileUrl, member);
-            memberProfileRepository.save(file);
-            member.registerProfile(file);
+            return MemberProfile.create(fileUrl, member);
         } catch (IOException e) {
             log.error("error => {}", e);
             throw new CustomException(FILE_UPLOAD_ERROR);
@@ -461,8 +459,9 @@ public class MemberService {
         }
 
         Member member = Member.join(email, name, request.getMemberType(), GOOGLE);
+        MemberProfile profile = getGoogleProfile(picture, member);
+        member.setMemberProfile(profile);
         memberRepository.save(member);
-        getGoogleProfile(picture, member);
 
         //초대가입인 경우
         if (StringUtils.isNotEmpty(request.getUuid())) {
@@ -500,11 +499,7 @@ public class MemberService {
     }
 
     private String createFileUUID() {
-        return System.currentTimeMillis() + "_" + UUID.randomUUID();
-    }
-
-    private String getImageExtension(String profileImage) {
-        return profileImage.substring(profileImage.lastIndexOf("."));
+        return System.currentTimeMillis() + "-" + UUID.randomUUID();
     }
 
     private void validateDuplicationUserId(String userId) {

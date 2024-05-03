@@ -47,12 +47,4 @@ public class ScheduleWaiting extends BaseTimeEntity<ScheduleWaiting, Long> {
 		this.schedule = schedule;
 		this.member = member;
 	}
-
-	public void registerSchedule(Schedule schedule) {
-		this.schedule = schedule;
-	}
-
-	public void deleteScheduleWaiting() {
-		this.delYn = true;
-	}
 }

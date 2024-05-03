@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 interface TrainerScheduleRepositoryCustom {
-    fun findAllSchedule(searchCond: ScheduleSearchCond, trainerId: Long, member: Member): List<ScheduleCommandResult?>
+    fun findAllSchedule(searchCond: ScheduleSearchCond, member: Member): List<ScheduleCommandResult?>
     fun findAvailableRegisterSchedule(request: RegisterScheduleCommand, trainerId: Long): Schedule?
     fun validateRegisterSchedule(lessonDt: LocalDate, startTime: LocalTime, localTime: LocalTime, trainerId: Long): Long
 }

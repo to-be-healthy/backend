@@ -185,4 +185,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	public void registerFcmToken(String fcmToken) {
 		this.fcmToken = fcmToken;
 	}
+
+	public void setMemberProfile(MemberProfile profile) {
+		this.memberProfile = profile;
+	}
 }

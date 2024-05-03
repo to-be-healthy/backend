@@ -26,8 +26,7 @@ class TrainerScheduleRepositoryImpl(
 
     override fun findAllSchedule(
         searchCond: ScheduleSearchCond,
-        trainerId: Long,
-        member: Member,
+        trainer: Member
     ): List<ScheduleCommandResult> {
         val results = queryFactory
             .select(schedule)
@@ -40,12 +39,12 @@ class TrainerScheduleRepositoryImpl(
                 lessonDtEq(searchCond),
                 lessonDtBetween(searchCond),
                 delYnFalse(),
-                schedule.trainer.id.eq(trainerId),
+                schedule.trainer.id.eq(trainer.id),
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
 
-        return results.map { ScheduleCommandResult.from(it, member) }
+        return results.map { ScheduleCommandResult.from(it, trainer) }
     }
 
     private fun delYnFalse(): BooleanExpression {
