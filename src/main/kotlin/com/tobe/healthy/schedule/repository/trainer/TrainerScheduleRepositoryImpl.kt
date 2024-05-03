@@ -52,9 +52,8 @@ class TrainerScheduleRepositoryImpl(
             .select(schedule)
             .from(schedule)
             .where(
-                schedule.lessonDt.eq(request?.lessonDt),
-                schedule.lessonStartTime.between(request?.lessonStartTime, request?.lessonEndTime),
-                schedule.lessonEndTime.between(request?.lessonStartTime, request?.lessonEndTime),
+                schedule.lessonDt.eq(request.lessonDt),
+                schedule.lessonStartTime.before(request.lessonEndTime).and(schedule.lessonEndTime.after(request.lessonStartTime)),
                 schedule.trainer.id.eq(trainerId),
             )
             .fetchOne()

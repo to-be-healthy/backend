@@ -61,7 +61,7 @@ class LessonHistoryController(
                 responseCode = "404(3)", description = "일정을 찾을 수 없습니다.",
                 content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
             ),
-    ])
+        ])
     fun registerLessonHistory(@Parameter(content = [Content(schema = Schema(implementation = RegisterLessonHistoryCommand::class))])
                               @RequestBody @Valid request: RegisterLessonHistoryCommand,
                               @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {

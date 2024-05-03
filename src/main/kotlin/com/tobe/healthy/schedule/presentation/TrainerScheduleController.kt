@@ -61,6 +61,7 @@ class TrainerScheduleController(
         summary = "트레이너가 전체 일정을 조회한다.", description = "트레이너가 전체 일정을 조회한다. 특정 일자나 기간으로 조회하고 싶으면 DTO를 활용한다.", responses = [ApiResponse(responseCode = "200", description = "트레이너가 전체 일정 조회 완료")],
     )
     @GetMapping("/all")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun findAllSchedule(@ParameterObject searchCond: ScheduleSearchCond, @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<List<ScheduleCommandResult?>> {
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
