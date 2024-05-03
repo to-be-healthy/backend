@@ -3,10 +3,13 @@ package com.tobe.healthy.schedule.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.ScheduleService;
-import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
+import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleRequest;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
-import com.tobe.healthy.schedule.domain.dto.out.*;
+import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -37,7 +40,7 @@ public class ScheduleController {
 	})
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	@PostMapping
-	public ResponseHandler<Boolean> registerSchedule(@RequestBody AutoCreateScheduleCommand request,
+	public ResponseHandler<Boolean> registerSchedule(@RequestBody RegisterScheduleRequest request,
 													 @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 				.data(scheduleService.registerSchedule(request, member.getMemberId()))

@@ -10,13 +10,14 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Schema(description = "일정 등록 DTO")
-public class AutoCreateScheduleCommand {
+public class RegisterScheduleRequest {
 
 	@Schema(description = "시작 수업 일자", example = "2024-04-01")
 	@NotNull(message = "시작 수업 일자를 입력해 주세요.")
@@ -43,7 +44,7 @@ public class AutoCreateScheduleCommand {
 	private LocalTime lunchEndTime;
 
 	@Schema(description = "휴무일", example = "2024-04-05", type = "string")
-	private LocalDate closedDt;
+	private List<LocalDate> closedDt;
 
 	@Schema(description = "세션당 수업 시간", example = "30 | 60 | 90 | 120")
 	@NotNull(message = "세션당 수업 시간을 입력해 주세요.")

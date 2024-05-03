@@ -1,33 +1,25 @@
 package com.tobe.healthy.schedule.domain.entity;
 
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.NO_SHOW;
-import static jakarta.persistence.CascadeType.ALL;
-import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.FetchType.LAZY;
-import static jakarta.persistence.GenerationType.IDENTITY;
-import static lombok.AccessLevel.PROTECTED;
-
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
+import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
@@ -62,11 +54,11 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, ReservationStatus reservationStatus) {
 		ScheduleBuilder reserve = Schedule.builder()
-			.lessonDt(date)
-			.lessonStartTime(startTime)
-			.lessonEndTime(endTime)
-			.trainer(trainer)
-			.reservationStatus(reservationStatus);
+				.lessonDt(date)
+				.lessonStartTime(startTime)
+				.lessonEndTime(endTime)
+				.trainer(trainer)
+				.reservationStatus(reservationStatus);
 
 		return reserve.build();
 	}
@@ -96,8 +88,8 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@Builder
 	public Schedule(Long id, LocalDate lessonDt, LocalTime lessonStartTime, LocalTime lessonEndTime,
-		ReservationStatus reservationStatus, Member trainer, Member applicant,
-		List<StandBySchedule> standBySchedule, boolean delYn) {
+					ReservationStatus reservationStatus, Member trainer, Member applicant,
+					List<StandBySchedule> standBySchedule, boolean delYn) {
 		this.id = id;
 		this.lessonDt = lessonDt;
 		this.lessonStartTime = lessonStartTime;

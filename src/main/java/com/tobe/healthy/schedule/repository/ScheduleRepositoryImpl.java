@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -113,6 +114,18 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 				)
 				.fetchOne();
 		return Optional.ofNullable(entity);
+	}
+
+	@Override
+	public Boolean validateRegisterSchedule(LocalDate lessonDt, LocalTime startTime, LocalTime endTime, Long trainerId) {
+		return queryFactory.select(schedule.count().gt(0).as("isScheduleRegisterd"))
+				.from(schedule)
+				.where(
+						schedule.lessonDt.eq(lessonDt),
+						schedule.trainer.id.eq(trainerId),
+						(schedule.lessonStartTime.between(startTime, endTime).or(schedule.lessonEndTime.between(startTime, endTime)))
+				)
+				.fetchOne();
 	}
 
 	private BooleanExpression scheduleDelYnFalse() {

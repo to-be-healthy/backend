@@ -8,6 +8,8 @@ import com.tobe.healthy.schedule.domain.dto.out.MyStandbySchedule;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,4 +19,5 @@ public interface ScheduleRepositoryCustom {
 	List<MyReservation> findAllMyReservation(Long memberId, ScheduleSearchCond searchCond);
 	List<MyStandbySchedule> findAllMyStandbySchedule(Long memberId);
 	Optional<Schedule> findAvailableRegisterSchedule(RegisterScheduleCommand request, Long trainerId);
+	Boolean validateRegisterSchedule(LocalDate lessonDt, LocalTime startTime, LocalTime localTime, Long trainerId);
 }

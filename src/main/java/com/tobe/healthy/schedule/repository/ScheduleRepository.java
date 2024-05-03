@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long>, ScheduleRepositoryCustom {
@@ -26,6 +25,4 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long>, Sched
 	@EntityGraph(attributePaths = {"trainer"})
 	@Query("select s from Schedule s where s.id = :scheduleId and s.reservationStatus = 'AVAILABLE' and s.applicant is null and s.delYn = false")
 	Optional<Schedule> findAvailableScheduleById(Long scheduleId);
-
-	Optional<Schedule> findScheduleByLessonDt(LocalDate lessonDt);
 }
