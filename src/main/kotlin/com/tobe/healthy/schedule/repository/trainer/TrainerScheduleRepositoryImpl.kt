@@ -10,7 +10,7 @@ import com.tobe.healthy.schedule.domain.dto.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.domain.dto.`in`.ScheduleSearchCond
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
-import com.tobe.healthy.schedule.domain.entity.QStandBySchedule.standBySchedule
+import com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import lombok.extern.slf4j.Slf4j
 import org.springframework.stereotype.Repository
@@ -24,23 +24,27 @@ class TrainerScheduleRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
 ) : TrainerScheduleRepositoryCustom {
 
-    override fun findAllSchedule(searchCond: ScheduleSearchCond, trainerId: Long, member: Member, ): List<ScheduleCommandResult> {
+    override fun findAllSchedule(
+        searchCond: ScheduleSearchCond,
+        trainer: Member
+    ): List<ScheduleCommandResult> {
         val results = queryFactory
             .select(schedule)
             .from(schedule)
             .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
             .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
-            .leftJoin(schedule.standBySchedule, standBySchedule)
-            .on(standBySchedule.delYn.isFalse())
+            .leftJoin(schedule.scheduleWaiting, scheduleWaiting)
+            .on(scheduleWaiting.delYn.isFalse())
             .where(
                 lessonDtEq(searchCond),
                 lessonDtBetween(searchCond),
                 delYnFalse(),
-                schedule.trainer.id.eq(trainerId))
+                schedule.trainer.id.eq(trainer.id),
+            )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
 
-        return results.map { ScheduleCommandResult.from(it, member) }
+        return results.map { ScheduleCommandResult.from(it, trainer) }
     }
 
     private fun delYnFalse(): BooleanExpression {
@@ -53,7 +57,8 @@ class TrainerScheduleRepositoryImpl(
             .from(schedule)
             .where(
                 schedule.lessonDt.eq(request.lessonDt),
-                schedule.lessonStartTime.before(request.lessonEndTime).and(schedule.lessonEndTime.after(request.lessonStartTime)),
+                schedule.lessonStartTime.before(request.lessonEndTime)
+                    .and(schedule.lessonEndTime.after(request.lessonStartTime)),
                 schedule.trainer.id.eq(trainerId),
             )
             .fetchOne()
@@ -71,7 +76,8 @@ class TrainerScheduleRepositoryImpl(
             .where(
                 schedule.lessonDt.eq(lessonDt),
                 schedule.trainer.id.eq(trainerId),
-                schedule.lessonStartTime.before(endTime).and(schedule.lessonEndTime.after(startTime)))
+                schedule.lessonStartTime.before(endTime).and(schedule.lessonEndTime.after(startTime)),
+            )
             .fetchOne()!!
     }
 

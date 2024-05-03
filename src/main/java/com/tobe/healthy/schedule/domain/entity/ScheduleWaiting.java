@@ -17,10 +17,10 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @DynamicUpdate
-public class StandBySchedule extends BaseTimeEntity<StandBySchedule, Long> {
+public class ScheduleWaiting extends BaseTimeEntity<ScheduleWaiting, Long> {
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
-	@Column(name = "stand_by_schedule_id")
+	@Column(name = "schedule_waiting_id")
 	private Long id;
 
 	@ManyToOne(fetch = LAZY)
@@ -34,25 +34,17 @@ public class StandBySchedule extends BaseTimeEntity<StandBySchedule, Long> {
 	@ColumnDefault("false")
 	private boolean delYn = false;
 
-	public static StandBySchedule register(Member member, Schedule schedule) {
-		return StandBySchedule.builder()
+	public static ScheduleWaiting register(Member member, Schedule schedule) {
+		return ScheduleWaiting.builder()
 			.schedule(schedule)
 			.member(member)
 			.build();
 	}
 
 	@Builder
-	public StandBySchedule(Long id, Schedule schedule, Member member) {
+	public ScheduleWaiting(Long id, Schedule schedule, Member member) {
 		this.id = id;
 		this.schedule = schedule;
 		this.member = member;
-	}
-
-	public void registerSchedule(Schedule schedule) {
-		this.schedule = schedule;
-	}
-
-	public void deleteStandBy() {
-		this.delYn = true;
 	}
 }

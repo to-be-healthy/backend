@@ -16,6 +16,4 @@ public class MemberInviteResultCommand {
         this.uuid = uuid;
         this.invitationLink = invitationLink;
     }
-
-
 }

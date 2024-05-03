@@ -7,9 +7,9 @@ import java.util.Optional
 
 interface TrainerScheduleRepository : JpaRepository<Schedule, Long>, TrainerScheduleRepositoryCustom {
 
-    @Query("select s from Schedule s where s.trainer.id = :userId and s.id = :scheduleId and s.delYn = false")
-    fun findScheduleByTrainerId(userId: Long, scheduleId: Long): Schedule?
+    @Query("select s from Schedule s where s.trainer.id = :trainerId and s.id = :scheduleId and s.delYn = false")
+    fun findScheduleByTrainerId(scheduleId: Long, trainerId: Long): Schedule?
 
-    @Query("select s from Schedule s left join fetch s.standBySchedule where s.id = :scheduleId and s.reservationStatus = 'COMPLETED' and s.applicant is not null and s.delYn = false")
-    fun findAvailableStandById(scheduleId: Long): Optional<Schedule>
+    @Query("select s from Schedule s left join fetch s.scheduleWaiting where s.id = :scheduleId and s.reservationStatus = 'COMPLETED' and s.applicant is not null and s.delYn = false")
+    fun findAvailableWaitingId(scheduleId: Long): Optional<Schedule>
 }

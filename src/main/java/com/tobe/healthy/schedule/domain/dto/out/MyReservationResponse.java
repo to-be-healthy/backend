@@ -20,5 +20,4 @@ public class MyReservationResponse {
                 .reservations(ObjectUtils.isEmpty(reservations) ? null : reservations)
                 .build();
     }
-
 }

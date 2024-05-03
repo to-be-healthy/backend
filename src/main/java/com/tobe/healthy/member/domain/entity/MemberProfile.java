@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import javax.annotation.Nullable;
 
+import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -25,7 +26,7 @@ public class MemberProfile extends BaseTimeEntity<MemberProfile, Long> {
 	@Column(name = "member_profile_id")
 	private Long id;
 
-	@OneToOne(mappedBy = "memberProfile", fetch = LAZY)
+	@OneToOne(mappedBy = "memberProfile", fetch = LAZY, cascade = ALL)
 	private Member member;
 
 	@Nullable

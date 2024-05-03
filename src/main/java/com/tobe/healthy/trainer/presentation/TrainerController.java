@@ -3,9 +3,9 @@ package com.tobe.healthy.trainer.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.gym.application.GymService;
-import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.trainer.application.TrainerService;
@@ -42,9 +42,9 @@ public class TrainerController {
     private final MemberService memberService;
 
     @Operation(summary = "트레이너가 학생 초대하기", responses = {
-		@ApiResponse(responseCode = "400", description = "시작날짜와 종료날짜가 유효하지않습니다."),
-		@ApiResponse(responseCode = "400", description = "회원을 찾을 수 없습니다."),
-		@ApiResponse(responseCode = "200", description = "회원초대가 완료 되었습니다.")
+            @ApiResponse(responseCode = "400", description = "시작날짜와 종료날짜가 유효하지않습니다."),
+            @ApiResponse(responseCode = "400", description = "회원을 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "200", description = "회원초대가 완료 되었습니다.")
     })
     @PostMapping("/invitation")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
@@ -122,11 +122,11 @@ public class TrainerController {
     @GetMapping("/members")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<List<MemberInTeamResult>> findAllMyMemberInTrainer(@AuthenticationPrincipal CustomMemberDetails member,
-                                                                           @Parameter(description = "검색할 이름", example = "임채린")
-                                                                           @RequestParam(required = false) String searchValue,
-                                                                           @Parameter(description = "정렬 조건", example = "ranking, memberId")
-                                                                               @RequestParam(required = false, defaultValue = "memberId") String sortValue,
-                                                                           @PageableDefault(size = 100) Pageable pageable) {
+                                                                              @Parameter(description = "검색할 이름", example = "임채린")
+                                                                              @RequestParam(required = false) String searchValue,
+                                                                              @Parameter(description = "정렬 조건", example = "ranking, memberId")
+                                                                              @RequestParam(required = false, defaultValue = "memberId") String sortValue,
+                                                                              @PageableDefault(size = 100) Pageable pageable) {
         return ResponseHandler.<List<MemberInTeamResult>>builder()
                 .data(trainerService.findAllMyMemberInTeam(member.getMemberId(), searchValue, sortValue, pageable))
                 .message("트레이너가 관리하는 학생을 조회하였습니다.")
@@ -141,9 +141,9 @@ public class TrainerController {
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<List<MemberDto>> findAllUnattachedMembers(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                      @Parameter(description = "검색할 이름", example = "임채린")
-                                                                           @RequestParam(required = false) String searchValue,
+                                                                     @RequestParam(required = false) String searchValue,
                                                                      @Parameter(description = "정렬 조건", example = "memberId")
-                                                                           @RequestParam(required = false, defaultValue = "memberId") String sortValue,
+                                                                     @RequestParam(required = false, defaultValue = "memberId") String sortValue,
                                                                      Pageable pageable) {
         return ResponseHandler.<List<MemberDto>>builder()
                 .data(trainerService.findAllUnattachedMembers(customMemberDetails.getMember(), searchValue, sortValue, pageable))
@@ -159,7 +159,7 @@ public class TrainerController {
     @PatchMapping("/trainer-feedback")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태", example = "ENABLED")
-                                                              @RequestParam AlarmStatus alarmStatus,
+                                                          @RequestParam AlarmStatus alarmStatus,
                                                           @AuthenticationPrincipal CustomMemberDetails member) {
         return ResponseHandler.<Boolean>builder()
                 .data(memberService.changeTrainerFeedback(alarmStatus, member.getMemberId()))
