@@ -4,7 +4,6 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.ScheduleService;
 import com.tobe.healthy.schedule.application.ScheduleWaitingService;
-import com.tobe.healthy.schedule.domain.dto.out.MyStandbySchedule;
 import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,8 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
