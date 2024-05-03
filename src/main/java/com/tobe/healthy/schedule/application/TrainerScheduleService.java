@@ -1,16 +1,11 @@
 package com.tobe.healthy.schedule.application;
 
 import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.course.domain.dto.CourseDto;
-import com.tobe.healthy.course.domain.entity.Course;
-import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleRequest;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
-import com.tobe.healthy.schedule.domain.dto.out.MyStandbySchedule;
-import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
@@ -41,7 +36,6 @@ public class TrainerScheduleService {
     private final MemberRepository memberRepository;
     private final TrainerScheduleRepository trainerScheduleRepository;
     private final StandByScheduleRepository standByScheduleRepository;
-    private final CourseRepository courseRepository;
 
     public Boolean registerSchedule(RegisterScheduleRequest request, Long trainerId) {
         validateScheduleDate(request);
@@ -160,13 +154,6 @@ public class TrainerScheduleService {
             schedule.cancelMemberSchedule();
             return idInfo;
         }
-    }
-
-    public MyStandbyScheduleResponse findAllMyStandbySchedule(Long memberId) {
-        Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
-        CourseDto course = optCourse.map(CourseDto::from).orElse(null);
-        List<MyStandbySchedule> result = trainerScheduleRepository.findAllMyStandbySchedule(memberId);
-        return MyStandbyScheduleResponse.create(course, result);
     }
 
     public ScheduleIdInfo updateReservationStatusToNoShow(Long scheduleId, Long memberId) {

@@ -3,6 +3,7 @@ package com.tobe.healthy.schedule.application;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository;
@@ -48,5 +49,9 @@ public class ScheduleWaitingService {
 				.orElseThrow(() -> new CustomException(STAND_BY_SCHEDULE_NOT_FOUND));
 		standByScheduleRepository.delete(standBySchedule);
 		return true;
+	}
+
+	public MyStandbyScheduleResponse findAllMyStandbySchedule(Long memberId) {
+		return null;
 	}
 }
