@@ -240,7 +240,6 @@ public class MemberService {
 			ObjectMetadata objectMetadata = getObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
 			String extension = requireNonNull(originalFileName).substring(originalFileName.lastIndexOf("."));
 
-			String savedFileName = "profile/" + System.currentTimeMillis() + "_" + randomUUID() + extension;
 			String savedFileName = "profile/" + createFileUUID() + extension;
 
 			try (InputStream inputStream = uploadFile.getInputStream()) {

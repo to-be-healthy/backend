@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -117,52 +118,42 @@ public class FileService {
 
 	// 1. 파일을 AWS S3에 업로드 후 업로드 주소 반환
 	// 2.
-	public List<RegisterFileResponse> uploadFiles(FileUploadType fileUploadType, Long fileUploadTypeId, List<MultipartFile> uploadFiles, Long memberId) {
+	public List<RegisterFileResponse> uploadFiles(FileUploadType fileUploadType, List<MultipartFile> uploadFiles) {
 		List<RegisterFileResponse> uploadFile = new ArrayList<>();
-		Member member = memberRepository.findById(memberId).orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		int fileOrder = 0;
 		for (MultipartFile file: uploadFiles) {
-			if (!file.isEmpty()) {
-				try (InputStream inputStream = file.getInputStream()) {
-					String originalFileName = file.getOriginalFilename();
-					String extension = originalFileName.substring(
-						originalFileName.lastIndexOf("."));
-					ObjectMetadata objectMetadata = new ObjectMetadata();
-					objectMetadata.setContentLength(file.getSize());
-					objectMetadata.setContentType(file.getContentType());
-					String savedFileName = "custom/" + System.currentTimeMillis() + "_" + randomUUID() + extension;
-					amazonS3.putObject(
-						"to-be-healthy-bucket",
-						savedFileName,
-						inputStream,
-						objectMetadata
-					);
-					String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
-					AwsS3File awsS3File = AwsS3File.builder()
-						.originalFileName(originalFileName)
-						.member(member)
-						.fileUploadType(fileUploadType)
-						.fileUploadTypeId(fileUploadTypeId)
-						.fileUrl(fileUrl)
-						.fileOrder(++fileOrder)
-						.build();
-
-					uploadFile.add(new RegisterFileResponse(fileUrl, originalFileName, fileOrder));
-				} catch (IOException e) {
-					e.printStackTrace();
-					log.error("error => {}", e.getMessage());
-				}
-			}
+//			if (!file.isEmpty()) {
+//				try (InputStream inputStream = file.getInputStream()) {
+//					String originalFileName = file.getOriginalFilename();
+//					String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+//					ObjectMetadata objectMetadata = new ObjectMetadata();
+//					objectMetadata.setContentLength(file.getSize());
+//					objectMetadata.setContentType(file.getContentType());
+//					String savedFileName = fileUploadType.getCode() + separator + System.currentTimeMillis() + "_" + randomUUID() + extension;
+//					amazonS3.putObject(
+//						"to-be-healthy-bucket",
+//						savedFileName,
+//						inputStream,
+//						objectMetadata
+//					);
+//					String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+//					AwsS3File awsS3File = AwsS3File.builder()
+//						.originalFileName(originalFileName)
+//						.member(member)
+//						.fileUploadType(fileUploadType)
+//						.fileUploadTypeId(fileUploadTypeId)
+//						.fileUrl(fileUrl)
+//						.fileOrder(++fileOrder)
+//						.build();
+//
+//					uploadFile.add(new RegisterFileResponse(fileUrl, originalFileName, fileOrder));
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//					log.error("error => {}", e.getMessage());
+//				}
+//			}
 		}
 		return uploadFile;
-	}
-
-	@Data
-	@AllArgsConstructor
-	public static class RegisterFileResponse {
-		private String fileUrl;
-		private String fileName;
-		private int fileOrder;
 	}
 
 	public void uploadDietFile(Diet diet, DietType type, MultipartFile uploadFile) {

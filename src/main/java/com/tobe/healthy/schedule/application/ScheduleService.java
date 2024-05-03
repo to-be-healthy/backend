@@ -128,15 +128,14 @@ public class ScheduleService {
 		return ScheduleIdInfo.from(schedule);
 	}
 
-	public ScheduleCommandResponse findAllSchedule(ScheduleSearchCond searchCond, Member loginMember) {
-		Long trainerId;
-		if(STUDENT.equals(loginMember.getMemberType())){
-			TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(loginMember.getId())
-					.orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
-			trainerId = mapping.getTrainer().getId();
-		}else{
-			trainerId = loginMember.getId();
-		}
+	public List<ScheduleCommandResult> findAllSchedule(ScheduleSearchCond searchCond, Member trainer) {
+		return scheduleRepository.findAllSchedule(searchCond, trainer.getId());
+	}
+
+	public ScheduleCommandResponse findAllScheduleOfTrainer(ScheduleSearchCond searchCond, Member member) {
+		TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId())
+				.orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
+		Long trainerId = mapping.getTrainer().getId();
 		List<ScheduleCommandResult> schedule = scheduleRepository.findAllSchedule(searchCond, trainerId);
 
 		List<ScheduleCommandResult> morning = schedule.stream()
