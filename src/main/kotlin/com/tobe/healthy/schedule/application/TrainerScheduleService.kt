@@ -8,6 +8,7 @@ import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_ALREADY_EXISTS
 import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_LESS_THAN_30_DAYS
 import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND
 import com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE
+import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.dto.`in`.RegisterScheduleCommand
@@ -64,8 +65,8 @@ class TrainerScheduleService(
                 }
 
                 val isDuplicateSchedule = trainerScheduleRepository.validateRegisterSchedule(lessonDt, startTime, endTime, trainerId)
-
-                if (isDuplicateSchedule) {
+                log.info { "isDuplicateSchedule -> ${isDuplicateSchedule}" }
+                if (isDuplicateSchedule > 0) {
                     throw CustomException(SCHEDULE_ALREADY_EXISTS)
                 }
 
@@ -106,11 +107,11 @@ class TrainerScheduleService(
         }
     }
 
-    fun findAllSchedule(searchCond: ScheduleSearchCond, trainer: Member): List<ScheduleCommandResult> {
+    fun findAllSchedule(searchCond: ScheduleSearchCond, trainer: Member): List<ScheduleCommandResult?> {
         return trainerScheduleRepository.findAllSchedule(searchCond, trainer.id, trainer)
     }
 
-    fun updateReservationStatusToNoShow(scheduleId: Long?, memberId: Long?): ScheduleIdInfo {
+    fun updateReservationStatusToNoShow(scheduleId: Long, memberId: Long): ScheduleIdInfo {
         val schedule = trainerScheduleRepository.findScheduleByTrainerId(memberId, scheduleId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
         schedule.updateReservationStatusToNoShow()
@@ -126,7 +127,7 @@ class TrainerScheduleService(
         } ?: throw CustomException(SCHEDULE_ALREADY_EXISTS)
     }
 
-    fun cancelTrainerSchedule(scheduleId: Long?, memberId: Long?): Boolean {
+    fun cancelTrainerSchedule(scheduleId: Long, memberId: Long): Boolean {
         val entity = trainerScheduleRepository.findScheduleByTrainerId(memberId, scheduleId) ?: throw CustomException(SCHEDULE_NOT_FOUND)
         entity.cancelTrainerSchedule()
         return true

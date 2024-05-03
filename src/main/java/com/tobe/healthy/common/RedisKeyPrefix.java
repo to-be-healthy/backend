@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum RedisKeyPrefix implements EnumMapperType {
     EMAIL_VERIFICATION("verification:"),
     REFRESH_TOKEN("refresh-token:"),
-    INVITATION("invitation:");
+    INVITATION("invitation:"),
+    TEMP_FILE_URI("temp-file-uri:");
 
     private final String description;
 

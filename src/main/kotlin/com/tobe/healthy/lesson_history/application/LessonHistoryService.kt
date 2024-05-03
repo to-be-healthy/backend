@@ -3,6 +3,7 @@ package com.tobe.healthy.lesson_history.application
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.tobe.healthy.common.CustomPagingResponse
+import com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI
 import com.tobe.healthy.common.RedisService
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.EXCEED_MAXIMUM_NUMBER_OF_FILES
@@ -194,7 +195,7 @@ class LessonHistoryService(
                     fileOrder = uploadFile.fileOrder,
                 )
                 lessonHistoryFilesRepository.save(file)
-                redisService.deleteValues(uploadFile.fileUrl)
+                redisService.deleteValues(TEMP_FILE_URI.description + uploadFile.fileUrl)
             }
         }
     }
@@ -328,7 +329,7 @@ class LessonHistoryService(
                             fileOrder = fileOrder++,
                         ),
                     )
-                    redisService.setValuesWithTimeout(fileUrl, memberId.toString(), FILE_TEMP_UPLOAD_TIMEOUT) // 30분
+                    redisService.setValuesWithTimeout(TEMP_FILE_URI.description + fileUrl, memberId.toString(), FILE_TEMP_UPLOAD_TIMEOUT) // 30분
                 }
             }
         }
