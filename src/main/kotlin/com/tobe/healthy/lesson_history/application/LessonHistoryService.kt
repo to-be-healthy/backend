@@ -51,7 +51,6 @@ class LessonHistoryService(
 
     fun registerLessonHistory(
         request: RegisterLessonHistoryCommand,
-        uploadFiles: MutableList<MultipartFile>?,
         trainerId: Long,
     ): Boolean {
         val (findMember, findTrainer, findSchedule) = checkLessonHistoryRequirements(
@@ -61,7 +60,7 @@ class LessonHistoryService(
 
         val lessonHistory = registerLessonHistory(request, findMember, findTrainer, findSchedule)
 
-        registerFiles(uploadFiles, findMember, lessonHistory)
+        registerFiles(request.uploadFileResponse, findTrainer, lessonHistory)
 
         return true
     }
@@ -176,34 +175,22 @@ class LessonHistoryService(
     }
 
     private fun registerFiles(
-        uploadFiles: MutableList<MultipartFile>?,
+        uploadFiles: MutableList<UploadFileResponse>?,
         findMember: Member,
         lessonHistory: LessonHistory,
     ) {
         uploadFiles?.let {
-            val uploadFileResponse: MutableList<UploadFileResponse> = mutableListOf()
-            var fileOrder = 1
             checkMaximumFileSize(it.size)
 
             for (uploadFile in it) {
-                if (!uploadFile.isEmpty) {
-                    val fileUrl = putFile(uploadFile)
-
-                    val file = LessonHistoryFiles(
-                        member = findMember,
-                        lessonHistory = lessonHistory,
-                        fileUrl = fileUrl,
-                        fileOrder = fileOrder++,
-                    )
-
-                    lessonHistoryFilesRepository.save(file)
-                    uploadFileResponse.add(
-                        UploadFileResponse(
-                            fileUrl = fileUrl,
-                            fileOrder = file.fileOrder,
-                        ),
-                    )
-                }
+                val file = LessonHistoryFiles(
+                    member = findMember,
+                    lessonHistory = lessonHistory,
+                    fileUrl = uploadFile.fileUrl,
+                    fileOrder = uploadFile.fileOrder,
+                )
+                lessonHistoryFilesRepository.save(file)
+                redisService.deleteValues(uploadFile.fileUrl)
             }
         }
     }
@@ -324,21 +311,24 @@ class LessonHistoryService(
         )
     }
 
-    fun registerFilesOfLessonHistory(uploadFiles: MutableList<MultipartFile>, memberId: Long?): List<UploadFileResponse> {
+    fun registerFilesOfLessonHistory(
+        uploadFiles: MutableList<MultipartFile>,
+        memberId: Long?,
+    ): List<UploadFileResponse> {
         val uploadFileResponse: MutableList<UploadFileResponse> = mutableListOf()
-        var fileOrder = 0
+        var fileOrder = 1
         uploadFiles?.let {
             checkMaximumFileSize(it.size)
 
             for (uploadFile in it) {
                 if (!uploadFile.isEmpty) {
                     val fileUrl = putFile(uploadFile)
-                    val file = LessonHistoryFiles(
-                        fileUrl = fileUrl,
-                        fileOrder = ++fileOrder,
+                    uploadFileResponse.add(
+                        UploadFileResponse(
+                            fileUrl = fileUrl,
+                            fileOrder = fileOrder++,
+                        ),
                     )
-                    lessonHistoryFilesRepository.save(file)
-                    uploadFileResponse.add(UploadFileResponse(fileUrl = file.fileUrl, fileOrder = file.fileOrder))
                     redisService.setValuesWithTimeout(fileUrl, memberId.toString(), (30 * 60 * 1000).toLong()) // 30분
                 }
             }

@@ -17,7 +17,7 @@ class ObjectCopy(
 
     "객체의 필드를 대상으로 null체크를 한다" {
         val memberInfo = MemberInfo(name = " ", age = 27)
-//        memberInfo.name.isNullOrBlank() shouldBe true
+//        memberInfo.name.isNullOrBlank() shouldBe truez
 //        memberInfo.name.isNullOrEmpty() shouldBe true
 //        MemberInfo(name = "정선우", age = 27)
 //        val memberInfos: MutableList<MemberInfo> = mutableListOf()

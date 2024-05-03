@@ -63,12 +63,11 @@ class LessonHistoryController(
             ),
     ])
     fun registerLessonHistory(@Parameter(content = [Content(schema = Schema(implementation = RegisterLessonHistoryCommand::class))])
-                              @RequestPart @Valid request: RegisterLessonHistoryCommand,
-                              @RequestPart(required = false) uploadFiles: MutableList<MultipartFile>?,
+                              @RequestBody @Valid request: RegisterLessonHistoryCommand,
                               @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<Boolean> {
         return ApiResult(
             message = "수업 일지를 등록하였습니다.",
-            data = lessonHistoryService.registerLessonHistory(request, uploadFiles, member.memberId)
+            data = lessonHistoryService.registerLessonHistory(request, member.memberId)
         )
     }
 
@@ -77,7 +76,7 @@ class LessonHistoryController(
     fun registerFilesOfLessonHistory(uploadFiles: MutableList<MultipartFile>,
                                      @AuthenticationPrincipal member: CustomMemberDetails): ApiResult<List<UploadFileResponse>> {
         return ApiResult(
-            message = "수업 일지를 등록하였습니다.",
+            message = "파일을 등록하였습니다.",
             data = lessonHistoryService.registerFilesOfLessonHistory(uploadFiles, member.memberId)
         )
     }

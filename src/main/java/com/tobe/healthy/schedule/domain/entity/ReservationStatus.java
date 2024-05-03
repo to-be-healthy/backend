@@ -9,7 +9,8 @@ import lombok.Getter;
 public enum ReservationStatus implements EnumMapperType {
 	COMPLETED("예약완료"),
 	AVAILABLE("예약가능"),
-	NO_SHOW("노쇼");
+	NO_SHOW("노쇼"),
+	WAITING("대기중");
 
 	private final String description;
 

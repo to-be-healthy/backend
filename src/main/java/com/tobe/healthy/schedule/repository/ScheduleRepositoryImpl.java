@@ -1,10 +1,5 @@
 package com.tobe.healthy.schedule.repository;
 
-import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
-import static com.tobe.healthy.schedule.domain.entity.QStandBySchedule.standBySchedule;
-import static java.util.stream.Collectors.toList;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -16,13 +11,19 @@ import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
+import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
+import static com.tobe.healthy.schedule.domain.entity.QStandBySchedule.standBySchedule;
+import static java.util.stream.Collectors.toList;
 
 @Repository
 @RequiredArgsConstructor
@@ -103,9 +104,12 @@ public class ScheduleRepositoryImpl implements ScheduleRepositoryCustom {
 		Schedule entity = queryFactory
 				.select(schedule)
 				.from(schedule)
-				.where(schedule.lessonDt.eq(request.getLessonDt()),
+				.where(
+						schedule.lessonDt.eq(request.getLessonDt()),
 						schedule.lessonStartTime.eq(request.getLessonStartTime()),
-						schedule.lessonEndTime.eq(request.getLessonEndTime()), schedule.trainer.id.eq(trainerId))
+						schedule.lessonEndTime.eq(request.getLessonEndTime()),
+						schedule.trainer.id.eq(trainerId)
+				)
 				.fetchOne();
 		return Optional.ofNullable(entity);
 	}

@@ -1,18 +1,5 @@
 package com.tobe.healthy.schedule.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.DATETIME_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.LUNCH_TIME_INVALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.NOT_RESERVABLE_SCHEDULE;
-import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_ALREADY_EXISTS;
-import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_LESS_THAN_30_DAYS;
-import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE;
-import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_MAPPED;
-import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
-import static java.time.LocalTime.NOON;
-
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.repository.CourseRepository;
@@ -21,16 +8,17 @@ import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.schedule.domain.dto.in.AutoCreateScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.RegisterScheduleCommand;
 import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
-import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
-import com.tobe.healthy.schedule.domain.dto.out.MyStandbyScheduleResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
+import com.tobe.healthy.schedule.domain.dto.out.*;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.StandBySchedule;
 import com.tobe.healthy.schedule.repository.ScheduleRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -38,10 +26,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
+import static java.time.LocalTime.NOON;
 
 @Service
 @RequiredArgsConstructor
@@ -77,7 +66,7 @@ public class ScheduleService {
 				if (startDtIsEqualsEndDt(request, startTime)) {
 					break;
 				}
-				Schedule entity =
+				Schedule schedule =
 					Schedule.registerSchedule(
 						startDt,
 						trainer,
@@ -85,7 +74,7 @@ public class ScheduleService {
 						startTime.plusMinutes(request.getSessionTime().getDescription()),
 						AVAILABLE
 					);
-				scheduleRepository.save(entity);
+				scheduleRepository.save(schedule);
 			}
 			startDt = startDt.plusDays(1);
 		}
