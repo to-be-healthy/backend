@@ -1,5 +1,6 @@
 package com.tobe.healthy.workout.application;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.file.FileService;
@@ -68,13 +69,14 @@ public class WorkoutHistoryService {
         completedExerciseRepository.saveAll(completedExercises);
     }
 
-    public List<WorkoutHistoryDto> getWorkoutHistory(Member loginMember, Long memberId, Pageable pageable, String searchDate) {
-        List<WorkoutHistoryDto> historiesDto =
-                workoutHistoryRepository.getWorkoutHistoryOfMonth(loginMember.getId(), memberId, pageable, searchDate).stream().toList();
+    public CustomPaging<WorkoutHistoryDto> getWorkoutHistory(Member loginMember, Long memberId, Pageable pageable, String searchDate) {
+        Page<WorkoutHistoryDto> pageDtos = workoutHistoryRepository.getWorkoutHistoryOfMonth(loginMember.getId(), memberId, pageable, searchDate);
+        List<WorkoutHistoryDto> historiesDto = pageDtos.stream().toList();
         List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
         historiesDto = setHistoryListFile(historiesDto, ids);
-        List<WorkoutHistoryDto> result = setHistoryListExercise(historiesDto, ids);
-        return result.isEmpty() ? null : result;
+        List<WorkoutHistoryDto> content = setHistoryListExercise(historiesDto, ids);
+        return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
+                pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 
     public List<WorkoutHistoryDto> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable) {

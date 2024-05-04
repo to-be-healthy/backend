@@ -1,5 +1,6 @@
 package com.tobe.healthy.member.presentation;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.course.application.CourseService;
@@ -145,11 +146,11 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/{memberId}/workout-histories")
-	public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails loginMember,
+	public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails loginMember,
 																	  @Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
 																	  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 																	  Pageable pageable) {
-		return ResponseHandler.<List<WorkoutHistoryDto>>builder()
+		return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
 				.data(workoutService.getWorkoutHistory(loginMember.getMember(), memberId, pageable, searchDate))
 				.message("운동기록이 조회되었습니다.")
 				.build();
@@ -160,10 +161,10 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/{memberId}/diets")
-	public ResponseHandler<List<DietDto>> getDiet(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
+	public ResponseHandler<CustomPaging<DietDto>> getDiet(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
 																	  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 																	  Pageable pageable) {
-		return ResponseHandler.<List<DietDto>>builder()
+		return ResponseHandler.<CustomPaging<DietDto>>builder()
 				.data(dietService.getDiet(memberId, pageable, searchDate))
 				.message("식단기록 조회되었습니다.")
 				.build();

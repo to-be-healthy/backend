@@ -1,5 +1,6 @@
 package com.tobe.healthy.diet.application;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.DietFileDto;
@@ -43,12 +44,13 @@ public class DietService {
     private final TrainerMemberMappingRepository mappingRepository;
     private final FileService fileService;
 
-    public List<DietDto> getDiet(Long memberId, Pageable pageable, String searchDate) {
-        Page<Diet> diets = dietRepository.getDietOfMonth(memberId, pageable, searchDate);
-        List<DietDto> dietDtos = diets.map(DietDto::from).stream().toList();
+    public CustomPaging<DietDto> getDiet(Long memberId, Pageable pageable, String searchDate) {
+        Page<Diet> pageDtos = dietRepository.getDietOfMonth(memberId, pageable, searchDate);
+        List<DietDto> dietDtos = pageDtos.map(DietDto::from).stream().toList();
         List<Long> ids = dietDtos.stream().map(DietDto::getDietId).collect(Collectors.toList());
-        dietDtos = setDietFile(dietDtos, ids);
-        return dietDtos.isEmpty() ? null : dietDtos;
+        List<DietDto> content = setDietFile(dietDtos, ids);
+        return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
+                pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 
     public void likeDiet(Member member, Long dietId) {
