@@ -106,11 +106,28 @@ class TrainerScheduleController(
     @DeleteMapping("/no-show/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun updateReservationStatusToNoShow(
-        @Parameter(description = "일정 아이디", example = "1") @PathVariable scheduleId: Long, @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+        @Parameter(description = "일정 아이디", example = "1") @PathVariable scheduleId: Long,
+        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<ScheduleIdInfo> {
         return ApiResultResponse(
             message = "노쇼 처리되었습니다.",
             data = trainerScheduleService.updateReservationStatusToNoShow(scheduleId, customMemberDetails.memberId)
+        )
+    }
+
+    @Operation(summary = "트레이너가 학생 노쇼 처리를 취소한다.", description = "트레이너가 학생 노쇼 처리를 취소한다.", responses = [
+        ApiResponse(responseCode = "200", description = "노쇼 처리가 취소되었습니다."),
+        ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
+    ])
+    @PostMapping("/no-show/{scheduleId}")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    fun revertReservationStatusToNoShow(
+        @Parameter(description = "일정 아이디", example = "1") @PathVariable scheduleId: Long,
+        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    ): ApiResultResponse<ScheduleIdInfo> {
+        return ApiResultResponse(
+            message = "노쇼 처리가 취소되었습니다.",
+            data = trainerScheduleService.revertReservationStatusToNoShow(scheduleId, customMemberDetails.memberId)
         )
     }
 }

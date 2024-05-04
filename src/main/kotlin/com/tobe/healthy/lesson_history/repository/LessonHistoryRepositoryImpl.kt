@@ -4,8 +4,6 @@ import com.querydsl.core.types.ConstantImpl.create
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
 import com.tobe.healthy.lesson_history.domain.dto.`in`.SearchCondRequest
 import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryDetailResponse
 import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryResponse
@@ -104,11 +102,10 @@ class LessonHistoryRepositoryImpl(
     }
 
     private fun validateMemberType(memberId: Long, memberType: MemberType): BooleanExpression {
-        if (memberType == TRAINER) {
-            return lessonHistory.trainer.id.eq(memberId)
+        return if (memberType == TRAINER) {
+            lessonHistory.trainer.id.eq(memberId)
         } else {
-            val result = trainerMemberMappingRepository.findByMemberId(memberId).orElseThrow { throw CustomException(LESSON_HISTORY_NOT_FOUND) }
-            return lessonHistory.trainer.id.eq(result.trainer.id)
+            lessonHistory.student.id.eq(memberId)
         }
     }
 

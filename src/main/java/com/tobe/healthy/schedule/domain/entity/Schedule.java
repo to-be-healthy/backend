@@ -67,6 +67,10 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 		this.reservationStatus = NO_SHOW;
 	}
 
+	public void revertReservationStatusToNoShow() {
+		this.reservationStatus = COMPLETED;
+	}
+
 	public void registerSchedule(Member member) {
 		this.applicant = member;
 		this.reservationStatus = COMPLETED;

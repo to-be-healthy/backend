@@ -118,6 +118,13 @@ class TrainerScheduleService(
         return ScheduleIdInfo.from(schedule)
     }
 
+    fun revertReservationStatusToNoShow(scheduleId: Long, trainerId: Long): ScheduleIdInfo {
+        val schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, trainerId)
+            ?: throw CustomException(SCHEDULE_NOT_FOUND)
+        schedule.revertReservationStatusToNoShow()
+        return ScheduleIdInfo.from(schedule)
+    }
+
     fun registerIndividualSchedule(request: RegisterScheduleCommand, trainerId: Long): Boolean {
         trainerScheduleRepository.findAvailableRegisterSchedule(request, trainerId)?.let {
             throw CustomException(SCHEDULE_ALREADY_EXISTS)
