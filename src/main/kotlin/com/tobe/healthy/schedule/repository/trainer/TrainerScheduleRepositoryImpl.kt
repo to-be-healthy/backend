@@ -11,6 +11,7 @@ import com.tobe.healthy.schedule.domain.dto.`in`.ScheduleSearchCond
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
 import com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import lombok.extern.slf4j.Slf4j
@@ -101,6 +102,27 @@ class TrainerScheduleRepositoryImpl(
             )
             .fetchOne()
         return Optional.ofNullable(result)
+    }
+
+    override fun findScheduleByTrainerId(scheduleId: Long, reservationStatus: ReservationStatus, trainerId: Long): Schedule? {
+        return queryFactory.select(schedule).from(schedule)
+            .where(
+                schedule.id.eq(scheduleId),
+                schedule.trainer.id.eq(trainerId),
+                schedule.reservationStatus.eq(reservationStatus),
+                schedule.delYn.eq(false)
+            )
+            .fetchOne()
+    }
+
+    override fun findScheduleByTrainerId(scheduleId: Long, trainerId: Long): Schedule? {
+        return queryFactory.select(schedule).from(schedule)
+            .where(
+                schedule.id.eq(scheduleId),
+                schedule.trainer.id.eq(trainerId),
+                schedule.delYn.eq(false)
+            )
+            .fetchOne()
     }
 
     private fun lessonDtBetween(searchCond: ScheduleSearchCond): BooleanExpression? {
