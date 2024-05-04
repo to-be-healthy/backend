@@ -81,7 +81,7 @@ class TrainerScheduleService(
     }
 
     private fun isStartTimeEqualsLunchStartTime(request: RegisterScheduleRequest, startTime: LocalTime): Boolean {
-        return startTime == request.lunchStartTime
+        return startTime == request?.lunchStartTime
     }
 
     private fun startTimeIsBefore(request: RegisterScheduleRequest, startTime: LocalTime): Boolean {
@@ -99,7 +99,7 @@ class TrainerScheduleService(
         if (request.startTime.isAfter(request.endTime)) {
             throw CustomException(DATETIME_NOT_VALID)
         }
-        if (request.lunchStartTime.isAfter(request.lunchEndTime)) {
+        if (request.lunchStartTime?.isAfter(request.lunchEndTime) == true) {
             throw CustomException(LUNCH_TIME_INVALID)
         }
         if (DAYS.between(request.startDt, request.endDt) > 30) {

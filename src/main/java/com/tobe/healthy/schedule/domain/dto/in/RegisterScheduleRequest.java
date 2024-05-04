@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -36,11 +37,11 @@ public class RegisterScheduleRequest {
 	private LocalTime endTime;
 
 	@Schema(description = "시작 점심시간", example = "12:00:00", type = "string")
-	@NotNull(message = "시작 점심시간을 입력해 주세요.")
+	@Nullable
 	private LocalTime lunchStartTime;
 
 	@Schema(description = "종료 점심시간", example = "13:00:00", type = "string")
-	@NotNull(message = "종료 점심시간을 입력해 주세요.")
+	@Nullable
 	private LocalTime lunchEndTime;
 
 	@Schema(description = "휴무일", example = "2024-04-05", type = "string")

@@ -13,7 +13,7 @@ class FirebaseConfig {
 
     @PostConstruct
     fun initializeFCM() {
-        FileInputStream("firebase-adminsdk.json").use {
+        FileInputStream("config/firebase-adminsdk.json").use {
             val options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(it))
                 .build()
