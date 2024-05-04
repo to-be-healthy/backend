@@ -1,7 +1,10 @@
 package com.tobe.healthy.trainer.presentation;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
+import com.tobe.healthy.diet.application.DietService;
+import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.gym.application.GymService;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.MemberDto;
@@ -22,6 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,8 +42,8 @@ public class TrainerController {
 
     private final TrainerService trainerService;
     private final WorkoutHistoryService workoutService;
-    private final GymService gymService;
     private final MemberService memberService;
+    private final DietService dietService;
 
     @Operation(summary = "트레이너가 학생 초대하기", responses = {
             @ApiResponse(responseCode = "400", description = "시작날짜와 종료날짜가 유효하지않습니다."),
@@ -102,19 +106,6 @@ public class TrainerController {
                 .build();
     }
 
-    @Operation(summary = "트레이너가 관리하는 학생들의 운동기록 목록 조회하기", responses = {
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-            @ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
-    })
-    @GetMapping("/{trainerId}/workout-histories")
-    public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistoryByTrainer(@Parameter(description = "트레이너 ID") @PathVariable("trainerId") Long trainerId,
-                                                                               Pageable pageable) {
-        return ResponseHandler.<List<WorkoutHistoryDto>>builder()
-                .data(workoutService.getWorkoutHistoryByTrainer(trainerId, pageable))
-                .message("운동기록이 조회되었습니다.")
-                .build();
-    }
-
     @Operation(summary = "트레이너가 관리하는 학생들을 조회한다.", description = "트레이너가 관리하는 학생 전체를 조회한다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "트레이너가 관리하는 학생 조회 완료")
@@ -166,4 +157,35 @@ public class TrainerController {
                 .message("수업 기록 여부가 변경되었습니다.")
                 .build();
     }
+
+    @Operation(summary = "트레이너가 관리하는 학생들의 운동기록 목록 조회하기", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
+    })
+    @GetMapping("/workout-histories")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistoryByTrainer(@AuthenticationPrincipal CustomMemberDetails loginMember,
+                                                                                       @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+                                                                                       Pageable pageable) {
+        return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
+                .data(workoutService.getWorkoutHistoryByTrainer(loginMember.getMemberId(), pageable, searchDate))
+                .message("운동기록이 조회되었습니다.")
+                .build();
+    }
+
+    @Operation(summary = "트레이너가 관리하는 학생들의 식단기록 목록 조회하기", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
+    })
+    @GetMapping("/diets")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    public ResponseHandler<CustomPaging<DietDto>> getDietByTrainer(@AuthenticationPrincipal CustomMemberDetails loginMember,
+                                                                                       @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+                                                                                       Pageable pageable) {
+        return ResponseHandler.<CustomPaging<DietDto>>builder()
+                .data(dietService.getDietByTrainer(loginMember.getMemberId(), pageable, searchDate))
+                .message("식단기록이 조회되었습니다.")
+                .build();
+    }
+
 }

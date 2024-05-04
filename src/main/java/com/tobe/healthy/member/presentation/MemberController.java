@@ -141,6 +141,24 @@ public class MemberController {
 				.build();
 	}
 
+	/**
+	 * 운동기록 시작 ============================================================================================
+	 */
+
+	@Operation(summary = "내 운동기록 목록 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
+	})
+	@GetMapping("/me/workout-histories")
+	public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails loginMember,
+																			  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+																			  Pageable pageable) {
+		return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
+				.data(workoutService.getWorkoutHistory(loginMember.getMember(), loginMember.getMemberId(), pageable, searchDate))
+				.message("운동기록이 조회되었습니다.")
+				.build();
+	}
+
 	@Operation(summary = "학생의 운동기록 목록 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
 			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
@@ -156,7 +174,43 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "학생의 식단기록 목록 조회", responses = {
+	@Operation(summary = "내 트레이너가 관리하는 학생들의 운동기록 목록 조회하기", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
+	})
+	@GetMapping("/my-trainer/workout-histories")
+	public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistoryMyTrainer(@AuthenticationPrincipal CustomMemberDetails loginMember,
+																					   @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+																					   Pageable pageable) {
+		return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
+				.data(workoutService.getWorkoutHistoryMyTrainer(loginMember.getMemberId(), pageable, searchDate))
+				.message("운동기록이 조회되었습니다.")
+				.build();
+	}
+
+	/**
+	 * 운동기록 끝 ============================================================================================
+	 */
+
+	/**
+	 * 식단기록 시작 ============================================================================================
+	 */
+
+	@Operation(summary = "내 식단기록 목록 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
+	})
+	@GetMapping("/me/diets")
+	public ResponseHandler<CustomPaging<DietDto>> getDiet(@AuthenticationPrincipal CustomMemberDetails loginMember,
+														  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+														  Pageable pageable) {
+		return ResponseHandler.<CustomPaging<DietDto>>builder()
+				.data(dietService.getDiet(loginMember.getMemberId(), pageable, searchDate))
+				.message("식단기록 조회되었습니다.")
+				.build();
+	}
+
+	@Operation(summary = "다른 학생의 식단기록 목록 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
 			@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
 	})
@@ -169,6 +223,24 @@ public class MemberController {
 				.message("식단기록 조회되었습니다.")
 				.build();
 	}
+
+	@Operation(summary = "내 트레이너가 관리하는 학생들의 식단기록 목록 조회하기", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
+	})
+	@GetMapping("/my-trainer/diets")
+	public ResponseHandler<CustomPaging<DietDto>> getDietMyTrainer(@AuthenticationPrincipal CustomMemberDetails loginMember,
+														  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+														  Pageable pageable) {
+		return ResponseHandler.<CustomPaging<DietDto>>builder()
+				.data(dietService.getDietMyTrainer(loginMember.getMemberId(), pageable, searchDate))
+				.message("식단기록 조회되었습니다.")
+				.build();
+	}
+
+	/**
+	 * 식단기록 끝 ============================================================================================
+	 */
 
 	@Operation(summary = "학생이 본인의 수강권 조회", responses = {
 			@ApiResponse(responseCode = "404", description = "존재하지 않는 학생"),

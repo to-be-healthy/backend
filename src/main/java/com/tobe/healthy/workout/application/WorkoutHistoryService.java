@@ -79,15 +79,12 @@ public class WorkoutHistoryService {
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 
-    public List<WorkoutHistoryDto> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable) {
-        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
+    public CustomPaging<WorkoutHistoryDto> getWorkoutHistoryMyTrainer(Long studentId, Pageable pageable, String searchDate) {
+        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(studentId)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(mapping.getTrainer().getId(), TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
-        Page<WorkoutHistory> histories = workoutHistoryRepository.getWorkoutHistoryByTrainer(trainer, pageable);
-        List<WorkoutHistoryDto> historiesDto = histories.map(WorkoutHistoryDto::from).stream().toList();
-        List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
-        historiesDto = setHistoryListFile(historiesDto, ids);
-        List<WorkoutHistoryDto> result = setHistoryListExercise(historiesDto, ids);
-        return result.isEmpty() ? null : result;
+        return getWorkoutHistoryByTrainer(trainer.getId(), pageable, searchDate);
     }
 
     public WorkoutHistoryDto getWorkoutHistoryDetail(Long workoutHistoryId) {
@@ -185,4 +182,15 @@ public class WorkoutHistoryService {
         }
     }
 
+    public CustomPaging<WorkoutHistoryDto> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable, String searchDate){
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+        Page<WorkoutHistory> pageDtos = workoutHistoryRepository.getWorkoutHistoryByTrainer(trainer, pageable, searchDate);
+        List<WorkoutHistoryDto> historiesDto = pageDtos.map(WorkoutHistoryDto::from).stream().toList();
+        List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
+        historiesDto = setHistoryListFile(historiesDto, ids);
+        List<WorkoutHistoryDto> content = setHistoryListExercise(historiesDto, ids);
+        return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
+                pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
+    }
 }

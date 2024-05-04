@@ -11,8 +11,11 @@ import com.tobe.healthy.diet.repository.DietLikeRepository;
 import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.file.FileService;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
+import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,9 +31,10 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.tobe.healthy.config.error.ErrorCode.DIET_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.LIKE_ALREADY_EXISTS;
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_FOUND;
 import static com.tobe.healthy.diet.domain.entity.DietType.*;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 
 
 @Service
@@ -43,6 +47,8 @@ public class DietService {
     private final DietLikeRepository dietLikeRepository;
     private final TrainerMemberMappingRepository mappingRepository;
     private final FileService fileService;
+    private final MemberRepository memberRepository;
+
 
     public CustomPaging<DietDto> getDiet(Long memberId, Pageable pageable, String searchDate) {
         Page<Diet> pageDtos = dietRepository.getDietOfMonth(memberId, pageable, searchDate);
@@ -142,4 +148,24 @@ public class DietService {
 
         return setDietFile(DietDto.from(diet), List.of(diet.getDietId()));
     }
+
+    public CustomPaging<DietDto> getDietMyTrainer(Long studentId, Pageable pageable, String searchDate) {
+        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(studentId)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(mapping.getTrainer().getId(), TRAINER)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+        return getDietByTrainer(trainer.getId(), pageable, searchDate);
+    }
+
+    public CustomPaging<DietDto> getDietByTrainer(Long trainerId, Pageable pageable, String searchDate) {
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+        Page<Diet> pageDtos = dietRepository.getDietByTrainer(trainer, pageable, searchDate);
+        List<DietDto> dietDtos = pageDtos.map(DietDto::from).stream().toList();
+        List<Long> ids = dietDtos.stream().map(DietDto::getDietId).collect(Collectors.toList());
+        List<DietDto> content = setDietFile(dietDtos, ids);
+        return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
+                pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
+    }
+
 }

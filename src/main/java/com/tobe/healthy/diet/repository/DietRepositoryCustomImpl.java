@@ -8,6 +8,8 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietFiles;
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +22,7 @@ import java.util.List;
 
 import static com.tobe.healthy.diet.domain.entity.QDiet.diet;
 import static com.tobe.healthy.diet.domain.entity.QDietFiles.dietFiles;
+import static com.tobe.healthy.workout.domain.entity.QWorkoutHistory.workoutHistory;
 
 
 @Repository
@@ -80,6 +83,28 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 .orderBy(diet.createdAt.desc())
                 .limit(1)
                 .fetchOne();
+    }
+
+    @Override
+    public Page<Diet> getDietByTrainer(Member trainer, Pageable pageable, String searchDate) {
+        Long totalCnt = queryFactory
+                .select(diet.count())
+                .from(diet)
+                .where(diet.trainer.id.eq(trainer.getId()), dietDeYnEq(false), convertDateFormat(searchDate))
+                .fetchOne();
+        List<Diet> diets =  queryFactory
+                .select(diet)
+                .from(diet)
+                .where(diet.trainer.id.eq(trainer.getId()), dietDeYnEq(false), convertDateFormat(searchDate))
+                .orderBy(diet.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+        return PageableExecutionUtils.getPage(diets, pageable, ()-> totalCnt );
+    }
+
+    private BooleanExpression dietDeYnEq(boolean bool) {
+        return diet.delYn.eq(bool);
     }
 
     private BooleanExpression dietFileDeYnEq(boolean bool) {
