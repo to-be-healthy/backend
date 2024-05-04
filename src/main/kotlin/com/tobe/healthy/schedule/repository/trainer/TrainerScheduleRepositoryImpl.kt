@@ -94,7 +94,7 @@ class TrainerScheduleRepositoryImpl(
             .leftJoin(schedule.scheduleWaiting, scheduleWaiting)
             .where(
                 schedule.id.eq(scheduleId),
-                schedule.lessonDt.before(now().minusDays(1)),
+                schedule.lessonDt.after(now().minusDays(1)),
                 schedule.reservationStatus.eq(COMPLETED),
                 schedule.applicant.isNotNull,
                 schedule.delYn.eq(false)
