@@ -21,7 +21,7 @@ class LessonHistoryComment(
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "parent_id")
-    val parentId: LessonHistoryComment? = null,
+    val parent: LessonHistoryComment? = null,
 
     val order: Int,
 

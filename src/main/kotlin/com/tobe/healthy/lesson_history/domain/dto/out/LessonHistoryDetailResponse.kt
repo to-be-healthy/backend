@@ -75,10 +75,10 @@ data class LessonHistoryDetailResponse(
         }
 
         private fun sortLessonHistoryComment(comment: List<LessonHistoryComment?>): MutableList<LessonHistoryCommentCommandResult?> {
-            val (comments, replies) = comment.sortedBy{ it?.order }.partition { it?.parentId == null }
+            val (comments, replies) = comment.sortedBy{ it?.order }.partition { it?.parent == null }
 
             comments.forEach { parent ->
-                parent?.replies = replies.filter { child -> child?.parentId?.id == parent?.id }
+                parent?.replies = replies.filter { child -> child?.parent?.id == parent?.id }
                                         .sortedBy { it?.order }
                                         .toMutableList()
             }
@@ -128,7 +128,7 @@ data class LessonHistoryDetailResponse(
                         member = LessonHistoryCommentMemberResult.from(entity.writer),
                         orderNum = entity.order,
                         replies = entity.replies?.let { it -> it.map { from(it) } }?.toMutableList(),
-                        parentId = entity?.let { it?.parentId?.id },
+                        parentId = entity?.let { it?.parent?.id },
                         files = entity.files.map { LessonHistoryFileResults.from(it) }.toMutableList(),
                         delYn = entity.delYn,
                         createdAt = entity.createdAt,

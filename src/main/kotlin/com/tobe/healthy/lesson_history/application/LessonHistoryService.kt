@@ -138,21 +138,26 @@ class LessonHistoryService(
         request: CommentRegisterCommand,
         memberId: Long,
     ): Boolean {
-        val findMember = memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
-        val lessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?:
-            throw CustomException(LESSON_HISTORY_NOT_FOUND)
+        val findMember = memberRepository.findByIdOrNull(memberId)
+            ?: throw CustomException(MEMBER_NOT_FOUND)
+
+        val lessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
+            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+
         val order = lessonHistoryCommentRepository.findTopComment(
             lessonHistory.id,
-            lessonHistoryCommentId!!,
+            lessonHistoryCommentId!!
         )
+
         val parentComment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
+            ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
 
         val entity = LessonHistoryComment(
             order = order,
             content = request.comment!!,
             writer = findMember,
             lessonHistory = lessonHistory,
-            parentId = parentComment
+            parent = parentComment
         )
 
         lessonHistoryCommentRepository.save(entity)
