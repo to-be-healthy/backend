@@ -9,6 +9,7 @@ import org.springframework.data.redis.listener.KeyExpirationEventMessageListener
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
+import static com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_REMOVE_ERROR;
 
 @Component
@@ -20,6 +21,8 @@ public class RedisKeyExpiredListener extends KeyExpirationEventMessageListener {
 	@Value("${aws.s3.bucket-name}")
 	private String bucketName;
 
+	private final String S3_DOMAIN = "https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/";
+
 	public RedisKeyExpiredListener(RedisMessageListenerContainer listenerContainer, AmazonS3 amazonS3) {
 		super(listenerContainer);
         this.amazonS3 = amazonS3;
@@ -28,9 +31,11 @@ public class RedisKeyExpiredListener extends KeyExpirationEventMessageListener {
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
 		String fileUrl = message.toString();
-		if (fileUrl != null && fileUrl.startsWith("https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com")) {
+		if (fileUrl != null && fileUrl.startsWith(TEMP_FILE_URI.getDescription())) {
 			try {
-				amazonS3.deleteObject(bucketName, fileUrl.replaceAll("https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/", ""));
+				String fileName = fileUrl.replaceAll(TEMP_FILE_URI.getDescription() + S3_DOMAIN, "");
+				amazonS3.deleteObject(bucketName, fileName);
+				log.info("fileName: {}", fileName);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new CustomException(FILE_REMOVE_ERROR);
