@@ -17,13 +17,7 @@ import lombok.extern.slf4j.Slf4j
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequiredArgsConstructor
@@ -43,7 +37,8 @@ class TrainerScheduleController(
     )
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping
-    fun registerSchedule(@RequestBody request: RegisterScheduleRequest, @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
+    fun registerSchedule(@RequestBody request: RegisterScheduleRequest,
+                         @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "일정 등록에 성공하였습니다.",
             data = trainerScheduleService.registerSchedule(request, member.memberId)
@@ -60,7 +55,8 @@ class TrainerScheduleController(
     )
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping("/individual")
-    fun registerIndividualSchedule(@RequestBody request: RegisterScheduleCommand, @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
+    fun registerIndividualSchedule(@RequestBody request: RegisterScheduleCommand,
+                                   @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "개별 일정 등록에 성공하였습니다.",
             data = trainerScheduleService.registerIndividualSchedule(request, member.memberId)
@@ -75,7 +71,8 @@ class TrainerScheduleController(
     )
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findAllSchedule(@ParameterObject searchCond: ScheduleSearchCond, @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<List<ScheduleCommandResult?>> {
+    fun findAllSchedule(@ParameterObject searchCond: ScheduleSearchCond,
+                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<List<ScheduleCommandResult?>> {
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
             data = trainerScheduleService.findAllSchedule(searchCond, customMemberDetails.member)
@@ -90,7 +87,8 @@ class TrainerScheduleController(
     )
     @DeleteMapping("/trainer/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun cancelScheduleForTrainer(@Parameter(description = "일정 아이디", example = "1") @PathVariable scheduleId: Long, @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    fun cancelScheduleForTrainer(@Parameter(description = "일정 아이디", example = "1") @PathVariable scheduleId: Long,
+                                 @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "일정을 취소하였습니다.",

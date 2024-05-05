@@ -18,9 +18,8 @@ import lombok.extern.slf4j.Slf4j
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
 import java.time.LocalDate
-import java.time.LocalDate.now
 import java.time.LocalTime
-import java.util.Optional
+import java.util.*
 
 @Repository
 @Slf4j
@@ -95,7 +94,6 @@ class TrainerScheduleRepositoryImpl(
             .leftJoin(schedule.scheduleWaiting, scheduleWaiting)
             .where(
                 schedule.id.eq(scheduleId),
-                schedule.lessonDt.after(now().minusDays(1)),
                 schedule.reservationStatus.eq(COMPLETED),
                 schedule.applicant.isNotNull,
                 schedule.delYn.eq(false)
