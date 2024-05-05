@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -52,12 +53,12 @@ public class StudentScheduleService {
 
 		List<ScheduleCommandResult> morning = schedule.stream()
 				.filter(s -> NOON.isAfter(s.getLessonStartTime()))
-				.peek(s -> { if(s.getWaitingByName()!=null) s.setReservationStatus(SOLD_OUT); })
+				.peek(s -> { if(s.getWaitingByName()!=null|| s.getLessonDt().equals(LocalDate.now())) s.setReservationStatus(SOLD_OUT); })
 				.collect(Collectors.toList());
 
 		List<ScheduleCommandResult> afternoon = schedule.stream()
 				.filter(s -> NOON.isBefore(s.getLessonStartTime()))
-				.peek(s -> { if(s.getWaitingByName()!=null) s.setReservationStatus(SOLD_OUT); })
+				.peek(s -> { if(s.getWaitingByName()!=null|| s.getLessonDt().equals(LocalDate.now())) s.setReservationStatus(SOLD_OUT); })
 				.collect(Collectors.toList());
 
 		return ScheduleCommandResponse.create(morning, afternoon);
