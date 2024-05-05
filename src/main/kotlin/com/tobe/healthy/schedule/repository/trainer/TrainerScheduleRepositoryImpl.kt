@@ -6,14 +6,14 @@ import com.querydsl.core.types.dsl.StringExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.domain.entity.QMember
-import com.tobe.healthy.schedule.domain.dto.`in`.RegisterScheduleCommand
-import com.tobe.healthy.schedule.domain.dto.`in`.ScheduleSearchCond
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
 import com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
 import com.tobe.healthy.schedule.domain.entity.Schedule
+import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
+import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
 import lombok.extern.slf4j.Slf4j
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
@@ -37,12 +37,12 @@ class TrainerScheduleRepositoryImpl(
             .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
             .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
             .leftJoin(schedule.scheduleWaiting, scheduleWaiting)
-            .on(delYnEq(false))
+            .on(scheduleWaitingDelYnEq(false))
             .where(
                 lessonDtEq(searchCond),
                 lessonDtBetween(searchCond),
                 trainerIdEq(trainer),
-                scheduleWaitingDelYnEq(false)
+                delYnEq(false)
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()

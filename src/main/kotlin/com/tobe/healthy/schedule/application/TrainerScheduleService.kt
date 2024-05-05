@@ -4,13 +4,13 @@ import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
-import com.tobe.healthy.schedule.domain.dto.`in`.RegisterScheduleCommand
-import com.tobe.healthy.schedule.domain.dto.`in`.RegisterScheduleRequest
-import com.tobe.healthy.schedule.domain.dto.`in`.ScheduleSearchCond
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.*
 import com.tobe.healthy.schedule.domain.entity.Schedule
+import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
+import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
+import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
 import lombok.RequiredArgsConstructor
 import lombok.extern.slf4j.Slf4j
@@ -47,7 +47,7 @@ class TrainerScheduleService(
                     break
                 }
 
-                if (request.closedDt.contains(lessonDt)) {
+                if (request.closedDt?.contains(lessonDt) == true) {
                     lessonDt = lessonDt.plusDays(ONE_DAY)
                     continue
                 }

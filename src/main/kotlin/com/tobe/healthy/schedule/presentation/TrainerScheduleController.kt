@@ -3,11 +3,11 @@ package com.tobe.healthy.schedule.presentation
 import com.tobe.healthy.ApiResultResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.schedule.application.TrainerScheduleService
-import com.tobe.healthy.schedule.domain.dto.`in`.RegisterScheduleCommand
-import com.tobe.healthy.schedule.domain.dto.`in`.RegisterScheduleRequest
-import com.tobe.healthy.schedule.domain.dto.`in`.ScheduleSearchCond
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
+import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
+import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
+import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
