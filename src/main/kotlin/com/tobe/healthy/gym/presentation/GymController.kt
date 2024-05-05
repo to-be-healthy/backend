@@ -5,6 +5,7 @@ import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.gym.application.GymService
 import com.tobe.healthy.gym.domain.dto.out.GymListCommandResult
 import com.tobe.healthy.gym.domain.dto.out.RegisterGymResponse
+import com.tobe.healthy.gym.domain.dto.out.SelectMyGymResponse
 import com.tobe.healthy.gym.domain.dto.out.TrainerCommandResult
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -63,7 +64,7 @@ class GymController(
     fun selectMyGym(@Parameter(description = "헬스장 ID") @PathVariable gymId: Long,
                     @Parameter(description = "6자리 난수로 구성된 헬스장 가입 번호") joinCode: Int,
                     @AuthenticationPrincipal member: CustomMemberDetails,
-    ): ApiResultResponse<Boolean> {
+    ): ApiResultResponse<SelectMyGymResponse> {
         return ApiResultResponse(
             data = gymService.selectMyGym(gymId, joinCode, member.memberId),
             message = "내 헬스장으로 등록되었습니다."

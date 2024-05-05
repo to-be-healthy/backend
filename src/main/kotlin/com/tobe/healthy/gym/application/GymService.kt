@@ -8,6 +8,7 @@ import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
 import com.tobe.healthy.config.error.ErrorCode.UNCHANGED_GYM_ID
 import com.tobe.healthy.gym.domain.dto.out.GymListCommandResult
 import com.tobe.healthy.gym.domain.dto.out.RegisterGymResponse
+import com.tobe.healthy.gym.domain.dto.out.SelectMyGymResponse
 import com.tobe.healthy.gym.domain.dto.out.TrainerCommandResult
 import com.tobe.healthy.gym.domain.entity.Gym
 import com.tobe.healthy.gym.repository.GymRepository
@@ -28,7 +29,7 @@ class GymService(
         return gymRepository.findAll().map { GymListCommandResult.from(it) }
     }
 
-    fun selectMyGym(gymId: Long, joinCode: Int, memberId: Long): Boolean {
+    fun selectMyGym(gymId: Long, joinCode: Int, memberId: Long): SelectMyGymResponse {
 
         val member = memberRepository.findByIdOrNull(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
@@ -42,13 +43,13 @@ class GymService(
             }
         }
 
-        if (member.gym.id == gym.id) {
+        if (member.gym?.id == gym.id) {
             throw CustomException(UNCHANGED_GYM_ID)
         }
 
         member.registerGym(gym)
 
-        return true
+        return SelectMyGymResponse.from(gym)
     }
 
     fun registerGym(name: String): RegisterGymResponse {

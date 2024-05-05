@@ -77,6 +77,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	@ManyToOne(fetch = LAZY, cascade = PERSIST)
 	@JoinColumn(name = "gym_id")
+	@Nullable
 	private Gym gym;
 
 	@OneToMany(fetch = LAZY, mappedBy = "trainer")
