@@ -11,12 +11,16 @@ import com.tobe.healthy.schedule.domain.dto.`in`.ScheduleSearchCond
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
 import com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import lombok.extern.slf4j.Slf4j
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
 import java.time.LocalDate
+import java.time.LocalDate.now
 import java.time.LocalTime
+import java.util.Optional
 
 @Repository
 @Slf4j
@@ -38,14 +42,17 @@ class TrainerScheduleRepositoryImpl(
             .where(
                 lessonDtEq(searchCond),
                 lessonDtBetween(searchCond),
-                delYnFalse(),
-                schedule.trainer.id.eq(trainer.id),
+                trainerIdEq(trainer),
+                delYnFalse()
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
 
-        return results.map { ScheduleCommandResult.from(it, trainer) }
+        return results.map { ScheduleCommandResult.from(it) }
     }
+
+    private fun trainerIdEq(trainer: Member): BooleanExpression? =
+        schedule.trainer.id.eq(trainer.id)
 
     private fun delYnFalse(): BooleanExpression {
         return schedule.delYn.eq(false)
@@ -79,6 +86,43 @@ class TrainerScheduleRepositoryImpl(
                 schedule.lessonStartTime.before(endTime).and(schedule.lessonEndTime.after(startTime)),
             )
             .fetchOne()!!
+    }
+
+    override fun findAvailableWaitingId(scheduleId: Long): Optional<Schedule> {
+        val result = queryFactory
+            .select(schedule)
+            .from(schedule)
+            .leftJoin(schedule.scheduleWaiting, scheduleWaiting)
+            .where(
+                schedule.id.eq(scheduleId),
+                schedule.lessonDt.after(now().minusDays(1)),
+                schedule.reservationStatus.eq(COMPLETED),
+                schedule.applicant.isNotNull,
+                schedule.delYn.eq(false)
+            )
+            .fetchOne()
+        return Optional.ofNullable(result)
+    }
+
+    override fun findScheduleByTrainerId(scheduleId: Long, reservationStatus: ReservationStatus, trainerId: Long): Schedule? {
+        return queryFactory.select(schedule).from(schedule)
+            .where(
+                schedule.id.eq(scheduleId),
+                schedule.trainer.id.eq(trainerId),
+                schedule.reservationStatus.eq(reservationStatus),
+                schedule.delYn.eq(false)
+            )
+            .fetchOne()
+    }
+
+    override fun findScheduleByTrainerId(scheduleId: Long, trainerId: Long): Schedule? {
+        return queryFactory.select(schedule).from(schedule)
+            .where(
+                schedule.id.eq(scheduleId),
+                schedule.trainer.id.eq(trainerId),
+                schedule.delYn.eq(false)
+            )
+            .fetchOne()
     }
 
     private fun lessonDtBetween(searchCond: ScheduleSearchCond): BooleanExpression? {

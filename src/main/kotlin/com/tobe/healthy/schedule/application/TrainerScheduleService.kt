@@ -17,6 +17,8 @@ import com.tobe.healthy.schedule.domain.dto.`in`.ScheduleSearchCond
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus.NO_SHOW
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
 import lombok.RequiredArgsConstructor
@@ -81,7 +83,7 @@ class TrainerScheduleService(
     }
 
     private fun isStartTimeEqualsLunchStartTime(request: RegisterScheduleRequest, startTime: LocalTime): Boolean {
-        return startTime == request.lunchStartTime
+        return startTime == request?.lunchStartTime
     }
 
     private fun startTimeIsBefore(request: RegisterScheduleRequest, startTime: LocalTime): Boolean {
@@ -99,7 +101,7 @@ class TrainerScheduleService(
         if (request.startTime.isAfter(request.endTime)) {
             throw CustomException(DATETIME_NOT_VALID)
         }
-        if (request.lunchStartTime.isAfter(request.lunchEndTime)) {
+        if (request.lunchStartTime?.isAfter(request.lunchEndTime) == true) {
             throw CustomException(LUNCH_TIME_INVALID)
         }
         if (DAYS.between(request.startDt, request.endDt) > 30) {
@@ -112,9 +114,16 @@ class TrainerScheduleService(
     }
 
     fun updateReservationStatusToNoShow(scheduleId: Long, trainerId: Long): ScheduleIdInfo {
-        val schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, trainerId)
+        val schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, COMPLETED, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
         schedule.updateReservationStatusToNoShow()
+        return ScheduleIdInfo.from(schedule)
+    }
+
+    fun revertReservationStatusToNoShow(scheduleId: Long, trainerId: Long): ScheduleIdInfo {
+        val schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, NO_SHOW, trainerId)
+            ?: throw CustomException(SCHEDULE_NOT_FOUND)
+        schedule.revertReservationStatusToNoShow()
         return ScheduleIdInfo.from(schedule)
     }
 
@@ -130,7 +139,8 @@ class TrainerScheduleService(
     }
 
     fun cancelTrainerSchedule(scheduleId: Long, trainerId: Long): Boolean {
-        val entity = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, trainerId) ?: throw CustomException(SCHEDULE_NOT_FOUND)
+        val entity = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, trainerId)
+            ?: throw CustomException(SCHEDULE_NOT_FOUND)
         entity.cancelTrainerSchedule()
         return true
     }
