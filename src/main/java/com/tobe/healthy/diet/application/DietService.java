@@ -90,7 +90,7 @@ public class DietService {
         if(!ObjectUtils.isEmpty(diet.getDietFiles())) {
             diet.getDietFiles().stream()
                     .filter(f -> requestType.equals(f.getType()))
-                    .forEach(file -> fileService.deleteFile(file.getFileName()));
+                    .forEach(file -> fileService.deleteFile("diet/", getFileName(file.getFileUrl())));
         }
 
         if(!ObjectUtils.isEmpty(requestFile)){
@@ -129,7 +129,7 @@ public class DietService {
                 .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
         diet.deleteDiet();
         dietLikeRepository.deleteLikeByDietId(dietId);
-        diet.getDietFiles().forEach(file -> fileService.deleteFile(file.getFileName()));
+        diet.getDietFiles().forEach(file -> fileService.deleteFile("diet/", getFileName(file.getFileUrl())));
     }
 
     public DietDto updateDiet(Member member, Long dietId, DietUpdateCommand command) {
@@ -141,7 +141,7 @@ public class DietService {
         diet.changeFastDinner(command.isDinnerFast());
 
         diet.deleteFiles();
-        diet.getDietFiles().forEach(file -> fileService.deleteFile(file.getFileName()));
+        diet.getDietFiles().forEach(file -> fileService.deleteFile("diet/", getFileName(file.getFileUrl())));
         if(!ObjectUtils.isEmpty(command.getBreakfastFile())) fileService.uploadDietFile(diet, BREAKFAST, command.getBreakfastFile());
         if(!ObjectUtils.isEmpty(command.getLunchFile())) fileService.uploadDietFile(diet, LUNCH, command.getLunchFile());
         if(!ObjectUtils.isEmpty(command.getDinnerFile())) fileService.uploadDietFile(diet, DINNER, command.getDinnerFile());
@@ -166,6 +166,11 @@ public class DietService {
         List<DietDto> content = setDietFile(dietDtos, ids);
         return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
+    }
+
+    private String getFileName(String url){
+        String[] arr = url.split("/");
+        return arr[arr.length - 1];
     }
 
 }

@@ -84,9 +84,9 @@ public class FileService {
 		return uploadFile;
 	}
 
-	public void deleteFile(String fileName){
+	public void deleteFile(String folder, String fileName){
 		try{
-			amazonS3.deleteObject(bucketName, fileName);
+			amazonS3.deleteObject(bucketName, folder + fileName);
 		}catch (Exception e){
 			e.printStackTrace();
 			throw new CustomException(FILE_REMOVE_ERROR);
@@ -96,18 +96,15 @@ public class FileService {
 	public void uploadDietFile(Diet diet, DietType type, MultipartFile uploadFile) {
 		if (!uploadFile.isEmpty()) {
 			try {
-				String savedFileName = System.currentTimeMillis() + "-" + randomUUID();
 				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
+				String savedFileName = "diet/" + System.currentTimeMillis() + "-" + randomUUID() + extension;
 
 				ObjectMetadata objectMetadata = new ObjectMetadata();
 				objectMetadata.setContentLength(uploadFile.getSize());
 				objectMetadata.setContentType(uploadFile.getContentType());
 				amazonS3.putObject(bucketName, savedFileName, uploadFile.getInputStream(), objectMetadata);
 				String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
-
-				DietFiles dietFile = DietFiles.create(savedFileName, cleanPath(uploadFile.getOriginalFilename())
-						, extension, uploadFile.getSize(), diet, fileUrl, type);
-				dietFileRepository.save(dietFile);
+				dietFileRepository.save(DietFiles.create(diet, fileUrl, type));
 			} catch (IOException e) {
 				e.printStackTrace();
 				throw new CustomException(FILE_UPLOAD_ERROR);

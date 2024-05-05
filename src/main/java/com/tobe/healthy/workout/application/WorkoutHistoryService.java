@@ -90,7 +90,7 @@ public class WorkoutHistoryService {
         history.deleteWorkoutHistory();
         completedExerciseRepository.deleteAllInBatch(history.getCompletedExercises());
         workoutHistoryLikeRepository.deleteLikeByWorkoutHistoryId(workoutHistoryId);
-        history.getHistoryFiles().forEach(file -> fileService.deleteFile(getFileName(file.getFileUrl())));
+        history.getHistoryFiles().forEach(file -> fileService.deleteFile("workout-history/", getFileName(file.getFileUrl())));
     }
 
     public WorkoutHistoryDto updateWorkoutHistory(Member member, Long workoutHistoryId, HistoryAddCommand command) {
@@ -104,7 +104,7 @@ public class WorkoutHistoryService {
         saveCompletedExercises(history, command);
         //파일 수정
         history.deleteFiles();
-        history.getHistoryFiles().forEach(file -> fileService.deleteFile(getFileName(file.getFileUrl())));
+        history.getHistoryFiles().forEach(file -> fileService.deleteFile("workout-history/", getFileName(file.getFileUrl())));
         uploadWorkoutFiles(history, command.getFiles());
         return setHistoryFile(WorkoutHistoryDto.from(history), List.of(history.getWorkoutHistoryId()));
     }
