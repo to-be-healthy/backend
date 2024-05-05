@@ -40,7 +40,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         List<WorkoutHistoryDto> workoutHistories = queryFactory
                 .select(new QWorkoutHistoryDto(workoutHistory.workoutHistoryId, workoutHistory.content, workoutHistory.member
                         , isLiked()
-                        , workoutHistory.likeCnt, workoutHistory.commentCnt))
+                        , workoutHistory.likeCnt, workoutHistory.commentCnt, workoutHistory.viewMySelf))
                 .from(workoutHistory)
                 .leftJoin(workoutHistoryLike)
                 .on(workoutHistory.workoutHistoryId.eq(workoutHistoryLike.workoutHistoryLikePK.workoutHistory.workoutHistoryId)
@@ -58,12 +58,14 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         Long totalCnt = queryFactory
                 .select(workoutHistory.count())
                 .from(workoutHistory)
-                .where(workoutHistory.gym.id.eq(gymId), historyDeYnEq(false), convertDateFormat(searchDate))
+                .where(workoutHistory.gym.id.eq(gymId), historyDeYnEq(false),
+                        convertDateFormat(searchDate), viewMySelfEq(false))
                 .fetchOne();
         List<WorkoutHistory> workoutHistories =  queryFactory
                 .select(workoutHistory)
                 .from(workoutHistory)
-                .where(workoutHistory.gym.id.eq(gymId), historyDeYnEq(false), convertDateFormat(searchDate))
+                .where(workoutHistory.gym.id.eq(gymId), historyDeYnEq(false),
+                        convertDateFormat(searchDate), viewMySelfEq(false))
                 .orderBy(workoutHistory.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -89,6 +91,10 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
 
     private BooleanExpression historyDeYnEq(boolean bool) {
         return workoutHistory.delYn.eq(bool);
+    }
+
+    private BooleanExpression viewMySelfEq(boolean bool) {
+        return workoutHistory.viewMySelf.eq(bool);
     }
 
     private BooleanExpression historyFileDeYnEq(boolean bool) {

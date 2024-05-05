@@ -49,11 +49,8 @@ public class WorkoutHistoryService {
 
 
     public WorkoutHistoryDto addWorkoutHistory(Member member, HistoryAddCommand command) {
-        MemberDto memberDto = MemberDto.from(member);
         Member result = memberRepository.findByMemberIdWithGym(member.getId());
-        WorkoutHistoryDto workoutHistoryDto = WorkoutHistoryDto.create(command, memberDto);
-        WorkoutHistory history = WorkoutHistory.create(workoutHistoryDto, member, result.getGym());
-
+        WorkoutHistory history = WorkoutHistory.create(command, member, result.getGym());
         workoutHistoryRepository.save(history);
         saveCompletedExercises(history, command);
         uploadWorkoutFiles(history, command.getFiles());
