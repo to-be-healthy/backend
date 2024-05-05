@@ -1,5 +1,6 @@
 package com.tobe.healthy.workout.presentation;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.file.FileService;
@@ -14,6 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -118,6 +121,20 @@ public class WorkoutHistoryController {
         workoutService.deleteLikeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
         return ResponseHandler.<Void>builder()
                 .message("운동기록 좋아요가 취소되었습니다.")
+                .build();
+    }
+
+    @Operation(summary = "같은 헬스장 학생들의 운동기록 목록 조회하기", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
+    })
+    @GetMapping("/my-gym")
+    public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistoryMyGym(@AuthenticationPrincipal CustomMemberDetails loginMember,
+                                                                                   @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+                                                                                   Pageable pageable) {
+        return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
+                .data(workoutService.getWorkoutHistoryMyGym(loginMember.getMemberId(), pageable, searchDate))
+                .message("운동기록이 조회되었습니다.")
                 .build();
     }
 

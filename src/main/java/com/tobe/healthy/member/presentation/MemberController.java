@@ -174,20 +174,6 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "내 트레이너가 관리하는 학생들의 운동기록 목록 조회하기", responses = {
-			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
-	})
-	@GetMapping("/my-trainer/workout-histories")
-	public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistoryMyTrainer(@AuthenticationPrincipal CustomMemberDetails loginMember,
-																					   @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
-																					   Pageable pageable) {
-		return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
-				.data(workoutService.getWorkoutHistoryMyTrainer(loginMember.getMemberId(), pageable, searchDate))
-				.message("운동기록이 조회되었습니다.")
-				.build();
-	}
-
 	/**
 	 * 운동기록 끝 ============================================================================================
 	 */

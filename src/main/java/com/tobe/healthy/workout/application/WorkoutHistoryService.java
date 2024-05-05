@@ -49,10 +49,10 @@ public class WorkoutHistoryService {
 
 
     public WorkoutHistoryDto addWorkoutHistory(Member member, HistoryAddCommand command) {
-        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId()).orElse(null);
         MemberDto memberDto = MemberDto.from(member);
+        Member result = memberRepository.findByMemberIdWithGym(member.getId());
         WorkoutHistoryDto workoutHistoryDto = WorkoutHistoryDto.create(command, memberDto);
-        WorkoutHistory history = WorkoutHistory.create(workoutHistoryDto, member, mapping == null ? null : mapping.getTrainer());
+        WorkoutHistory history = WorkoutHistory.create(workoutHistoryDto, member, result.getGym());
 
         workoutHistoryRepository.save(history);
         saveCompletedExercises(history, command);
@@ -77,14 +77,6 @@ public class WorkoutHistoryService {
         List<WorkoutHistoryDto> content = setHistoryListExercise(historiesDto, ids);
         return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
-    }
-
-    public CustomPaging<WorkoutHistoryDto> getWorkoutHistoryMyTrainer(Long studentId, Pageable pageable, String searchDate) {
-        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(studentId)
-                .orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
-        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(mapping.getTrainer().getId(), TRAINER)
-                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
-        return getWorkoutHistoryByTrainer(trainer.getId(), pageable, searchDate);
     }
 
     public WorkoutHistoryDto getWorkoutHistoryDetail(Long workoutHistoryId) {
@@ -182,10 +174,9 @@ public class WorkoutHistoryService {
         }
     }
 
-    public CustomPaging<WorkoutHistoryDto> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable, String searchDate){
-        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
-                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
-        Page<WorkoutHistory> pageDtos = workoutHistoryRepository.getWorkoutHistoryByTrainer(trainer, pageable, searchDate);
+    public CustomPaging<WorkoutHistoryDto> getWorkoutHistoryMyGym(Long studentId, Pageable pageable, String searchDate) {
+        Member member = memberRepository.findByMemberIdWithGym(studentId);
+        Page<WorkoutHistory> pageDtos = workoutHistoryRepository.getWorkoutHistoryByGym(member.getGym().getId(), pageable, searchDate);
         List<WorkoutHistoryDto> historiesDto = pageDtos.map(WorkoutHistoryDto::from).stream().toList();
         List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
         historiesDto = setHistoryListFile(historiesDto, ids);
@@ -193,4 +184,5 @@ public class WorkoutHistoryService {
         return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
+
 }

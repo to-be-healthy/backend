@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface MemberRepositoryCustom {
 
-    Member findByMemberIdWithGym(Long trainerId);
+    Member findByMemberIdWithGym(Long mmeberId);
     Member findByMemberIdWithProfileAndGym(Long memberId);
     List<MemberInTeamResult> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable);
     Page<Member> findAllUnattachedMembers(Long gymId, String searchValue, String sortValue, Pageable pageable);
