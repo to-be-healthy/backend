@@ -1,7 +1,7 @@
 package com.tobe.healthy.schedule.application
 
 import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE
+import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
@@ -43,13 +43,15 @@ class TrainerScheduleServiceTest(
         lessonEndDt = of(2024, 12, 1)
     )
 
+    val trainerId = 542L
+
     // 특정 상황 설정
     Given("트레이너가 일정을 등록하고") {
         val trainerId = 542L
         trainerScheduleService.registerSchedule(requestSchedule, trainerId)
 
         // 특정 상황 실행
-        When("등록한 일정을 조회 해서") {
+        When("등록한 일정을 조회를 했을 때") {
             val trainer = findMember(memberRepository, trainerId)
             val schedules = trainerScheduleService.findAllSchedule(searchCondSchedule, trainer)
 
@@ -70,15 +72,47 @@ class TrainerScheduleServiceTest(
     }
 
     Given("트레이너가 일정을 등록한 뒤에") {
-        val trainerId = 542L
-        When("유효하지 않은 일정 정보를 입력하면") {
-            Then("예외를 발생시킨다") {
-                val copyRequest = requestSchedule.copy(startDt = of(2024, 12, 2))
-                val exception = shouldThrow<CustomException> {
-                    trainerScheduleService.registerSchedule(copyRequest, trainerId)
-                }
-                exception.message shouldBe START_DATE_AFTER_END_DATE.message
+
+        Then("수업 시작일이 종료일보다 미래여서 예외를 발생시킨다") {
+            val copyRequest = requestSchedule.copy(
+                startDt = of(2024, 12, 2)
+            )
+            val exception = shouldThrow<CustomException> {
+                trainerScheduleService.registerSchedule(copyRequest, trainerId)
             }
+            exception.message shouldBe START_DATE_AFTER_END_DATE.message
+        }
+
+        Then("수업 시작시간이 종료일보다 미래여서 예외를 발생시킨다") {
+            val copyRequest = requestSchedule.copy(
+                startTime = LocalTime.of(17, 0)
+            )
+            val exception = shouldThrow<CustomException> {
+                trainerScheduleService.registerSchedule(copyRequest, trainerId)
+            }
+            exception.message shouldBe DATETIME_NOT_VALID.message
+        }
+
+        Then("등록할 수업 시간이 30일을 초과해서 예외를 발생시킨다") {
+            val copyRequest = requestSchedule.copy(
+                startDt = of(2025, 1, 1),
+                endDt = of(2025, 2, 10)
+            )
+            val exception = shouldThrow<CustomException> {
+                trainerScheduleService.registerSchedule(copyRequest, trainerId)
+            }
+            exception.message shouldBe SCHEDULE_LESS_THAN_30_DAYS.message
+        }
+
+        Then("시작 점심시간이 종료 점심시간보다 미래여서 예외를 발생시킨다") {
+            val copyRequest = requestSchedule.copy(
+                lunchStartTime = LocalTime.of(13, 0),
+                lunchEndTime = LocalTime.of(11, 0)
+            )
+            val exception = shouldThrow<CustomException> {
+                trainerScheduleService.registerSchedule(copyRequest, trainerId)
+            }
+            exception.message shouldBe LUNCH_TIME_INVALID.message
         }
     }
 })
