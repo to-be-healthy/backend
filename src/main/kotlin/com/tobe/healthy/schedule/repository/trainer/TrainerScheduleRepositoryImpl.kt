@@ -37,12 +37,12 @@ class TrainerScheduleRepositoryImpl(
             .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
             .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
             .leftJoin(schedule.scheduleWaiting, scheduleWaiting)
-            .on(scheduleWaiting.delYn.isFalse())
+            .on(delYnEq(false))
             .where(
                 lessonDtEq(searchCond),
                 lessonDtBetween(searchCond),
                 trainerIdEq(trainer),
-                delYnFalse()
+                scheduleWaitingDelYnEq(false)
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
@@ -50,22 +50,15 @@ class TrainerScheduleRepositoryImpl(
         return results.map { ScheduleCommandResult.from(it) }
     }
 
-    private fun trainerIdEq(trainer: Member): BooleanExpression? =
-        schedule.trainer.id.eq(trainer.id)
-
-    private fun delYnFalse(): BooleanExpression {
-        return schedule.delYn.eq(false)
-    }
-
     override fun findAvailableRegisterSchedule(request: RegisterScheduleCommand, trainerId: Long): Schedule? {
         return queryFactory
             .select(schedule)
             .from(schedule)
             .where(
-                schedule.lessonDt.eq(request.lessonDt),
-                schedule.lessonStartTime.before(request.lessonEndTime)
-                    .and(schedule.lessonEndTime.after(request.lessonStartTime)),
-                schedule.trainer.id.eq(trainerId),
+                lessonDtEq(request),
+                lessonStartDtBefore(request.lessonEndTime),
+                lessonEndDtAfter(request.lessonStartTime),
+                trainerIdEq(trainerId),
             )
             .fetchOne()
     }
@@ -80,9 +73,10 @@ class TrainerScheduleRepositoryImpl(
             .select(schedule.count())
             .from(schedule)
             .where(
-                schedule.lessonDt.eq(lessonDt),
-                schedule.trainer.id.eq(trainerId),
-                schedule.lessonStartTime.before(endTime).and(schedule.lessonEndTime.after(startTime)),
+                lessonDtEq(lessonDt),
+                trainerIdEq(trainerId),
+                lessonStartDtBefore(endTime),
+                lessonEndDtAfter(startTime)
             )
             .fetchOne()!!
     }
@@ -93,10 +87,10 @@ class TrainerScheduleRepositoryImpl(
             .from(schedule)
             .leftJoin(schedule.scheduleWaiting, scheduleWaiting)
             .where(
-                schedule.id.eq(scheduleId),
-                schedule.reservationStatus.eq(COMPLETED),
-                schedule.applicant.isNotNull,
-                schedule.delYn.eq(false)
+                scheduleIdEq(scheduleId),
+                reservationStatusEq(COMPLETED),
+                applicantIsNotNull(),
+                delYnEq(false)
             )
             .fetchOne()
         return Optional.ofNullable(result)
@@ -105,10 +99,10 @@ class TrainerScheduleRepositoryImpl(
     override fun findScheduleByTrainerId(scheduleId: Long, reservationStatus: ReservationStatus, trainerId: Long): Schedule? {
         return queryFactory.select(schedule).from(schedule)
             .where(
-                schedule.id.eq(scheduleId),
-                schedule.trainer.id.eq(trainerId),
-                schedule.reservationStatus.eq(reservationStatus),
-                schedule.delYn.eq(false)
+                scheduleIdEq(scheduleId),
+                trainerIdEq(trainerId),
+                reservationStatusEq(reservationStatus),
+                delYnEq(false)
             )
             .fetchOne()
     }
@@ -116,12 +110,45 @@ class TrainerScheduleRepositoryImpl(
     override fun findScheduleByTrainerId(scheduleId: Long, trainerId: Long): Schedule? {
         return queryFactory.select(schedule).from(schedule)
             .where(
-                schedule.id.eq(scheduleId),
-                schedule.trainer.id.eq(trainerId),
-                schedule.delYn.eq(false)
+                scheduleIdEq(scheduleId),
+                trainerIdEq(trainerId),
+                delYnEq(false)
             )
             .fetchOne()
     }
+
+    private fun lessonEndDtAfter(startTime: LocalTime?): BooleanExpression? =
+        schedule.lessonEndTime.after(startTime)
+
+    private fun lessonStartDtBefore(endTime: LocalTime?): BooleanExpression? =
+        schedule.lessonStartTime.before(endTime)
+
+    private fun scheduleWaitingDelYnEq(boolean: Boolean): BooleanExpression? =
+        scheduleWaiting.delYn.eq(boolean)
+
+    private fun trainerIdEq(trainer: Member): BooleanExpression? =
+        trainerIdEq(trainer.id)
+
+    private fun lessonDtEq(request: RegisterScheduleCommand): BooleanExpression? =
+        schedule.lessonDt.eq(request.lessonDt)
+
+    private fun lessonDtEq(lessonDt: LocalDate): BooleanExpression? =
+        schedule.lessonDt.eq(lessonDt)
+
+    private fun applicantIsNotNull(): BooleanExpression? =
+        schedule.applicant.isNotNull
+
+    private fun reservationStatusEq(reservationStatus: ReservationStatus): BooleanExpression? =
+        schedule.reservationStatus.eq(reservationStatus)
+
+    private fun delYnEq(boolean: Boolean): BooleanExpression? =
+        schedule.delYn.eq(boolean)
+
+    private fun scheduleIdEq(scheduleId: Long): BooleanExpression? =
+        schedule.id.eq(scheduleId)
+
+    private fun trainerIdEq(trainerId: Long): BooleanExpression? =
+        schedule.trainer.id.eq(trainerId)
 
     private fun lessonDtBetween(searchCond: ScheduleSearchCond): BooleanExpression? {
         if (!ObjectUtils.isEmpty(searchCond.lessonStartDt) && !ObjectUtils.isEmpty(searchCond.lessonEndDt)) {

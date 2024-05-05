@@ -14,9 +14,12 @@ class LessonHistoryCommentRepositoryImpl(
         val result = queryFactory
             .select(lessonHistoryComment.order.max().add(1))
             .from(lessonHistoryComment)
-            .where(lessonHistoryIdEq(lessonHistoryId), parentCommentIdIsNull())
+            .where(
+                lessonHistoryIdEq(lessonHistoryId),
+                parentCommentIdIsNull()
+            )
             .fetchOne() ?: 1
-        return result;
+        return result
     }
 
     override fun findTopComment(lessonHistoryId: Long, lessonHistoryCommentId: Long): Int {
