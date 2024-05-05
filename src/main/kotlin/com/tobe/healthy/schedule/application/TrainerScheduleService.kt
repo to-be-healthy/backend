@@ -20,8 +20,6 @@ import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
 import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
-import lombok.RequiredArgsConstructor
-import lombok.extern.slf4j.Slf4j
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -31,9 +29,7 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit.DAYS
 
 @Service
-@RequiredArgsConstructor
 @Transactional
-@Slf4j
 class TrainerScheduleService(
     private val memberRepository: MemberRepository,
     private val trainerScheduleRepository: TrainerScheduleRepository,

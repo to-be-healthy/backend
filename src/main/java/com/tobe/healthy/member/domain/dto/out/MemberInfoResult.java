@@ -1,6 +1,6 @@
 package com.tobe.healthy.member.domain.dto.out;
 
-import com.tobe.healthy.gym.domain.dto.GymDto;
+import com.tobe.healthy.gym.domain.dto.out.GymDto;
 import com.tobe.healthy.member.domain.dto.ProfileDto;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;

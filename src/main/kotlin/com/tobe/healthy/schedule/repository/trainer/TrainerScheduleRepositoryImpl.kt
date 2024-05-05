@@ -14,15 +14,13 @@ import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
-import lombok.extern.slf4j.Slf4j
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
 import java.time.LocalDate
 import java.time.LocalTime
-import java.util.*
+import java.util.Optional
 
 @Repository
-@Slf4j
 class TrainerScheduleRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
 ) : TrainerScheduleRepositoryCustom {
