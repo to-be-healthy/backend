@@ -2,7 +2,6 @@ package com.tobe.healthy.schedule.repository.trainer
 
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
-import com.querydsl.core.types.dsl.StringExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.domain.entity.QMember
@@ -37,7 +36,7 @@ class TrainerScheduleRepositoryImpl(
             .leftJoin(schedule.scheduleWaiting, scheduleWaiting)
             .on(scheduleWaitingDelYnEq(false))
             .where(
-                lessonDtEq(searchCond),
+                lessonDtMonthEq(searchCond.lessonDt),
                 lessonDtBetween(searchCond),
                 trainerIdEq(trainer),
                 delYnEq(false)
@@ -53,7 +52,7 @@ class TrainerScheduleRepositoryImpl(
             .select(schedule)
             .from(schedule)
             .where(
-                lessonDtEq(request),
+                lessonDtMonthEq(request),
                 lessonStartDtBefore(request.lessonEndTime),
                 lessonEndDtAfter(request.lessonStartTime),
                 trainerIdEq(trainerId),
@@ -71,7 +70,7 @@ class TrainerScheduleRepositoryImpl(
             .select(schedule.count())
             .from(schedule)
             .where(
-                lessonDtEq(lessonDt),
+                lessonDtMonthEq(lessonDt),
                 trainerIdEq(trainerId),
                 lessonStartDtBefore(endTime),
                 lessonEndDtAfter(startTime)
@@ -115,6 +114,19 @@ class TrainerScheduleRepositoryImpl(
             .fetchOne()
     }
 
+    override fun findAllByLessonDtAndTrainerId(lessonDt: String, trainerId: Long): List<Schedule?> {
+        return queryFactory
+            .select(schedule)
+            .from(schedule)
+            .leftJoin(schedule.scheduleWaiting).fetchJoin()
+            .where(
+                lessonDtEq(lessonDt),
+                trainerIdEq(trainerId),
+                delYnEq(false)
+            )
+            .fetch()
+    }
+
     private fun lessonEndDtAfter(startTime: LocalTime?): BooleanExpression? =
         schedule.lessonEndTime.after(startTime)
 
@@ -127,10 +139,10 @@ class TrainerScheduleRepositoryImpl(
     private fun trainerIdEq(trainer: Member): BooleanExpression? =
         trainerIdEq(trainer.id)
 
-    private fun lessonDtEq(request: RegisterScheduleCommand): BooleanExpression? =
+    private fun lessonDtMonthEq(request: RegisterScheduleCommand): BooleanExpression? =
         schedule.lessonDt.eq(request.lessonDt)
 
-    private fun lessonDtEq(lessonDt: LocalDate): BooleanExpression? =
+    private fun lessonDtMonthEq(lessonDt: LocalDate): BooleanExpression? =
         schedule.lessonDt.eq(lessonDt)
 
     private fun applicantIsNotNull(): BooleanExpression? =
@@ -155,11 +167,15 @@ class TrainerScheduleRepositoryImpl(
         return null
     }
 
-    private fun lessonDtEq(searchCond: ScheduleSearchCond): BooleanExpression? {
-        if (!ObjectUtils.isEmpty(searchCond.lessonDt)) {
-            val formattedDate: StringExpression = stringTemplate("DATE_FORMAT({0}, '%Y%m')", schedule.lessonDt)
-            return formattedDate.eq(searchCond.lessonDt)
+    private fun lessonDtMonthEq(lessonDt: String?): BooleanExpression? {
+        if (!ObjectUtils.isEmpty(lessonDt)) {
+            val formattedDate = stringTemplate("DATE_FORMAT({0}, '%Y%m')", schedule.lessonDt)
+            return formattedDate.eq(lessonDt)
         }
         return null
+    }
+    private fun lessonDtEq(lessonDt: String): BooleanExpression? {
+        val formattedDate = stringTemplate("DATE_FORMAT({0}, '%Y%m%d')", schedule.lessonDt)
+        return formattedDate.eq(lessonDt)
     }
 }

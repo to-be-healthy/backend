@@ -8,7 +8,7 @@ import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
 import java.time.LocalDate
 import java.time.LocalTime
-import java.util.*
+import java.util.Optional
 
 interface TrainerScheduleRepositoryCustom {
     fun findAllSchedule(searchCond: ScheduleSearchCond, member: Member): List<ScheduleCommandResult?>
@@ -17,4 +17,5 @@ interface TrainerScheduleRepositoryCustom {
     fun findAvailableWaitingId(scheduleId: Long): Optional<Schedule>
     fun findScheduleByTrainerId(scheduleId: Long, reservationStatus: ReservationStatus, trainerId: Long): Schedule?
     fun findScheduleByTrainerId(scheduleId: Long, trainerId: Long): Schedule?
+    fun findAllByLessonDtAndTrainerId(lessonDt: String, trainerId: Long): List<Schedule?>
 }

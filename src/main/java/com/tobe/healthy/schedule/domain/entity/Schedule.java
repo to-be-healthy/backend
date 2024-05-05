@@ -104,4 +104,8 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 		this.scheduleWaiting = scheduleWaiting;
 		this.delYn = delYn;
 	}
+
+	public void updateLessonDtToClosedDay() {
+		this.delYn = true;
+	}
 }

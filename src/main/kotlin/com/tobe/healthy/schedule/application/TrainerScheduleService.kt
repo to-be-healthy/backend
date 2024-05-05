@@ -19,6 +19,7 @@ import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
 import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
+import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -33,6 +34,7 @@ import java.time.temporal.ChronoUnit.DAYS
 class TrainerScheduleService(
     private val memberRepository: MemberRepository,
     private val trainerScheduleRepository: TrainerScheduleRepository,
+    private val scheduleWaitingRepository: ScheduleWaitingRepository
 ) {
     fun registerSchedule(request: RegisterScheduleRequest, trainerId: Long): Boolean {
         validateScheduleDate(request)
@@ -44,7 +46,7 @@ class TrainerScheduleService(
 
         while (isLessonDtBeforeOrEqualsEndDt(request, lessonDt)) {
             var startTime = request.startTime
-            while (startTimeIsBefore(request, startTime)) {
+            while (startTimeIsBefore(request.endTime, startTime)) {
                 val endTime = startTime.plusMinutes(request.sessionTime.description.toLong())
 
                 if (endTime.isAfter(request.endTime)) {
@@ -56,8 +58,8 @@ class TrainerScheduleService(
                     continue
                 }
 
-                if (isStartTimeEqualsLunchStartTime(request, startTime)) {
-                    val duration = between(request?.lunchStartTime, request?.lunchEndTime)
+                if (isStartTimeEqualsLunchStartTime(request?.lunchStartTime, startTime)) {
+                    val duration = between(request.lunchStartTime, request?.lunchEndTime)
                     startTime = startTime.plusMinutes(duration.toMinutes())
                     continue
                 }
@@ -78,12 +80,12 @@ class TrainerScheduleService(
         return true
     }
 
-    private fun isStartTimeEqualsLunchStartTime(request: RegisterScheduleRequest, startTime: LocalTime): Boolean {
-        return startTime == request?.lunchStartTime
+    private fun isStartTimeEqualsLunchStartTime(lunchStartTime: LocalTime?, startTime: LocalTime): Boolean {
+        return startTime == lunchStartTime
     }
 
-    private fun startTimeIsBefore(request: RegisterScheduleRequest, startTime: LocalTime): Boolean {
-        return startTime.isBefore(request.endTime)
+    private fun startTimeIsBefore(endTime: LocalTime, startTime: LocalTime): Boolean {
+        return startTime.isBefore(endTime)
     }
 
     private fun isLessonDtBeforeOrEqualsEndDt(request: RegisterScheduleRequest, lessonDt: LocalDate): Boolean {
@@ -136,11 +138,25 @@ class TrainerScheduleService(
         }
     }
 
-    fun cancelTrainerSchedule(scheduleId: Long, trainerId: Long): Boolean {
+    fun cancelTrainerSchedule(scheduleId: Long, trainerId: Long): LocalTime {
         // todo: 2024-05-05 일요일 오후 14:16 등록된 학생이 있는경우 푸시알림등으로 취소되었다는 알림이 필요 - seonwoo_jung
         val entity = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
         entity.cancelTrainerSchedule()
+        return entity.lessonStartTime
+    }
+
+    fun updateLessonDtToClosedDay(lessonDt: String, trainerId: Long): Boolean {
+        val findSchedule = trainerScheduleRepository.findAllByLessonDtAndTrainerId(lessonDt, trainerId)
+
+        if (findSchedule.isEmpty()) {
+            throw CustomException(SCHEDULE_NOT_FOUND)
+        }
+
+        findSchedule.forEach {
+            it?.updateLessonDtToClosedDay()
+            it?.scheduleWaiting?.forEach { waiting -> scheduleWaitingRepository.delete(waiting) }
+        }
         return true
     }
 }

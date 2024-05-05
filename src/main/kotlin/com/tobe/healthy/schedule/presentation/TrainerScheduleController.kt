@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.format.DateTimeFormatter
 
 @RestController
 @RequestMapping("/schedule/v1")
@@ -92,9 +94,27 @@ class TrainerScheduleController(
     fun cancelScheduleForTrainer(@Parameter(description = "일정 아이디", example = "1") @PathVariable scheduleId: Long,
                                  @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<Boolean> {
+        val lessonStartTime = trainerScheduleService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId)
         return ApiResultResponse(
-            message = "일정을 취소하였습니다.",
-            data = trainerScheduleService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId)
+            message = "${lessonStartTime.format(DateTimeFormatter.ofPattern("a HH시 mm분"))} 수업이 취소되었습니다.",
+            data = true
+        )
+    }
+
+    @Operation(
+        summary = "트레이너가 특정 일을 휴무일로 변경한다.", description = "트레이너가 특정 일을 휴무일로 변경한다.", responses = [
+            ApiResponse(responseCode = "200", description = "해당 일을 휴무일로 변경하였습니다."),
+            ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
+        ]
+    )
+    @PostMapping("/trainer/change-closed-day")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    fun cancelScheduleForTrainer(@RequestParam lessonDt: String,
+                                 @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    ): ApiResultResponse<Boolean> {
+        return ApiResultResponse(
+            message = "휴무일로 변경되었습니다.",
+            data = trainerScheduleService.updateLessonDtToClosedDay(lessonDt, customMemberDetails.memberId)
         )
     }
 
