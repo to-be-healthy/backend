@@ -1,12 +1,20 @@
 package com.tobe.healthy.schedule.application
 
 import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.*
+import com.tobe.healthy.config.error.ErrorCode.DATETIME_NOT_VALID
+import com.tobe.healthy.config.error.ErrorCode.LUNCH_TIME_INVALID
+import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
+import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_ALREADY_EXISTS
+import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_LESS_THAN_30_DAYS
+import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND
+import com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.*
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus.NO_SHOW
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
@@ -122,13 +130,13 @@ class TrainerScheduleService(
     fun registerIndividualSchedule(request: RegisterScheduleCommand, trainerId: Long): Boolean {
         trainerScheduleRepository.findAvailableRegisterSchedule(request, trainerId)?.let {
             throw CustomException(SCHEDULE_ALREADY_EXISTS)
-        } ?: run {
-            val trainer = memberRepository.findByIdOrNull(trainerId)
-                ?: throw CustomException(MEMBER_NOT_FOUND)
+        } ?: let {
+                val trainer = memberRepository.findByIdOrNull(trainerId)
+                    ?: throw CustomException(MEMBER_NOT_FOUND)
 
-            val entity = Schedule.registerSchedule(request.lessonDt, trainer, request.lessonStartTime, request.lessonEndTime, AVAILABLE)
-            trainerScheduleRepository.save(entity)
-            return true
+                val entity = Schedule.registerSchedule(request.lessonDt, trainer, request.lessonStartTime, request.lessonEndTime, AVAILABLE)
+                trainerScheduleRepository.save(entity)
+                return true
         }
     }
 

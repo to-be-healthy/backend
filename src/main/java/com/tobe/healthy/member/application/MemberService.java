@@ -79,6 +79,7 @@ public class MemberService {
     private final MailService mailService;
     private final CourseService courseService;
     private final MemberProfileRepository memberProfileRepository;
+    private static final Integer EMAIL_AUTH_TIMEOUT = 3 * 60 * 1000;
 
     public boolean validateUserIdDuplication(String userId) {
         if (userId.length() < 4) {
@@ -103,7 +104,7 @@ public class MemberService {
         });
 
         String authKey = getAuthCode();
-        redisService.setValuesWithTimeout(email, authKey, 3 * 60 * 1000); // 3분
+        redisService.setValuesWithTimeout(email, authKey, EMAIL_AUTH_TIMEOUT); // 3분
 
         // 3. 이메일에 인증번호 전송한다.
         mailService.sendAuthMail(email, authKey);
@@ -176,15 +177,20 @@ public class MemberService {
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-        return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), member.getMemberType(),
-                refreshToken, member.getGym());
+        return tokenGenerator.exchangeAccessToken(member.getId(),
+                                                  member.getUserId(),
+                                                  member.getMemberType(),
+                                                  refreshToken,
+                                                  member.getGym());
     }
 
     public MemberFindIdCommandResult findUserId(MemberFindIdCommand request) {
         Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        return new MemberFindIdCommandResult(member.getUserId().substring(member.getUserId().length() - 3) + "**",
-                member.getCreatedAt());
+        return new MemberFindIdCommandResult(
+                member.getUserId().substring(member.getUserId().length() - 3) + "**",
+                member.getCreatedAt()
+                );
     }
 
     public String findMemberPW(MemberFindPWCommand request) {
