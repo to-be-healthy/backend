@@ -1,6 +1,6 @@
 package com.tobe.healthy.config.security;
 
-import com.tobe.healthy.common.RedisService;
+import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;

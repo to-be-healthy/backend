@@ -1,4 +1,4 @@
-package com.tobe.healthy.common;
+package com.tobe.healthy.common.redis;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.tobe.healthy.config.error.CustomException;
@@ -9,7 +9,7 @@ import org.springframework.data.redis.listener.KeyExpirationEventMessageListener
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
-import static com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI;
+import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_REMOVE_ERROR;
 
 @Component

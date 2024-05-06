@@ -1,14 +1,12 @@
 package com.tobe.healthy.workout.application;
 
 import com.tobe.healthy.common.CustomPaging;
-import com.tobe.healthy.common.RedisService;
+import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.file.FileService;
 import com.tobe.healthy.file.RegisterFile;
-import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryFileDto;
@@ -26,9 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI;
+import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 
 
 @Service

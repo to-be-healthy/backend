@@ -3,7 +3,7 @@ package com.tobe.healthy.file;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.tobe.healthy.common.RedisService;
+import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietFiles;
@@ -11,8 +11,6 @@ import com.tobe.healthy.diet.domain.entity.DietType;
 import com.tobe.healthy.diet.repository.DietFileRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistoryFiles;
 import com.tobe.healthy.workout.repository.WorkoutFileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI;
+import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static java.util.UUID.randomUUID;
-import static org.springframework.util.StringUtils.cleanPath;
 
 @Service
 @Transactional
