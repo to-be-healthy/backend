@@ -51,6 +51,7 @@ class TrainerScheduleService(
 
         var lessonDt = request.startDt
         var startTime = findTrainerSchedule.lessonStartTime
+        val schedules = mutableListOf<Schedule>()
 
         while (!lessonDt.isAfter(request.endDt)) {
             val endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
@@ -82,10 +83,11 @@ class TrainerScheduleService(
             }
 
             val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, AVAILABLE)
-            trainerScheduleRepository.save(schedule)
+            schedules.add(schedule)
 
             startTime = endTime
         }
+        trainerScheduleRepository.saveAll(schedules)
         return true
     }
 
