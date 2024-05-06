@@ -8,6 +8,7 @@ import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
@@ -50,12 +51,15 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private String name;
 
 	@ColumnDefault("0")
+	@Default
 	private int age = 0;
 
 	@ColumnDefault("0")
+	@Default
 	private int height = 0;
 
 	@ColumnDefault("0")
+	@Default
 	private int weight = 0;
 
 	@OneToOne(fetch = LAZY, cascade = ALL)
@@ -65,14 +69,17 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	@Enumerated(STRING)
 	@ColumnDefault("'STUDENT'")
+	@Default
 	private MemberType memberType = STUDENT;
 
 	@Enumerated(STRING)
 	@ColumnDefault("'ENABLED'")
+	@Default
 	private AlarmStatus pushAlarmStatus = ENABLED;
 
 	@Enumerated(STRING)
 	@ColumnDefault("'ENABLED'")
+	@Default
 	private AlarmStatus feedbackAlarmStatus = ENABLED;
 
 	@ManyToOne(fetch = LAZY, cascade = PERSIST)
@@ -81,16 +88,20 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private Gym gym;
 
 	@OneToMany(fetch = LAZY, mappedBy = "trainer")
+	@Default
 	private final List<Schedule> trainerSchedules = new ArrayList<>();
 
 	@OneToMany(fetch = LAZY, mappedBy = "applicant")
+	@Default
 	private final List<Schedule> applicantSchedules = new ArrayList<>();
 
 	@OneToMany(mappedBy = "member")
+	@Default
 	private final List<ScheduleWaiting> scheduleWaitings = new ArrayList<>();
 
 	@Enumerated(STRING)
 	@ColumnDefault("'NONE'")
+	@Default
 	private SocialType socialType = NONE;
 
 	private String nickname;
@@ -98,6 +109,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private String fcmToken;
 
 	@ColumnDefault("false")
+	@Default
 	private boolean delYn = false;
 
 	public static Member join(MemberJoinCommand request, String password) {

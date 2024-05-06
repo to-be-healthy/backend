@@ -35,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -80,6 +81,8 @@ public class MemberService {
     private final CourseService courseService;
     private final MemberProfileRepository memberProfileRepository;
     private static final Integer EMAIL_AUTH_TIMEOUT = 3 * 60 * 1000;
+    @Value("${aws.s3.bucket-name}")
+    private String bucketName;
 
     public boolean validateUserIdDuplication(String userId) {
         if (userId.length() < 4) {
@@ -235,12 +238,12 @@ public class MemberService {
 
             try (InputStream inputStream = uploadFile.getInputStream()) {
                 amazonS3.putObject(
-                        "to-be-healthy-bucket",
+                        bucketName,
                         savedFileName,
                         inputStream,
                         objectMetadata
                 );
-                String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+                String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
                 MemberProfile memberProfile = MemberProfile.create(fileUrl, member);
                 memberProfileRepository.save(memberProfile);
             } catch (IOException e) {
@@ -375,12 +378,12 @@ public class MemberService {
         ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(
-                    "to-be-healthy-bucket",
+                    bucketName,
                     savedFileName,
                     inputStream,
                     objectMetadata
             );
-            String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
             return MemberProfile.create(fileUrl, member);
         } catch (IOException e) {
             log.error("error => {}", e);
@@ -394,8 +397,8 @@ public class MemberService {
         String savedFileName = "profile/" + createFileUUID() + extension;
         ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
-            amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
-            String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+            amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
             return MemberProfile.create(fileUrl, member);
         } catch (IOException e) {
             log.error("error => {}", e);
