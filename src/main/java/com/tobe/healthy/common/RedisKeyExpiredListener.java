@@ -9,6 +9,7 @@ import org.springframework.data.redis.listener.KeyExpirationEventMessageListener
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
+import static com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_REMOVE_ERROR;
 
 @Component
@@ -28,14 +29,14 @@ public class RedisKeyExpiredListener extends KeyExpirationEventMessageListener {
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
 		String fileUrl = message.toString();
-		if (fileUrl != null && fileUrl.startsWith("https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com")) {
+		if (fileUrl != null && fileUrl.startsWith(TEMP_FILE_URI.getDescription() + "https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com")) {
 			try {
-				amazonS3.deleteObject(bucketName, fileUrl.replaceAll("https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/", ""));
+				amazonS3.deleteObject(bucketName, fileUrl.replaceAll(TEMP_FILE_URI.getDescription() + "https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/", ""));
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("onMessage error => {}", e.getMessage());
 				throw new CustomException(FILE_REMOVE_ERROR);
 			}
 		}
-		log.info("onMessage pattern => {} | {}", new String(pattern), message.toString());
+		log.info("onMessage pattern => {} | {}", new String(pattern), message);
 	}
 }

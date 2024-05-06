@@ -1,13 +1,12 @@
 package com.tobe.healthy.schedule.application
 
 import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.DATETIME_NOT_VALID
-import com.tobe.healthy.config.error.ErrorCode.LUNCH_TIME_INVALID
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
 import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_ALREADY_EXISTS
 import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_LESS_THAN_30_DAYS
 import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND
 import com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE
+import com.tobe.healthy.config.error.ErrorCode.TRAINER_SCHEDULE_NOT_FOUND
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
@@ -16,16 +15,20 @@ import com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.NO_SHOW
 import com.tobe.healthy.schedule.domain.entity.Schedule
+import com.tobe.healthy.schedule.entity.TrainerScheduleClosedDaysInfo
+import com.tobe.healthy.schedule.entity.TrainerScheduleInfo
+import com.tobe.healthy.schedule.entity.`in`.RegisterDefaultLessonTimeRequest
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
 import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
+import com.tobe.healthy.schedule.entity.out.RegisterDefaultLessonTimeResponse
+import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository
 import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration.between
-import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit.DAYS
 
@@ -34,7 +37,8 @@ import java.time.temporal.ChronoUnit.DAYS
 class TrainerScheduleService(
     private val memberRepository: MemberRepository,
     private val trainerScheduleRepository: TrainerScheduleRepository,
-    private val scheduleWaitingRepository: ScheduleWaitingRepository
+    private val scheduleWaitingRepository: ScheduleWaitingRepository,
+    private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository,
 ) {
     fun registerSchedule(request: RegisterScheduleRequest, trainerId: Long): Boolean {
         validateScheduleDate(request)
@@ -42,40 +46,45 @@ class TrainerScheduleService(
         val trainer = memberRepository.findByIdOrNull(trainerId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
+        val findTrainerSchedule = trainerScheduleInfoRepository.findByTrainerId(trainerId)
+            ?: throw CustomException(TRAINER_SCHEDULE_NOT_FOUND)
+
         var lessonDt = request.startDt
+        var startTime = findTrainerSchedule.lessonStartTime
 
-        while (isLessonDtBeforeOrEqualsEndDt(request, lessonDt)) {
-            var startTime = request.startTime
-            while (startTimeIsBefore(request.endTime, startTime)) {
-                val endTime = startTime.plusMinutes(request.sessionTime.description.toLong())
+        while (!lessonDt.isAfter(request.endDt)) {
+            val endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
 
-                if (endTime.isAfter(request.endTime)) {
-                    break
-                }
-
-                if (request.closedDt?.contains(lessonDt) == true) {
-                    lessonDt = lessonDt.plusDays(ONE_DAY)
-                    continue
-                }
-
-                if (isStartTimeEqualsLunchStartTime(request?.lunchStartTime, startTime)) {
-                    val duration = between(request.lunchStartTime, request?.lunchEndTime)
-                    startTime = startTime.plusMinutes(duration.toMinutes())
-                    continue
-                }
-
-                val isDuplicateSchedule = trainerScheduleRepository.validateRegisterSchedule(lessonDt, startTime, endTime, trainerId)
-
-                if (isDuplicateSchedule > 0) {
-                    throw CustomException(SCHEDULE_ALREADY_EXISTS)
-                }
-
-                val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, AVAILABLE)
-                trainerScheduleRepository.save(schedule)
-
-                startTime = endTime
+            if (endTime.isAfter(findTrainerSchedule.lessonEndTime)) {
+                startTime = findTrainerSchedule.lessonStartTime
+                lessonDt = lessonDt.plusDays(ONE_DAY)
+                continue
             }
-            lessonDt = lessonDt.plusDays(ONE_DAY)
+
+            findTrainerSchedule.trainerScheduleClosedDays?.forEach {
+                if (it.closedDays == lessonDt.dayOfWeek) {
+                    lessonDt = lessonDt.plusDays(ONE_DAY)
+                    return@forEach
+                }
+            }
+
+            if (isStartTimeEqualsLunchStartTime(findTrainerSchedule.lunchStartTime, startTime)) {
+                val duration = between(findTrainerSchedule.lunchStartTime, findTrainerSchedule.lunchEndTime)
+                startTime = startTime.plusMinutes(duration.toMinutes())
+                continue
+            }
+
+            val isDuplicateSchedule =
+                trainerScheduleRepository.validateRegisterSchedule(lessonDt, startTime, endTime, trainerId)
+
+            if (isDuplicateSchedule > 0) {
+                throw CustomException(SCHEDULE_ALREADY_EXISTS)
+            }
+
+            val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, AVAILABLE)
+            trainerScheduleRepository.save(schedule)
+
+            startTime = endTime
         }
         return true
     }
@@ -84,23 +93,9 @@ class TrainerScheduleService(
         return startTime == lunchStartTime
     }
 
-    private fun startTimeIsBefore(endTime: LocalTime, startTime: LocalTime): Boolean {
-        return startTime.isBefore(endTime)
-    }
-
-    private fun isLessonDtBeforeOrEqualsEndDt(request: RegisterScheduleRequest, lessonDt: LocalDate): Boolean {
-        return !lessonDt.isAfter(request.endDt)
-    }
-
     private fun validateScheduleDate(request: RegisterScheduleRequest) {
         if (request.startDt.isAfter(request.endDt)) {
             throw CustomException(START_DATE_AFTER_END_DATE)
-        }
-        if (request.startTime.isAfter(request.endTime)) {
-            throw CustomException(DATETIME_NOT_VALID)
-        }
-        if (request.lunchStartTime?.isAfter(request?.lunchEndTime) == true) {
-            throw CustomException(LUNCH_TIME_INVALID)
         }
         if (DAYS.between(request.startDt, request.endDt) > ONE_MONTH) {
             throw CustomException(SCHEDULE_LESS_THAN_30_DAYS)
@@ -129,12 +124,18 @@ class TrainerScheduleService(
         trainerScheduleRepository.findAvailableRegisterSchedule(request, trainerId)?.let {
             throw CustomException(SCHEDULE_ALREADY_EXISTS)
         } ?: let {
-                val trainer = memberRepository.findByIdOrNull(trainerId)
-                    ?: throw CustomException(MEMBER_NOT_FOUND)
+            val trainer = memberRepository.findByIdOrNull(trainerId)
+                ?: throw CustomException(MEMBER_NOT_FOUND)
 
-                val entity = Schedule.registerSchedule(request.lessonDt, trainer, request.lessonStartTime, request.lessonEndTime, AVAILABLE)
-                trainerScheduleRepository.save(entity)
-                return true
+            val entity = Schedule.registerSchedule(
+                request.lessonDt,
+                trainer,
+                request.lessonStartTime,
+                request.lessonEndTime,
+                AVAILABLE,
+            )
+            trainerScheduleRepository.save(entity)
+            return true
         }
     }
 
@@ -158,6 +159,44 @@ class TrainerScheduleService(
             it?.scheduleWaiting?.forEach { waiting -> scheduleWaitingRepository.delete(waiting) }
         }
         return true
+    }
+
+    fun registerDefaultLessonTime(
+        request: RegisterDefaultLessonTimeRequest,
+        trainerId: Long,
+    ): RegisterDefaultLessonTimeResponse {
+        val findTrainer = memberRepository.findByIdOrNull(trainerId)
+            ?: throw CustomException(MEMBER_NOT_FOUND)
+
+        trainerScheduleInfoRepository.findByTrainerId(trainerId)?.let {
+            it.changeDefaultLessonTime(request)
+            it.trainerScheduleClosedDays?.clear()
+            it.trainerScheduleClosedDays?.addAll(
+                request.closedDt?.map { dayOfWeek ->
+                    TrainerScheduleClosedDaysInfo.registerClosedDay(
+                        dayOfWeek,
+                        it,
+                    )
+                }?.toMutableList() ?: mutableListOf(),
+            )
+        } ?: let {
+            val trainerScheduleInfo = TrainerScheduleInfo.registerDefaultLessonTime(request, findTrainer)
+            val trainerScheduleClosedDaysInfos = mutableListOf<TrainerScheduleClosedDaysInfo>()
+
+            request.closedDt?.forEach { dayOfWeek ->
+                trainerScheduleClosedDaysInfos.add(
+                    TrainerScheduleClosedDaysInfo.registerClosedDay(
+                        dayOfWeek,
+                        trainerScheduleInfo,
+                    ),
+                )
+            }
+
+            trainerScheduleInfo.registerTrainerScheduleClosedDays(trainerScheduleClosedDaysInfos)
+            trainerScheduleInfoRepository.save(trainerScheduleInfo)
+        }
+
+        return RegisterDefaultLessonTimeResponse.from(request)
     }
 }
 

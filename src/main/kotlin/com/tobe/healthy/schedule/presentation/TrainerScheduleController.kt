@@ -5,9 +5,11 @@ import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.schedule.application.TrainerScheduleService
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
+import com.tobe.healthy.schedule.entity.`in`.RegisterDefaultLessonTimeRequest
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
 import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
+import com.tobe.healthy.schedule.entity.out.RegisterDefaultLessonTimeResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -31,6 +33,25 @@ import java.time.format.DateTimeFormatter
 class TrainerScheduleController(
     private val trainerScheduleService: TrainerScheduleService
 ) {
+
+    @Operation(
+        summary = "트레이너가 기본 수업 시간을 설정한다.", description = "트레이너가 기본 수업 시간을 설정한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "일정 등록 성공"),
+            ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
+            ApiResponse(responseCode = "400", description = "이미 등록된 일정이 존재합니다.")
+        ]
+    )
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    @PostMapping("/default-lesson-time")
+    fun registerSchedule(@RequestBody request: RegisterDefaultLessonTimeRequest,
+                         @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterDefaultLessonTimeResponse> {
+        return ApiResultResponse(
+            message = "기본 수업 시간이 설정되었습니다.",
+            data = trainerScheduleService.registerDefaultLessonTime(request, member.memberId)
+        )
+    }
+
     @Operation(
         summary = "트레이너가 일정을 등록한다.", description = "트레이너가 일정을 등록한다.",
         responses = [

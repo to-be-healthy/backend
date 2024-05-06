@@ -6,5 +6,4 @@ import org.springframework.boot.test.context.SpringBootTest
 val log = KotlinLogging.logger {}
 
 @SpringBootTest
-class KotlinHealthyApplicationTests() {
-}
+class KotlinHealthyApplicationTests

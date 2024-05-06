@@ -17,7 +17,7 @@ data class TrainerCommandResult(
                 userId = member.userId,
                 email = member.email,
                 name = member.name,
-                memberProfile = member?.memberProfile
+                memberProfile = member.memberProfile
             )
         }
     }

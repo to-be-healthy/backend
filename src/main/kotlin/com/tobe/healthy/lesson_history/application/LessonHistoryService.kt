@@ -145,7 +145,7 @@ class LessonHistoryService(
 
         val order = lessonHistoryCommentRepository.findTopComment(
             lessonHistory.id,
-            lessonHistoryCommentId!!
+            lessonHistoryCommentId
         )
 
         val parentComment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
@@ -171,7 +171,7 @@ class LessonHistoryService(
         val comment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
             ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
 
-        comment.updateLessonHistoryComment(request.comment!!)
+        comment.updateLessonHistoryComment(request.comment)
 
         return true
     }
@@ -330,7 +330,7 @@ class LessonHistoryService(
     ): List<UploadFileResponse> {
         val uploadFileResponse: MutableList<UploadFileResponse> = mutableListOf()
         var fileOrder = 1
-        uploadFiles?.let {
+        uploadFiles.let {
             checkMaximumFileSize(it.size)
 
             for (uploadFile in it) {
