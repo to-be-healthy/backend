@@ -1,14 +1,10 @@
 package com.tobe.healthy.config.security;
 
-import static java.lang.String.valueOf;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Base64;
-import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +12,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import java.util.Base64;
+import java.util.Date;
+
+import static java.lang.String.valueOf;
 
 @Component
 @RequiredArgsConstructor
@@ -37,7 +38,7 @@ public class JwtTokenProvider {
     }
 
     public Claims decode(String token) {
-        return Jwts.parserBuilder()
+        return Jwts.parser()
                 .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
@@ -53,7 +54,10 @@ public class JwtTokenProvider {
 
     // Jwt 토큰의 유효성 + 만료일자 확인
     public boolean validateToken(String jwtToken) {
-        Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken.substring("Bearer ".length()));
+        Jws<Claims> claims = Jwts.parser()
+                .setSigningKey(secretKey)
+                .build()
+                .parseSignedClaims(jwtToken.substring("Bearer ".length()));
         return !claims.getBody().getExpiration().before(new Date());// 만료시간이 현재시간보다 전인지 확인
     }
 
@@ -63,7 +67,11 @@ public class JwtTokenProvider {
     }
 
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getBody();
     }
 
 }

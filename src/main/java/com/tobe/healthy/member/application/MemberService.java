@@ -395,7 +395,11 @@ public class MemberService {
         byte[] image = getProfileImage(profileImage);
         String extension = ".jpg";
         String savedFileName = "profile/" + createFileUUID() + extension;
-        ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
+        ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
+        return qwe(member, image, savedFileName, objectMetadata);
+    }
+
+    private MemberProfile qwe(Member member, byte[] image, String savedFileName, ObjectMetadata objectMetadata) {
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
             String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
@@ -535,10 +539,9 @@ public class MemberService {
     private String getAuthCode() {
         Random random = new Random();
         StringBuilder buffer = new StringBuilder();
-        int num = 0;
 
         while (buffer.length() < 6) {
-            num = random.nextInt(10);
+            int num = random.nextInt(10);
             buffer.append(num);
         }
 
