@@ -8,8 +8,10 @@ import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
 import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
+import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.DietFileDto;
+import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietFiles;
 import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.member.domain.dto.MemberDto;
@@ -50,7 +52,7 @@ public class TrainerService {
     private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final TrainerMemberMappingRepository mappingRepository;
-    private final DietRepository repository;
+    private final DietService dietService;
     private final CourseService courseService;
     private final CourseRepository courseRepository;
 
@@ -114,13 +116,9 @@ public class TrainerService {
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
-        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
-        List<DietFiles> dietFiles = repository.findAllCreateAtToday(memberId, start, end);
-        List<DietFileDto> fileDtos = dietFiles.stream().map(DietFileDto::from).collect(Collectors.toList());
-
+        DietDto diet = dietService.getDietCreatedAtToday(memberId);
         MemberDetailResult result = memberRepository.getMemberOfTrainer(memberId);
-        if(!dietFiles.isEmpty()) result.setDiet(DietDto.create(dietFiles.get(0).getDiet().getDietId(), fileDtos));
+        result.setDiet(diet);
 
         Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
         result.setCourse(optCourse.map(CourseDto::from).orElse(null));

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RankDto {
+public class TempRankDto {
 
     private int ranking;
     private Long memberId;

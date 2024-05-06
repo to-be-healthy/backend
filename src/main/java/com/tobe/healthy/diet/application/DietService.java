@@ -49,6 +49,11 @@ public class DietService {
     private final FileService fileService;
     private final MemberRepository memberRepository;
 
+    public DietDto getDietCreatedAtToday(Long memberId) {
+        Diet diet = dietRepository.getDietCreatedAtToday(memberId);
+        List<Long> ids = List.of(diet.getDietId());
+        return setDietFile(DietDto.from(diet), ids);
+    }
 
     public CustomPaging<DietDto> getDiet(Long memberId, Pageable pageable, String searchDate) {
         Page<Diet> pageDtos = dietRepository.getDietOfMonth(memberId, pageable, searchDate);

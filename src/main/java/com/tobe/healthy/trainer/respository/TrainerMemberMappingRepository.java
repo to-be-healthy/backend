@@ -15,4 +15,6 @@ public interface TrainerMemberMappingRepository extends JpaRepository<TrainerMem
     void deleteByMemberId(Long memberId);
     List<TrainerMemberMapping> findAllByTrainerId(Long trainerId);
     void deleteByTrainerIdAndMemberId(Long trainerId, Long memberId);
+    long countByTrainerId(Long trainerId);
+
 }

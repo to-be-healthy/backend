@@ -11,4 +11,5 @@ interface LessonHistoryRepositoryCustom {
     fun findAllLessonHistory(request: SearchCondRequest, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryResponse>
     fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): LessonHistoryDetailResponse?
     fun findAllLessonHistoryByMemberId(studentId: Long, request: SearchCondRequest, pageable: Pageable): Page<LessonHistoryResponse>
+    fun findTop1LessonHistoryByMemberId(studentId: Long): LessonHistoryResponse
 }

@@ -82,6 +82,19 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 		return schedules.stream().map(MyReservation::from).collect(toList());
 	}
 
+	@Override
+	public MyReservation findTop1MyReservation(Long memberId) {
+		List<Schedule> schedules = queryFactory.select(schedule)
+				.from(schedule)
+				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
+				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
+				.where(schedule.applicant.id.eq(memberId), schedule.lessonDt.goe(LocalDate.now()))
+				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+				.limit(1)
+				.fetch();
+		return schedules.stream().map(MyReservation::from).collect(toList()).get(0);
+	}
+
 	private BooleanExpression scheduleDelYnFalse() {
 		return schedule.delYn.isFalse();
 	}

@@ -3,9 +3,9 @@ package com.tobe.healthy.point.application;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.point.domain.dto.PointDto;
-import com.tobe.healthy.point.domain.dto.RankDto;
-import com.tobe.healthy.point.domain.dto.out.PointGetResult;
+import com.tobe.healthy.point.domain.dto.PointHistoryDto;
+import com.tobe.healthy.point.domain.dto.TempRankDto;
+import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.point.domain.entity.Point;
 import com.tobe.healthy.point.domain.entity.PointType;
@@ -47,12 +47,12 @@ public class PointService {
         for(Long trainerId : trainerIds){
             members = mappingRepository.findAllByTrainerId(trainerId);
             List<Long> memberIds = members.stream().map(m -> m.getMember().getId()).toList();
-            List<RankDto> ranks = pointRepository.calculateRank(memberIds).stream().toList()
-                    .stream().map(obj -> new RankDto(((Long) obj[0]).intValue(), (Long) obj[1], ((BigDecimal) obj[2]).intValue()))
+            List<TempRankDto> ranks = pointRepository.calculateRank(memberIds).stream().toList()
+                    .stream().map(obj -> new TempRankDto(((Long) obj[0]).intValue(), (Long) obj[1], ((BigDecimal) obj[2]).intValue()))
                     .collect(Collectors.toList());
 
             for(TrainerMemberMapping thisMember : members){
-                List<RankDto> thisRankDto = ranks.stream().filter(r -> r.getMemberId().equals(thisMember.getMember().getId())).toList();
+                List<TempRankDto> thisRankDto = ranks.stream().filter(r -> r.getMemberId().equals(thisMember.getMember().getId())).toList();
                 thisMember.changeRanking(thisRankDto.isEmpty() ? 999 : thisRankDto.get(0).getRanking());
             }
         }
@@ -70,14 +70,14 @@ public class PointService {
         pointRepository.save(Point.create(member, type, calculation, point));
     }
 
-    public PointGetResult getPoint(Member member, String searchDate, Pageable pageable) {
+    public PointDto getPoint(Member member, String searchDate, Pageable pageable) {
         Long memberId = member.getId();
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         Page<Point> histories = pointRepository.getPoint(memberId, searchDate, pageable);
         int monthPoint = pointRepository.getPointOfSearchMonth(memberId, searchDate);
         int totalPoint = pointRepository.getTotalPoint(memberId);
-        List<PointDto> pointHistoryDtos = histories.map(PointDto::from).stream().toList();
-        return PointGetResult.create(monthPoint, totalPoint, pointHistoryDtos.isEmpty() ? null : pointHistoryDtos);
+        List<PointHistoryDto> pointHistoryDtos = histories.map(PointHistoryDto::from).stream().toList();
+        return PointDto.create(monthPoint, totalPoint, pointHistoryDtos.isEmpty() ? null : pointHistoryDtos);
     }
 }

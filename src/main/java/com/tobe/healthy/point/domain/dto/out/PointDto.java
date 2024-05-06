@@ -1,6 +1,6 @@
 package com.tobe.healthy.point.domain.dto.out;
 
-import com.tobe.healthy.point.domain.dto.PointDto;
+import com.tobe.healthy.point.domain.dto.PointHistoryDto;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,16 +8,16 @@ import java.util.List;
 
 @Data
 @Builder
-public class PointGetResult {
+public class PointDto {
 
     private int monthPoint;
     private int totalPoint;
 
     @Builder.Default
-    private List<PointDto> pointHistories = null;
+    private List<PointHistoryDto> pointHistories = null;
 
-    public static PointGetResult create(int monthPoint, int totalPoint, List<PointDto> pointHistoryDtos) {
-        return PointGetResult.builder()
+    public static PointDto create(int monthPoint, int totalPoint, List<PointHistoryDto> pointHistoryDtos) {
+        return PointDto.builder()
                 .monthPoint(monthPoint)
                 .totalPoint(totalPoint)
                 .pointHistories(pointHistoryDtos)

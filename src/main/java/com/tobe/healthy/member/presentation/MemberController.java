@@ -11,9 +11,10 @@ import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemoCommand;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
+import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.point.application.PointService;
-import com.tobe.healthy.point.domain.dto.out.PointGetResult;
+import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,8 +31,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members/v1")
@@ -45,6 +44,18 @@ public class MemberController {
 	private final CourseService courseService;
 	private final PointService pointService;
 	private final DietService dietService;
+
+	@Operation(summary = "학생 홈 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "학생 홈을 반환한다.")
+	})
+	@GetMapping("/home")
+	public ResponseHandler<StudentHomeResult> getStudentHome(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<StudentHomeResult>builder()
+				.data(memberService.getStudentHome(customMemberDetails.getMemberId()))
+				.message("학생 홈이 조회되었습니다.")
+				.build();
+	}
 
 	@Operation(summary = "내 정보 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청."),
@@ -263,10 +274,10 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "포인트 및 히스토리를 반환한다.")
 	})
 	@GetMapping("/point")
-	public ResponseHandler<PointGetResult> getPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-													@Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
-													Pageable pageable) {
-		return ResponseHandler.<PointGetResult>builder()
+	public ResponseHandler<PointDto> getPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+											  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+											  Pageable pageable) {
+		return ResponseHandler.<PointDto>builder()
 				.data(pointService.getPoint(customMemberDetails.getMember(), searchDate, pageable))
 				.message("포인트가 조회되었습니다.")
 				.build();

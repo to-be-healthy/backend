@@ -9,20 +9,21 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietFiles;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import static com.tobe.healthy.diet.domain.entity.QDiet.diet;
 import static com.tobe.healthy.diet.domain.entity.QDietFiles.dietFiles;
-import static com.tobe.healthy.workout.domain.entity.QWorkoutHistory.workoutHistory;
 
 
 @Repository
@@ -31,19 +32,18 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
+
     @Override
-    public List<DietFiles> findAllCreateAtToday(Long memberId, LocalDateTime start, LocalDateTime end) {
-        return queryFactory.select(dietFiles)
-                .from(dietFiles)
-                .where(JPAExpressions.selectFrom(diet)
-                        .where(diet.dietId.eq(dietFiles.diet.dietId)
-                        , createdAtBetween(start, end)
-                        , delYnEq(false)
-                        , memberIdEq(memberId))
-                        .orderBy(diet.createdAt.desc())
-                        .limit(1)
-                        .exists())
-                .fetch();
+    public Diet getDietCreatedAtToday(Long memberId) {
+        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
+        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+
+        return queryFactory.select(diet)
+                .from(diet)
+                .where(createdAtBetween(start, end), delYnEq(false), memberIdEq(memberId))
+                .orderBy(diet.createdAt.desc())
+                .limit(1)
+                .fetchOne();
     }
 
     @Override

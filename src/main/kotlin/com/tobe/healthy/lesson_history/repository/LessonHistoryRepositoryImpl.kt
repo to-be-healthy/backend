@@ -92,6 +92,21 @@ class LessonHistoryRepositoryImpl(
         return PageableExecutionUtils.getPage(contents, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
+    override fun findTop1LessonHistoryByMemberId(studentId: Long): LessonHistoryResponse {
+        val entities = queryFactory
+            .select(lessonHistory)
+            .from(lessonHistory)
+            .innerJoin(lessonHistory.trainer).fetchJoin()
+            .innerJoin(lessonHistory.student).fetchJoin()
+            .innerJoin(lessonHistory.schedule).fetchJoin()
+            .where(lessonHistory.student.id.eq(studentId))
+            .orderBy(lessonHistory.createdAt.desc())
+            .limit(1)
+            .fetch()
+
+        return entities.map {LessonHistoryResponse.from(it)}.toMutableList().get(0);
+    }
+
     private fun updateFeedbackCheckStatus(
         results: LessonHistory,
         memberId: Long,
