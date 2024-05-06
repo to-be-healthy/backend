@@ -214,7 +214,7 @@ class LessonHistoryController(
     @DeleteMapping("/comment/{lessonHistoryCommentId}")
     fun deleteLessonHistoryComment(@Parameter(description = "수업일지 댓글 ID", example = "1") @PathVariable lessonHistoryCommentId: Long): ApiResultResponse<Boolean> {
         return ApiResultResponse(
-            message = "댓글이 삭제되었습니다.",
+            message = "댓글 1개가 삭제되었습니다.",
             data = lessonHistoryService.deleteLessonHistoryComment(lessonHistoryCommentId)
         )
     }
