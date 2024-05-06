@@ -47,6 +47,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+    implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
     implementation(group = "com.google.code.gson", name = "gson", version = "2.9.0")
     implementation(group = "org.springframework.boot", name = "spring-boot-starter-aop", version = "3.2.1")
     implementation(group = "com.google.guava", name = "guava", version = "33.0.0-jre")
@@ -57,10 +59,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
 
-    compileOnly("io.jsonwebtoken:jjwt-api:0.11.5")
-    compileOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+//    compileOnly("io.jsonwebtoken:jjwt-api:0.11.5")
+    /*compileOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")*/
+//    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
     runtimeOnly("com.h2database:h2")
 
     testCompileOnly("org.projectlombok:lombok")
