@@ -4,6 +4,8 @@ import com.querydsl.core.types.ConstantImpl.create
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
+import com.tobe.healthy.config.error.CustomException
+import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
 import com.tobe.healthy.lesson_history.domain.dto.`in`.SearchCondRequest
 import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryDetailResponse
 import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryResponse
@@ -12,7 +14,6 @@ import com.tobe.healthy.lesson_history.domain.entity.LessonHistory
 import com.tobe.healthy.lesson_history.domain.entity.QLessonHistory.lessonHistory
 import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
-import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository
 import io.micrometer.common.util.StringUtils
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Repository
 @Repository
 class LessonHistoryRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
-    private val trainerMemberMappingRepository: TrainerMemberMappingRepository
 ) : LessonHistoryRepositoryCustom {
 
     override fun findAllLessonHistory(request: SearchCondRequest, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryResponse> {
@@ -37,7 +37,7 @@ class LessonHistoryRepositoryImpl(
             .limit(pageable.pageSize.toLong())
             .fetch()
 
-        val contents = entities.map { e -> LessonHistoryResponse.from(e) }.toMutableList()
+        val contents = entities.map { LessonHistoryResponse.from(it) }.toMutableList()
 
         val totalCount = queryFactory
             .select(lessonHistory.count())
@@ -63,7 +63,8 @@ class LessonHistoryRepositoryImpl(
 
         entity?.let {
             updateFeedbackCheckStatus(entity, memberId)
-        }
+        } ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+
         return LessonHistoryDetailResponse.detailFrom(entity)
     }
 

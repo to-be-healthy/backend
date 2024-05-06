@@ -25,6 +25,7 @@ import java.util.List;
 
 import static com.tobe.healthy.course.domain.entity.QCourse.course;
 import static com.tobe.healthy.gym.domain.entity.QGym.gym;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static com.tobe.healthy.member.domain.entity.QMember.member;
 import static com.tobe.healthy.member.domain.entity.QMemberProfile.memberProfile;
 import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
@@ -135,6 +136,20 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
                 .limit(1)
                 .fetchOne();
+    }
+
+    @Override
+    public List<Member> findAllTrainerByGym(Long gymId) {
+        return queryFactory.select(member)
+                .from(member)
+                .leftJoin(member.memberProfile).fetchJoin()
+                .where(
+                        member.gym.id.eq(gymId),
+                        member.memberType.eq(TRAINER),
+                        member.delYn.eq(false)
+                )
+                .orderBy(member.id.desc())
+                .fetch();
     }
 
     private Predicate lessonDateTimeAfterToday() {

@@ -85,6 +85,11 @@ aws:
     secret-key: ${AWS_S3_SECRET_KEY}
     bucket-name: to-be-healthy-bucket
 
+firebase:
+  admin-sdk:
+    file: ${FIREBASE_ADMIN_SDK_FILE}
+
+
 # Spring openapi
 springdoc:
   packages-to-scan: com.tobe.healthy

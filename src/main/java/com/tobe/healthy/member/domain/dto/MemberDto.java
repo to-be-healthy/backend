@@ -1,6 +1,6 @@
 package com.tobe.healthy.member.domain.dto;
 
-import com.tobe.healthy.gym.domain.dto.GymDto;
+import com.tobe.healthy.gym.domain.dto.out.GymDto;
 import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.*;
 import lombok.Builder;

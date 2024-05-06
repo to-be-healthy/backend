@@ -1,26 +1,25 @@
 package com.tobe.healthy.schedule.repository.student;
 
+import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
+import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
+import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting;
+import static java.util.stream.Collectors.toList;
+
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.QMember;
-import com.tobe.healthy.schedule.domain.dto.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.entity.in.ScheduleSearchCond;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
-import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting;
-import static java.util.stream.Collectors.toList;
 
 @Repository
 @RequiredArgsConstructor

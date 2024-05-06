@@ -57,9 +57,8 @@ public class P6SpySqlFormatConfig implements MessageFormattingStrategy {
 			}
 		}
 
-		return new StringBuilder()
-				.append("\n\n\tConnection ID: ").append(connectionId)
-				.append(" | Execution Time: ").append(elapsed).append(" ms\n")
-				.append("\n--------------------------------------\n").toString();
+		return "\n\n\tConnection ID: " + connectionId +
+                " | Execution Time: " + elapsed + " ms\n" +
+                "\n--------------------------------------\n";
 	}
 }

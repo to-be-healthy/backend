@@ -6,6 +6,7 @@ import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,6 +32,8 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @DynamicUpdate
+@Builder
+@AllArgsConstructor
 public class Member extends BaseTimeEntity<Member, Long> {
 
 	@Id
@@ -74,6 +77,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	@ManyToOne(fetch = LAZY, cascade = PERSIST)
 	@JoinColumn(name = "gym_id")
+	@Nullable
 	private Gym gym;
 
 	@OneToMany(fetch = LAZY, mappedBy = "trainer")
@@ -117,21 +121,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 				.memberType(memberType)
 				.socialType(socialType)
 				.build();
-	}
-
-	@Builder
-	public Member(String userId, String email, String password, String name, MemberProfile memberProfile, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, Gym gym, SocialType socialType, boolean delYn) {
-		this.userId = userId;
-		this.email = email;
-		this.password = password;
-		this.name = name;
-		this.memberProfile = memberProfile;
-		this.memberType = memberType;
-		this.pushAlarmStatus = pushAlarmStatus;
-		this.feedbackAlarmStatus = feedbackAlarmStatus;
-		this.gym = gym;
-		this.socialType = socialType;
-		this.delYn = delYn;
 	}
 
 	public void registerProfile(MemberProfile memberProfileId) {

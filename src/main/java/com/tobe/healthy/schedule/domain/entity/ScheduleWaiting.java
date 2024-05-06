@@ -32,7 +32,7 @@ public class ScheduleWaiting extends BaseTimeEntity<ScheduleWaiting, Long> {
 	private Member member;
 
 	@ColumnDefault("false")
-	private boolean delYn = false;
+	private final boolean delYn = false;
 
 	public static ScheduleWaiting register(Member member, Schedule schedule) {
 		return ScheduleWaiting.builder()
