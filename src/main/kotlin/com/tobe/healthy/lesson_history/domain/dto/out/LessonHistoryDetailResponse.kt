@@ -120,7 +120,7 @@ data class LessonHistoryDetailResponse(
                         content = if (entity.delYn) "삭제된 댓글입니다." else entity.content,
                         member = LessonHistoryCommentMemberResult.from(entity.writer),
                         orderNum = entity.order,
-                        replies = entity.replies?.map { from(it) }?.toMutableList() ?: mutableListOf(),
+                        replies = entity.replies.map { from(it) }?.toMutableList() ?: mutableListOf(),
                         parentId = entity.parent?.id,
                         files = entity.files.map { LessonHistoryFileResults.from(it) }.toMutableList(),
                         delYn = entity.delYn,
