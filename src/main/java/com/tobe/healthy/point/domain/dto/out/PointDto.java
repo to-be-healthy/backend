@@ -16,11 +16,18 @@ public class PointDto {
     @Builder.Default
     private List<PointHistoryDto> pointHistories = null;
 
+    public static PointDto create(int monthPoint, int totalPoint) {
+        return PointDto.builder()
+                .monthPoint(monthPoint)
+                .totalPoint(totalPoint)
+                .build();
+    }
+
     public static PointDto create(int monthPoint, int totalPoint, List<PointHistoryDto> pointHistoryDtos) {
         return PointDto.builder()
                 .monthPoint(monthPoint)
                 .totalPoint(totalPoint)
-                .pointHistories(pointHistoryDtos)
+                .pointHistories(pointHistoryDtos.isEmpty() ? null : pointHistoryDtos)
                 .build();
     }
 

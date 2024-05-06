@@ -46,22 +46,26 @@ public class StudentScheduleService {
 
 		TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId())
 				.orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
-
 		Long trainerId = mapping.getTrainer().getId();
+		return settingMorningAndAfternoon(studentScheduleRepository.findAllSchedule(searchCond, trainerId, member));
+	}
 
-		List<ScheduleCommandResult> schedule = studentScheduleRepository.findAllSchedule(searchCond, trainerId, member);
-
+	private ScheduleCommandResponse settingMorningAndAfternoon(List<ScheduleCommandResult> schedule) {
 		List<ScheduleCommandResult> morning = schedule.stream()
 				.filter(s -> NOON.isAfter(s.getLessonStartTime()))
-				.peek(s -> { if(s.getWaitingByName()!=null|| s.getLessonDt().equals(LocalDate.now())) s.setReservationStatus(SOLD_OUT); })
+				.peek(s -> { if(isExistsWaitingOrLessonDtEqToday(s)) s.setReservationStatus(SOLD_OUT); })
 				.collect(Collectors.toList());
 
 		List<ScheduleCommandResult> afternoon = schedule.stream()
 				.filter(s -> NOON.isBefore(s.getLessonStartTime()))
-				.peek(s -> { if(s.getWaitingByName()!=null|| s.getLessonDt().equals(LocalDate.now())) s.setReservationStatus(SOLD_OUT); })
+				.peek(s -> { if(isExistsWaitingOrLessonDtEqToday(s)) s.setReservationStatus(SOLD_OUT); })
 				.collect(Collectors.toList());
 
 		return ScheduleCommandResponse.create(morning, afternoon);
+	}
+
+	private boolean isExistsWaitingOrLessonDtEqToday(ScheduleCommandResult schedule){
+		return schedule.getWaitingByName()!=null || schedule.getLessonDt().equals(LocalDate.now());
 	}
 
 	public MyReservationResponse findAllMyReservation(Long memberId, ScheduleSearchCond searchCond) {

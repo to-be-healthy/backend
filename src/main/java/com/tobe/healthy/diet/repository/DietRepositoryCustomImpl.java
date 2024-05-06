@@ -74,7 +74,10 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
     }
 
     @Override
-    public Diet findTop1ByCreateAtToday(Long memberId, LocalDateTime start, LocalDateTime end) {
+    public Diet findTop1ByCreateAtToday(Long memberId) {
+        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
+        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+
         return queryFactory.select(diet)
                 .from(diet)
                 .where(createdAtBetween(start, end)
@@ -90,17 +93,21 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
         Long totalCnt = queryFactory
                 .select(diet.count())
                 .from(diet)
-                .where(diet.trainer.id.eq(trainer.getId()), dietDeYnEq(false), convertDateFormat(searchDate))
+                .where(dietTrainerIdEq(trainer), dietDeYnEq(false), convertDateFormat(searchDate))
                 .fetchOne();
         List<Diet> diets =  queryFactory
                 .select(diet)
                 .from(diet)
-                .where(diet.trainer.id.eq(trainer.getId()), dietDeYnEq(false), convertDateFormat(searchDate))
+                .where(dietTrainerIdEq(trainer), dietDeYnEq(false), convertDateFormat(searchDate))
                 .orderBy(diet.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
         return PageableExecutionUtils.getPage(diets, pageable, ()-> totalCnt );
+    }
+
+    private BooleanExpression dietTrainerIdEq(Member trainer) {
+        return diet.trainer.id.eq(trainer.getId());
     }
 
     private BooleanExpression dietDeYnEq(boolean bool) {

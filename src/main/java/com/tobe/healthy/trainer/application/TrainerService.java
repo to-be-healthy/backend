@@ -49,6 +49,8 @@ public class TrainerService {
     private final CourseService courseService;
     private final CourseRepository courseRepository;
 
+    private static final int ONE_DAY = 24 * 60 * 60 * 1000;
+
 
     public TrainerMemberMappingDto addStudentOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
         TrainerMemberMappingDto mappingDto = mappingMemberAndTrainer(trainerId, memberId);
@@ -88,7 +90,7 @@ public class TrainerService {
             put("name", name);
             put("lessonCnt", String.valueOf(lessonCnt));
         }};
-        redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), 24 * 60 * 60 * 1000); // 1days
+        redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), ONE_DAY); // 1days
         return new MemberInviteResultCommand(uuid, invitationLink);
     }
 

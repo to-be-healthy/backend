@@ -51,6 +51,7 @@ public class DietService {
 
     public DietDto getDietCreatedAtToday(Long memberId) {
         Diet diet = dietRepository.getDietCreatedAtToday(memberId);
+        if(diet == null) return null;
         List<Long> ids = List.of(diet.getDietId());
         return setDietFile(DietDto.from(diet), ids);
     }
@@ -84,18 +85,18 @@ public class DietService {
         Long memberId = member.getId();
         DietType requestType = command.getType();
         MultipartFile requestFile = command.getFile();
-        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
-        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
-        Diet diet = dietRepository.findTop1ByCreateAtToday(memberId, start, end);
+
+        Diet diet = dietRepository.findTop1ByCreateAtToday(memberId);
 
         TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId).orElse(null);
-        if(ObjectUtils.isEmpty(diet)) diet = dietRepository.save(Diet.create(member, mapping == null ? null : mapping.getTrainer()));
+        Member trainer = mapping == null ? null : mapping.getTrainer();
+        if(ObjectUtils.isEmpty(diet)) diet = dietRepository.save(Diet.create(member, trainer));
 
         diet.deleteFile(requestType);
         if(!ObjectUtils.isEmpty(diet.getDietFiles())) {
             diet.getDietFiles().stream()
                     .filter(f -> requestType.equals(f.getType()))
-                    .forEach(file -> fileService.deleteFile("diet/", getFileName(file.getFileUrl())));
+                    .forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
         }
 
         if(!ObjectUtils.isEmpty(requestFile)){
@@ -134,7 +135,7 @@ public class DietService {
                 .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
         diet.deleteDiet();
         dietLikeRepository.deleteLikeByDietId(dietId);
-        diet.getDietFiles().forEach(file -> fileService.deleteFile("diet/", getFileName(file.getFileUrl())));
+        diet.getDietFiles().forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
     }
 
     public DietDto updateDiet(Member member, Long dietId, DietUpdateCommand command) {
@@ -146,7 +147,7 @@ public class DietService {
         diet.changeFastDinner(command.isDinnerFast());
 
         diet.deleteFiles();
-        diet.getDietFiles().forEach(file -> fileService.deleteFile("diet/", getFileName(file.getFileUrl())));
+        diet.getDietFiles().forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
         if(!ObjectUtils.isEmpty(command.getBreakfastFile())) fileService.uploadDietFile(diet, BREAKFAST, command.getBreakfastFile());
         if(!ObjectUtils.isEmpty(command.getLunchFile())) fileService.uploadDietFile(diet, LUNCH, command.getLunchFile());
         if(!ObjectUtils.isEmpty(command.getDinnerFile())) fileService.uploadDietFile(diet, DINNER, command.getDinnerFile());

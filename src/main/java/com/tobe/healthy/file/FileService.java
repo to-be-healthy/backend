@@ -35,8 +35,6 @@ import static java.util.UUID.randomUUID;
 @Slf4j
 public class FileService {
 
-	private final WorkoutFileRepository workoutFileRepository;
-	private final MemberRepository memberRepository;
 	private final DietFileRepository dietFileRepository;
 	private final AmazonS3 amazonS3;
 	private final RedisService redisService;
@@ -81,9 +79,18 @@ public class FileService {
 		return uploadFile;
 	}
 
-	public void deleteFile(String folder, String fileName){
+	public void deleteDietFile(String fileName){
 		try{
-			amazonS3.deleteObject(bucketName, folder + fileName);
+			amazonS3.deleteObject(bucketName, "diet/" + fileName);
+		}catch (Exception e){
+			e.printStackTrace();
+			throw new CustomException(FILE_REMOVE_ERROR);
+		}
+	}
+
+	public void deleteHistoryFile(String fileName){
+		try{
+			amazonS3.deleteObject(bucketName, "workout-history/" + fileName);
 		}catch (Exception e){
 			e.printStackTrace();
 			throw new CustomException(FILE_REMOVE_ERROR);

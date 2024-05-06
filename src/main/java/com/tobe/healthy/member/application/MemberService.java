@@ -608,9 +608,8 @@ public class MemberService {
     }
 
     public MemberInfoResult getMemberInfo(Long memberId) {
-        memberRepository.findById(memberId)
+        Member member = memberRepository.findByIdAndDelYnFalse(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        Member member = memberRepository.findByMemberIdWithProfileAndGym(memberId);
         return MemberInfoResult.create(member);
     }
 
@@ -651,7 +650,7 @@ public class MemberService {
         //포인트
         int monthPoint = pointRepository.getPointOfSearchMonth(memberId, getNowMonth());
         int totalPoint = pointRepository.getTotalPoint(memberId);
-        PointDto point = PointDto.create(monthPoint, totalPoint, null);
+        PointDto point = PointDto.create(monthPoint, totalPoint );
 
         //랭킹
         RankDto rank = new RankDto();

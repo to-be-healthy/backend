@@ -35,7 +35,10 @@ public class DietCommentService {
     public List<DietCommentDto> getCommentsByDietId(Long dietId, Pageable pageable) {
         List<DietComment> comments = commentRepository.getCommentsByDietId(dietId, pageable).stream().toList();
         if(comments.isEmpty()) return null;
+        return settingReplyFormat(comments);
+    }
 
+    private List<DietCommentDto> settingReplyFormat(List<DietComment> comments) {
         List<DietCommentDto> dtos = comments.stream()
                 .map(c -> DietCommentDto.create(c, c.getMember().getMemberProfile())).toList();
         Map<Boolean, List<DietCommentDto>> dtos2 = dtos.stream()
@@ -51,16 +54,18 @@ public class DietCommentService {
     public void addComment(Long dietId, DietCommentAddCommand command, Member member) {
         Diet diet = dietRepository.findById(dietId)
                 .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
+
+        boolean isReply = command.getParentCommentId() != null;
         Long depth = 0L, orderNum = 0L;
         Long commentCnt = commentRepository.countByDiet(diet);
-        if(command.getParentCommentId() == null){ //댓글
-            depth = 0L;
-            orderNum = commentCnt;
-        }else{ //대댓글
+        if(isReply){
             DietComment parentComment = commentRepository.findByCommentIdAndDelYnFalse(command.getParentCommentId())
                     .orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
             depth = parentComment.getDepth()+1;
             orderNum = parentComment.getOrderNum();
+        }else{
+            depth = 0L;
+            orderNum = commentCnt;
         }
         commentRepository.save(DietComment.create(diet, member, command, depth, orderNum));
         diet.updateCommentCnt(++commentCnt);

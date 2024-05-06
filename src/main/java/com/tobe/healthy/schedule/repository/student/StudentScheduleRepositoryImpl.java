@@ -37,13 +37,17 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.leftJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
 				.leftJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.leftJoin(schedule.scheduleWaiting, scheduleWaiting).on(scheduleWaiting.delYn.isFalse())
-				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), schedule.trainer.id.eq(trainerId))
+				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), scheduleTrainerIdEq(trainerId))
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
 
 		return results.stream()
 				.map(result -> ScheduleCommandResult.from(result, member))
 				.collect(toList());
+	}
+
+	private BooleanExpression scheduleTrainerIdEq(Long trainerId) {
+		return schedule.trainer.id.eq(trainerId);
 	}
 
 	private BooleanExpression scheduleWaitingDelYnFalse() {

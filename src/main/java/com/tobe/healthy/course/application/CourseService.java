@@ -51,10 +51,14 @@ public class CourseService {
         mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
 
-        Long cnt = courseRepository.countByMemberIdAndRemainLessonCntGreaterThan(member.getId(), 0);
-        if(0 < cnt) throw new CustomException(COURSE_ALREADY_EXISTS);
+        checkCourAlreadyExists(member.getId());
         Course course = courseRepository.save(Course.create(member, trainer, command.getLessonCnt(), command.getLessonCnt()));
         courseHistoryRepository.save(CourseHistory.create(course, course.getTotalLessonCnt(), PLUS, COURSE_CREATE, trainer));
+    }
+
+    private void checkCourAlreadyExists(Long memberId) {
+        Long cnt = courseRepository.countByMemberIdAndRemainLessonCntGreaterThan(memberId, 0);
+        if(0 < cnt) throw new CustomException(COURSE_ALREADY_EXISTS);
     }
 
     public void deleteCourse(Long trainerId, Long courseId) {
@@ -76,27 +80,37 @@ public class CourseService {
         return CourseGetResult.create(usingCourse, courseHistoryDtos.isEmpty() ? null : courseHistoryDtos, member.getGym().getName());
     }
 
-    public void updateCourse(Long trainerId, Long courseId, CourseUpdateCommand command) {
+    public void updateCourseByTrainer(Long trainerId, Long courseId, CourseUpdateCommand command) {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
         Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(command.getMemberId(), STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
-
-        Course course;
-        if(courseId == null){
-            course = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(member.getId(), 0)
-                    .orElseThrow(() -> new CustomException(LESSON_CNT_NOT_VALID));
-        }else{
-            course = courseRepository.findByCourseIdAndMemberIdAndTrainerId(courseId, member.getId(), trainerId)
+        Course course = courseRepository.findByCourseIdAndMemberIdAndTrainerId(courseId, member.getId(), trainerId)
                     .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
-        }
+        updateCourse(command, trainer, course);
+    }
+
+    public void updateCourseByMember(Long trainerId, CourseUpdateCommand command) {
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(command.getMemberId(), STUDENT)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
+        Course course = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(member.getId(), 0)
+                    .orElseThrow(() -> new CustomException(LESSON_CNT_NOT_VALID));
+        updateCourse(command, trainer, course);
+    }
+
+    private void updateCourse(CourseUpdateCommand command, Member trainer, Course course) {
         int result = command.getCalculation().apply(course.getRemainLessonCnt(), command.getUpdateCnt());
-        if(result < 0) throw new CustomException(LESSON_CNT_NOT_VALID);
+        if (result < 0) throw new CustomException(LESSON_CNT_NOT_VALID);
 
         course.updateRemainLessonCnt(command);
-        if(CourseHistoryType.getEnumByGroup(TRAINER).contains(command.getType())){
+        //수강권 변경 주체가 트레이너인 경우 -> 총 횟수도 함께 업데이트
+        if (CourseHistoryType.getEnumByGroup(TRAINER).contains(command.getType())) {
             course.updateTotalLessonCnt(command);
         }
         courseHistoryRepository.save(CourseHistory.create(course, command.getUpdateCnt(), command.getCalculation(), command.getType(), trainer));
