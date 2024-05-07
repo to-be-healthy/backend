@@ -1,5 +1,22 @@
 package com.tobe.healthy.member.domain.entity;
 
+import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.gym.domain.entity.Gym;
+import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
+import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
+import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
@@ -10,37 +27,10 @@ import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
-import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.gym.domain.entity.Gym;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import javax.annotation.Nullable;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.DynamicUpdate;
-
 @Entity
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @DynamicUpdate
-@Builder
-@AllArgsConstructor
 public class Member extends BaseTimeEntity<Member, Long> {
 
 	@Id
@@ -178,5 +168,25 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	public void setMemberProfile(MemberProfile profile) {
 		this.memberProfile = profile;
+	}
+
+	@Builder
+	public Member(Long id, String userId, String email, String password, String name, int age, int height, int weight, @Nullable MemberProfile memberProfile, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, @Nullable Gym gym, SocialType socialType, String nickname, boolean delYn) {
+		this.id = id;
+		this.userId = userId;
+		this.email = email;
+		this.password = password;
+		this.name = name;
+		this.age = age;
+		this.height = height;
+		this.weight = weight;
+		this.memberProfile = memberProfile;
+		this.memberType = memberType;
+		this.pushAlarmStatus = pushAlarmStatus;
+		this.feedbackAlarmStatus = feedbackAlarmStatus;
+		this.gym = gym;
+		this.socialType = socialType;
+		this.nickname = nickname;
+		this.delYn = delYn;
 	}
 }

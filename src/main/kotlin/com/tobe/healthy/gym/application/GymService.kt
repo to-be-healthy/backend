@@ -73,10 +73,9 @@ class GymService(
     private fun getJoinCode(): Int {
         val random = Random()
         val builder = StringBuilder()
-        var num = 0
 
         while (builder.length < 6) {
-            num = random.nextInt(10)
+            val num = random.nextInt(10)
             builder.append(num)
         }
 

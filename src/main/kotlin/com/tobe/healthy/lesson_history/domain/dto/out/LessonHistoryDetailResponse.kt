@@ -71,12 +71,12 @@ data class LessonHistoryDetailResponse(
         private fun sortLessonHistoryComment(comments: List<LessonHistoryComment>): List<LessonHistoryCommentCommandResult?> {
             val (parent, child) = comments.sortedBy { it.order }.partition { it.parent == null }
 
-            parent.forEach { parent ->
-                parent.replies = child.filter { child -> child.parent?.id == parent.id }
+            parent.forEach { parentComment ->
+                parentComment.replies = child.filter { child -> child.parent?.id == parentComment.id }
                                       .sortedBy { it.order }
                                       .toMutableList()
             }
-            return parent.map { parent -> LessonHistoryCommentCommandResult.from(parent) }
+            return parent.map { parentComment -> LessonHistoryCommentCommandResult.from(parentComment) }
         }
 
         private fun validateAttendanceStatus(lessonDt: LocalDate, lessonEndTime: LocalTime): String {
@@ -120,7 +120,7 @@ data class LessonHistoryDetailResponse(
                         content = if (entity.delYn) "삭제된 댓글입니다." else entity.content,
                         member = LessonHistoryCommentMemberResult.from(entity.writer),
                         orderNum = entity.order,
-                        replies = entity.replies.map { from(it) }?.toMutableList() ?: mutableListOf(),
+                        replies = entity.replies.map { from(it) }.toMutableList(),
                         parentId = entity.parent?.id,
                         files = entity.files.map { LessonHistoryFileResults.from(it) }.toMutableList(),
                         delYn = entity.delYn,
