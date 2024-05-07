@@ -56,7 +56,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
 
-    // todo: 2024-05-06 월요일 오후 19:44 JJWT 라이브러리 버전 업그레이드 필요 - seonwoo_jung
     implementation("io.jsonwebtoken:jjwt-api:0.12.5")
     implementation("io.jsonwebtoken:jjwt-impl:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
@@ -65,7 +64,7 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok")
     testImplementation("io.rest-assured:rest-assured:5.4.0")
 
-    implementation("com.amazonaws:aws-java-sdk-s3:1.12.711")
+    implementation("com.amazonaws:aws-java-sdk-s3:1.12.714")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
     implementation("com.google.firebase:firebase-admin:9.2.0")
 
