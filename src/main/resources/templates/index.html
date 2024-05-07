@@ -1,60 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>index</title>
+  <meta charset="UTF-8">
+  <title>FCM</title>
 </head>
-<!--<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>-->
-<!--<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>-->
-<!--<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>-->
-<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase.js"></script>
-<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-messaging.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase.js" />
+<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-app.js" />
+<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-messaging.js" />
 
 <script th:inline="javascript">
-    window.onload = function() {
-        console.log('window onload');
-        initiallizeFirebase();
-    }
+  window.onload = function () {
+    console.log('window onload');
+    initiallizeFirebase();
+  }
 
-    function initiallizeFirebase() {
-        const firebaseConfig = {
-            apiKey: "AIzaSyBaG-SAt2hzgha2C16CNZQGnnB0qdiH7_I",
-            authDomain: "to-be-healthy-417411.firebaseapp.com",
-            projectId: "to-be-healthy-417411",
-            storageBucket: "to-be-healthy-417411.appspot.com",
-            messagingSenderId: "827137813758",
-            appId: "1:827137813758:web:a36ff6e25eb30b32eb89af",
-            measurementId: "G-68SZ9TBE6Y"
-        };
+  function initiallizeFirebase() {
+    const firebaseConfig = {
+      apiKey: "AIzaSyBaG-SAt2hzgha2C16CNZQGnnB0qdiH7_I",
+      authDomain: "to-be-healthy-417411.firebaseapp.com",
+      projectId: "to-be-healthy-417411",
+      storageBucket: "to-be-healthy-417411.appspot.com",
+      messagingSenderId: "827137813758",
+      appId: "1:827137813758:web:a36ff6e25eb30b32eb89af",
+      measurementId: "G-68SZ9TBE6Y"
+    };
 
-        firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
 
-        const messaging = firebase.messaging();
-        // RequestPermission 첫 어플 시작 시 알림 허용 or 불허를 사용자에게 안내합니다.
-        // 허용하지 않을 시 알람 메시지는 가지 않습니다.
-        messaging.requestPermission()
-            .then(function() {
-                // 알람이 허용되었을 때 토큰을 반환합니다.
-                // 해당 토큰을 통해 FCM 특정 사용자에게 메시지를 보낼 수 있습니다.
-                return messaging.getToken();
-            })
-            .then(async function(token) {
-                console.log(token);
-                // 해당 onMessage는 데이터메시지로, 포그라운드인 상태에서
-                // FCM 메시지를 전송하는 경우 콘솔에 표기하도록 작성된 코드입니다.
+    const messaging = firebase.messaging();
 
-                messaging.onMessage(payload => {
-                    console.log(payload);
-
-                })
-            })
-            .catch(function(err) {
-                console.log('알람 허용 실패', err);
-            });
-    }
+    messaging.requestPermission().then(function () {
+      return messaging.getToken();
+    }).then(async function (token) {
+      console.log(token);
+      messaging.onMessage(payload => {
+        console.log(payload);
+      })
+    }).catch(function (err) {
+      console.log('알람 허용 실패', err);
+    });
+  }
 </script>
 <body>
-    <h1>hi! fcm</h1>
+  <h1>hi! fcm</h1>
 </body>
 </html>

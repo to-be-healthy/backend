@@ -46,27 +46,28 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
+    implementation("org.springframework.boot:spring-boot-devtools")
     implementation(group = "com.google.code.gson", name = "gson", version = "2.10")
     implementation(group = "org.springframework.boot", name = "spring-boot-starter-aop", version = "3.2.5")
     implementation(group = "com.google.guava", name = "guava", version = "33.1.0-jre")
-
-    testImplementation("io.projectreactor:reactor-test")
-    runtimeOnly("com.mysql:mysql-connector-j")
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.security:spring-security-test")
-
     implementation("io.jsonwebtoken:jjwt-api:0.12.5")
     implementation("io.jsonwebtoken:jjwt-impl:0.12.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
-
-    testCompileOnly("org.projectlombok:lombok")
-    testAnnotationProcessor("org.projectlombok:lombok")
-    testImplementation("io.rest-assured:rest-assured:5.4.0")
-
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.714")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
     implementation("com.google.firebase:firebase-admin:9.2.0")
+    implementation("com.google.firebase:firebase-admin:9.2.0")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+
+    runtimeOnly("com.mysql:mysql-connector-j")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
+
+    testImplementation("io.projectreactor:reactor-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation("io.rest-assured:rest-assured:5.4.0")
+
+    testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
 
     // kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
@@ -76,9 +77,7 @@ dependencies {
     implementation("jakarta.persistence:jakarta.persistence-api")
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-
     implementation("io.github.microutils:kotlin-logging-jvm:4.0.0-beta-2")
-    testCompileOnly("io.github.microutils:kotlin-logging-jvm:4.0.0-beta-2")
 
     kapt("jakarta.annotation:jakarta.annotation-api")
     kapt("jakarta.persistence:jakarta.persistence-api")
@@ -89,9 +88,7 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:5.8.1")
     testImplementation("io.kotest:kotest-runner-junit5:5.8.1")
     testImplementation("io.mockk:mockk:1.13.10")
-
-    implementation("com.google.firebase:firebase-admin:9.2.0")
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    testCompileOnly("io.github.microutils:kotlin-logging-jvm:4.0.0-beta-2")
 }
 
 tasks.withType<KotlinCompile> {
