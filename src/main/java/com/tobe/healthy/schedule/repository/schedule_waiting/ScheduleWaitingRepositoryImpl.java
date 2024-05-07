@@ -1,19 +1,18 @@
 package com.tobe.healthy.schedule.repository.schedule_waiting;
 
+import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
+import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting;
+import static java.util.stream.Collectors.toList;
+
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.QMember;
 import com.tobe.healthy.schedule.domain.dto.out.MyScheduleWaiting;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
-import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting;
-import static java.util.stream.Collectors.toList;
 
 @Repository
 @RequiredArgsConstructor

@@ -1,5 +1,10 @@
 package com.tobe.healthy.common.aop;
 
+import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
+import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION_CANCEL;
+import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
+import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
+
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
@@ -11,11 +16,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
-
-import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
-import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION_CANCEL;
-import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
-import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 
 
 @Slf4j

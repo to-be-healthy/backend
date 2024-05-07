@@ -1,20 +1,19 @@
 package com.tobe.healthy.diet.repository;
 
+import static com.tobe.healthy.diet.domain.entity.QDietComment.dietComment;
+import static com.tobe.healthy.member.domain.entity.QMember.member;
+
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.diet.domain.entity.DietComment;
 import com.tobe.healthy.member.domain.entity.QMemberProfile;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
-
-import java.util.List;
-
-import static com.tobe.healthy.diet.domain.entity.QDietComment.dietComment;
-import static com.tobe.healthy.member.domain.entity.QMember.member;
 
 
 @Repository

@@ -1,11 +1,10 @@
 package com.tobe.healthy.config.error;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import static lombok.AccessLevel.PROTECTED;
 
 import java.time.LocalDateTime;
-
-import static lombok.AccessLevel.PROTECTED;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = PROTECTED)

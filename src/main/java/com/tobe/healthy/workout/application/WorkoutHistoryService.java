@@ -1,5 +1,12 @@
 package com.tobe.healthy.workout.application;
 
+import static com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI;
+import static com.tobe.healthy.config.error.ErrorCode.EXERCISE_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.LIKE_ALREADY_EXISTS;
+import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_NOT_FOUND;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
+
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.file.FileService;
@@ -13,21 +20,25 @@ import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.entity.*;
-import com.tobe.healthy.workout.repository.*;
+import com.tobe.healthy.workout.domain.entity.CompletedExercise;
+import com.tobe.healthy.workout.domain.entity.Exercise;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistoryFiles;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistoryLike;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistoryLikePK;
+import com.tobe.healthy.workout.repository.CompletedExerciseRepository;
+import com.tobe.healthy.workout.repository.ExerciseRepository;
+import com.tobe.healthy.workout.repository.WorkoutFileRepository;
+import com.tobe.healthy.workout.repository.WorkoutHistoryLikeRepository;
+import com.tobe.healthy.workout.repository.WorkoutHistoryRepository;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI;
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 
 
 @Service

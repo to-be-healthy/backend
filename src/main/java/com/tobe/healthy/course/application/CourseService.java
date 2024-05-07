@@ -1,5 +1,16 @@
 package com.tobe.healthy.course.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.COURSE_ALREADY_EXISTS;
+import static com.tobe.healthy.config.error.ErrorCode.COURSE_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.LESSON_CNT_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_MAPPED;
+import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_FOUND;
+import static com.tobe.healthy.course.domain.entity.CourseHistoryType.COURSE_CREATE;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
+import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
+
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.CourseHistoryDto;
@@ -12,24 +23,16 @@ import com.tobe.healthy.course.domain.entity.CourseHistoryType;
 import com.tobe.healthy.course.repository.CourseHistoryRepository;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
-
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.course.domain.entity.CourseHistoryType.COURSE_CREATE;
-import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
-import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
-import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 
 
 @Service

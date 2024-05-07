@@ -1,5 +1,12 @@
 package com.tobe.healthy.schedule.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.NOT_RESERVABLE_SCHEDULE;
+import static com.tobe.healthy.config.error.ErrorCode.RESERVATION_CANCEL_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.RESERVATION_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
+import static java.time.LocalTime.NOON;
+
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -8,17 +15,13 @@ import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import com.tobe.healthy.schedule.repository.CommonScheduleRepository;
 import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Optional;
-
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static java.time.LocalTime.NOON;
 
 @Service
 @RequiredArgsConstructor

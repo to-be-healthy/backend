@@ -2,13 +2,9 @@ package com.tobe.healthy.gym.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
 import com.tobe.healthy.member.domain.entity.Member
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
+import jakarta.persistence.*
 import jakarta.persistence.FetchType.LAZY
-import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType.IDENTITY
-import jakarta.persistence.Id
-import jakarta.persistence.OneToMany
 import org.hibernate.annotations.DynamicUpdate
 
 @Entity

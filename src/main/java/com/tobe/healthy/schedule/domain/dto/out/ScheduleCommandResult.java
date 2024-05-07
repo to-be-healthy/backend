@@ -1,19 +1,18 @@
 package com.tobe.healthy.schedule.domain.dto.out;
 
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
+
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.util.ObjectUtils;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
 
 @Data
 @NoArgsConstructor

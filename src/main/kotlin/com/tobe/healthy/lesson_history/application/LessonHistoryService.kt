@@ -6,17 +6,8 @@ import com.tobe.healthy.common.CustomPagingResponse
 import com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI
 import com.tobe.healthy.common.RedisService
 import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.EXCEED_MAXIMUM_NUMBER_OF_FILES
-import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_COMMENT_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_FOUND
-import com.tobe.healthy.lesson_history.domain.dto.`in`.CommentRegisterCommand
-import com.tobe.healthy.lesson_history.domain.dto.`in`.LessonHistoryCommand
-import com.tobe.healthy.lesson_history.domain.dto.`in`.LessonHistoryCommentCommand
-import com.tobe.healthy.lesson_history.domain.dto.`in`.RegisterLessonHistoryCommand
-import com.tobe.healthy.lesson_history.domain.dto.`in`.SearchCondRequest
+import com.tobe.healthy.config.error.ErrorCode.*
+import com.tobe.healthy.lesson_history.domain.dto.`in`.*
 import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryDetailResponse
 import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryResponse
 import com.tobe.healthy.lesson_history.domain.dto.out.UploadFileResponse
@@ -39,7 +30,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.lang.System.currentTimeMillis
-import java.util.UUID
+import java.util.*
 
 @Service
 @Transactional

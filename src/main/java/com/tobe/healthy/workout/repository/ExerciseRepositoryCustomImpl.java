@@ -1,19 +1,21 @@
 package com.tobe.healthy.workout.repository;
 
+import static com.tobe.healthy.workout.domain.entity.QExercise.exercise;
+import static com.tobe.healthy.workout.domain.entity.QInstructions.instructions1;
+
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.workout.domain.entity.*;
+import com.tobe.healthy.workout.domain.entity.Exercise;
+import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
+import com.tobe.healthy.workout.domain.entity.Instructions;
+import com.tobe.healthy.workout.domain.entity.PrimaryMuscle;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
-
-import java.util.List;
-
-import static com.tobe.healthy.workout.domain.entity.QExercise.exercise;
-import static com.tobe.healthy.workout.domain.entity.QInstructions.instructions1;
 
 
 @Repository

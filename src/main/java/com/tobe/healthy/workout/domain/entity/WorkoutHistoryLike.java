@@ -1,9 +1,13 @@
 package com.tobe.healthy.workout.domain.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.util.function.Consumer;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 
 @Entity

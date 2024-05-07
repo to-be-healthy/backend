@@ -1,17 +1,16 @@
 package com.tobe.healthy.config;
 
-import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
-import jakarta.annotation.PostConstruct;
-import org.springframework.context.annotation.Configuration;
-
-import java.util.Stack;
-
 import static com.p6spy.engine.logging.Category.STATEMENT;
 import static com.p6spy.engine.spy.P6SpyOptions.getActiveInstance;
 import static java.util.Locale.ROOT;
 import static org.hibernate.engine.jdbc.internal.FormatStyle.BASIC;
 import static org.hibernate.engine.jdbc.internal.FormatStyle.DDL;
 import static org.springframework.util.StringUtils.hasText;
+
+import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
+import jakarta.annotation.PostConstruct;
+import java.util.Stack;
+import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class P6SpySqlFormatConfig implements MessageFormattingStrategy {

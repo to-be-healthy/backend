@@ -1,10 +1,9 @@
 package com.tobe.healthy.course.domain.dto;
 
 import com.tobe.healthy.course.domain.entity.Course;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 
 @Data

@@ -1,5 +1,14 @@
 package com.tobe.healthy.member.repository;
 
+import static com.tobe.healthy.course.domain.entity.QCourse.course;
+import static com.tobe.healthy.gym.domain.entity.QGym.gym;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
+import static com.tobe.healthy.member.domain.entity.QMember.member;
+import static com.tobe.healthy.member.domain.entity.QMemberProfile.memberProfile;
+import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
+import static com.tobe.healthy.trainer.domain.entity.QTrainerMemberMapping.trainerMemberMapping;
+
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
@@ -12,25 +21,15 @@ import com.tobe.healthy.member.domain.dto.out.QMemberDetailResult;
 import com.tobe.healthy.member.domain.dto.out.QMemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static com.tobe.healthy.course.domain.entity.QCourse.course;
-import static com.tobe.healthy.gym.domain.entity.QGym.gym;
-import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
-import static com.tobe.healthy.member.domain.entity.QMember.member;
-import static com.tobe.healthy.member.domain.entity.QMemberProfile.memberProfile;
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
-import static com.tobe.healthy.trainer.domain.entity.QTrainerMemberMapping.trainerMemberMapping;
 
 
 @Repository

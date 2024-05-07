@@ -1,13 +1,12 @@
 package com.tobe.healthy.diet.repository;
 
+import static com.tobe.healthy.diet.domain.entity.QDietLike.dietLike;
+
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
-
-import static com.tobe.healthy.diet.domain.entity.QDietLike.dietLike;
-import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryLike.workoutHistoryLike;
 
 
 @Repository

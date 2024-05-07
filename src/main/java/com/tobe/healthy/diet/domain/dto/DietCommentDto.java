@@ -1,16 +1,14 @@
 package com.tobe.healthy.diet.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tobe.healthy.diet.domain.entity.DietComment;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.workout.domain.dto.CommentMemberDto;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 
 @Data

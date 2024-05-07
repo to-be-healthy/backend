@@ -1,11 +1,7 @@
 package com.tobe.healthy.gym.application
 
 import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.GYM_DUPLICATION
-import com.tobe.healthy.config.error.ErrorCode.GYM_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.JOIN_CODE_NOT_VALID
-import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.UNCHANGED_GYM_ID
+import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.gym.domain.dto.out.GymListCommandResult
 import com.tobe.healthy.gym.domain.dto.out.RegisterGymResponse
 import com.tobe.healthy.gym.domain.dto.out.SelectMyGymResponse
@@ -17,7 +13,7 @@ import com.tobe.healthy.member.repository.MemberRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.Random
+import java.util.*
 
 @Service
 @Transactional

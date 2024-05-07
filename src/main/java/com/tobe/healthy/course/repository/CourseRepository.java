@@ -1,10 +1,8 @@
 package com.tobe.healthy.course.repository;
 
 import com.tobe.healthy.course.domain.entity.Course;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CourseRepository extends JpaRepository<Course, Long> {
 

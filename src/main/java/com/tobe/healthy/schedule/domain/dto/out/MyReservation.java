@@ -1,11 +1,10 @@
 package com.tobe.healthy.schedule.domain.dto.out;
 
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import lombok.Builder;
-import lombok.Data;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
+import lombok.Builder;
+import lombok.Data;
 
 @Data
 @Builder

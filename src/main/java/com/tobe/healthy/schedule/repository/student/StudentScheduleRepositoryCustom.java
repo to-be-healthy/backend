@@ -3,7 +3,6 @@ package com.tobe.healthy.schedule.repository.student;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
-
 import com.tobe.healthy.schedule.entity.in.ScheduleSearchCond;
 import java.util.List;
 
