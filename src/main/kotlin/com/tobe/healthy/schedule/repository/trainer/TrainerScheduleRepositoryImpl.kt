@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
 import java.time.LocalDate
 import java.time.LocalTime
-import java.util.Optional
+import java.util.*
 
 @Repository
 class TrainerScheduleRepositoryImpl(
@@ -26,7 +26,7 @@ class TrainerScheduleRepositoryImpl(
 
     override fun findAllSchedule(
         searchCond: ScheduleSearchCond,
-        trainer: Member
+        trainerId: Long
     ): List<ScheduleCommandResult> {
         val results = queryFactory
             .select(schedule)
@@ -38,7 +38,7 @@ class TrainerScheduleRepositoryImpl(
             .where(
                 lessonDtMonthEq(searchCond.lessonDt),
                 lessonDtBetween(searchCond),
-                trainerIdEq(trainer),
+                trainerIdEq(trainerId),
                 delYnEq(false)
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
