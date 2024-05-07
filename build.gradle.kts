@@ -6,12 +6,12 @@ plugins {
     id("io.freefair.lombok") version "8.6"
     id("io.spring.dependency-management") version "1.1.4"
 
-    kotlin("jvm") version "1.9.22"
-    kotlin("plugin.spring") version "1.9.22"
-    kotlin("plugin.allopen") version "1.9.22"
-    kotlin("plugin.jpa") version "1.9.22"
-    kotlin("plugin.lombok") version "1.9.22"
-    kotlin("kapt") version "1.9.22"
+    kotlin("jvm") version "1.9.23"
+    kotlin("plugin.spring") version "1.9.23"
+    kotlin("plugin.allopen") version "1.9.23"
+    kotlin("plugin.jpa") version "1.9.23"
+    kotlin("plugin.lombok") version "1.9.23"
+    kotlin("kapt") version "1.9.23"
     idea
 }
 
@@ -39,19 +39,16 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("com.googlecode.json-simple:json-simple:1.1.1")
-    implementation("org.modelmapper:modelmapper:3.1.1")
-    implementation("org.springframework.boot:spring-boot-starter-webflux:3.1.2")
+    implementation("org.modelmapper:modelmapper:3.2.0")
+    implementation("org.springframework.boot:spring-boot-starter-webflux:3.2.4")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
-    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
-    implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
-    implementation(group = "com.google.code.gson", name = "gson", version = "2.9.0")
-    implementation(group = "org.springframework.boot", name = "spring-boot-starter-aop", version = "3.2.1")
-    implementation(group = "com.google.guava", name = "guava", version = "33.0.0-jre")
+    implementation(group = "com.google.code.gson", name = "gson", version = "2.10")
+    implementation(group = "org.springframework.boot", name = "spring-boot-starter-aop", version = "3.2.5")
+    implementation(group = "com.google.guava", name = "guava", version = "33.1.0-jre")
 
     testImplementation("io.projectreactor:reactor-test")
     runtimeOnly("com.mysql:mysql-connector-j")
@@ -59,36 +56,35 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
 
-//    compileOnly("io.jsonwebtoken:jjwt-api:0.11.5")
-    /*compileOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")*/
-//    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
-    runtimeOnly("com.h2database:h2")
+    // todo: 2024-05-06 월요일 오후 19:44 JJWT 라이브러리 버전 업그레이드 필요 - seonwoo_jung
+    implementation("io.jsonwebtoken:jjwt-api:0.12.5")
+    implementation("io.jsonwebtoken:jjwt-impl:0.12.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
 
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
-    testImplementation("io.rest-assured:rest-assured:5.3.0")
+    testImplementation("io.rest-assured:rest-assured:5.4.0")
 
-    implementation("com.amazonaws:aws-java-sdk-s3:1.12.696")
+    implementation("com.amazonaws:aws-java-sdk-s3:1.12.711")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
     implementation("com.google.firebase:firebase-admin:9.2.0")
 
     // kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("javax.xml.bind:jaxb-api:2.3.1")
-    implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+    implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
+    implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
     implementation("jakarta.persistence:jakarta.persistence-api")
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
-    testCompileOnly("io.github.microutils:kotlin-logging-jvm:3.0.5")
+    implementation("io.github.microutils:kotlin-logging-jvm:4.0.0-beta-2")
+    testCompileOnly("io.github.microutils:kotlin-logging-jvm:4.0.0-beta-2")
 
     kapt("jakarta.annotation:jakarta.annotation-api")
     kapt("jakarta.persistence:jakarta.persistence-api")
     kapt("org.projectlombok:lombok")
-    kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
+    kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
     testImplementation("io.kotest:kotest-assertions-core:5.8.1")

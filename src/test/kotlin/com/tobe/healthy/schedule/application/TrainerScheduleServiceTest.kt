@@ -1,17 +1,10 @@
 package com.tobe.healthy.schedule.application
 
 import com.tobe.healthy.log
-import com.tobe.healthy.member.domain.entity.Member
-import com.tobe.healthy.member.repository.MemberRepository
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
-import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
 import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
-import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
-import io.kotest.assertions.fail
 import io.kotest.core.spec.style.BehaviorSpec
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate.of
 
@@ -19,8 +12,6 @@ import java.time.LocalDate.of
 @Transactional
 class TrainerScheduleServiceTest(
     private val trainerScheduleService: TrainerScheduleService,
-    private val trainerScheduleRepository: TrainerScheduleRepository,
-    private val memberRepository: MemberRepository
 ) : BehaviorSpec({
     val requestSchedule = RegisterScheduleRequest(
         startDt = of(2029, 12, 1),
@@ -47,11 +38,3 @@ class TrainerScheduleServiceTest(
         }
     }
 })
-
-private fun findSchedule(trainerScheduleRepository: TrainerScheduleRepository, schedules: List<ScheduleCommandResult?>): Schedule {
-    return trainerScheduleRepository.findByIdOrNull(schedules[0]!!.scheduleId!!) ?: fail("일정을 찾을 수 없음")
-}
-
-private fun findMember(memberRepository: MemberRepository, trainerId: Long): Member {
-    return memberRepository.findByIdOrNull(trainerId) ?: fail("회원을 찾을 수 없음")
-}

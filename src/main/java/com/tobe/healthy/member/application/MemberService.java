@@ -1,5 +1,31 @@
 package com.tobe.healthy.member.application;
 
+import static com.tobe.healthy.config.error.ErrorCode.CONFIRM_PASSWORD_NOT_MATCHED;
+import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.INVITE_LINK_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.INVITE_NAME_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.JSON_PARSING_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_LENGTH_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_MAPPED;
+import static com.tobe.healthy.config.error.ErrorCode.NOT_MATCH_PASSWORD;
+import static com.tobe.healthy.config.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
+import static com.tobe.healthy.config.error.ErrorCode.PROFILE_ACCESS_FAILED;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.USERID_POLICY_VIOLATION;
+import static com.tobe.healthy.member.domain.entity.SocialType.GOOGLE;
+import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
+import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,9 +41,17 @@ import com.tobe.healthy.config.error.OAuthException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
-import com.tobe.healthy.member.domain.dto.in.*;
+import com.tobe.healthy.member.domain.dto.in.IdToken;
+import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand.MemberFindIdCommandResult;
+import com.tobe.healthy.member.domain.dto.in.MemberFindPWCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberLoginCommand;
+import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
+import com.tobe.healthy.member.domain.dto.in.MemoCommand;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
+import com.tobe.healthy.member.domain.dto.in.SocialLoginCommand;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
@@ -31,6 +65,18 @@ import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import io.jsonwebtoken.impl.Base64UrlCodec;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -45,20 +91,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.regex.Pattern;
-
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.SocialType.*;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 @Service
 @RequiredArgsConstructor
@@ -80,6 +112,8 @@ public class MemberService {
     private final CourseService courseService;
     private final MemberProfileRepository memberProfileRepository;
     private static final Integer EMAIL_AUTH_TIMEOUT = 3 * 60 * 1000;
+    @Value("${aws.s3.bucket-name}")
+    private String bucketName;
 
     public boolean validateUserIdDuplication(String userId) {
         if (userId.length() < 4) {
@@ -235,12 +269,12 @@ public class MemberService {
 
             try (InputStream inputStream = uploadFile.getInputStream()) {
                 amazonS3.putObject(
-                        "to-be-healthy-bucket",
+                        bucketName,
                         savedFileName,
                         inputStream,
                         objectMetadata
                 );
-                String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+                String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
                 MemberProfile memberProfile = MemberProfile.create(fileUrl, member);
                 memberProfileRepository.save(memberProfile);
             } catch (IOException e) {
@@ -332,7 +366,7 @@ public class MemberService {
             String token = decordToken(result);
             return new ObjectMapper().readValue(token, IdToken.class);
         } catch (JsonProcessingException e) {
-            log.error("error => {}", e.getMessage());
+            log.error("error => {}", e);
             throw new CustomException(JSON_PARSING_ERROR);
         }
     }
@@ -372,24 +406,37 @@ public class MemberService {
     private MemberProfile getProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
         String savedFileName = "profile/" + createFileUUID();
-        return putFile(member, image, savedFileName);
+        ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
+        try (InputStream inputStream = new ByteArrayInputStream(image)) {
+            amazonS3.putObject(
+                    bucketName,
+                    savedFileName,
+                    inputStream,
+                    objectMetadata
+            );
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+            return MemberProfile.create(fileUrl, member);
+        } catch (IOException e) {
+            log.error("error => {}", e);
+            throw new CustomException(FILE_UPLOAD_ERROR);
+        }
     }
 
     private MemberProfile getGoogleProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
         String extension = ".jpg";
         String savedFileName = "profile/" + createFileUUID() + extension;
-        return putFile(member, image, savedFileName);
+        ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
+        return qwe(member, image, savedFileName, objectMetadata);
     }
 
-    private MemberProfile putFile(Member member, byte[] image, String savedFileName) {
-        ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
+    private MemberProfile qwe(Member member, byte[] image, String savedFileName, ObjectMetadata objectMetadata) {
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
-            amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
-            String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+            amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
             return MemberProfile.create(fileUrl, member);
         } catch (IOException e) {
-            log.error("error => {}", e.getMessage());
+            log.error("error => {}", e);
             throw new CustomException(FILE_UPLOAD_ERROR);
         }
     }

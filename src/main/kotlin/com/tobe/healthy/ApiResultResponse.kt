@@ -1,6 +1,6 @@
 package com.tobe.healthy
 
-import mu.KotlinLogging
+import mu.two.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.OK
 
