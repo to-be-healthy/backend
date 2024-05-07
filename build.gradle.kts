@@ -49,7 +49,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-devtools")
     implementation(group = "com.google.code.gson", name = "gson", version = "2.10")
     implementation(group = "org.springframework.boot", name = "spring-boot-starter-aop", version = "3.2.5")
-    implementation(group = "com.google.guava", name = "guava", version = "33.1.0-jre")
+    implementation(group = "com.google.guava", name = "guava", version = "33.2.0-jre")
     implementation("io.jsonwebtoken:jjwt-api:0.12.5")
     implementation("io.jsonwebtoken:jjwt-impl:0.12.5")
     implementation("com.amazonaws:aws-java-sdk-s3:1.12.714")
