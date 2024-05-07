@@ -48,7 +48,12 @@ public class P6SpySqlFormatConfig implements MessageFormattingStrategy {
 	}
 
 	private String formatConnectionInfo(int connectionId, long elapsed) {
-		return String.format("\n\n\tConnection ID: %d | Execution Time: %d ms\n" +
-				"\n===========================================================================\n", connectionId, elapsed);
+		return String.format("""
+
+
+                \tConnection ID: %d | Execution Time: %d ms
+
+                ===========================================================================
+                """, connectionId, elapsed);
 	}
 }

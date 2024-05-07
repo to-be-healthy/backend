@@ -3,7 +3,6 @@ package com.tobe.healthy.schedule.repository.trainer
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
-import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.domain.entity.QMember
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
@@ -135,9 +134,6 @@ class TrainerScheduleRepositoryImpl(
 
     private fun scheduleWaitingDelYnEq(boolean: Boolean): BooleanExpression? =
         scheduleWaiting.delYn.eq(boolean)
-
-    private fun trainerIdEq(trainer: Member): BooleanExpression? =
-        trainerIdEq(trainer.id)
 
     private fun lessonDtMonthEq(request: RegisterScheduleCommand): BooleanExpression? =
         schedule.lessonDt.eq(request.lessonDt)

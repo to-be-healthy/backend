@@ -375,7 +375,7 @@ public class MemberService {
     private MemberProfile getProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
         String savedFileName = "profile/" + createFileUUID();
-        ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
+        ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(
                     bucketName,
@@ -457,7 +457,7 @@ public class MemberService {
         try {
             idToken = objectMapper.readValue(payload, Map.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("error => {}", e.getStackTrace()[0]);
         }
         String email = idToken.get("email");
         String name = idToken.get("name");
@@ -506,7 +506,7 @@ public class MemberService {
                             }))
                     .bodyToMono(OAuthInfo.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("error => {}", e.getStackTrace()[0]);
         }
         return responseMono.share().block();
     }
@@ -594,7 +594,7 @@ public class MemberService {
         try {
             map = objectMapper.readValue(mappedData, HashMap.class);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("error => {}", e.getStackTrace()[0]);
         }
         return map;
     }

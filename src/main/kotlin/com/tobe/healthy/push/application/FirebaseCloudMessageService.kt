@@ -29,9 +29,7 @@ class FirebaseCloudMessageService(
         val findMember = memberRepository.findByIdOrNull(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
-        memberTokenRepository.findByMemberId(findMember.id)?.let {
-            it.changeToken(token)
-        } ?: let {
+        memberTokenRepository.findByMemberId(findMember.id)?.changeToken(token) ?: let {
             val memberToken = MemberToken.register(findMember, token)
             memberTokenRepository.save(memberToken)
         }

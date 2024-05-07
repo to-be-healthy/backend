@@ -1,9 +1,5 @@
 package com.tobe.healthy.schedule.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_MAPPED;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
-import static java.time.LocalTime.NOON;
-
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.entity.Course;
@@ -17,13 +13,18 @@ import com.tobe.healthy.schedule.entity.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_MAPPED;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
+import static java.time.LocalTime.NOON;
 
 @Service
 @RequiredArgsConstructor

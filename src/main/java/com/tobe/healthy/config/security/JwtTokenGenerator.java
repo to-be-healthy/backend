@@ -22,7 +22,6 @@ import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 public class JwtTokenGenerator {
     private final Long accessTokenValidSeconds;
     private final Long refreshTokenValidSeconds;
-    private final String jwtSecret;
     private final Key key;
     private final RedisService redisService;
 
@@ -32,7 +31,6 @@ public class JwtTokenGenerator {
                              RedisService redisService) {
         this.accessTokenValidSeconds = accessTokenValidSeconds;
         this.refreshTokenValidSeconds = refreshTokenValidSeconds;
-        this.jwtSecret = jwtSecret;
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         this.redisService = redisService;
     }

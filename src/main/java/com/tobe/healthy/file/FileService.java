@@ -75,8 +75,7 @@ public class FileService {
 					redisService.setValuesWithTimeout(TEMP_FILE_URI.getDescription() + fileUrl, member.getId().toString(), FILE_TEMP_UPLOAD_TIMEOUT); // 30분
 					uploadFile.add(new RegisterFile(fileUrl, ++fileOrder));
 				} catch (IOException e) {
-					e.printStackTrace();
-					log.error("error => {}", e.getMessage());
+					log.error("error => {}", e.getStackTrace()[0]);
 				}
 			}
 		}
@@ -87,7 +86,7 @@ public class FileService {
 		try{
 			amazonS3.deleteObject(bucketName, fileName);
 		}catch (Exception e){
-			e.printStackTrace();
+			log.error("error => {}", e.getStackTrace()[0]);
 			throw new CustomException(FILE_REMOVE_ERROR);
 		}
 	}
@@ -108,7 +107,7 @@ public class FileService {
 						, extension, uploadFile.getSize(), diet, fileUrl, type);
 				dietFileRepository.save(dietFile);
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.error("error => {}", e.getStackTrace()[0]);
 				throw new CustomException(FILE_UPLOAD_ERROR);
 			}
 		}

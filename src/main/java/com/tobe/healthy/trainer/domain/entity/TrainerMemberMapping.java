@@ -15,7 +15,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Table(name = "trainer_member_mapping")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class TrainerMemberMapping extends BaseTimeEntity {
+public class TrainerMemberMapping extends BaseTimeEntity<TrainerMemberMapping, Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
