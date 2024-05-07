@@ -1,9 +1,5 @@
 package com.tobe.healthy.point.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
-import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
-
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -16,18 +12,23 @@ import com.tobe.healthy.point.domain.entity.PointType;
 import com.tobe.healthy.point.repository.PointRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 
 
 @Service

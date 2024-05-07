@@ -5,10 +5,11 @@ import com.tobe.healthy.config.error.ErrorCode;
 import com.tobe.healthy.config.security.JwtTokenProvider;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Slf4j
 @Service

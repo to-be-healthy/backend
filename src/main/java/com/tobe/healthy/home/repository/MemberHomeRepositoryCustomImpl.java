@@ -6,12 +6,13 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.applicationform.domain.entity.QApplicationForm;
 import com.tobe.healthy.common.ResultFormatType;
 import com.tobe.healthy.workout.domain.entity.QWorkoutHistory;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor

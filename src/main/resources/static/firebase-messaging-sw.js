@@ -13,7 +13,7 @@ let firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
-// 백그라운드 메시지 핸들링
+
 messaging.setBackgroundMessageHandler(function(payload) {
     const title = 'Hello, World!';
     const options = {

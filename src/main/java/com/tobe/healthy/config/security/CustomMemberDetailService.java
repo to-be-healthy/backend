@@ -1,7 +1,5 @@
 package com.tobe.healthy.config.security;
 
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +7,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

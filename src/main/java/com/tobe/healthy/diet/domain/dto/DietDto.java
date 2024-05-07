@@ -2,10 +2,11 @@ package com.tobe.healthy.diet.domain.dto;
 
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.member.domain.dto.MemberDto;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder

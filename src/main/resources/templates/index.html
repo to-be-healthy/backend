@@ -1,47 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>FCM</title>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="#">
+    <title>FCM 토큰 발급받기</title>
 </head>
-<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase.js" />
-<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-app.js" />
-<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-messaging.js" />
+<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase.js"/>
 
 <script th:inline="javascript">
-  window.onload = function () {
-    console.log('window onload');
-    initiallizeFirebase();
-  }
+    window.onload = function () {
+        console.log('window onload');
+        initiallizeFirebase();
+    }
 
-  function initiallizeFirebase() {
-    const firebaseConfig = {
-      apiKey: "AIzaSyBaG-SAt2hzgha2C16CNZQGnnB0qdiH7_I",
-      authDomain: "to-be-healthy-417411.firebaseapp.com",
-      projectId: "to-be-healthy-417411",
-      storageBucket: "to-be-healthy-417411.appspot.com",
-      messagingSenderId: "827137813758",
-      appId: "1:827137813758:web:a36ff6e25eb30b32eb89af",
-      measurementId: "G-68SZ9TBE6Y"
-    };
+    function initiallizeFirebase() {
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaG-SAt2hzgha2C16CNZQGnnB0qdiH7_I",
+            authDomain: "to-be-healthy-417411.firebaseapp.com",
+            projectId: "to-be-healthy-417411",
+            storageBucket: "to-be-healthy-417411.appspot.com",
+            messagingSenderId: "827137813758",
+            appId: "1:827137813758:web:a36ff6e25eb30b32eb89af",
+            measurementId: "G-68SZ9TBE6Y"
+        };
 
-    firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
 
-    const messaging = firebase.messaging();
+        const messaging = firebase.messaging();
 
-    messaging.requestPermission().then(function () {
-      return messaging.getToken();
-    }).then(async function (token) {
-      console.log(token);
-      messaging.onMessage(payload => {
-        console.log(payload);
-      })
-    }).catch(function (err) {
-      console.log('알람 허용 실패', err);
-    });
-  }
+        messaging.requestPermission().then(function () {
+            return messaging.getToken();
+        }).then(async function (token) {
+            handleToken(token);
+        }).catch(function (err) {
+            console.log('Unable to get permission to notify.', err);
+        });
+
+        messaging.onTokenRefresh(() => {
+            messaging.getToken().then((refreshedToken) => {
+                console.log('Token refreshed.');
+            }).catch((err) => {
+                console.log('Unable to retrieve refreshed token ', err);
+            });
+        });
+
+        messaging.onMessage((payload) => {
+            console.log('Message received. ', payload);
+            // 여기에 메시지를 페이지에 표시하거나 추가 처리하는 코드를 작성할 수 있습니다.
+            alert(payload);
+        });
+    }
+
+    function handleToken(newToken) {
+        const oldToken = localStorage.getItem('fcmToken');
+        if (!oldToken || oldToken !== newToken) {
+            localStorage.setItem('fcmToken', newToken);
+            console.log("token 바뀜")
+        } else {
+            console.log('Token unchanged, not updating server.');
+        }
+    }
 </script>
 <body>
-  <h1>hi! fcm</h1>
+    <h1>hi! fcm</h1>
 </body>
 </html>

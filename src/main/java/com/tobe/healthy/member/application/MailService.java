@@ -1,7 +1,5 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
-
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.mail.MessagingException;
@@ -12,6 +10,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import static com.tobe.healthy.config.error.ErrorCode.MAIL_SEND_ERROR;
 
 @Service
 @RequiredArgsConstructor

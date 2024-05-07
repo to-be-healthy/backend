@@ -1,32 +1,17 @@
 package com.tobe.healthy.diet.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.DIET_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.LIKE_ALREADY_EXISTS;
-import static com.tobe.healthy.diet.domain.entity.DietType.BREAKFAST;
-import static com.tobe.healthy.diet.domain.entity.DietType.DINNER;
-import static com.tobe.healthy.diet.domain.entity.DietType.LUNCH;
-
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.DietFileDto;
 import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
 import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
-import com.tobe.healthy.diet.domain.entity.Diet;
-import com.tobe.healthy.diet.domain.entity.DietFiles;
-import com.tobe.healthy.diet.domain.entity.DietLike;
-import com.tobe.healthy.diet.domain.entity.DietLikePK;
-import com.tobe.healthy.diet.domain.entity.DietType;
+import com.tobe.healthy.diet.domain.entity.*;
 import com.tobe.healthy.diet.repository.DietLikeRepository;
 import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.file.FileService;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,6 +20,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.tobe.healthy.config.error.ErrorCode.DIET_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.LIKE_ALREADY_EXISTS;
+import static com.tobe.healthy.diet.domain.entity.DietType.*;
 
 
 @Service

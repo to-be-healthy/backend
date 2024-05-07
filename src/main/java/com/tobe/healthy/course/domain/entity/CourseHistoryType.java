@@ -1,14 +1,15 @@
 package com.tobe.healthy.course.domain.entity;
 
-import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
-import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
-
 import com.tobe.healthy.common.EnumGroup;
 import com.tobe.healthy.common.EnumMapperTypeExt;
 import com.tobe.healthy.member.domain.entity.MemberType;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.util.List;
+
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 
 @AllArgsConstructor
 @Getter

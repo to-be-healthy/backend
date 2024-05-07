@@ -3,12 +3,13 @@ package com.tobe.healthy.workout.domain.dto;
 import com.tobe.healthy.workout.domain.entity.Exercise;
 import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
 import com.tobe.healthy.workout.domain.entity.PrimaryMuscle;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Data

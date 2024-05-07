@@ -2,9 +2,10 @@ package com.tobe.healthy.course.domain.dto.out;
 
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.CourseHistoryDto;
-import java.util.List;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @Builder

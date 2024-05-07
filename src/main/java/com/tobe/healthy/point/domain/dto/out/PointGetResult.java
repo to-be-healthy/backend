@@ -1,9 +1,10 @@
 package com.tobe.healthy.point.domain.dto.out;
 
 import com.tobe.healthy.point.domain.dto.PointDto;
-import java.util.List;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @Builder

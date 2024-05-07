@@ -1,12 +1,13 @@
 package com.tobe.healthy.workout.repository;
 
-import static com.tobe.healthy.workout.domain.entity.QCompletedExercise.completedExercise;
-
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.workout.domain.entity.CompletedExercise;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+import static com.tobe.healthy.workout.domain.entity.QCompletedExercise.completedExercise;
 
 
 @Repository

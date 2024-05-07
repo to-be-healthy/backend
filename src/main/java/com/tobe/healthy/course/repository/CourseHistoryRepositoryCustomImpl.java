@@ -1,21 +1,22 @@
 package com.tobe.healthy.course.repository;
 
-import static com.tobe.healthy.course.domain.entity.QCourse.course;
-import static com.tobe.healthy.course.domain.entity.QCourseHistory.courseHistory;
-
 import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.course.domain.entity.CourseHistory;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
+
+import java.util.List;
+
+import static com.tobe.healthy.course.domain.entity.QCourse.course;
+import static com.tobe.healthy.course.domain.entity.QCourseHistory.courseHistory;
 
 @Repository
 @RequiredArgsConstructor

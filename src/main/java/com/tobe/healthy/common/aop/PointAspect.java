@@ -1,9 +1,5 @@
 package com.tobe.healthy.common.aop;
 
-import static com.tobe.healthy.point.domain.entity.PointType.DIET;
-import static com.tobe.healthy.point.domain.entity.PointType.NO_SHOW;
-import static com.tobe.healthy.point.domain.entity.PointType.WORKOUT;
-
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.entity.Calculation;
@@ -16,6 +12,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
+
+import static com.tobe.healthy.point.domain.entity.PointType.*;
 
 
 @Slf4j

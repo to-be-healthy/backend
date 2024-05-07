@@ -3,9 +3,10 @@ package com.tobe.healthy.member.repository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.SocialType;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 	@Query("select m from Member m where m.email = :email and m.socialType = 'NONE' and m.delYn = false")

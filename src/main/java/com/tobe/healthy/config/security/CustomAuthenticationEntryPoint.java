@@ -1,20 +1,21 @@
 package com.tobe.healthy.config.security;
 
-import static com.tobe.healthy.config.error.ErrorCode.HANDLE_ACCESS_DENIED;
-import static com.tobe.healthy.config.error.ErrorResponse.of;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.config.error.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+import static com.tobe.healthy.config.error.ErrorCode.HANDLE_ACCESS_DENIED;
+import static com.tobe.healthy.config.error.ErrorResponse.of;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Component
 @Slf4j

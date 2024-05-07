@@ -1,9 +1,5 @@
 package com.tobe.healthy.trainer.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_ALREADY_MAPPED;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_FOUND;
-
 import com.tobe.healthy.common.RedisKeyPrefix;
 import com.tobe.healthy.common.RedisService;
 import com.tobe.healthy.config.error.CustomException;
@@ -28,15 +24,6 @@ import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
 import com.tobe.healthy.trainer.domain.dto.out.MemberInviteResultCommand;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
@@ -44,6 +31,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.tobe.healthy.config.error.ErrorCode.*;
 
 
 @Service
