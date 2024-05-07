@@ -2,57 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>index</title>
+    <link rel="shortcut icon" href="#">
+    <title>FCM 토큰 발급받기</title>
 </head>
-<!--<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>-->
-<!--<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>-->
-<!--<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>-->
-<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase.js"></script>
-<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-messaging.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase.js" />
 
 <script th:inline="javascript">
-    window.onload = function() {
-        console.log('window onload');
-        initiallizeFirebase();
+  window.onload = function() {
+      console.log('window onload');
+      initiallizeFirebase();
+  }
+
+  function initiallizeFirebase() {
+    const firebaseConfig = {
+      apiKey: "AIzaSyBaG-SAt2hzgha2C16CNZQGnnB0qdiH7_I",
+      authDomain: "to-be-healthy-417411.firebaseapp.com",
+      projectId: "to-be-healthy-417411",
+      storageBucket: "to-be-healthy-417411.appspot.com",
+      messagingSenderId: "827137813758",
+      appId: "1:827137813758:web:a36ff6e25eb30b32eb89af",
+      measurementId: "G-68SZ9TBE6Y"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    const messaging = firebase.messaging();
+
+    messaging.requestPermission().then(function () {
+      return messaging.getToken();
+    }).then(async function (token) {
+      handleToken(token);
+    }).catch(function (err) {
+      console.log('Unable to get permission to notify.', err);
+    });
+
+    messaging.onTokenRefresh(() => {
+      messaging.getToken().then((refreshedToken) => {
+        console.log('Token refreshed.');
+      }).catch((err) => {
+        console.log('Unable to retrieve refreshed token ', err);
+      });
+    });
+
+    messaging.onMessage((payload) => {
+      console.log('Message received. ', payload);
+      // 여기에 메시지를 페이지에 표시하거나 추가 처리하는 코드를 작성할 수 있습니다.
+      alert(payload);
+    });
+  }
+
+  function handleToken(newToken) {
+    const oldToken = localStorage.getItem('fcmToken');
+    if (!oldToken || oldToken !== newToken) {
+      localStorage.setItem('fcmToken', newToken);
+      console.log("token 바뀜")
+    } else {
+      console.log('Token unchanged, not updating server.');
     }
+  }
 
-    function initiallizeFirebase() {
-        const firebaseConfig = {
-            apiKey: "AIzaSyBaG-SAt2hzgha2C16CNZQGnnB0qdiH7_I",
-            authDomain: "to-be-healthy-417411.firebaseapp.com",
-            projectId: "to-be-healthy-417411",
-            storageBucket: "to-be-healthy-417411.appspot.com",
-            messagingSenderId: "827137813758",
-            appId: "1:827137813758:web:a36ff6e25eb30b32eb89af",
-            measurementId: "G-68SZ9TBE6Y"
-        };
+  function displayMessage(payload) {
+    // 이 함수는 메시지 내용을 웹 페이지에 표시하는 예제입니다.
+    const messageElement = document.createElement('div');
+    messageElement.textContent = "Received message: " + payload.data.message;
+    document.body.appendChild(messageElement);
+  }
 
-        firebase.initializeApp(firebaseConfig);
-
-        const messaging = firebase.messaging();
-        // RequestPermission 첫 어플 시작 시 알림 허용 or 불허를 사용자에게 안내합니다.
-        // 허용하지 않을 시 알람 메시지는 가지 않습니다.
-        messaging.requestPermission()
-            .then(function() {
-                // 알람이 허용되었을 때 토큰을 반환합니다.
-                // 해당 토큰을 통해 FCM 특정 사용자에게 메시지를 보낼 수 있습니다.
-                return messaging.getToken();
-            })
-            .then(async function(token) {
-                console.log(token);
-                // 해당 onMessage는 데이터메시지로, 포그라운드인 상태에서
-                // FCM 메시지를 전송하는 경우 콘솔에 표기하도록 작성된 코드입니다.
-
-                messaging.onMessage(payload => {
-                    console.log(payload);
-
-                })
-            })
-            .catch(function(err) {
-                console.log('알람 허용 실패', err);
-            });
-    }
 </script>
 <body>
     <h1>hi! fcm</h1>
