@@ -70,4 +70,35 @@ class FirebaseCloudMessageService(
             request.message
         )
     }
+
+    fun sendPushAlarm(memberId: Long, request: NotificationRequest): NotificationResponse {
+        val findMemberToken = memberTokenRepository.findByMemberId(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
+
+        val message = Message.builder()
+            .setToken(findMemberToken.token)
+            .setWebpushConfig(
+                WebpushConfig.builder()
+                    .putHeader("ttl", "300")
+                    .setNotification(
+                        WebpushNotification(
+                            request.title,
+                            request.message
+                        )
+                    )
+                    .build()
+            )
+            .build()
+
+        val response = FirebaseMessaging
+            .getInstance()
+            .sendAsync(message)
+            .get()
+
+        log.info("Sent message: ${response}")
+
+        return NotificationResponse.from(
+            request.title,
+            request.message
+        )
+    }
 }
