@@ -17,14 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.format.DateTimeFormatter
 
 @RestController
@@ -100,7 +93,7 @@ class TrainerScheduleController(
                         @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<List<ScheduleCommandResult?>> {
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
-            data = trainerScheduleService.findAllSchedule(searchCond, customMemberDetails.member)
+            data = trainerScheduleService.findAllSchedule(searchCond, customMemberDetails.memberId)
         )
     }
 

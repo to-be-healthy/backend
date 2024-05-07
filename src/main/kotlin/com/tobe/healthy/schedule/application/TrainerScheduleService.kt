@@ -1,19 +1,11 @@
 package com.tobe.healthy.schedule.application
 
 import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_ALREADY_EXISTS
-import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_LESS_THAN_30_DAYS
-import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE
-import com.tobe.healthy.config.error.ErrorCode.TRAINER_SCHEDULE_NOT_FOUND
-import com.tobe.healthy.member.domain.entity.Member
+import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.NO_SHOW
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus.*
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.entity.TrainerScheduleClosedDaysInfo
 import com.tobe.healthy.schedule.entity.TrainerScheduleInfo
@@ -52,6 +44,7 @@ class TrainerScheduleService(
         var lessonDt = request.startDt
         var startTime = findTrainerSchedule.lessonStartTime
         val schedules = mutableListOf<Schedule>()
+//        val closedShedule = mutableListOf<Schedule>()
 
         while (!lessonDt.isAfter(request.endDt)) {
             val endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
@@ -63,12 +56,14 @@ class TrainerScheduleService(
             }
 
             findTrainerSchedule.trainerScheduleClosedDays?.forEach {
+                // 휴무일일 경우
                 if (it.closedDays == lessonDt.dayOfWeek) {
                     lessonDt = lessonDt.plusDays(ONE_DAY)
                     return@forEach
                 }
             }
 
+            // 점심시간일 경우
             if (isStartTimeEqualsLunchStartTime(findTrainerSchedule.lunchStartTime, startTime)) {
                 val duration = between(findTrainerSchedule.lunchStartTime, findTrainerSchedule.lunchEndTime)
                 startTime = startTime.plusMinutes(duration.toMinutes())
@@ -104,8 +99,8 @@ class TrainerScheduleService(
         }
     }
 
-    fun findAllSchedule(searchCond: ScheduleSearchCond, trainer: Member): List<ScheduleCommandResult?> {
-        return trainerScheduleRepository.findAllSchedule(searchCond, trainer)
+    fun findAllSchedule(searchCond: ScheduleSearchCond, trainerId: Long): List<ScheduleCommandResult?> {
+        return trainerScheduleRepository.findAllSchedule(searchCond, trainerId)
     }
 
     fun updateReservationStatusToNoShow(scheduleId: Long, trainerId: Long): ScheduleIdInfo {
