@@ -91,6 +91,12 @@ dependencies {
     testCompileOnly("io.github.microutils:kotlin-logging-jvm:4.0.0-beta-2")
 }
 
+allOpen {
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.Embeddable")
+    annotation("jakarta.persistence.MappedSuperclass")
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs += "-Xjsr305=strict"
@@ -98,12 +104,7 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-allOpen {
-    annotation("jakarta.persistence.Entity")
-    annotation("jakarta.persistence.Embeddable")
-    annotation("jakarta.persistence.MappedSuperclass")
-}
-
-tasks.withType<Test>().configureEach {
+tasks.withType<Test> {
     useJUnitPlatform()
 }
+
