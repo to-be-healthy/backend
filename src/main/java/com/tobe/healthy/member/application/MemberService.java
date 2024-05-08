@@ -647,13 +647,6 @@ public class MemberService {
         mapping.changeMemo(command.getMemo());
     }
 
-    public String registerFcmToken(String fcmToken, Long memberId) {
-        Member findMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        findMember.registerFcmToken(fcmToken);
-        return fcmToken;
-    }
-
     public StudentHomeResult getStudentHome(Long memberId) {
         //수강권
         Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
