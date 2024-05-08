@@ -77,16 +77,14 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	}
 
 	@Override
-	public MyReservation findTop1MyReservation(Long memberId) {
-		List<Schedule> schedules = queryFactory.select(schedule)
+	public MyReservation findMyNextReservation(Long memberId) {
+		Schedule result = queryFactory.select(schedule)
 				.from(schedule)
-				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
-				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
 				.where(scheduleApplicantIdEq(memberId), lessonDateTimeAfterNow())
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.limit(1)
-				.fetch();
-		return schedules.size()==0 ? null : schedules.stream().map(MyReservation::from).collect(toList()).get(0);
+				.fetchOne();
+		return result==null ? null : MyReservation.from(result);
 	}
 
 	private Predicate lessonDateTimeAfterNow() {

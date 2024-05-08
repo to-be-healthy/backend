@@ -670,7 +670,7 @@ public class MemberService {
         }
 
         //다음 PT 예정일
-        MyReservation myReservation = studentScheduleRepository.findTop1MyReservation(memberId);
+        MyReservation myReservation = studentScheduleRepository.findMyNextReservation(memberId);
 
         //수업일지
         LessonHistoryResponse lessonHistory = lessonHistoryRepository.findTop1LessonHistoryByMemberId(memberId);
