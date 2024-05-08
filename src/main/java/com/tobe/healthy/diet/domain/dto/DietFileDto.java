@@ -11,20 +11,12 @@ public class DietFileDto {
 
     private Long id;
     private Long dietId;
-    private String fileName;
-    private String originalName;
-    private String extension;
-    private Long fileSize;
     private String fileUrl;
     private DietType type;
 
     public static DietFileDto from(DietFiles dietFile) {
         return DietFileDto.builder()
                 .id(dietFile.getId())
-                .fileName(dietFile.getFileName())
-                .originalName(dietFile.getOriginalName())
-                .extension(dietFile.getExtension())
-                .fileSize(dietFile.getFileSize())
                 .fileUrl(dietFile.getFileUrl())
                 .type(dietFile.getType())
                 .dietId(dietFile.getDiet().getDietId())

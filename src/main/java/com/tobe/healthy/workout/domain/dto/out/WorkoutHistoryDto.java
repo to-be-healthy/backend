@@ -29,6 +29,7 @@ public class WorkoutHistoryDto {
     private boolean liked;
     private Long likeCnt;
     private Long commentCnt;
+    private boolean viewMySelf;
 
     @Builder.Default
     @JsonIgnore
@@ -45,7 +46,6 @@ public class WorkoutHistoryDto {
         WorkoutHistoryDtoBuilder builder = WorkoutHistoryDto.builder()
                 .content(command.getContent())
                 .member(memberDto);
-//                .multipartFiles(command.getFiles());
                 return builder.build();
     }
 
@@ -56,17 +56,19 @@ public class WorkoutHistoryDto {
                 .member(MemberDto.from(history.getMember()))
                 .likeCnt(history.getLikeCnt())
                 .commentCnt(history.getCommentCnt())
+                .viewMySelf(history.getViewMySelf())
                 .build();
     }
 
     @QueryProjection
-    public WorkoutHistoryDto(Long workoutHistoryId, String content, Member member, boolean liked, Long likeCnt, Long commentCnt) {
+    public WorkoutHistoryDto(Long workoutHistoryId, String content, Member member, boolean liked, Long likeCnt, Long commentCnt, boolean viewMySelf) {
         this.workoutHistoryId = workoutHistoryId;
         this.content = content;
         this.member = MemberDto.from(member);
         this.liked = liked;
         this.likeCnt = likeCnt;
         this.commentCnt = commentCnt;
+        this.viewMySelf = viewMySelf;
     }
 
 }

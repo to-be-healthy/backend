@@ -67,7 +67,7 @@ public class CourseController {
     public ResponseHandler<Void> updateCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                               @Parameter(description = "수강권 ID") @PathVariable("courseId") Long courseId,
                                               @RequestBody @Valid CourseUpdateCommand command) {
-        courseService.updateCourse(customMemberDetails.getMember().getId(), courseId, command);
+        courseService.updateCourseByTrainer(customMemberDetails.getMember().getId(), courseId, command);
         return ResponseHandler.<Void>builder()
                 .message("수강권 횟수가 증가 및 차감 되었습니다.")
                 .build();

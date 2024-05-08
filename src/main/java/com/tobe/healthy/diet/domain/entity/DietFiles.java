@@ -25,13 +25,6 @@ public class DietFiles extends BaseTimeEntity<DietFiles, Long> {
     @Column(name = "file_id")
     private Long id;
 
-    private String fileName;
-    private String originalName;
-
-    @Column(name = "file_ext")
-    private String extension;
-
-    private Long fileSize;
     private String fileUrl;
 
     @ColumnDefault("false")
@@ -46,12 +39,8 @@ public class DietFiles extends BaseTimeEntity<DietFiles, Long> {
     @ColumnDefault("'BREAKFAST'")
     private DietType type;
 
-    public static DietFiles create(String savedFileName, String originalName, String extension, long fileSize, Diet diet, String fileUrl, DietType type) {
+    public static DietFiles create(Diet diet, String fileUrl, DietType type) {
         return DietFiles.builder()
-                .fileName(savedFileName)
-                .originalName(originalName)
-                .extension(extension)
-                .fileSize(fileSize)
                 .fileUrl(fileUrl)
                 .diet(diet)
                 .type(type)
