@@ -21,7 +21,7 @@ public class RedisKeyExpiredListener extends KeyExpirationEventMessageListener {
 	@Value("${aws.s3.bucket-name}")
 	private String bucketName;
 
-	private final String S3_DOMAIN = "https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/";
+	private final static String S3_DOMAIN = "https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/";
 
 	public RedisKeyExpiredListener(RedisMessageListenerContainer listenerContainer, AmazonS3 amazonS3) {
 		super(listenerContainer);

@@ -21,7 +21,6 @@ class PushRestController(
     @PostMapping("/register")
     fun registerFcmToken(@RequestBody request: RegisterTokenRequest,
                          @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterTokenResponse> {
-        redisService.setValuesWithTimeout("123", "123", 60000)
         return ApiResultResponse(
             message = "토큰을 저장하였습니다.",
             data = firebaseCloudMessageService.registerFcmToken(request, member.memberId)
