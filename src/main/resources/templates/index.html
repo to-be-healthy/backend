@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <script src="https://www.gstatic.com/firebasejs/5.9.2/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-messaging.js"></script>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" href="#">
     <title>FCM 토큰 발급받기</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="shortcut icon" href="#">
 </head>
-<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase.js"></script>
-<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/5.9.2/firebase-messaging.js"></script>
 
+<body>
 <script th:inline="javascript">
     window.onload = function () {
         console.log('window onload');
@@ -17,13 +19,13 @@
 
     function initiallizeFirebase() {
         const firebaseConfig = {
-            apiKey: "AIzaSyBaG-SAt2hzgha2C16CNZQGnnB0qdiH7_I",
-            authDomain: "to-be-healthy-417411.firebaseapp.com",
-            projectId: "to-be-healthy-417411",
-            storageBucket: "to-be-healthy-417411.appspot.com",
-            messagingSenderId: "827137813758",
-            appId: "1:827137813758:web:a36ff6e25eb30b32eb89af",
-            measurementId: "G-68SZ9TBE6Y"
+            apiKey: "AIzaSyCCvaGdXas6LuaCNPeZ9FMCNqhR5VbaL2U",
+            authDomain: "solar-imprint-417411.firebaseapp.com",
+            projectId: "solar-imprint-417411",
+            storageBucket: "solar-imprint-417411.appspot.com",
+            messagingSenderId: "793717607575",
+            appId: "1:793717607575:web:fa7d5b2f29130f3c87add2",
+            measurementId: "G-F501B0PBYH"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -59,15 +61,14 @@
             document.getElementById('token').textContent = newToken;
             console.log("token 바뀜" + newToken)
         } else {
-            console.log('Token unchanged, not updating server.' + newToken);
+            console.log('Token unchanged, not updating server: ' + newToken);
             document.getElementById('token').textContent = newToken;
         }
     }
 </script>
-<body>
-    <h1>hi! fcm</h1>
-    <div>
-        <b id="token"></b>
-    </div>
+<h1>hi! fcm</h1>
+<div>
+    <b id="token"></b>
+</div>
 </body>
 </html>
