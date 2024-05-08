@@ -1,7 +1,7 @@
 package com.tobe.healthy.push.presentation
 
 import com.tobe.healthy.ApiResultResponse
-import com.tobe.healthy.common.RedisService
+import com.tobe.healthy.common.redis.RedisService
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.push.application.FirebaseCloudMessageService
 import com.tobe.healthy.push.domain.NotificationRequest

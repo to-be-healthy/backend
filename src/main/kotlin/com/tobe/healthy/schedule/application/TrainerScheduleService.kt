@@ -44,7 +44,6 @@ class TrainerScheduleService(
         var lessonDt = request.startDt
         var startTime = findTrainerSchedule.lessonStartTime
         val schedules = mutableListOf<Schedule>()
-//        val closedShedule = mutableListOf<Schedule>()
 
         while (!lessonDt.isAfter(request.endDt)) {
             val endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
