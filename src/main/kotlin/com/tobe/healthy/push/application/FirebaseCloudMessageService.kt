@@ -8,10 +8,7 @@ import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
 import com.tobe.healthy.log
 import com.tobe.healthy.member.repository.MemberRepository
-import com.tobe.healthy.push.domain.MemberToken
-import com.tobe.healthy.push.domain.NotificationRequest
-import com.tobe.healthy.push.domain.NotificationResponse
-import com.tobe.healthy.push.domain.RegisterTokenResponse
+import com.tobe.healthy.push.domain.*
 import com.tobe.healthy.push.repository.MemberTokenRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -25,18 +22,18 @@ class FirebaseCloudMessageService(
     private val memberTokenRepository: MemberTokenRepository
 ) {
 
-    fun registerFcmToken(token: String, memberId: Long): RegisterTokenResponse {
+    fun registerFcmToken(request: RegisterTokenRequest, memberId: Long): RegisterTokenResponse {
         val findMember = memberRepository.findByIdOrNull(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
-        memberTokenRepository.findByMemberId(findMember.id)?.changeToken(token) ?: let {
-            val memberToken = MemberToken.register(findMember, token)
+        memberTokenRepository.findByMemberId(findMember.id)?.changeToken(request.token) ?: let {
+            val memberToken = MemberToken.register(findMember, request.token)
             memberTokenRepository.save(memberToken)
         }
 
         return RegisterTokenResponse(
             name = findMember.name,
-            token = token
+            token = request.token
         )
     }
 

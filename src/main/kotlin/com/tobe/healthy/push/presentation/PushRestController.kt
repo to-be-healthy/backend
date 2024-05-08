@@ -5,6 +5,7 @@ import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.push.application.FirebaseCloudMessageService
 import com.tobe.healthy.push.domain.NotificationRequest
 import com.tobe.healthy.push.domain.NotificationResponse
+import com.tobe.healthy.push.domain.RegisterTokenRequest
 import com.tobe.healthy.push.domain.RegisterTokenResponse
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -15,11 +16,11 @@ class PushRestController(
     private val firebaseCloudMessageService: FirebaseCloudMessageService
 ) {
     @PostMapping("/register")
-    fun registerFcmToken(@RequestParam token: String,
+    fun registerFcmToken(@RequestBody request: RegisterTokenRequest,
                          @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterTokenResponse> {
         return ApiResultResponse(
             message = "토큰을 저장하였습니다.",
-            data = firebaseCloudMessageService.registerFcmToken(token, member.memberId)
+            data = firebaseCloudMessageService.registerFcmToken(request, member.memberId)
         )
     }
 
