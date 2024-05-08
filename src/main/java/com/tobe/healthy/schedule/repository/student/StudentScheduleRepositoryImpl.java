@@ -46,18 +46,6 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.collect(toList());
 	}
 
-	private BooleanExpression scheduleTrainerIdEq(Long trainerId) {
-		return schedule.trainer.id.eq(trainerId);
-	}
-
-	private BooleanExpression scheduleWaitingDelYnFalse() {
-		return scheduleWaiting.delYn.isFalse();
-	}
-
-	private BooleanExpression delYnFalse() {
-		return schedule.delYn.eq(false);
-	}
-
 	@Override
 	public List<ScheduleCommandResult> findAllByApplicantId(Long memberId) {
 		QMember trainer = new QMember("trainer");
@@ -66,7 +54,7 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 			.from(schedule)
 			.leftJoin(schedule.trainer, trainer).fetchJoin()
 			.leftJoin(schedule.scheduleWaiting, scheduleWaiting).fetchJoin()
-			.where(schedule.applicant.id.eq(memberId), scheduleDelYnFalse(), scheduleWaitingDelYnFalse())
+			.where(scheduleApplicantIdEq(memberId), scheduleDelYnFalse(), scheduleWaitingDelYnFalse())
 			.orderBy(schedule.lessonDt.desc(), schedule.lessonStartTime.asc())
 			.fetch();
 		return fetch.stream()
@@ -80,7 +68,7 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.from(schedule)
 				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.where(schedule.applicant.id.eq(memberId), schedule.lessonDt.goe(LocalDate.now()), lessonDtEq(searchCond))
+				.where(scheduleApplicantIdEq(memberId), schedule.lessonDt.goe(LocalDate.now()), lessonDtEq(searchCond))
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
 		return schedules.stream().map(MyReservation::from).collect(toList());
@@ -92,11 +80,11 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.from(schedule)
 				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.where(schedule.applicant.id.eq(memberId), schedule.lessonDt.goe(LocalDate.now()))
+				.where(scheduleApplicantIdEq(memberId), schedule.lessonDt.goe(LocalDate.now()))
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.limit(1)
 				.fetch();
-		return schedules.stream().map(MyReservation::from).collect(toList()).get(0);
+		return schedules==null ? null : schedules.stream().map(MyReservation::from).collect(toList()).get(0);
 	}
 
 	private BooleanExpression scheduleDelYnFalse() {
@@ -117,4 +105,21 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 		}
 		return null;
 	}
+
+	private BooleanExpression scheduleTrainerIdEq(Long trainerId) {
+		return schedule.trainer.id.eq(trainerId);
+	}
+
+	private BooleanExpression scheduleWaitingDelYnFalse() {
+		return scheduleWaiting.delYn.isFalse();
+	}
+
+	private BooleanExpression delYnFalse() {
+		return schedule.delYn.eq(false);
+	}
+
+	private BooleanExpression scheduleApplicantIdEq(Long memberId) {
+		return schedule.applicant.id.eq(memberId);
+	}
+
 }
