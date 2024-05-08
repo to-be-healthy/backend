@@ -12,6 +12,7 @@ import com.tobe.healthy.member.domain.dto.out.QMemberDetailResult;
 import com.tobe.healthy.member.domain.dto.out.QMemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import static com.tobe.healthy.course.domain.entity.QCourse.course;
 import static com.tobe.healthy.gym.domain.entity.QGym.gym;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static com.tobe.healthy.member.domain.entity.QMember.member;
 import static com.tobe.healthy.member.domain.entity.QMemberProfile.memberProfile;
@@ -45,7 +47,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .select(member, gym)
                 .from(member)
                 .leftJoin(member.gym, gym).fetchJoin()
-                .where(memberIdEq(trainerId), member.delYn.eq(false))
+                .where(memberIdEq(trainerId), memberDelYnEq(false))
                 .fetchOne();
         Member m = tuple.get(member);
         m.registerGym(tuple.get(gym));
@@ -59,7 +61,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .from(member)
                 .leftJoin(member.memberProfile, memberProfile).fetchJoin()
                 .leftJoin(member.gym, gym).fetchJoin()
-                .where(memberIdEq(memberId), member.delYn.eq(false))
+                .where(memberIdEq(memberId),memberDelYnEq(false))
                 .fetchOne();
         Member m = tuple.get(member);
         m.registerProfile(tuple.get(memberProfile));
@@ -79,9 +81,9 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .on(memberProfile.member.memberProfile.eq(member.memberProfile))
                 .leftJoin(course)
                 .on(course.member.id.eq(member.id), course.remainLessonCnt.gt(0))
-                .where(trainerMemberMapping.trainer.id.eq(trainerId)
-                        , member.memberType.eq(MemberType.STUDENT)
-                        , member.delYn.eq(false)
+                .where(mappingTrainerIdEq(trainerId)
+                        , memberTypeEq(STUDENT)
+                        , memberDelYnEq(false)
                         , nameLike(searchValue))
                 .orderBy(sortBy(sortValue))
                 .fetch();
@@ -92,10 +94,10 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         Long totalCnt = queryFactory
                 .select(member.count())
                 .from(member)
-                .where(member.memberType.eq(MemberType.STUDENT)
-                        , member.delYn.eq(false)
+                .where(memberTypeEq(STUDENT)
+                        , memberDelYnEq(false)
                         , nameLike(searchValue)
-                        , member.gym.id.eq(gymId)
+                        , memberGymIdEq(gymId)
                         , JPAExpressions.selectFrom(trainerMemberMapping)
                                 .where(trainerMemberMapping.member.eq(member))
                                 .notExists())
@@ -103,10 +105,10 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         List<Member> members = queryFactory
                 .select(member)
                 .from(member)
-                .where(member.memberType.eq(MemberType.STUDENT)
-                        , member.delYn.eq(false)
+                .where(memberTypeEq(STUDENT)
+                        , memberDelYnEq(false)
                         , nameLike(searchValue)
-                        , member.gym.id.eq(gymId)
+                        , memberGymIdEq(gymId)
                         , JPAExpressions.selectFrom(trainerMemberMapping)
                                 .where(trainerMemberMapping.member.eq(member))
                                 .notExists())
@@ -129,15 +131,23 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .on(member.id.eq(trainerMemberMapping.member.id))
                 .leftJoin(schedule)
                 .on(member.id.eq(schedule.applicant.id)
-                        , schedule.delYn.eq(false)
-                        , schedule.reservationStatus.eq(COMPLETED)
-                        , lessonDateTimeAfterToday())
-                .where(memberIdEq(memberId), member.delYn.eq(false))
+                        , scheduleDelYnEq(false)
+                        , scheduleReservationStatusEq(COMPLETED)
+                        , lessonDateTimeAfterNow())
+                .where(memberIdEq(memberId), memberDelYnEq(false))
                 .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
                 .limit(1)
                 .fetchOne();
     }
 
+    private BooleanExpression scheduleReservationStatusEq(ReservationStatus status) {
+        return schedule.reservationStatus.eq(status);
+    }
+
+    private BooleanExpression scheduleDelYnEq(boolean bool) {
+        return schedule.delYn.eq(bool);
+    }
+    
     @Override
     public List<Member> findAllTrainerByGym(Long gymId) {
         return queryFactory.select(member)
@@ -152,7 +162,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .fetch();
     }
 
-    private Predicate lessonDateTimeAfterToday() {
+    private Predicate lessonDateTimeAfterNow() {
         return schedule.lessonDt.after(LocalDate.now())
                 .or(schedule.lessonDt.goe(LocalDate.now()).and(schedule.lessonStartTime.after(LocalTime.now())));
     }
@@ -176,6 +186,22 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
             if ("ranking".equals(sortValue)) return trainerMemberMapping.ranking.asc();
         }
         return member.id.asc();
+    }
+
+    private BooleanExpression memberDelYnEq(boolean bool) {
+        return member.delYn.eq(bool);
+    }
+
+    private BooleanExpression mappingTrainerIdEq(Long trainerId) {
+        return trainerMemberMapping.trainer.id.eq(trainerId);
+    }
+
+    private BooleanExpression memberTypeEq(MemberType memberType) {
+        return member.memberType.eq(memberType);
+    }
+
+    private BooleanExpression memberGymIdEq(Long gymId) {
+        return member.gym.id.eq(gymId);
     }
 
 }

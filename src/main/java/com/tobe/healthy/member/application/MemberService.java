@@ -4,8 +4,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tobe.healthy.common.RedisKeyPrefix;
-import com.tobe.healthy.common.RedisService;
+import com.tobe.healthy.common.redis.RedisKeyPrefix;
+import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.config.error.OAuthError.GoogleError;
@@ -14,19 +14,32 @@ import com.tobe.healthy.config.error.OAuthError.NaverError;
 import com.tobe.healthy.config.error.OAuthException;
 import com.tobe.healthy.config.security.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
+import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
+import com.tobe.healthy.course.domain.entity.Course;
+import com.tobe.healthy.course.repository.CourseRepository;
+import com.tobe.healthy.diet.application.DietService;
+import com.tobe.healthy.diet.domain.dto.DietDto;
+import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryResponse;
+import com.tobe.healthy.lesson_history.repository.LessonHistoryRepository;
 import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand.MemberFindIdCommandResult;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
+import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberProfileRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.point.domain.dto.out.PointDto;
+import com.tobe.healthy.point.domain.dto.out.RankDto;
+import com.tobe.healthy.point.repository.PointRepository;
+import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
+import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
@@ -52,6 +65,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -80,6 +94,12 @@ public class MemberService {
     private final MailService mailService;
     private final CourseService courseService;
     private final MemberProfileRepository memberProfileRepository;
+    private final CourseRepository courseRepository;
+    private final PointRepository pointRepository;
+    private final StudentScheduleRepository studentScheduleRepository;
+    private final LessonHistoryRepository lessonHistoryRepository;
+    private final DietService dietService;
+
     private static final Integer EMAIL_AUTH_TIMEOUT = 3 * 60 * 1000;
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -600,9 +620,8 @@ public class MemberService {
     }
 
     public MemberInfoResult getMemberInfo(Long memberId) {
-        memberRepository.findById(memberId)
+        Member member = memberRepository.findByIdAndDelYnFalse(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        Member member = memberRepository.findByMemberIdWithProfileAndGym(memberId);
         return MemberInfoResult.create(member);
     }
 
@@ -626,5 +645,50 @@ public class MemberService {
         TrainerMemberMapping mapping = mappingRepository.findByTrainerIdAndMemberId(trainerId, mmeberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
         mapping.changeMemo(command.getMemo());
+    }
+
+    public StudentHomeResult getStudentHome(Long memberId) {
+        //트레이너 매핑 여부
+        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId).orElse(null);
+        boolean isMapped = mapping != null;
+
+        //수강권
+        Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
+        CourseDto usingCourse = optCourse.map(CourseDto::from).orElse(null);
+
+        //포인트
+        int monthPoint = pointRepository.getPointOfSearchMonth(memberId, getNowMonth());
+        int totalPoint = pointRepository.getTotalPoint(memberId);
+        PointDto point = PointDto.create(monthPoint, totalPoint );
+
+        //랭킹
+        RankDto rank = new RankDto();
+        if(isMapped){
+            long totalMemberCnt = mappingRepository.countByTrainerId(mapping.getTrainer().getId());
+            rank.setRanking(mapping.getRanking());
+            rank.setTotalMemberCnt((int) totalMemberCnt);
+        }
+
+        //다음 PT 예정일
+        MyReservation myReservation = studentScheduleRepository.findMyNextReservation(memberId);
+
+        //수업일지
+        LessonHistoryResponse lessonHistory = lessonHistoryRepository.findTop1LessonHistoryByMemberId(memberId);
+
+        //식단
+        DietDto diet = dietService.getDietCreatedAtToday(memberId);
+
+        return StudentHomeResult.create(isMapped, usingCourse, point, rank, myReservation, lessonHistory, diet);
+    }
+
+    private String getNowMonth() {
+        return LocalDate.now().toString().substring(0, 7);
+    }
+
+    public Boolean changeScheduleNotice(AlarmStatus alarmStatus, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        member.changeScheduleNotice(alarmStatus);
+        return true;
     }
 }

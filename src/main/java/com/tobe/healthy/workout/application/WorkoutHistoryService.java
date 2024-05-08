@@ -1,13 +1,12 @@
 package com.tobe.healthy.workout.application;
 
-import com.tobe.healthy.common.RedisService;
+import com.tobe.healthy.common.CustomPaging;
+import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.file.FileService;
 import com.tobe.healthy.file.RegisterFile;
-import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryFileDto;
@@ -25,9 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI;
+import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 
 
 @Service
@@ -39,7 +37,6 @@ public class WorkoutHistoryService {
     private final FileService fileService;
     private final WorkoutHistoryLikeRepository workoutHistoryLikeRepository;
     private final WorkoutHistoryRepository workoutHistoryRepository;
-    private final TrainerMemberMappingRepository mappingRepository;
     private final CompletedExerciseRepository completedExerciseRepository;
     private final ExerciseRepository exerciseRepository;
     private final MemberRepository memberRepository;
@@ -48,11 +45,8 @@ public class WorkoutHistoryService {
 
 
     public WorkoutHistoryDto addWorkoutHistory(Member member, HistoryAddCommand command) {
-        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId()).orElse(null);
-        MemberDto memberDto = MemberDto.from(member);
-        WorkoutHistoryDto workoutHistoryDto = WorkoutHistoryDto.create(command, memberDto);
-        WorkoutHistory history = WorkoutHistory.create(workoutHistoryDto, member, mapping == null ? null : mapping.getTrainer());
-
+        Member result = memberRepository.findByMemberIdWithGym(member.getId());
+        WorkoutHistory history = WorkoutHistory.create(command, member, result.getGym());
         workoutHistoryRepository.save(history);
         saveCompletedExercises(history, command);
         uploadWorkoutFiles(history, command.getFiles());
@@ -68,24 +62,14 @@ public class WorkoutHistoryService {
         completedExerciseRepository.saveAll(completedExercises);
     }
 
-    public List<WorkoutHistoryDto> getWorkoutHistory(Member loginMember, Long memberId, Pageable pageable, String searchDate) {
-        List<WorkoutHistoryDto> historiesDto =
-                workoutHistoryRepository.getWorkoutHistoryOfMonth(loginMember.getId(), memberId, pageable, searchDate).stream().toList();
+    public CustomPaging<WorkoutHistoryDto> getWorkoutHistory(Member loginMember, Long memberId, Pageable pageable, String searchDate) {
+        Page<WorkoutHistoryDto> pageDtos = workoutHistoryRepository.getWorkoutHistoryOfMonth(loginMember.getId(), memberId, pageable, searchDate);
+        List<WorkoutHistoryDto> historiesDto = pageDtos.stream().toList();
         List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
         historiesDto = setHistoryListFile(historiesDto, ids);
-        List<WorkoutHistoryDto> result = setHistoryListExercise(historiesDto, ids);
-        return result.isEmpty() ? null : result;
-    }
-
-    public List<WorkoutHistoryDto> getWorkoutHistoryByTrainer(Long trainerId, Pageable pageable) {
-        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
-                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
-        Page<WorkoutHistory> histories = workoutHistoryRepository.getWorkoutHistoryByTrainer(trainer, pageable);
-        List<WorkoutHistoryDto> historiesDto = histories.map(WorkoutHistoryDto::from).stream().toList();
-        List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
-        historiesDto = setHistoryListFile(historiesDto, ids);
-        List<WorkoutHistoryDto> result = setHistoryListExercise(historiesDto, ids);
-        return result.isEmpty() ? null : result;
+        List<WorkoutHistoryDto> content = setHistoryListExercise(historiesDto, ids);
+        return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
+                pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 
     public WorkoutHistoryDto getWorkoutHistoryDetail(Long workoutHistoryId) {
@@ -102,7 +86,7 @@ public class WorkoutHistoryService {
         history.deleteWorkoutHistory();
         completedExerciseRepository.deleteAllInBatch(history.getCompletedExercises());
         workoutHistoryLikeRepository.deleteLikeByWorkoutHistoryId(workoutHistoryId);
-        history.getHistoryFiles().forEach(file -> fileService.deleteFile(getFileName(file.getFileUrl())));
+        history.getHistoryFiles().forEach(file -> fileService.deleteHistoryFile(getFileName(file.getFileUrl())));
     }
 
     public WorkoutHistoryDto updateWorkoutHistory(Member member, Long workoutHistoryId, HistoryAddCommand command) {
@@ -116,7 +100,7 @@ public class WorkoutHistoryService {
         saveCompletedExercises(history, command);
         //파일 수정
         history.deleteFiles();
-        history.getHistoryFiles().forEach(file -> fileService.deleteFile(getFileName(file.getFileUrl())));
+        history.getHistoryFiles().forEach(file -> fileService.deleteHistoryFile(getFileName(file.getFileUrl())));
         uploadWorkoutFiles(history, command.getFiles());
         return setHistoryFile(WorkoutHistoryDto.from(history), List.of(history.getWorkoutHistoryId()));
     }
@@ -181,6 +165,17 @@ public class WorkoutHistoryService {
             workoutFileRepository.save(WorkoutHistoryFiles.create(history, fileInfo.getFileUrl(), fileInfo.getFileOrder()));
             redisService.deleteValues(TEMP_FILE_URI.getDescription() + fileInfo.getFileUrl());
         }
+    }
+
+    public CustomPaging<WorkoutHistoryDto> getWorkoutHistoryMyGym(Long studentId, Pageable pageable, String searchDate) {
+        Member member = memberRepository.findByMemberIdWithGym(studentId);
+        Page<WorkoutHistory> pageDtos = workoutHistoryRepository.getWorkoutHistoryByGym(member.getGym().getId(), pageable, searchDate);
+        List<WorkoutHistoryDto> historiesDto = pageDtos.map(WorkoutHistoryDto::from).stream().toList();
+        List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
+        historiesDto = setHistoryListFile(historiesDto, ids);
+        List<WorkoutHistoryDto> content = setHistoryListExercise(historiesDto, ids);
+        return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
+                pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 
 }

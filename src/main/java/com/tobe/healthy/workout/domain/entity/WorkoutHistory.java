@@ -1,7 +1,9 @@
 package com.tobe.healthy.workout.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,8 +36,8 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     private Member member;
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "trainer_id")
-    private Member trainer;
+    @JoinColumn(name = "gym_id")
+    private Gym gym;
 
     @ColumnDefault("false")
     @Builder.Default
@@ -48,6 +50,10 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     @ColumnDefault("0")
     @Builder.Default
     private Long commentCnt = 0L;
+
+    @ColumnDefault("false")
+    @Builder.Default
+    private Boolean viewMySelf = false;
 
     @Builder.Default
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
@@ -62,12 +68,12 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     private List<CompletedExercise> completedExercises = new ArrayList<>();
 
 
-    public static WorkoutHistory create(WorkoutHistoryDto historyDto, Member member, Member trainer) {
+    public static WorkoutHistory create(HistoryAddCommand command, Member member, Gym gym) {
         return WorkoutHistory.builder()
-                .workoutHistoryId(historyDto.getWorkoutHistoryId())
-                .content(historyDto.getContent())
+                .content(command.getContent())
+                .viewMySelf(command.isViewMySelf())
                 .member(member)
-                .trainer(trainer)
+                .gym(gym)
                 .build();
     }
 

@@ -1,4 +1,4 @@
-package com.tobe.healthy.common;
+package com.tobe.healthy.common.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
