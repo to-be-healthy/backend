@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*
 class PushRestController(
     private val firebaseCloudMessageService: FirebaseCloudMessageService
 ) {
+
     @PostMapping("/register")
     fun registerFcmToken(@RequestBody request: RegisterTokenRequest,
                          @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterTokenResponse> {
@@ -33,7 +34,8 @@ class PushRestController(
     }
 
     @PostMapping("/{memberId}")
-    fun sendPushAlarm(@PathVariable memberId: Long, @RequestBody request: NotificationRequest): ApiResultResponse<NotificationResponse> {
+    fun sendPushAlarm(@PathVariable memberId: Long,
+                      @RequestBody request: NotificationRequest): ApiResultResponse<NotificationResponse> {
         return ApiResultResponse(
             message = "푸시 전송에 성공하였습니다.",
             data = firebaseCloudMessageService.sendPushAlarm(memberId, request)
