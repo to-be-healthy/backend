@@ -3,9 +3,12 @@ package com.tobe.healthy.member.repository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.SocialType;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
@@ -30,5 +33,13 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 	@Query("select m from Member m where m.id = :memberId and m.delYn = false")
 	Optional<Member> findById(Long memberId);
 
+	@EntityGraph(attributePaths = {"gym"})
 	Optional<Member> findByIdAndMemberTypeAndDelYnFalse(Long memberId, MemberType memberType);
+
+	@EntityGraph(attributePaths = {"gym", "memberProfile"})
+	Optional<Member> findByIdAndDelYnFalse(Long memberId);
+
+	@Query("select m from Member m where m.gym.id = :gymId and m.memberType = 'TRAINER' and m.delYn = false order by m.id desc")
+	List<Member> findAllTrainerByGym(@Param("gymId") Long gymId);
+
 }

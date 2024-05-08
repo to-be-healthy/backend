@@ -1,5 +1,6 @@
 package com.tobe.healthy.diet.application;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.DietFileDto;
@@ -10,8 +11,11 @@ import com.tobe.healthy.diet.repository.DietLikeRepository;
 import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.file.FileService;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
+import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
+import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,9 +31,10 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.tobe.healthy.config.error.ErrorCode.DIET_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.LIKE_ALREADY_EXISTS;
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_FOUND;
 import static com.tobe.healthy.diet.domain.entity.DietType.*;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 
 
 @Service
@@ -42,13 +47,22 @@ public class DietService {
     private final DietLikeRepository dietLikeRepository;
     private final TrainerMemberMappingRepository mappingRepository;
     private final FileService fileService;
+    private final MemberRepository memberRepository;
 
-    public List<DietDto> getDiet(Long memberId, Pageable pageable, String searchDate) {
-        Page<Diet> diets = dietRepository.getDietOfMonth(memberId, pageable, searchDate);
-        List<DietDto> dietDtos = diets.map(DietDto::from).stream().toList();
+    public DietDto getDietCreatedAtToday(Long memberId) {
+        Diet diet = dietRepository.getDietCreatedAtToday(memberId);
+        if(diet == null) return null;
+        List<Long> ids = List.of(diet.getDietId());
+        return setDietFile(DietDto.from(diet), ids);
+    }
+
+    public CustomPaging<DietDto> getDiet(Long memberId, Pageable pageable, String searchDate) {
+        Page<Diet> pageDtos = dietRepository.getDietOfMonth(memberId, pageable, searchDate);
+        List<DietDto> dietDtos = pageDtos.map(DietDto::from).stream().toList();
         List<Long> ids = dietDtos.stream().map(DietDto::getDietId).collect(Collectors.toList());
-        dietDtos = setDietFile(dietDtos, ids);
-        return dietDtos.isEmpty() ? null : dietDtos;
+        List<DietDto> content = setDietFile(dietDtos, ids);
+        return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
+                pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 
     public void likeDiet(Member member, Long dietId) {
@@ -71,18 +85,18 @@ public class DietService {
         Long memberId = member.getId();
         DietType requestType = command.getType();
         MultipartFile requestFile = command.getFile();
-        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
-        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
-        Diet diet = dietRepository.findTop1ByCreateAtToday(memberId, start, end);
+
+        Diet diet = dietRepository.findTop1ByCreateAtToday(memberId);
 
         TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId).orElse(null);
-        if(ObjectUtils.isEmpty(diet)) diet = dietRepository.save(Diet.create(member, mapping == null ? null : mapping.getTrainer()));
+        Member trainer = mapping == null ? null : mapping.getTrainer();
+        if(ObjectUtils.isEmpty(diet)) diet = dietRepository.save(Diet.create(member, trainer));
 
         diet.deleteFile(requestType);
         if(!ObjectUtils.isEmpty(diet.getDietFiles())) {
             diet.getDietFiles().stream()
                     .filter(f -> requestType.equals(f.getType()))
-                    .forEach(file -> fileService.deleteFile(file.getFileName()));
+                    .forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
         }
 
         if(!ObjectUtils.isEmpty(requestFile)){
@@ -121,7 +135,7 @@ public class DietService {
                 .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
         diet.deleteDiet();
         dietLikeRepository.deleteLikeByDietId(dietId);
-        diet.getDietFiles().forEach(file -> fileService.deleteFile(file.getFileName()));
+        diet.getDietFiles().forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
     }
 
     public DietDto updateDiet(Member member, Long dietId, DietUpdateCommand command) {
@@ -133,11 +147,36 @@ public class DietService {
         diet.changeFastDinner(command.isDinnerFast());
 
         diet.deleteFiles();
-        diet.getDietFiles().forEach(file -> fileService.deleteFile(file.getFileName()));
+        diet.getDietFiles().forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
         if(!ObjectUtils.isEmpty(command.getBreakfastFile())) fileService.uploadDietFile(diet, BREAKFAST, command.getBreakfastFile());
         if(!ObjectUtils.isEmpty(command.getLunchFile())) fileService.uploadDietFile(diet, LUNCH, command.getLunchFile());
         if(!ObjectUtils.isEmpty(command.getDinnerFile())) fileService.uploadDietFile(diet, DINNER, command.getDinnerFile());
 
         return setDietFile(DietDto.from(diet), List.of(diet.getDietId()));
     }
+
+    public CustomPaging<DietDto> getDietMyTrainer(Long studentId, Pageable pageable, String searchDate) {
+        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(studentId)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(mapping.getTrainer().getId(), TRAINER)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+        return getDietByTrainer(trainer.getId(), pageable, searchDate);
+    }
+
+    public CustomPaging<DietDto> getDietByTrainer(Long trainerId, Pageable pageable, String searchDate) {
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+        Page<Diet> pageDtos = dietRepository.getDietByTrainer(trainer, pageable, searchDate);
+        List<DietDto> dietDtos = pageDtos.map(DietDto::from).stream().toList();
+        List<Long> ids = dietDtos.stream().map(DietDto::getDietId).collect(Collectors.toList());
+        List<DietDto> content = setDietFile(dietDtos, ids);
+        return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
+                pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
+    }
+
+    private String getFileName(String url){
+        String[] arr = url.split("/");
+        return arr[arr.length - 1];
+    }
+
 }

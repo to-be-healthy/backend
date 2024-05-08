@@ -47,12 +47,12 @@ public class CourseAspect {
         //수업 취소자 수강권 +1
         CourseService courseService = courseServiceObjectProvider.getObject();
         command = CourseUpdateCommand.create(studentId, PLUS, RESERVATION_CANCEL, ONE_LESSON);
-        courseService.updateCourse(trainerId, null, command);
+        courseService.updateCourseByMember(trainerId, command);
 
         //수업 대기자 수강권 -1
         if(!ObjectUtils.isEmpty(waitingStudentId)){
             command = CourseUpdateCommand.create(waitingStudentId, MINUS, RESERVATION, ONE_LESSON);
-            courseService.updateCourse(trainerId, null, command);
+            courseService.updateCourseByMember(trainerId, command);
         }
     }
 
@@ -63,7 +63,7 @@ public class CourseAspect {
 
         CourseService courseService = courseServiceObjectProvider.getObject();
         CourseUpdateCommand command = CourseUpdateCommand.create(studentId, MINUS, RESERVATION, ONE_LESSON);
-        courseService.updateCourse(trainerId, null, command);
+        courseService.updateCourseByMember(trainerId, command);
     }
 
 }

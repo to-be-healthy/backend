@@ -13,6 +13,8 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
+import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
+import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 import static com.tobe.healthy.point.domain.entity.PointType.*;
 
 
@@ -39,26 +41,36 @@ public class PointAspect {
     @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleService.updateReservationStatusToNoShow(..))")
     private void updateReservationStatusToNoShow() {}
 
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleService.revertReservationStatusToNoShow(..))")
+    private void revertReservationStatusToNoShow() {}
+
     @AfterReturning(value = "addWorkoutHistory()", returning = "returnValue")
     public void plusPointWhenPostWorkout(JoinPoint joinPoint, Object returnValue) {
         Long memberId = ((WorkoutHistoryDto) returnValue).getMember().getId();
         //메서드가 호출되는 시점에 스프링 컨테이너에 등록된 Bean을 조회 (지연조회)
         PointService pointService = pointServiceProvider.getObject();
-        pointService.updatePoint(memberId, WORKOUT, Calculation.PLUS, ONE_POINT);
+        pointService.updatePoint(memberId, WORKOUT, PLUS, ONE_POINT);
     }
 
     @AfterReturning(value = "addDiet()", returning = "returnValue")
     public void plusPointWhenPostDiet(JoinPoint joinPoint, Object returnValue) {
         Long memberId = ((DietDto) returnValue).getMember().getId();
         PointService pointService = pointServiceProvider.getObject();
-        pointService.updatePoint(memberId, DIET, Calculation.PLUS, ONE_POINT);
+        pointService.updatePoint(memberId, DIET, PLUS, ONE_POINT);
     }
 
     @AfterReturning(value = "updateReservationStatusToNoShow()", returning = "returnValue")
     public void minusPointWhenNoShow(JoinPoint joinPoint, Object returnValue) {
         Long memberId = ((ScheduleIdInfo) returnValue).getStudentId();
         PointService pointService = pointServiceProvider.getObject();
-        pointService.updatePoint(memberId, NO_SHOW, Calculation.MINUS, THREE_POINT);
+        pointService.updatePoint(memberId, NO_SHOW, MINUS, THREE_POINT);
+    }
+
+    @AfterReturning(value = "revertReservationStatusToNoShow()", returning = "returnValue")
+    public void plusPointWhenRevertNoShow(JoinPoint joinPoint, Object returnValue) {
+        Long memberId = ((ScheduleIdInfo) returnValue).getStudentId();
+        PointService pointService = pointServiceProvider.getObject();
+        pointService.updatePoint(memberId, NO_SHOW_CANCEL, PLUS, THREE_POINT);
     }
 
 }

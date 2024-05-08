@@ -72,6 +72,10 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@ColumnDefault("'ENABLED'")
 	private AlarmStatus feedbackAlarmStatus = ENABLED;
 
+	@Enumerated(STRING)
+	@ColumnDefault("'ENABLED'")
+	private AlarmStatus scheduleNoticeStatus = ENABLED;
+
 	@ManyToOne(fetch = LAZY, cascade = PERSIST)
 	@JoinColumn(name = "gym_id")
 	@Nullable
@@ -148,6 +152,10 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	public void changeTrainerFeedback(AlarmStatus alarmStatus) {
 		this.feedbackAlarmStatus = alarmStatus;
+	}
+
+	public void changeScheduleNotice(AlarmStatus alarmStatus) {
+		this.scheduleNoticeStatus = alarmStatus;
 	}
 
 	public void changeAge(int age){
