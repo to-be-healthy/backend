@@ -16,13 +16,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.schedule.application.TrainerScheduleServiceKt.ONE_DAY;
 import static java.time.LocalTime.NOON;
 
 @Service
@@ -39,18 +40,20 @@ public class ScheduleWaitingService {
 	public String registerScheduleWaiting(Long scheduleId, Long memberId) {
 
 		Member member = memberRepository.findById(memberId)
-				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		Schedule schedule = trainerScheduleRepository.findAvailableWaitingId(scheduleId)
-				.orElseThrow(() -> new CustomException(NOT_SCHEDULE_WAITING));
+		Schedule findSchedule = trainerScheduleRepository.findAvailableWaitingId(scheduleId)
+			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
-		if (!ObjectUtils.isEmpty(schedule.getScheduleWaiting())) {
+		LocalDateTime lessonDateTime = LocalDateTime.of(findSchedule.getLessonDt(), findSchedule.getLessonStartTime());
+
+		if (lessonDateTime.minusDays(ONE_DAY).isAfter(LocalDateTime.now())) {
+			ScheduleWaiting scheduleWaiting = ScheduleWaiting.register(member, findSchedule);
+			scheduleWaitingRepository.save(scheduleWaiting);
+			return getScheduleTimeText(findSchedule.getLessonStartTime());
+		} else {
 			throw new CustomException(NOT_SCHEDULE_WAITING);
 		}
-
-		ScheduleWaiting scheduleWaiting = ScheduleWaiting.register(member, schedule);
-		scheduleWaitingRepository.save(scheduleWaiting);
-		return getScheduleTimeText(schedule.getLessonStartTime());
 	}
 
 	public String cancelScheduleWaiting(Long scheduleId, Long memberId) {

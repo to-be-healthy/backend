@@ -3,7 +3,6 @@ package com.tobe.healthy.course.domain.entity;
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.point.domain.entity.Calculation;
-import com.tobe.healthy.point.domain.entity.PointType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

@@ -1,6 +1,5 @@
 package com.tobe.healthy.workout.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistoryComment;
 import lombok.AllArgsConstructor;

@@ -25,8 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
-import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI;
+import static com.tobe.healthy.config.error.ErrorCode.FILE_REMOVE_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
 import static java.util.UUID.randomUUID;
 
 @Service
@@ -71,8 +72,7 @@ public class FileService {
 					redisService.setValuesWithTimeout(TEMP_FILE_URI.getDescription() + fileUrl, member.getId().toString(), FILE_TEMP_UPLOAD_TIMEOUT); // 30분
 					uploadFile.add(new RegisterFile(fileUrl, ++fileOrder));
 				} catch (IOException e) {
-					e.printStackTrace();
-					log.error("error => {}", e.getMessage());
+					log.error("error => {}", e.getStackTrace()[0]);
 				}
 			}
 		}
@@ -92,7 +92,7 @@ public class FileService {
 		try{
 			amazonS3.deleteObject(bucketName, "workout-history/" + fileName);
 		}catch (Exception e){
-			e.printStackTrace();
+			log.error("error => {}", e.getStackTrace()[0]);
 			throw new CustomException(FILE_REMOVE_ERROR);
 		}
 	}
@@ -110,7 +110,7 @@ public class FileService {
 				String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
 				dietFileRepository.save(DietFiles.create(diet, fileUrl, type));
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.error("error => {}", e.getStackTrace()[0]);
 				throw new CustomException(FILE_UPLOAD_ERROR);
 			}
 		}

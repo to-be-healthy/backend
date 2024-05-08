@@ -4,7 +4,10 @@ import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +38,7 @@ public class Course extends BaseTimeEntity<Course, Long> {
     private int remainLessonCnt;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    private List<CourseHistory> courseHistories = new ArrayList<>();
+    private final List<CourseHistory> courseHistories = new ArrayList<>();
 
     @Builder
     public Course(Member member, Member trainer, int totalLessonCnt, int remainLessonCnt) {

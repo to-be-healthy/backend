@@ -3,36 +3,48 @@ package com.tobe.healthy.schedule.presentation
 import com.tobe.healthy.ApiResultResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.schedule.application.TrainerScheduleService
-import com.tobe.healthy.schedule.domain.dto.`in`.RegisterScheduleCommand
-import com.tobe.healthy.schedule.domain.dto.`in`.RegisterScheduleRequest
-import com.tobe.healthy.schedule.domain.dto.`in`.ScheduleSearchCond
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
+import com.tobe.healthy.schedule.entity.`in`.RegisterDefaultLessonTimeRequest
+import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
+import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
+import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
+import com.tobe.healthy.schedule.entity.out.RegisterDefaultLessonTimeResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
-import lombok.RequiredArgsConstructor
-import lombok.extern.slf4j.Slf4j
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import java.time.format.DateTimeFormatter
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/schedule/v1")
-@Slf4j
 @Tag(name = "03-01.수업 API", description = "수업 일정 API")
 class TrainerScheduleController(
     private val trainerScheduleService: TrainerScheduleService
 ) {
+
+    @Operation(
+        summary = "트레이너가 기본 수업 시간을 설정한다.", description = "트레이너가 기본 수업 시간을 설정한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "일정 등록 성공"),
+            ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
+            ApiResponse(responseCode = "400", description = "이미 등록된 일정이 존재합니다.")
+        ]
+    )
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    @PostMapping("/default-lesson-time")
+    fun registerSchedule(@RequestBody request: RegisterDefaultLessonTimeRequest,
+                         @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterDefaultLessonTimeResponse> {
+        return ApiResultResponse(
+            message = "기본 수업 시간이 설정되었습니다.",
+            data = trainerScheduleService.registerDefaultLessonTime(request, member.memberId)
+        )
+    }
+
     @Operation(
         summary = "트레이너가 일정을 등록한다.", description = "트레이너가 일정을 등록한다.",
         responses = [
@@ -43,7 +55,8 @@ class TrainerScheduleController(
     )
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping
-    fun registerSchedule(@RequestBody request: RegisterScheduleRequest, @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
+    fun registerSchedule(@RequestBody request: RegisterScheduleRequest,
+                         @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "일정 등록에 성공하였습니다.",
             data = trainerScheduleService.registerSchedule(request, member.memberId)
@@ -60,7 +73,8 @@ class TrainerScheduleController(
     )
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping("/individual")
-    fun registerIndividualSchedule(@RequestBody request: RegisterScheduleCommand, @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
+    fun registerIndividualSchedule(@RequestBody request: RegisterScheduleCommand,
+                                   @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "개별 일정 등록에 성공하였습니다.",
             data = trainerScheduleService.registerIndividualSchedule(request, member.memberId)
@@ -75,10 +89,11 @@ class TrainerScheduleController(
     )
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findAllSchedule(@ParameterObject searchCond: ScheduleSearchCond, @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<List<ScheduleCommandResult?>> {
+    fun findAllSchedule(@ParameterObject searchCond: ScheduleSearchCond,
+                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<List<ScheduleCommandResult?>> {
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
-            data = trainerScheduleService.findAllSchedule(searchCond, customMemberDetails.member)
+            data = trainerScheduleService.findAllSchedule(searchCond, customMemberDetails.memberId)
         )
     }
 
@@ -90,11 +105,30 @@ class TrainerScheduleController(
     )
     @DeleteMapping("/trainer/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun cancelScheduleForTrainer(@Parameter(description = "일정 아이디", example = "1") @PathVariable scheduleId: Long, @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    fun cancelScheduleForTrainer(@Parameter(description = "일정 아이디", example = "1") @PathVariable scheduleId: Long,
+                                 @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    ): ApiResultResponse<Boolean> {
+        val lessonStartTime = trainerScheduleService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId)
+        return ApiResultResponse(
+            message = "${lessonStartTime.format(DateTimeFormatter.ofPattern("a HH시 mm분"))} 수업이 취소되었습니다.",
+            data = true
+        )
+    }
+
+    @Operation(
+        summary = "트레이너가 특정 일을 휴무일로 변경한다.", description = "트레이너가 특정 일을 휴무일로 변경한다.", responses = [
+            ApiResponse(responseCode = "200", description = "해당 일을 휴무일로 변경하였습니다."),
+            ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
+        ]
+    )
+    @PostMapping("/trainer/change-closed-day")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    fun cancelScheduleForTrainer(@RequestParam lessonDt: String,
+                                 @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<Boolean> {
         return ApiResultResponse(
-            message = "일정을 취소하였습니다.",
-            data = trainerScheduleService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId)
+            message = "휴무일로 변경되었습니다.",
+            data = trainerScheduleService.updateLessonDtToClosedDay(lessonDt, customMemberDetails.memberId)
         )
     }
 

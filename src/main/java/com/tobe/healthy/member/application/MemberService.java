@@ -48,6 +48,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -99,6 +100,9 @@ public class MemberService {
     private final LessonHistoryRepository lessonHistoryRepository;
     private final DietService dietService;
 
+    private static final Integer EMAIL_AUTH_TIMEOUT = 3 * 60 * 1000;
+    @Value("${aws.s3.bucket-name}")
+    private String bucketName;
 
     public boolean validateUserIdDuplication(String userId) {
         if (userId.length() < 4) {
@@ -123,7 +127,7 @@ public class MemberService {
         });
 
         String authKey = getAuthCode();
-        redisService.setValuesWithTimeout(email, authKey, 3 * 60 * 1000); // 3분
+        redisService.setValuesWithTimeout(email, authKey, EMAIL_AUTH_TIMEOUT); // 3분
 
         // 3. 이메일에 인증번호 전송한다.
         mailService.sendAuthMail(email, authKey);
@@ -196,15 +200,20 @@ public class MemberService {
         Member member = memberRepository.findByUserId(userId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-        return tokenGenerator.exchangeAccessToken(member.getId(), member.getUserId(), member.getMemberType(),
-                refreshToken, member.getGym());
+        return tokenGenerator.exchangeAccessToken(member.getId(),
+                                                  member.getUserId(),
+                                                  member.getMemberType(),
+                                                  refreshToken,
+                                                  member.getGym());
     }
 
     public MemberFindIdCommandResult findUserId(MemberFindIdCommand request) {
         Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        return new MemberFindIdCommandResult(member.getUserId().substring(member.getUserId().length() - 3) + "**",
-                member.getCreatedAt());
+        return new MemberFindIdCommandResult(
+                member.getUserId().substring(member.getUserId().length() - 3) + "**",
+                member.getCreatedAt()
+                );
     }
 
     public String findMemberPW(MemberFindPWCommand request) {
@@ -249,12 +258,12 @@ public class MemberService {
 
             try (InputStream inputStream = uploadFile.getInputStream()) {
                 amazonS3.putObject(
-                        "to-be-healthy-bucket",
+                        bucketName,
                         savedFileName,
                         inputStream,
                         objectMetadata
                 );
-                String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+                String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
                 MemberProfile memberProfile = MemberProfile.create(fileUrl, member);
                 memberProfileRepository.save(memberProfile);
             } catch (IOException e) {
@@ -386,15 +395,15 @@ public class MemberService {
     private MemberProfile getProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
         String savedFileName = "profile/" + createFileUUID();
-        ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
+        ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(
-                    "to-be-healthy-bucket",
+                    bucketName,
                     savedFileName,
                     inputStream,
                     objectMetadata
             );
-            String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
             return MemberProfile.create(fileUrl, member);
         } catch (IOException e) {
             log.error("error => {}", e);
@@ -406,10 +415,14 @@ public class MemberService {
         byte[] image = getProfileImage(profileImage);
         String extension = ".jpg";
         String savedFileName = "profile/" + createFileUUID() + extension;
-        ObjectMetadata objectMetadata = getObjectMetadata(Long.valueOf(image.length), IMAGE_PNG_VALUE);
+        ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
+        return qwe(member, image, savedFileName, objectMetadata);
+    }
+
+    private MemberProfile qwe(Member member, byte[] image, String savedFileName, ObjectMetadata objectMetadata) {
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
-            amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
-            String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+            amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
             return MemberProfile.create(fileUrl, member);
         } catch (IOException e) {
             log.error("error => {}", e);
@@ -464,7 +477,7 @@ public class MemberService {
         try {
             idToken = objectMapper.readValue(payload, Map.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("error => {}", e.getStackTrace()[0]);
         }
         String email = idToken.get("email");
         String name = idToken.get("name");
@@ -513,7 +526,7 @@ public class MemberService {
                             }))
                     .bodyToMono(OAuthInfo.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("error => {}", e.getStackTrace()[0]);
         }
         return responseMono.share().block();
     }
@@ -546,10 +559,9 @@ public class MemberService {
     private String getAuthCode() {
         Random random = new Random();
         StringBuilder buffer = new StringBuilder();
-        int num = 0;
 
         while (buffer.length() < 6) {
-            num = random.nextInt(10);
+            int num = random.nextInt(10);
             buffer.append(num);
         }
 
@@ -602,7 +614,7 @@ public class MemberService {
         try {
             map = objectMapper.readValue(mappedData, HashMap.class);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("error => {}", e.getStackTrace()[0]);
         }
         return map;
     }

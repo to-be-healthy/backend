@@ -12,7 +12,6 @@ import com.tobe.healthy.course.domain.entity.CourseHistoryType;
 import com.tobe.healthy.course.repository.CourseHistoryRepository;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +26,8 @@ import java.util.Optional;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.COURSE_CREATE;
-import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 
 

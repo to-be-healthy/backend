@@ -75,7 +75,7 @@ public class MemberController {
 	})
 	@GetMapping("/{memberId}")
 	public ResponseHandler<MemberInfoResult> getMemberInfo(@Parameter(description = "조회할 회원 아이디", example = "1")
-													@PathVariable("memberId") Long memberId) {
+														   @PathVariable("memberId") Long memberId) {
 		return ResponseHandler.<MemberInfoResult>builder()
 				.data(memberService.getMemberInfo(memberId))
 				.message("회원정보가 조회 되었습니다.")
@@ -260,9 +260,9 @@ public class MemberController {
 	@GetMapping("/{memberId}/course")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ResponseHandler<CourseGetResult> getCourse(@Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId,
-														@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+													  @AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 													  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
-														Pageable pageable) {
+													  Pageable pageable) {
 		return ResponseHandler.<CourseGetResult>builder()
 				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, memberId, searchDate))
 				.message("수강권이 조회되었습니다.")
@@ -290,8 +290,8 @@ public class MemberController {
 	@PutMapping("/{memberId}/memo")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ResponseHandler<Void> updateMemo(@AuthenticationPrincipal CustomMemberDetails trainer,
-											   @PathVariable Long memberId,
-											   @RequestBody MemoCommand command) {
+										    @PathVariable Long memberId,
+										    @RequestBody MemoCommand command) {
 		memberService.updateMemo(trainer.getMemberId(), memberId, command);
 		return ResponseHandler.<Void>builder()
 				.message("메모가 수정되었습니다.")
@@ -309,18 +309,6 @@ public class MemberController {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberService.assignNickname(nickname, studentId))
 				.message("닉네임을 지정하였습니다.")
-				.build();
-	}
-
-	@Operation(summary = "FCM 토큰을 등록한다.", responses = {
-			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
-			@ApiResponse(responseCode = "200", description = "토큰이 등록되었습니다.")
-	})
-	@PostMapping("/fcm-token")
-	public ResponseHandler<String> registerFcmToken(@RequestParam String fcmToken, @AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<String>builder()
-				.data(memberService.registerFcmToken(fcmToken, member.getMemberId()))
-				.message("토큰을 저장하였습니다.")
 				.build();
 	}
 }

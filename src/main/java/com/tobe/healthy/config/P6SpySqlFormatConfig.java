@@ -4,8 +4,6 @@ import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Stack;
-
 import static com.p6spy.engine.logging.Category.STATEMENT;
 import static com.p6spy.engine.spy.P6SpyOptions.getActiveInstance;
 import static java.util.Locale.ROOT;
@@ -16,6 +14,10 @@ import static org.springframework.util.StringUtils.hasText;
 @Configuration
 public class P6SpySqlFormatConfig implements MessageFormattingStrategy {
 
+	private static final String CREATE = "create";
+	private static final String ALTER = "alter";
+	private static final String COMMENT = "comment";
+
 	@PostConstruct
 	public void setLogMessageFormat() {
 		getActiveInstance().setLogMessageFormat(this.getClass().getName());
@@ -23,43 +25,35 @@ public class P6SpySqlFormatConfig implements MessageFormattingStrategy {
 
 	@Override
 	public String formatMessage(int connectionId, String now, long elapsed, String category, String prepared, String sql, String url) {
-		sql = formatSql(category, sql);
+		sql = applySqlFormat(category, sql);
 
-		if (!hasText(sql)) {
-			return "";
-		}
-
-		return String.format("[%s] | %d ms | %s", category, elapsed, sql + createStack(connectionId, elapsed));
+		return hasText(sql) ? buildFormattedMessage(sql, connectionId, elapsed) : "";
 	}
 
-	private String formatSql(String category, String sql) {
-		if (hasText(sql) && STATEMENT.getName().equals(category)) {
-			String trimmedSQL = sql.trim().toLowerCase(ROOT);
-			if (trimmedSQL.startsWith("create") || trimmedSQL.startsWith("alter") || trimmedSQL.startsWith("comment")) {
-				sql = DDL.getFormatter().format(sql);
-			} else {
-				sql = BASIC.getFormatter().format(sql);
-			}
+	private String applySqlFormat(String category, String sql) {
+		if (!hasText(sql) || !STATEMENT.getName().equals(category)) {
 			return sql;
 		}
-		return sql;
+
+		String trimmedSQL = sql.trim().toLowerCase(ROOT);
+		if (trimmedSQL.startsWith(CREATE) || trimmedSQL.startsWith(ALTER) || trimmedSQL.startsWith(COMMENT)) {
+			return DDL.getFormatter().format(sql);
+		} else {
+			return BASIC.getFormatter().format(sql);
+		}
 	}
 
-	// stack 콘솔 표기
-	private String createStack(int connectionId, long elapsed) {
-		Stack<String> callStack = new Stack<>();
-		StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+	private String buildFormattedMessage(String formattedSql, int connectionId, long elapsed) {
+		return String.format("%s%s", formattedSql, formatConnectionInfo(connectionId, elapsed));
+	}
 
-		for (StackTraceElement stackTraceElement : stackTrace) {
-			String trace = stackTraceElement.toString();
-			if (trace.startsWith("octopus.backend")) {
-				callStack.push(trace);
-			}
-		}
+	private String formatConnectionInfo(int connectionId, long elapsed) {
+		return String.format("""
 
-		return new StringBuilder()
-				.append("\n\n\tConnection ID: ").append(connectionId)
-				.append(" | Execution Time: ").append(elapsed).append(" ms\n")
-				.append("\n--------------------------------------\n").toString();
+
+                \tConnection ID: %d | Execution Time: %d ms
+
+                ===========================================================================
+                """, connectionId, elapsed);
 	}
 }

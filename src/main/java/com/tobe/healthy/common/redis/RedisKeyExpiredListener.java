@@ -36,10 +36,10 @@ public class RedisKeyExpiredListener extends KeyExpirationEventMessageListener {
 				String fileName = fileUrl.replaceAll(TEMP_FILE_URI.getDescription() + S3_DOMAIN, "");
 				amazonS3.deleteObject(bucketName, fileName);
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("onMessage error => {}", e.getMessage());
 				throw new CustomException(FILE_REMOVE_ERROR);
 			}
 		}
-		log.info("onMessage pattern => {} | {}", new String(pattern), message.toString());
+		log.info("onMessage pattern => {} | {}", new String(pattern), message);
 	}
 }

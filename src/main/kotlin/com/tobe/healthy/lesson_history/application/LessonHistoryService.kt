@@ -6,17 +6,8 @@ import com.tobe.healthy.common.CustomPagingResponse
 import com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI
 import com.tobe.healthy.common.redis.RedisService
 import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.EXCEED_MAXIMUM_NUMBER_OF_FILES
-import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_COMMENT_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND
-import com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_FOUND
-import com.tobe.healthy.lesson_history.domain.dto.`in`.CommentRegisterCommand
-import com.tobe.healthy.lesson_history.domain.dto.`in`.LessonHistoryCommand
-import com.tobe.healthy.lesson_history.domain.dto.`in`.LessonHistoryCommentCommand
-import com.tobe.healthy.lesson_history.domain.dto.`in`.RegisterLessonHistoryCommand
-import com.tobe.healthy.lesson_history.domain.dto.`in`.SearchCondRequest
+import com.tobe.healthy.config.error.ErrorCode.*
+import com.tobe.healthy.lesson_history.domain.dto.`in`.*
 import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryDetailResponse
 import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryResponse
 import com.tobe.healthy.lesson_history.domain.dto.out.UploadFileResponse
@@ -39,7 +30,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.lang.System.currentTimeMillis
-import java.util.UUID
+import java.util.*
 
 @Service
 @Transactional
@@ -56,10 +47,7 @@ class LessonHistoryService(
 ) {
 
     fun registerLessonHistory(request: RegisterLessonHistoryCommand, trainerId: Long): Boolean {
-        val (findMember, findTrainer, findSchedule) = checkLessonHistoryRequirements(
-            request,
-            trainerId,
-        )
+        val (findMember, findTrainer, findSchedule) = checkLessonHistoryRequirements(request, trainerId)
 
         val lessonHistory = registerLessonHistory(request, findMember, findTrainer, findSchedule)
 
@@ -96,21 +84,23 @@ class LessonHistoryService(
     fun updateLessonHistory(lessonHistoryId: Long, request: LessonHistoryCommand): Boolean {
         val findLessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
             ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+
         findLessonHistory.updateLessonHistory(request.title!!, request.content!!)
+
         registerFile(
             uploadFiles = request.uploadFileResponse,
             findMember = findLessonHistory.trainer,
             lessonHistory = findLessonHistory,
             lessonHistoryComment = null,
         )
+
         return true
     }
 
     fun deleteLessonHistory(lessonHistoryId: Long): Boolean {
-        val findLessonHistory =
-            lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(
-                LESSON_HISTORY_NOT_FOUND,
-            )
+        val findLessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
+            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+
         lessonHistoryRepository.deleteById(findLessonHistory.id)
         return true
     }
@@ -120,12 +110,12 @@ class LessonHistoryService(
         request: CommentRegisterCommand,
         memberId: Long,
     ): Boolean {
-        val findMember =
-            memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
-        val lessonHistory =
-            lessonHistoryRepository.findByIdOrNull(lessonHistoryId) ?: throw CustomException(
-                LESSON_HISTORY_NOT_FOUND,
-            )
+        val findMember = memberRepository.findByIdOrNull(memberId)
+            ?: throw CustomException(MEMBER_NOT_FOUND)
+
+        val lessonHistory = lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
+            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+
         val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id)
         val lessonHistoryComment = registerComment(order, request, findMember, lessonHistory)
         registerFile(request.uploadFileResponse, findMember, lessonHistory, lessonHistoryComment)
@@ -146,7 +136,7 @@ class LessonHistoryService(
 
         val order = lessonHistoryCommentRepository.findTopComment(
             lessonHistory.id,
-            lessonHistoryCommentId!!
+            lessonHistoryCommentId
         )
 
         val parentComment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
@@ -171,15 +161,19 @@ class LessonHistoryService(
     ): Boolean {
         val comment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
             ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
-        comment.updateLessonHistoryComment(request.comment!!)
+
+        comment.updateLessonHistoryComment(request.comment)
+
         return true
     }
 
     fun deleteLessonHistoryComment(lessonHistoryCommentId: Long): Boolean {
-        val findLessonHistoryComment =
-            lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
+
+        val findLessonHistoryComment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
                 ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
+
         findLessonHistoryComment.deleteComment()
+
         return true
     }
 
@@ -189,6 +183,7 @@ class LessonHistoryService(
         lessonHistory: LessonHistory
     ) {
         uploadFiles?.let {
+
             checkMaximumFileSize(it.size)
 
             for (uploadFile in it) {
@@ -198,7 +193,9 @@ class LessonHistoryService(
                     fileUrl = uploadFile.fileUrl,
                     fileOrder = uploadFile.fileOrder,
                 )
+
                 lessonHistoryFilesRepository.save(file)
+
                 redisService.deleteValues(TEMP_FILE_URI.description + uploadFile.fileUrl)
             }
         }
@@ -208,16 +205,16 @@ class LessonHistoryService(
         request: RegisterLessonHistoryCommand,
         trainerId: Long
     ): Triple<Member, Member, Schedule> {
-        val findMember =
-            memberRepository.findByIdOrNull(request.studentId) ?: throw CustomException(
-                MEMBER_NOT_FOUND,
-            )
-        val findTrainer =
-            memberRepository.findByIdOrNull(trainerId) ?: throw CustomException(TRAINER_NOT_FOUND)
-        val findSchedule =
-            trainerScheduleRepository.findByIdOrNull(request.scheduleId) ?: throw CustomException(
-                SCHEDULE_NOT_FOUND,
-            )
+
+        val findMember = memberRepository.findByIdOrNull(request.studentId)
+            ?: throw CustomException(MEMBER_NOT_FOUND)
+
+        val findTrainer = memberRepository.findByIdOrNull(trainerId)
+            ?: throw CustomException(TRAINER_NOT_FOUND)
+
+        val findSchedule = trainerScheduleRepository.findByIdOrNull(request.scheduleId)
+            ?: throw CustomException(SCHEDULE_NOT_FOUND)
+
         return Triple(findMember, findTrainer, findSchedule)
     }
 
@@ -302,8 +299,11 @@ class LessonHistoryService(
         request: SearchCondRequest,
         pageable: Pageable
     ): CustomPagingResponse<LessonHistoryResponse> {
-        val findMember = memberRepository.findByIdOrNull(studentId) ?: throw CustomException(MEMBER_NOT_FOUND)
+        val findMember = memberRepository.findByIdOrNull(studentId)
+            ?: throw CustomException(MEMBER_NOT_FOUND)
+
         val results = lessonHistoryRepository.findAllLessonHistoryByMemberId(findMember.id, request, pageable)
+
         return CustomPagingResponse(
             findMember.name,
             results.content,
@@ -321,7 +321,7 @@ class LessonHistoryService(
     ): List<UploadFileResponse> {
         val uploadFileResponse: MutableList<UploadFileResponse> = mutableListOf()
         var fileOrder = 1
-        uploadFiles?.let {
+        uploadFiles.let {
             checkMaximumFileSize(it.size)
 
             for (uploadFile in it) {

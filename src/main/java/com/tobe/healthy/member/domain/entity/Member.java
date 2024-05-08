@@ -74,6 +74,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	@ManyToOne(fetch = LAZY, cascade = PERSIST)
 	@JoinColumn(name = "gym_id")
+	@Nullable
 	private Gym gym;
 
 	@OneToMany(fetch = LAZY, mappedBy = "trainer")
@@ -90,8 +91,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private SocialType socialType = NONE;
 
 	private String nickname;
-
-	private String fcmToken;
 
 	@ColumnDefault("false")
 	private boolean delYn = false;
@@ -117,21 +116,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 				.memberType(memberType)
 				.socialType(socialType)
 				.build();
-	}
-
-	@Builder
-	public Member(String userId, String email, String password, String name, MemberProfile memberProfile, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, Gym gym, SocialType socialType, boolean delYn) {
-		this.userId = userId;
-		this.email = email;
-		this.password = password;
-		this.name = name;
-		this.memberProfile = memberProfile;
-		this.memberType = memberType;
-		this.pushAlarmStatus = pushAlarmStatus;
-		this.feedbackAlarmStatus = feedbackAlarmStatus;
-		this.gym = gym;
-		this.socialType = socialType;
-		this.delYn = delYn;
 	}
 
 	public void registerProfile(MemberProfile memberProfileId) {
@@ -182,11 +166,27 @@ public class Member extends BaseTimeEntity<Member, Long> {
 		this.nickname = nickname;
 	}
 
-	public void registerFcmToken(String fcmToken) {
-		this.fcmToken = fcmToken;
-	}
-
 	public void setMemberProfile(MemberProfile profile) {
 		this.memberProfile = profile;
+	}
+
+	@Builder
+	public Member(Long id, String userId, String email, String password, String name, int age, int height, int weight, @Nullable MemberProfile memberProfile, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, @Nullable Gym gym, SocialType socialType, String nickname, boolean delYn) {
+		this.id = id;
+		this.userId = userId;
+		this.email = email;
+		this.password = password;
+		this.name = name;
+		this.age = age;
+		this.height = height;
+		this.weight = weight;
+		this.memberProfile = memberProfile;
+		this.memberType = memberType;
+		this.pushAlarmStatus = pushAlarmStatus;
+		this.feedbackAlarmStatus = feedbackAlarmStatus;
+		this.gym = gym;
+		this.socialType = socialType;
+		this.nickname = nickname;
+		this.delYn = delYn;
 	}
 }

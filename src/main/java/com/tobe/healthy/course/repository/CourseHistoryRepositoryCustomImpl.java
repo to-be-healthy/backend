@@ -17,7 +17,6 @@ import java.util.List;
 
 import static com.tobe.healthy.course.domain.entity.QCourse.course;
 import static com.tobe.healthy.course.domain.entity.QCourseHistory.courseHistory;
-import static com.tobe.healthy.point.domain.entity.QPoint.point1;
 
 @Repository
 @RequiredArgsConstructor
