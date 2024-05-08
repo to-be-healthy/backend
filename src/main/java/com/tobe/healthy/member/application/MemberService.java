@@ -681,4 +681,11 @@ public class MemberService {
     private String getNowMonth() {
         return LocalDate.now().toString().substring(0, 7);
     }
+
+    public Boolean changeScheduleNotice(AlarmStatus alarmStatus, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        member.changeScheduleNotice(alarmStatus);
+        return true;
+    }
 }
