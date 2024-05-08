@@ -10,8 +10,6 @@ import com.tobe.healthy.diet.domain.entity.DietFiles;
 import com.tobe.healthy.diet.domain.entity.DietType;
 import com.tobe.healthy.diet.repository.DietFileRepository;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.workout.repository.WorkoutFileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,15 +34,9 @@ import static org.springframework.util.StringUtils.cleanPath;
 @RequiredArgsConstructor
 @Slf4j
 public class FileService {
-
-	private final WorkoutFileRepository workoutFileRepository;
-	private final MemberRepository memberRepository;
 	private final DietFileRepository dietFileRepository;
 	private final AmazonS3 amazonS3;
 	private final RedisService redisService;
-
-	@Value("${file.upload.location}")
-	private String uploadDir;
 
 	@Value("${aws.s3.bucket-name}")
 	private String bucketName;

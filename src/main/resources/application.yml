@@ -58,10 +58,6 @@ server:
   tomcat:
     uri-encoding: UTF-8
 
-file:
-  upload:
-    location: ${FILE_UPLOAD_LOCATION}
-
 oauth:
   kakao:
     grant-type: ${OAUTH_KAKAO_GRANT_TYPE}
