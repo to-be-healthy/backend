@@ -133,7 +133,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .on(member.id.eq(schedule.applicant.id)
                         , scheduleDelYnEq(false)
                         , scheduleReservationStatusEq(COMPLETED)
-                        , lessonDateTimeAfterToday())
+                        , lessonDateTimeAfterNow())
                 .where(memberIdEq(memberId), memberDelYnEq(false))
                 .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
                 .limit(1)
@@ -162,7 +162,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .fetch();
     }
 
-    private Predicate lessonDateTimeAfterToday() {
+    private Predicate lessonDateTimeAfterNow() {
         return schedule.lessonDt.after(LocalDate.now())
                 .or(schedule.lessonDt.goe(LocalDate.now()).and(schedule.lessonStartTime.after(LocalTime.now())));
     }

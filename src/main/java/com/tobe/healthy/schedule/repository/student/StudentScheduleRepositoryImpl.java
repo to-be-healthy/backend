@@ -1,5 +1,6 @@
 package com.tobe.healthy.schedule.repository.student;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
@@ -80,11 +82,16 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.from(schedule)
 				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.where(scheduleApplicantIdEq(memberId), schedule.lessonDt.goe(LocalDate.now()))
+				.where(scheduleApplicantIdEq(memberId), lessonDateTimeAfterNow())
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.limit(1)
 				.fetch();
-		return schedules==null ? null : schedules.stream().map(MyReservation::from).collect(toList()).get(0);
+		return schedules.size()==0 ? null : schedules.stream().map(MyReservation::from).collect(toList()).get(0);
+	}
+
+	private Predicate lessonDateTimeAfterNow() {
+		return schedule.lessonDt.after(LocalDate.now())
+				.or(schedule.lessonDt.goe(LocalDate.now()).and(schedule.lessonStartTime.after(LocalTime.now())));
 	}
 
 	private BooleanExpression scheduleDelYnFalse() {

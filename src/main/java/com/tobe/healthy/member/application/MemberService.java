@@ -648,6 +648,10 @@ public class MemberService {
     }
 
     public StudentHomeResult getStudentHome(Long memberId) {
+        //트레이너 매핑 여부
+        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId).orElse(null);
+        boolean isMapped = mapping != null;
+
         //수강권
         Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
         CourseDto usingCourse = optCourse.map(CourseDto::from).orElse(null);
@@ -659,8 +663,7 @@ public class MemberService {
 
         //랭킹
         RankDto rank = new RankDto();
-        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId).orElse(null);
-        if(mapping != null){
+        if(isMapped){
             long totalMemberCnt = mappingRepository.countByTrainerId(mapping.getTrainer().getId());
             rank.setRanking(mapping.getRanking());
             rank.setTotalMemberCnt((int) totalMemberCnt);
@@ -675,7 +678,7 @@ public class MemberService {
         //식단
         DietDto diet = dietService.getDietCreatedAtToday(memberId);
 
-        return StudentHomeResult.create(usingCourse, point, rank, myReservation, lessonHistory, diet);
+        return StudentHomeResult.create(isMapped, usingCourse, point, rank, myReservation, lessonHistory, diet);
     }
 
     private String getNowMonth() {
