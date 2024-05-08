@@ -5,7 +5,6 @@ import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.Tokens;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static io.jsonwebtoken.SignatureAlgorithm.HS256;
@@ -21,7 +22,6 @@ import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 public class JwtTokenGenerator {
     private final Long accessTokenValidSeconds;
     private final Long refreshTokenValidSeconds;
-    private final String jwtSecret;
     private final Key key;
     private final RedisService redisService;
 
@@ -31,7 +31,6 @@ public class JwtTokenGenerator {
                              RedisService redisService) {
         this.accessTokenValidSeconds = accessTokenValidSeconds;
         this.refreshTokenValidSeconds = refreshTokenValidSeconds;
-        this.jwtSecret = jwtSecret;
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         this.redisService = redisService;
     }
@@ -63,13 +62,13 @@ public class JwtTokenGenerator {
     }
 
     private String createAccessToken(Long memberId, String userId, String memberType, Date expiry) {
-        Claims claims = Jwts.claims();
+        Map<String, Object> claims = new HashMap<>();
         claims.put("memberId", memberId);
         claims.put("userId", userId);
         claims.put("memberType", memberType);
         claims.put("uuid", UUID.randomUUID().toString());
         return Jwts.builder()
-                .setClaims(claims)
+                .claims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(expiry)
                 .signWith(key, HS256)
@@ -77,7 +76,7 @@ public class JwtTokenGenerator {
     }
 
     private String createRefreshToken(Long memberId, String userId, Date expiry, String memberType) {
-        Claims claims = Jwts.claims();
+        Map<String, Object> claims = new HashMap<>();
         claims.put("memberId", memberId);
         claims.put("userId", userId);
         claims.put("memberType", memberType);

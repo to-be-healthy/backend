@@ -9,14 +9,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
-import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "trainer_member_mapping")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class TrainerMemberMapping extends BaseTimeEntity {
+public class TrainerMemberMapping extends BaseTimeEntity<TrainerMemberMapping, Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +35,6 @@ public class TrainerMemberMapping extends BaseTimeEntity {
 
     private String memo;
 
-
     public static TrainerMemberMapping create(Member trainer, Member member) {
         return TrainerMemberMapping.builder()
                 .trainer(trainer)
@@ -51,10 +49,11 @@ public class TrainerMemberMapping extends BaseTimeEntity {
         this.memo = memo;
     }
 
-    public void changeRanking(int ranking){
+    public void changeRanking(int ranking) {
         this.ranking = ranking;
     }
-    public void changeMemo(String memo){
+
+    public void changeMemo(String memo) {
         this.memo = memo;
     }
 }

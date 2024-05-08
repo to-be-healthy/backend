@@ -19,5 +19,4 @@ public class ProfileDto {
                 .fileUrl(memberProfile.getFileUrl())
                 .build();
     }
-
 }

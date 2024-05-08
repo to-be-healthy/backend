@@ -14,25 +14,30 @@ class LessonHistoryCommentRepositoryImpl(
         val result = queryFactory
             .select(lessonHistoryComment.order.max().add(1))
             .from(lessonHistoryComment)
-            .where(lessonHistoryIdEq(lessonHistoryId), parentCommentIdIsNull())
+            .where(
+                lessonHistoryIdEq(lessonHistoryId),
+                parentCommentIdIsNull()
+            )
             .fetchOne() ?: 1
-        return result;
+        return result
     }
 
-    override fun findTopComment(lessonHistoryId: Long, lessonHistoryCommentParentId: Long): Int {
-        val result = queryFactory
+    override fun findTopComment(lessonHistoryId: Long, lessonHistoryCommentId: Long): Int {
+        return queryFactory
             .select(lessonHistoryComment.order.max().add(1))
             .from(lessonHistoryComment)
-            .where(lessonHistoryIdEq(lessonHistoryId), parentCommentIdEq(lessonHistoryCommentParentId))
+            .where(
+                lessonHistoryIdEq(lessonHistoryId),
+                parentCommentIdEq(lessonHistoryCommentId)
+            )
             .fetchOne() ?: 1
-        return result;
     }
 
     private fun parentCommentIdEq(lessonHistoryCommentParentId: Long): BooleanExpression? =
-        lessonHistoryComment.parentId.id.eq(lessonHistoryCommentParentId)
+        lessonHistoryComment.parent.id.eq(lessonHistoryCommentParentId)
 
     private fun parentCommentIdIsNull(): BooleanExpression =
-        lessonHistoryComment.parentId.isNull
+        lessonHistoryComment.parent.isNull
 
     private fun lessonHistoryIdEq(lessonHistoryId: Long): BooleanExpression =
         lessonHistoryComment.lessonHistory.id.eq(lessonHistoryId)

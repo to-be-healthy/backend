@@ -31,16 +31,16 @@ public class CourseAspect {
         this.courseServiceObjectProvider = courseServiceObjectProvider;
     }
 
-    @Pointcut("execution(* com.tobe.healthy.schedule.application.ScheduleService.cancelMemberSchedule(..))")
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleService.cancelMemberSchedule(..))")
     private void cancelMemberSchedule() {}
 
-    @Pointcut("execution(* com.tobe.healthy.schedule.application.ScheduleService.reserveSchedule(..))")
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleService.reserveSchedule(..))")
     private void reserveSchedule() {}
 
     @AfterReturning(value = "cancelMemberSchedule()", returning = "returnValue")
     public void updateCourseWhenCancelSchedule(JoinPoint joinPoint, Object returnValue) {
         Long studentId = ((ScheduleIdInfo) returnValue).getStudentId();
-        Long standbyStudentId = ((ScheduleIdInfo) returnValue).getStandbyStudentId();
+        Long waitingStudentId = ((ScheduleIdInfo) returnValue).getWaitingStudentId();
         Long trainerId = ((ScheduleIdInfo) returnValue).getTrainerId();
         CourseUpdateCommand command;
 
@@ -50,8 +50,8 @@ public class CourseAspect {
         courseService.updateCourse(trainerId, null, command);
 
         //수업 대기자 수강권 -1
-        if(!ObjectUtils.isEmpty(standbyStudentId)){
-            command = CourseUpdateCommand.create(standbyStudentId, MINUS, RESERVATION, ONE_LESSON);
+        if(!ObjectUtils.isEmpty(waitingStudentId)){
+            command = CourseUpdateCommand.create(waitingStudentId, MINUS, RESERVATION, ONE_LESSON);
             courseService.updateCourse(trainerId, null, command);
         }
     }

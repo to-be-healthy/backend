@@ -62,7 +62,7 @@ public class MailService {
 			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
 			mailSender.send(mimeMessage);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("error => {}", e.getStackTrace()[0]);
 			throw new CustomException(MAIL_SEND_ERROR);
 		}
 	}

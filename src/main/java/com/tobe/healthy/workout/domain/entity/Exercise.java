@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import static jakarta.persistence.EnumType.STRING;
-import lombok.Builder;
 
 @Entity
 @Table(name = "exercise")

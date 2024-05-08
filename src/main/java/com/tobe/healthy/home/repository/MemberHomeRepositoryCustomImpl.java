@@ -19,8 +19,8 @@ import java.util.Set;
 public class MemberHomeRepositoryCustomImpl implements MemberHomeRepositoryCustom{
 
     private final JPAQueryFactory queryFactory;
-    private QApplicationForm qAppliform = QApplicationForm.applicationForm;
-    private QWorkoutHistory qWorkoutHistory = QWorkoutHistory.workoutHistory;
+    private final QApplicationForm qAppliform = QApplicationForm.applicationForm;
+    private final QWorkoutHistory qWorkoutHistory = QWorkoutHistory.workoutHistory;
 
     @Override
     public long getAttendanceOfMonth(long memberId, LocalDate startDay, LocalDate endDay) {

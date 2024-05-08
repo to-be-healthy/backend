@@ -14,7 +14,6 @@ import com.tobe.healthy.lesson_history.domain.entity.LessonHistory
 import com.tobe.healthy.lesson_history.domain.entity.QLessonHistory.lessonHistory
 import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
-import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository
 import io.micrometer.common.util.StringUtils
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Repository
 @Repository
 class LessonHistoryRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
-    private val trainerMemberMappingRepository: TrainerMemberMappingRepository
 ) : LessonHistoryRepositoryCustom {
 
     override fun findAllLessonHistory(request: SearchCondRequest, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryResponse> {
@@ -39,7 +37,7 @@ class LessonHistoryRepositoryImpl(
             .limit(pageable.pageSize.toLong())
             .fetch()
 
-        val contents = entities.map { e -> LessonHistoryResponse.from(e) }.toMutableList()
+        val contents = entities.map { LessonHistoryResponse.from(it) }.toMutableList()
 
         val totalCount = queryFactory
             .select(lessonHistory.count())
@@ -65,7 +63,8 @@ class LessonHistoryRepositoryImpl(
 
         entity?.let {
             updateFeedbackCheckStatus(entity, memberId)
-        }
+        } ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+
         return LessonHistoryDetailResponse.detailFrom(entity)
     }
 
@@ -104,11 +103,10 @@ class LessonHistoryRepositoryImpl(
     }
 
     private fun validateMemberType(memberId: Long, memberType: MemberType): BooleanExpression {
-        if (memberType == TRAINER) {
-            return lessonHistory.trainer.id.eq(memberId)
+        return if (memberType == TRAINER) {
+            lessonHistory.trainer.id.eq(memberId)
         } else {
-            val result = trainerMemberMappingRepository.findByMemberId(memberId).orElseThrow { throw CustomException(LESSON_HISTORY_NOT_FOUND) }
-            return lessonHistory.trainer.id.eq(result.trainer.id)
+            lessonHistory.student.id.eq(memberId)
         }
     }
 

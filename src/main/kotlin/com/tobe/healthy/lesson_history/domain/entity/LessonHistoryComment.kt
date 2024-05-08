@@ -1,20 +1,14 @@
 package com.tobe.healthy.lesson_history.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
-import com.tobe.healthy.file.AwsS3File
 import com.tobe.healthy.member.domain.entity.Member
+import jakarta.persistence.*
 import jakarta.persistence.CascadeType.ALL
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
 import jakarta.persistence.FetchType.LAZY
-import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType.IDENTITY
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.DynamicUpdate
+import kotlin.jvm.Transient
 
 @Entity
 @DynamicUpdate
@@ -22,7 +16,7 @@ class LessonHistoryComment(
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "parent_id")
-    val parentId: LessonHistoryComment? = null,
+    val parent: LessonHistoryComment? = null,
 
     val order: Int,
 
@@ -37,7 +31,7 @@ class LessonHistoryComment(
     val lessonHistory: LessonHistory,
 
     @OneToMany(fetch = LAZY, mappedBy = "lessonHistoryComment", cascade = [ALL])
-    var files: MutableList<AwsS3File> = mutableListOf(),
+    var files: MutableList<LessonHistoryFiles> = mutableListOf(),
 
     @Id
     @GeneratedValue(strategy = IDENTITY)

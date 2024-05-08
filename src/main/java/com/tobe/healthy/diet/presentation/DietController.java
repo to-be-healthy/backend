@@ -6,8 +6,6 @@ import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
 import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
-import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

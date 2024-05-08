@@ -5,7 +5,6 @@ import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import lombok.Builder;
 import lombok.Data;
 
-
 @Data
 @Builder
 public class TrainerMemberMappingDto {
@@ -21,5 +20,4 @@ public class TrainerMemberMappingDto {
                 .member(MemberDto.from(mapping.getMember()))
                 .build();
     }
-
 }

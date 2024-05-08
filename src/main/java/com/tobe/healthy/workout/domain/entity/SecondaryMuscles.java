@@ -3,8 +3,6 @@ package com.tobe.healthy.workout.domain.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import static jakarta.persistence.EnumType.STRING;
-
 @Entity
 @Table(name = "secondary_muscles")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

@@ -1,5 +1,6 @@
 package com.tobe.healthy.workout.domain.dto.in;
 
+import com.tobe.healthy.file.RegisterFile;
 import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
@@ -7,7 +8,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,6 @@ public class HistoryAddCommand {
     private List<CompletedExerciseDto> completedExercises = new ArrayList<>();
 
     @NotEmpty(message = "사진을 추가해 주세요.")
-    private List<MultipartFile> files = new ArrayList<>();
+    private List<RegisterFile> files = new ArrayList<>();
 
 }

@@ -2,7 +2,7 @@ package com.tobe.healthy.config
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.regions.Regions
+import com.amazonaws.regions.Regions.AP_NORTHEAST_2
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import org.springframework.beans.factory.annotation.Value
@@ -22,7 +22,7 @@ class S3Config(
             .withCredentials(
                 AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey))
             )
-            .withRegion(Regions.AP_NORTHEAST_2)
+            .withRegion(AP_NORTHEAST_2)
             .build()
     }
 }

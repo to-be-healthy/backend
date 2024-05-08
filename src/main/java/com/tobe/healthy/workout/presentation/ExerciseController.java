@@ -1,20 +1,10 @@
 package com.tobe.healthy.workout.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
-import com.tobe.healthy.member.application.MemberService;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
-import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.trainer.application.TrainerService;
-import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.workout.application.ExerciseService;
-import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.ExerciseDto;
 import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
 import com.tobe.healthy.workout.domain.entity.PrimaryMuscle;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,7 +12,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 

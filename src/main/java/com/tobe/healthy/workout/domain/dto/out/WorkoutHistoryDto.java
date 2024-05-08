@@ -44,8 +44,8 @@ public class WorkoutHistoryDto {
     public static WorkoutHistoryDto create(HistoryAddCommand command, MemberDto memberDto) {
         WorkoutHistoryDtoBuilder builder = WorkoutHistoryDto.builder()
                 .content(command.getContent())
-                .member(memberDto)
-                .multipartFiles(command.getFiles());
+                .member(memberDto);
+//                .multipartFiles(command.getFiles());
                 return builder.build();
     }
 

@@ -1,6 +1,5 @@
 package com.tobe.healthy.course.domain.dto;
 
-import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.domain.entity.CourseHistory;
 import com.tobe.healthy.course.domain.entity.CourseHistoryType;
 import com.tobe.healthy.point.domain.entity.Calculation;

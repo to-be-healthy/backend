@@ -2,15 +2,10 @@ package com.tobe.healthy.lesson_history.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
 import com.tobe.healthy.member.domain.entity.Member
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
+import jakarta.persistence.*
+import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.FetchType.LAZY
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.GenerationType.IDENTITY
 
 @Entity
 class LessonHistoryFiles(
@@ -26,12 +21,12 @@ class LessonHistoryFiles(
     @JoinColumn(name = "lesson_history_id")
     val lessonHistory: LessonHistory? = null,
 
-    @ManyToOne(fetch = LAZY, cascade = [CascadeType.ALL])
+    @ManyToOne(fetch = LAZY, cascade = [ALL])
     @JoinColumn(name = "lesson_history_comment_id")
     val lessonHistoryComment: LessonHistoryComment? = null,
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     @Column(name = "lesson_history_files_id")
     val id: Long = 0
 ) : BaseTimeEntity<LessonHistoryFiles, Long>() {

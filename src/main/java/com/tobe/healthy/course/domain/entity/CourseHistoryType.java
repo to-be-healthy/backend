@@ -1,12 +1,10 @@
 package com.tobe.healthy.course.domain.entity;
 
 import com.tobe.healthy.common.EnumGroup;
-import com.tobe.healthy.common.EnumMapperType;
 import com.tobe.healthy.common.EnumMapperTypeExt;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
 
 import java.util.List;
 

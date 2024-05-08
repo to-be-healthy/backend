@@ -5,9 +5,7 @@ import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.SocialType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
@@ -33,13 +31,4 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 	Optional<Member> findById(Long memberId);
 
 	Optional<Member> findByIdAndMemberTypeAndDelYnFalse(Long memberId, MemberType memberType);
-
-	@Query("select m from Member m where m.gym.id = :gymId and m.memberType = 'TRAINER' and m.delYn = false order by m.id desc")
-	List<Member> findAllTrainerByGym(@Param("gymId") Long gymId);
-
-	@Query("select m from Member m where m.id in(:members) and m.memberType = 'STUDENT' and m.delYn = false")
-	List<Member> findAll(Long[] members);
-
-	@Query("select m from Member m where m.id in(:members) and m.memberType = 'STUDENT' and m.delYn = false")
-	List<Member> findAll(List<Long> members);
 }
