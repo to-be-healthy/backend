@@ -39,6 +39,5 @@ out/
 .vscode/
 
 ## 추가
-upload/
 resources/firebase-adminsdk.json
 config/firebase-adminsdk.json

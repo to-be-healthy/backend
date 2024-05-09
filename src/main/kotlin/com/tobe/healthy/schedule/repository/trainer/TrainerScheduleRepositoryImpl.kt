@@ -4,7 +4,6 @@ import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.member.domain.entity.QMember
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
 import com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
@@ -12,6 +11,7 @@ import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
+import com.tobe.healthy.schedule.entity.out.LessonResponse
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
 import java.time.LocalDate
@@ -26,7 +26,7 @@ class TrainerScheduleRepositoryImpl(
     override fun findAllSchedule(
         searchCond: ScheduleSearchCond,
         trainerId: Long
-    ): List<ScheduleCommandResult> {
+    ):  LessonResponse? {
         val results = queryFactory
             .select(schedule)
             .from(schedule)
@@ -43,7 +43,7 @@ class TrainerScheduleRepositoryImpl(
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
 
-        return results.map { ScheduleCommandResult.from(it) }
+        return LessonResponse.from(results)
     }
 
     override fun findAvailableRegisterSchedule(request: RegisterScheduleCommand, trainerId: Long): Schedule? {

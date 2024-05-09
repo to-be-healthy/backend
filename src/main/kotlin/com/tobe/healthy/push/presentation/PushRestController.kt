@@ -1,6 +1,7 @@
 package com.tobe.healthy.push.presentation
 
 import com.tobe.healthy.ApiResultResponse
+import com.tobe.healthy.common.RedisService
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.push.application.FirebaseCloudMessageService
 import com.tobe.healthy.push.domain.NotificationRequest
@@ -13,11 +14,14 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/push")
 class PushRestController(
-    private val firebaseCloudMessageService: FirebaseCloudMessageService
+    private val firebaseCloudMessageService: FirebaseCloudMessageService,
+    private val redisService: RedisService
 ) {
+
     @PostMapping("/register")
     fun registerFcmToken(@RequestBody request: RegisterTokenRequest,
                          @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterTokenResponse> {
+        redisService.setValuesWithTimeout("123", "123", 60000)
         return ApiResultResponse(
             message = "토큰을 저장하였습니다.",
             data = firebaseCloudMessageService.registerFcmToken(request, member.memberId)
@@ -33,7 +37,8 @@ class PushRestController(
     }
 
     @PostMapping("/{memberId}")
-    fun sendPushAlarm(@PathVariable memberId: Long, @RequestBody request: NotificationRequest): ApiResultResponse<NotificationResponse> {
+    fun sendPushAlarm(@PathVariable memberId: Long,
+                      @RequestBody request: NotificationRequest): ApiResultResponse<NotificationResponse> {
         return ApiResultResponse(
             message = "푸시 전송에 성공하였습니다.",
             data = firebaseCloudMessageService.sendPushAlarm(memberId, request)
