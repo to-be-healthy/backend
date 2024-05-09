@@ -21,7 +21,7 @@ public class HealthyApplication {
     }
 
     @PostConstruct
-    void setTimeZone() {
+    public void setTimeZone() {
         TimeZone.setDefault(getTimeZone("Asia/Seoul"));
     }
 }
