@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,7 +55,7 @@ public class StudentScheduleService {
 		List<ScheduleCommandResult> morning = schedule.stream()
 				.filter(s -> NOON.isAfter(s.getLessonStartTime()))
 				.peek(s -> {
-					if(isExistsWaitingAndLessonDtEqToday(s) || isBeforeStartTimeThenNow(s)){
+					if(isExistsWaitingAndLessonDtEqToday(s) || isBeforeLessonDateTimeThenNow(s)){
 						s.setReservationStatus(SOLD_OUT);
 					}
 				})
@@ -64,7 +64,7 @@ public class StudentScheduleService {
 		List<ScheduleCommandResult> afternoon = schedule.stream()
 				.filter(s -> NOON.isBefore(s.getLessonStartTime()))
 				.peek(s -> {
-					if(isExistsWaitingAndLessonDtEqToday(s) || isBeforeStartTimeThenNow(s)){
+					if(isExistsWaitingAndLessonDtEqToday(s) || isBeforeLessonDateTimeThenNow(s)){
 						s.setReservationStatus(SOLD_OUT);
 					}
 				})
@@ -73,8 +73,9 @@ public class StudentScheduleService {
 		return ScheduleCommandResponse.create(morning, afternoon);
 	}
 
-	private boolean isBeforeStartTimeThenNow(ScheduleCommandResult schedule){
-		return schedule.getLessonStartTime().isBefore(LocalTime.now());
+	private boolean isBeforeLessonDateTimeThenNow(ScheduleCommandResult schedule){
+		LocalDateTime lessonDateTime = LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime());
+		return lessonDateTime.isBefore(LocalDateTime.now());
 	}
 
 	private boolean isExistsWaitingAndLessonDtEqToday(ScheduleCommandResult schedule){
