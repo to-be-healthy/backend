@@ -3,7 +3,6 @@ package com.tobe.healthy.schedule.application
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.member.repository.MemberRepository
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.*
 import com.tobe.healthy.schedule.domain.entity.Schedule
@@ -13,6 +12,7 @@ import com.tobe.healthy.schedule.entity.`in`.RegisterDefaultLessonTimeRequest
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
 import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
+import com.tobe.healthy.schedule.entity.out.LessonResponse
 import com.tobe.healthy.schedule.entity.out.RegisterDefaultLessonTimeResponse
 import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository
 import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository
@@ -98,7 +98,7 @@ class TrainerScheduleService(
         }
     }
 
-    fun findAllSchedule(searchCond: ScheduleSearchCond, trainerId: Long): List<ScheduleCommandResult?> {
+    fun findAllSchedule(searchCond: ScheduleSearchCond, trainerId: Long): LessonResponse? {
         return trainerScheduleRepository.findAllSchedule(searchCond, trainerId)
     }
 
