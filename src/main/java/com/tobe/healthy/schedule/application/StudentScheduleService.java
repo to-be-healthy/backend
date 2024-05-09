@@ -48,10 +48,11 @@ public class StudentScheduleService {
 		TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId())
 				.orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
 		Long trainerId = mapping.getTrainer().getId();
-		return settingMorningAndAfternoon(studentScheduleRepository.findAllSchedule(searchCond, trainerId, member));
+		List<ScheduleCommandResult> list = studentScheduleRepository.findAllSchedule(searchCond, trainerId, member);
+		return settingMorningAndAfternoon(list, member);
 	}
 
-	private ScheduleCommandResponse settingMorningAndAfternoon(List<ScheduleCommandResult> schedule) {
+	private ScheduleCommandResponse settingMorningAndAfternoon(List<ScheduleCommandResult> schedule, Member member) {
 		List<ScheduleCommandResult> morning = schedule.stream()
 				.filter(s -> NOON.isAfter(s.getLessonStartTime()))
 				.peek(s -> { if(isSoldOut(s)) s.setReservationStatus(SOLD_OUT); })
@@ -62,7 +63,7 @@ public class StudentScheduleService {
 				.peek(s -> { if(isSoldOut(s)) s.setReservationStatus(SOLD_OUT); })
 				.collect(Collectors.toList());
 
-		return ScheduleCommandResponse.create(morning, afternoon);
+		return ScheduleCommandResponse.create(member.getScheduleNoticeStatus(), morning, afternoon);
 	}
 
 	private boolean isSoldOut(ScheduleCommandResult s) {
