@@ -4,3 +4,6 @@ include:
   - name: UNUSED_IMPORT
   - name: RemoveCurlyBracesFromTemplate
   - name: SimplifyStreamApiCallChains
+  - name: ThrowablePrintStackTrace
+  - name: DuplicatedCode
+  - name: UnusedSymbol
