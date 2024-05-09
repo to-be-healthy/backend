@@ -36,8 +36,6 @@ public class ExerciseController {
     public ResponseHandler<List<ExerciseDto>> getExercise(@Parameter(description = "운동 카테고리") @RequestParam(required = false) ExerciseCategory category,
                                                           @Parameter(description = "사용하는 근육") @RequestParam(required = false) PrimaryMuscle primaryMuscle,
                                                           Pageable pageable) {
-
-
         return ResponseHandler.<List<ExerciseDto>>builder()
                 .data(exerciseService.getExercise(category, primaryMuscle, pageable))
                 .message("운동 종류가 조회되었습니다.")

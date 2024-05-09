@@ -18,4 +18,5 @@ public interface MemberRepositoryCustom {
     Page<Member> findAllUnattachedMembers(Long gymId, String searchValue, String sortValue, Pageable pageable);
     MemberDetailResult getMemberOfTrainer(Long memberId);
     List<Member> findAllTrainerByGym(@Param("gymId") Long gymId);
+    List<MemberInTeamResult> getBestStudent(Long trainerId);
 }
