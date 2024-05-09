@@ -1,24 +1,36 @@
 importScripts('https://www.gstatic.com/firebasejs/5.9.2/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/5.9.2/firebase-messaging.js');
 
-// Initialize Firebase
-let firebaseConfig = {
-    apiKey: "AIzaSyBaG-SAt2hzgha2C16CNZQGnnB0qdiH7_I",
-    authDomain: "to-be-healthy-417411.firebaseapp.com",
-    projectId: "to-be-healthy-417411",
-    storageBucket: "to-be-healthy-417411.appspot.com",
-    messagingSenderId: "827137813758",
-    appId: "1:827137813758:web:a36ff6e25eb30b32eb89af",
-    measurementId: "G-68SZ9TBE6Y"
+console.log("serviceWorker Start...!");
+
+self.addEventListener("install", function (e) {
+    console.log("fcm sw install..");
+    self.skipWaiting();
+});
+
+self.addEventListener("activate", function (e) {
+    console.log("fcm sw activate..");
+});
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCCvaGdXas6LuaCNPeZ9FMCNqhR5VbaL2U",
+    authDomain: "solar-imprint-417411.firebaseapp.com",
+    projectId: "solar-imprint-417411",
+    storageBucket: "solar-imprint-417411.appspot.com",
+    messagingSenderId: "793717607575",
+    appId: "1:793717607575:web:fa7d5b2f29130f3c87add2",
+    measurementId: "G-F501B0PBYH"
 };
+
 firebase.initializeApp(firebaseConfig);
+
 const messaging = firebase.messaging();
 
-messaging.setBackgroundMessageHandler(function(payload) {
-    const title = 'Hello, World!';
-    const options = {
-        body: payload.data.status
+messaging.setBackgroundMessageHandler((payload) => {
+    console.log("setBackgroundMessageHandler Start..!");
+    let notificationTitle = payload.title;
+    const notificationOptions = {
+        body: payload.body
     };
-
-    return self.registration.showNotification(title, options);
+    self.registration.showNotification(notificationTitle, notificationOptions);
 });

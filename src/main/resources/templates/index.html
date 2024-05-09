@@ -9,12 +9,11 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="shortcut icon" href="#">
 </head>
-
-<body>
 <script th:inline="javascript">
     window.onload = function () {
         console.log('window onload');
         initiallizeFirebase();
+        registerServiceWorker();
     }
 
     function initiallizeFirebase() {
@@ -27,6 +26,7 @@
             appId: "1:793717607575:web:fa7d5b2f29130f3c87add2",
             measurementId: "G-F501B0PBYH"
         };
+
 
         firebase.initializeApp(firebaseConfig);
 
@@ -65,7 +65,22 @@
             document.getElementById('token').textContent = newToken;
         }
     }
+
+    debugger;
+
+    function registerServiceWorker() {
+        console.log("registerServiceWorker()");
+        navigator.serviceWorker.register("/firebase-messaging-sw.js")
+            .then(function (registration) {
+                console.dir(registration.scope);
+                console.log("Service Worker가 scope에 등록되었습니다.:", registration.scope);
+            })
+            .catch(function (err) {
+                console.log("Service Worker 등록 실패:", err);
+            });
+    }
 </script>
+<body>
 <h1>hi! fcm</h1>
 <div>
     <b id="token"></b>
