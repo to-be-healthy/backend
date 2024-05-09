@@ -7,8 +7,10 @@ import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryResponse;
 import com.tobe.healthy.lesson_history.repository.LessonHistoryRepository;
+import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
 import com.tobe.healthy.member.domain.dto.out.TrainerHomeResult;
+import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
 import com.tobe.healthy.point.repository.PointRepository;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -39,6 +42,7 @@ public class HomeService {
     private final DietService dietService;
     private final TrainerMemberMappingRepository mappingRepository;
     private final TrainerScheduleRepository trainerScheduleRepository;
+    private final MemberRepository memberRepository;
 
     public StudentHomeResult getStudentHome(Long memberId) {
         //트레이너 매핑 여부
@@ -78,14 +82,13 @@ public class HomeService {
         long mappingStudentCount = mappingRepository.countByTrainerId(trainerId);
 
         // 우수회원 추가 필요
-        TrainerMemberMapping top1Student = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(trainerId)
-                .orElse(null);
+        List<MemberInTeamResult> bestStudents = memberRepository.getBestStudent(trainerId);
 
         TrainerTodayScheduleResponse trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId);
 
         return TrainerHomeResult.builder()
                 .studentCount(mappingStudentCount)
-                .top1StudentName(top1Student != null ? top1Student.getMember().getName() : null)
+                .bestStudents(bestStudents)
                 .todaySchedule(trainerTodaySchedule)
                 .build();
     }

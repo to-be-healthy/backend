@@ -4,10 +4,12 @@ import com.tobe.healthy.schedule.entity.out.TrainerTodayScheduleResponse;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class TrainerHomeResult {
     private Long studentCount;
-    private String top1StudentName;
+    private List<MemberInTeamResult> bestStudents;
     private TrainerTodayScheduleResponse todaySchedule;
 }
