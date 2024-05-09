@@ -66,10 +66,25 @@ class TrainerScheduleRepositoryImpl(
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
 
+        val scheduleCount = queryFactory
+            .select(schedule.count())
+            .from(schedule)
+            .where(
+                lessonDtEq(searchCond.lessonDt),
+                trainerIdEq(trainerId),
+                reservationStatusEq(COMPLETED),
+                delYnEq(false)
+            )
+            .fetchOne()
+
+
         val response = LessonResponse.from(results)
 
         response?.let {
-            val trainerTodaySchedule = TrainerTodayScheduleResponse(trainerName = response.trainerName)
+            val trainerTodaySchedule = TrainerTodayScheduleResponse(
+                trainerName = response.trainerName,
+                scheduleTotalCount = scheduleCount!!,
+            )
 
             response.schedule.forEach { (key) ->
                 response.schedule[key]?.filter {

@@ -36,7 +36,9 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-web") {
+        exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
+    }
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("com.googlecode.json-simple:json-simple:1.1.1")
     implementation("org.modelmapper:modelmapper:3.2.0")
@@ -52,9 +54,8 @@ dependencies {
     implementation(group = "com.google.guava", name = "guava", version = "33.2.0-jre")
     implementation("io.jsonwebtoken:jjwt-api:0.12.5")
     implementation("io.jsonwebtoken:jjwt-impl:0.12.5")
-    implementation("com.amazonaws:aws-java-sdk-s3:1.12.714")
+    implementation("com.amazonaws:aws-java-sdk-s3:1.12.718")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
-    implementation("com.google.firebase:firebase-admin:9.2.0")
     implementation("com.google.firebase:firebase-admin:9.2.0")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 

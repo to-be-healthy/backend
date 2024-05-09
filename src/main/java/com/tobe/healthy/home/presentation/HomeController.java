@@ -4,6 +4,8 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.home.application.HomeService;
 import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
+import com.tobe.healthy.member.domain.dto.out.TrainerHomeResult;
+import com.tobe.healthy.schedule.entity.in.TrainerTodayScheduleSearchCond;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,9 +44,10 @@ public class HomeController {
     })
     @GetMapping("/trainer")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<StudentHomeResult> getTrainerHome(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-        return ResponseHandler.<StudentHomeResult>builder()
-                .data(homeService.getStudentHome(customMemberDetails.getMemberId()))
+    public ResponseHandler<TrainerHomeResult> getTrainerHome(@RequestBody TrainerTodayScheduleSearchCond request,
+                                                             @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+        return ResponseHandler.<TrainerHomeResult>builder()
+                .data(homeService.getTrainerHome(request, customMemberDetails.getMemberId()))
                 .message("트레이너 홈이 조회되었습니다.")
                 .build();
     }

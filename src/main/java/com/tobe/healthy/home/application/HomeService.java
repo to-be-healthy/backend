@@ -8,11 +8,15 @@ import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryResponse;
 import com.tobe.healthy.lesson_history.repository.LessonHistoryRepository;
 import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
+import com.tobe.healthy.member.domain.dto.out.TrainerHomeResult;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
 import com.tobe.healthy.point.repository.PointRepository;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
+import com.tobe.healthy.schedule.entity.in.TrainerTodayScheduleSearchCond;
+import com.tobe.healthy.schedule.entity.out.TrainerTodayScheduleResponse;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
+import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +38,7 @@ public class HomeService {
     private final LessonHistoryRepository lessonHistoryRepository;
     private final DietService dietService;
     private final TrainerMemberMappingRepository mappingRepository;
+    private final TrainerScheduleRepository trainerScheduleRepository;
 
     public StudentHomeResult getStudentHome(Long memberId) {
         //트레이너 매핑 여부
@@ -67,6 +72,22 @@ public class HomeService {
         DietDto diet = dietService.getDietCreatedAtToday(memberId);
 
         return StudentHomeResult.create(isMapped, usingCourse, point, rank, myReservation, lessonHistory, diet);
+    }
+
+    public TrainerHomeResult getTrainerHome(TrainerTodayScheduleSearchCond request, Long trainerId) {
+        long mappingStudentCount = mappingRepository.countByTrainerId(trainerId);
+
+        // 우수회원 추가 필요
+        TrainerMemberMapping top1Student = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(trainerId)
+                .orElse(null);
+
+        TrainerTodayScheduleResponse trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId);
+
+        return TrainerHomeResult.builder()
+                .studentCount(mappingStudentCount)
+                .top1StudentName(top1Student != null ? top1Student.getMember().getName() : null)
+                .todaySchedule(trainerTodaySchedule)
+                .build();
     }
 
     private String getNowMonth() {
