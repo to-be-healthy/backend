@@ -4,12 +4,10 @@ import com.tobe.healthy.ApiResultResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.schedule.application.TrainerScheduleService
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
-import com.tobe.healthy.schedule.entity.`in`.RegisterDefaultLessonTimeRequest
-import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
-import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
-import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
+import com.tobe.healthy.schedule.entity.`in`.*
 import com.tobe.healthy.schedule.entity.out.LessonResponse
 import com.tobe.healthy.schedule.entity.out.RegisterDefaultLessonTimeResponse
+import com.tobe.healthy.schedule.entity.out.TrainerTodayScheduleResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -94,6 +92,22 @@ class TrainerScheduleController(
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
             data = trainerScheduleService.findAllSchedule(searchCond, customMemberDetails.memberId)
+        )
+    }
+
+    @Operation(
+        summary = "트레이너가 특정 날짜의 일정을 조회한다.", description = "트레이너가 특정 날짜의 일정을 조회한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "트레이너가 특정 날짜의 일정 조회 완료")
+        ]
+    )
+    @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    fun findOneSchedule(@RequestBody searchCond: TrainerTodayScheduleSearchCond,
+                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<TrainerTodayScheduleResponse?> {
+        return ApiResultResponse(
+            message = "특정 날짜의 일정을 조회했습니다.",
+            data = trainerScheduleService.findOneTrainerTodaySchedule(searchCond, customMemberDetails.memberId)
         )
     }
 

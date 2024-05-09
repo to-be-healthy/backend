@@ -8,12 +8,10 @@ import com.tobe.healthy.schedule.domain.entity.ReservationStatus.*
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.entity.TrainerScheduleClosedDaysInfo
 import com.tobe.healthy.schedule.entity.TrainerScheduleInfo
-import com.tobe.healthy.schedule.entity.`in`.RegisterDefaultLessonTimeRequest
-import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
-import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
-import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
+import com.tobe.healthy.schedule.entity.`in`.*
 import com.tobe.healthy.schedule.entity.out.LessonResponse
 import com.tobe.healthy.schedule.entity.out.RegisterDefaultLessonTimeResponse
+import com.tobe.healthy.schedule.entity.out.TrainerTodayScheduleResponse
 import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository
 import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
@@ -102,6 +100,10 @@ class TrainerScheduleService(
         return trainerScheduleRepository.findAllSchedule(searchCond, trainerId)
     }
 
+    fun findOneTrainerTodaySchedule(searchCond: TrainerTodayScheduleSearchCond, trainerId: Long): TrainerTodayScheduleResponse? {
+        return trainerScheduleRepository.findOneTrainerTodaySchedule(searchCond, trainerId)
+    }
+
     fun updateReservationStatusToNoShow(scheduleId: Long, trainerId: Long): ScheduleIdInfo {
         val schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, COMPLETED, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
@@ -157,12 +159,9 @@ class TrainerScheduleService(
         return true
     }
 
-    fun registerDefaultLessonTime(
-        request: RegisterDefaultLessonTimeRequest,
-        trainerId: Long,
-    ): RegisterDefaultLessonTimeResponse {
+    fun registerDefaultLessonTime(request: RegisterDefaultLessonTimeRequest, trainerId: Long, ): RegisterDefaultLessonTimeResponse {
         val findTrainer = memberRepository.findByIdOrNull(trainerId)
-            ?: throw CustomException(MEMBER_NOT_FOUND)
+                ?: throw CustomException(MEMBER_NOT_FOUND)
 
         trainerScheduleInfoRepository.findByTrainerId(trainerId)?.let {
             it.changeDefaultLessonTime(request)
