@@ -53,7 +53,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
@@ -237,7 +240,7 @@ public class MemberService {
 
         if (!uploadFile.isEmpty()) {
             ObjectMetadata objectMetadata = getObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
-            String savedFileName = "profile/" + createFileUUID();
+            String savedFileName = "profile/" + Utils.createFileUUID();
 
             try (InputStream inputStream = uploadFile.getInputStream()) {
                 amazonS3.putObject(
@@ -377,7 +380,7 @@ public class MemberService {
 
     private MemberProfile getProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
-        String savedFileName = "profile/" + createFileUUID();
+        String savedFileName = "profile/" + Utils.createFileUUID();
         ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(
@@ -397,7 +400,7 @@ public class MemberService {
     private MemberProfile getGoogleProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
         String extension = ".jpg";
-        String savedFileName = "profile/" + createFileUUID() + extension;
+        String savedFileName = "profile/" + Utils.createFileUUID() + extension;
         ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
         return qwe(member, image, savedFileName, objectMetadata);
     }
@@ -512,10 +515,6 @@ public class MemberService {
             log.error("error => {}", e.getStackTrace()[0]);
         }
         return responseMono.share().block();
-    }
-
-    private String createFileUUID() {
-        return System.currentTimeMillis() + "-" + UUID.randomUUID();
     }
 
     private void validateDuplicationUserId(String userId) {

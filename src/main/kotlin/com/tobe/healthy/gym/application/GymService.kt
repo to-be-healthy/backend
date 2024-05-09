@@ -14,7 +14,6 @@ import com.tobe.healthy.member.repository.MemberRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 
 @Service
 @Transactional
@@ -65,17 +64,5 @@ class GymService(
 
     fun findAllTrainersByGym(gymId: Long): List<TrainerCommandResult?> {
         return memberRepository.findAllTrainerByGym(gymId).map { TrainerCommandResult.from(it) }
-    }
-
-    private fun getJoinCode(): Int {
-        val random = Random()
-        val builder = StringBuilder()
-
-        while (builder.length < 6) {
-            val num = random.nextInt(10)
-            builder.append(num)
-        }
-
-        return builder.toString().toInt()
     }
 }

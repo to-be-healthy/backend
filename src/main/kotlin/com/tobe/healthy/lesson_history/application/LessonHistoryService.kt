@@ -1,8 +1,8 @@
 package com.tobe.healthy.lesson_history.application
 
 import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.model.ObjectMetadata
 import com.tobe.healthy.common.CustomPagingResponse
+import com.tobe.healthy.common.Utils
 import com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI
 import com.tobe.healthy.common.redis.RedisService
 import com.tobe.healthy.config.error.CustomException
@@ -29,8 +29,6 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
-import java.lang.System.currentTimeMillis
-import java.util.*
 
 @Service
 @Transactional
@@ -229,13 +227,6 @@ class LessonHistoryService(
         return lessonHistory
     }
 
-    private fun getObjectMetadata(uploadFile: MultipartFile): ObjectMetadata {
-        val objectMetadata = ObjectMetadata()
-        objectMetadata.contentLength = uploadFile.size
-        objectMetadata.contentType = uploadFile.contentType
-        return objectMetadata
-    }
-
     private fun registerComment(
         order: Int,
         request: CommentRegisterCommand,
@@ -275,8 +266,8 @@ class LessonHistoryService(
     }
 
     private fun putFile(uploadFile: MultipartFile): String {
-        val objectMetadata = getObjectMetadata(uploadFile)
-        val savedFileName = "lesson-history/" + currentTimeMillis().toString() + "-" + UUID.randomUUID().toString()
+        val objectMetadata = Utils.createObjectMetadata(uploadFile.size, uploadFile.contentType)
+        val savedFileName = "lesson-history/" + Utils.createFileUUID()
         amazonS3.putObject(
             bucketName,
             savedFileName,
