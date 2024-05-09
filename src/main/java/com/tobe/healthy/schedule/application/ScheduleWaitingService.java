@@ -57,6 +57,12 @@ public class ScheduleWaitingService {
 	}
 
 	public String cancelScheduleWaiting(Long scheduleId, Long memberId) {
+		Schedule schedule = trainerScheduleRepository.findAvailableWaitingId(scheduleId)
+				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+
+		LocalDateTime before24Hour = LocalDateTime.of(schedule.getLessonDt().minusDays(1), schedule.getLessonStartTime());
+		if (LocalDateTime.now().isAfter(before24Hour)) throw new CustomException(RESERVATION_CANCEL_NOT_VALID);
+
 		ScheduleWaiting scheduleWaiting = scheduleWaitingRepository.findByScheduleIdAndMemberId(scheduleId, memberId)
 				.orElseThrow(() -> new CustomException(SCHEDULE_WAITING_NOT_FOUND));
 		scheduleWaitingRepository.delete(scheduleWaiting);
