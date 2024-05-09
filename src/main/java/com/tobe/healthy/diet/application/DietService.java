@@ -14,8 +14,6 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,14 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_FOUND;
 import static com.tobe.healthy.diet.domain.entity.DietType.*;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 
@@ -51,7 +45,7 @@ public class DietService {
 
     public DietDto getDietCreatedAtToday(Long memberId) {
         Diet diet = dietRepository.getDietCreatedAtToday(memberId);
-        if(diet == null) return null;
+        if (diet == null) return null;
         List<Long> ids = List.of(diet.getDietId());
         return setDietFile(DietDto.from(diet), ids);
     }
@@ -69,7 +63,9 @@ public class DietService {
         Diet diet = dietRepository.findByDietIdAndDelYnFalse(dietId)
                 .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
         DietLikePK likePk = DietLikePK.create(diet, member);
-        dietLikeRepository.findById(likePk).ifPresent(i -> {throw new CustomException(LIKE_ALREADY_EXISTS);});
+        dietLikeRepository.findById(likePk).ifPresent(i -> {
+            throw new CustomException(LIKE_ALREADY_EXISTS);
+        });
         dietLikeRepository.save(DietLike.from(likePk));
         diet.updateLikeCnt(dietLikeRepository.getLikeCnt(diet.getDietId()));
     }
@@ -90,16 +86,16 @@ public class DietService {
 
         TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId).orElse(null);
         Member trainer = mapping == null ? null : mapping.getTrainer();
-        if(ObjectUtils.isEmpty(diet)) diet = dietRepository.save(Diet.create(member, trainer));
+        if (ObjectUtils.isEmpty(diet)) diet = dietRepository.save(Diet.create(member, trainer));
 
         diet.deleteFile(requestType);
-        if(!ObjectUtils.isEmpty(diet.getDietFiles())) {
+        if (!ObjectUtils.isEmpty(diet.getDietFiles())) {
             diet.getDietFiles().stream()
                     .filter(f -> requestType.equals(f.getType()))
                     .forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
         }
 
-        if(!ObjectUtils.isEmpty(requestFile)){
+        if (!ObjectUtils.isEmpty(requestFile)) {
             fileService.uploadDietFile(diet, requestType, requestFile);
         }
 
@@ -148,9 +144,12 @@ public class DietService {
 
         diet.deleteFiles();
         diet.getDietFiles().forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
-        if(!ObjectUtils.isEmpty(command.getBreakfastFile())) fileService.uploadDietFile(diet, BREAKFAST, command.getBreakfastFile());
-        if(!ObjectUtils.isEmpty(command.getLunchFile())) fileService.uploadDietFile(diet, LUNCH, command.getLunchFile());
-        if(!ObjectUtils.isEmpty(command.getDinnerFile())) fileService.uploadDietFile(diet, DINNER, command.getDinnerFile());
+        if (!ObjectUtils.isEmpty(command.getBreakfastFile()))
+            fileService.uploadDietFile(diet, BREAKFAST, command.getBreakfastFile());
+        if (!ObjectUtils.isEmpty(command.getLunchFile()))
+            fileService.uploadDietFile(diet, LUNCH, command.getLunchFile());
+        if (!ObjectUtils.isEmpty(command.getDinnerFile()))
+            fileService.uploadDietFile(diet, DINNER, command.getDinnerFile());
 
         return setDietFile(DietDto.from(diet), List.of(diet.getDietId()));
     }
@@ -174,7 +173,7 @@ public class DietService {
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 
-    private String getFileName(String url){
+    private String getFileName(String url) {
         String[] arr = url.split("/");
         return arr[arr.length - 1];
     }

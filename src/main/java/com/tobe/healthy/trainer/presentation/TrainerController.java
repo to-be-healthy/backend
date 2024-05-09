@@ -5,7 +5,6 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
-import com.tobe.healthy.gym.application.GymService;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
@@ -17,7 +16,6 @@ import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
 import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
 import com.tobe.healthy.trainer.domain.dto.out.MemberInviteResultCommand;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -165,8 +163,8 @@ public class TrainerController {
     @GetMapping("/diets")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<CustomPaging<DietDto>> getDietByTrainer(@AuthenticationPrincipal CustomMemberDetails loginMember,
-                                                                                       @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
-                                                                                       Pageable pageable) {
+                                                                   @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+                                                                   Pageable pageable) {
         return ResponseHandler.<CustomPaging<DietDto>>builder()
                 .data(dietService.getDietByTrainer(loginMember.getMemberId(), pageable, searchDate))
                 .message("식단기록이 조회되었습니다.")

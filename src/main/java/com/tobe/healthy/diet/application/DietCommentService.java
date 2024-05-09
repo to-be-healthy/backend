@@ -56,7 +56,7 @@ public class DietCommentService {
                 .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
 
         boolean isReply = command.getParentCommentId() != null;
-        Long depth = 0L, orderNum = 0L;
+        Long depth, orderNum;
         Long commentCnt = commentRepository.countByDiet(diet);
         if(isReply){
             DietComment parentComment = commentRepository.findByCommentIdAndDelYnFalse(command.getParentCommentId())

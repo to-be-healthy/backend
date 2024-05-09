@@ -9,7 +9,7 @@ data class LessonResponse(
     val schedule: Map<LocalDate?, List<LessonDetailResponse?>>
 ) {
     companion object {
-        fun from(schedule: MutableList<Schedule?>): LessonResponse? {
+        fun from(schedule: MutableList<Schedule?>): LessonResponse {
             return schedule.let {
                 val groupingData = schedule.groupBy { it?.lessonDt }
                     .mapValues { entry ->

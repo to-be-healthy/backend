@@ -33,7 +33,7 @@ public class WorkoutCommentService {
     public void addComment(Long workoutHistoryId, HistoryCommentAddCommand command, Member member) {
         WorkoutHistory history = workoutHistoryRepository.findById(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
-        Long depth = 0L, orderNum = 0L;
+        Long depth, orderNum;
         Long commentCnt = commentRepository.countByWorkoutHistory(history);
         if(command.getParentCommentId() == null){ //댓글
             depth = 0L;

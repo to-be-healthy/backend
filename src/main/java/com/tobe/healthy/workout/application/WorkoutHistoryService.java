@@ -7,7 +7,6 @@ import com.tobe.healthy.file.FileService;
 import com.tobe.healthy.file.RegisterFile;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
@@ -91,7 +90,7 @@ public class WorkoutHistoryService {
 
     public WorkoutHistoryDto updateWorkoutHistory(Member member, Long workoutHistoryId, HistoryAddCommand command) {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndMemberIdAndDelYnFalse(workoutHistoryId, member.getId())
-            .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         //내용 수정
         history.updateContent(command.getContent());
         //운동종류 수정
@@ -109,7 +108,9 @@ public class WorkoutHistoryService {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndDelYnFalse(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         WorkoutHistoryLikePK likePk = WorkoutHistoryLikePK.create(history, member);
-        workoutHistoryLikeRepository.findById(likePk).ifPresent(i -> {throw new CustomException(LIKE_ALREADY_EXISTS);});
+        workoutHistoryLikeRepository.findById(likePk).ifPresent(i -> {
+            throw new CustomException(LIKE_ALREADY_EXISTS);
+        });
         workoutHistoryLikeRepository.save(WorkoutHistoryLike.from(likePk));
         history.updateLikeCnt(workoutHistoryLikeRepository.getLikeCnt(history.getWorkoutHistoryId()));
     }
@@ -155,7 +156,7 @@ public class WorkoutHistoryService {
         }).collect(Collectors.toList());
     }
 
-    private String getFileName(String url){
+    private String getFileName(String url) {
         String[] arr = url.split("/");
         return arr[arr.length - 1];
     }

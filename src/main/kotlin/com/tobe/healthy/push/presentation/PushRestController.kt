@@ -1,7 +1,6 @@
 package com.tobe.healthy.push.presentation
 
 import com.tobe.healthy.ApiResultResponse
-import com.tobe.healthy.common.redis.RedisService
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.push.application.FirebaseCloudMessageService
 import com.tobe.healthy.push.domain.NotificationRequest
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/push")
 class PushRestController(
     private val firebaseCloudMessageService: FirebaseCloudMessageService,
-    private val redisService: RedisService
 ) {
 
     @PostMapping("/register")

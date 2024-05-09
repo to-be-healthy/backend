@@ -4,7 +4,6 @@ import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;

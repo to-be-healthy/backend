@@ -1,6 +1,5 @@
 package com.tobe.healthy.workout.repository;
 
-import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
 import com.tobe.healthy.workout.domain.entity.WorkoutHistoryFiles;

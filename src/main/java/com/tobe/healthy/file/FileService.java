@@ -33,80 +33,78 @@ import static java.util.UUID.randomUUID;
 @RequiredArgsConstructor
 @Slf4j
 public class FileService {
-	private final DietFileRepository dietFileRepository;
-	private final AmazonS3 amazonS3;
-	private final RedisService redisService;
+    private final DietFileRepository dietFileRepository;
+    private final AmazonS3 amazonS3;
+    private final RedisService redisService;
 
-	@Value("${aws.s3.bucket-name}")
-	private String bucketName;
+    @Value("${aws.s3.bucket-name}")
+    private String bucketName;
 
-	private final Long FILE_TEMP_UPLOAD_TIMEOUT = 30 * 60 * 1000L; // 30분
+    private final Long FILE_TEMP_UPLOAD_TIMEOUT = 30 * 60 * 1000L; // 30분
 
 
-	// 1. 파일을 AWS S3에 업로드 후 업로드 주소 반환
-	public List<RegisterFile> uploadFiles(String folder, List<MultipartFile> uploadFiles, Member member) {
-		List<RegisterFile> uploadFile = new ArrayList<>();
-		int fileOrder = 0;
-		for (MultipartFile file: uploadFiles) {
-			if (!file.isEmpty()) {
-				try (InputStream inputStream = file.getInputStream()) {
-					String originalFileName = file.getOriginalFilename();
-					String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-					ObjectMetadata objectMetadata = new ObjectMetadata();
-					objectMetadata.setContentLength(file.getSize());
-					objectMetadata.setContentType(file.getContentType());
-					String savedFileName = folder + "/" + System.currentTimeMillis() + "-" + randomUUID() + extension;
-					amazonS3.putObject(
-						"to-be-healthy-bucket",
-						savedFileName,
-						inputStream,
-						objectMetadata
-					);
-					String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
-					redisService.setValuesWithTimeout(TEMP_FILE_URI.getDescription() + fileUrl, member.getId().toString(), FILE_TEMP_UPLOAD_TIMEOUT); // 30분
-					uploadFile.add(new RegisterFile(fileUrl, ++fileOrder));
-				} catch (IOException e) {
-					log.error("error => {}", e.getStackTrace()[0]);
-				}
-			}
-		}
-		return uploadFile;
-	}
+    // 1. 파일을 AWS S3에 업로드 후 업로드 주소 반환
+    public List<RegisterFile> uploadFiles(String folder, List<MultipartFile> uploadFiles, Member member) {
+        List<RegisterFile> uploadFile = new ArrayList<>();
+        int fileOrder = 0;
+        for (MultipartFile file : uploadFiles) {
+            if (!file.isEmpty()) {
+                try (InputStream inputStream = file.getInputStream()) {
+                    ObjectMetadata objectMetadata = new ObjectMetadata();
+                    objectMetadata.setContentLength(file.getSize());
+                    objectMetadata.setContentType(file.getContentType());
+                    String savedFileName = folder + "/" + System.currentTimeMillis() + "-" + randomUUID();
+                    amazonS3.putObject(
+                            "to-be-healthy-bucket",
+                            savedFileName,
+                            inputStream,
+                            objectMetadata
+                    );
+                    String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
+                    redisService.setValuesWithTimeout(TEMP_FILE_URI.getDescription() + fileUrl, member.getId().toString(), FILE_TEMP_UPLOAD_TIMEOUT); // 30분
+                    uploadFile.add(new RegisterFile(fileUrl, ++fileOrder));
+                } catch (IOException e) {
+                    log.error("error => {}", e.getStackTrace()[0]);
+                }
+            }
+        }
+        return uploadFile;
+    }
 
-	public void deleteDietFile(String fileName){
-		try{
-			amazonS3.deleteObject(bucketName, "diet/" + fileName);
-		}catch (Exception e){
-			e.printStackTrace();
-			throw new CustomException(FILE_REMOVE_ERROR);
-		}
-	}
+    public void deleteDietFile(String fileName) {
+        try {
+            amazonS3.deleteObject(bucketName, "diet/" + fileName);
+        } catch (Exception e) {
+            log.error("error => {}", e.getStackTrace()[0]);
+            throw new CustomException(FILE_REMOVE_ERROR);
+        }
+    }
 
-	public void deleteHistoryFile(String fileName){
-		try{
-			amazonS3.deleteObject(bucketName, "workout-history/" + fileName);
-		}catch (Exception e){
-			log.error("error => {}", e.getStackTrace()[0]);
-			throw new CustomException(FILE_REMOVE_ERROR);
-		}
-	}
+    public void deleteHistoryFile(String fileName) {
+        try {
+            amazonS3.deleteObject(bucketName, "workout-history/" + fileName);
+        } catch (Exception e) {
+            log.error("error => {}", e.getStackTrace()[0]);
+            throw new CustomException(FILE_REMOVE_ERROR);
+        }
+    }
 
-	public void uploadDietFile(Diet diet, DietType type, MultipartFile uploadFile) {
-		if (!uploadFile.isEmpty()) {
-			try {
-				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
-				String savedFileName = "diet/" + System.currentTimeMillis() + "-" + randomUUID() + extension;
+    public void uploadDietFile(Diet diet, DietType type, MultipartFile uploadFile) {
+        if (!uploadFile.isEmpty()) {
+            try {
+                String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
+                String savedFileName = "diet/" + System.currentTimeMillis() + "-" + randomUUID() + extension;
 
-				ObjectMetadata objectMetadata = new ObjectMetadata();
-				objectMetadata.setContentLength(uploadFile.getSize());
-				objectMetadata.setContentType(uploadFile.getContentType());
-				amazonS3.putObject(bucketName, savedFileName, uploadFile.getInputStream(), objectMetadata);
-				String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
-				dietFileRepository.save(DietFiles.create(diet, fileUrl, type));
-			} catch (IOException e) {
-				log.error("error => {}", e.getStackTrace()[0]);
-				throw new CustomException(FILE_UPLOAD_ERROR);
-			}
-		}
-	}
+                ObjectMetadata objectMetadata = new ObjectMetadata();
+                objectMetadata.setContentLength(uploadFile.getSize());
+                objectMetadata.setContentType(uploadFile.getContentType());
+                amazonS3.putObject(bucketName, savedFileName, uploadFile.getInputStream(), objectMetadata);
+                String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+                dietFileRepository.save(DietFiles.create(diet, fileUrl, type));
+            } catch (IOException e) {
+                log.error("error => {}", e.getStackTrace()[0]);
+                throw new CustomException(FILE_UPLOAD_ERROR);
+            }
+        }
+    }
 }

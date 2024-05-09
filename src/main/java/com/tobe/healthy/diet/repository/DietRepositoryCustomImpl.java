@@ -4,13 +4,11 @@ import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietFiles;
 import com.tobe.healthy.member.domain.entity.Member;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -35,8 +33,8 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
 
     @Override
     public Diet getDietCreatedAtToday(Long memberId) {
-        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
-        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0, 0));
+        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59));
 
         return queryFactory.select(diet)
                 .from(diet)
@@ -53,7 +51,7 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 .from(diet)
                 .where(memberIdEq(memberId), delYnEq(false), convertDateFormat(searchDate))
                 .fetchOne();
-        List<Diet> diets =  queryFactory
+        List<Diet> diets = queryFactory
                 .select(diet)
                 .from(diet)
                 .where(memberIdEq(memberId), delYnEq(false), convertDateFormat(searchDate))
@@ -61,7 +59,7 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-        return PageableExecutionUtils.getPage(diets, pageable, ()-> totalCnt );
+        return PageableExecutionUtils.getPage(diets, pageable, () -> totalCnt);
     }
 
     @Override
@@ -75,8 +73,8 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
 
     @Override
     public Diet findTop1ByCreateAtToday(Long memberId) {
-        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
-        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0, 0));
+        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59));
 
         return queryFactory.select(diet)
                 .from(diet)
@@ -95,7 +93,7 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 .from(diet)
                 .where(dietTrainerIdEq(trainer), dietDeYnEq(false), convertDateFormat(searchDate))
                 .fetchOne();
-        List<Diet> diets =  queryFactory
+        List<Diet> diets = queryFactory
                 .select(diet)
                 .from(diet)
                 .where(dietTrainerIdEq(trainer), dietDeYnEq(false), convertDateFormat(searchDate))
@@ -103,7 +101,7 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-        return PageableExecutionUtils.getPage(diets, pageable, ()-> totalCnt );
+        return PageableExecutionUtils.getPage(diets, pageable, () -> totalCnt);
     }
 
     private BooleanExpression dietTrainerIdEq(Member trainer) {

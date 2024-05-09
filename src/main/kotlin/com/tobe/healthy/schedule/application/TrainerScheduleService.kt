@@ -159,7 +159,7 @@ class TrainerScheduleService(
         return true
     }
 
-    fun registerDefaultLessonTime(request: RegisterDefaultLessonTimeRequest, trainerId: Long, ): RegisterDefaultLessonTimeResponse {
+    fun registerDefaultLessonTime(request: RegisterDefaultLessonTimeRequest, trainerId: Long): RegisterDefaultLessonTimeResponse {
         val findTrainer = memberRepository.findByIdOrNull(trainerId)
                 ?: throw CustomException(MEMBER_NOT_FOUND)
 

@@ -2,7 +2,6 @@ package com.tobe.healthy.common.aop;
 
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.point.application.PointService;
-import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import lombok.extern.slf4j.Slf4j;

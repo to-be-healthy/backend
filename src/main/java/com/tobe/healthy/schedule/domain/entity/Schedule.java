@@ -95,8 +95,8 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@Builder
 	public Schedule(Long id, LocalDate lessonDt, LocalTime lessonStartTime, LocalTime lessonEndTime,
-					ReservationStatus reservationStatus, Member trainer, Member applicant,
-					List<ScheduleWaiting> scheduleWaiting, boolean delYn) {
+					ReservationStatus reservationStatus, Member trainer, @Nullable Member applicant,
+					@Nullable List<ScheduleWaiting> scheduleWaiting, boolean delYn) {
 		this.id = id;
 		this.lessonDt = lessonDt;
 		this.lessonStartTime = lessonStartTime;

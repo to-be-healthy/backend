@@ -174,8 +174,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
 		this.nickname = nickname;
 	}
 
-	public void setMemberProfile(MemberProfile profile) {
-		this.memberProfile = profile;
+	public void setMemberProfile(MemberProfile memberProfile) {
+		this.memberProfile = memberProfile;
 	}
 
 	@Builder
