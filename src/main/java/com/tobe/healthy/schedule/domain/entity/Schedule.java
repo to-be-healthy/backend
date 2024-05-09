@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -44,9 +45,11 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@ManyToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "applicant_id")
+	@Nullable
 	private Member applicant;
 
 	@OneToMany(fetch = LAZY, mappedBy = "schedule")
+	@Nullable
 	private List<ScheduleWaiting> scheduleWaiting = new ArrayList<>();
 
 	@ColumnDefault("false")

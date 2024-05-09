@@ -3,12 +3,12 @@ package com.tobe.healthy.schedule.presentation
 import com.tobe.healthy.ApiResultResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.schedule.application.TrainerScheduleService
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
 import com.tobe.healthy.schedule.entity.`in`.RegisterDefaultLessonTimeRequest
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
 import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
+import com.tobe.healthy.schedule.entity.out.LessonResponse
 import com.tobe.healthy.schedule.entity.out.RegisterDefaultLessonTimeResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -90,7 +90,7 @@ class TrainerScheduleController(
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun findAllSchedule(@ParameterObject searchCond: ScheduleSearchCond,
-                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<List<ScheduleCommandResult?>> {
+                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<LessonResponse?> {
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
             data = trainerScheduleService.findAllSchedule(searchCond, customMemberDetails.memberId)

@@ -2,7 +2,6 @@ package com.tobe.healthy.trainer.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
-import com.tobe.healthy.gym.application.GymService;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
@@ -38,7 +37,6 @@ public class TrainerController {
 
     private final TrainerService trainerService;
     private final WorkoutHistoryService workoutService;
-    private final GymService gymService;
     private final MemberService memberService;
 
     @Operation(summary = "트레이너가 학생 초대하기", responses = {
