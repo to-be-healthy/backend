@@ -13,6 +13,7 @@ import java.util.List;
 public interface WorkoutHistoryRepositoryCustom {
 
     Page<WorkoutHistoryDto> getWorkoutHistoryOfMonth(Long loginMemberId, Long memberId, Pageable pageable, String searchDate);
-    Page<WorkoutHistory> getWorkoutHistoryByTrainer(Member trainer, Pageable pageable);
+    Page<WorkoutHistory> getWorkoutHistoryByGym(Long gymId, Pageable pageable, String searchDate);
     List<WorkoutHistoryFiles> getWorkoutHistoryFile(@Param("ids") List<Long> ids);
+
 }

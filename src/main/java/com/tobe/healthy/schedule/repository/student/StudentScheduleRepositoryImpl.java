@@ -1,5 +1,6 @@
 package com.tobe.healthy.schedule.repository.student;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
@@ -37,21 +39,13 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.leftJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
 				.leftJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.leftJoin(schedule.scheduleWaiting, scheduleWaiting).on(scheduleWaiting.delYn.isFalse())
-				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), schedule.trainer.id.eq(trainerId))
+				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), scheduleTrainerIdEq(trainerId))
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
 
 		return results.stream()
 				.map(result -> ScheduleCommandResult.from(result, member))
 				.collect(toList());
-	}
-
-	private BooleanExpression scheduleWaitingDelYnFalse() {
-		return scheduleWaiting.delYn.isFalse();
-	}
-
-	private BooleanExpression delYnFalse() {
-		return schedule.delYn.eq(false);
 	}
 
 	@Override
@@ -62,7 +56,7 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 			.from(schedule)
 			.leftJoin(schedule.trainer, trainer).fetchJoin()
 			.leftJoin(schedule.scheduleWaiting, scheduleWaiting).fetchJoin()
-			.where(schedule.applicant.id.eq(memberId), scheduleDelYnFalse(), scheduleWaitingDelYnFalse())
+			.where(scheduleApplicantIdEq(memberId), scheduleDelYnFalse(), scheduleWaitingDelYnFalse())
 			.orderBy(schedule.lessonDt.desc(), schedule.lessonStartTime.asc())
 			.fetch();
 		return fetch.stream()
@@ -76,10 +70,26 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.from(schedule)
 				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.where(schedule.applicant.id.eq(memberId), schedule.lessonDt.goe(LocalDate.now()), lessonDtEq(searchCond))
+				.where(scheduleApplicantIdEq(memberId), lessonDateTimeAfterNow())
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
 		return schedules.stream().map(MyReservation::from).collect(toList());
+	}
+
+	@Override
+	public MyReservation findMyNextReservation(Long memberId) {
+		Schedule result = queryFactory.select(schedule)
+				.from(schedule)
+				.where(scheduleApplicantIdEq(memberId), lessonDateTimeAfterNow())
+				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+				.limit(1)
+				.fetchOne();
+		return result==null ? null : MyReservation.from(result);
+	}
+
+	private Predicate lessonDateTimeAfterNow() {
+		return schedule.lessonDt.after(LocalDate.now())
+				.or(schedule.lessonDt.goe(LocalDate.now()).and(schedule.lessonStartTime.after(LocalTime.now())));
 	}
 
 	private BooleanExpression scheduleDelYnFalse() {
@@ -100,4 +110,21 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 		}
 		return null;
 	}
+
+	private BooleanExpression scheduleTrainerIdEq(Long trainerId) {
+		return schedule.trainer.id.eq(trainerId);
+	}
+
+	private BooleanExpression scheduleWaitingDelYnFalse() {
+		return scheduleWaiting.delYn.isFalse();
+	}
+
+	private BooleanExpression delYnFalse() {
+		return schedule.delYn.eq(false);
+	}
+
+	private BooleanExpression scheduleApplicantIdEq(Long memberId) {
+		return schedule.applicant.id.eq(memberId);
+	}
+
 }

@@ -3,7 +3,7 @@ package com.tobe.healthy.file;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.tobe.healthy.common.RedisService;
+import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietFiles;
@@ -23,11 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI;
+import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_REMOVE_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
 import static java.util.UUID.randomUUID;
-import static org.springframework.util.StringUtils.cleanPath;
 
 @Service
 @Transactional
@@ -74,9 +73,18 @@ public class FileService {
 		return uploadFile;
 	}
 
-	public void deleteFile(String fileName){
+	public void deleteDietFile(String fileName){
 		try{
-			amazonS3.deleteObject(bucketName, fileName);
+			amazonS3.deleteObject(bucketName, "diet/" + fileName);
+		}catch (Exception e){
+			e.printStackTrace();
+			throw new CustomException(FILE_REMOVE_ERROR);
+		}
+	}
+
+	public void deleteHistoryFile(String fileName){
+		try{
+			amazonS3.deleteObject(bucketName, "workout-history/" + fileName);
 		}catch (Exception e){
 			log.error("error => {}", e.getStackTrace()[0]);
 			throw new CustomException(FILE_REMOVE_ERROR);
@@ -86,18 +94,15 @@ public class FileService {
 	public void uploadDietFile(Diet diet, DietType type, MultipartFile uploadFile) {
 		if (!uploadFile.isEmpty()) {
 			try {
-				String savedFileName = System.currentTimeMillis() + "-" + randomUUID();
 				String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
+				String savedFileName = "diet/" + System.currentTimeMillis() + "-" + randomUUID() + extension;
 
 				ObjectMetadata objectMetadata = new ObjectMetadata();
 				objectMetadata.setContentLength(uploadFile.getSize());
 				objectMetadata.setContentType(uploadFile.getContentType());
 				amazonS3.putObject(bucketName, savedFileName, uploadFile.getInputStream(), objectMetadata);
 				String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
-
-				DietFiles dietFile = DietFiles.create(savedFileName, cleanPath(uploadFile.getOriginalFilename())
-						, extension, uploadFile.getSize(), diet, fileUrl, type);
-				dietFileRepository.save(dietFile);
+				dietFileRepository.save(DietFiles.create(diet, fileUrl, type));
 			} catch (IOException e) {
 				log.error("error => {}", e.getStackTrace()[0]);
 				throw new CustomException(FILE_UPLOAD_ERROR);

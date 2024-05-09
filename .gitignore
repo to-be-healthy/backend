@@ -3,8 +3,6 @@ HELP.md
 build/
 src/main/generated/
 src/test/generated_tests/
-src/main/resources/serviceAccountKey.json
-src/main/resources/firebase-adminsdk.json
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
@@ -42,4 +40,4 @@ out/
 
 ## 추가
 resources/firebase-adminsdk.json
-config/
+config/firebase-adminsdk.json

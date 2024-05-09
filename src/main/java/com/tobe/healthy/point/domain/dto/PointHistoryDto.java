@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PointDto {
+public class PointHistoryDto {
 
     private Long pointId;
     private PointType type;
@@ -22,8 +22,8 @@ public class PointDto {
     private int point;
     private LocalDateTime createdAt;
 
-    public static PointDto from(Point point) {
-        return PointDto.builder()
+    public static PointHistoryDto from(Point point) {
+        return PointHistoryDto.builder()
                 .pointId(point.getPointId())
                 .type(point.getType())
                 .calculation(point.getCalculation())

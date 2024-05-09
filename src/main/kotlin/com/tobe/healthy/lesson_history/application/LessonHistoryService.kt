@@ -3,8 +3,8 @@ package com.tobe.healthy.lesson_history.application
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.tobe.healthy.common.CustomPagingResponse
-import com.tobe.healthy.common.RedisKeyPrefix.TEMP_FILE_URI
-import com.tobe.healthy.common.RedisService
+import com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI
+import com.tobe.healthy.common.redis.RedisService
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.lesson_history.domain.dto.`in`.*
@@ -35,14 +35,14 @@ import java.util.*
 @Service
 @Transactional
 class LessonHistoryService(
-    private val lessonHistoryRepository: LessonHistoryRepository,
-    private val lessonHistoryFilesRepository: LessonHistoryFilesRepository,
-    private val memberRepository: MemberRepository,
-    private val trainerScheduleRepository: TrainerScheduleRepository,
-    private val lessonHistoryCommentRepository: LessonHistoryCommentRepository,
-    private val amazonS3: AmazonS3,
-    private val redisService: RedisService,
-    @Value("\${aws.s3.bucket-name}")
+        private val lessonHistoryRepository: LessonHistoryRepository,
+        private val lessonHistoryFilesRepository: LessonHistoryFilesRepository,
+        private val memberRepository: MemberRepository,
+        private val trainerScheduleRepository: TrainerScheduleRepository,
+        private val lessonHistoryCommentRepository: LessonHistoryCommentRepository,
+        private val amazonS3: AmazonS3,
+        private val redisService: RedisService,
+        @Value("\${aws.s3.bucket-name}")
     private val bucketName: String,
 ) {
 

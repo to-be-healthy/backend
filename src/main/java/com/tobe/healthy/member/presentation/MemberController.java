@@ -1,5 +1,6 @@
 package com.tobe.healthy.member.presentation;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.course.application.CourseService;
@@ -10,9 +11,10 @@ import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemoCommand;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
+import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.point.application.PointService;
-import com.tobe.healthy.point.domain.dto.out.PointGetResult;
+import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,8 +31,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members/v1")
@@ -44,6 +44,18 @@ public class MemberController {
 	private final CourseService courseService;
 	private final PointService pointService;
 	private final DietService dietService;
+
+	@Operation(summary = "학생 홈 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "학생 홈을 반환한다.")
+	})
+	@GetMapping("/home")
+	public ResponseHandler<StudentHomeResult> getStudentHome(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<StudentHomeResult>builder()
+				.data(memberService.getStudentHome(customMemberDetails.getMemberId()))
+				.message("학생 홈이 조회되었습니다.")
+				.build();
+	}
 
 	@Operation(summary = "내 정보 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청."),
@@ -140,34 +152,92 @@ public class MemberController {
 				.build();
 	}
 
+	/**
+	 * 운동기록 시작 ============================================================================================
+	 */
+
+	@Operation(summary = "내 운동기록 목록 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
+	})
+	@GetMapping("/me/workout-histories")
+	public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails loginMember,
+																			  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+																			  Pageable pageable) {
+		return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
+				.data(workoutService.getWorkoutHistory(loginMember.getMember(), loginMember.getMemberId(), pageable, searchDate))
+				.message("운동기록이 조회되었습니다.")
+				.build();
+	}
+
 	@Operation(summary = "학생의 운동기록 목록 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
 			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/{memberId}/workout-histories")
-	public ResponseHandler<List<WorkoutHistoryDto>> getWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails loginMember,
+	public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails loginMember,
 																	  @Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
 																	  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 																	  Pageable pageable) {
-		return ResponseHandler.<List<WorkoutHistoryDto>>builder()
+		return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
 				.data(workoutService.getWorkoutHistory(loginMember.getMember(), memberId, pageable, searchDate))
 				.message("운동기록이 조회되었습니다.")
 				.build();
 	}
 
-	@Operation(summary = "학생의 식단기록 목록 조회", responses = {
+	/**
+	 * 운동기록 끝 ============================================================================================
+	 */
+
+	/**
+	 * 식단기록 시작 ============================================================================================
+	 */
+
+	@Operation(summary = "내 식단기록 목록 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
+	})
+	@GetMapping("/me/diets")
+	public ResponseHandler<CustomPaging<DietDto>> getDiet(@AuthenticationPrincipal CustomMemberDetails loginMember,
+														  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+														  Pageable pageable) {
+		return ResponseHandler.<CustomPaging<DietDto>>builder()
+				.data(dietService.getDiet(loginMember.getMemberId(), pageable, searchDate))
+				.message("식단기록 조회되었습니다.")
+				.build();
+	}
+
+	@Operation(summary = "다른 학생의 식단기록 목록 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
 			@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/{memberId}/diets")
-	public ResponseHandler<List<DietDto>> getDiet(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
-												  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
-												  Pageable pageable) {
-		return ResponseHandler.<List<DietDto>>builder()
+	public ResponseHandler<CustomPaging<DietDto>> getDiet(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
+																	  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+																	  Pageable pageable) {
+		return ResponseHandler.<CustomPaging<DietDto>>builder()
 				.data(dietService.getDiet(memberId, pageable, searchDate))
 				.message("식단기록 조회되었습니다.")
 				.build();
 	}
+
+	@Operation(summary = "내 트레이너가 관리하는 학생들의 식단기록 목록 조회하기", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
+	})
+	@GetMapping("/my-trainer/diets")
+	public ResponseHandler<CustomPaging<DietDto>> getDietMyTrainer(@AuthenticationPrincipal CustomMemberDetails loginMember,
+														  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+														  Pageable pageable) {
+		return ResponseHandler.<CustomPaging<DietDto>>builder()
+				.data(dietService.getDietMyTrainer(loginMember.getMemberId(), pageable, searchDate))
+				.message("식단기록 조회되었습니다.")
+				.build();
+	}
+
+	/**
+	 * 식단기록 끝 ============================================================================================
+	 */
 
 	@Operation(summary = "학생이 본인의 수강권 조회", responses = {
 			@ApiResponse(responseCode = "404", description = "존재하지 않는 학생"),
@@ -204,10 +274,10 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "포인트 및 히스토리를 반환한다.")
 	})
 	@GetMapping("/point")
-	public ResponseHandler<PointGetResult> getPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-													@Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
-													Pageable pageable) {
-		return ResponseHandler.<PointGetResult>builder()
+	public ResponseHandler<PointDto> getPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+											  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+											  Pageable pageable) {
+		return ResponseHandler.<PointDto>builder()
 				.data(pointService.getPoint(customMemberDetails.getMember(), searchDate, pageable))
 				.message("포인트가 조회되었습니다.")
 				.build();
@@ -241,4 +311,20 @@ public class MemberController {
 				.message("닉네임을 지정하였습니다.")
 				.build();
 	}
+
+	@Operation(summary = "스케줄 공지 보기 여부를 변경한다.", description = "스케줄 공지 보기 여부를 변경한다.",
+			responses = {
+					@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
+					@ApiResponse(responseCode = "200", description = "스케줄 공지 보기 여부가 변경되었습니다.")
+			})
+	@PatchMapping("/schedule-notice")
+	public ResponseHandler<Boolean> changeScheduleNotice(@Parameter(description = "변경할 상태", example = "ENABLED")
+														  @RequestParam AlarmStatus alarmStatus,
+														  @AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<Boolean>builder()
+				.data(memberService.changeScheduleNotice(alarmStatus, member.getMemberId()))
+				.message("스케줄 공지 보기 여부가 변경되었습니다.")
+				.build();
+	}
+
 }

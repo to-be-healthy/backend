@@ -1,5 +1,6 @@
-package com.tobe.healthy.common;
+package com.tobe.healthy.common.redis;
 
+import com.tobe.healthy.common.EnumMapperType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

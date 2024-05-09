@@ -29,17 +29,21 @@ public class PointRepositoryCustomImpl implements PointRepositoryCustom {
         Long totalCnt = queryFactory
                 .select(point1.count())
                 .from(point1)
-                .where(point1.member.id.eq(memberId), convertDateFormat(searchDate))
+                .where(pointMemberIdEq(memberId), convertDateFormat(searchDate))
                 .fetchOne();
         List<com.tobe.healthy.point.domain.entity.Point> points =  queryFactory
                 .select(point1)
                 .from(point1)
-                .where(point1.member.id.eq(memberId), convertDateFormat(searchDate))
+                .where(pointMemberIdEq(memberId), convertDateFormat(searchDate))
                 .orderBy(point1.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
         return PageableExecutionUtils.getPage(points, pageable, ()-> totalCnt );
+    }
+
+    private BooleanExpression pointMemberIdEq(Long memberId) {
+        return point1.member.id.eq(memberId);
     }
 
     private BooleanExpression convertDateFormat(String searchDate) {
