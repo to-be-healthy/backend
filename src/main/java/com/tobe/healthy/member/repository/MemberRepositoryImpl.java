@@ -89,6 +89,29 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .fetch();
     }
 
+    public List<MemberInTeamResult> getBestStudent(Long trainerId) {
+        return queryFactory
+                .select(new QMemberInTeamResult(member.id, member.name, member.userId, member.email,
+                        trainerMemberMapping.ranking, course.totalLessonCnt, course.remainLessonCnt,
+                        member.nickname, memberProfile.fileUrl))
+                .from(trainerMemberMapping)
+                .innerJoin(trainerMemberMapping.member, member)
+                .on(trainerMemberMapping.member.id.eq(member.id))
+                .leftJoin(member.memberProfile, memberProfile)
+                .leftJoin(course)
+                .on(course.member.id.eq(member.id), course.remainLessonCnt.gt(0))
+                .where(mappingTrainerIdEq(trainerId)
+                        , memberTypeEq(STUDENT)
+                        , memberDelYnEq(false)
+                        , rankingTop1())
+                .orderBy(sortBy("ranking"))
+                .fetch();
+    }
+
+    private BooleanExpression rankingTop1() {
+        return trainerMemberMapping.ranking.eq(1);
+    }
+
     @Override
     public Page<Member> findAllUnattachedMembers(Long gymId, String searchValue, String sortValue, Pageable pageable) {
         Long totalCnt = queryFactory
