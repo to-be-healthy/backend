@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -53,19 +54,31 @@ public class StudentScheduleService {
 	private ScheduleCommandResponse settingMorningAndAfternoon(List<ScheduleCommandResult> schedule) {
 		List<ScheduleCommandResult> morning = schedule.stream()
 				.filter(s -> NOON.isAfter(s.getLessonStartTime()))
-				.peek(s -> { if(isExistsWaitingOrLessonDtEqToday(s)) s.setReservationStatus(SOLD_OUT); })
+				.peek(s -> {
+					if(isExistsWaitingAndLessonDtEqToday(s) || isBeforeStartTimeThenNow(s)){
+						s.setReservationStatus(SOLD_OUT);
+					}
+				})
 				.collect(Collectors.toList());
 
 		List<ScheduleCommandResult> afternoon = schedule.stream()
 				.filter(s -> NOON.isBefore(s.getLessonStartTime()))
-				.peek(s -> { if(isExistsWaitingOrLessonDtEqToday(s)) s.setReservationStatus(SOLD_OUT); })
+				.peek(s -> {
+					if(isExistsWaitingAndLessonDtEqToday(s) || isBeforeStartTimeThenNow(s)){
+						s.setReservationStatus(SOLD_OUT);
+					}
+				})
 				.collect(Collectors.toList());
 
 		return ScheduleCommandResponse.create(morning, afternoon);
 	}
 
-	private boolean isExistsWaitingOrLessonDtEqToday(ScheduleCommandResult schedule){
-		return schedule.getWaitingByName()!=null || schedule.getLessonDt().equals(LocalDate.now());
+	private boolean isBeforeStartTimeThenNow(ScheduleCommandResult schedule){
+		return schedule.getLessonStartTime().isBefore(LocalTime.now());
+	}
+
+	private boolean isExistsWaitingAndLessonDtEqToday(ScheduleCommandResult schedule){
+		return schedule.getWaitingByName()!=null && schedule.getLessonDt().equals(LocalDate.now());
 	}
 
 	public MyReservationResponse findAllMyReservation(Long memberId, ScheduleSearchCond searchCond) {
