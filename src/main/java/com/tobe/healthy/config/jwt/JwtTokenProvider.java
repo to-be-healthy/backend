@@ -1,5 +1,6 @@
-package com.tobe.healthy.config.security;
+package com.tobe.healthy.config.jwt;
 
+import com.tobe.healthy.config.security.CustomMemberDetailService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;

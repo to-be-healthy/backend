@@ -1,5 +1,7 @@
 package com.tobe.healthy.config.security;
 
+import com.tobe.healthy.config.jwt.JwtFilter;
+import com.tobe.healthy.config.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

@@ -13,7 +13,7 @@ import com.tobe.healthy.config.error.OAuthError.GoogleError;
 import com.tobe.healthy.config.error.OAuthError.KakaoError;
 import com.tobe.healthy.config.error.OAuthError.NaverError;
 import com.tobe.healthy.config.error.OAuthException;
-import com.tobe.healthy.config.security.JwtTokenGenerator;
+import com.tobe.healthy.config.jwt.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
 import com.tobe.healthy.member.domain.dto.in.*;

@@ -1,4 +1,4 @@
-package com.tobe.healthy.config.security;
+package com.tobe.healthy.config.jwt;
 
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.gym.domain.entity.Gym;

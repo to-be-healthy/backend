@@ -1,4 +1,4 @@
-package com.tobe.healthy.config.security;
+package com.tobe.healthy.config.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
