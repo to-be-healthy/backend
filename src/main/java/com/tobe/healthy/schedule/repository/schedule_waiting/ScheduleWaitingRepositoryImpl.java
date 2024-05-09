@@ -1,5 +1,7 @@
 package com.tobe.healthy.schedule.repository.schedule_waiting;
 
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.QMember;
 import com.tobe.healthy.schedule.domain.dto.out.MyScheduleWaiting;
@@ -9,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
@@ -29,10 +32,23 @@ public class ScheduleWaitingRepositoryImpl implements ScheduleWaitingRepositoryC
 				.innerJoin(scheduleWaiting.schedule, schedule).fetchJoin()
 				.innerJoin(scheduleWaiting.member, new QMember("member")).fetchJoin()
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.where(scheduleWaiting.member.id.eq(memberId), scheduleWaiting.delYn.isFalse(),
-						scheduleWaiting.schedule.lessonDt.goe(LocalDate.now()))
+				.where(scheduleWaitingMemberIdEq(memberId), delYnFalse(),
+						lessonDateTimeAfterYesterday())
 				.orderBy(scheduleWaiting.schedule.lessonDt.asc(), scheduleWaiting.schedule.lessonStartTime.asc())
 				.fetch();
 		return results.stream().map(MyScheduleWaiting::from).collect(toList());
+	}
+
+	private BooleanExpression delYnFalse() {
+		return scheduleWaiting.delYn.isFalse();
+	}
+
+	private BooleanExpression scheduleWaitingMemberIdEq(Long memberId) {
+		return scheduleWaiting.member.id.eq(memberId);
+	}
+
+	private Predicate lessonDateTimeAfterYesterday() {
+		return schedule.lessonDt.after(LocalDate.now().plusDays(1))
+				.or(schedule.lessonDt.goe(LocalDate.now().plusDays(1)).and(schedule.lessonStartTime.after(LocalTime.now())));
 	}
 }
