@@ -399,16 +399,11 @@ public class MemberService {
 
     private MemberProfile getGoogleProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
-        String extension = ".jpg";
-        String savedFileName = "profile/" + Utils.createFileUUID() + extension;
+        String savedFileName = "profile/" + Utils.createFileUUID();
         ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
-        return qwe(member, image, savedFileName, objectMetadata);
-    }
-
-    private MemberProfile qwe(Member member, byte[] image, String savedFileName, ObjectMetadata objectMetadata) {
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
-            amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
-            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+            amazonS3.putObject("to-be-healthy-bucket", savedFileName, inputStream, objectMetadata);
+            String fileUrl = amazonS3.getUrl("to-be-healthy-bucket", savedFileName).toString();
             return MemberProfile.create(fileUrl, member);
         } catch (IOException e) {
             log.error("error => {}", e);
