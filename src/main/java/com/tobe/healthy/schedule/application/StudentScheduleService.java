@@ -55,7 +55,7 @@ public class StudentScheduleService {
 		List<ScheduleCommandResult> morning = schedule.stream()
 				.filter(s -> NOON.isAfter(s.getLessonStartTime()))
 				.peek(s -> {
-					if(isExistsWaitingAndLessonDtEqToday(s) || isBeforeLessonDateTimeThenNow(s)){
+					if(isExistsWaitingOrLessonDtEqToday(s) || isBeforeLessonDateTimeThenNow(s)){
 						s.setReservationStatus(SOLD_OUT);
 					}
 				})
@@ -64,7 +64,7 @@ public class StudentScheduleService {
 		List<ScheduleCommandResult> afternoon = schedule.stream()
 				.filter(s -> NOON.isBefore(s.getLessonStartTime()))
 				.peek(s -> {
-					if(isExistsWaitingAndLessonDtEqToday(s) || isBeforeLessonDateTimeThenNow(s)){
+					if(isExistsWaitingOrLessonDtEqToday(s) || isBeforeLessonDateTimeThenNow(s)){
 						s.setReservationStatus(SOLD_OUT);
 					}
 				})
@@ -78,8 +78,8 @@ public class StudentScheduleService {
 		return lessonDateTime.isBefore(LocalDateTime.now());
 	}
 
-	private boolean isExistsWaitingAndLessonDtEqToday(ScheduleCommandResult schedule){
-		return schedule.getWaitingByName()!=null && schedule.getLessonDt().equals(LocalDate.now());
+	private boolean isExistsWaitingOrLessonDtEqToday(ScheduleCommandResult schedule){
+		return schedule.getWaitingByName()!=null || schedule.getLessonDt().equals(LocalDate.now());
 	}
 
 	public MyReservationResponse findAllMyReservation(Long memberId, ScheduleSearchCond searchCond) {
