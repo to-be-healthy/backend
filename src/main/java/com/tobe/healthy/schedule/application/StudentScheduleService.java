@@ -73,7 +73,9 @@ public class StudentScheduleService {
 	//수업시간 24시간 전부터는 대기 불가
 	private boolean validateWaitingBefore24Hour(ScheduleCommandResult schedule){
 		LocalDateTime before24hour = LocalDateTime.of(schedule.getLessonDt().minusDays(1), schedule.getLessonStartTime());
-		return LocalDateTime.now().isAfter(before24hour) && schedule.getWaitingByName()==null;
+		return LocalDateTime.now().isAfter(before24hour)
+				&& schedule.getApplicantName()!=null
+				&& schedule.getWaitingByName()==null;
 	}
 
 	//수업시간 30분 전부터는 예약 불가
@@ -90,12 +92,15 @@ public class StudentScheduleService {
 
 	//금일 대기 불가
 	private boolean validateWaitingToday(ScheduleCommandResult schedule){
-		return schedule.getLessonDt().equals(LocalDate.now()) && schedule.getWaitingByName()==null;
+		return schedule.getLessonDt().equals(LocalDate.now())
+				&& schedule.getApplicantName()!=null
+				&& schedule.getWaitingByName()==null;
 	}
 
 	//대기자 있음
 	private boolean existsWaiting(ScheduleCommandResult schedule){
-		return schedule.getWaitingByName()!=null;
+		return schedule.getApplicantName()!=null
+				&& schedule.getWaitingByName()!=null;
 	}
 
 	public MyReservationResponse findAllMyReservation(Long memberId, ScheduleSearchCond searchCond) {
