@@ -6,34 +6,36 @@ import java.time.LocalTime
 
 data class LessonResponse(
     val trainerName: String?,
-    val schedule: Map<LocalDate?, List<LessonDetailResponse>>
+    val schedule: Map<LocalDate?, List<LessonDetailResponse?>>
 ) {
     companion object {
-        fun from(schedule: MutableList<Schedule>): LessonResponse? {
-            val groupingData = schedule.groupBy { it?.lessonDt }
-                .mapValues { entry ->
-                    entry.value.map { schedule ->
-                        LessonDetailResponse(
-                            scheduleId = schedule.id,
-                            lessonStartTime = schedule.lessonStartTime,
-                            lessonEndTime = schedule.lessonEndTime,
-                            reservationStatus = schedule.reservationStatus.name,
-                            applicantName = schedule.applicant?.name
-                        )
+        fun from(schedule: MutableList<Schedule?>): LessonResponse? {
+            return schedule?.let {
+                val groupingData = schedule.groupBy { it?.lessonDt }
+                    .mapValues { entry ->
+                        entry.value.map { schedule ->
+                            LessonDetailResponse(
+                                scheduleId = schedule?.id,
+                                lessonStartTime = schedule?.lessonStartTime,
+                                lessonEndTime = schedule?.lessonEndTime,
+                                reservationStatus = schedule?.reservationStatus?.name,
+                                applicantName = schedule?.applicant?.name
+                            )
+                        }
                     }
-                }
-            return LessonResponse(
-                trainerName = "${schedule.firstOrNull()?.trainer?.name} 트레이너",
-                schedule = groupingData
-            )
+                LessonResponse(
+                    trainerName = schedule.firstOrNull()?.trainer?.name?.let { "${it} 트레이너" } ?: null,
+                    schedule = groupingData
+                )
+            }
         }
     }
 
     data class LessonDetailResponse(
-        val scheduleId: Long,
+        val scheduleId: Long?,
         val lessonStartTime: LocalTime?,
         val lessonEndTime: LocalTime?,
-        val reservationStatus: String,
+        val reservationStatus: String?,
         val applicantName: String?
     )
 }

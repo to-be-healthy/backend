@@ -1,7 +1,7 @@
 package com.tobe.healthy.push.presentation
 
 import com.tobe.healthy.ApiResultResponse
-import com.tobe.healthy.common.RedisService
+import com.tobe.healthy.common.redis.RedisService
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.push.application.FirebaseCloudMessageService
 import com.tobe.healthy.push.domain.NotificationRequest
@@ -21,7 +21,6 @@ class PushRestController(
     @PostMapping("/register")
     fun registerFcmToken(@RequestBody request: RegisterTokenRequest,
                          @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterTokenResponse> {
-        redisService.setValuesWithTimeout("123", "123", 60000)
         return ApiResultResponse(
             message = "토큰을 저장하였습니다.",
             data = firebaseCloudMessageService.registerFcmToken(request, member.memberId)
