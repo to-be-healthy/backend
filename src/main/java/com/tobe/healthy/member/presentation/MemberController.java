@@ -11,7 +11,6 @@ import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemoCommand;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
-import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
@@ -44,18 +43,6 @@ public class MemberController {
 	private final CourseService courseService;
 	private final PointService pointService;
 	private final DietService dietService;
-
-	@Operation(summary = "학생 홈 조회", responses = {
-			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-			@ApiResponse(responseCode = "200", description = "학생 홈을 반환한다.")
-	})
-	@GetMapping("/home")
-	public ResponseHandler<StudentHomeResult> getStudentHome(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<StudentHomeResult>builder()
-				.data(memberService.getStudentHome(customMemberDetails.getMemberId()))
-				.message("학생 홈이 조회되었습니다.")
-				.build();
-	}
 
 	@Operation(summary = "내 정보 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청."),

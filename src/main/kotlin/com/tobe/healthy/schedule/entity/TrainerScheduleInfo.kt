@@ -17,9 +17,13 @@ import java.time.LocalTime
 @ToString
 class TrainerScheduleInfo(
     var lessonStartTime: LocalTime,
+
     var lessonEndTime: LocalTime,
+
     var lunchStartTime: LocalTime? = null,
+
     var lunchEndTime: LocalTime? = null,
+
     @Enumerated(STRING)
     var lessonTime: LessonTime,
 
