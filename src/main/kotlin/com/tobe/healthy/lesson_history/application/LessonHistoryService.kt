@@ -41,7 +41,7 @@ class LessonHistoryService(
         private val amazonS3: AmazonS3,
         private val redisService: RedisService,
         @Value("\${aws.s3.bucket-name}")
-    private val bucketName: String,
+        private val bucketName: String,
 ) {
 
     fun registerLessonHistory(request: RegisterLessonHistoryCommand, trainerId: Long): Boolean {

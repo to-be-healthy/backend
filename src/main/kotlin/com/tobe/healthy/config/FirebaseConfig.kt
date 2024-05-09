@@ -20,7 +20,10 @@ class FirebaseConfig(
             val options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(it))
                 .build()
-            return FirebaseApp.initializeApp(options)
+            if (FirebaseApp.getApps().isEmpty()) {
+                return FirebaseApp.initializeApp(options)
+            }
+            return FirebaseApp.getInstance()
         }
     }
 }

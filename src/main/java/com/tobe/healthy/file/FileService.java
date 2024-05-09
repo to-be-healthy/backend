@@ -3,6 +3,7 @@ package com.tobe.healthy.file;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.tobe.healthy.common.Utils;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.entity.Diet;
@@ -50,9 +51,7 @@ public class FileService {
         for (MultipartFile file : uploadFiles) {
             if (!file.isEmpty()) {
                 try (InputStream inputStream = file.getInputStream()) {
-                    ObjectMetadata objectMetadata = new ObjectMetadata();
-                    objectMetadata.setContentLength(file.getSize());
-                    objectMetadata.setContentType(file.getContentType());
+                    ObjectMetadata objectMetadata = Utils.createObjectMetadata(file.getSize(), file.getContentType());
                     String savedFileName = folder + "/" + System.currentTimeMillis() + "-" + randomUUID();
                     amazonS3.putObject(
                             "to-be-healthy-bucket",

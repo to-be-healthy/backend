@@ -44,8 +44,9 @@ public class SecurityConfig {
                 exceptionHandling.accessDeniedHandler(accessDeniedHandler);
             })
             .authorizeHttpRequests(
-                authorize -> authorize.requestMatchers("/auth/v1/**", "/favicon.ico", "/file/**", "/v3/**", "/swagger-ui/**", "/fcm", "/firebase-messaging-sw.js").permitAll()
-									  .anyRequest().authenticated())
+                authorize -> authorize
+                        .requestMatchers("/auth/v1/**", "/favicon.ico", "/file/**", "/v3/**", "/swagger-ui/**", "/fcm", "/firebase-messaging-sw.js", "/*.js").permitAll()
+                        .anyRequest().authenticated())
             .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
             .build();
     }
