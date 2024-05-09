@@ -7,3 +7,13 @@ include:
   - name: ThrowablePrintStackTrace
   - name: DuplicatedCode
   - name: UnusedSymbol
+exclude:
+  - name: LombokSetterMayBeUsed
+    paths:
+      - .idea\modules
+  - name: SimplifyStreamApiCallChains
+    paths:
+      - .idea\modules
+  - name: RemoveCurlyBracesFromTemplate
+    paths:
+      - .idea\modules
