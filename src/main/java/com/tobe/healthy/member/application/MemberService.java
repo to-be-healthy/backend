@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tobe.healthy.common.Utils;
 import com.tobe.healthy.common.redis.RedisKeyPrefix;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.OAuthProperties;
@@ -107,7 +108,8 @@ public class MemberService {
             throw new CustomException(MEMBER_EMAIL_DUPLICATION);
         });
 
-        String authKey = getAuthCode();
+        String authKey = Utils.getAuthCode(6);
+
         redisService.setValuesWithTimeout(email, authKey, EMAIL_AUTH_TIMEOUT); // 3분
 
         // 3. 이메일에 인증번호 전송한다.
@@ -535,18 +537,6 @@ public class MemberService {
         String resetPW = RandomStringUtils.random(12, true, true);
         member.resetPassword(passwordEncoder.encode(resetPW));
         mailService.sendResetPassword(email, resetPW);
-    }
-
-    private String getAuthCode() {
-        Random random = new Random();
-        StringBuilder buffer = new StringBuilder();
-
-        while (buffer.length() < 6) {
-            int num = random.nextInt(10);
-            buffer.append(num);
-        }
-
-        return buffer.toString();
     }
 
     public MemberJoinCommandResult joinWithInvitation(MemberJoinCommand request) {

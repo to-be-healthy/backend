@@ -24,10 +24,10 @@ class Gym(
 
 ) : BaseTimeEntity<Gym, Long>() {
     companion object {
-        fun registerGym(name: String, accessKey: Int): Gym {
+        fun registerGym(name: String, accessKey: String): Gym {
             return Gym(
                 name = name,
-                joinCode = accessKey
+                joinCode = accessKey.toInt()
             )
         }
     }

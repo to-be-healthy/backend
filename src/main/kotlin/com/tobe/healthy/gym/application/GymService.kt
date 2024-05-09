@@ -1,5 +1,6 @@
 package com.tobe.healthy.gym.application
 
+import com.tobe.healthy.common.Utils
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.gym.domain.dto.out.GymListCommandResult
@@ -53,7 +54,7 @@ class GymService(
             throw CustomException(GYM_DUPLICATION)
         }
 
-        val joinCode = getJoinCode()
+        val joinCode = Utils.getAuthCode(6)
 
         val gym = Gym.registerGym(name, joinCode)
 
