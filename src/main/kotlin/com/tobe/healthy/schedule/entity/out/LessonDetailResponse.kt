@@ -19,7 +19,8 @@ data class LessonResponse(
                                 lessonStartTime = schedule?.lessonStartTime,
                                 lessonEndTime = schedule?.lessonEndTime,
                                 reservationStatus = schedule?.reservationStatus?.name,
-                                applicantName = schedule?.applicant?.name
+                                applicantName = schedule?.applicant?.name,
+                                waitingStudentName = schedule?.scheduleWaiting?.firstOrNull()?.member?.name
                             )
                         }
                     }
@@ -36,6 +37,7 @@ data class LessonResponse(
         val lessonStartTime: LocalTime?,
         val lessonEndTime: LocalTime?,
         val reservationStatus: String?,
-        val applicantName: String?
+        val applicantName: String?,
+        val waitingStudentName: String?
     )
 }
