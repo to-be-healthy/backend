@@ -69,10 +69,10 @@ class TrainerScheduleRepositoryImpl(
         val response = LessonResponse.from(results)
 
         response?.let {
-            val trainerTodaySchedule = TrainerTodayScheduleResponse(trainerName = response?.trainerName)
+            val trainerTodaySchedule = TrainerTodayScheduleResponse(trainerName = response.trainerName)
 
-            response?.schedule?.forEach { (key) ->
-                response?.schedule[key]?.filter {
+            response.schedule.forEach { (key) ->
+                response.schedule[key]?.filter {
                     if (it?.lessonStartTime?.isBefore(LocalTime.now()) == true) {
                         trainerTodaySchedule.before.add(it)
                     } else {

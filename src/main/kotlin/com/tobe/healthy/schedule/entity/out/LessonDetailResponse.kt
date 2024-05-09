@@ -10,7 +10,7 @@ data class LessonResponse(
 ) {
     companion object {
         fun from(schedule: MutableList<Schedule?>): LessonResponse? {
-            return schedule?.let {
+            return schedule.let {
                 val groupingData = schedule.groupBy { it?.lessonDt }
                     .mapValues { entry ->
                         entry.value.map { schedule ->
@@ -24,7 +24,7 @@ data class LessonResponse(
                         }
                     }
                 LessonResponse(
-                    trainerName = schedule.firstOrNull()?.trainer?.name?.let { "${it} 트레이너" } ?: null,
+                    trainerName = schedule.firstOrNull()?.trainer?.name?.let { "${it} 트레이너" },
                     schedule = groupingData
                 )
             }
