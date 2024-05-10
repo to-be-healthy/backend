@@ -1,4 +1,4 @@
-package com.tobe.healthy.common;
+package com.tobe.healthy.common.enums;
 
 public interface EnumMapperType {
 	String getCode();

@@ -1,6 +1,6 @@
 package com.tobe.healthy.schedule.domain.entity;
 
-import com.tobe.healthy.common.EnumMapperType;
+import com.tobe.healthy.common.enums.EnumMapperType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

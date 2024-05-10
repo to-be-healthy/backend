@@ -1,5 +1,11 @@
 package com.tobe.healthy.config.security;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
+import com.tobe.healthy.config.jwt.JwtFilter;
+import com.tobe.healthy.config.jwt.JwtTokenProvider;
+import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -14,11 +20,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-
-import java.util.Collections;
-import java.util.List;
-
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Slf4j
 @EnableWebSecurity

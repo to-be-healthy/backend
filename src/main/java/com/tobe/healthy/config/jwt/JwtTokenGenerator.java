@@ -1,4 +1,6 @@
-package com.tobe.healthy.config.security;
+package com.tobe.healthy.config.jwt;
+
+import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.gym.domain.entity.Gym;
@@ -7,16 +9,13 @@ import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import static io.jsonwebtoken.SignatureAlgorithm.HS256;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenGenerator {

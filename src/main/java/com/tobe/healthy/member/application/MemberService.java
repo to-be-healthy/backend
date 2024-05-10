@@ -1,5 +1,7 @@
 package com.tobe.healthy.member.application;
 
+import static com.tobe.healthy.common.Utils.createProfileFileName;
+import static com.tobe.healthy.common.Utils.validateUserId;
 import static com.tobe.healthy.config.error.ErrorCode.CONFIRM_PASSWORD_NOT_MATCHED;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
 import static com.tobe.healthy.config.error.ErrorCode.INVITE_LINK_NOT_FOUND;
@@ -39,7 +41,7 @@ import com.tobe.healthy.config.error.OAuthError.GoogleError;
 import com.tobe.healthy.config.error.OAuthError.KakaoError;
 import com.tobe.healthy.config.error.OAuthError.NaverError;
 import com.tobe.healthy.config.error.OAuthException;
-import com.tobe.healthy.config.security.JwtTokenGenerator;
+import com.tobe.healthy.config.jwt.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
 import com.tobe.healthy.member.domain.dto.in.IdToken;
@@ -75,7 +77,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -118,7 +119,7 @@ public class MemberService {
     private String bucketName;
 
     public boolean validateUserIdDuplication(String userId) {
-        if (userId.length() < 4) {
+        if (validateUserId(userId)) {
             throw new CustomException(MEMBER_ID_NOT_VALID);
         }
         memberRepository.findByUserId(userId).ifPresent(m -> {
@@ -181,19 +182,17 @@ public class MemberService {
         if (!request.getPassword().equals(request.getPasswordConfirm())) {
             throw new CustomException(CONFIRM_PASSWORD_NOT_MATCHED);
         }
-        String regexp = "^[A-Za-z0-9]+$";
-        if (request.getPassword().length() < 8 || !Pattern.matches(regexp, request.getPassword())) {
+        if (Utils.validatePassword(request.getPassword())) {
             throw new CustomException(PASSWORD_POLICY_VIOLATION);
         }
     }
 
     private void validateName(String name) {
-        if (name.length() < 2) {
+        if (Utils.validateNameLength(name)) {
             throw new CustomException(MEMBER_NAME_LENGTH_NOT_VALID);
         }
 
-        String regexp = "^[가-힣A-Za-z]+$";
-        if (!Pattern.matches(regexp, name)) {
+        if (Utils.validateNameFormat(name)) {
             throw new CustomException(MEMBER_NAME_NOT_VALID);
         }
     }
@@ -256,6 +255,10 @@ public class MemberService {
             throw new CustomException(NOT_MATCH_PASSWORD);
         }
 
+        if (Utils.validatePassword(request.getChangePassword())) {
+            throw new CustomException(PASSWORD_POLICY_VIOLATION);
+        }
+
         Member member = memberRepository.findById(memberId)
                 .filter(m -> passwordEncoder.matches(request.getCurrPassword1(), m.getPassword()))
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
@@ -273,14 +276,14 @@ public class MemberService {
 
         if (!uploadFile.isEmpty()) {
             ObjectMetadata objectMetadata = getObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
-            String savedFileName = "profile/" + createFileUUID();
+            String savedFileName = createProfileFileName();
 
             try (InputStream inputStream = uploadFile.getInputStream()) {
                 amazonS3.putObject(
-                        bucketName,
-                        savedFileName,
-                        inputStream,
-                        objectMetadata
+                    bucketName,
+                    savedFileName,
+                    inputStream,
+                    objectMetadata
                 );
                 String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
                 MemberProfile memberProfile = MemberProfile.create(fileUrl, member);
@@ -296,6 +299,7 @@ public class MemberService {
     public Boolean changeName(String name, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        validateName(name);
         member.changeName(name);
         return true;
     }
@@ -413,7 +417,7 @@ public class MemberService {
 
     private MemberProfile getProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
-        String savedFileName = "profile/" + createFileUUID();
+        String savedFileName = createProfileFileName();
         ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(
@@ -432,10 +436,16 @@ public class MemberService {
 
     private MemberProfile getGoogleProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
-        String extension = ".jpg";
-        String savedFileName = "profile/" + createFileUUID() + extension;
+        String savedFileName = createProfileFileName();
         ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
-        return qwe(member, image, savedFileName, objectMetadata);
+        try (InputStream inputStream = new ByteArrayInputStream(image)) {
+            amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+            return MemberProfile.create(fileUrl, member);
+        } catch (IOException e) {
+            log.error("error => {}", e);
+            throw new CustomException(FILE_UPLOAD_ERROR);
+        }
     }
 
     private MemberProfile qwe(Member member, byte[] image, String savedFileName, ObjectMetadata objectMetadata) {
@@ -548,10 +558,6 @@ public class MemberService {
             log.error("error => {}", e.getStackTrace()[0]);
         }
         return responseMono.share().block();
-    }
-
-    private String createFileUUID() {
-        return System.currentTimeMillis() + "-" + UUID.randomUUID();
     }
 
     private void validateDuplicationUserId(String userId) {
