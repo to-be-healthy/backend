@@ -1,7 +1,7 @@
 package com.tobe.healthy.member.application;
 
 import static com.tobe.healthy.common.Utils.EMAIL_AUTH_TIMEOUT;
-import static com.tobe.healthy.common.Utils.createProfileFileName;
+import static com.tobe.healthy.common.Utils.createFileName;
 import static com.tobe.healthy.common.Utils.validateUserId;
 import static com.tobe.healthy.config.error.ErrorCode.CONFIRM_PASSWORD_NOT_MATCHED;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
@@ -276,7 +276,7 @@ public class MemberService {
 
         if (!uploadFile.isEmpty()) {
             ObjectMetadata objectMetadata = getObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
-            String savedFileName = createProfileFileName();
+            String savedFileName = createFileName("profile/");
 
             try (InputStream inputStream = uploadFile.getInputStream()) {
                 amazonS3.putObject(
@@ -417,7 +417,7 @@ public class MemberService {
 
     private MemberProfile getProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
-        String savedFileName = createProfileFileName();
+        String savedFileName = createFileName("profile/");
         ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(
@@ -436,7 +436,7 @@ public class MemberService {
 
     private MemberProfile getGoogleProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
-        String savedFileName = createProfileFileName();
+        String savedFileName = createFileName("profile/");
         ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);

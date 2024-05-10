@@ -2,7 +2,8 @@ package com.tobe.healthy.lesson_history.application
 
 import com.amazonaws.services.s3.AmazonS3
 import com.tobe.healthy.common.CustomPagingResponse
-import com.tobe.healthy.common.Utils
+import com.tobe.healthy.common.Utils.createFileName
+import com.tobe.healthy.common.Utils.createObjectMetadata
 import com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI
 import com.tobe.healthy.common.redis.RedisService
 import com.tobe.healthy.config.error.CustomException
@@ -266,8 +267,8 @@ class LessonHistoryService(
     }
 
     private fun putFile(uploadFile: MultipartFile): String {
-        val objectMetadata = Utils.createObjectMetadata(uploadFile.size, uploadFile.contentType)
-        val savedFileName = "lesson-history/" + Utils.createFileUUID()
+        val objectMetadata = createObjectMetadata(uploadFile.size, uploadFile.contentType)
+        val savedFileName =  createFileName("lesson-history/")
         amazonS3.putObject(
             bucketName,
             savedFileName,
