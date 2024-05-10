@@ -1,5 +1,6 @@
 package com.tobe.healthy.member.application;
 
+import static com.tobe.healthy.common.Utils.EMAIL_AUTH_TIMEOUT;
 import static com.tobe.healthy.common.Utils.createProfileFileName;
 import static com.tobe.healthy.common.Utils.validateUserId;
 import static com.tobe.healthy.config.error.ErrorCode.CONFIRM_PASSWORD_NOT_MATCHED;
@@ -114,7 +115,6 @@ public class MemberService {
     private final CourseService courseService;
     private final MemberProfileRepository memberProfileRepository;
 
-    private static final Integer EMAIL_AUTH_TIMEOUT = 3 * 60 * 1000;
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
@@ -229,9 +229,9 @@ public class MemberService {
         Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         return new MemberFindIdCommandResult(
-                member.getUserId().substring(member.getUserId().length() - 3) + "**",
-                member.getCreatedAt()
-                );
+            member.getUserId().substring(member.getUserId().length() - 3) + "**",
+                   member.getCreatedAt()
+        );
     }
 
     public String findMemberPW(MemberFindPWCommand request) {
@@ -438,17 +438,6 @@ public class MemberService {
         byte[] image = getProfileImage(profileImage);
         String savedFileName = createProfileFileName();
         ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
-        try (InputStream inputStream = new ByteArrayInputStream(image)) {
-            amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
-            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
-            return MemberProfile.create(fileUrl, member);
-        } catch (IOException e) {
-            log.error("error => {}", e);
-            throw new CustomException(FILE_UPLOAD_ERROR);
-        }
-    }
-
-    private MemberProfile qwe(Member member, byte[] image, String savedFileName, ObjectMetadata objectMetadata) {
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
             String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();

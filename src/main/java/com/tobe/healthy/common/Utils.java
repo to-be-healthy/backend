@@ -5,6 +5,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.RandomStringUtils;
 
 public class Utils {
+    public static final Integer EMAIL_AUTH_TIMEOUT = 3 * 60 * 1000;
+
     public static String getAuthCode(int num) {
         return RandomStringUtils.randomNumeric(num);
     }
