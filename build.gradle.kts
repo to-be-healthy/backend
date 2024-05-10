@@ -84,8 +84,8 @@ dependencies {
     kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
-    testImplementation("io.kotest:kotest-assertions-core:5.8.1")
-    testImplementation("io.kotest:kotest-runner-junit5:5.8.1")
+    testImplementation("io.kotest:kotest-assertions-core:5.9.0")
+    testImplementation("io.kotest:kotest-runner-junit5:5.9.0")
     testImplementation("io.mockk:mockk:1.13.10")
     testCompileOnly("io.github.microutils:kotlin-logging-jvm:4.0.0-beta-2")
 }
