@@ -27,11 +27,11 @@ data class RegisterDefaultLessonTimeRequest(
     val sessionTime: LessonTime
 ) {
     init {
-        if (!startTime.isBefore(endTime)) {
-            throw CustomException(LUNCH_TIME_INVALID)
-        }
-        if (lunchStartTime?.isBefore(lunchEndTime) == false) {
+        if (startTime?.isAfter(endTime) == true || startTime == endTime) {
             throw CustomException(START_TIME_AFTER_END_TIME)
+        }
+        if (lunchStartTime?.isAfter(lunchEndTime) == true) {
+            throw CustomException(LUNCH_TIME_INVALID)
         }
     }
 }

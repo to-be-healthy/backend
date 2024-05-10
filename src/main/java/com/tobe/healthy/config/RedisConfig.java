@@ -1,4 +1,4 @@
-package com.tobe.healthy.config.error;
+package com.tobe.healthy.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
