@@ -3,10 +3,10 @@ package com.tobe.healthy.gym.presentation
 import com.tobe.healthy.ApiResultResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.gym.application.GymService
-import com.tobe.healthy.gym.domain.dto.out.GymListCommandResult
+import com.tobe.healthy.gym.domain.dto.out.GymListResponse
 import com.tobe.healthy.gym.domain.dto.out.RegisterGymResponse
-import com.tobe.healthy.gym.domain.dto.out.SelectMyGymResponse
-import com.tobe.healthy.gym.domain.dto.out.TrainerCommandResult
+import com.tobe.healthy.gym.domain.dto.out.SelectMyGymCommandResponse
+import com.tobe.healthy.gym.domain.dto.out.TrainersOfGymResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -39,7 +39,7 @@ class GymController(
         responses = [ApiResponse(responseCode = "200", description = "모든 헬스장을 조회한다.")],
     )
     @GetMapping
-    fun findAllGym(): ApiResultResponse<List<GymListCommandResult>> {
+    fun findAllGym(): ApiResultResponse<List<GymListResponse>> {
         return ApiResultResponse(
             data = gymService.findAllGym(),
             message = "모든 헬스장을 조회하였습니다."
@@ -59,7 +59,7 @@ class GymController(
     fun selectMyGym(@Parameter(description = "헬스장 ID") @PathVariable gymId: Long,
                     @Parameter(description = "6자리 난수로 구성된 헬스장 가입 번호") joinCode: Int,
                     @AuthenticationPrincipal member: CustomMemberDetails,
-    ): ApiResultResponse<SelectMyGymResponse> {
+    ): ApiResultResponse<SelectMyGymCommandResponse> {
         return ApiResultResponse(
             data = gymService.selectMyGym(gymId, joinCode, member.memberId),
             message = "내 헬스장으로 등록되었습니다."
@@ -72,7 +72,7 @@ class GymController(
         responses = [ApiResponse(responseCode = "200", description = "헬스장에 모든 트레이너 조회완료")],
     )
     @GetMapping("/{gymId}/trainers")
-    fun findAllTrainersByGym(@Parameter(description = "헬스장 ID") @PathVariable(name = "gymId") gymId: Long): ApiResultResponse<List<TrainerCommandResult?>> {
+    fun findAllTrainersByGym(@Parameter(description = "헬스장 ID") @PathVariable(name = "gymId") gymId: Long): ApiResultResponse<List<TrainersOfGymResponse?>> {
         return ApiResultResponse(
             data = gymService.findAllTrainersByGym(gymId),
             message = "헬스장의 모든 트레이너들을 조회하였습니다."
