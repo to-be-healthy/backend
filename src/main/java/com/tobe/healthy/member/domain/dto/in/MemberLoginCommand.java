@@ -15,15 +15,15 @@ import lombok.ToString;
 @NoArgsConstructor
 @Schema(description = "로그인 DTO")
 public class MemberLoginCommand {
-    @Schema(description = "아이디", example = "to-be-healthy")
+    @Schema(description = "아이디", example = "healthy-trainer0")
     @NotEmpty(message = "아이디를 입력해 주세요.")
     private String userId;
 
-    @Schema(description = "비밀번호", example = "zxcvbnm11")
+    @Schema(description = "비밀번호", example = "12345678a")
     @NotEmpty(message = "비밀번호를 입력해 주세요.")
     private String password;
 
-    @Schema(description = "회원 구분" , example = "STUDENT")
+    @Schema(description = "회원 구분" , example = "TRAINER")
     @NotNull(message = "회원 구분이 필요합니다.")
     private MemberType memberType;
 }

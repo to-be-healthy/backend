@@ -1,7 +1,5 @@
 package com.tobe.healthy.config.jwt;
 
-import static io.jsonwebtoken.SignatureAlgorithm.HS256;
-
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.Member;
@@ -9,13 +7,17 @@ import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+
+import static io.jsonwebtoken.SignatureAlgorithm.HS256;
 
 @Component
 public class JwtTokenGenerator {
@@ -37,9 +39,9 @@ public class JwtTokenGenerator {
     public Tokens create(Member member) {
         long nowInMilliseconds = new Date().getTime();
 
-        String accessToken = createAccessToken(member.getId(), member.getUserId(), member.getMemberType().name(), getAccessTokenValid(nowInMilliseconds));
+        String accessToken = createAccessToken(member.getId(), member.getUserId(), member.getMemberType().name(), getAccessTokenValid(nowInMilliseconds), member.getGym());
 
-        String refreshToken = createRefreshToken(member.getId(), member.getUserId(), getRefreshTokenValid(nowInMilliseconds), member.getMemberType().name());
+        String refreshToken = createRefreshToken(member.getId(), member.getUserId(), getRefreshTokenValid(nowInMilliseconds), member.getMemberType().name(), member.getGym());
 
         redisService.setValuesWithTimeout(member.getUserId(), refreshToken, getRefreshTokenValid(nowInMilliseconds).getTime());
 
@@ -56,16 +58,12 @@ public class JwtTokenGenerator {
 
     public Tokens exchangeAccessToken(Long memberId, String userId, MemberType memberType, String refreshToken, Gym gym) {
         long nowInMilliseconds = new Date().getTime();
-        String changedAccessToken = createAccessToken(memberId, userId, memberType.name(), getAccessTokenValid(nowInMilliseconds));
+        String changedAccessToken = createAccessToken(memberId, userId, memberType.name(), getAccessTokenValid(nowInMilliseconds), gym);
         return new Tokens(changedAccessToken, refreshToken, userId, memberType, gym);
     }
 
-    private String createAccessToken(Long memberId, String userId, String memberType, Date expiry) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("memberId", memberId);
-        claims.put("userId", userId);
-        claims.put("memberType", memberType);
-        claims.put("uuid", UUID.randomUUID().toString());
+    private String createAccessToken(Long memberId, String userId, String memberType, Date expiry, Gym gym) {
+        Map<String, Object> claims = createClaims(memberId, userId, memberType, gym);
         return Jwts.builder()
                 .claims(claims)
                 .setIssuedAt(new Date())
@@ -74,17 +72,23 @@ public class JwtTokenGenerator {
                 .compact();
     }
 
-    private String createRefreshToken(Long memberId, String userId, Date expiry, String memberType) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("memberId", memberId);
-        claims.put("userId", userId);
-        claims.put("memberType", memberType);
-        claims.put("uuid", UUID.randomUUID().toString());
+    private String createRefreshToken(Long memberId, String userId, Date expiry, String memberType, Gym gym) {
+        Map<String, Object> claims = createClaims(memberId, userId, memberType, gym);
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(expiry)
                 .signWith(key, HS256)
                 .compact();
+    }
+
+    private static @NotNull Map<String, Object> createClaims(Long memberId, String userId, String memberType, Gym gym) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("memberId", memberId);
+        claims.put("userId", userId);
+        claims.put("memberType", memberType);
+        claims.put("uuid", UUID.randomUUID().toString());
+        claims.put("gymId", gym != null ? gym.getId() : null);
+        return claims;
     }
 }
