@@ -55,8 +55,6 @@ class TrainerScheduleService(
             findTrainerSchedule.trainerScheduleClosedDays?.forEach {
                 // 휴무일일 경우
                 if (it.closedDays == lessonDt.dayOfWeek) {
-                    val schedule = Schedule.registerSchedule(lessonDt, trainer, null, null, CLOSED_DAY)
-                    schedules.add(schedule)
                     lessonDt = lessonDt.plusDays(ONE_DAY)
                     return@forEach
                 }
@@ -64,8 +62,6 @@ class TrainerScheduleService(
 
             // 점심시간일 경우
             if (isStartTimeEqualsLunchStartTime(findTrainerSchedule.lunchStartTime, startTime)) {
-                val schedule = Schedule.registerSchedule(lessonDt, trainer, findTrainerSchedule.lunchStartTime, findTrainerSchedule.lunchEndTime, LUNCH_TIME)
-                schedules.add(schedule)
                 val duration = between(findTrainerSchedule.lunchStartTime, findTrainerSchedule.lunchEndTime)
                 startTime = startTime.plusMinutes(duration.toMinutes())
                 continue

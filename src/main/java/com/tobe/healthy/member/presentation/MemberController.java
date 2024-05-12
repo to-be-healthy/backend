@@ -31,6 +31,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/members/v1")
@@ -105,7 +107,7 @@ public class MemberController {
 			@ApiResponse(responseCode = "500", description = "파일 업로드중 에러가 발생하였습니다."),
 			@ApiResponse(responseCode = "200", description = "프로필 사진이 등록되었습니다.")
 	})
-	@PutMapping("/profile")
+	@PutMapping(value = "/profile", consumes = MULTIPART_FORM_DATA_VALUE)
 	public ResponseHandler<Boolean> changeProfile(@RequestParam MultipartFile file,
 												  @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
