@@ -626,4 +626,26 @@ public class MemberService {
         member.changeScheduleNotice(alarmStatus);
         return true;
     }
+
+    public Boolean changeEmail(EmailChangeCommand request, Long memberId) {
+        memberRepository.findByEmail(request.getEmail())
+                .ifPresent(m -> new CustomException(MEMBER_EMAIL_DUPLICATION));
+
+        Member findMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        String value = redisService.getValues(request.getEmail());
+
+        if (isEmpty(value) || !value.equals(request.getAuthNumber())) {
+            throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
+        }
+
+        if (request.getAuthNumber().equals(value)) {
+            findMember.changeEmail(request.getEmail());
+            redisService.deleteValues(request.getEmail());
+            return true;
+        }
+
+        return false;
+    }
 }
