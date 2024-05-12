@@ -127,7 +127,8 @@ class TrainerScheduleRepositoryImpl(
                 lessonDtMonthEq(lessonDt),
                 trainerIdEq(trainerId),
                 lessonStartDtBefore(endTime),
-                lessonEndDtAfter(startTime)
+                lessonEndDtAfter(startTime),
+                delYnEq(false)
             )
             .fetchOne()!!
     }
