@@ -242,7 +242,7 @@ public class MemberService {
     }
 
     public Boolean changeProfile(MultipartFile uploadFile, Long memberId) {
-        Member member = memberRepository.findById(memberId)
+        Member findMember = memberRepository.findMemberById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         if (!uploadFile.isEmpty()) {
@@ -257,8 +257,7 @@ public class MemberService {
                     objectMetadata
                 );
                 String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
-                MemberProfile memberProfile = MemberProfile.create(fileUrl, member);
-                memberProfileRepository.save(memberProfile);
+                findMember.changeProfile(fileUrl);
             } catch (IOException e) {
                 log.error("error => {}", e);
                 throw new CustomException(FILE_UPLOAD_ERROR);

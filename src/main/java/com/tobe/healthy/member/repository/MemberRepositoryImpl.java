@@ -23,6 +23,7 @@ import org.springframework.util.ObjectUtils;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import static com.tobe.healthy.course.domain.entity.QCourse.course;
 import static com.tobe.healthy.gym.domain.entity.QGym.gym;
@@ -113,6 +114,15 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 )
                 .orderBy(sortBy("ranking"))
                 .fetch();
+    }
+
+    @Override
+    public Optional<Member> findMemberById(Long memberId) {
+        Member findMember = queryFactory.select(member)
+                .from(member).leftJoin(member.memberProfile).fetchJoin()
+                .where(memberIdEq(memberId), memberDelYnEq(false))
+                .fetchOne();
+        return Optional.ofNullable(findMember);
     }
 
     private BooleanExpression rankingTop1() {

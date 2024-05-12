@@ -201,4 +201,9 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	public void changeEmail(String email) {
 		this.email = email;
 	}
+
+	public void changeProfile(String fileUrl) {
+		MemberProfile memberProfile = MemberProfile.create(fileUrl);
+		this.memberProfile = memberProfile;
+	}
 }

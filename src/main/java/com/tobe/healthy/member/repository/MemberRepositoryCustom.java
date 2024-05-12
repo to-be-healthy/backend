@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface MemberRepositoryCustom {
@@ -19,4 +20,5 @@ public interface MemberRepositoryCustom {
     MemberDetailResult getMemberOfTrainer(Long memberId);
     List<Member> findAllTrainerByGym(@Param("gymId") Long gymId);
     List<MemberInTeamResult> getBestStudent(Long trainerId);
+    Optional<Member> findMemberById(Long memberId);
 }
