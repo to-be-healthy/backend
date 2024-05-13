@@ -13,7 +13,7 @@ import com.tobe.healthy.config.error.OAuthError.GoogleError;
 import com.tobe.healthy.config.error.OAuthError.KakaoError;
 import com.tobe.healthy.config.error.OAuthError.NaverError;
 import com.tobe.healthy.config.error.OAuthException;
-import com.tobe.healthy.config.security.JwtTokenGenerator;
+import com.tobe.healthy.config.jwt.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
 import com.tobe.healthy.member.domain.dto.in.*;
@@ -26,7 +26,6 @@ import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.member.domain.entity.Tokens;
-import com.tobe.healthy.member.repository.MemberProfileRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
@@ -53,12 +52,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
+import static com.tobe.healthy.common.Utils.*;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.member.domain.entity.SocialType.*;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static io.micrometer.common.util.StringUtils.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
@@ -80,14 +83,12 @@ public class MemberService {
     private final AmazonS3 amazonS3;
     private final MailService mailService;
     private final CourseService courseService;
-    private final MemberProfileRepository memberProfileRepository;
 
-    private static final Integer EMAIL_AUTH_TIMEOUT = 3 * 60 * 1000;
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
     public boolean validateUserIdDuplication(String userId) {
-        if (userId.length() < 4) {
+        if (validateUserId(userId)) {
             throw new CustomException(MEMBER_ID_NOT_VALID);
         }
         memberRepository.findByUserId(userId).ifPresent(m -> {
@@ -125,6 +126,7 @@ public class MemberService {
             throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
         }
 
+        redisService.deleteValues(email);
         return true;
     }
 
@@ -145,19 +147,17 @@ public class MemberService {
         if (!request.getPassword().equals(request.getPasswordConfirm())) {
             throw new CustomException(CONFIRM_PASSWORD_NOT_MATCHED);
         }
-        String regexp = "^[A-Za-z0-9]+$";
-        if (request.getPassword().length() < 8 || !Pattern.matches(regexp, request.getPassword())) {
+        if (Utils.validatePassword(request.getPassword())) {
             throw new CustomException(PASSWORD_POLICY_VIOLATION);
         }
     }
 
     private void validateName(String name) {
-        if (name.length() < 2) {
+        if (Utils.validateNameLength(name)) {
             throw new CustomException(MEMBER_NAME_LENGTH_NOT_VALID);
         }
 
-        String regexp = "^[가-힣A-Za-z]+$";
-        if (!Pattern.matches(regexp, name)) {
+        if (Utils.validateNameFormat(name)) {
             throw new CustomException(MEMBER_NAME_NOT_VALID);
         }
     }
@@ -194,9 +194,9 @@ public class MemberService {
         Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         return new MemberFindIdCommandResult(
-                member.getUserId().substring(member.getUserId().length() - 3) + "**",
-                member.getCreatedAt()
-                );
+            member.getUserId().substring(member.getUserId().length() - 3) + "**",
+                  member.getCreatedAt()
+        );
     }
 
     public String findMemberPW(MemberFindPWCommand request) {
@@ -220,6 +220,10 @@ public class MemberService {
             throw new CustomException(NOT_MATCH_PASSWORD);
         }
 
+        if (Utils.validatePassword(request.getChangePassword())) {
+            throw new CustomException(PASSWORD_POLICY_VIOLATION);
+        }
+
         Member member = memberRepository.findById(memberId)
                 .filter(m -> passwordEncoder.matches(request.getCurrPassword1(), m.getPassword()))
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
@@ -232,25 +236,24 @@ public class MemberService {
     }
 
     public Boolean changeProfile(MultipartFile uploadFile, Long memberId) {
-        Member member = memberRepository.findById(memberId)
+        Member findMember = memberRepository.findMemberById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         if (!uploadFile.isEmpty()) {
-            ObjectMetadata objectMetadata = getObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
-            String savedFileName = "profile/" + createFileUUID();
+            ObjectMetadata objectMetadata = createObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
+            String savedFileName = createFileName("profile/");
 
             try (InputStream inputStream = uploadFile.getInputStream()) {
                 amazonS3.putObject(
-                        bucketName,
-                        savedFileName,
-                        inputStream,
-                        objectMetadata
+                    bucketName,
+                    savedFileName,
+                    inputStream,
+                    objectMetadata
                 );
                 String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
-                MemberProfile memberProfile = MemberProfile.create(fileUrl, member);
-                memberProfileRepository.save(memberProfile);
+                findMember.changeProfile(fileUrl);
             } catch (IOException e) {
-                log.error("error => {}", e);
+                log.error("error => {}", e.getStackTrace()[0]);
                 throw new CustomException(FILE_UPLOAD_ERROR);
             }
         }
@@ -260,6 +263,7 @@ public class MemberService {
     public Boolean changeName(String name, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        validateName(name);
         member.changeName(name);
         return true;
     }
@@ -338,7 +342,7 @@ public class MemberService {
             String token = decordToken(result);
             return new ObjectMapper().readValue(token, IdToken.class);
         } catch (JsonProcessingException e) {
-            log.error("error => {}", e);
+            log.error("error => {}", e.getStackTrace()[0]);
             throw new CustomException(JSON_PARSING_ERROR);
         }
     }
@@ -363,7 +367,10 @@ public class MemberService {
             throw new CustomException(MEMBER_NOT_FOUND);
         }
 
-        Member member = Member.join(authorization.getResponse().getEmail(), authorization.getResponse().getName(), request.getMemberType(), NAVER);
+        Member member = Member.join(authorization.getResponse().getEmail(),
+                                    authorization.getResponse().getName(),
+                                    request.getMemberType(),
+                                    NAVER);
         MemberProfile profile = getProfile(authorization.getResponse().getProfileImage(), member);
         member.setMemberProfile(profile);
         memberRepository.save(member);
@@ -377,8 +384,8 @@ public class MemberService {
 
     private MemberProfile getProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
-        String savedFileName = "profile/" + createFileUUID();
-        ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
+        String savedFileName = createFileName("profile/");
+        ObjectMetadata objectMetadata = createObjectMetadata(image.length, IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(
                     bucketName,
@@ -389,26 +396,21 @@ public class MemberService {
             String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
             return MemberProfile.create(fileUrl, member);
         } catch (IOException e) {
-            log.error("error => {}", e);
+            log.error("error => {}", e.getStackTrace()[0]);
             throw new CustomException(FILE_UPLOAD_ERROR);
         }
     }
 
     private MemberProfile getGoogleProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
-        String extension = ".jpg";
-        String savedFileName = "profile/" + createFileUUID() + extension;
-        ObjectMetadata objectMetadata = getObjectMetadata((long) image.length, IMAGE_PNG_VALUE);
-        return qwe(member, image, savedFileName, objectMetadata);
-    }
-
-    private MemberProfile qwe(Member member, byte[] image, String savedFileName, ObjectMetadata objectMetadata) {
+        String savedFileName = createFileName("profile/");
+        ObjectMetadata objectMetadata = createObjectMetadata(image.length, IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
             String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
             return MemberProfile.create(fileUrl, member);
         } catch (IOException e) {
-            log.error("error => {}", e);
+            log.error("error => {}", e.getStackTrace()[0]);
             throw new CustomException(FILE_UPLOAD_ERROR);
         }
     }
@@ -498,7 +500,7 @@ public class MemberService {
         try {
             responseMono = webClient.post()
                     .uri(oAuthProperties.getGoogle().getTokenUri())
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .contentType(APPLICATION_FORM_URLENCODED)
                     .accept(MediaType.APPLICATION_JSON)
                     .bodyValue(requestBody)
                     .retrieve()
@@ -512,10 +514,6 @@ public class MemberService {
             log.error("error => {}", e.getStackTrace()[0]);
         }
         return responseMono.share().block();
-    }
-
-    private String createFileUUID() {
-        return System.currentTimeMillis() + "-" + UUID.randomUUID();
     }
 
     private void validateDuplicationUserId(String userId) {
@@ -596,13 +594,6 @@ public class MemberService {
         return MemberInfoResult.create(member);
     }
 
-    private ObjectMetadata getObjectMetadata(Long fileSize, String contentType) {
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(fileSize);
-        objectMetadata.setContentType(contentType);
-        return objectMetadata;
-    }
-
     public Boolean assignNickname(String nickname, Long studentId) {
         Member member = memberRepository.findById(studentId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
@@ -622,6 +613,25 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         member.changeScheduleNotice(alarmStatus);
+        return true;
+    }
+
+    public Boolean changeEmail(EmailChangeCommand request, Long memberId) {
+        memberRepository.findByEmail(request.getEmail()).ifPresent(m -> {
+                    throw new CustomException(MEMBER_EMAIL_DUPLICATION);
+                });
+
+        Member findMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        String value = redisService.getValues(request.getEmail());
+
+        if (isEmpty(value) || !value.equals(request.getAuthNumber())) {
+            throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
+        }
+
+        findMember.changeEmail(request.getEmail());
+        redisService.deleteValues(request.getEmail());
         return true;
     }
 }

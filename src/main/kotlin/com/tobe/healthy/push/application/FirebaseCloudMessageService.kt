@@ -38,20 +38,7 @@ class FirebaseCloudMessageService(
     }
 
     fun sendPushAlarm(request: NotificationRequest): NotificationResponse {
-        val message = Message.builder()
-            .setToken(request.token)
-            .setWebpushConfig(
-                WebpushConfig.builder()
-                    .putHeader("ttl", "300")
-                    .setNotification(
-                        WebpushNotification(
-                            request.title,
-                            request.message
-                        )
-                    )
-                    .build()
-            )
-            .build()
+        val message = createMessage(request.token, request.title, request.message)
 
         val response = FirebaseMessaging
             .getInstance()
@@ -66,23 +53,27 @@ class FirebaseCloudMessageService(
         )
     }
 
-    fun sendPushAlarm(memberId: Long, request: NotificationRequest): NotificationResponse {
-        val findMemberToken = memberTokenRepository.findByMemberId(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
-
-        val message = Message.builder()
-            .setToken(findMemberToken.token)
+    private fun createMessage(token: String?, title: String, message: String): Message? =
+        Message.builder()
+            .setToken(token)
             .setWebpushConfig(
                 WebpushConfig.builder()
                     .putHeader("ttl", "300")
                     .setNotification(
                         WebpushNotification(
-                            request.title,
-                            request.message
+                            title,
+                            message
                         )
                     )
                     .build()
             )
             .build()
+
+    fun sendPushAlarm(memberId: Long, request: NotificationRequest): NotificationResponse {
+        val findMemberToken = memberTokenRepository.findByMemberId(memberId)
+            ?: throw CustomException(MEMBER_NOT_FOUND)
+
+        val message = createMessage(findMemberToken.token, request.title, request.message)
 
         val response = FirebaseMessaging
             .getInstance()

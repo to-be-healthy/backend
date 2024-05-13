@@ -3,7 +3,7 @@ package com.tobe.healthy.gym.domain.dto.out
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.domain.entity.MemberProfile
 
-data class TrainerCommandResult(
+data class TrainersOfGymResponse(
     val id: Long,
     val userId: String,
     val email: String,
@@ -11,8 +11,8 @@ data class TrainerCommandResult(
     val memberProfile: MemberProfile? = null
 ) {
     companion object {
-        fun from(member: Member): TrainerCommandResult {
-            return TrainerCommandResult(
+        fun from(member: Member): TrainersOfGymResponse {
+            return TrainersOfGymResponse(
                 id = member.id,
                 userId = member.userId,
                 email = member.email,

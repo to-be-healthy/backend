@@ -2,13 +2,13 @@ package com.tobe.healthy.gym.domain.dto.out
 
 import com.tobe.healthy.gym.domain.entity.Gym
 
-data class SelectMyGymResponse(
+data class SelectMyGymCommandResponse(
     val id: Long,
     val name: String
 ) {
     companion object {
-        fun from(gym: Gym): SelectMyGymResponse {
-            return SelectMyGymResponse(
+        fun from(gym: Gym): SelectMyGymCommandResponse {
+            return SelectMyGymCommandResponse(
                 id = gym.id,
                 name = gym.name
             )

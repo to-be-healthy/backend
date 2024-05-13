@@ -103,7 +103,7 @@ class TrainerScheduleController(
     )
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findOneSchedule(@RequestBody searchCond: TrainerTodayScheduleSearchCond,
+    fun findOneSchedule(searchCond: TrainerTodayScheduleSearchCond,
                         @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<TrainerTodayScheduleResponse?> {
         return ApiResultResponse(
             message = "특정 날짜의 일정을 조회했습니다.",

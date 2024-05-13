@@ -8,6 +8,7 @@ import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.member.application.MemberService;
+import com.tobe.healthy.member.domain.dto.in.EmailChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemoCommand;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
@@ -29,6 +30,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @RestController
 @RequiredArgsConstructor
@@ -104,7 +107,7 @@ public class MemberController {
 			@ApiResponse(responseCode = "500", description = "파일 업로드중 에러가 발생하였습니다."),
 			@ApiResponse(responseCode = "200", description = "프로필 사진이 등록되었습니다.")
 	})
-	@PutMapping("/profile")
+	@PutMapping(value = "/profile", consumes = MULTIPART_FORM_DATA_VALUE)
 	public ResponseHandler<Boolean> changeProfile(@RequestParam MultipartFile file,
 												  @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
@@ -299,6 +302,19 @@ public class MemberController {
 				.build();
 	}
 
+	@Operation(summary = "회원이 이메일을 변경한다.", responses = {
+			@ApiResponse(responseCode = "404", description = "등록된 학생이 아닙니다."),
+			@ApiResponse(responseCode = "200", description = "이메일이 변경되었습니다.")
+	})
+	@PatchMapping("/email")
+	public ResponseHandler<Boolean> changeEmail(@RequestBody EmailChangeCommand emailChangeCommand,
+												@AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<Boolean>builder()
+				.data(memberService.changeEmail(emailChangeCommand, member.getMemberId()))
+				.message("이메일이 변경되었습니다.")
+				.build();
+	}
+
 	@Operation(summary = "스케줄 공지 보기 여부를 변경한다.", description = "스케줄 공지 보기 여부를 변경한다.",
 			responses = {
 					@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
@@ -306,8 +322,8 @@ public class MemberController {
 			})
 	@PatchMapping("/schedule-notice")
 	public ResponseHandler<Boolean> changeScheduleNotice(@Parameter(description = "변경할 상태", example = "ENABLED")
-														  @RequestParam AlarmStatus alarmStatus,
-														  @AuthenticationPrincipal CustomMemberDetails member) {
+														 @RequestParam AlarmStatus alarmStatus,
+														 @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberService.changeScheduleNotice(alarmStatus, member.getMemberId()))
 				.message("스케줄 공지 보기 여부가 변경되었습니다.")

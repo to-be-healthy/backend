@@ -36,9 +36,7 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-web") {
-        exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
-    }
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("com.googlecode.json-simple:json-simple:1.1.1")
     implementation("org.modelmapper:modelmapper:3.2.0")
@@ -86,8 +84,8 @@ dependencies {
     kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
-    testImplementation("io.kotest:kotest-assertions-core:5.8.1")
-    testImplementation("io.kotest:kotest-runner-junit5:5.8.1")
+    testImplementation("io.kotest:kotest-assertions-core:5.9.0")
+    testImplementation("io.kotest:kotest-runner-junit5:5.9.0")
     testImplementation("io.mockk:mockk:1.13.10")
     testCompileOnly("io.github.microutils:kotlin-logging-jvm:4.0.0-beta-2")
 }
