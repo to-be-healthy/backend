@@ -5,6 +5,7 @@ plugins {
     id("org.springframework.boot") version "3.2.2"
     id("io.freefair.lombok") version "8.6"
     id("io.spring.dependency-management") version "1.1.4"
+    id("com.gorylenko.gradle-git-properties") version "2.4.1"
 
     kotlin("jvm") version "1.9.23"
     kotlin("plugin.spring") version "1.9.23"
@@ -62,8 +63,10 @@ dependencies {
 
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("io.rest-assured:rest-assured:5.4.0")
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
@@ -107,3 +110,6 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+springBoot {
+    buildInfo()
+}

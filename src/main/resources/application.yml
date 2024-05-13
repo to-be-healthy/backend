@@ -107,3 +107,27 @@ decorator:
   datasource:
     p6spy:
       enable-logging: true
+
+management:
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
+    env:
+      enabled: true
+  endpoint:
+    health:
+      show-components: always
+
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  server:
+    port: 9090
+
+info:
+  app:
+    name: to-be-healthy-actuator
+    company: to-be-healthy
