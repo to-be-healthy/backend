@@ -1,4 +1,4 @@
-package com.tobe.healthy.file;
+package com.tobe.healthy.workout.application;
 
 
 import com.amazonaws.services.s3.AmazonS3;
@@ -10,6 +10,7 @@ import com.tobe.healthy.diet.domain.entity.DietFiles;
 import com.tobe.healthy.diet.domain.entity.DietType;
 import com.tobe.healthy.diet.repository.DietFileRepository;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

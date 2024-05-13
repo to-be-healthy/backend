@@ -1,6 +1,5 @@
 package com.tobe.healthy.workout.domain.dto.in;
 
-import com.tobe.healthy.file.RegisterFile;
 import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;

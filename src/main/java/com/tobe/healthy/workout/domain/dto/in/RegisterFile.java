@@ -1,4 +1,4 @@
-package com.tobe.healthy.file;
+package com.tobe.healthy.workout.domain.dto.in;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
