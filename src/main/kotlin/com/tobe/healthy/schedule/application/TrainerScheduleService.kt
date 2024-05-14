@@ -42,7 +42,7 @@ class TrainerScheduleService(
         val schedules = mutableListOf<Schedule>()
 
         while (!lessonDt.isAfter(request.endDt)) {
-            val endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
+            var endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
 
             if (endTime.isAfter(findTrainerSchedule.lessonEndTime)) {
                 startTime = findTrainerSchedule.lessonStartTime
@@ -50,12 +50,21 @@ class TrainerScheduleService(
                 continue
             }
 
-            findTrainerSchedule.trainerScheduleClosedDays?.forEach {
+            val isClosedDay = findTrainerSchedule.trainerScheduleClosedDays?.any {
+                it.closedDays == lessonDt.dayOfWeek
+            } ?: false
+
+            if (isClosedDay) {
                 // 휴무일일 경우
-                if (it.closedDays == lessonDt.dayOfWeek) {
-                    lessonDt = lessonDt.plusDays(ONE_DAY)
-                    return@forEach
+                while (!startTime.isAfter(endTime)) {
+                    val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, DISABLED)
+                    schedules.add(schedule)
+                    startTime = endTime
+                    endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
                 }
+                startTime = findTrainerSchedule.lessonStartTime
+                lessonDt = lessonDt.plusDays(ONE_DAY)
+                continue
             }
 
             // 점심시간일 경우
@@ -152,7 +161,6 @@ class TrainerScheduleService(
 
         findSchedule.forEach {
             it?.updateLessonDtToClosedDay()
-            it?.scheduleWaiting?.forEach { waiting -> scheduleWaitingRepository.delete(waiting) }
         }
         return true
     }

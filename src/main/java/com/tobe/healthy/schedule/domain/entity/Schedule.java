@@ -109,6 +109,7 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	}
 
 	public void updateLessonDtToClosedDay() {
-		this.delYn = true;
+		this.reservationStatus = DISABLED;
+		this.applicant = null;
 	}
 }

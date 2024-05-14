@@ -11,7 +11,8 @@ public enum ReservationStatus implements EnumMapperType {
 	AVAILABLE("예약가능"),
 	NO_SHOW("노쇼"),
 	SOLD_OUT("대기마감"),
-	LUNCH_TIME("점심시간");
+	LUNCH_TIME("점심시간"),
+	DISABLED("예약불가");
 
 	private final String description;
 
