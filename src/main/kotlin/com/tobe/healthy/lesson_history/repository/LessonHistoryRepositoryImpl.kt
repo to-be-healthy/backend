@@ -1,6 +1,5 @@
 package com.tobe.healthy.lesson_history.repository
 
-import com.querydsl.core.types.ConstantImpl.create
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
@@ -129,11 +128,7 @@ class LessonHistoryRepositoryImpl(
         if (StringUtils.isEmpty(searchDate)) {
             return null
         }
-        val stringTemplate = stringTemplate(
-            "DATE_FORMAT({0}, {1})",
-            lessonHistory.schedule.lessonDt,
-            create("%Y%m")
-        )
+        val stringTemplate = stringTemplate("DATE_FORMAT({0}, '%Y-%m')", lessonHistory.schedule.lessonDt)
         return stringTemplate.eq(searchDate)
     }
 }
