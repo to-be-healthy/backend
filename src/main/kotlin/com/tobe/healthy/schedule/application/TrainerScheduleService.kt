@@ -9,9 +9,7 @@ import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.entity.TrainerScheduleClosedDaysInfo
 import com.tobe.healthy.schedule.entity.TrainerScheduleInfo
 import com.tobe.healthy.schedule.entity.`in`.*
-import com.tobe.healthy.schedule.entity.out.LessonResponse
-import com.tobe.healthy.schedule.entity.out.RegisterDefaultLessonTimeResponse
-import com.tobe.healthy.schedule.entity.out.TrainerTodayScheduleResponse
+import com.tobe.healthy.schedule.entity.out.*
 import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository
 import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
@@ -28,7 +26,7 @@ class TrainerScheduleService(
     private val memberRepository: MemberRepository,
     private val trainerScheduleRepository: TrainerScheduleRepository,
     private val scheduleWaitingRepository: ScheduleWaitingRepository,
-    private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository,
+    private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository
 ) {
     fun registerSchedule(request: RegisterScheduleRequest, trainerId: Long): Boolean {
         validateScheduleDate(request)
@@ -192,6 +190,24 @@ class TrainerScheduleService(
         }
 
         return RegisterDefaultLessonTimeResponse.from(request)
+    }
+
+    fun findDefaultLessonTime(trainerId: Long): TrainerScheduleResponse {
+        val trainerScheduleInfo = trainerScheduleInfoRepository.findByTrainerId(trainerId)
+            ?: throw CustomException(TRAINER_SCHEDULE_NOT_FOUND)
+        return TrainerScheduleResponse.from(trainerScheduleInfo)
+    }
+
+    fun registerScheduleForStudent(scheduleId: Long, studentId: Long, trainerId: Long): RegisterScheduleForStudentResponse {
+        val schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, AVAILABLE, trainerId)
+            ?: throw CustomException(SCHEDULE_NOT_FOUND)
+
+        val findStudent = memberRepository.findById(studentId)
+            .orElseThrow { throw CustomException(MEMBER_NOT_FOUND) }
+
+        schedule.registerSchedule(findStudent)
+
+        return RegisterScheduleForStudentResponse.from(schedule, findStudent);
     }
 }
 

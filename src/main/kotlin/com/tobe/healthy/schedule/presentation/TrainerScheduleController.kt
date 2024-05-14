@@ -5,9 +5,7 @@ import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.schedule.application.TrainerScheduleService
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
 import com.tobe.healthy.schedule.entity.`in`.*
-import com.tobe.healthy.schedule.entity.out.LessonResponse
-import com.tobe.healthy.schedule.entity.out.RegisterDefaultLessonTimeResponse
-import com.tobe.healthy.schedule.entity.out.TrainerTodayScheduleResponse
+import com.tobe.healthy.schedule.entity.out.*
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -35,11 +33,27 @@ class TrainerScheduleController(
     )
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping("/default-lesson-time")
-    fun registerSchedule(@RequestBody request: RegisterDefaultLessonTimeRequest,
-                         @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterDefaultLessonTimeResponse> {
+    fun registerDefaultSchedule(@RequestBody request: RegisterDefaultLessonTimeRequest,
+                                @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterDefaultLessonTimeResponse> {
         return ApiResultResponse(
             message = "기본 수업 시간이 설정되었습니다.",
             data = trainerScheduleService.registerDefaultLessonTime(request, member.memberId)
+        )
+    }
+
+    @Operation(
+        summary = "트레이너가 기본 수업 시간을 조회한다.", description = "트레이너가 기본 수업 시간을 조회한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "일정 조회 성공"),
+            ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
+        ]
+    )
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    @GetMapping("/default-lesson-time")
+    fun findDefaultSchedule(@AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<TrainerScheduleResponse> {
+        return ApiResultResponse(
+            message = "기본 수업 조회에 성공하였습니다.",
+            data = trainerScheduleService.findDefaultLessonTime(member.memberId)
         )
     }
 
@@ -76,6 +90,25 @@ class TrainerScheduleController(
         return ApiResultResponse(
             message = "개별 일정 등록에 성공하였습니다.",
             data = trainerScheduleService.registerIndividualSchedule(request, member.memberId)
+        )
+    }
+
+    @Operation(
+        summary = "트레이너가 학생을 일정에 등록한다.", description = "트레이너가 학생을 일정에 등록한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "일정 등록 성공"),
+            ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
+            ApiResponse(responseCode = "400", description = "이미 등록된 일정이 존재합니다.")
+        ]
+    )
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    @PostMapping("/{scheduleId}/{studentId}")
+    fun registerScheduleForStudent(@PathVariable scheduleId: Long,
+                                   @PathVariable studentId: Long,
+                                   @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterScheduleForStudentResponse> {
+        return ApiResultResponse(
+            message = "일정에 학생을 등록하였습니다.",
+            data = trainerScheduleService.registerScheduleForStudent(scheduleId, studentId, member.memberId)
         )
     }
 
