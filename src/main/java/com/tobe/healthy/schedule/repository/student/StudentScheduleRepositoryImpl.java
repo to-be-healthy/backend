@@ -8,6 +8,7 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.QMember;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.entity.in.ScheduleSearchCond;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.List;
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
 import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
 import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
 import static java.util.stream.Collectors.toList;
 
 @Repository
@@ -39,7 +41,8 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.leftJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
 				.leftJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.leftJoin(schedule.scheduleWaiting, scheduleWaiting).on(scheduleWaiting.delYn.isFalse())
-				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), scheduleTrainerIdEq(trainerId))
+				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), scheduleTrainerIdEq(trainerId)
+				, scheduleReservationStatusForStudent())
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
 
@@ -85,6 +88,12 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.limit(1)
 				.fetchOne();
 		return result==null ? null : MyReservation.from(result);
+	}
+
+	private BooleanExpression scheduleReservationStatusForStudent() {
+		return schedule.reservationStatus.eq(COMPLETED)
+				.or(schedule.reservationStatus.eq(AVAILABLE))
+				.or(schedule.reservationStatus.eq(SOLD_OUT));
 	}
 
 	private Predicate lessonDateTimeAfterNow() {

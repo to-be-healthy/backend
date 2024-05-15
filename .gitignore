@@ -40,3 +40,4 @@ out/
 
 ## 추가
 config/firebase-adminsdk.json
+/logs
