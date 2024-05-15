@@ -5,22 +5,22 @@ import com.tobe.healthy.schedule.entity.`in`.RegisterDefaultLessonTimeRequest
 import java.time.DayOfWeek
 
 data class RegisterDefaultLessonTimeResponse(
-    val startTime: String?,
-    val endTime: String?,
+    val lessonStartTime: String?,
+    val lessonEndTime: String?,
     val lunchStartTime: String? = null,
     val lunchEndTime: String? = null,
-    val closedDt: List<DayOfWeek>? = null,
-    val sessionTime: Int
+    val closedDays: List<DayOfWeek>? = null,
+    val lessonTime: Int
 ) {
     companion object {
         fun from(request: RegisterDefaultLessonTimeRequest): RegisterDefaultLessonTimeResponse {
             return RegisterDefaultLessonTimeResponse(
-                startTime = dateTimeFormat(request.startTime),
-                endTime = dateTimeFormat(request.endTime),
+                lessonStartTime = dateTimeFormat(request.lessonStartTime),
+                lessonEndTime = dateTimeFormat(request.lessonEndTime),
                 lunchStartTime = dateTimeFormat(request.lunchStartTime),
                 lunchEndTime = dateTimeFormat(request.lunchEndTime),
-                closedDt = request.closedDt,
-                sessionTime = request.sessionTime
+                closedDays = request.closedDays,
+                lessonTime = request.lessonTime
             )
         }
     }
