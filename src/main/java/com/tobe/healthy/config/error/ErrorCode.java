@@ -63,6 +63,7 @@ public enum ErrorCode {
 	RESERVATION_CANCEL_NOT_VALID(BAD_REQUEST, "C_037", "취소 가능한 시간이 아닙니다."),
 	UNCHANGED_GYM_ID(BAD_REQUEST, "C_038", "변경하려는 헬스장은 이전과 동일한 헬스장입니다."),
 	TRAINER_SCHEDULE_NOT_FOUND(BAD_REQUEST, "C_039", "미리 스케줄을 등록 후 사용해 주세요."),
+	INVALID_LESSON_TIME_DESCRIPTION(BAD_REQUEST, "C_020", "유효하지 않은 수업 시간입니다."),
 
 	SERVER_ERROR(INTERNAL_SERVER_ERROR, "S_001", "서버에서 오류가 발생하였습니다."),
 	FILE_UPLOAD_ERROR(INTERNAL_SERVER_ERROR, "S_002", "파일 업로드중 에러가 발생하였습니다."),
