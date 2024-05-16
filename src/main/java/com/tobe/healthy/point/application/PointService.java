@@ -1,6 +1,9 @@
 package com.tobe.healthy.point.application;
 
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.course.domain.dto.CourseDto;
+import com.tobe.healthy.course.domain.entity.Course;
+import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.point.domain.dto.PointHistoryDto;
@@ -26,8 +29,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.tobe.healthy.config.error.ErrorCode.LESSON_CNT_NOT_VALID;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
@@ -45,6 +50,7 @@ public class PointService {
     private final PointRepository pointRepository;
     private final MemberRepository memberRepository;
     private final StudentScheduleRepository studentScheduleRepository;
+    private final CourseRepository courseRepository;
 
     public void updateMemberRank() {
         List<Long> trainerIds = mappingRepository.findAllTrainerIds();
@@ -68,10 +74,11 @@ public class PointService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-        //마지막 PT일자 지난 경우 포인트 미지급
+        //수강권 잔여 횟수가 0 && 마지막 PT일자 지난 경우 포인트 미지급
         if(DIET == type || WORKOUT == type){
+            Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(member.getId(), 0);
             MyReservation myNextReservation = studentScheduleRepository.findMyNextReservation(memberId);
-            if(myNextReservation == null) return;
+            if(optCourse.isEmpty() && myNextReservation == null) return;
         }
 
         if(PLUS == calculation){
