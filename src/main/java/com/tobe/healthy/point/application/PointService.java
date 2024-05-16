@@ -90,6 +90,6 @@ public class PointService {
         Page<Point> histories = pointRepository.getPoint(memberId, searchDate, pageable);
         int monthPoint = pointRepository.getPointOfSearchMonth(memberId, searchDate);
         int totalPoint = pointRepository.getTotalPoint(memberId, searchDate);
-        return PointDto.create(monthPoint, totalPoint, histories.map(PointHistoryDto::from).stream().toList());
+        return PointDto.create(searchDate, monthPoint, totalPoint, histories.map(PointHistoryDto::from).stream().toList());
     }
 }

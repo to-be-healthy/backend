@@ -67,9 +67,10 @@ public class HomeService {
         CourseDto usingCourse = optCourse.map(CourseDto::from).orElse(null);
 
         //포인트
-        int monthPoint = pointRepository.getPointOfSearchMonth(memberId, getNowMonth());
-        int totalPoint = pointRepository.getTotalPoint(memberId, getNowMonth());
-        PointDto point = PointDto.create(monthPoint, totalPoint);
+        String yyyyMM = getNowMonth();
+        int monthPoint = pointRepository.getPointOfSearchMonth(memberId, yyyyMM);
+        int totalPoint = pointRepository.getTotalPoint(memberId, yyyyMM);
+        PointDto point = PointDto.create(yyyyMM, monthPoint, totalPoint);
 
         //랭킹
         RankDto rank = new RankDto();
