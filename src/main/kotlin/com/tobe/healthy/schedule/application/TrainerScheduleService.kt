@@ -37,11 +37,11 @@ class TrainerScheduleService(
         val findTrainerSchedule = trainerScheduleInfoRepository.findByTrainerId(trainerId)
             ?: throw CustomException(TRAINER_SCHEDULE_NOT_FOUND)
 
-        var lessonDt = request.startDt
+        var lessonDt = request.lessonStartDt
         var startTime = findTrainerSchedule.lessonStartTime
         val schedules = mutableListOf<Schedule>()
 
-        while (!lessonDt.isAfter(request.endDt)) {
+        while (!lessonDt.isAfter(request.lessonEndDt)) {
             var endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
 
             if (endTime.isAfter(findTrainerSchedule.lessonEndTime)) {
@@ -95,10 +95,10 @@ class TrainerScheduleService(
     }
 
     private fun validateScheduleDate(request: RegisterScheduleRequest) {
-        if (request.startDt.isAfter(request.endDt)) {
+        if (request.lessonStartDt.isAfter(request.lessonEndDt)) {
             throw CustomException(START_DATE_AFTER_END_DATE)
         }
-        if (DAYS.between(request.startDt, request.endDt) > ONE_MONTH) {
+        if (DAYS.between(request.lessonStartDt, request.lessonEndDt) > ONE_MONTH) {
             throw CustomException(SCHEDULE_LESS_THAN_30_DAYS)
         }
     }
@@ -173,7 +173,7 @@ class TrainerScheduleService(
             it.changeDefaultLessonTime(request)
             it.trainerScheduleClosedDays?.clear()
             it.trainerScheduleClosedDays?.addAll(
-                request.closedDt?.map { dayOfWeek ->
+                request.closedDays?.map { dayOfWeek ->
                     TrainerScheduleClosedDaysInfo.registerClosedDay(
                         dayOfWeek,
                         it,
@@ -184,7 +184,7 @@ class TrainerScheduleService(
             val trainerScheduleInfo = TrainerScheduleInfo.registerDefaultLessonTime(request, findTrainer)
             val trainerScheduleClosedDaysInfos = mutableListOf<TrainerScheduleClosedDaysInfo>()
 
-            request.closedDt?.forEach { dayOfWeek ->
+            request.closedDays?.forEach { dayOfWeek ->
                 trainerScheduleClosedDaysInfos.add(
                     TrainerScheduleClosedDaysInfo.registerClosedDay(
                         dayOfWeek,

@@ -5,8 +5,8 @@ import java.time.LocalDate
 
 data class RegisterScheduleRequest(
     @Schema(description = "시작 수업 일자", example = "2024-04-01")
-    val startDt: LocalDate,
+    val lessonStartDt: LocalDate,
 
     @Schema(description = "종료 수업 일자", example = "2024-04-30")
-    val endDt: LocalDate,
+    val lessonEndDt: LocalDate,
 )

@@ -1,5 +1,7 @@
 package com.tobe.healthy.schedule.entity
 
+import com.tobe.healthy.config.error.CustomException
+import com.tobe.healthy.config.error.ErrorCode.INVALID_LESSON_TIME_DESCRIPTION
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.schedule.domain.entity.LessonTime
 import com.tobe.healthy.schedule.entity.`in`.RegisterDefaultLessonTimeRequest
@@ -45,23 +47,31 @@ class TrainerScheduleInfo(
     }
 
     fun changeDefaultLessonTime(request: RegisterDefaultLessonTimeRequest) {
-        this.lessonStartTime = request.startTime
-        this.lessonEndTime = request.endTime
+        this.lessonStartTime = request.lessonStartTime
+        this.lessonEndTime = request.lessonEndTime
         this.lunchStartTime = request.lunchStartTime
         this.lunchEndTime = request.lunchEndTime
-        this.lessonTime = request.sessionTime
+        this.lessonTime = fromDescription(request.lessonTime)
     }
 
     companion object {
         fun registerDefaultLessonTime(request: RegisterDefaultLessonTimeRequest, trainer: Member): TrainerScheduleInfo {
             return TrainerScheduleInfo(
-                lessonStartTime = request.startTime,
-                lessonEndTime = request.endTime,
+                lessonStartTime = request.lessonStartTime,
+                lessonEndTime = request.lessonEndTime,
                 lunchStartTime = request.lunchStartTime,
                 lunchEndTime = request.lunchEndTime,
-                lessonTime = request.sessionTime,
+                lessonTime = fromDescription(request.lessonTime),
                 trainer = trainer
             )
+        }
+        fun fromDescription(description: Int): LessonTime {
+            for (lessonTime in LessonTime.values()) {
+                if (lessonTime.description == description) {
+                    return lessonTime
+                }
+            }
+            throw CustomException(INVALID_LESSON_TIME_DESCRIPTION)
         }
     }
 }
