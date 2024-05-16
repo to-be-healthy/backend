@@ -88,7 +88,7 @@ public class PointService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         Page<Point> histories = pointRepository.getPoint(memberId, searchDate, pageable);
         int monthPoint = pointRepository.getPointOfSearchMonth(memberId, searchDate);
-        int totalPoint = pointRepository.getTotalPoint(memberId);
+        int totalPoint = pointRepository.getTotalPoint(memberId, searchDate);
         return PointDto.create(monthPoint, totalPoint, histories.map(PointHistoryDto::from).stream().toList());
     }
 }

@@ -55,7 +55,7 @@ public class HomeService {
 
         //포인트
         int monthPoint = pointRepository.getPointOfSearchMonth(memberId, getNowMonth());
-        int totalPoint = pointRepository.getTotalPoint(memberId);
+        int totalPoint = pointRepository.getTotalPoint(memberId, getNowMonth());
         PointDto point = PointDto.create(monthPoint, totalPoint );
 
         //랭킹
