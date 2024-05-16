@@ -2,6 +2,8 @@ package com.tobe.healthy.member.domain.dto.out;
 
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.diet.domain.dto.DietDto;
+import com.tobe.healthy.gym.domain.dto.out.GymDto;
+import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryResponse;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
@@ -20,8 +22,9 @@ public class StudentHomeResult {
     private MyReservation myReservation;
     private LessonHistoryResponse lessonHistory;
     private DietDto diet;
+    private GymDto gym;
 
-    public static StudentHomeResult create(boolean isMapped, CourseDto course, PointDto point, RankDto rank, MyReservation myReservation, LessonHistoryResponse lessonHistory, DietDto diet) {
+    public static StudentHomeResult create(boolean isMapped, CourseDto course, PointDto point, RankDto rank, MyReservation myReservation, LessonHistoryResponse lessonHistory, DietDto diet, GymDto gym) {
         return StudentHomeResult.builder()
                 .isMapped(isMapped)
                 .course(course)
@@ -30,6 +33,7 @@ public class StudentHomeResult {
                 .myReservation(myReservation)
                 .lessonHistory(lessonHistory)
                 .diet(diet)
+                .gym(gym)
                 .build();
     }
 }

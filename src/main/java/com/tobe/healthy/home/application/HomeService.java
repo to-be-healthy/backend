@@ -1,15 +1,19 @@
 package com.tobe.healthy.home.application;
 
+import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
+import com.tobe.healthy.gym.domain.dto.out.GymDto;
 import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryResponse;
 import com.tobe.healthy.lesson_history.repository.LessonHistoryRepository;
 import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
 import com.tobe.healthy.member.domain.dto.out.TrainerHomeResult;
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
@@ -30,6 +34,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -45,6 +52,12 @@ public class HomeService {
     private final MemberRepository memberRepository;
 
     public StudentHomeResult getStudentHome(Long memberId) {
+        //헬스장 정보
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        GymDto gym = member.getGym() == null ? null : GymDto.Companion.from(member.getGym());
+
+
         //트레이너 매핑 여부
         TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId).orElse(null);
         boolean isMapped = mapping != null;
@@ -56,7 +69,7 @@ public class HomeService {
         //포인트
         int monthPoint = pointRepository.getPointOfSearchMonth(memberId, getNowMonth());
         int totalPoint = pointRepository.getTotalPoint(memberId, getNowMonth());
-        PointDto point = PointDto.create(monthPoint, totalPoint );
+        PointDto point = PointDto.create(monthPoint, totalPoint);
 
         //랭킹
         RankDto rank = new RankDto();
@@ -75,7 +88,7 @@ public class HomeService {
         //식단
         DietDto diet = dietService.getDietCreatedAtToday(memberId);
 
-        return StudentHomeResult.create(isMapped, usingCourse, point, rank, myReservation, lessonHistory, diet);
+        return StudentHomeResult.create(isMapped, usingCourse, point, rank, myReservation, lessonHistory, diet, gym);
     }
 
     public TrainerHomeResult getTrainerHome(TrainerTodayScheduleSearchCond request, Long trainerId) {
