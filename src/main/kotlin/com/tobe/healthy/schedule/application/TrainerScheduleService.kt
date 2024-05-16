@@ -28,7 +28,7 @@ class TrainerScheduleService(
     private val scheduleWaitingRepository: ScheduleWaitingRepository,
     private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository
 ) {
-    fun registerSchedule(request: RegisterScheduleRequest, trainerId: Long): Boolean {
+    fun registerSchedule(request: RegisterScheduleRequest, trainerId: Long): ScheduleRegisterResponse {
         validateScheduleDate(request)
 
         val trainer = memberRepository.findByIdOrNull(trainerId)
@@ -87,7 +87,8 @@ class TrainerScheduleService(
             startTime = endTime
         }
         trainerScheduleRepository.saveAll(schedules)
-        return true
+
+        return ScheduleRegisterResponse.from(schedules, findTrainerSchedule)
     }
 
     private fun isStartTimeEqualsLunchStartTime(lunchStartTime: LocalTime?, startTime: LocalTime): Boolean {

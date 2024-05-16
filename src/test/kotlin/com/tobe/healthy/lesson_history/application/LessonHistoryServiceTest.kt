@@ -8,8 +8,7 @@ import com.tobe.healthy.lesson_history.domain.entity.LessonHistoryComment
 import com.tobe.healthy.lesson_history.repository.LessonHistoryCommentRepository
 import com.tobe.healthy.lesson_history.repository.LessonHistoryRepository
 import com.tobe.healthy.member.domain.entity.Member
-import com.tobe.healthy.member.domain.entity.MemberType.STUDENT
-import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
+import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import io.kotest.core.spec.style.BehaviorSpec
@@ -29,13 +28,12 @@ class LessonHistoryServiceTest(
     private val passwordEncoder: PasswordEncoder,
     private val lessonHistoryRepository: LessonHistoryRepository,
     private val lessonHistoryCommentRepository: LessonHistoryCommentRepository,
+    private val memberRepository: MemberRepository
 ) : BehaviorSpec({
 
     Given("회원가입을 하고") {
-        val student = createStudent(passwordEncoder.encode("pass123"))
-        val trainer = createTrainer(passwordEncoder.encode("pass123"))
-        em.persist(student)
-        em.persist(trainer)
+        val student = memberRepository.findByUserId("healthy-student0").get()
+        val trainer = memberRepository.findByUserId("healthy-trainer0").get()
         When("게시글과 댓글을 등록했을 때") {
             val schedule = createSchedule(trainer, student)
             val lessonHistory = createLessonHistory("테스트 게시글 제목", "테스트 게시글 내용", trainer, student, schedule)
@@ -89,26 +87,6 @@ class LessonHistoryServiceTest(
             .trainer(trainer)
             .applicant(student)
             .build()
-        }
-
-        private fun createStudent(password: String): Member {
-            return Member.builder()
-                .userId("student")
-                .email("student@gmail.com")
-                .password(password)
-                .name("student")
-                .memberType(STUDENT)
-                .build()
-        }
-
-        private fun createTrainer(password: String): Member {
-            return Member.builder()
-                .userId("trainer")
-                .email("trainer@gmail.com")
-                .password(password)
-                .name("trainer")
-                .memberType(TRAINER)
-                .build()
         }
     }
 }

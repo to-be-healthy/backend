@@ -67,6 +67,7 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("io.rest-assured:rest-assured:5.4.0")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+    runtimeOnly("com.h2database:h2")
 
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
