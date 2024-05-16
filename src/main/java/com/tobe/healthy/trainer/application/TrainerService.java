@@ -10,12 +10,16 @@ import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
+import com.tobe.healthy.gym.domain.dto.out.GymDto;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.point.domain.dto.out.PointDto;
+import com.tobe.healthy.point.domain.dto.out.RankDto;
+import com.tobe.healthy.point.repository.PointRepository;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
 import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
 import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
@@ -30,10 +34,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 
 
 @Service
@@ -48,6 +54,7 @@ public class TrainerService {
     private final DietService dietService;
     private final CourseService courseService;
     private final CourseRepository courseRepository;
+    private final PointRepository pointRepository;
 
     private static final int ONE_DAY = 24 * 60 * 60 * 1000;
 
@@ -108,16 +115,41 @@ public class TrainerService {
     public MemberDetailResult getMemberOfTrainer(Member trainer, Long memberId) {
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), MemberType.TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
-        memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
+        //식단
         DietDto diet = dietService.getDietCreatedAtToday(memberId);
         MemberDetailResult result = memberRepository.getMemberOfTrainer(memberId);
         result.setDiet(diet);
 
+        //수강권
         Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
         result.setCourse(optCourse.map(CourseDto::from).orElse(null));
+
+        //포인트
+        String yyyyMM = getNowMonth();
+        int monthPoint = pointRepository.getPointOfSearchMonth(memberId, yyyyMM);
+        int totalPoint = pointRepository.getTotalPoint(memberId, yyyyMM);
+        PointDto point = PointDto.create(yyyyMM, monthPoint, totalPoint);
+        result.setPoint(point);
+
+        //트레이너 매핑 여부
+        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId).orElse(null);
+
+        //랭킹
+        long totalMemberCnt = mappingRepository.countByTrainerId(trainer.getId());
+        RankDto rank = RankDto.create(mapping.getRanking(), mapping.getLastMonthRanking(), (int) totalMemberCnt);
+        result.setRank(rank);
+
+        //헬스장 정보
+        GymDto gym = member.getGym() == null ? null : GymDto.Companion.from(member.getGym());
+        result.setGym(gym);
         return result;
+    }
+
+    private String getNowMonth() {
+        return LocalDate.now().toString().substring(0, 7);
     }
 
     public void deleteStudentOfTrainer(Member trainer, Long memberId) {
