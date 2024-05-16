@@ -33,6 +33,9 @@ public class TrainerMemberMapping extends BaseTimeEntity<TrainerMemberMapping, L
     @ColumnDefault("999")
     private int ranking = 999;
 
+    @ColumnDefault("999")
+    private int lastMonthRanking = 999;
+
     private String memo;
 
     public static TrainerMemberMapping create(Member trainer, Member member) {
@@ -51,6 +54,10 @@ public class TrainerMemberMapping extends BaseTimeEntity<TrainerMemberMapping, L
 
     public void changeRanking(int ranking) {
         this.ranking = ranking;
+    }
+
+    public void changeLastMonthRanking(int lastMonthRanking) {
+        this.lastMonthRanking = lastMonthRanking;
     }
 
     public void changeMemo(String memo) {

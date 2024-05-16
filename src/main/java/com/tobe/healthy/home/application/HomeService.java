@@ -76,6 +76,7 @@ public class HomeService {
         if(isMapped){
             long totalMemberCnt = mappingRepository.countByTrainerId(mapping.getTrainer().getId());
             rank.setRanking(mapping.getRanking());
+            rank.setLastMonthRanking(mapping.getLastMonthRanking());
             rank.setTotalMemberCnt((int) totalMemberCnt);
         }
 

@@ -58,6 +58,7 @@ public class PointService {
 
             for(TrainerMemberMapping thisMember : members){
                 List<TempRankDto> thisRankDto = ranks.stream().filter(r -> r.getMemberId().equals(thisMember.getMember().getId())).toList();
+                thisMember.changeLastMonthRanking(thisMember.getRanking());
                 thisMember.changeRanking(thisRankDto.isEmpty() ? 999 : thisRankDto.get(0).getRanking());
             }
         }

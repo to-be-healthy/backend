@@ -5,6 +5,7 @@ import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.home.application.HomeService;
 import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
 import com.tobe.healthy.member.domain.dto.out.TrainerHomeResult;
+import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.schedule.entity.in.TrainerTodayScheduleSearchCond;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeController {
 
     private final HomeService homeService;
+    private final PointService pointService;
 
     @Operation(summary = "학생 홈 조회", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
@@ -51,4 +53,5 @@ public class HomeController {
                 .message("트레이너 홈이 조회되었습니다.")
                 .build();
     }
+
 }
