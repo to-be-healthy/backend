@@ -14,9 +14,7 @@ import java.time.LocalTime
 
 @SpringBootTest
 @Transactional
-class ScheduleSettingTest(
-
-) : StringSpec({
+class ScheduleSettingTest : StringSpec({
 
     "수업 시작 일자가 종료 일자보다 같거나 빠르면 정상적으로 등록된다" {
 

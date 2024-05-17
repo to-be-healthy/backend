@@ -6,4 +6,5 @@ import io.kotest.extensions.spring.SpringTestLifecycleMode
 
 class ProjectConfig: AbstractProjectConfig() {
     override fun extensions() = listOf(SpringTestExtension(SpringTestLifecycleMode.Root))
+//    override val parallelism = 10
 }

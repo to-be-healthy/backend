@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 class GymServiceTest(
     private val gymService: GymService,
     private val gymRepository: GymRepository,
-    private val memberRepository: MemberRepository
+    private val memberRepository: MemberRepository,
 ) : StringSpec({
 
     "헬스장을 등록한다" {

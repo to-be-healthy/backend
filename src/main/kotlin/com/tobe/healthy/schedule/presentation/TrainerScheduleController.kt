@@ -52,7 +52,7 @@ class TrainerScheduleController(
     @GetMapping("/default-lesson-time")
     fun findDefaultSchedule(@AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<TrainerScheduleResponse> {
         return ApiResultResponse(
-            message = "기본 수업 조회에 성공하였습니다.",
+            message = "기본 수업 시간 조회에 성공하였습니다.",
             data = trainerScheduleService.findDefaultLessonTime(member.memberId)
         )
     }
