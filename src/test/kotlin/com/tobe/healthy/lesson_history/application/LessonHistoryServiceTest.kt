@@ -36,12 +36,8 @@ class LessonHistoryServiceTest(
 
             When("댓글을 등록하고") {
                 val commentRequest = CommentRegisterCommand(comment = "수업일지 테스트 댓글", null)
-                val response =
-                    lessonHistoryService.registerLessonHistoryComment(
-                        result.lessonHistoryId,
-                        commentRequest,
-                        student.id
-                    )
+                val response = lessonHistoryService.registerLessonHistoryComment(result.lessonHistoryId, commentRequest, student.id)
+
                 Then("댓글이 정상적으로 등록되었는지 검증한다") {
                     response.comment shouldBe commentRequest.comment
                     response.writerId shouldBe student.id
