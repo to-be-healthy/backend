@@ -6,9 +6,7 @@ import com.tobe.healthy.config.error.ErrorResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lesson_history.application.LessonHistoryService
 import com.tobe.healthy.lesson_history.domain.dto.`in`.*
-import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryDetailResponse
-import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryResponse
-import com.tobe.healthy.lesson_history.domain.dto.out.UploadFileResponse
+import com.tobe.healthy.lesson_history.domain.dto.out.*
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -50,7 +48,7 @@ class LessonHistoryController(
         ])
     fun registerLessonHistory(@Parameter(content = [Content(schema = Schema(implementation = RegisterLessonHistoryCommand::class))])
                               @RequestBody @Valid request: RegisterLessonHistoryCommand,
-                              @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
+                              @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterLessonHistoryCommandResponse> {
         return ApiResultResponse(
             message = "수업 일지를 등록하였습니다.",
             data = lessonHistoryService.registerLessonHistory(request, member.memberId)
@@ -155,7 +153,7 @@ class LessonHistoryController(
     fun registerLessonHistoryComment(@Parameter(description = "수업일지 ID", example = "1") @PathVariable lessonHistoryId: Long,
                                      @Parameter(content = [Content(schema = Schema(implementation = CommentRegisterCommand::class))])
                                      @RequestBody @Valid request: CommentRegisterCommand,
-                                     @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
+                                     @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterLessonHistoryCommentResponse> {
         return ApiResultResponse(
             message = "댓글이 등록되었습니다.",
             data = lessonHistoryService.registerLessonHistoryComment(lessonHistoryId, request, member.memberId)

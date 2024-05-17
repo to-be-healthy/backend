@@ -3,6 +3,7 @@ package com.tobe.healthy.schedule.application
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_ALREADY_EXISTS
 import com.tobe.healthy.member.repository.MemberRepository
+import com.tobe.healthy.schedule.entity.`in`.RegisterDefaultLessonTimeRequest
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
 import io.kotest.assertions.throwables.shouldThrow
@@ -21,10 +22,20 @@ class TrainerScheduleServiceTest(
 ) : BehaviorSpec({
     Given("트레이너가 등록할 일정 정보를 설정하고") {
         val trainer = memberRepository.findByUserId("healthy-trainer0").get()
+        val lessonDefaultRequest = RegisterDefaultLessonTimeRequest(
+            lessonStartTime = LocalTime.of(9, 0),
+            lessonEndTime = LocalTime.of(20, 0),
+            lunchStartTime = LocalTime.of(12, 0),
+            lunchEndTime = LocalTime.of(13, 0),
+            lessonTime = 60
+        )
+        val registerDefaultLessonTimeResponse = trainerScheduleService.registerDefaultLessonTime(lessonDefaultRequest, trainer.id)
+
         val request = RegisterScheduleRequest(
             lessonStartDt = LocalDate.of(2024, 5, 1),
             lessonEndDt = LocalDate.of(2024, 5, 31),
         )
+
         When("일정을 등록했을 때") {
             val result = trainerScheduleService.registerSchedule(request, trainer.id)
 

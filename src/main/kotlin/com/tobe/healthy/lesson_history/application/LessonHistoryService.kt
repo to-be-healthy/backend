@@ -9,9 +9,7 @@ import com.tobe.healthy.common.redis.RedisService
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.lesson_history.domain.dto.`in`.*
-import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryDetailResponse
-import com.tobe.healthy.lesson_history.domain.dto.out.LessonHistoryResponse
-import com.tobe.healthy.lesson_history.domain.dto.out.UploadFileResponse
+import com.tobe.healthy.lesson_history.domain.dto.out.*
 import com.tobe.healthy.lesson_history.domain.entity.LessonHistory
 import com.tobe.healthy.lesson_history.domain.entity.LessonHistoryComment
 import com.tobe.healthy.lesson_history.domain.entity.LessonHistoryFiles
@@ -45,14 +43,14 @@ class LessonHistoryService(
         private val bucketName: String,
 ) {
 
-    fun registerLessonHistory(request: RegisterLessonHistoryCommand, trainerId: Long): Boolean {
+    fun registerLessonHistory(request: RegisterLessonHistoryCommand, trainerId: Long): RegisterLessonHistoryCommandResponse {
         val (findMember, findTrainer, findSchedule) = checkLessonHistoryRequirements(request, trainerId)
 
         val lessonHistory = registerLessonHistory(request, findMember, findTrainer, findSchedule)
 
         registerFiles(request.uploadFileResponse, findTrainer, lessonHistory)
 
-        return true
+        return RegisterLessonHistoryCommandResponse.from(lessonHistory)
     }
 
     fun findAllLessonHistory(
@@ -108,7 +106,7 @@ class LessonHistoryService(
         lessonHistoryId: Long,
         request: CommentRegisterCommand,
         memberId: Long,
-    ): Boolean {
+    ): RegisterLessonHistoryCommentResponse {
         val findMember = memberRepository.findByIdOrNull(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
@@ -118,7 +116,7 @@ class LessonHistoryService(
         val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id)
         val lessonHistoryComment = registerComment(order, request, findMember, lessonHistory)
         registerFile(request.uploadFileResponse, findMember, lessonHistory, lessonHistoryComment)
-        return true
+        return RegisterLessonHistoryCommentResponse.from(lessonHistoryComment)
     }
 
     fun registerLessonHistoryReply(

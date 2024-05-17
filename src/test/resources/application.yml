@@ -28,13 +28,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-
     properties:
       hibernate:
         auto_quote_keyword: true
         globally_quoted_identifiers: true
         default_batch_fetch_size: 100
-      database-platform: org.hibernate.dialect.H2Dialect
     open-in-view: false
     defer-datasource-initialization: true
   data:
