@@ -5,8 +5,9 @@ import com.tobe.healthy.member.domain.dto.MemberDto;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static com.tobe.healthy.diet.domain.entity.DietType.BREAKFAST;
 
 @Data
 @Builder
@@ -18,33 +19,42 @@ public class DietDto {
     private Long commentCnt;
 
     @Builder.Default
-    private Boolean fastBreakfast = false;
-
+    private DietDetailDto breakfast = new DietDetailDto();
     @Builder.Default
-    private Boolean fastLunch = false;
-
+    private DietDetailDto lunch = new DietDetailDto();
     @Builder.Default
-    private Boolean fastDinner = false;
+    private DietDetailDto dinner = new DietDetailDto();
 
-    @Builder.Default
-    private List<DietFileDto> dietFiles = new ArrayList<>();
 
     public static DietDto create(Long dietId, List<DietFileDto> dietFiles) {
-        return DietDto.builder()
+        DietDto dto = DietDto.builder()
                 .dietId(dietId)
-                .dietFiles(dietFiles)
                 .build();
+        dto.setDietFiles(dietFiles);
+        return dto;
     }
 
     public static DietDto from(Diet diet) {
-        return DietDto.builder()
+        DietDto dto = DietDto.builder()
                 .dietId(diet.getDietId())
                 .member(MemberDto.from(diet.getMember()))
                 .likeCnt(diet.getLikeCnt())
                 .commentCnt(diet.getCommentCnt())
-                .fastBreakfast(diet.getFastBreakfast())
-                .fastLunch(diet.getFastLunch())
-                .fastDinner(diet.getFastDinner())
                 .build();
+        dto.breakfast.setFast(diet.getFastBreakfast());
+        dto.lunch.setFast(diet.getFastLunch());
+        dto.dinner.setFast(diet.getFastDinner());
+        return dto;
     }
+
+    public void setDietFiles(List<DietFileDto> filesDto) {
+        for(DietFileDto file : filesDto){
+            switch (file.getType()){
+                case BREAKFAST -> this.breakfast.setDietFile(file);
+                case LUNCH -> this.lunch.setDietFile(file);
+                case DINNER -> this.dinner.setDietFile(file);
+            }
+        }
+    }
+
 }
