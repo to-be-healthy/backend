@@ -24,6 +24,7 @@ class GymServiceTest(
 
         // when
         val response = gymService.registerGym(name)
+
         // then
         response.name shouldBe name
         response.joinCode.length shouldBe 6

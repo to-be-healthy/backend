@@ -171,7 +171,7 @@ class LessonHistoryController(
                                      @Parameter(description = "수업일지 댓글 ID", example = "1") @PathVariable lessonHistoryCommentId: Long,
                                      @Parameter(content = [Content(schema = Schema(implementation = CommentRegisterCommand::class))])
                                      @RequestBody @Valid request: CommentRegisterCommand,
-                                     @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
+                                     @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RegisterReplyResponse> {
         return ApiResultResponse(
             message = "대댓글이 등록되었습니다.",
             data = lessonHistoryService.registerLessonHistoryReply(lessonHistoryId, lessonHistoryCommentId, request, member.memberId)
