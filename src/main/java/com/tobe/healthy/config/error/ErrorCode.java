@@ -55,7 +55,7 @@ public enum ErrorCode {
 	LESSON_HISTORY_COMMENT_NOT_FOUND(NOT_FOUND, "C_030", "수업 일지 댓글이 존재하지 않습니다."),
 	EXCEED_MAXIMUM_NUMBER_OF_FILES(BAD_REQUEST, "C_031", "파일 업로드는 최대 3개까지 가능합니다."),
 	LUNCH_TIME_INVALID(BAD_REQUEST, "C_032", "시작 점심시간이 종료 점심시간과 같거나 빠를 수 없습니다."),
-	SCHEDULE_LESS_THAN_30_DAYS(BAD_REQUEST, "C_033", "일정 등록은 30일을 넘을 수 없습니다."),
+	SCHEDULE_LESS_THAN_31_DAYS(BAD_REQUEST, "C_033", "일정 등록은 31일을 넘을 수 없습니다."),
 	START_DATE_AFTER_END_DATE(BAD_REQUEST, "C_034", "수업 시작일은 종료일보다 빨라야 합니다."),
 	START_TIME_AFTER_END_TIME(BAD_REQUEST, "C_034", "수업 시작 시간은 종료 시간보다 빨라야 합니다."),
 	SCHEDULE_ALREADY_EXISTS(BAD_REQUEST, "C_035", "이미 등록된 일정이 존재합니다."),

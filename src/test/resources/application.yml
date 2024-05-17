@@ -1,0 +1,94 @@
+spring:
+  profiles:
+    active: TEST
+
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          starttls:
+            enable: true
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  sql:
+    init:
+      mode: always
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        auto_quote_keyword: true
+        globally_quoted_identifiers: true
+        default_batch_fetch_size: 100
+    open-in-view: false
+    defer-datasource-initialization: true
+  data:
+    redis:
+      host: ${DATA_REDIS_HOST} #redis-compose, local 실행시 localhost
+      port: 6379
+
+jwt:
+  secret: ${JWT_SECRET_TOKEN}
+  access-token-valid-seconds: ${JWT_ACCESS_TOKEN_VALID_SECONDS}
+  refresh-token-valid-seconds: ${JWT_REFRESH_TOKEN_VALID_SECONDS}
+
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+  tomcat:
+    uri-encoding: UTF-8
+
+oauth:
+  kakao:
+    grant-type: ${OAUTH_KAKAO_GRANT_TYPE}
+    client-id: ${OAUTH_KAKAO_CLIENT_ID}
+    client-secret: ${OAUTH_KAKAO_CLIENT_SECRET}
+    redirect-uri: ${OAUTH_KAKAO_REDIRECT_URI}
+    token-uri: ${OAUTH_KAKAO_TOKEN_URI}
+    user-info-uri: ${OAUTH_KAKAO_USER_INFO_URI}
+  naver:
+    grant-type: ${OAUTH_NAVER_GRANT_TYPE}
+    client-id: ${OAUTH_NAVER_CLIENT_ID}
+    client-secret: ${OAUTH_NAVER_CLIENT_SECRET}
+    token-uri: ${OAUTH_NAVER_TOKEN_URI}
+    user-info-uri: ${OAUTH_NAVER_USER_INFO_URI}
+  google:
+    grant-type: ${OAUTH_GOOGLE_GRANT_TYPE}
+    client-id: ${OAUTH_GOOGLE_CLIENT_ID}
+    client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET}
+    token-uri: ${OAUTH_GOOGLE_TOKEN_URI}
+    user-info-uri: ${OAUTH_GOOGLE_USER_INFO_URI}
+    redirect-uri: ${OAUTH_GOOGLE_REDIRECT_URI}
+
+aws:
+  s3:
+    access-key: ${AWS_S3_ACCESS_KEY}
+    secret-key: ${AWS_S3_SECRET_KEY}
+    bucket-name: to-be-healthy-bucket
+
+firebase:
+  admin-sdk:
+    file: ${FIREBASE_ADMIN_SDK_FILE}
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true

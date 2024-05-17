@@ -11,26 +11,21 @@ import com.tobe.healthy.schedule.entity.TrainerScheduleInfo
 import com.tobe.healthy.schedule.entity.`in`.*
 import com.tobe.healthy.schedule.entity.out.*
 import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository
-import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration.between
 import java.time.LocalTime
-import java.time.temporal.ChronoUnit.DAYS
 
 @Service
 @Transactional
 class TrainerScheduleService(
     private val memberRepository: MemberRepository,
     private val trainerScheduleRepository: TrainerScheduleRepository,
-    private val scheduleWaitingRepository: ScheduleWaitingRepository,
     private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository
 ) {
-    fun registerSchedule(request: RegisterScheduleRequest, trainerId: Long): Boolean {
-        validateScheduleDate(request)
-
+    fun registerSchedule(request: RegisterScheduleRequest, trainerId: Long): ScheduleRegisterResponse {
         val trainer = memberRepository.findByIdOrNull(trainerId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
@@ -87,20 +82,12 @@ class TrainerScheduleService(
             startTime = endTime
         }
         trainerScheduleRepository.saveAll(schedules)
-        return true
+
+        return ScheduleRegisterResponse.from(schedules, findTrainerSchedule)
     }
 
     private fun isStartTimeEqualsLunchStartTime(lunchStartTime: LocalTime?, startTime: LocalTime): Boolean {
         return startTime == lunchStartTime
-    }
-
-    private fun validateScheduleDate(request: RegisterScheduleRequest) {
-        if (request.lessonStartDt.isAfter(request.lessonEndDt)) {
-            throw CustomException(START_DATE_AFTER_END_DATE)
-        }
-        if (DAYS.between(request.lessonStartDt, request.lessonEndDt) > ONE_MONTH) {
-            throw CustomException(SCHEDULE_LESS_THAN_30_DAYS)
-        }
     }
 
     fun findAllSchedule(searchCond: ScheduleSearchCond, trainerId: Long): LessonResponse? {
@@ -219,5 +206,5 @@ class TrainerScheduleService(
     }
 }
 
-const val ONE_MONTH = 30
+const val ONE_MONTH = 31
 const val ONE_DAY = 1L

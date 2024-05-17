@@ -68,7 +68,7 @@ class TrainerScheduleController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping
     fun registerSchedule(@RequestBody request: RegisterScheduleRequest,
-                         @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
+                         @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<ScheduleRegisterResponse> {
         return ApiResultResponse(
             message = "일정 등록에 성공하였습니다.",
             data = trainerScheduleService.registerSchedule(request, member.memberId)
