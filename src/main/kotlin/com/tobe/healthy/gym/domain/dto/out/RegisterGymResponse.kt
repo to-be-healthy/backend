@@ -5,7 +5,7 @@ import com.tobe.healthy.gym.domain.entity.Gym
 data class RegisterGymResponse(
     val id: Long,
     val name: String,
-    val joinCode: Int
+    val joinCode: String
 ) {
 
     companion object {

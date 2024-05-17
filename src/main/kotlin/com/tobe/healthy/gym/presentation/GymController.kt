@@ -57,7 +57,7 @@ class GymController(
     )
     @PostMapping("/{gymId}")
     fun selectMyGym(@Parameter(description = "헬스장 ID") @PathVariable gymId: Long,
-                    @Parameter(description = "6자리 난수로 구성된 헬스장 가입 번호") joinCode: Int?,
+                    @Parameter(description = "6자리 난수로 구성된 헬스장 가입 번호") joinCode: String?,
                     @AuthenticationPrincipal member: CustomMemberDetails,
     ): ApiResultResponse<SelectMyGymCommandResponse> {
         return ApiResultResponse(

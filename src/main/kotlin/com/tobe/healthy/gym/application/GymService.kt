@@ -25,7 +25,7 @@ class GymService(
         return gymRepository.findAll().map { GymListResponse.from(it) }
     }
 
-    fun selectMyGym(gymId: Long, joinCode: Int?, memberId: Long): SelectMyGymCommandResponse {
+    fun selectMyGym(gymId: Long, joinCode: String?, memberId: Long): SelectMyGymCommandResponse {
 
         val member = memberRepository.findByIdOrNull(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)

@@ -17,7 +17,7 @@ class Gym(
 
     val name: String,
 
-    val joinCode: Int,
+    val joinCode: String,
 
     @OneToMany(fetch = LAZY, mappedBy = "gym")
     val member: List<Member> = mutableListOf()
@@ -27,7 +27,7 @@ class Gym(
         fun registerGym(name: String, accessKey: String): Gym {
             return Gym(
                 name = name,
-                joinCode = accessKey.toInt()
+                joinCode = accessKey
             )
         }
     }
