@@ -12,6 +12,7 @@ import com.tobe.healthy.member.domain.dto.in.EmailChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemoCommand;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
+import com.tobe.healthy.member.domain.dto.out.TrainerMappingResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
@@ -335,9 +336,9 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "학생이 트레이너와 매핑 여부를 반환한다.")
 	})
 	@GetMapping("/trainer-mapping")
-	public ResponseHandler<Object> getTrainerMapping(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		memberService.getTrainerMapping(customMemberDetails.getMember());
-		return ResponseHandler.<Object>builder()
+	public ResponseHandler<TrainerMappingResult> getTrainerMapping(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ResponseHandler.<TrainerMappingResult>builder()
+				.data(memberService.getTrainerMapping(customMemberDetails.getMember()))
 				.message("매핑 여부가 조회되었습니다.")
 				.build();
 	}

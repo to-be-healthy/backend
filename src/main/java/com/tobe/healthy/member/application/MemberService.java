@@ -22,6 +22,7 @@ import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
+import com.tobe.healthy.member.domain.dto.out.TrainerMappingResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
@@ -636,8 +637,8 @@ public class MemberService {
         return true;
     }
 
-    public void getTrainerMapping(Member member) {
-        mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId())
-                .orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
+    public TrainerMappingResult getTrainerMapping(Member member) {
+        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId()).orElse(null);
+        return new TrainerMappingResult(mapping != null);
     }
 }
