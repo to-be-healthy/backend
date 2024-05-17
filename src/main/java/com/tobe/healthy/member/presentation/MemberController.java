@@ -330,4 +330,16 @@ public class MemberController {
 				.build();
 	}
 
+	@Operation(summary = "학생이 트레이너와 매핑 여부 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "학생이 트레이너와 매핑 여부를 반환한다.")
+	})
+	@GetMapping("/trainer-mapping")
+	public ResponseHandler<Object> getTrainerMapping(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		memberService.getTrainerMapping(customMemberDetails.getMember());
+		return ResponseHandler.<Object>builder()
+				.message("매핑 여부가 조회되었습니다.")
+				.build();
+	}
+
 }

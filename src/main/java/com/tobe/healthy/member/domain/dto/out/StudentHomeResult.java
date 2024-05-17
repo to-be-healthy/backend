@@ -15,7 +15,6 @@ import lombok.Data;
 @Builder
 public class StudentHomeResult {
 
-    private boolean isMapped;
     private CourseDto course;
     private PointDto point;
     private RankDto rank;
@@ -24,9 +23,8 @@ public class StudentHomeResult {
     private DietDto diet;
     private GymDto gym;
 
-    public static StudentHomeResult create(boolean isMapped, CourseDto course, PointDto point, RankDto rank, MyReservation myReservation, LessonHistoryResponse lessonHistory, DietDto diet, GymDto gym) {
+    public static StudentHomeResult create(CourseDto course, PointDto point, RankDto rank, MyReservation myReservation, LessonHistoryResponse lessonHistory, DietDto diet, GymDto gym) {
         return StudentHomeResult.builder()
-                .isMapped(isMapped)
                 .course(course)
                 .point(point)
                 .rank(rank)

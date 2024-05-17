@@ -90,7 +90,7 @@ public class HomeService {
         //식단
         DietDto diet = dietService.getDietCreatedAtToday(memberId);
 
-        return StudentHomeResult.create(isMapped, usingCourse, point, rank, myReservation, lessonHistory, diet, gym);
+        return StudentHomeResult.create(usingCourse, point, rank, myReservation, lessonHistory, diet, gym);
     }
 
     public TrainerHomeResult getTrainerHome(TrainerTodayScheduleSearchCond request, Long trainerId) {

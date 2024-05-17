@@ -31,6 +31,7 @@ import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import io.jsonwebtoken.impl.Base64UrlCodec;
+import io.lettuce.core.cluster.pubsub.RedisClusterPubSubListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -633,5 +634,10 @@ public class MemberService {
         findMember.changeEmail(request.getEmail());
         redisService.deleteValues(request.getEmail());
         return true;
+    }
+
+    public void getTrainerMapping(Member member) {
+        mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId())
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
     }
 }
