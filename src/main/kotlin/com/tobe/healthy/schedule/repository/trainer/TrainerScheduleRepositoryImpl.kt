@@ -80,7 +80,7 @@ class TrainerScheduleRepositoryImpl(
 
         val response = LessonResponse.from(results)
 
-        response?.let {
+        response.let {
             val trainerTodaySchedule = TrainerTodayScheduleResponse(
                 trainerName = response.trainerName,
                 scheduleTotalCount = scheduleCount!!,
@@ -97,7 +97,7 @@ class TrainerScheduleRepositoryImpl(
             }
             return trainerTodaySchedule
 
-        } ?: return null
+        }
     }
 
     override fun findAvailableRegisterSchedule(request: RegisterScheduleCommand, trainerId: Long): Schedule? {

@@ -26,7 +26,7 @@ data class RegisterDefaultLessonTimeRequest(
     val lessonTime: Int
 ) {
     init {
-        if (lessonStartTime?.isAfter(lessonEndTime) == true || lessonStartTime == lessonEndTime) {
+        if (lessonStartTime.isAfter(lessonEndTime) || lessonStartTime == lessonEndTime) {
             throw CustomException(START_TIME_AFTER_END_TIME)
         }
         if (lunchStartTime?.isAfter(lunchEndTime) == true) {

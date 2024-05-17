@@ -16,9 +16,9 @@ class LessonDetailResponseSerializer : JsonSerializer<LessonDetailResponse>() {
         gen.writeStringField("reservationStatus", value.reservationStatus?.name)
 
         if (value.reservationStatus != ReservationStatus.DISABLED) {
-            gen.writeObjectField("applicantId", value.applicantId ?: null)
+            gen.writeObjectField("applicantId", value.applicantId)
             gen.writeStringField("applicantName", value.applicantName)
-            gen.writeObjectField("waitingStudentId", value.waitingStudentId ?: null)
+            gen.writeObjectField("waitingStudentId", value.waitingStudentId)
             gen.writeStringField("waitingStudentName", value.waitingStudentName)
         }
 
