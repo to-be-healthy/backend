@@ -124,8 +124,7 @@ public class TrainerService {
         result.setDiet(diet);
 
         //수강권
-        Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
-        result.setCourse(optCourse.map(CourseDto::from).orElse(null));
+        result.setCourse(courseService.getNowUsingCourse(memberId));
 
         //포인트
         String yyyyMM = getNowMonth();

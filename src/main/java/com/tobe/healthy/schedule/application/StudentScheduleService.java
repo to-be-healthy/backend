@@ -1,6 +1,7 @@
 package com.tobe.healthy.schedule.application;
 
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
@@ -37,6 +38,7 @@ public class StudentScheduleService {
 	private final StudentScheduleRepository studentScheduleRepository;
 	private final CourseRepository courseRepository;
 	private final TrainerMemberMappingRepository mappingRepository;
+	private final CourseService courseService;
 
 	public List<ScheduleCommandResult> findAllByApplicantId(Long memberId) {
 		List<ScheduleCommandResult> result = studentScheduleRepository.findAllByApplicantId(memberId);
@@ -105,9 +107,7 @@ public class StudentScheduleService {
 	}
 
 	public MyReservationResponse findAllMyReservation(Long memberId, ScheduleSearchCond searchCond) {
-		Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
-		CourseDto course = optCourse.map(CourseDto::from).orElse(null);
 		List<MyReservation> result = studentScheduleRepository.findAllMyReservation(memberId, searchCond);
-		return MyReservationResponse.create(course, result);
+		return MyReservationResponse.create(courseService.getNowUsingCourse(memberId), result);
 	}
 }

@@ -1,6 +1,7 @@
 package com.tobe.healthy.home.application;
 
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
@@ -49,6 +50,7 @@ public class HomeService {
     private final TrainerMemberMappingRepository mappingRepository;
     private final TrainerScheduleRepository trainerScheduleRepository;
     private final MemberRepository memberRepository;
+    private final CourseService courseService;
 
     public StudentHomeResult getStudentHome(Long memberId) {
         //헬스장 정보
@@ -62,8 +64,7 @@ public class HomeService {
         boolean isMapped = mapping != null;
 
         //수강권
-        Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
-        CourseDto usingCourse = optCourse.map(CourseDto::from).orElse(null);
+        CourseDto usingCourse = courseService.getNowUsingCourse(memberId);
 
         //포인트
         String yyyyMM = getNowMonth();

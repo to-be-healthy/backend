@@ -42,20 +42,22 @@ public class CourseAspect {
     */
     @AfterReturning(value = "cancelMemberSchedule()", returning = "returnValue")
     public void updateCourseWhenCancelSchedule(JoinPoint joinPoint, Object returnValue) {
-        Long studentId = ((ScheduleIdInfo) returnValue).getStudentId();
-        Long waitingStudentId = ((ScheduleIdInfo) returnValue).getWaitingStudentId();
-        Long trainerId = ((ScheduleIdInfo) returnValue).getTrainerId();
+        ScheduleIdInfo scheduleIdInfo = ((ScheduleIdInfo) returnValue);
+        Long scheduleId = scheduleIdInfo.getScheduleId();
+        Long studentId = scheduleIdInfo.getStudentId();
+        Long waitingStudentId = scheduleIdInfo.getWaitingStudentId();
+        Long trainerId = scheduleIdInfo.getTrainerId();
         CourseUpdateCommand command;
 
         //수업 취소자 수강권 +1
         CourseService courseService = courseServiceObjectProvider.getObject();
         command = CourseUpdateCommand.create(studentId, PLUS, RESERVATION_CANCEL, ONE_LESSON);
-        courseService.updateCourseByMember(trainerId, command);
+        courseService.updateCourseByMember(scheduleId, trainerId, command);
 
         //수업 대기자 수강권 -1
         if(!ObjectUtils.isEmpty(waitingStudentId)){
             command = CourseUpdateCommand.create(waitingStudentId, MINUS, RESERVATION, ONE_LESSON);
-            courseService.updateCourseByMember(trainerId, command);
+            courseService.updateCourseByMember(scheduleId, trainerId, command);
         }
     }
 
@@ -64,12 +66,14 @@ public class CourseAspect {
      */
     @AfterReturning(value = "reserveSchedule()", returning = "returnValue")
     public void minusCourseWhenReserveSchedule(JoinPoint joinPoint, Object returnValue) {
-        Long studentId = ((ScheduleIdInfo) returnValue).getStudentId();
-        Long trainerId = ((ScheduleIdInfo) returnValue).getTrainerId();
+        ScheduleIdInfo scheduleIdInfo = ((ScheduleIdInfo) returnValue);
+        Long scheduleId = scheduleIdInfo.getScheduleId();
+        Long studentId = scheduleIdInfo.getStudentId();
+        Long trainerId = scheduleIdInfo.getTrainerId();
 
         CourseService courseService = courseServiceObjectProvider.getObject();
         CourseUpdateCommand command = CourseUpdateCommand.create(studentId, MINUS, RESERVATION, ONE_LESSON);
-        courseService.updateCourseByMember(trainerId, command);
+        courseService.updateCourseByMember(scheduleId, trainerId, command);
     }
 
 }
