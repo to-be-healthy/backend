@@ -25,22 +25,19 @@ public class MemberProfile extends BaseTimeEntity<MemberProfile, Long> {
 	@Column(name = "member_profile_id")
 	private Long id;
 
-	@OneToOne(mappedBy = "memberProfile", fetch = LAZY, orphanRemoval = true)
+	@OneToOne(mappedBy = "memberProfile", fetch = LAZY)
 	private Member member;
 
 	@Nullable
 	private String fileUrl;
 
-	public static MemberProfile create(String fileUrl, Member member) {
+	private String fileName;
+
+	public static MemberProfile create(String fileName, String fileUrl, Member member) {
 		return MemberProfile.builder()
+			.fileName(fileName)
 			.fileUrl(fileUrl)
 			.member(member)
-			.build();
-	}
-
-	public static MemberProfile create(String fileUrl) {
-		return MemberProfile.builder()
-			.fileUrl(fileUrl)
 			.build();
 	}
 }

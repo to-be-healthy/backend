@@ -11,7 +11,9 @@ import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.EmailChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemoCommand;
+import com.tobe.healthy.member.domain.dto.out.DeleteMemberProfileResponse;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
+import com.tobe.healthy.member.domain.dto.out.RegisterMemberProfileResponse;
 import com.tobe.healthy.member.domain.dto.out.TrainerMappingResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.point.application.PointService;
@@ -109,11 +111,23 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "프로필 사진이 등록되었습니다.")
 	})
 	@PutMapping(value = "/profile", consumes = MULTIPART_FORM_DATA_VALUE)
-	public ResponseHandler<Boolean> changeProfile(@RequestParam MultipartFile file,
-												  @AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
-				.data(memberService.changeProfile(file, member.getMemberId()))
+	public ResponseHandler<RegisterMemberProfileResponse> changeProfile(@RequestParam MultipartFile file,
+												 @AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<RegisterMemberProfileResponse>builder()
+				.data(memberService.registerProfile(file, member.getMemberId()))
 				.message("프로필 사진이 등록되었습니다.")
+				.build();
+	}
+
+	@Operation(summary = "프로필 사진을 삭제한다.", responses = {
+			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
+			@ApiResponse(responseCode = "200", description = "프로필 사진이 삭제되었습니다.")
+	})
+	@DeleteMapping("/profile")
+	public ResponseHandler<DeleteMemberProfileResponse> changeProfile(@AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<DeleteMemberProfileResponse>builder()
+				.data(memberService.deleteProfile(member.getMemberId()))
+				.message("프로필 사진이 삭제되었습니다.")
 				.build();
 	}
 

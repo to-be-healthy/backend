@@ -55,7 +55,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@ColumnDefault("0")
 	private int weight = 0;
 
-	@OneToOne(fetch = LAZY, cascade = ALL)
+	@OneToOne(fetch = LAZY, cascade = ALL, orphanRemoval = true)
 	@JoinColumn(name = "member_profile_id")
 	@Nullable
 	private MemberProfile memberProfile;
@@ -202,8 +202,11 @@ public class Member extends BaseTimeEntity<Member, Long> {
 		this.email = email;
 	}
 
-	public void changeProfile(String fileUrl) {
-		MemberProfile memberProfile = MemberProfile.create(fileUrl);
-		this.memberProfile = memberProfile;
+	public void registerProfile(String fileName, String fileUrl) {
+		this.memberProfile = MemberProfile.create(fileName, fileUrl, this);
+	}
+
+	public void deleteProfile() {
+		this.memberProfile = null;
 	}
 }

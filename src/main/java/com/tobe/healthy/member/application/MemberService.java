@@ -19,20 +19,17 @@ import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
 import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand.MemberFindIdCommandResult;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
-import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
-import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
-import com.tobe.healthy.member.domain.dto.out.MemberJoinCommandResult;
-import com.tobe.healthy.member.domain.dto.out.TrainerMappingResult;
+import com.tobe.healthy.member.domain.dto.out.*;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.member.repository.MemberProfileRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import io.jsonwebtoken.impl.Base64UrlCodec;
-import io.lettuce.core.cluster.pubsub.RedisClusterPubSubListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -45,6 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -85,6 +83,7 @@ public class MemberService {
     private final AmazonS3 amazonS3;
     private final MailService mailService;
     private final CourseService courseService;
+    private final MemberProfileRepository memberProfileRepository;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -237,29 +236,49 @@ public class MemberService {
         return true;
     }
 
-    public Boolean changeProfile(MultipartFile uploadFile, Long memberId) {
+    public RegisterMemberProfileResponse registerProfile(MultipartFile uploadFile, Long memberId) {
         Member findMember = memberRepository.findMemberById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-        if (!uploadFile.isEmpty()) {
-            ObjectMetadata objectMetadata = createObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
-            String savedFileName = createFileName("profile/");
-
-            try (InputStream inputStream = uploadFile.getInputStream()) {
-                amazonS3.putObject(
-                    bucketName,
-                    savedFileName,
-                    inputStream,
-                    objectMetadata
-                );
-                String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
-                findMember.changeProfile(fileUrl);
-            } catch (IOException e) {
-                log.error("error => {}", e.getStackTrace()[0]);
-                throw new CustomException(FILE_UPLOAD_ERROR);
-            }
+        if (uploadFile.isEmpty()) {
+            throw new IllegalArgumentException("프로필 사진을 등록해 주세요.");
         }
-        return true;
+
+        ObjectMetadata objectMetadata = createObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
+        String savedFileName = createFileName("profile/");
+
+        try (InputStream inputStream = uploadFile.getInputStream()) {
+            amazonS3.putObject(
+                bucketName,
+                savedFileName,
+                inputStream,
+                objectMetadata
+            );
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+            findMember.registerProfile(savedFileName, fileUrl);
+            return RegisterMemberProfileResponse.from(fileUrl, savedFileName);
+        } catch (IOException e) {
+            log.error("error => {}", e.getStackTrace()[0]);
+            throw new CustomException(FILE_UPLOAD_ERROR);
+        }
+    }
+
+    public DeleteMemberProfileResponse deleteProfile(Long memberId) {
+        Member findMember = memberRepository.findMemberById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        if (ObjectUtils.isEmpty(findMember.getMemberProfile())) {
+            throw new IllegalArgumentException("프로필 사진이 없습니다.");
+        }
+
+        String fileUrl = findMember.getMemberProfile().getFileUrl();
+        String fileName = findMember.getMemberProfile().getFileName();
+
+        amazonS3.deleteObject(bucketName, fileName);
+
+        findMember.deleteProfile();
+
+        return DeleteMemberProfileResponse.from(fileUrl, fileName);
     }
 
     public Boolean changeName(String name, Long memberId) {
@@ -396,7 +415,7 @@ public class MemberService {
                     objectMetadata
             );
             String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
-            return MemberProfile.create(fileUrl, member);
+            return MemberProfile.create(savedFileName, fileUrl, member);
         } catch (IOException e) {
             log.error("error => {}", e.getStackTrace()[0]);
             throw new CustomException(FILE_UPLOAD_ERROR);
@@ -410,7 +429,7 @@ public class MemberService {
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
             String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
-            return MemberProfile.create(fileUrl, member);
+            return MemberProfile.create(savedFileName, fileUrl, member);
         } catch (IOException e) {
             log.error("error => {}", e.getStackTrace()[0]);
             throw new CustomException(FILE_UPLOAD_ERROR);
