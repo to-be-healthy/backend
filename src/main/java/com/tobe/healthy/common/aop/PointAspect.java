@@ -43,6 +43,9 @@ public class PointAspect {
     @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleService.revertReservationStatusToNoShow(..))")
     private void revertReservationStatusToNoShow() {}
 
+    /*
+     * 운동기록 등록
+     */
     @AfterReturning(value = "addWorkoutHistory()", returning = "returnValue")
     public void plusPointWhenPostWorkout(JoinPoint joinPoint, Object returnValue) {
         Long memberId = ((WorkoutHistoryDto) returnValue).getMember().getId();
@@ -51,6 +54,9 @@ public class PointAspect {
         pointService.updatePoint(memberId, WORKOUT, PLUS, ONE_POINT);
     }
 
+    /*
+     * 식단기록 등록
+     */
     @AfterReturning(value = "addDiet()", returning = "returnValue")
     public void plusPointWhenPostDiet(JoinPoint joinPoint, Object returnValue) {
         Long memberId = ((DietDto) returnValue).getMember().getId();
@@ -58,6 +64,9 @@ public class PointAspect {
         pointService.updatePoint(memberId, DIET, PLUS, ONE_POINT);
     }
 
+    /*
+     * 노쇼 처리
+     */
     @AfterReturning(value = "updateReservationStatusToNoShow()", returning = "returnValue")
     public void minusPointWhenNoShow(JoinPoint joinPoint, Object returnValue) {
         Long memberId = ((ScheduleIdInfo) returnValue).getStudentId();
@@ -65,6 +74,9 @@ public class PointAspect {
         pointService.updatePoint(memberId, NO_SHOW, MINUS, THREE_POINT);
     }
 
+    /*
+     * 노쇼 취소
+     */
     @AfterReturning(value = "revertReservationStatusToNoShow()", returning = "returnValue")
     public void plusPointWhenRevertNoShow(JoinPoint joinPoint, Object returnValue) {
         Long memberId = ((ScheduleIdInfo) returnValue).getStudentId();

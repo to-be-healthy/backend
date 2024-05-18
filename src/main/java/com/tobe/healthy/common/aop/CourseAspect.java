@@ -31,12 +31,15 @@ public class CourseAspect {
         this.courseServiceObjectProvider = courseServiceObjectProvider;
     }
 
-    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleService.cancelMemberSchedule(..))")
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.CommonScheduleService.cancelMemberSchedule(..))")
     private void cancelMemberSchedule() {}
 
-    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleService.reserveSchedule(..))")
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.CommonScheduleService.reserveSchedule(..))")
     private void reserveSchedule() {}
 
+    /*
+    * 수업 취소
+    */
     @AfterReturning(value = "cancelMemberSchedule()", returning = "returnValue")
     public void updateCourseWhenCancelSchedule(JoinPoint joinPoint, Object returnValue) {
         Long studentId = ((ScheduleIdInfo) returnValue).getStudentId();
@@ -56,6 +59,9 @@ public class CourseAspect {
         }
     }
 
+    /*
+     * 수업 예약
+     */
     @AfterReturning(value = "reserveSchedule()", returning = "returnValue")
     public void minusCourseWhenReserveSchedule(JoinPoint joinPoint, Object returnValue) {
         Long studentId = ((ScheduleIdInfo) returnValue).getStudentId();
