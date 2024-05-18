@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
-public interface CommonScheduleRepository extends JpaRepository<Schedule, Long> {
+public interface CommonScheduleRepository extends JpaRepository<Schedule, Long>, CommonScheduleRepositoryCustom {
 
 	@EntityGraph(attributePaths = {"applicant"})
 	@Query("select s from Schedule s where s.applicant.id = :userId and s.id = :scheduleId and s.delYn = false")

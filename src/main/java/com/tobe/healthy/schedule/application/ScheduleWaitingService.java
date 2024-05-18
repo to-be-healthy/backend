@@ -1,6 +1,7 @@
 package com.tobe.healthy.schedule.application;
 
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
@@ -36,6 +37,7 @@ public class ScheduleWaitingService {
 	private final TrainerScheduleRepository trainerScheduleRepository;
 	private final ScheduleWaitingRepository scheduleWaitingRepository;
 	private final CourseRepository courseRepository;
+	private final CourseService courseService;
 
 	public String registerScheduleWaiting(Long scheduleId, Long memberId) {
 
@@ -70,10 +72,8 @@ public class ScheduleWaitingService {
 	}
 
 	public MyScheduleWaitingResponse findAllMyScheduleWaiting(Long memberId) {
-		Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
-		CourseDto course = optCourse.map(CourseDto::from).orElse(null);
 		List<MyScheduleWaiting> result = scheduleWaitingRepository.findAllMyScheduleWaiting(memberId);
-		return MyScheduleWaitingResponse.create(course, result);
+		return MyScheduleWaitingResponse.create(courseService.getNowUsingCourse(memberId), result);
 	}
 
 	private String getScheduleTimeText(LocalTime lessonStartTime){

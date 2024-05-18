@@ -1,6 +1,7 @@
 package com.tobe.healthy.schedule.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -54,6 +55,10 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@ColumnDefault("false")
 	private boolean delYn = false;
+
+	@ManyToOne(fetch = LAZY)
+	@JoinColumn(name = "course_id")
+	private Course course;
 
 	public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, ReservationStatus reservationStatus) {
 		ScheduleBuilder reserve = Schedule.builder()
@@ -111,5 +116,13 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	public void updateLessonDtToClosedDay() {
 		this.reservationStatus = DISABLED;
 		this.applicant = null;
+	}
+
+	public void registerCourse(Course course){
+		this.course = course;
+	}
+
+	public void deleteCourse(){
+		this.course = null;
 	}
 }
