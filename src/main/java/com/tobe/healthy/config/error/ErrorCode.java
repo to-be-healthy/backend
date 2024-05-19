@@ -22,7 +22,7 @@ public enum ErrorCode {
 	DIET_NOT_FOUND(NOT_FOUND, "C_009", "식단기록이 존재하지 않습니다."),
 	MAIL_AUTH_CODE_NOT_VALID(BAD_REQUEST, "C_010", "인증번호가 일치하지 않습니다.다시 확인해 주세요."),
 	REFRESH_TOKEN_NOT_VALID(BAD_REQUEST, "C_011", "갱신 토큰이 유효하지 않습니다."),
-	MEMBER_ID_DUPLICATION(BAD_REQUEST, "C_012", "사용할 수 없는 아이디입니다."),
+	MEMBER_ID_DUPLICATION(BAD_REQUEST, "C_012", "이미 등록된 아이디입니다."),
 	MEMBER_ALREADY_MAPPED(BAD_REQUEST, "C_013", "이미 등록된 회원입니다."),
 	MEMBER_NOT_MAPPED(BAD_REQUEST, "C_013", "내 학생이 아닙니다."),
 	TRAINER_NOT_MAPPED(BAD_REQUEST, "C_013", "매핑된 트레이너가 없습니다."),

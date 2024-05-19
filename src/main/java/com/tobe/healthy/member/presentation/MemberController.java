@@ -11,10 +11,7 @@ import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.EmailChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemoCommand;
-import com.tobe.healthy.member.domain.dto.out.DeleteMemberProfileResponse;
-import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
-import com.tobe.healthy.member.domain.dto.out.RegisterMemberProfileResponse;
-import com.tobe.healthy.member.domain.dto.out.TrainerMappingResult;
+import com.tobe.healthy.member.domain.dto.out.*;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
@@ -112,7 +109,7 @@ public class MemberController {
 	})
 	@PutMapping(value = "/profile", consumes = MULTIPART_FORM_DATA_VALUE)
 	public ResponseHandler<RegisterMemberProfileResponse> changeProfile(@RequestParam MultipartFile file,
-												 @AuthenticationPrincipal CustomMemberDetails member) {
+																		@AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<RegisterMemberProfileResponse>builder()
 				.data(memberService.registerProfile(file, member.getMemberId()))
 				.message("프로필 사진이 등록되었습니다.")
@@ -136,9 +133,9 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "이름이 변경되었습니다.")
 	})
 	@PatchMapping("/name")
-	public ResponseHandler<Boolean> changeName(@Parameter(description = "변경할 이름", example = "홍길동") @RequestParam String name,
+	public ResponseHandler<String> changeName(@Parameter(description = "변경할 이름", example = "홍길동") @RequestParam String name,
 											   @AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
+		return ResponseHandler.<String>builder()
 				.data(memberService.changeName(name, member.getMemberId()))
 				.message("이름이 변경되었습니다.")
 				.build();
@@ -148,11 +145,12 @@ public class MemberController {
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 			@ApiResponse(responseCode = "200", description = "알림 상태가 변경되었습니다.")
 	})
-	@PatchMapping("/alarm")
-	public ResponseHandler<Boolean> changeAlarm(@Parameter(description = "변경할 알림 상태", example = "ENABLED") @RequestParam AlarmStatus alarmStatus,
-												@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
-				.data(memberService.changeAlarm(alarmStatus, member.getMemberId()))
+	@PatchMapping("/alarm/{type}/{status}")
+	public ResponseHandler<MemberChangeAlarmResult> changeAlarm(@PathVariable String type,
+																@PathVariable AlarmStatus status,
+																@AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<MemberChangeAlarmResult>builder()
+				.data(memberService.changeAlarm(type, status, member.getMemberId()))
 				.message("알림 상태가 변경되었습니다.")
 				.build();
 	}
@@ -218,8 +216,8 @@ public class MemberController {
 	})
 	@GetMapping("/{memberId}/diets")
 	public ResponseHandler<CustomPaging<DietDto>> getDiet(@Parameter(description = "학생 ID", example = "1") @PathVariable("memberId") Long memberId,
-																	  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
-																	  Pageable pageable) {
+														  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+														  Pageable pageable) {
 		return ResponseHandler.<CustomPaging<DietDto>>builder()
 				.data(dietService.getDiet(memberId, pageable, searchDate))
 				.message("식단기록 조회되었습니다.")
@@ -232,8 +230,8 @@ public class MemberController {
 	})
 	@GetMapping("/my-trainer/diets")
 	public ResponseHandler<CustomPaging<DietDto>> getDietMyTrainer(@AuthenticationPrincipal CustomMemberDetails loginMember,
-														  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
-														  Pageable pageable) {
+																   @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+																   Pageable pageable) {
 		return ResponseHandler.<CustomPaging<DietDto>>builder()
 				.data(dietService.getDietMyTrainer(loginMember.getMemberId(), pageable, searchDate))
 				.message("식단기록 조회되었습니다.")

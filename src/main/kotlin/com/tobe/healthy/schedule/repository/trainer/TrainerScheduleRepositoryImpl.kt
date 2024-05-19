@@ -8,6 +8,7 @@ import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
 import com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus.DISABLED
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
 import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
@@ -38,7 +39,7 @@ class TrainerScheduleRepositoryImpl(
             .on(scheduleWaitingDelYnEq(false))
             .where(
                 lessonDtMonthEq(searchCond.lessonDt),
-                lessonDtBetween(searchCond),
+                lessonDtBetween(searchCond?.lessonStartDt, searchCond?.lessonEndDt),
                 trainerIdEq(trainerId),
                 delYnEq(false)
             )
@@ -153,7 +154,9 @@ class TrainerScheduleRepositoryImpl(
         reservationStatus: ReservationStatus,
         trainerId: Long
     ): Schedule? {
-        return queryFactory.select(schedule).from(schedule)
+        return queryFactory
+            .select(schedule)
+            .from(schedule)
             .where(
                 scheduleIdEq(scheduleId),
                 trainerIdEq(trainerId),
@@ -181,6 +184,19 @@ class TrainerScheduleRepositoryImpl(
             .where(
                 lessonDtEq(lessonDt),
                 trainerIdEq(trainerId),
+                delYnEq(false)
+            )
+            .fetch()
+    }
+
+    override fun findAllDisabledSchedule(lessonStartDt: LocalDate, lessonEndDt: LocalDate, trainerId: Long): List<Schedule?> {
+        return queryFactory
+            .select(schedule)
+            .from(schedule)
+            .where(
+                lessonDtBetween(lessonStartDt, lessonEndDt),
+                trainerIdEq(trainerId),
+                reservationStatusEq(DISABLED),
                 delYnEq(false)
             )
             .fetch()
@@ -216,9 +232,9 @@ class TrainerScheduleRepositoryImpl(
     private fun trainerIdEq(trainerId: Long): BooleanExpression? =
         schedule.trainer.id.eq(trainerId)
 
-    private fun lessonDtBetween(searchCond: ScheduleSearchCond): BooleanExpression? {
-        if (!ObjectUtils.isEmpty(searchCond.lessonStartDt) && !ObjectUtils.isEmpty(searchCond.lessonEndDt)) {
-            return schedule.lessonDt.between(searchCond.lessonStartDt, searchCond.lessonEndDt)
+    private fun lessonDtBetween(lessonStartDt: LocalDate?, lessonEndDt: LocalDate?): BooleanExpression? {
+        if (!ObjectUtils.isEmpty(lessonStartDt) && !ObjectUtils.isEmpty(lessonEndDt)) {
+            return schedule.lessonDt.between(lessonStartDt, lessonEndDt)
         }
         return null
     }

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
-import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -39,16 +39,16 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@Enumerated(STRING)
 	private ReservationStatus reservationStatus = AVAILABLE;
 
-	@ManyToOne(fetch = LAZY, cascade = ALL)
+	@ManyToOne(fetch = LAZY, cascade = PERSIST)
 	@JoinColumn(name = "trainer_id")
 	private Member trainer;
 
-	@ManyToOne(fetch = LAZY, cascade = ALL)
+	@ManyToOne(fetch = LAZY, cascade = PERSIST)
 	@JoinColumn(name = "applicant_id")
 	@Nullable
 	private Member applicant;
 
-	@OneToMany(fetch = LAZY, mappedBy = "schedule")
+	@OneToMany(fetch = LAZY, mappedBy = "schedule", orphanRemoval = true)
 	@Nullable
 	private List<ScheduleWaiting> scheduleWaiting = new ArrayList<>();
 
@@ -66,8 +66,8 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 		return reserve.build();
 	}
 
-	public void updateReservationStatusToNoShow() {
-		this.reservationStatus = NO_SHOW;
+	public void updateReservationStatusToNoShow(ReservationStatus reservationStatus) {
+		this.reservationStatus = reservationStatus;
 	}
 
 	public void revertReservationStatusToNoShow() {

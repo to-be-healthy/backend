@@ -4,6 +4,7 @@ import com.tobe.healthy.common.redis.RedisService
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_NOT_VALID
+import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.dto.`in`.MemberLoginCommand
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.domain.entity.MemberType.STUDENT
@@ -86,5 +87,11 @@ class MemberServiceTest(
         }
 
         exception.message shouldBe "프로필 사진이 없습니다."
+    }
+
+    "회원이 닉네임을 변경한다" {
+        val changeName = memberService.changeName("미3누", student.id)
+        log.info { "변경된 닉네임: ${changeName}"}
+        changeName shouldBe "미3누"
     }
 })

@@ -281,19 +281,19 @@ public class MemberService {
         return DeleteMemberProfileResponse.from(fileUrl, fileName);
     }
 
-    public Boolean changeName(String name, Long memberId) {
+    public String changeName(String name, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         validateName(name);
         member.changeName(name);
-        return true;
+        return name;
     }
 
-    public Boolean changeAlarm(AlarmStatus alarmStatus, Long memberId) {
+    public MemberChangeAlarmResult changeAlarm(String type, AlarmStatus alarmStatus, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        member.changeAlarm(alarmStatus);
-        return true;
+        member.changeAlarm(type, alarmStatus);
+        return MemberChangeAlarmResult.from(type, alarmStatus);
     }
 
     public Boolean changeTrainerFeedback(AlarmStatus alarmStatus, Long memberId) {

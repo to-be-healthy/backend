@@ -6,6 +6,7 @@ import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +29,8 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
+@AllArgsConstructor
+@Builder
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @DynamicUpdate
@@ -47,12 +50,15 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private String name;
 
 	@ColumnDefault("0")
+	@Builder.Default
 	private int age = 0;
 
 	@ColumnDefault("0")
+	@Builder.Default
 	private int height = 0;
 
 	@ColumnDefault("0")
+	@Builder.Default
 	private int weight = 0;
 
 	@OneToOne(fetch = LAZY, cascade = ALL, orphanRemoval = true)
@@ -62,18 +68,27 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	@Enumerated(STRING)
 	@ColumnDefault("'STUDENT'")
+	@Builder.Default
 	private MemberType memberType = STUDENT;
 
 	@Enumerated(STRING)
 	@ColumnDefault("'ENABLED'")
+	@Builder.Default
 	private AlarmStatus pushAlarmStatus = ENABLED;
 
 	@Enumerated(STRING)
 	@ColumnDefault("'ENABLED'")
+	@Builder.Default
+	private AlarmStatus communityAlarmStatus = ENABLED;
+
+	@Enumerated(STRING)
+	@ColumnDefault("'ENABLED'")
+	@Builder.Default
 	private AlarmStatus feedbackAlarmStatus = ENABLED;
 
 	@Enumerated(STRING)
 	@ColumnDefault("'ENABLED'")
+	@Builder.Default
 	private AlarmStatus scheduleNoticeStatus = ENABLED;
 
 	@ManyToOne(fetch = LAZY, cascade = PERSIST)
@@ -82,21 +97,26 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	private Gym gym;
 
 	@OneToMany(fetch = LAZY, mappedBy = "trainer")
+	@Builder.Default
 	private final List<Schedule> trainerSchedules = new ArrayList<>();
 
 	@OneToMany(fetch = LAZY, mappedBy = "applicant")
+	@Builder.Default
 	private final List<Schedule> applicantSchedules = new ArrayList<>();
 
-	@OneToMany(mappedBy = "member")
+	@OneToMany(fetch = LAZY, mappedBy = "member")
+	@Builder.Default
 	private final List<ScheduleWaiting> scheduleWaitings = new ArrayList<>();
 
 	@Enumerated(STRING)
 	@ColumnDefault("'NONE'")
+	@Builder.Default
 	private SocialType socialType = NONE;
 
 	private String nickname;
 
 	@ColumnDefault("false")
+	@Builder.Default
 	private boolean delYn = false;
 
 	public static Member join(MemberJoinCommand request, String password) {
@@ -146,8 +166,17 @@ public class Member extends BaseTimeEntity<Member, Long> {
 		this.name = name;
 	}
 
-	public void changeAlarm(AlarmStatus alarmStatus) {
-		this.pushAlarmStatus = alarmStatus;
+	public void changeAlarm(String type, AlarmStatus alarmStatus) {
+		switch (type) {
+			case "pushAlarmStatus" ->
+					this.pushAlarmStatus = alarmStatus;
+
+			case "communityAlarmStatus" ->
+					this.communityAlarmStatus = alarmStatus;
+
+			case "feedbackAlarmStatus" ->
+					this.feedbackAlarmStatus = alarmStatus;
+		}
 	}
 
 	public void changeTrainerFeedback(AlarmStatus alarmStatus) {
@@ -176,26 +205,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	public void setMemberProfile(MemberProfile memberProfile) {
 		this.memberProfile = memberProfile;
-	}
-
-	@Builder
-	public Member(Long id, String userId, String email, String password, String name, int age, int height, int weight, @Nullable MemberProfile memberProfile, MemberType memberType, AlarmStatus pushAlarmStatus, AlarmStatus feedbackAlarmStatus, @Nullable Gym gym, SocialType socialType, String nickname, boolean delYn) {
-		this.id = id;
-		this.userId = userId;
-		this.email = email;
-		this.password = password;
-		this.name = name;
-		this.age = age;
-		this.height = height;
-		this.weight = weight;
-		this.memberProfile = memberProfile;
-		this.memberType = memberType;
-		this.pushAlarmStatus = pushAlarmStatus;
-		this.feedbackAlarmStatus = feedbackAlarmStatus;
-		this.gym = gym;
-		this.socialType = socialType;
-		this.nickname = nickname;
-		this.delYn = delYn;
 	}
 
 	public void changeEmail(String email) {
