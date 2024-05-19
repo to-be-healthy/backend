@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 class GymServiceTest(
     private val gymService: GymService,
     private val gymRepository: GymRepository,
-    private val memberRepository: MemberRepository
+    private val memberRepository: MemberRepository,
 ) : StringSpec({
 
     "헬스장을 등록한다" {
@@ -24,15 +24,16 @@ class GymServiceTest(
 
         // when
         val response = gymService.registerGym(name)
+
         // then
         response.name shouldBe name
         response.joinCode.length shouldBe 6
     }
 
     "내 헬스장으로 등록한다" {
-        val findGym = gymRepository.findByName("건강해짐 원흥점")
+        val findGym = gymRepository.findByName("건강해짐 원흥점") ?: throw IllegalArgumentException("헬스장을 찾을 수 없습니다.")
         val trainer = memberRepository.findByUserId("healthy-trainer0").get()
-        val response = gymService.selectMyGym(findGym!!.id, findGym!!.joinCode, trainer.id)
+        val response = gymService.selectMyGym(findGym.id, findGym.joinCode, trainer.id)
         response.id shouldBe findGym.id
         response.name shouldBe "건강해짐 원흥점"
     }

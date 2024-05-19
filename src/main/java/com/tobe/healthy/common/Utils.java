@@ -20,21 +20,21 @@ public class Utils {
     public static boolean validatePassword(String password) {
         String regexp = "^[A-Za-z0-9]+$";
         if (password.length() < 8 || !Pattern.matches(regexp, password)) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     public static boolean validateNameLength(String name) {
         if (name.length() < 2) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     public static boolean validateNameFormat(String name) {
         String regexp = "^[가-힣A-Za-z]+$";
-        if (!Pattern.matches(regexp, name)) {
+        if (Pattern.matches(regexp, name)) {
             return false;
         }
         return true;

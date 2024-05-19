@@ -4,6 +4,7 @@ import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.*
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.entity.TrainerScheduleClosedDaysInfo
@@ -98,10 +99,10 @@ class TrainerScheduleService(
         return trainerScheduleRepository.findOneTrainerTodaySchedule(searchCond, trainerId)
     }
 
-    fun updateReservationStatusToNoShow(scheduleId: Long, trainerId: Long): ScheduleIdInfo {
-        val schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, COMPLETED, trainerId)
+    fun updateReservationStatusToNoShow(reservationStatus: ReservationStatus, scheduleId: Long, trainerId: Long): ScheduleIdInfo {
+        val schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, reservationStatus, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
-        schedule.updateReservationStatusToNoShow()
+        schedule.updateReservationStatusToNoShow(reservationStatus)
         return ScheduleIdInfo.from(schedule)
     }
 

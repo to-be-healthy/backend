@@ -124,7 +124,7 @@ class LessonHistoryService(
         lessonHistoryCommentId: Long,
         request: CommentRegisterCommand,
         memberId: Long,
-    ): Boolean {
+    ): RegisterReplyResponse {
         val findMember = memberRepository.findByIdOrNull(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
@@ -149,7 +149,8 @@ class LessonHistoryService(
 
         lessonHistoryCommentRepository.save(entity)
         registerFile(request.uploadFileResponse, findMember, lessonHistory, entity)
-        return true
+
+        return RegisterReplyResponse.from(entity)
     }
 
     fun updateLessonHistoryComment(

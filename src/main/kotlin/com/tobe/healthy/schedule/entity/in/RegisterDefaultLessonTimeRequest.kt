@@ -9,10 +9,10 @@ import java.time.LocalTime
 
 data class RegisterDefaultLessonTimeRequest(
     @Schema(description = "시작 수업 시간", example = "10:00:00", type = "string")
-    val lessonStartTime: LocalTime,
+    val lessonStartTime: LocalTime = LocalTime.of(9, 0, 0),
 
     @Schema(description = "종료 수업 시간", example = "22:00:00", type = "string")
-    val lessonEndTime: LocalTime,
+    val lessonEndTime: LocalTime = LocalTime.of(18, 0, 0),
 
     @Schema(description = "시작 점심시간", example = "12:00:00", type = "string")
     val lunchStartTime: LocalTime? = null,
@@ -26,7 +26,7 @@ data class RegisterDefaultLessonTimeRequest(
     val lessonTime: Int
 ) {
     init {
-        if (lessonStartTime?.isAfter(lessonEndTime) == true || lessonStartTime == lessonEndTime) {
+        if (lessonStartTime.isAfter(lessonEndTime) || lessonStartTime == lessonEndTime) {
             throw CustomException(START_TIME_AFTER_END_TIME)
         }
         if (lunchStartTime?.isAfter(lunchEndTime) == true) {
