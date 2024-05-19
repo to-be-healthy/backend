@@ -1,7 +1,7 @@
-package com.tobe.healthy.schedule.entity.out
+package com.tobe.healthy.schedule.domain.dto.out
 
 import com.tobe.healthy.common.TimeFormatter.Companion.dateTimeFormat
-import com.tobe.healthy.schedule.entity.`in`.CommandRegisterDefaultLessonTime
+import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterDefaultLessonTime
 import java.time.DayOfWeek
 
 data class CommandRegisterDefaultLessonTimeResult(

@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.entity
+package com.tobe.healthy.schedule.domain.entity
 
 import jakarta.persistence.*
 import jakarta.persistence.EnumType.STRING

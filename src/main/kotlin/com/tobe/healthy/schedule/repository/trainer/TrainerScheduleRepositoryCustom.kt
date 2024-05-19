@@ -1,12 +1,12 @@
 package com.tobe.healthy.schedule.repository.trainer
 
+import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterIndividualSchedule
+import com.tobe.healthy.schedule.domain.dto.`in`.TrainerSchedule
+import com.tobe.healthy.schedule.domain.dto.`in`.TrainerScheduleByDate
+import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleByDateResult
+import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleResult
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.Schedule
-import com.tobe.healthy.schedule.entity.`in`.CommandRegisterIndividualSchedule
-import com.tobe.healthy.schedule.entity.`in`.TrainerSchedule
-import com.tobe.healthy.schedule.entity.`in`.TrainerScheduleByDate
-import com.tobe.healthy.schedule.entity.out.TrainerScheduleByDateResult
-import com.tobe.healthy.schedule.entity.out.TrainerScheduleResult
 import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*

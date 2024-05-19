@@ -1,6 +1,6 @@
 package com.tobe.healthy.member.domain.dto.out;
 
-import com.tobe.healthy.schedule.entity.out.TrainerScheduleByDateResult;
+import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleByDateResult;
 import lombok.Builder;
 import lombok.Data;
 

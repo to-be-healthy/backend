@@ -1,8 +1,8 @@
-package com.tobe.healthy.schedule.entity.out
+package com.tobe.healthy.schedule.domain.dto.out
 
 import com.tobe.healthy.schedule.domain.entity.LessonTime
 import com.tobe.healthy.schedule.domain.entity.Schedule
-import com.tobe.healthy.schedule.entity.TrainerScheduleInfo
+import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
 import java.time.LocalDate
 import java.time.LocalTime
 

@@ -1,6 +1,6 @@
-package com.tobe.healthy.schedule.entity.out
+package com.tobe.healthy.schedule.domain.dto.out
 
-import com.tobe.healthy.schedule.entity.out.TrainerScheduleResult.LessonDetailResult
+import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleResult.LessonDetailResult
 
 data class TrainerScheduleByDateResult(
     val trainerName: String? = null,

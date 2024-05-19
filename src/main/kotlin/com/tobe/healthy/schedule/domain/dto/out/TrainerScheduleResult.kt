@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.entity.out
+package com.tobe.healthy.schedule.domain.dto.out
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.tobe.healthy.common.LessonDetailResultSerializer

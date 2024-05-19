@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.entity.out
+package com.tobe.healthy.schedule.domain.dto.out
 
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.schedule.domain.entity.Schedule

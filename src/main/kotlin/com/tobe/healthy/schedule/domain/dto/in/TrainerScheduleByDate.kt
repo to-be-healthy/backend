@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.entity.`in`
+package com.tobe.healthy.schedule.domain.dto.`in`
 
 import io.swagger.v3.oas.annotations.media.Schema
 

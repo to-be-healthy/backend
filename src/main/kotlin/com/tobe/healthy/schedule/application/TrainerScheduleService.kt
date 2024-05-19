@@ -2,11 +2,11 @@ package com.tobe.healthy.schedule.application
 
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.TRAINER_SCHEDULE_NOT_FOUND
-import com.tobe.healthy.schedule.entity.`in`.TrainerSchedule
-import com.tobe.healthy.schedule.entity.`in`.TrainerScheduleByDate
-import com.tobe.healthy.schedule.entity.out.TrainerDefaultLessonTimeResult
-import com.tobe.healthy.schedule.entity.out.TrainerScheduleByDateResult
-import com.tobe.healthy.schedule.entity.out.TrainerScheduleResult
+import com.tobe.healthy.schedule.domain.dto.`in`.TrainerSchedule
+import com.tobe.healthy.schedule.domain.dto.`in`.TrainerScheduleByDate
+import com.tobe.healthy.schedule.domain.dto.out.TrainerDefaultLessonTimeResult
+import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleByDateResult
+import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleResult
 import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
 import org.springframework.stereotype.Service

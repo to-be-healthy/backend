@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.entity.`in`
+package com.tobe.healthy.schedule.domain.dto.`in`
 
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_LESS_THAN_31_DAYS

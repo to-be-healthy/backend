@@ -1,4 +1,4 @@
-package com.tobe.healthy.push.domain
+package com.tobe.healthy.push.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
 import com.tobe.healthy.member.domain.entity.Member

@@ -3,8 +3,8 @@ package com.tobe.healthy.schedule.application
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_ALREADY_EXISTS
 import com.tobe.healthy.member.repository.MemberRepository
-import com.tobe.healthy.schedule.entity.`in`.CommandRegisterIndividualSchedule
-import com.tobe.healthy.schedule.entity.`in`.CommandRegisterSchedule
+import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterIndividualSchedule
+import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe

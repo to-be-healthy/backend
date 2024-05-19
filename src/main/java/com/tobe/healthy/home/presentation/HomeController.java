@@ -6,7 +6,7 @@ import com.tobe.healthy.home.application.HomeService;
 import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
 import com.tobe.healthy.member.domain.dto.out.TrainerHomeResult;
 import com.tobe.healthy.point.application.PointService;
-import com.tobe.healthy.schedule.entity.in.TrainerScheduleByDate;
+import com.tobe.healthy.schedule.domain.dto.in.TrainerScheduleByDate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;

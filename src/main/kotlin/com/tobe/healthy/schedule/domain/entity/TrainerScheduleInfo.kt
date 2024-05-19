@@ -1,10 +1,9 @@
-package com.tobe.healthy.schedule.entity
+package com.tobe.healthy.schedule.domain.entity
 
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.INVALID_LESSON_TIME_DESCRIPTION
 import com.tobe.healthy.member.domain.entity.Member
-import com.tobe.healthy.schedule.domain.entity.LessonTime
-import com.tobe.healthy.schedule.entity.`in`.CommandRegisterDefaultLessonTime
+import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterDefaultLessonTime
 import jakarta.persistence.*
 import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.EnumType.STRING
