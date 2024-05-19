@@ -4,19 +4,17 @@ import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.INVALID_LESSON_TIME_DESCRIPTION
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.schedule.domain.entity.LessonTime
-import com.tobe.healthy.schedule.entity.`in`.RegisterDefaultLessonTimeRequest
+import com.tobe.healthy.schedule.entity.`in`.CommandRegisterDefaultLessonTime
 import jakarta.persistence.*
 import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.EnumType.STRING
 import jakarta.persistence.FetchType.LAZY
 import jakarta.persistence.GenerationType.IDENTITY
-import lombok.ToString
 import org.hibernate.annotations.DynamicUpdate
 import java.time.LocalTime
 
 @Entity
 @DynamicUpdate
-@ToString
 class TrainerScheduleInfo(
     var lessonStartTime: LocalTime,
 
@@ -46,7 +44,7 @@ class TrainerScheduleInfo(
         this.trainerScheduleClosedDays?.addAll(trainerScheduleClosedDays)
     }
 
-    fun changeDefaultLessonTime(request: RegisterDefaultLessonTimeRequest) {
+    fun changeDefaultLessonTime(request: CommandRegisterDefaultLessonTime) {
         this.lessonStartTime = request.lessonStartTime
         this.lessonEndTime = request.lessonEndTime
         this.lunchStartTime = request.lunchStartTime
@@ -55,7 +53,7 @@ class TrainerScheduleInfo(
     }
 
     companion object {
-        fun registerDefaultLessonTime(request: RegisterDefaultLessonTimeRequest, trainer: Member): TrainerScheduleInfo {
+        fun registerDefaultLessonTime(request: CommandRegisterDefaultLessonTime, trainer: Member): TrainerScheduleInfo {
             return TrainerScheduleInfo(
                 lessonStartTime = request.lessonStartTime,
                 lessonEndTime = request.lessonEndTime,

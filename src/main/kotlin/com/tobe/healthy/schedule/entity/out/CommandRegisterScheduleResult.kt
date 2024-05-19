@@ -6,7 +6,7 @@ import com.tobe.healthy.schedule.entity.TrainerScheduleInfo
 import java.time.LocalDate
 import java.time.LocalTime
 
-data class ScheduleRegisterResponse(
+data class CommandRegisterScheduleResult(
     val lessonDt: MutableList<LocalDate> = mutableListOf(),
     val lessonStartTime: LocalTime,
     val lessonEndTime: LocalTime,
@@ -18,8 +18,8 @@ data class ScheduleRegisterResponse(
         fun from(
             schedule: List<Schedule>,
             trainerScheduleInfo: TrainerScheduleInfo
-        ): ScheduleRegisterResponse {
-            return ScheduleRegisterResponse(
+        ): CommandRegisterScheduleResult {
+            return CommandRegisterScheduleResult(
                 lessonDt = schedule.map { it.lessonDt }.distinct().toMutableList(),
                 lessonStartTime = trainerScheduleInfo.lessonStartTime,
                 lessonEndTime = trainerScheduleInfo.lessonEndTime,

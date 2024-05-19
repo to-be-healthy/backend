@@ -5,7 +5,7 @@ import com.tobe.healthy.schedule.domain.entity.Schedule
 import java.time.LocalDate
 import java.time.LocalTime
 
-data class RegisterScheduleForStudentResponse(
+data class CommandRegisterScheduleByStudentResult(
     val scheduleId: Long,
     val lessonDt: LocalDate,
     val lessonStartTime: LocalTime,
@@ -13,8 +13,8 @@ data class RegisterScheduleForStudentResponse(
     val studentName: String
 ) {
     companion object {
-        fun from(schedule: Schedule, student: Member) : RegisterScheduleForStudentResponse {
-            return RegisterScheduleForStudentResponse(
+        fun from(schedule: Schedule, student: Member) : CommandRegisterScheduleByStudentResult {
+            return CommandRegisterScheduleByStudentResult(
                 scheduleId = schedule.id,
                 lessonDt = schedule.lessonDt,
                 lessonStartTime = schedule.lessonStartTime,

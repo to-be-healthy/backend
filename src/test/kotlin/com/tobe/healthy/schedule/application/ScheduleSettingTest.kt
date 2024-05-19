@@ -2,8 +2,8 @@ package com.tobe.healthy.schedule.application
 
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
-import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
-import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleRequest
+import com.tobe.healthy.schedule.entity.`in`.CommandRegisterIndividualSchedule
+import com.tobe.healthy.schedule.entity.`in`.CommandRegisterSchedule
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
@@ -18,12 +18,12 @@ class ScheduleSettingTest : StringSpec({
 
     "수업 시작 일자가 종료 일자보다 같거나 빠르면 정상적으로 등록된다" {
 
-        val registerRequest1 = RegisterScheduleRequest(
+        val registerRequest1 = CommandRegisterSchedule(
             lessonStartDt = LocalDate.of(2024, 5, 30),
             lessonEndDt = LocalDate.of(2024, 5, 30),
         )
 
-        val registerRequest2 = RegisterScheduleRequest(
+        val registerRequest2 = CommandRegisterSchedule(
             lessonStartDt = LocalDate.of(2024, 5, 29),
             lessonEndDt = LocalDate.of(2024, 5, 30),
         )
@@ -37,7 +37,7 @@ class ScheduleSettingTest : StringSpec({
 
     "수업 시작 일자가 종료 일자보다 미래면 예외가 발생한다" {
         val message = shouldThrow<CustomException> {
-            RegisterScheduleRequest(
+            CommandRegisterSchedule(
                 lessonStartDt = LocalDate.of(2024, 6, 1),
                 lessonEndDt = LocalDate.of(2024, 5, 30),
             )
@@ -48,7 +48,7 @@ class ScheduleSettingTest : StringSpec({
 
     "수업 시작 시간보다 종료 시간이 같거나 빠르면 예외가 발생한다" {
         shouldThrow<CustomException> {
-            RegisterScheduleCommand(
+            CommandRegisterIndividualSchedule(
                 lessonDt = LocalDate.of(2024, 5, 1),
                 lessonStartTime = LocalTime.of(12, 0, 0),
                 lessonEndTime = LocalTime.of(10, 0, 0)
@@ -56,7 +56,7 @@ class ScheduleSettingTest : StringSpec({
         }.message shouldBe START_TIME_AFTER_END_TIME.message
 
         shouldThrow<CustomException> {
-            RegisterScheduleCommand(
+            CommandRegisterIndividualSchedule(
                 lessonDt = LocalDate.of(2024, 5, 1),
                 lessonStartTime = LocalTime.of(10, 0, 0),
                 lessonEndTime = LocalTime.of(10, 0, 0)
@@ -66,7 +66,7 @@ class ScheduleSettingTest : StringSpec({
 
     "수업 시간이 30분 단위가 아닐경우 예외가 발생한다" {
         shouldThrow<CustomException> {
-            RegisterScheduleCommand(
+            CommandRegisterIndividualSchedule(
                 lessonDt = LocalDate.of(2024, 5, 1),
                 lessonStartTime = LocalTime.of(10, 0, 0),
                 lessonEndTime = LocalTime.of(11, 10, 0)
@@ -74,7 +74,7 @@ class ScheduleSettingTest : StringSpec({
         }.message shouldBe INVALID_LESSON_TIME_DESCRIPTION.message
 
 
-        val request = RegisterScheduleCommand(
+        val request = CommandRegisterIndividualSchedule(
             lessonDt = LocalDate.of(2024, 5, 1),
             lessonStartTime = LocalTime.of(10, 0, 0),
             lessonEndTime = LocalTime.of(11, 0, 0)

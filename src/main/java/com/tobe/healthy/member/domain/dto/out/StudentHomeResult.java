@@ -3,7 +3,7 @@ package com.tobe.healthy.member.domain.dto.out;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.gym.domain.dto.out.GymDto;
-import com.tobe.healthy.lessonhistory.domain.dto.out.LessonHistoryResponse;
+import com.tobe.healthy.lessonhistory.domain.dto.out.LessonHistoryResult;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
@@ -18,11 +18,11 @@ public class StudentHomeResult {
     private PointDto point;
     private RankDto rank;
     private MyReservation myReservation;
-    private LessonHistoryResponse lessonHistory;
+    private LessonHistoryResult lessonHistory;
     private DietDto diet;
     private GymDto gym;
 
-    public static StudentHomeResult create(CourseDto course, PointDto point, RankDto rank, MyReservation myReservation, LessonHistoryResponse lessonHistory, DietDto diet, GymDto gym) {
+    public static StudentHomeResult create(CourseDto course, PointDto point, RankDto rank, MyReservation myReservation, LessonHistoryResult lessonHistory, DietDto diet, GymDto gym) {
         return StudentHomeResult.builder()
                 .course(course)
                 .point(point)

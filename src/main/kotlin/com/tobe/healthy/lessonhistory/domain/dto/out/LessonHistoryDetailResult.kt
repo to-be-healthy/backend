@@ -1,7 +1,7 @@
 package com.tobe.healthy.lessonhistory.domain.dto.out
 
-import com.tobe.healthy.lessonhistory.domain.entity.AttendanceStatus.ABSENT
-import com.tobe.healthy.lessonhistory.domain.entity.AttendanceStatus.ATTENDED
+import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus.ABSENT
+import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus.ATTENDED
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryComment
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryFiles
@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Schema(description = "수업 일지 상세 조회 응답 DTO")
-data class LessonHistoryDetailResponse(
+data class LessonHistoryDetailResult(
     val id: Long,
     val title: String,
     val content: String,
@@ -31,8 +31,8 @@ data class LessonHistoryDetailResponse(
 ) {
 
     companion object {
-        fun from(entity: LessonHistory): LessonHistoryDetailResponse {
-            return LessonHistoryDetailResponse(
+        fun from(entity: LessonHistory): LessonHistoryDetailResult {
+            return LessonHistoryDetailResult(
                 id = entity.id,
                 title = entity.title,
                 content = entity.content,
@@ -48,8 +48,8 @@ data class LessonHistoryDetailResponse(
             )
         }
 
-        fun detailFrom(entity: LessonHistory): LessonHistoryDetailResponse {
-            return LessonHistoryDetailResponse(
+        fun detailFrom(entity: LessonHistory): LessonHistoryDetailResult {
+            return LessonHistoryDetailResult(
                     id = entity.id,
                     title = entity.title,
                     content = entity.content,

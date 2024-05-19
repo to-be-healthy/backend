@@ -2,19 +2,19 @@ package com.tobe.healthy.schedule.repository.trainer
 
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.Schedule
-import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
-import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
-import com.tobe.healthy.schedule.entity.`in`.TrainerTodayScheduleSearchCond
-import com.tobe.healthy.schedule.entity.out.LessonResponse
-import com.tobe.healthy.schedule.entity.out.TrainerTodayScheduleResponse
+import com.tobe.healthy.schedule.entity.`in`.CommandRegisterIndividualSchedule
+import com.tobe.healthy.schedule.entity.`in`.TrainerSchedule
+import com.tobe.healthy.schedule.entity.`in`.TrainerScheduleByDate
+import com.tobe.healthy.schedule.entity.out.TrainerScheduleByDateResult
+import com.tobe.healthy.schedule.entity.out.TrainerScheduleResult
 import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
 
 interface TrainerScheduleRepositoryCustom {
-    fun findAllSchedule(searchCond: ScheduleSearchCond, trainerId: Long): LessonResponse?
-    fun findOneTrainerTodaySchedule(searchCond: TrainerTodayScheduleSearchCond, trainerId: Long): TrainerTodayScheduleResponse?
-    fun findAvailableRegisterSchedule(request: RegisterScheduleCommand, trainerId: Long): Schedule?
+    fun findAllSchedule(trainerSchedule: TrainerSchedule, trainerId: Long): TrainerScheduleResult?
+    fun findOneTrainerTodaySchedule(queryTrainerSchedule: TrainerScheduleByDate, trainerId: Long): TrainerScheduleByDateResult?
+    fun findAvailableRegisterSchedule(request: CommandRegisterIndividualSchedule, trainerId: Long): Schedule?
     fun validateRegisterSchedule(lessonDt: LocalDate, startTime: LocalTime, endTime: LocalTime, trainerId: Long): Long
     fun findAvailableWaitingId(scheduleId: Long): Optional<Schedule>
     fun findScheduleByTrainerId(scheduleId: Long, reservationStatus: ReservationStatus, trainerId: Long): Schedule?

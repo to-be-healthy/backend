@@ -3,12 +3,11 @@ package com.tobe.healthy.home.application;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
-import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.gym.domain.dto.out.GymDto;
-import com.tobe.healthy.lessonhistory.domain.dto.out.LessonHistoryResponse;
+import com.tobe.healthy.lessonhistory.domain.dto.out.LessonHistoryResult;
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository;
 import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
@@ -19,8 +18,8 @@ import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
 import com.tobe.healthy.point.repository.PointRepository;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
-import com.tobe.healthy.schedule.entity.in.TrainerTodayScheduleSearchCond;
-import com.tobe.healthy.schedule.entity.out.TrainerTodayScheduleResponse;
+import com.tobe.healthy.schedule.entity.in.TrainerScheduleByDate;
+import com.tobe.healthy.schedule.entity.out.TrainerScheduleByDateResult;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
@@ -32,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
@@ -85,7 +83,7 @@ public class HomeService {
         MyReservation myReservation = studentScheduleRepository.findMyNextReservation(memberId);
 
         //수업일지
-        LessonHistoryResponse lessonHistory = lessonHistoryRepository.findTop1LessonHistoryByMemberId(memberId);
+        LessonHistoryResult lessonHistory = lessonHistoryRepository.findTop1LessonHistoryByMemberId(memberId);
 
         //식단
         DietDto diet = dietService.getDietCreatedAtToday(memberId);
@@ -93,13 +91,13 @@ public class HomeService {
         return StudentHomeResult.create(usingCourse, point, rank, myReservation, lessonHistory, diet, gym);
     }
 
-    public TrainerHomeResult getTrainerHome(TrainerTodayScheduleSearchCond request, Long trainerId) {
+    public TrainerHomeResult getTrainerHome(TrainerScheduleByDate request, Long trainerId) {
         long mappingStudentCount = mappingRepository.countByTrainerId(trainerId);
 
         // 우수회원 추가 필요
         List<MemberInTeamResult> bestStudents = memberRepository.getBestStudent(trainerId);
 
-        TrainerTodayScheduleResponse trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId);
+        TrainerScheduleByDateResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId);
 
         return TrainerHomeResult.builder()
                 .studentCount(mappingStudentCount)

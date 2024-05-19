@@ -2,7 +2,7 @@ package com.tobe.healthy.lessonhistory.domain.dto.out
 
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryComment
 
-data class RegisterLessonHistoryCommentResponse(
+data class CommandRegisterCommentResult(
     val lessonHistoryId: Long,
     val lessonHistoryCommentId: Long,
     val writerId: Long,
@@ -10,8 +10,8 @@ data class RegisterLessonHistoryCommentResponse(
     val comment: String,
 ) {
     companion object {
-        fun from(lessonHistoryComment: LessonHistoryComment) : RegisterLessonHistoryCommentResponse {
-            return RegisterLessonHistoryCommentResponse(
+        fun from(lessonHistoryComment: LessonHistoryComment) : CommandRegisterCommentResult {
+            return CommandRegisterCommentResult(
                 lessonHistoryId = lessonHistoryComment.lessonHistory.id,
                 lessonHistoryCommentId = lessonHistoryComment.id,
                 writerId = lessonHistoryComment.writer.id,

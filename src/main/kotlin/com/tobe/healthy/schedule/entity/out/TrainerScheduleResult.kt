@@ -1,27 +1,28 @@
 package com.tobe.healthy.schedule.entity.out
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.tobe.healthy.common.LessonDetailResponseSerializer
+import com.tobe.healthy.common.LessonDetailResultSerializer
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
-data class LessonResponse(
+data class TrainerScheduleResult(
     val trainerName: String?,
-    val schedule: Map<LocalDate?, List<LessonDetailResponse?>>
+    val schedule: Map<LocalDate?, List<LessonDetailResult?>>
 ) {
     companion object {
         private const val DEFAULT_DURATION = 60.0
-        fun from(schedule: MutableList<Schedule?>): LessonResponse {
+        fun from(schedule: MutableList<Schedule?>): TrainerScheduleResult {
             return schedule.let {
                 val groupingData = schedule.groupBy { it?.lessonDt }
                     .mapValues { entry ->
                         entry.value.map { schedule ->
-                            LessonDetailResponse(
+                            LessonDetailResult(
                                 scheduleId = schedule?.id,
-                                duration = Duration.between(schedule?.lessonStartTime, schedule?.lessonEndTime).toMinutes() / DEFAULT_DURATION,
+                                duration = Duration.between(schedule?.lessonStartTime, schedule?.lessonEndTime)
+                                    .toMinutes() / DEFAULT_DURATION,
                                 lessonStartTime = schedule?.lessonStartTime,
                                 lessonEndTime = schedule?.lessonEndTime,
                                 reservationStatus = schedule?.reservationStatus,
@@ -32,7 +33,7 @@ data class LessonResponse(
                             )
                         }
                     }
-                LessonResponse(
+                TrainerScheduleResult(
                     trainerName = schedule.firstOrNull()?.trainer?.name?.let { "${it} 트레이너" },
                     schedule = groupingData
                 )
@@ -40,8 +41,8 @@ data class LessonResponse(
         }
     }
 
-    @JsonSerialize(using = LessonDetailResponseSerializer::class)
-    data class LessonDetailResponse(
+    @JsonSerialize(using = LessonDetailResultSerializer::class)
+    data class LessonDetailResult(
         val scheduleId: Long?,
         val duration: Double?,
         val lessonStartTime: LocalTime?,

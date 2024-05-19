@@ -8,7 +8,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
-data class RegisterScheduleCommand(
+data class CommandRegisterIndividualSchedule(
     @Schema(description = "등록할 수업 일자", example = "2024-04-01")
     val lessonDt: LocalDate,
 

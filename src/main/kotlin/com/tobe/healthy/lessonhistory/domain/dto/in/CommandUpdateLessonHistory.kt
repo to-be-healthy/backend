@@ -1,10 +1,10 @@
 package com.tobe.healthy.lessonhistory.domain.dto.`in`
 
-import com.tobe.healthy.lessonhistory.domain.dto.out.UploadFileResponse
+import com.tobe.healthy.lessonhistory.domain.dto.out.CommandUploadFileResult
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
 
-data class LessonHistoryCommand(
+data class CommandUpdateLessonHistory(
     @Schema(description = "수정할 수업일지 제목")
     @field:NotBlank(message = "수정할 수업일지 제목을 입력해 주세요.")
     val title: String?,
@@ -14,5 +14,5 @@ data class LessonHistoryCommand(
     val content: String?,
 
     @Schema(description = "등록할 파일", required = false)
-    val uploadFileResponse: MutableList<UploadFileResponse>?
+    val commandUploadFileResult: MutableList<CommandUploadFileResult>?
 )

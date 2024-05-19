@@ -4,7 +4,7 @@ import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import java.time.LocalDate
 import java.time.LocalTime
 
-data class RegisterLessonHistoryCommandResponse(
+data class CommandRegisterLessonHistoryResult(
     val lessonHistoryId: Long,
     val title: String,
     val content: String,
@@ -18,8 +18,8 @@ data class RegisterLessonHistoryCommandResponse(
     val studentName: String,
 ) {
     companion object {
-        fun from(lessonHistory: LessonHistory): RegisterLessonHistoryCommandResponse {
-            return RegisterLessonHistoryCommandResponse(
+        fun from(lessonHistory: LessonHistory): CommandRegisterLessonHistoryResult {
+            return CommandRegisterLessonHistoryResult(
                 lessonHistoryId = lessonHistory.id,
                 title = lessonHistory.title,
                 content = lessonHistory.content,

@@ -1,8 +1,7 @@
 package com.tobe.healthy.lessonhistory.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
-import com.tobe.healthy.lessonhistory.domain.dto.`in`.RegisterLessonHistoryCommand
-import com.tobe.healthy.lessonhistory.domain.entity.FeedbackCheckStatus.UNREAD
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryReadStatus.UNREAD
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import jakarta.persistence.*
@@ -39,7 +38,7 @@ class LessonHistory(
     val schedule: Schedule,
 
     @Enumerated(STRING)
-    var feedbackChecked: FeedbackCheckStatus = UNREAD,
+    var feedbackChecked: LessonHistoryReadStatus = UNREAD,
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -52,15 +51,15 @@ class LessonHistory(
         this.content = content
     }
 
-    fun updateFeedbackStatus(feedbackStatus: FeedbackCheckStatus) {
+    fun updateFeedbackStatus(feedbackStatus: LessonHistoryReadStatus) {
         this.feedbackChecked = feedbackStatus
     }
 
     companion object {
-        fun register(request: RegisterLessonHistoryCommand, student: Member, trainer: Member, schedule: Schedule): LessonHistory {
+        fun register(title: String, content: String, student: Member, trainer: Member, schedule: Schedule): LessonHistory {
             return LessonHistory(
-                title = request.title!!,
-                content = request.content!!,
+                title = title,
+                content = content,
                 trainer = trainer,
                 student = student,
                 schedule = schedule

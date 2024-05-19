@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
-import com.tobe.healthy.schedule.entity.out.LessonResponse.LessonDetailResponse
+import com.tobe.healthy.schedule.entity.out.TrainerScheduleResult.LessonDetailResult
 
-class LessonDetailResponseSerializer : JsonSerializer<LessonDetailResponse>() {
-    override fun serialize(value: LessonDetailResponse, gen: JsonGenerator, serializers: SerializerProvider) {
+class LessonDetailResultSerializer : JsonSerializer<LessonDetailResult>() {
+    override fun serialize(value: LessonDetailResult, gen: JsonGenerator, serializers: SerializerProvider) {
         gen.writeStartObject()
         value.scheduleId?.let { gen.writeNumberField("scheduleId", it) }
         value.duration?.let { gen.writeNumberField("duration", it) }

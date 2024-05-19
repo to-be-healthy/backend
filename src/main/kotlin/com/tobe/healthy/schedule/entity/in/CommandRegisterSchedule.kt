@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-data class RegisterScheduleRequest(
+data class CommandRegisterSchedule(
     @Schema(description = "시작 수업 일자", example = "2024-04-01")
     val lessonStartDt: LocalDate,
 

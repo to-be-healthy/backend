@@ -1,7 +1,7 @@
 package com.tobe.healthy.lessonhistory.domain.dto.out
 
-import com.tobe.healthy.lessonhistory.domain.entity.AttendanceStatus.ABSENT
-import com.tobe.healthy.lessonhistory.domain.entity.AttendanceStatus.ATTENDED
+import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus.ABSENT
+import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus.ATTENDED
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryFiles
 import io.swagger.v3.oas.annotations.media.Schema
@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Schema(description = "수업 일지")
-data class LessonHistoryResponse(
+data class LessonHistoryResult(
     @Schema(description = "수업 일지 ID", example = "1")
     val id: Long,
     @Schema(description = "수업 일지 제목", example = "홍길동님 수업 일지입니다!")
@@ -40,9 +40,9 @@ data class LessonHistoryResponse(
 ) {
 
     companion object {
-        fun from(entity: LessonHistory?): LessonHistoryResponse? {
+        fun from(entity: LessonHistory?): LessonHistoryResult? {
             entity?.let {
-                return LessonHistoryResponse(
+                return LessonHistoryResult(
                     id = entity.id,
                     title = entity.title,
                     content = entity.content,

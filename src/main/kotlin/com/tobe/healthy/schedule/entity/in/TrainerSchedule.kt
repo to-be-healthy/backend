@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
-data class ScheduleSearchCond(
+data class TrainerSchedule(
     @Schema(description = "조회할 수업 일자", example = "2024-04")
     var lessonDt: String? = null,
 

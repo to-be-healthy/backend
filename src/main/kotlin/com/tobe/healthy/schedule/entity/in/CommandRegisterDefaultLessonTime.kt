@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.DayOfWeek
 import java.time.LocalTime
 
-data class RegisterDefaultLessonTimeRequest(
+data class CommandRegisterDefaultLessonTime(
     @Schema(description = "시작 수업 시간", example = "10:00:00", type = "string")
     val lessonStartTime: LocalTime = LocalTime.of(9, 0, 0),
 

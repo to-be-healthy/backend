@@ -1,6 +1,6 @@
 package com.tobe.healthy.lessonhistory.domain.entity
 
-enum class FeedbackCheckStatus(
+enum class LessonHistoryReadStatus(
     val description: String
 ) {
     READ("읽음"),

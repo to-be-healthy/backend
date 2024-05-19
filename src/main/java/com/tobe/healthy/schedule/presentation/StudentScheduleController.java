@@ -6,7 +6,7 @@ import com.tobe.healthy.schedule.application.StudentScheduleService;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
-import com.tobe.healthy.schedule.entity.in.ScheduleSearchCond;
+import com.tobe.healthy.schedule.entity.in.TrainerSchedule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,7 +37,7 @@ public class StudentScheduleController {
                     @ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
             })
     @GetMapping("/all")
-    public ResponseHandler<ScheduleCommandResponse> findAllScheduleOfTrainer(@ParameterObject ScheduleSearchCond searchCond,
+    public ResponseHandler<ScheduleCommandResponse> findAllScheduleOfTrainer(@ParameterObject TrainerSchedule searchCond,
                                                                              @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
         return ResponseHandler.<ScheduleCommandResponse>builder()
                 .data(studentScheduleService.findAllScheduleOfTrainer(searchCond, customMemberDetails.getMember()))
@@ -65,7 +65,7 @@ public class StudentScheduleController {
     @GetMapping("/my-reservation")
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
     public ResponseHandler<MyReservationResponse> findAllMyReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                       @ParameterObject ScheduleSearchCond searchCond) {
+                                                                       @ParameterObject TrainerSchedule searchCond) {
         return ResponseHandler.<MyReservationResponse>builder()
                 .data(studentScheduleService.findAllMyReservation(customMemberDetails.getMemberId(), searchCond))
                 .message("학생이 내 예약을 조회하였습니다.")
