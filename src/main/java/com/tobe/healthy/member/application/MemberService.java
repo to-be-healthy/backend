@@ -20,10 +20,7 @@ import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.MemberFindIdCommand.MemberFindIdCommandResult;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.*;
-import com.tobe.healthy.member.domain.entity.AlarmStatus;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberProfile;
-import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.member.domain.entity.*;
 import com.tobe.healthy.member.repository.MemberProfileRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
@@ -289,11 +286,11 @@ public class MemberService {
         return name;
     }
 
-    public MemberChangeAlarmResult changeAlarm(String type, AlarmStatus alarmStatus, Long memberId) {
+    public MemberChangeAlarmResult changeAlarm(AlarmType alarmType, AlarmStatus alarmStatus, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        member.changeAlarm(type, alarmStatus);
-        return MemberChangeAlarmResult.from(type, alarmStatus);
+        member.changeAlarm(alarmType, alarmStatus);
+        return MemberChangeAlarmResult.from(alarmType, alarmStatus);
     }
 
     public Boolean changeTrainerFeedback(AlarmStatus alarmStatus, Long memberId) {

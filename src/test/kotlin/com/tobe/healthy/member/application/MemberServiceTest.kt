@@ -90,8 +90,8 @@ class MemberServiceTest(
     }
 
     "회원이 닉네임을 변경한다" {
-        val changeName = memberService.changeName("미3누", student.id)
+        val changeName = memberService.changeName("미미미누", student.id)
         log.info { "변경된 닉네임: ${changeName}"}
-        changeName shouldBe "미3누"
+        changeName shouldBe "미미미누"
     }
 })

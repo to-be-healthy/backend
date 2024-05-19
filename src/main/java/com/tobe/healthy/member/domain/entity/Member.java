@@ -166,16 +166,12 @@ public class Member extends BaseTimeEntity<Member, Long> {
 		this.name = name;
 	}
 
-	public void changeAlarm(String type, AlarmStatus alarmStatus) {
+	public void changeAlarm(AlarmType type, AlarmStatus alarmStatus) {
 		switch (type) {
-			case "pushAlarmStatus" ->
-					this.pushAlarmStatus = alarmStatus;
-
-			case "communityAlarmStatus" ->
-					this.communityAlarmStatus = alarmStatus;
-
-			case "feedbackAlarmStatus" ->
-					this.feedbackAlarmStatus = alarmStatus;
+			case PUSH -> this.pushAlarmStatus = alarmStatus;
+			case COMMUNITY -> this.communityAlarmStatus = alarmStatus;
+			case FEEDBACK -> this.feedbackAlarmStatus = alarmStatus;
+			case SCHEDULENOTICE -> this.scheduleNoticeStatus = alarmStatus;
 		}
 	}
 

@@ -13,6 +13,7 @@ import com.tobe.healthy.member.domain.dto.in.MemberPasswordChangeCommand;
 import com.tobe.healthy.member.domain.dto.in.MemoCommand;
 import com.tobe.healthy.member.domain.dto.out.*;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
+import com.tobe.healthy.member.domain.entity.AlarmType;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
@@ -146,7 +147,7 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "알림 상태가 변경되었습니다.")
 	})
 	@PatchMapping("/alarm/{type}/{status}")
-	public ResponseHandler<MemberChangeAlarmResult> changeAlarm(@PathVariable String type,
+	public ResponseHandler<MemberChangeAlarmResult> changeAlarm(@PathVariable AlarmType type,
 																@PathVariable AlarmStatus status,
 																@AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<MemberChangeAlarmResult>builder()
