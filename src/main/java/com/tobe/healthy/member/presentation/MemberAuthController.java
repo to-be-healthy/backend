@@ -2,8 +2,8 @@ package com.tobe.healthy.member.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.member.application.MemberAuthService;
-import com.tobe.healthy.member.domain.dto.in.FindMemberId;
-import com.tobe.healthy.member.domain.dto.in.FindMemberId.FindMemberIdResult;
+import com.tobe.healthy.member.domain.dto.in.RetrieveMemberId;
+import com.tobe.healthy.member.domain.dto.in.RetrieveMemberId.FindMemberIdResult;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -55,7 +55,7 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "이메일 이름이 일치한 사용자 아이디를 반환한다.")
 	})
 	@PostMapping("/find/user-id")
-	public ResponseHandler<FindMemberIdResult> findUserId(@RequestBody FindMemberId request) {
+	public ResponseHandler<FindMemberIdResult> findUserId(@RequestBody RetrieveMemberId request) {
 		return ResponseHandler.<FindMemberIdResult>builder()
 			.data(memberAuthService.findUserId(request))
 			.message("아이디 찾기에 성공하였습니다.")

@@ -2,11 +2,11 @@ package com.tobe.healthy.schedule.application
 
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.TRAINER_SCHEDULE_NOT_FOUND
-import com.tobe.healthy.schedule.domain.dto.`in`.TrainerSchedule
-import com.tobe.healthy.schedule.domain.dto.`in`.TrainerScheduleByDate
-import com.tobe.healthy.schedule.domain.dto.out.TrainerDefaultLessonTimeResult
-import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleByDateResult
-import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleResult
+import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
+import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
+import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerDefaultLessonTimeResult
+import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
+import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonInfoResult
 import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
 import org.springframework.stereotype.Service
@@ -18,17 +18,17 @@ class TrainerScheduleService(
     private val trainerScheduleRepository: TrainerScheduleRepository,
     private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository
 ) {
-    fun findDefaultLessonTime(trainerId: Long): TrainerDefaultLessonTimeResult {
+    fun findDefaultLessonTime(trainerId: Long): RetrieveTrainerDefaultLessonTimeResult {
         val trainerScheduleInfo = trainerScheduleInfoRepository.findByTrainerId(trainerId)
             ?: throw CustomException(TRAINER_SCHEDULE_NOT_FOUND)
-        return TrainerDefaultLessonTimeResult.from(trainerScheduleInfo)
+        return RetrieveTrainerDefaultLessonTimeResult.from(trainerScheduleInfo)
     }
 
-    fun findAllSchedule(trainerSchedule: TrainerSchedule, trainerId: Long): TrainerScheduleResult? {
-        return trainerScheduleRepository.findAllSchedule(trainerSchedule, trainerId)
+    fun findAllSchedule(retrieveTrainerScheduleByLessonInfo: RetrieveTrainerScheduleByLessonInfo, trainerId: Long): RetrieveTrainerScheduleByLessonInfoResult? {
+        return trainerScheduleRepository.findAllSchedule(retrieveTrainerScheduleByLessonInfo, trainerId)
     }
 
-    fun findOneTrainerTodaySchedule(queryTrainerSchedule: TrainerScheduleByDate, trainerId: Long): TrainerScheduleByDateResult? {
+    fun findOneTrainerTodaySchedule(queryTrainerSchedule: RetrieveTrainerScheduleByLessonDt, trainerId: Long): RetrieveTrainerScheduleByLessonDtResult? {
         return trainerScheduleRepository.findOneTrainerTodaySchedule(queryTrainerSchedule, trainerId)
     }
 }

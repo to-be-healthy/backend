@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
-data class TrainerSchedule(
+data class RetrieveTrainerScheduleByLessonInfo(
     @Schema(description = "조회할 수업 일자", example = "2024-04")
     var lessonDt: String? = null,
 
@@ -19,7 +19,7 @@ data class TrainerSchedule(
 ) {
     init {
         if (lessonDt == null && lessonStartDt == null && lessonEndDt == null) {
-            lessonDt = DateTimeFormatter.ofPattern("yyyy-MM").format(LocalDate.now()).toString()
+            lessonDt = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"))
         }
 
         if (lessonStartDt != null && lessonEndDt != null && ChronoUnit.DAYS.between(lessonStartDt, lessonEndDt) > 31) {

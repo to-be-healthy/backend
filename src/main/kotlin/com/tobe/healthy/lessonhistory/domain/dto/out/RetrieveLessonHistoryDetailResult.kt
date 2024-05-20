@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Schema(description = "수업 일지 상세 조회 응답 DTO")
-data class LessonHistoryDetailResult(
+data class RetrieveLessonHistoryDetailResult(
     val id: Long,
     val title: String,
     val content: String,
@@ -31,8 +31,8 @@ data class LessonHistoryDetailResult(
 ) {
 
     companion object {
-        fun from(entity: LessonHistory): LessonHistoryDetailResult {
-            return LessonHistoryDetailResult(
+        fun from(entity: LessonHistory): RetrieveLessonHistoryDetailResult {
+            return RetrieveLessonHistoryDetailResult(
                 id = entity.id,
                 title = entity.title,
                 content = entity.content,
@@ -48,8 +48,8 @@ data class LessonHistoryDetailResult(
             )
         }
 
-        fun detailFrom(entity: LessonHistory): LessonHistoryDetailResult {
-            return LessonHistoryDetailResult(
+        fun detailFrom(entity: LessonHistory): RetrieveLessonHistoryDetailResult {
+            return RetrieveLessonHistoryDetailResult(
                     id = entity.id,
                     title = entity.title,
                     content = entity.content,

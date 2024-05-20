@@ -8,13 +8,13 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
-data class TrainerScheduleResult(
+data class RetrieveTrainerScheduleByLessonInfoResult(
     val trainerName: String?,
     val schedule: Map<LocalDate?, List<LessonDetailResult?>>
 ) {
     companion object {
         private const val DEFAULT_DURATION = 60.0
-        fun from(schedule: MutableList<Schedule?>): TrainerScheduleResult {
+        fun from(schedule: MutableList<Schedule?>): RetrieveTrainerScheduleByLessonInfoResult {
             return schedule.let {
                 val groupingData = schedule.groupBy { it?.lessonDt }
                     .mapValues { entry ->
@@ -33,7 +33,7 @@ data class TrainerScheduleResult(
                             )
                         }
                     }
-                TrainerScheduleResult(
+                RetrieveTrainerScheduleByLessonInfoResult(
                     trainerName = schedule.firstOrNull()?.trainer?.name?.let { "${it} 트레이너" },
                     schedule = groupingData
                 )

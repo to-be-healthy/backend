@@ -5,10 +5,10 @@ import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.member.domain.entity.QMember
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterIndividualSchedule
-import com.tobe.healthy.schedule.domain.dto.`in`.TrainerSchedule
-import com.tobe.healthy.schedule.domain.dto.`in`.TrainerScheduleByDate
-import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleByDateResult
-import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleResult
+import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
+import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
+import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
+import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonInfoResult
 import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
 import com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
@@ -27,9 +27,9 @@ class TrainerScheduleRepositoryImpl(
 ) : TrainerScheduleRepositoryCustom {
 
     override fun findAllSchedule(
-        trainerSchedule: TrainerSchedule,
+        retrieveTrainerScheduleByLessonInfo: RetrieveTrainerScheduleByLessonInfo,
         trainerId: Long
-    ): TrainerScheduleResult? {
+    ): RetrieveTrainerScheduleByLessonInfoResult? {
         val results = queryFactory
             .select(schedule)
             .from(schedule)
@@ -38,21 +38,21 @@ class TrainerScheduleRepositoryImpl(
             .leftJoin(schedule.scheduleWaiting, scheduleWaiting)
             .on(scheduleWaitingDelYnEq(false))
             .where(
-                lessonDtMonthEq(trainerSchedule.lessonDt),
-                lessonDtBetween(trainerSchedule.lessonStartDt, trainerSchedule.lessonEndDt),
+                lessonDtMonthEq(retrieveTrainerScheduleByLessonInfo.lessonDt),
+                lessonDtBetween(retrieveTrainerScheduleByLessonInfo.lessonStartDt, retrieveTrainerScheduleByLessonInfo.lessonEndDt),
                 trainerIdEq(trainerId),
                 delYnEq(false)
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
 
-        return TrainerScheduleResult.from(results)
+        return RetrieveTrainerScheduleByLessonInfoResult.from(results)
     }
 
     override fun findOneTrainerTodaySchedule(
-        queryTrainerSchedule: TrainerScheduleByDate,
+        queryTrainerSchedule: RetrieveTrainerScheduleByLessonDt,
         trainerId: Long
-    ): TrainerScheduleByDateResult? {
+    ): RetrieveTrainerScheduleByLessonDtResult? {
         val results = queryFactory
             .select(schedule)
             .from(schedule)
@@ -79,10 +79,10 @@ class TrainerScheduleRepositoryImpl(
             .fetchOne()
 
 
-        val response = TrainerScheduleResult.from(results)
+        val response = RetrieveTrainerScheduleByLessonInfoResult.from(results)
 
         response.let {
-            val trainerTodaySchedule = TrainerScheduleByDateResult(
+            val trainerTodaySchedule = RetrieveTrainerScheduleByLessonDtResult(
                 trainerName = response.trainerName,
                 scheduleTotalCount = scheduleCount!!,
             )

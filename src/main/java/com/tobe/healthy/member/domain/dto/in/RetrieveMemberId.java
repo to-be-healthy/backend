@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "아이디 찾기 DTO")
-public class FindMemberId {
+public class RetrieveMemberId {
 	@Schema(description = "이메일" , example = "to-be-healthy@gmail.com")
 	@NotEmpty(message = "이메일을 입력해 주세요.")
 	private String email;

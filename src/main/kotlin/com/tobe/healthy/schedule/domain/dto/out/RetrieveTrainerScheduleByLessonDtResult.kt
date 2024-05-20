@@ -1,8 +1,8 @@
 package com.tobe.healthy.schedule.domain.dto.out
 
-import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleResult.LessonDetailResult
+import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonInfoResult.LessonDetailResult
 
-data class TrainerScheduleByDateResult(
+data class RetrieveTrainerScheduleByLessonDtResult(
     val trainerName: String? = null,
     val scheduleTotalCount: Long,
     val before: MutableList<LessonDetailResult?> = mutableListOf(),

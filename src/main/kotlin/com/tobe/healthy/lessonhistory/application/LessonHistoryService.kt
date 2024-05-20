@@ -3,9 +3,9 @@ package com.tobe.healthy.lessonhistory.application
 import com.tobe.healthy.common.CustomPagingResponse
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
-import com.tobe.healthy.lessonhistory.domain.dto.`in`.LessonHistoryByDateCond
-import com.tobe.healthy.lessonhistory.domain.dto.out.LessonHistoryDetailResult
-import com.tobe.healthy.lessonhistory.domain.dto.out.LessonHistoryResult
+import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDateCond
+import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
+import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.repository.MemberRepository
@@ -22,11 +22,11 @@ class LessonHistoryService(
 ) {
 
     fun findAllLessonHistory(
-        request: LessonHistoryByDateCond,
+        request: RetrieveLessonHistoryByDateCond,
         pageable: Pageable,
         memberId: Long,
         memberType: MemberType
-    ): CustomPagingResponse<LessonHistoryResult> {
+    ): CustomPagingResponse<RetrieveLessonHistoryByDateCondResult> {
         val results = lessonHistoryRepository.findAllLessonHistory(request, pageable, memberId, memberType)
         return CustomPagingResponse(
             content = results.content,
@@ -40,9 +40,9 @@ class LessonHistoryService(
 
     fun findAllLessonHistoryByMemberId(
         studentId: Long,
-        request: LessonHistoryByDateCond,
+        request: RetrieveLessonHistoryByDateCond,
         pageable: Pageable
-    ): CustomPagingResponse<LessonHistoryResult> {
+    ): CustomPagingResponse<RetrieveLessonHistoryByDateCondResult> {
         val findMember = memberRepository.findByIdOrNull(studentId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
@@ -63,7 +63,7 @@ class LessonHistoryService(
         lessonHistoryId: Long,
         memberId: Long,
         memberType: MemberType
-    ): LessonHistoryDetailResult? {
+    ): RetrieveLessonHistoryDetailResult? {
         return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, memberId, memberType)
     }
 }

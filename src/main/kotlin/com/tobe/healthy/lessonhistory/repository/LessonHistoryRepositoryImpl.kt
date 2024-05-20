@@ -5,9 +5,9 @@ import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
-import com.tobe.healthy.lessonhistory.domain.dto.`in`.LessonHistoryByDateCond
-import com.tobe.healthy.lessonhistory.domain.dto.out.LessonHistoryDetailResult
-import com.tobe.healthy.lessonhistory.domain.dto.out.LessonHistoryResult
+import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDateCond
+import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
+import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryReadStatus.READ
 import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistory.lessonHistory
@@ -24,7 +24,7 @@ class LessonHistoryRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
 ) : LessonHistoryRepositoryCustom {
 
-    override fun findAllLessonHistory(request: LessonHistoryByDateCond, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistoryResult> {
+    override fun findAllLessonHistory(request: RetrieveLessonHistoryByDateCond, pageable: Pageable, memberId: Long, memberType: MemberType): Page<RetrieveLessonHistoryByDateCondResult> {
         val entities = queryFactory
             .select(lessonHistory)
             .from(lessonHistory)
@@ -36,7 +36,7 @@ class LessonHistoryRepositoryImpl(
             .limit(pageable.pageSize.toLong())
             .fetch()
 
-        val contents = entities.map { LessonHistoryResult.from(it) }.toMutableList()
+        val contents = entities.map { RetrieveLessonHistoryByDateCondResult.from(it) }.toMutableList()
 
         val totalCount = queryFactory
             .select(lessonHistory.count())
@@ -49,7 +49,7 @@ class LessonHistoryRepositoryImpl(
         return PageableExecutionUtils.getPage(contents, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
-    override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): LessonHistoryDetailResult? {
+    override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): RetrieveLessonHistoryDetailResult? {
         val entity = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
@@ -64,10 +64,10 @@ class LessonHistoryRepositoryImpl(
             updateFeedbackCheckStatus(entity, memberId)
         } ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
-        return LessonHistoryDetailResult.detailFrom(entity)
+        return RetrieveLessonHistoryDetailResult.detailFrom(entity)
     }
 
-    override fun findAllLessonHistoryByMemberId(studentId: Long, request: LessonHistoryByDateCond, pageable: Pageable): Page<LessonHistoryResult> {
+    override fun findAllLessonHistoryByMemberId(studentId: Long, request: RetrieveLessonHistoryByDateCond, pageable: Pageable): Page<RetrieveLessonHistoryByDateCondResult> {
         val entities = queryFactory
             .select(lessonHistory)
             .from(lessonHistory)
@@ -79,7 +79,7 @@ class LessonHistoryRepositoryImpl(
             .limit(pageable.pageSize.toLong())
             .fetch()
 
-        val contents = entities.map {LessonHistoryResult.from(it)}.toMutableList()
+        val contents = entities.map {RetrieveLessonHistoryByDateCondResult.from(it)}.toMutableList()
 
         val totalCount = queryFactory
             .select(lessonHistory.count())
@@ -92,7 +92,7 @@ class LessonHistoryRepositoryImpl(
         return PageableExecutionUtils.getPage(contents, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
-    override fun findTop1LessonHistoryByMemberId(studentId: Long): LessonHistoryResult? {
+    override fun findTop1LessonHistoryByMemberId(studentId: Long): RetrieveLessonHistoryByDateCondResult? {
         val entity = queryFactory
             .select(lessonHistory)
             .from(lessonHistory)
@@ -104,7 +104,7 @@ class LessonHistoryRepositoryImpl(
             .limit(1)
             .fetchOne()
 
-        return LessonHistoryResult.from(entity)
+        return RetrieveLessonHistoryByDateCondResult.from(entity)
     }
 
     private fun updateFeedbackCheckStatus(

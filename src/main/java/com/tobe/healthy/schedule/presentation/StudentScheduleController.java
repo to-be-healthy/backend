@@ -3,7 +3,7 @@ package com.tobe.healthy.schedule.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.StudentScheduleService;
-import com.tobe.healthy.schedule.domain.dto.in.TrainerSchedule;
+import com.tobe.healthy.schedule.domain.dto.in.RetrieveTrainerScheduleByLessonInfo;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
@@ -37,7 +37,7 @@ public class StudentScheduleController {
                     @ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
             })
     @GetMapping("/all")
-    public ResponseHandler<ScheduleCommandResponse> findAllScheduleOfTrainer(@ParameterObject TrainerSchedule searchCond,
+    public ResponseHandler<ScheduleCommandResponse> findAllScheduleOfTrainer(@ParameterObject RetrieveTrainerScheduleByLessonInfo searchCond,
                                                                              @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
         return ResponseHandler.<ScheduleCommandResponse>builder()
                 .data(studentScheduleService.findAllScheduleOfTrainer(searchCond, customMemberDetails.getMember()))
@@ -65,7 +65,7 @@ public class StudentScheduleController {
     @GetMapping("/my-reservation")
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
     public ResponseHandler<MyReservationResponse> findAllMyReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                       @ParameterObject TrainerSchedule searchCond) {
+                                                                       @ParameterObject RetrieveTrainerScheduleByLessonInfo searchCond) {
         return ResponseHandler.<MyReservationResponse>builder()
                 .data(studentScheduleService.findAllMyReservation(customMemberDetails.getMemberId(), searchCond))
                 .message("학생이 내 예약을 조회하였습니다.")

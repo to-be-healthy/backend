@@ -7,7 +7,7 @@ import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.gym.domain.dto.out.GymDto;
-import com.tobe.healthy.lessonhistory.domain.dto.out.LessonHistoryResult;
+import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult;
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository;
 import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
@@ -17,9 +17,9 @@ import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
 import com.tobe.healthy.point.repository.PointRepository;
-import com.tobe.healthy.schedule.domain.dto.in.TrainerScheduleByDate;
+import com.tobe.healthy.schedule.domain.dto.in.RetrieveTrainerScheduleByLessonDt;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
-import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleByDateResult;
+import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
@@ -83,7 +83,7 @@ public class HomeService {
         MyReservation myReservation = studentScheduleRepository.findMyNextReservation(memberId);
 
         //수업일지
-        LessonHistoryResult lessonHistory = lessonHistoryRepository.findTop1LessonHistoryByMemberId(memberId);
+        RetrieveLessonHistoryByDateCondResult lessonHistory = lessonHistoryRepository.findTop1LessonHistoryByMemberId(memberId);
 
         //식단
         DietDto diet = dietService.getDietCreatedAtToday(memberId);
@@ -91,13 +91,13 @@ public class HomeService {
         return StudentHomeResult.create(usingCourse, point, rank, myReservation, lessonHistory, diet, gym);
     }
 
-    public TrainerHomeResult getTrainerHome(TrainerScheduleByDate request, Long trainerId) {
+    public TrainerHomeResult getTrainerHome(RetrieveTrainerScheduleByLessonDt request, Long trainerId) {
         long mappingStudentCount = mappingRepository.countByTrainerId(trainerId);
 
         // 우수회원 추가 필요
         List<MemberInTeamResult> bestStudents = memberRepository.getBestStudent(trainerId);
 
-        TrainerScheduleByDateResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId);
+        RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId);
 
         return TrainerHomeResult.builder()
                 .studentCount(mappingStudentCount)

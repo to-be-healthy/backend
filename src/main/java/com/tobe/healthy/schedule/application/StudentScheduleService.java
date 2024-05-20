@@ -4,7 +4,7 @@ import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.schedule.domain.dto.in.TrainerSchedule;
+import com.tobe.healthy.schedule.domain.dto.in.RetrieveTrainerScheduleByLessonInfo;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
@@ -42,7 +42,7 @@ public class StudentScheduleService {
 		return result.isEmpty() ? null : result;
 	}
 
-	public ScheduleCommandResponse findAllScheduleOfTrainer(TrainerSchedule searchCond, Member member) {
+	public ScheduleCommandResponse findAllScheduleOfTrainer(RetrieveTrainerScheduleByLessonInfo searchCond, Member member) {
 
 		TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId())
 				.orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
@@ -103,7 +103,7 @@ public class StudentScheduleService {
 				&& schedule.getWaitingByName()!=null;
 	}
 
-	public MyReservationResponse findAllMyReservation(Long memberId, TrainerSchedule searchCond) {
+	public MyReservationResponse findAllMyReservation(Long memberId, RetrieveTrainerScheduleByLessonInfo searchCond) {
 		List<MyReservation> result = studentScheduleRepository.findAllMyReservation(memberId, searchCond);
 		return MyReservationResponse.create(courseService.getNowUsingCourse(memberId), result);
 	}

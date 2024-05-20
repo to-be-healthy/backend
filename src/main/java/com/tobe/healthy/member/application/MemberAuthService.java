@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.redis.RedisKeyPrefix;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.member.domain.dto.in.FindMemberId;
-import com.tobe.healthy.member.domain.dto.in.FindMemberId.FindMemberIdResult;
+import com.tobe.healthy.member.domain.dto.in.RetrieveMemberId;
+import com.tobe.healthy.member.domain.dto.in.RetrieveMemberId.FindMemberIdResult;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -49,7 +49,7 @@ public class MemberAuthService {
         return true;
     }
 
-    public FindMemberIdResult findUserId(FindMemberId request) {
+    public FindMemberIdResult findUserId(RetrieveMemberId request) {
         Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         return new FindMemberIdResult(

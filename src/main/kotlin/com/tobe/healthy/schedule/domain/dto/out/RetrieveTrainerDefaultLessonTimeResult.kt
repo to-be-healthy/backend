@@ -4,7 +4,7 @@ import com.tobe.healthy.common.TimeFormatter.Companion.dateTimeFormat
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
 import java.time.DayOfWeek
 
-data class TrainerDefaultLessonTimeResult(
+data class RetrieveTrainerDefaultLessonTimeResult(
     val lessonStartTime: String?,
     val lessonEndTime: String?,
     val lunchStartTime: String? = null,
@@ -13,8 +13,8 @@ data class TrainerDefaultLessonTimeResult(
     val closedDays: List<DayOfWeek> = mutableListOf()
 ) {
     companion object {
-        fun from(trainerScheduleInfo: TrainerScheduleInfo) : TrainerDefaultLessonTimeResult {
-            return TrainerDefaultLessonTimeResult(
+        fun from(trainerScheduleInfo: TrainerScheduleInfo) : RetrieveTrainerDefaultLessonTimeResult {
+            return RetrieveTrainerDefaultLessonTimeResult(
                 lessonStartTime = dateTimeFormat(trainerScheduleInfo.lessonStartTime),
                 lessonEndTime = dateTimeFormat(trainerScheduleInfo.lessonEndTime),
                 lunchStartTime = dateTimeFormat(trainerScheduleInfo.lunchStartTime),

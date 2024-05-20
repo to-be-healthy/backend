@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Schema(description = "수업 일지")
-data class LessonHistoryResult(
+data class RetrieveLessonHistoryByDateCondResult(
     @Schema(description = "수업 일지 ID", example = "1")
     val id: Long,
     @Schema(description = "수업 일지 제목", example = "홍길동님 수업 일지입니다!")
@@ -40,9 +40,9 @@ data class LessonHistoryResult(
 ) {
 
     companion object {
-        fun from(entity: LessonHistory?): LessonHistoryResult? {
+        fun from(entity: LessonHistory?): RetrieveLessonHistoryByDateCondResult? {
             entity?.let {
-                return LessonHistoryResult(
+                return RetrieveLessonHistoryByDateCondResult(
                     id = entity.id,
                     title = entity.title,
                     content = entity.content,

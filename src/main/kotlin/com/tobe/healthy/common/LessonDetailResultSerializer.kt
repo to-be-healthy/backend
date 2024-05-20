@@ -3,7 +3,7 @@ package com.tobe.healthy.common
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleResult.LessonDetailResult
+import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonInfoResult.LessonDetailResult
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 
 class LessonDetailResultSerializer : JsonSerializer<LessonDetailResult>() {
