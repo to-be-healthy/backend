@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "비밀번호 변경 DTO")
-public class MemberPasswordChangeCommand {
+public class CommandChangeMemberPassword {
 	@Schema(description = "현재 비밀번호" , example = "zxcvbnm=1")
 	@NotEmpty(message = "현재 비밀번호를 입력해 주세요.")
 	private String currPassword1;

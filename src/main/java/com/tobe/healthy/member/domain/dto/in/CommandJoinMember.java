@@ -13,7 +13,7 @@ import lombok.ToString;
 @ToString(exclude = "password")
 @Schema(title = "MemberJoinCommand", description = "회원가입 DTO")
 @Builder
-public class MemberJoinCommand {
+public class CommandJoinMember {
     @Schema(description = "아이디", example = "to-be-healthy")
     @NotEmpty(message = "아이디를 입력해 주세요.")
     private String userId;

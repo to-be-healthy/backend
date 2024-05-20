@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "소셜 로그인 DTO")
-public class SocialLoginCommand {
+public class CommandSocialLogin {
 	@Schema(description = "인가코드(카카오, 네이버, 구글 소셜 로그인시 필요)", example = "인가코드(카카오, 네이버, 구글 소셜 로그인시 필요)")
     private String code;
 

@@ -138,5 +138,4 @@ public class CourseService {
             case MINUS -> schedule.registerCourse(course); //수업예약
         }
     }
-
 }

@@ -2,7 +2,7 @@ package com.tobe.healthy.member.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.gym.domain.entity.Gym;
-import com.tobe.healthy.member.domain.dto.in.MemberJoinCommand;
+import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import jakarta.persistence.*;
@@ -119,7 +119,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@Builder.Default
 	private boolean delYn = false;
 
-	public static Member join(MemberJoinCommand request, String password) {
+	public static Member join(CommandJoinMember request, String password) {
 		return Member.builder()
 				.userId(request.getUserId())
 				.email(request.getEmail())
