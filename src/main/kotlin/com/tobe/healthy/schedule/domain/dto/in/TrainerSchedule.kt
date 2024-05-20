@@ -22,7 +22,7 @@ data class TrainerSchedule(
             lessonDt = DateTimeFormatter.ofPattern("yyyy-MM").format(LocalDate.now()).toString()
         }
 
-        if (ChronoUnit.DAYS.between(lessonStartDt, lessonEndDt) > 31) {
+        if (lessonStartDt != null && lessonEndDt != null && ChronoUnit.DAYS.between(lessonStartDt, lessonEndDt) > 31) {
             throw CustomException(SEARCH_LESS_THAN_31_DAYS)
         }
     }
