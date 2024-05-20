@@ -39,7 +39,7 @@ class TrainerScheduleRepositoryImpl(
             .on(scheduleWaitingDelYnEq(false))
             .where(
                 lessonDtMonthEq(trainerSchedule.lessonDt),
-                lessonDtBetween(trainerSchedule?.lessonStartDt, trainerSchedule?.lessonEndDt),
+                lessonDtBetween(trainerSchedule.lessonStartDt, trainerSchedule.lessonEndDt),
                 trainerIdEq(trainerId),
                 delYnEq(false)
             )
@@ -189,15 +189,13 @@ class TrainerScheduleRepositoryImpl(
             .fetch()
     }
 
-    override fun findAllDisabledSchedule(lessonStartDt: LocalDate, lessonEndDt: LocalDate, trainerId: Long): List<Schedule?> {
+    override fun findAllDisabledSchedule(lessonStartDt: LocalDate, lessonEndDt: LocalDate): List<Schedule?> {
         return queryFactory
             .select(schedule)
             .from(schedule)
             .where(
                 lessonDtBetween(lessonStartDt, lessonEndDt),
-                trainerIdEq(trainerId),
-                reservationStatusEq(DISABLED),
-                delYnEq(false)
+                reservationStatusEq(DISABLED)
             )
             .fetch()
     }

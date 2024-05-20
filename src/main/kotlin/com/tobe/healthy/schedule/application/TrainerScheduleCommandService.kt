@@ -21,8 +21,12 @@ import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.DayOfWeek.MONDAY
+import java.time.DayOfWeek.SUNDAY
 import java.time.Duration.between
+import java.time.LocalDate
 import java.time.LocalTime
+import java.time.temporal.TemporalAdjusters
 
 @Service
 @Transactional
@@ -185,6 +189,14 @@ class TrainerScheduleCommandService(
         schedule.registerSchedule(findStudent)
 
         return CommandRegisterScheduleByStudentResult.from(schedule, findStudent)
+    }
+
+    fun deleteDisabledSchedule() {
+        val today = LocalDate.now()
+        val startOfLastWeek = today.with(TemporalAdjusters.previous(MONDAY))
+        val endOfLastWeek = startOfLastWeek.with(TemporalAdjusters.nextOrSame(SUNDAY))
+        val disabledSchedule = trainerScheduleRepository.findAllDisabledSchedule(startOfLastWeek, endOfLastWeek)
+        trainerScheduleRepository.deleteAll(disabledSchedule)
     }
 
     private fun isStartTimeEqualsLunchStartTime(lunchStartTime: LocalTime?, startTime: LocalTime): Boolean {

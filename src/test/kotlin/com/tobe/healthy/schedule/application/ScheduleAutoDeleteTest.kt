@@ -40,13 +40,13 @@ class ScheduleAutoDeleteTest(
         val today = LocalDate.of(2024, 5, 20) // 월요일
         val startOfLastWeek = today.with(TemporalAdjusters.previous(MONDAY))
         val endOfLastWeek = startOfLastWeek.with(TemporalAdjusters.nextOrSame(SUNDAY))
-        val schedules = trainerScheduleRepository.findAllDisabledSchedule(startOfLastWeek, endOfLastWeek, trainer.id)
+        val schedules = trainerScheduleRepository.findAllDisabledSchedule(startOfLastWeek, endOfLastWeek)
 
         trainerScheduleRepository.deleteAll(schedules)
 
         em.flush()
         em.clear()
-        val deleteSchedules = trainerScheduleRepository.findAllDisabledSchedule(startOfLastWeek, endOfLastWeek, trainer.id)
+        val deleteSchedules = trainerScheduleRepository.findAllDisabledSchedule(startOfLastWeek, endOfLastWeek)
 
         deleteSchedules.size shouldBe 0
     }
