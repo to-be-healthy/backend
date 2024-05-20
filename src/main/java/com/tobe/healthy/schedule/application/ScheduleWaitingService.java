@@ -2,13 +2,11 @@ package com.tobe.healthy.schedule.application;
 
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
-import com.tobe.healthy.course.domain.dto.CourseDto;
-import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.schedule.domain.dto.out.FindMyScheduleWaitingResult;
 import com.tobe.healthy.schedule.domain.dto.out.MyScheduleWaiting;
-import com.tobe.healthy.schedule.domain.dto.out.MyScheduleWaitingResponse;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository;
@@ -21,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.schedule.application.TrainerScheduleServiceKt.ONE_DAY;
@@ -71,9 +68,9 @@ public class ScheduleWaitingService {
 		return getScheduleTimeText(scheduleWaiting.getSchedule().getLessonStartTime());
 	}
 
-	public MyScheduleWaitingResponse findAllMyScheduleWaiting(Long memberId) {
+	public FindMyScheduleWaitingResult findAllMyScheduleWaiting(Long memberId) {
 		List<MyScheduleWaiting> result = scheduleWaitingRepository.findAllMyScheduleWaiting(memberId);
-		return MyScheduleWaitingResponse.create(courseService.getNowUsingCourse(memberId), result);
+		return FindMyScheduleWaitingResult.create(courseService.getNowUsingCourse(memberId), result);
 	}
 
 	private String getScheduleTimeText(LocalTime lessonStartTime){

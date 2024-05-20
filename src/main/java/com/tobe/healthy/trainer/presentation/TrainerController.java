@@ -5,7 +5,7 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
-import com.tobe.healthy.member.application.MemberService;
+import com.tobe.healthy.member.application.MemberCommandService;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
@@ -40,7 +40,7 @@ public class TrainerController {
 
     private final TrainerService trainerService;
     private final WorkoutHistoryService workoutService;
-    private final MemberService memberService;
+    private final MemberCommandService memberCommandService;
     private final DietService dietService;
 
     @Operation(summary = "트레이너가 학생 초대하기", responses = {
@@ -151,7 +151,7 @@ public class TrainerController {
                                                           @RequestParam AlarmStatus alarmStatus,
                                                           @AuthenticationPrincipal CustomMemberDetails member) {
         return ResponseHandler.<Boolean>builder()
-                .data(memberService.changeTrainerFeedback(alarmStatus, member.getMemberId()))
+                .data(memberCommandService.changeTrainerFeedback(alarmStatus, member.getMemberId()))
                 .message("수업 기록 여부가 변경되었습니다.")
                 .build();
     }
@@ -170,5 +170,4 @@ public class TrainerController {
                 .message("식단기록이 조회되었습니다.")
                 .build();
     }
-
 }

@@ -11,7 +11,7 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 @Schema(description = "회원가입 성공 응답")
-public class MemberJoinCommandResult {
+public class CommandJoinMemberResult {
 	@Schema(description = "회원 ID")
     private Long id;
 	@Schema(description = "이메일")
@@ -23,8 +23,8 @@ public class MemberJoinCommandResult {
 	@Schema(description = "회원구분")
     private MemberType memberType;
 
-    public static MemberJoinCommandResult from(Member member){
-        return MemberJoinCommandResult.builder()
+    public static CommandJoinMemberResult from(Member member){
+        return CommandJoinMemberResult.builder()
                 .id(member.getId())
                 .email(member.getEmail())
                 .userId(member.getUserId())

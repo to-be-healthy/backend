@@ -9,13 +9,13 @@ import java.util.List;
 
 @Data
 @Builder
-public class MyScheduleWaitingResponse {
+public class FindMyScheduleWaitingResult {
 
     private CourseDto course;
     private List<MyScheduleWaiting> myScheduleWaitings;
 
-    public static MyScheduleWaitingResponse create(CourseDto course, List<MyScheduleWaiting> myScheduleWaitings) {
-        return MyScheduleWaitingResponse.builder()
+    public static FindMyScheduleWaitingResult create(CourseDto course, List<MyScheduleWaiting> myScheduleWaitings) {
+        return FindMyScheduleWaitingResult.builder()
                 .course(course)
                 .myScheduleWaitings(ObjectUtils.isEmpty(myScheduleWaitings) ? null : myScheduleWaitings)
                 .build();

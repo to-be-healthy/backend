@@ -5,12 +5,12 @@ import lombok.Data;
 
 @Data
 @Builder
-public class DeleteMemberProfileResponse {
+public class DeleteMemberProfileResult {
     private String fileUrl;
     private String fileName;
 
-    public static DeleteMemberProfileResponse from(String fileUrl, String fileName) {
-        return DeleteMemberProfileResponse.builder()
+    public static DeleteMemberProfileResult from(String fileUrl, String fileName) {
+        return DeleteMemberProfileResult.builder()
                 .fileUrl(fileUrl)
                 .fileName(fileName)
                 .build();

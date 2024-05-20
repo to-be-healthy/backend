@@ -14,7 +14,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "로그인 DTO")
-public class MemberLoginCommand {
+public class CommandLoginMember {
     @Schema(description = "아이디", example = "healthy-trainer0")
     @NotEmpty(message = "아이디를 입력해 주세요.")
     private String userId;

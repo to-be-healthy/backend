@@ -5,12 +5,12 @@ import lombok.Data;
 
 @Data
 @Builder
-public class RegisterMemberProfileResponse {
+public class RegisterMemberProfileResult {
     private String fileUrl;
     private String fileName;
 
-    public static RegisterMemberProfileResponse from(String fileUrl, String fileName) {
-        return RegisterMemberProfileResponse.builder()
+    public static RegisterMemberProfileResult from(String fileUrl, String fileName) {
+        return RegisterMemberProfileResult.builder()
                 .fileUrl(fileUrl)
                 .fileName(fileName)
                 .build();
