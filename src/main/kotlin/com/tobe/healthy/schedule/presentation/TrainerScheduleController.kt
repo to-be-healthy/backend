@@ -3,11 +3,11 @@ package com.tobe.healthy.schedule.presentation
 import com.tobe.healthy.ApiResultResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.schedule.application.TrainerScheduleService
-import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
-import com.tobe.healthy.schedule.entity.`in`.TrainerTodayScheduleSearchCond
-import com.tobe.healthy.schedule.entity.out.LessonResponse
-import com.tobe.healthy.schedule.entity.out.TrainerScheduleResponse
-import com.tobe.healthy.schedule.entity.out.TrainerTodayScheduleResponse
+import com.tobe.healthy.schedule.domain.dto.`in`.TrainerSchedule
+import com.tobe.healthy.schedule.domain.dto.`in`.TrainerScheduleByDate
+import com.tobe.healthy.schedule.domain.dto.out.TrainerDefaultLessonTimeResult
+import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleByDateResult
+import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleResult
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -34,7 +34,7 @@ class TrainerScheduleController(
     )
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @GetMapping("/default-lesson-time")
-    fun findDefaultSchedule(@AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<TrainerScheduleResponse> {
+    fun findDefaultSchedule(@AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<TrainerDefaultLessonTimeResult> {
         return ApiResultResponse(
             message = "기본 수업 시간 조회에 성공하였습니다.",
             data = trainerScheduleService.findDefaultLessonTime(member.memberId)
@@ -49,11 +49,11 @@ class TrainerScheduleController(
     )
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findAllSchedule(@ParameterObject searchCond: ScheduleSearchCond,
-                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<LessonResponse?> {
+    fun findAllSchedule(@ParameterObject trainerSchedule: TrainerSchedule,
+                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<TrainerScheduleResult?> {
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
-            data = trainerScheduleService.findAllSchedule(searchCond, customMemberDetails.memberId)
+            data = trainerScheduleService.findAllSchedule(trainerSchedule, customMemberDetails.memberId)
         )
     }
 
@@ -65,11 +65,11 @@ class TrainerScheduleController(
     )
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findOneSchedule(searchCond: TrainerTodayScheduleSearchCond,
-                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<TrainerTodayScheduleResponse?> {
+    fun findOneSchedule(queryTrainerSchedule: TrainerScheduleByDate,
+                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<TrainerScheduleByDateResult?> {
         return ApiResultResponse(
             message = "특정 날짜의 일정을 조회했습니다.",
-            data = trainerScheduleService.findOneTrainerTodaySchedule(searchCond, customMemberDetails.memberId)
+            data = trainerScheduleService.findOneTrainerTodaySchedule(queryTrainerSchedule, customMemberDetails.memberId)
         )
     }
 }

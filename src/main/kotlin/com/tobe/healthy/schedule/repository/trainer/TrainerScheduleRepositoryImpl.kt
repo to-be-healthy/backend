@@ -4,17 +4,17 @@ import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.member.domain.entity.QMember
+import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterIndividualSchedule
+import com.tobe.healthy.schedule.domain.dto.`in`.TrainerSchedule
+import com.tobe.healthy.schedule.domain.dto.`in`.TrainerScheduleByDate
+import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleByDateResult
+import com.tobe.healthy.schedule.domain.dto.out.TrainerScheduleResult
 import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
 import com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.DISABLED
 import com.tobe.healthy.schedule.domain.entity.Schedule
-import com.tobe.healthy.schedule.entity.`in`.RegisterScheduleCommand
-import com.tobe.healthy.schedule.entity.`in`.ScheduleSearchCond
-import com.tobe.healthy.schedule.entity.`in`.TrainerTodayScheduleSearchCond
-import com.tobe.healthy.schedule.entity.out.LessonResponse
-import com.tobe.healthy.schedule.entity.out.TrainerTodayScheduleResponse
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
 import java.time.LocalDate
@@ -27,9 +27,9 @@ class TrainerScheduleRepositoryImpl(
 ) : TrainerScheduleRepositoryCustom {
 
     override fun findAllSchedule(
-        searchCond: ScheduleSearchCond,
+        trainerSchedule: TrainerSchedule,
         trainerId: Long
-    ): LessonResponse? {
+    ): TrainerScheduleResult? {
         val results = queryFactory
             .select(schedule)
             .from(schedule)
@@ -38,28 +38,28 @@ class TrainerScheduleRepositoryImpl(
             .leftJoin(schedule.scheduleWaiting, scheduleWaiting)
             .on(scheduleWaitingDelYnEq(false))
             .where(
-                lessonDtMonthEq(searchCond.lessonDt),
-                lessonDtBetween(searchCond?.lessonStartDt, searchCond?.lessonEndDt),
+                lessonDtMonthEq(trainerSchedule.lessonDt),
+                lessonDtBetween(trainerSchedule.lessonStartDt, trainerSchedule.lessonEndDt),
                 trainerIdEq(trainerId),
                 delYnEq(false)
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
 
-        return LessonResponse.from(results)
+        return TrainerScheduleResult.from(results)
     }
 
     override fun findOneTrainerTodaySchedule(
-        searchCond: TrainerTodayScheduleSearchCond,
+        queryTrainerSchedule: TrainerScheduleByDate,
         trainerId: Long
-    ): TrainerTodayScheduleResponse? {
+    ): TrainerScheduleByDateResult? {
         val results = queryFactory
             .select(schedule)
             .from(schedule)
             .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
             .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
             .where(
-                lessonDtEq(searchCond.lessonDt),
+                lessonDtEq(queryTrainerSchedule.lessonDt),
                 trainerIdEq(trainerId),
                 reservationStatusEq(COMPLETED),
                 delYnEq(false)
@@ -71,7 +71,7 @@ class TrainerScheduleRepositoryImpl(
             .select(schedule.count())
             .from(schedule)
             .where(
-                lessonDtEq(searchCond.lessonDt),
+                lessonDtEq(queryTrainerSchedule.lessonDt),
                 trainerIdEq(trainerId),
                 reservationStatusEq(COMPLETED),
                 delYnEq(false)
@@ -79,10 +79,10 @@ class TrainerScheduleRepositoryImpl(
             .fetchOne()
 
 
-        val response = LessonResponse.from(results)
+        val response = TrainerScheduleResult.from(results)
 
         response.let {
-            val trainerTodaySchedule = TrainerTodayScheduleResponse(
+            val trainerTodaySchedule = TrainerScheduleByDateResult(
                 trainerName = response.trainerName,
                 scheduleTotalCount = scheduleCount!!,
             )
@@ -101,7 +101,7 @@ class TrainerScheduleRepositoryImpl(
         }
     }
 
-    override fun findAvailableRegisterSchedule(request: RegisterScheduleCommand, trainerId: Long): Schedule? {
+    override fun findAvailableRegisterSchedule(request: CommandRegisterIndividualSchedule, trainerId: Long): Schedule? {
         return queryFactory
             .select(schedule)
             .from(schedule)
@@ -189,15 +189,13 @@ class TrainerScheduleRepositoryImpl(
             .fetch()
     }
 
-    override fun findAllDisabledSchedule(lessonStartDt: LocalDate, lessonEndDt: LocalDate, trainerId: Long): List<Schedule?> {
+    override fun findAllDisabledSchedule(lessonStartDt: LocalDate, lessonEndDt: LocalDate): List<Schedule?> {
         return queryFactory
             .select(schedule)
             .from(schedule)
             .where(
                 lessonDtBetween(lessonStartDt, lessonEndDt),
-                trainerIdEq(trainerId),
-                reservationStatusEq(DISABLED),
-                delYnEq(false)
+                reservationStatusEq(DISABLED)
             )
             .fetch()
     }
@@ -211,7 +209,7 @@ class TrainerScheduleRepositoryImpl(
     private fun scheduleWaitingDelYnEq(boolean: Boolean): BooleanExpression? =
         scheduleWaiting.delYn.eq(boolean)
 
-    private fun lessonDtMonthEq(request: RegisterScheduleCommand): BooleanExpression? =
+    private fun lessonDtMonthEq(request: CommandRegisterIndividualSchedule): BooleanExpression? =
         schedule.lessonDt.eq(request.lessonDt)
 
     private fun lessonDtMonthEq(lessonDt: LocalDate): BooleanExpression? =

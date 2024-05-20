@@ -1,8 +1,8 @@
 package com.tobe.healthy.schedule.repository
 
-import com.tobe.healthy.schedule.entity.TrainerScheduleInfo
+import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
 import org.springframework.data.jpa.repository.JpaRepository
 
-interface TrainerScheduleInfoRepository : JpaRepository<TrainerScheduleInfo, Long>, TrainerScheduleInfoRepositoryCustom {
+interface TrainerScheduleInfoRepository : JpaRepository<TrainerScheduleInfo, Long> {
     fun findByTrainerId(trainerId: Long): TrainerScheduleInfo?
 }

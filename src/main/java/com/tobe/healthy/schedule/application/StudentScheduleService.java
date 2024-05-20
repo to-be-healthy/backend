@@ -2,15 +2,13 @@ package com.tobe.healthy.schedule.application;
 
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
-import com.tobe.healthy.course.domain.dto.CourseDto;
-import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.schedule.domain.dto.in.TrainerSchedule;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
-import com.tobe.healthy.schedule.entity.in.ScheduleSearchCond;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
@@ -22,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_MAPPED;
@@ -45,7 +42,7 @@ public class StudentScheduleService {
 		return result.isEmpty() ? null : result;
 	}
 
-	public ScheduleCommandResponse findAllScheduleOfTrainer(ScheduleSearchCond searchCond, Member member) {
+	public ScheduleCommandResponse findAllScheduleOfTrainer(TrainerSchedule searchCond, Member member) {
 
 		TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId())
 				.orElseThrow(() -> new CustomException(TRAINER_NOT_MAPPED));
@@ -106,7 +103,7 @@ public class StudentScheduleService {
 				&& schedule.getWaitingByName()!=null;
 	}
 
-	public MyReservationResponse findAllMyReservation(Long memberId, ScheduleSearchCond searchCond) {
+	public MyReservationResponse findAllMyReservation(Long memberId, TrainerSchedule searchCond) {
 		List<MyReservation> result = studentScheduleRepository.findAllMyReservation(memberId, searchCond);
 		return MyReservationResponse.create(courseService.getNowUsingCourse(memberId), result);
 	}

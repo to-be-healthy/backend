@@ -6,7 +6,7 @@ import com.tobe.healthy.home.application.HomeService;
 import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
 import com.tobe.healthy.member.domain.dto.out.TrainerHomeResult;
 import com.tobe.healthy.point.application.PointService;
-import com.tobe.healthy.schedule.entity.in.TrainerTodayScheduleSearchCond;
+import com.tobe.healthy.schedule.domain.dto.in.TrainerScheduleByDate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +46,7 @@ public class HomeController {
     })
     @GetMapping("/trainer")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    public ResponseHandler<TrainerHomeResult> getTrainerHome(@RequestBody TrainerTodayScheduleSearchCond request,
+    public ResponseHandler<TrainerHomeResult> getTrainerHome(@RequestBody TrainerScheduleByDate request,
                                                              @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
         return ResponseHandler.<TrainerHomeResult>builder()
                 .data(homeService.getTrainerHome(request, customMemberDetails.getMemberId()))

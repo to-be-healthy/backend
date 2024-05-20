@@ -1,6 +1,6 @@
 package com.tobe.healthy.lessonhistory.domain.entity
 
-enum class AttendanceStatus(
+enum class LessonAttendanceStatus(
     val description: String
 ) {
     ATTENDED("출석"),

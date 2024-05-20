@@ -2,10 +2,10 @@ package com.tobe.healthy.lessonhistory.application
 
 import com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI
 import com.tobe.healthy.common.redis.RedisService
-import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommentRegisterCommand
-import com.tobe.healthy.lessonhistory.domain.dto.`in`.RegisterLessonHistoryCommand
-import com.tobe.healthy.lessonhistory.domain.dto.out.RegisterLessonHistoryCommandResponse
-import com.tobe.healthy.lessonhistory.domain.dto.out.RegisterLessonHistoryCommentResponse
+import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommandRegisterComment
+import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommandRegisterLessonHistory
+import com.tobe.healthy.lessonhistory.domain.dto.out.CommandRegisterCommentResult
+import com.tobe.healthy.lessonhistory.domain.dto.out.CommandRegisterLessonHistoryResult
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.entity.Schedule
@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile
 class LessonHistoryServiceTest(
     private val memberRepository: MemberRepository,
     private val trainerScheduleRepository: TrainerScheduleRepository,
-    private val lessonHistoryService: LessonHistoryService,
+    private val lessonHistoryCommandService: LessonHistoryCommandService,
     private val redisService: RedisService
 ) : StringSpec({
 
@@ -37,24 +37,17 @@ class LessonHistoryServiceTest(
         schedule = trainerScheduleRepository.findByIdOrNull(1L)!!
     }
 
-    fun createLessonHistory(
-        studentId: Long,
-        trainerId: Long,
-        scheduleId: Long,
-        title: String,
-        content: String
-    ): RegisterLessonHistoryCommandResponse {
-        return RegisterLessonHistoryCommand(
+    fun createLessonHistory(studentId: Long, trainerId: Long, scheduleId: Long, title: String, content: String): CommandRegisterLessonHistoryResult {
+        return CommandRegisterLessonHistory(
             title = title,
             content = content,
             studentId = studentId,
-            scheduleId = scheduleId,
-            null
-        ).let { lessonHistoryService.registerLessonHistory(it, trainerId) }
+            scheduleId = scheduleId
+        ).let { lessonHistoryCommandService.registerLessonHistory(it, trainerId) }
     }
 
     "수업일지를 작성한다" {
-        val request = RegisterLessonHistoryCommand(
+        val request = CommandRegisterLessonHistory(
             title = "수업일지 테스트 제목",
             content = "수업일지 테스트 내용",
             studentId = student.id,
@@ -62,7 +55,7 @@ class LessonHistoryServiceTest(
             null
         )
 
-        val result = lessonHistoryService.registerLessonHistory(request, trainer.id)
+        val result = lessonHistoryCommandService.registerLessonHistory(request, trainer.id)
 
         result.title shouldBe request.title
         result.content shouldBe request.content
@@ -75,7 +68,7 @@ class LessonHistoryServiceTest(
             MockMultipartFile("file", "file1.txt", "text/plain", "some content".toByteArray())
         )
 
-        val results = lessonHistoryService.registerFilesOfLessonHistory(files, trainer.id)
+        val results = lessonHistoryCommandService.registerFilesOfLessonHistory(files, trainer.id)
 
         for (result in results) {
             val value = redisService.getValues(TEMP_FILE_URI.description + result.fileUrl)
@@ -87,9 +80,9 @@ class LessonHistoryServiceTest(
     "수업일지에 댓글을 작성한다" {
         val result = createLessonHistory(student.id, trainer.id, schedule.id, "수업일지 제목", "수업일지 내용")
 
-        val commentRequest = CommentRegisterCommand(comment = "수업일지 테스트 댓글", null)
+        val commentRequest = CommandRegisterComment(comment = "수업일지 테스트 댓글", null)
         val response =
-            lessonHistoryService.registerLessonHistoryComment(result.lessonHistoryId, commentRequest, student.id)
+            lessonHistoryCommandService.registerLessonHistoryComment(result.lessonHistoryId, commentRequest, student.id)
 
         response.comment shouldBe commentRequest.comment
         response.writerId shouldBe student.id
@@ -99,9 +92,9 @@ class LessonHistoryServiceTest(
         comment: String,
         lessonHistoryId: Long,
         memberId: Long
-    ): RegisterLessonHistoryCommentResponse {
-        return CommentRegisterCommand(comment = comment, null).let {
-            lessonHistoryService.registerLessonHistoryComment(lessonHistoryId, it, memberId)
+    ): CommandRegisterCommentResult {
+        return CommandRegisterComment(comment = comment, null).let {
+            lessonHistoryCommandService.registerLessonHistoryComment(lessonHistoryId, it, memberId)
         }
     }
 
@@ -109,10 +102,10 @@ class LessonHistoryServiceTest(
         // given
         val result = createLessonHistory(student.id, trainer.id, schedule.id, "수업일지 제목", "수업일지 내용")
         val response = createLessonHistoryComment("수업일지 테스트 댓글1", result.lessonHistoryId, student.id)
-        val resultReply = lessonHistoryService.registerLessonHistoryReply(
+        val resultReply = lessonHistoryCommandService.registerLessonHistoryReply(
             result.lessonHistoryId,
             response.lessonHistoryCommentId,
-            CommentRegisterCommand("대댓글!", null),
+            CommandRegisterComment("대댓글!", null),
             trainer.id
         )
 

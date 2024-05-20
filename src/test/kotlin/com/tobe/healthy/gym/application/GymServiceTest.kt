@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 @SpringBootTest
 @Transactional
 class GymServiceTest(
-    private val gymService: GymService,
+    private val gymCommandService: GymCommandService,
     private val gymRepository: GymRepository,
     private val memberRepository: MemberRepository,
 ) : StringSpec({
@@ -23,7 +23,7 @@ class GymServiceTest(
         val name = "건강해짐 화정점"
 
         // when
-        val response = gymService.registerGym(name)
+        val response = gymCommandService.registerGym(name)
 
         // then
         response.name shouldBe name
@@ -33,7 +33,7 @@ class GymServiceTest(
     "내 헬스장으로 등록한다" {
         val findGym = gymRepository.findByName("건강해짐 원흥점") ?: throw IllegalArgumentException("헬스장을 찾을 수 없습니다.")
         val trainer = memberRepository.findByUserId("healthy-trainer0").get()
-        val response = gymService.selectMyGym(findGym.id, findGym.joinCode, trainer.id)
+        val response = gymCommandService.selectMyGym(findGym.id, findGym.joinCode, trainer.id)
         response.id shouldBe findGym.id
         response.name shouldBe "건강해짐 원흥점"
     }
@@ -42,7 +42,7 @@ class GymServiceTest(
         val findGym = gymRepository.findByName("건강해짐 원흥점")
         val trainer = memberRepository.findByUserId("healthy-trainer0").get()
         val message = shouldThrow<CustomException> {
-            gymService.selectMyGym(findGym!!.id, "12345", trainer.id)
+            gymCommandService.selectMyGym(findGym!!.id, "12345", trainer.id)
         }.message
 
         message shouldBe JOIN_CODE_NOT_VALID.message
