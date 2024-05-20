@@ -192,7 +192,7 @@ public class MemberService {
         Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         return new MemberFindIdCommandResult(
-            member.getUserId().substring(member.getUserId().length() - 3) + "**",
+            member.getUserId().substring(0, member.getUserId().length() - 2) + "**",
                   member.getCreatedAt()
         );
     }

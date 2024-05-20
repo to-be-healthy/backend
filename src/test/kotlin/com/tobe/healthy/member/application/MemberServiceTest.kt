@@ -5,9 +5,11 @@ import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_NOT_VALID
 import com.tobe.healthy.log
+import com.tobe.healthy.member.domain.dto.`in`.MemberFindIdCommand
 import com.tobe.healthy.member.domain.dto.`in`.MemberLoginCommand
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.domain.entity.MemberType.STUDENT
+import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
 import com.tobe.healthy.member.repository.MemberRepository
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -93,5 +95,11 @@ class MemberServiceTest(
         val changeName = memberService.changeName("미미미누", student.id)
         log.info { "변경된 닉네임: ${changeName}"}
         changeName shouldBe "미미미누"
+    }
+
+    "회원이 아이디를 찾는다" {
+        val request = MemberFindIdCommand("healthy-trainer0@gmail.com", "healthy-trainer", TRAINER)
+        val response = memberService.findUserId(request)
+        log.info { "response: ${response}" }
     }
 })

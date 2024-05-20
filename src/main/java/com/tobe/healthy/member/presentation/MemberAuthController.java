@@ -34,7 +34,7 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "사용 가능한 아이디입니다.")
 	})
 	@GetMapping("/validation/user-id")
-	public ResponseHandler<Boolean> validateUsernameDuplication(@Parameter(description = "아이디") @RequestParam(name = "userId") String userId) {
+	public ResponseHandler<Boolean> validateUsernameDuplication(@RequestParam(name = "userId") String userId) {
 		return ResponseHandler.<Boolean>builder()
 			.data(memberService.validateUserIdDuplication(userId))
 			.message("사용할 수 있는 아이디입니다.")
@@ -47,7 +47,7 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "사용 가능한 이메일입니다.")
 	})
 	@GetMapping("/validation/email")
-	public ResponseHandler<Boolean> validateEmailDuplication(@Parameter(description = "이메일") @RequestParam String email) {
+	public ResponseHandler<Boolean> validateEmailDuplication(@RequestParam String email) {
 		return ResponseHandler.<Boolean>builder()
 			.data(memberService.validateEmailDuplication(email))
 			.message("사용 가능한 이메일입니다.")
@@ -61,7 +61,7 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "이메일로 인증번호를 전송하였습니다.")
 	})
 	@PostMapping("/validation/send-email")
-	public ResponseHandler<String> sendEmailVerification(@Parameter(description = "이메일") @RequestParam String email) {
+	public ResponseHandler<String> sendEmailVerification(@RequestParam String email) {
 		return ResponseHandler.<String>builder()
 			.data(memberService.sendEmailVerification(email))
 			.message("이메일로 인증번호를 발송중이에요!")
@@ -74,8 +74,7 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "이메일 인증번호가 일치합니다.")
 	})
 	@PostMapping("/validation/confirm-email")
-	public ResponseHandler<Boolean> verifyAuthMail(@Parameter(description = "이메일") @RequestParam String email,
-												   @Parameter(description = "이메일 인증번호") @RequestParam String emailKey) {
+	public ResponseHandler<Boolean> verifyAuthMail(@RequestParam String email, @RequestParam String emailKey) {
 		return ResponseHandler.<Boolean>builder()
 			.data(memberService.verifyEmailAuthNumber(emailKey, email))
 			.message("인증번호가 확인되었습니다.")

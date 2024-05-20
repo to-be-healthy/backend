@@ -1,5 +1,5 @@
 -- 트레이너 등록
-insert into "member" ("member_id", "email", "user_id", "password", "name", "member_type") values (default, 'healthy-trainer0@gmail.com', 'healthy-trainer0', '$2a$10$V6d4NDg8UFC1ShndqbOysO2aaNnU.o7MeT2c0EBPw.ZXd3xoLICdS', 'healthy-trainer', 'TRAINER');
+insert into "member" ("member_id", "email", "user_id", "password", "name", "member_type", "created_at", "updated_at") values (default, 'healthy-trainer0@gmail.com', 'healthy-trainer0', '$2a$10$V6d4NDg8UFC1ShndqbOysO2aaNnU.o7MeT2c0EBPw.ZXd3xoLICdS', 'healthy-trainer', 'TRAINER', '2024-05-20T15:19:00.000', '2024-05-20T15:19:00.000');
 
 -- 학생 등록
 insert into "member" ("member_id", "email", "user_id", "password", "name", "member_type") values (default, 'healthy-student0@gmail.com', 'healthy-student0', '$2a$10$V6d4NDg8UFC1ShndqbOysO2aaNnU.o7MeT2c0EBPw.ZXd3xoLICdS', 'healthy-student', 'STUDENT');
