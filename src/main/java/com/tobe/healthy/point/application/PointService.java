@@ -90,8 +90,7 @@ public class PointService {
         pointRepository.save(Point.create(member, type, calculation, point));
     }
 
-    public PointDto getPoint(Member member, String searchDate, Pageable pageable) {
-        Long memberId = member.getId();
+    public PointDto getPoint(Long memberId, String searchDate, Pageable pageable) {
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         Page<Point> histories = pointRepository.getPoint(memberId, searchDate, pageable);

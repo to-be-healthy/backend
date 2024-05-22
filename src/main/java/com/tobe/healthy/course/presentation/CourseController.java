@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/course/v1")
-@Tag(name = "수강권 API", description = "수강권 API")
+@Tag(name = "08. 수강권 API", description = "수강권 API")
 @Slf4j
 public class CourseController {
 

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/diet/v1")
-@Tag(name = "식단 API", description = "식단 API")
+@Tag(name = "09. 식단 API", description = "식단 API")
 @Slf4j
 public class DietController {
 

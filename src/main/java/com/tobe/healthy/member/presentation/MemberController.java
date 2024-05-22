@@ -183,16 +183,31 @@ public class MemberController {
 				.build();
 	}
 
-	@Operation(summary = "학생의 포인트 조회", responses = {
+	@Operation(summary = "학생이 본인의 포인트 조회", responses = {
 			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
 			@ApiResponse(responseCode = "200", description = "포인트 및 히스토리를 반환한다.")
 	})
 	@GetMapping("/point")
-	public ResponseHandler<PointDto> getPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ResponseHandler<PointDto> getMyPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 											  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 											  Pageable pageable) {
 		return ResponseHandler.<PointDto>builder()
-				.data(pointService.getPoint(customMemberDetails.getMember(), searchDate, pageable))
+				.data(pointService.getPoint(customMemberDetails.getMember().getId(), searchDate, pageable))
+				.message("포인트가 조회되었습니다.")
+				.build();
+	}
+
+	@Operation(summary = "트레이너가 학생의 포인트 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "포인트 및 히스토리를 반환한다.")
+	})
+	@GetMapping("/{memberId}/point")
+	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
+	public ResponseHandler<PointDto> getPoint(@Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId,
+											  @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+											  Pageable pageable) {
+		return ResponseHandler.<PointDto>builder()
+				.data(pointService.getPoint(memberId, searchDate, pageable))
 				.message("포인트가 조회되었습니다.")
 				.build();
 	}
