@@ -45,7 +45,7 @@ public class DietService {
 
     public DietDto getDietCreatedAtToday(Long memberId) {
         Diet diet = dietRepository.getDietCreatedAtToday(memberId);
-        if (diet == null) return null;
+        if (diet == null) return new DietDto();
         List<Long> ids = List.of(diet.getDietId());
         return setDietFile(DietDto.from(diet), ids);
     }
