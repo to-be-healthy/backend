@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.tobe.healthy.diet.domain.entity.DietType.BREAKFAST;
@@ -21,6 +22,8 @@ public class DietDto {
     private MemberDto member;
     private Long likeCnt;
     private Long commentCnt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @Builder.Default
     private DietDetailDto breakfast = new DietDetailDto();
@@ -30,20 +33,14 @@ public class DietDto {
     private DietDetailDto dinner = new DietDetailDto();
 
 
-    public static DietDto create(Long dietId, List<DietFileDto> dietFiles) {
-        DietDto dto = DietDto.builder()
-                .dietId(dietId)
-                .build();
-        dto.setDietFiles(dietFiles);
-        return dto;
-    }
-
     public static DietDto from(Diet diet) {
         DietDto dto = DietDto.builder()
                 .dietId(diet.getDietId())
                 .member(MemberDto.from(diet.getMember()))
                 .likeCnt(diet.getLikeCnt())
                 .commentCnt(diet.getCommentCnt())
+                .createdAt(diet.getCreatedAt())
+                .updatedAt(diet.getUpdatedAt())
                 .build();
         dto.breakfast.setFast(diet.getFastBreakfast());
         dto.lunch.setFast(diet.getFastLunch());

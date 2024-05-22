@@ -1,6 +1,7 @@
 package com.tobe.healthy.diet.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -84,6 +85,12 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
         }
     }
 
+    public void changeFast(DietUpdateCommand command) {
+        this.changeFastBreakfast(command.isBreakfastFast());
+        this.changeFastLunch(command.isLunchFast());
+        this.changeFastDinner(command.isDinnerFast());
+    }
+
     public void changeFastBreakfast(boolean isFast){
         this.fastBreakfast = isFast;
     }
@@ -120,4 +127,5 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     public void updateCommentCnt(Long commentCnt) {
         this.commentCnt = commentCnt;
     }
+
 }

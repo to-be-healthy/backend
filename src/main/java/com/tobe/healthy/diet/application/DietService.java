@@ -1,12 +1,14 @@
 package com.tobe.healthy.diet.application;
 
 import com.tobe.healthy.common.CustomPaging;
+import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.DietFileDto;
 import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
 import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
 import com.tobe.healthy.diet.domain.entity.*;
+import com.tobe.healthy.diet.repository.DietFileRepository;
 import com.tobe.healthy.diet.repository.DietLikeRepository;
 import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.workout.application.FileService;
@@ -24,8 +26,10 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.diet.domain.entity.DietType.*;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
@@ -39,9 +43,11 @@ public class DietService {
 
     private final DietRepository dietRepository;
     private final DietLikeRepository dietLikeRepository;
+    private final DietFileRepository dietFileRepository;
     private final TrainerMemberMappingRepository mappingRepository;
     private final FileService fileService;
     private final MemberRepository memberRepository;
+    private final RedisService redisService;
 
     public DietDto getDietCreatedAtToday(Long memberId) {
         Diet diet = dietRepository.getDietCreatedAtToday(memberId);
@@ -138,20 +144,53 @@ public class DietService {
         Diet diet = dietRepository.findByDietIdAndMemberIdAndDelYnFalse(dietId, member.getId())
                 .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
 
-        diet.changeFastBreakfast(command.isBreakfastFast());
-        diet.changeFastLunch(command.isLunchFast());
-        diet.changeFastDinner(command.isDinnerFast());
+        diet.changeFast(command);
+        deleteOldFiles(diet, command);
 
-        diet.deleteFiles();
-        diet.getDietFiles().forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
-        if (!ObjectUtils.isEmpty(command.getBreakfastFile()))
-            fileService.uploadDietFile(diet, BREAKFAST, command.getBreakfastFile());
-        if (!ObjectUtils.isEmpty(command.getLunchFile()))
-            fileService.uploadDietFile(diet, LUNCH, command.getLunchFile());
-        if (!ObjectUtils.isEmpty(command.getDinnerFile()))
-            fileService.uploadDietFile(diet, DINNER, command.getDinnerFile());
+        //아침 파일
+        if (!command.isBreakfastFast() && !ObjectUtils.isEmpty(command.getBreakfastFile())){
+            dietFileRepository.save(DietFiles.create(diet, command.getBreakfastFile(), BREAKFAST));
+            redisService.deleteValues(TEMP_FILE_URI.getDescription() + command.getBreakfastFile());
+        }else{
+            List<DietFiles> files = diet.getDietFiles().stream().filter(f -> BREAKFAST.equals(f.getType())).toList();
+            if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(getFileName(files.get(0).getFileUrl()));
+        }
+
+        //점심 파일
+        if (!command.isLunchFast() && !ObjectUtils.isEmpty(command.getLunchFile())){
+            dietFileRepository.save(DietFiles.create(diet, command.getLunchFile(), LUNCH));
+            redisService.deleteValues(TEMP_FILE_URI.getDescription() + command.getLunchFile());
+        }else{
+            List<DietFiles> files = diet.getDietFiles().stream().filter(f -> LUNCH.equals(f.getType())).toList();
+            if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(getFileName(files.get(0).getFileUrl()));
+        }
+
+        //저녁 파일
+        if (!command.isDinnerFast() && !ObjectUtils.isEmpty(command.getDinnerFile())){
+            dietFileRepository.save(DietFiles.create(diet, command.getDinnerFile(), DINNER));
+            redisService.deleteValues(TEMP_FILE_URI.getDescription() + command.getDinnerFile());
+        }else{
+            List<DietFiles> files = diet.getDietFiles().stream().filter(f -> DINNER.equals(f.getType())).toList();
+            if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(getFileName(files.get(0).getFileUrl()));
+        }
 
         return setDietFile(DietDto.from(diet), List.of(diet.getDietId()));
+    }
+
+    private void deleteOldFiles(Diet diet, DietUpdateCommand command) {
+        Set<String> oldFileUrlSet = diet.getDietFiles().stream()
+                .filter(f -> !f.getDelYn())
+                .map(DietFiles::getFileUrl).collect(Collectors.toSet());
+        oldFileUrlSet.remove(command.getBreakfastFile());
+        oldFileUrlSet.remove(command.getLunchFile());
+        oldFileUrlSet.remove(command.getDinnerFile());
+        Set<DietFiles> deleteFilesSet = diet.getDietFiles().stream()
+                .filter(f -> oldFileUrlSet.contains(f.getFileUrl())).collect(Collectors.toSet());
+
+        diet.deleteFiles();
+        diet.getDietFiles().stream()
+                .filter(deleteFilesSet::contains)
+                .forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
     }
 
     public CustomPaging<DietDto> getDietMyTrainer(Long studentId, Pageable pageable, String searchDate) {

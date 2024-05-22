@@ -36,7 +36,7 @@ public class WorkoutHistoryController {
 
     @Operation(summary = "운동기록 첨부파일 등록", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-            @ApiResponse(responseCode = "200", description = "운동기록ID, 회원ID, 운동기록 내용을 반환한다.")
+            @ApiResponse(responseCode = "200", description = "파일 url을 반환한다.")
     })
     @PostMapping("/file")
     public ResponseHandler<List<RegisterFile>> addWorkoutHistoryFile(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,

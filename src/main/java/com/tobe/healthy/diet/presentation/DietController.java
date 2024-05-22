@@ -6,6 +6,8 @@ import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
 import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
+import com.tobe.healthy.workout.application.FileService;
+import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,15 +17,32 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/diet/v1")
+@RequestMapping("/diets/v1")
 @Tag(name = "09. 식단 API", description = "식단 API")
 @Slf4j
 public class DietController {
 
     private final DietService dietService;
+    private final FileService fileService;
+
+    @Operation(summary = "식단기록 첨부파일 등록", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "파일 url을 반환한다.")
+    })
+    @PostMapping("/file")
+    public ResponseHandler<List<RegisterFile>> addDietFile(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                     @Valid List<MultipartFile> files) {
+        return ResponseHandler.<List<RegisterFile>>builder()
+                .data(fileService.uploadFiles("diet", files, customMemberDetails.getMember()))
+                .message("첨부파일이 등록되었습니다.")
+                .build();
+    }
 
     @Operation(summary = "식단기록 등록", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
@@ -94,8 +113,8 @@ public class DietController {
     })
     @PatchMapping("/{dietId}")
     public ResponseHandler<DietDto> updateDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                   @Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
-                                                                   @Valid DietUpdateCommand command) {
+                                               @Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
+                                               @RequestBody @Valid DietUpdateCommand command) {
         return ResponseHandler.<DietDto>builder()
                 .data(dietService.updateDiet(customMemberDetails.getMember(), dietId, command))
                 .message("식단기록이 수정되었습니다.")

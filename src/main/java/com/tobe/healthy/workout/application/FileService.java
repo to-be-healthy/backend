@@ -92,8 +92,7 @@ public class FileService {
     public void uploadDietFile(Diet diet, DietType type, MultipartFile uploadFile) {
         if (!uploadFile.isEmpty()) {
             try {
-                String extension = Objects.requireNonNull(uploadFile.getOriginalFilename()).substring(uploadFile.getOriginalFilename().lastIndexOf("."));
-                String savedFileName = "diet/" + System.currentTimeMillis() + "-" + randomUUID() + extension;
+                String savedFileName = "diet/" + System.currentTimeMillis() + "-" + randomUUID();
 
                 ObjectMetadata objectMetadata = new ObjectMetadata();
                 objectMetadata.setContentLength(uploadFile.getSize());
