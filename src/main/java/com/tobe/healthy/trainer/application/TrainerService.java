@@ -33,6 +33,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -154,6 +155,17 @@ public class TrainerService {
     public void deleteStudentOfTrainer(Member trainer, Long memberId) {
         Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        CourseDto courseDto = courseService.getNowUsingCourse(memberId);
+
+        //수강권 횟수가 남아있는 경우 삭제 불가
+        if(courseDto != null){
+            if(isRemainLessonCnt(courseDto)) throw new CustomException(COURSE_ALREADY_EXISTS);
+            courseService.deleteCourse(trainer.getId(), courseDto.getCourseId());
+        }
         mappingRepository.deleteByTrainerIdAndMemberId(trainer.getId(), member.getId());
+    }
+
+    private boolean isRemainLessonCnt(CourseDto courseDto){
+        return courseDto.getCompletedLessonCnt()<courseDto.getTotalLessonCnt();
     }
 }
