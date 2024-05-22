@@ -51,7 +51,7 @@ public class CourseController {
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<Void> deleteCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                               @Parameter(description = "수강권 ID") @PathVariable("courseId") Long courseId) {
-        courseService.deleteCourse(customMemberDetails.getMember().getId(), courseId);
+        courseService.deleteCourseByTrainer(customMemberDetails.getMember().getId(), courseId);
         return ResponseHandler.<Void>builder()
                 .message("수강권이 삭제되었습니다.")
                 .build();

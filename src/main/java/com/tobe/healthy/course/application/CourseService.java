@@ -14,8 +14,14 @@ import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.point.domain.entity.Calculation;
+import com.tobe.healthy.schedule.application.CommonScheduleService;
+import com.tobe.healthy.schedule.application.StudentScheduleService;
+import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
+import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
+import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.repository.CommonScheduleRepository;
+import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +51,8 @@ public class CourseService {
     private final CourseHistoryRepository courseHistoryRepository;
     private final TrainerMemberMappingRepository mappingRepository;
     private final CommonScheduleRepository commonScheduleRepository;
+    private final StudentScheduleRepository studentScheduleRepository;
+    private final CommonScheduleService commonScheduleService;
 
     public void addCourse(Long trainerId, CourseAddCommand command) {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
@@ -62,6 +70,26 @@ public class CourseService {
     private void checkCourAlreadyExists(Long memberId) {
         Long cnt = courseRepository.countByMemberIdAndRemainLessonCntGreaterThan(memberId, 0);
         if(0 < cnt) throw new CustomException(COURSE_ALREADY_EXISTS);
+    }
+
+    public void deleteCourseByTrainer(Long trainerId, Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
+        Long memberId = course.getMember().getId();
+
+        //수업 진행 횟수가 1회이상이면 삭제 불가
+        Long completedLessonCnt = commonScheduleRepository.getCompletedLessonCnt(memberId, courseId);
+        if(0 < completedLessonCnt){
+            throw new CustomException(COURSE_IS_USING);
+        }else{
+            //해당 수강권으로 예약된 수업 조회
+            StudentScheduleCond searchCond = new StudentScheduleCond(null, null, null, courseId);
+            List<MyReservation> result = studentScheduleRepository.findAllMyReservation(memberId, searchCond);
+
+            //수업 취소
+            result.forEach(r -> commonScheduleService.cancelMemberSchedule(r.getScheduleId(), memberId));
+        }
+        deleteCourse(trainerId, courseId);
     }
 
     public void deleteCourse(Long trainerId, Long courseId) {

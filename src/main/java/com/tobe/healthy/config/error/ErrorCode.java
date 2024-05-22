@@ -38,6 +38,7 @@ public enum ErrorCode {
 	DATETIME_NOT_VALID(BAD_REQUEST, "C_019", "시작날짜와 종료날짜가 유효하지 않습니다."),
 	COURSE_ALREADY_EXISTS(BAD_REQUEST, "C_020", "잔여 수강권이 존재합니다."),
 	COURSE_NOT_FOUND(NOT_FOUND, "C_020", "수강권이 존재하지 않습니다."),
+	COURSE_IS_USING(BAD_REQUEST, "C_020", "사용중인 수강권은 삭제할 수 없습니다."),
 	LESSON_CNT_NOT_VALID(BAD_REQUEST, "C_020", "수강권 횟수가 유효하지 않습니다."),
 	LIKE_ALREADY_EXISTS(BAD_REQUEST, "C_020", "이미 좋아요 하였습니다."),
 

@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.QMember;
 import com.tobe.healthy.schedule.domain.dto.in.RetrieveTrainerScheduleByLessonInfo;
+import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
@@ -33,7 +34,7 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public List<ScheduleCommandResult> findAllSchedule(RetrieveTrainerScheduleByLessonInfo searchCond, Long trainerId, Member member) {
+	public List<ScheduleCommandResult> findAllSchedule(StudentScheduleCond searchCond, Long trainerId, Member member) {
 		List<Schedule> results = queryFactory
 				.select(schedule)
 				.from(schedule)
@@ -67,12 +68,12 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	}
 
 	@Override
-	public List<MyReservation> findAllMyReservation(Long memberId, RetrieveTrainerScheduleByLessonInfo searchCond) {
+	public List<MyReservation> findAllMyReservation(Long memberId, StudentScheduleCond searchCond) {
 		List<Schedule> schedules = queryFactory.select(schedule)
 				.from(schedule)
 				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.where(scheduleApplicantIdEq(memberId), lessonDateTimeAfterNow())
+				.where(scheduleApplicantIdEq(memberId), lessonDateTimeAfterNow(), lessonDtEq(searchCond), courseIdEq(searchCond))
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
 		return schedules.stream().map(MyReservation::from).collect(toList());
@@ -104,14 +105,14 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 		return schedule.delYn.isFalse();
 	}
 
-	private BooleanExpression lessonDtBetween(RetrieveTrainerScheduleByLessonInfo searchCond) {
+	private BooleanExpression lessonDtBetween(StudentScheduleCond searchCond) {
 		if (!ObjectUtils.isEmpty(searchCond.getLessonStartDt()) && !ObjectUtils.isEmpty(searchCond.getLessonEndDt())) {
 			return schedule.lessonDt.between(searchCond.getLessonStartDt(), searchCond.getLessonEndDt());
 		}
 		return null;
 	}
 
-	private BooleanExpression lessonDtEq(RetrieveTrainerScheduleByLessonInfo searchCond) {
+	private BooleanExpression lessonDtEq(StudentScheduleCond searchCond) {
 		if (!ObjectUtils.isEmpty(searchCond.getLessonDt())) {
 			StringExpression formattedDate = stringTemplate("DATE_FORMAT({0}, '%Y%m')", schedule.lessonDt);
 			return formattedDate.eq(searchCond.getLessonDt());
@@ -133,6 +134,13 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 
 	private BooleanExpression scheduleApplicantIdEq(Long memberId) {
 		return schedule.applicant.id.eq(memberId);
+	}
+
+	private Predicate courseIdEq(StudentScheduleCond searchCond) {
+		if (!ObjectUtils.isEmpty(searchCond.getCourseId())) {
+			return schedule.course.courseId.eq(searchCond.getCourseId());
+		}
+		return null;
 	}
 
 }
