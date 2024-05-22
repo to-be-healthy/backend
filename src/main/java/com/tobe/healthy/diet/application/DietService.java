@@ -95,7 +95,7 @@ public class DietService {
                     .forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
         }
 
-        if (!ObjectUtils.isEmpty(requestFile)) {
+        if (!command.isFast() && !ObjectUtils.isEmpty(requestFile)) {
             fileService.uploadDietFile(diet, requestType, requestFile);
         }
 
