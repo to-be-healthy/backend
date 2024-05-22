@@ -65,7 +65,7 @@ public class DietController {
     public ResponseHandler<DietDto> getDietDetail(@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
         return ResponseHandler.<DietDto>builder()
                 .data(dietService.getDietDetail(dietId))
-                .message("식단기록이 등록되었습니다.")
+                .message("식단기록이 조회되었습니다.")
                 .build();
     }
 

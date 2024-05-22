@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/diet/v1")
+@RequestMapping("/diets/v1")
 @Tag(name = "09-00. 식단기록 댓글 API", description = "식단기록 댓글 API")
 @Slf4j
 public class DietCommentController {
