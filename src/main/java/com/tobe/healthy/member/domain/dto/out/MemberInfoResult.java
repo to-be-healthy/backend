@@ -26,7 +26,9 @@ public class MemberInfoResult {
 	private GymDto gym;
 	private MemberType memberType;
 	private AlarmStatus pushAlarmStatus;
+	private AlarmStatus communityAlarmStatus;
 	private AlarmStatus feedbackAlarmStatus;
+	private AlarmStatus scheduleNoticeStatus;
 	private SocialType socialType;
 
 
@@ -41,7 +43,9 @@ public class MemberInfoResult {
 				.weight(member.getWeight())
 				.memberType(member.getMemberType())
 				.pushAlarmStatus(member.getPushAlarmStatus())
+				.communityAlarmStatus(member.getCommunityAlarmStatus())
 				.feedbackAlarmStatus(member.getFeedbackAlarmStatus())
+				.scheduleNoticeStatus(member.getScheduleNoticeStatus())
 				.socialType(member.getSocialType());
 
 		if(member.getMemberProfile() != null){

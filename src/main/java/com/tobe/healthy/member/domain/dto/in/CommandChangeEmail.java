@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class CommandChangeEmail {
     private String email;
-    private String authNumber;
+    private String emailKey;
 }
