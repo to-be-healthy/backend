@@ -4,8 +4,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.workout.domain.entity.Exercise;
 import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
-import com.tobe.healthy.workout.domain.entity.Instructions;
-import com.tobe.healthy.workout.domain.entity.PrimaryMuscle;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +14,6 @@ import org.springframework.util.ObjectUtils;
 import java.util.List;
 
 import static com.tobe.healthy.workout.domain.entity.QExercise.exercise;
-import static com.tobe.healthy.workout.domain.entity.QInstructions.instructions1;
 
 
 @Repository
@@ -26,16 +23,16 @@ public class ExerciseRepositoryCustomImpl implements ExerciseRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Exercise> getExercise(ExerciseCategory category, PrimaryMuscle primaryMuscle, Pageable pageable) {
+    public Page<Exercise> getExercise(ExerciseCategory exerciseCategory, Pageable pageable) {
         Long totalCnt = queryFactory
                 .select(exercise.count())
                 .from(exercise)
-                .where(categoryEq(category), primaryMuscleEq(primaryMuscle))
+                .where(exerciseCategoryEq(exerciseCategory))
                 .fetchOne();
         List<Exercise> exercises = queryFactory
                 .select(exercise)
                 .from(exercise)
-                .where(categoryEq(category), primaryMuscleEq(primaryMuscle))
+                .where(exerciseCategoryEq(exerciseCategory))
                 .groupBy(exercise.exerciseId)
                 .orderBy(exercise.exerciseId.asc())
                 .offset(pageable.getOffset())
@@ -44,26 +41,9 @@ public class ExerciseRepositoryCustomImpl implements ExerciseRepositoryCustom {
         return PageableExecutionUtils.getPage(exercises, pageable, ()-> totalCnt );
     }
 
-    @Override
-    public List<Instructions> getInstructions(List<Long> ids) {
-        return queryFactory
-                .select(instructions1)
-                .from(instructions1)
-                .where(instructions1.exerciseId.in(ids))
-                .orderBy(instructions1.exerciseId.asc())
-                .fetch();
-    }
-
-    private BooleanExpression categoryEq(ExerciseCategory category) {
+    private BooleanExpression exerciseCategoryEq(ExerciseCategory category) {
         if (!ObjectUtils.isEmpty(category)){
             return exercise.category.eq(category);
-        }
-        return null;
-    }
-
-    private BooleanExpression primaryMuscleEq(PrimaryMuscle primaryMuscle) {
-        if (!ObjectUtils.isEmpty(primaryMuscle)){
-            return exercise.primaryMuscle.eq(primaryMuscle);
         }
         return null;
     }

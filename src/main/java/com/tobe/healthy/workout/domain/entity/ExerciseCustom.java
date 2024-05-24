@@ -1,30 +1,28 @@
 package com.tobe.healthy.workout.domain.entity;
 
-import com.tobe.healthy.workout.domain.dto.ExerciseDto;
 import jakarta.persistence.*;
 import lombok.*;
 
 import static jakarta.persistence.EnumType.STRING;
 
 @Entity
-@Table(name = "exercise")
+@Table(name = "exercise_custom")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 @Getter
-public class Exercise {
+public class ExerciseCustom {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "exercise_id")
-    private Long exerciseId;
+    @Column(name = "exercise_custom_id")
+    private Long exerciseCustomId;
 
     private String names;
 
     @Enumerated(STRING)
     private ExerciseCategory category;
 
-    private String primaryMuscle;
-    private String secondaryMuscle;
+    private String muscles;
 
 }

@@ -1,11 +1,11 @@
 package com.tobe.healthy.workout.application;
 
+import com.tobe.healthy.common.CustomPaging;
+import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.ExerciseDto;
-import com.tobe.healthy.workout.domain.dto.InstructionsDto;
+import com.tobe.healthy.workout.domain.dto.in.CustomExerciseAddCommand;
 import com.tobe.healthy.workout.domain.entity.Exercise;
 import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
-import com.tobe.healthy.workout.domain.entity.Instructions;
-import com.tobe.healthy.workout.domain.entity.PrimaryMuscle;
 import com.tobe.healthy.workout.repository.ExerciseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -26,18 +25,11 @@ public class ExerciseService {
 
     private final ExerciseRepository exerciseRepository;
 
-    public List<ExerciseDto> getExercise(ExerciseCategory category, PrimaryMuscle primaryMuscle, Pageable pageable) {
-        Page<Exercise> exercises = exerciseRepository.getExercise(category, primaryMuscle, pageable);
-        List<ExerciseDto> exerciseDtos = exercises.map(ExerciseDto::from).stream().toList();
-        List<Long> ids = exerciseDtos.stream().map(ExerciseDto::getExerciseId).collect(Collectors.toList());
-        List<Instructions> instructions = exerciseRepository.getInstructions(ids);
-        return exerciseDtos.stream().map(e -> {
-            List<String> instStr = instructions.stream().map(InstructionsDto::from)
-                    .filter(i -> i.getExerciseId().equals(e.getExerciseId()))
-                    .map(InstructionsDto::getInstructions).collect(Collectors.toList());
-            e.setInstructions(instStr);
-            return e;
-        }).collect(Collectors.toList());
+    public CustomPaging<ExerciseDto> getExercise(Member member, ExerciseCategory exerciseCategory, Pageable pageable) {
+        Page<Exercise> exercises = exerciseRepository.getExercise(exerciseCategory, pageable);
+        List<ExerciseDto> content = exercises.map(ExerciseDto::from).stream().toList();
+        return new CustomPaging(content, exercises.getPageable().getPageNumber(),
+                exercises.getPageable().getPageSize(), exercises.getTotalPages(), exercises.getTotalElements(), exercises.isLast());
     }
 
 }

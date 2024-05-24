@@ -1,21 +1,23 @@
 package com.tobe.healthy.workout.presentation;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.workout.application.ExerciseService;
 import com.tobe.healthy.workout.domain.dto.ExerciseDto;
+import com.tobe.healthy.workout.domain.dto.in.CustomExerciseAddCommand;
+import com.tobe.healthy.workout.domain.dto.out.ExerciseCategoryDto;
 import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
-import com.tobe.healthy.workout.domain.entity.PrimaryMuscle;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,16 +30,28 @@ public class ExerciseController {
 
     private final ExerciseService exerciseService;
 
-    @Operation(summary = "운동 종류 조회", responses = {
+    @Operation(summary = "운동 카레고리 조회", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "운동 종류를 반환한다.")
+    })
+    @GetMapping("/category")
+    public ResponseHandler<List<ExerciseCategoryDto>> getExerciseCategory() {
+        return ResponseHandler.<List<ExerciseCategoryDto>>builder()
+                .data(ExerciseCategory.getCategoryList())
+                .message("운동 카테고리가 조회되었습니다.")
+                .build();
+    }
+
+    @Operation(summary = "운동 종류 목록 조회", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동 종류를 반환한다.")
     })
     @GetMapping
-    public ResponseHandler<List<ExerciseDto>> getExercise(@Parameter(description = "운동 카테고리") @RequestParam(required = false) ExerciseCategory category,
-                                                          @Parameter(description = "사용하는 근육") @RequestParam(required = false) PrimaryMuscle primaryMuscle,
-                                                          Pageable pageable) {
-        return ResponseHandler.<List<ExerciseDto>>builder()
-                .data(exerciseService.getExercise(category, primaryMuscle, pageable))
+    public ResponseHandler<CustomPaging<ExerciseDto>> getExercise(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                  @Parameter(description = "카테고리") @RequestParam(required = false) ExerciseCategory exerciseCategory,
+                                                                  Pageable pageable) {
+        return ResponseHandler.<CustomPaging<ExerciseDto>>builder()
+                .data(exerciseService.getExercise(customMemberDetails.getMember(), exerciseCategory, pageable))
                 .message("운동 종류가 조회되었습니다.")
                 .build();
     }
