@@ -37,8 +37,7 @@ class TrainerScheduleCommandService(
 ) {
 
     fun registerSchedule(request: CommandRegisterSchedule, trainerId: Long): CommandRegisterScheduleResult {
-        val trainer = memberRepository.findByIdOrNull(trainerId)
-            ?: throw CustomException(MEMBER_NOT_FOUND)
+        val trainer = findMemberById(trainerId)
 
         val findTrainerSchedule = trainerScheduleInfoRepository.findByTrainerId(trainerId)
             ?: throw CustomException(TRAINER_SCHEDULE_NOT_FOUND)
@@ -80,21 +79,36 @@ class TrainerScheduleCommandService(
                 continue
             }
 
-            val isDuplicateSchedule =
-                trainerScheduleRepository.validateRegisterSchedule(lessonDt, startTime, endTime, trainerId)
-
-            if (isDuplicateSchedule > 0) {
-                throw CustomException(SCHEDULE_ALREADY_EXISTS)
-            }
+            isScheduleExisting(lessonDt, startTime, endTime, trainerId)
 
             val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, AVAILABLE)
             schedules.add(schedule)
 
             startTime = endTime
         }
+
         trainerScheduleRepository.saveAll(schedules)
 
         return CommandRegisterScheduleResult.from(schedules, findTrainerSchedule)
+    }
+
+    private fun isScheduleExisting(
+        lessonDt: LocalDate,
+        startTime: LocalTime,
+        endTime: LocalTime,
+        trainerId: Long
+    ) {
+        val isDuplicateSchedule =
+            trainerScheduleRepository.validateRegisterSchedule(
+                lessonDt,
+                startTime,
+                endTime,
+                trainerId
+            )
+
+        if (isDuplicateSchedule > 0) {
+            throw CustomException(SCHEDULE_ALREADY_EXISTS)
+        }
     }
 
     fun updateReservationStatusToNoShow(reservationStatus: ReservationStatus, scheduleId: Long, trainerId: Long): ScheduleIdInfo {
@@ -145,8 +159,7 @@ class TrainerScheduleCommandService(
     }
 
     fun registerDefaultLessonTime(request: CommandRegisterDefaultLessonTime, trainerId: Long): CommandRegisterDefaultLessonTimeResult {
-        val findTrainer = memberRepository.findByIdOrNull(trainerId)
-            ?: throw CustomException(MEMBER_NOT_FOUND)
+        val findTrainer = findMemberById(trainerId)
 
         trainerScheduleInfoRepository.findByTrainerId(trainerId)?.let {
             it.changeDefaultLessonTime(request)
@@ -178,6 +191,9 @@ class TrainerScheduleCommandService(
 
         return CommandRegisterDefaultLessonTimeResult.from(request)
     }
+
+    private fun findMemberById(trainerId: Long) = (memberRepository.findByIdOrNull(trainerId)
+        ?: throw CustomException(MEMBER_NOT_FOUND))
 
     fun registerScheduleForStudent(scheduleId: Long, studentId: Long, trainerId: Long): CommandRegisterScheduleByStudentResult {
         val schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, AVAILABLE, trainerId)
