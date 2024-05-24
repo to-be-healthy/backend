@@ -1,4 +1,4 @@
-package com.tobe.healthy.workout.domain.entity;
+package com.tobe.healthy.workout.domain.entity.exercise;
 
 import com.tobe.healthy.common.enums.EnumMapperType;
 import com.tobe.healthy.workout.domain.dto.out.ExerciseCategoryDto;

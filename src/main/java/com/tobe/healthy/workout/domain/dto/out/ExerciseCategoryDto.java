@@ -1,6 +1,6 @@
 package com.tobe.healthy.workout.domain.dto.out;
 
-import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
+import com.tobe.healthy.workout.domain.entity.exercise.ExerciseCategory;
 import lombok.Builder;
 import lombok.Data;
 

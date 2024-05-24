@@ -1,4 +1,4 @@
-package com.tobe.healthy.workout.repository;
+package com.tobe.healthy.workout.repository.workoutHistory;
 
 
 public interface WorkoutHistoryLikeRepositoryCustom {

@@ -7,7 +7,7 @@ import com.tobe.healthy.workout.application.ExerciseService;
 import com.tobe.healthy.workout.domain.dto.ExerciseDto;
 import com.tobe.healthy.workout.domain.dto.in.CustomExerciseAddCommand;
 import com.tobe.healthy.workout.domain.dto.out.ExerciseCategoryDto;
-import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
+import com.tobe.healthy.workout.domain.entity.exercise.ExerciseCategory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -53,6 +53,32 @@ public class ExerciseController {
         return ResponseHandler.<CustomPaging<ExerciseDto>>builder()
                 .data(exerciseService.getExercise(customMemberDetails.getMember(), exerciseCategory, pageable))
                 .message("운동 종류가 조회되었습니다.")
+                .build();
+    }
+
+    @Operation(summary = "운동 종류 추가", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "운동 종류를 등록한다.")
+    })
+    @PostMapping
+    public ResponseHandler<Void> addExerciseCustom(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                        @Valid @RequestBody CustomExerciseAddCommand command) {
+        exerciseService.addExerciseCustom(customMemberDetails.getMember(), command);
+        return ResponseHandler.<Void>builder()
+                .message("운동 종류가 등록되었습니다.")
+                .build();
+    }
+
+    @Operation(summary = "운동 종류 삭제", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "운동 종류를 삭제한다.")
+    })
+    @DeleteMapping("{exerciseCustomId}")
+    public ResponseHandler<Void> deleteExerciseCustom(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                      @Parameter(description = "커스텀 운동종류 ID") @PathVariable("exerciseCustomId") Long exerciseCustomId) {
+        exerciseService.deleteExerciseCustom(customMemberDetails.getMember(), exerciseCustomId);
+        return ResponseHandler.<Void>builder()
+                .message("운동 종류가 삭제되었습니다.")
                 .build();
     }
 

@@ -1,7 +1,7 @@
-package com.tobe.healthy.workout.repository;
+package com.tobe.healthy.workout.repository.exercise;
 
-import com.tobe.healthy.workout.domain.entity.Exercise;
-import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
+import com.tobe.healthy.workout.domain.entity.exercise.Exercise;
+import com.tobe.healthy.workout.domain.entity.exercise.ExerciseCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

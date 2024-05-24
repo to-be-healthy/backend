@@ -1,6 +1,6 @@
-package com.tobe.healthy.workout.repository;
+package com.tobe.healthy.workout.repository.workoutHistory;
 
-import com.tobe.healthy.workout.domain.entity.CompletedExercise;
+import com.tobe.healthy.workout.domain.entity.workoutHistory.CompletedExercise;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

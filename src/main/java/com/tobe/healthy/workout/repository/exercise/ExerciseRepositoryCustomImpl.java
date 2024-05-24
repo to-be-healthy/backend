@@ -1,9 +1,9 @@
-package com.tobe.healthy.workout.repository;
+package com.tobe.healthy.workout.repository.exercise;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.workout.domain.entity.Exercise;
-import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
+import com.tobe.healthy.workout.domain.entity.exercise.Exercise;
+import com.tobe.healthy.workout.domain.entity.exercise.ExerciseCategory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +13,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
-import static com.tobe.healthy.workout.domain.entity.QExercise.exercise;
+import static com.tobe.healthy.workout.domain.entity.exercise.QExercise.exercise;
 
 
 @Repository

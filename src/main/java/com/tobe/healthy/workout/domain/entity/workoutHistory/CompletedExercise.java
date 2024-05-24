@@ -1,4 +1,4 @@
-package com.tobe.healthy.workout.domain.entity;
+package com.tobe.healthy.workout.domain.entity.workoutHistory;
 
 import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
 import jakarta.persistence.*;

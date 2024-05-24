@@ -1,7 +1,7 @@
-package com.tobe.healthy.workout.repository;
+package com.tobe.healthy.workout.repository.workoutHistory;
 
-import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistoryComment;
+import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistory;
+import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryComment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
