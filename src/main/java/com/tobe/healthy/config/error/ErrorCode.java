@@ -30,7 +30,7 @@ public enum ErrorCode {
 	SCHEDULE_NOT_FOUND(NOT_FOUND, "C_015", "일정을 찾을 수 없습니다."),
 	COMMENT_NOT_FOUND(NOT_FOUND, "C_016", "댓글이 존재하지 않습니다."),
 	SCHEDULE_WAITING_NOT_FOUND(NOT_FOUND, "C_016", "대기한 일정을 찾을 수 없습니다."),
-	NOT_MATCH_PASSWORD(BAD_REQUEST, "C_017", "확인 비밀번호가 일치하지 않습니다."),
+	NOT_MATCH_PASSWORD(BAD_REQUEST, "C_017", "변경할 비밀번호가 일치하지 않습니다."),
 	INVITE_LINK_NOT_FOUND(NOT_FOUND, "C_018", "초대링크를 찾을 수 없습니다."),
 	INVITE_NAME_NOT_VALID(BAD_REQUEST, "C_019", "초대회원 이름이 유효하지 않습니다."),
 	EXERCISE_NOT_FOUND(NOT_FOUND, "C_020", "해당 운동이 존재하지 않습니다."),

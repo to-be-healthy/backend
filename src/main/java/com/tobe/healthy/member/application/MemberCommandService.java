@@ -49,9 +49,8 @@ public class MemberCommandService {
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
-    public String deleteMember(String password, Long memberId) {
+    public String deleteMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .filter(m -> passwordEncoder.matches(password, m.getPassword()))
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         member.deleteMember();
         mappingRepository.deleteByMemberId(memberId);
@@ -59,19 +58,19 @@ public class MemberCommandService {
     }
 
     public boolean changePassword(CommandChangeMemberPassword request, Long memberId) {
-        if (!request.getCurrPassword1().equals(request.getCurrPassword2())) {
+        if (!request.getChangePassword1().equals(request.getChangePassword2())) {
             throw new CustomException(NOT_MATCH_PASSWORD);
         }
 
-        if (Utils.validatePassword(request.getChangePassword())) {
+        if (Utils.validatePassword(request.getChangePassword1())) {
             throw new CustomException(PASSWORD_POLICY_VIOLATION);
         }
 
         Member member = memberRepository.findById(memberId)
-                .filter(m -> passwordEncoder.matches(request.getCurrPassword1(), m.getPassword()))
+                .filter(m -> passwordEncoder.matches(request.getCurrPassword(), m.getPassword()))
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-        String password = passwordEncoder.encode(request.getChangePassword());
+        String password = passwordEncoder.encode(request.getChangePassword1());
 
         member.changePassword(password);
 
@@ -163,12 +162,13 @@ public class MemberCommandService {
 
         String value = redisService.getValues(request.getEmail());
 
-        if (isEmpty(value) || !value.equals(request.getAuthNumber())) {
+        if (isEmpty(value) || !value.equals(request.getEmailKey())) {
             throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
         }
 
         findMember.changeEmail(request.getEmail());
         redisService.deleteValues(request.getEmail());
+
         return true;
     }
 
