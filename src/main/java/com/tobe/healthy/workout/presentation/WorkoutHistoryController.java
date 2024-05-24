@@ -40,9 +40,9 @@ public class WorkoutHistoryController {
     })
     @PostMapping("/file")
     public ResponseHandler<List<RegisterFile>> addWorkoutHistoryFile(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                    @Valid List<MultipartFile> files) {
+                                                                    @Valid List<MultipartFile> uploadFiles) {
         return ResponseHandler.<List<RegisterFile>>builder()
-                .data(fileService.uploadFiles("workout-history", files, customMemberDetails.getMember()))
+                .data(fileService.uploadFiles("workout-history", uploadFiles, customMemberDetails.getMember()))
                 .message("첨부파일이 등록되었습니다.")
                 .build();
     }

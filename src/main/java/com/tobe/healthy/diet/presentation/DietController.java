@@ -37,9 +37,9 @@ public class DietController {
     })
     @PostMapping("/file")
     public ResponseHandler<List<RegisterFile>> addDietFile(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                     @Valid List<MultipartFile> files) {
+                                                                     @Valid List<MultipartFile> uploadFiles) {
         return ResponseHandler.<List<RegisterFile>>builder()
-                .data(fileService.uploadFiles("diet", files, customMemberDetails.getMember()))
+                .data(fileService.uploadFiles("diet", uploadFiles, customMemberDetails.getMember()))
                 .message("첨부파일이 등록되었습니다.")
                 .build();
     }
