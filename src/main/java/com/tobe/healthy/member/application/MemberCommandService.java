@@ -1,5 +1,18 @@
 package com.tobe.healthy.member.application;
 
+import static com.tobe.healthy.common.Utils.createFileName;
+import static com.tobe.healthy.common.Utils.createObjectMetadata;
+import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
+import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_LENGTH_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_NOT_VALID;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_MAPPED;
+import static com.tobe.healthy.config.error.ErrorCode.NOT_MATCH_PASSWORD;
+import static com.tobe.healthy.config.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
+import static io.micrometer.common.util.StringUtils.isEmpty;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.tobe.healthy.common.Utils;
@@ -17,6 +30,8 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
+import java.io.IOException;
+import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,14 +40,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import static com.tobe.healthy.common.Utils.createFileName;
-import static com.tobe.healthy.common.Utils.createObjectMetadata;
-import static com.tobe.healthy.config.error.ErrorCode.*;
-import static io.micrometer.common.util.StringUtils.isEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -67,8 +74,7 @@ public class MemberCommandService {
         }
 
         Member member = memberRepository.findById(memberId)
-                .filter(m -> passwordEncoder.matches(request.getCurrPassword(), m.getPassword()))
-                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         String password = passwordEncoder.encode(request.getChangePassword1());
 

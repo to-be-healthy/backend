@@ -30,7 +30,9 @@ class PushCommandService(
         val findMember = memberRepository.findByIdOrNull(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
-        memberTokenRepository.findByMemberId(findMember.id)?.changeToken(request.token) ?: let {
+        memberTokenRepository.findByMemberId(findMember.id)?.let {
+            it.changeToken(request.token)
+        } ?: let {
             val memberToken = MemberToken.register(findMember, request.token)
             memberTokenRepository.save(memberToken)
         }

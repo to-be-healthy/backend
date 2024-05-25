@@ -1,7 +1,5 @@
 package com.tobe.healthy.schedule.application
 
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.TRAINER_SCHEDULE_NOT_FOUND
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerDefaultLessonTimeResult
@@ -18,9 +16,9 @@ class TrainerScheduleService(
     private val trainerScheduleRepository: TrainerScheduleRepository,
     private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository
 ) {
-    fun findDefaultLessonTime(trainerId: Long): RetrieveTrainerDefaultLessonTimeResult {
+    fun findDefaultLessonTime(trainerId: Long): RetrieveTrainerDefaultLessonTimeResult? {
         val trainerScheduleInfo = trainerScheduleInfoRepository.findByTrainerId(trainerId)
-            ?: throw CustomException(TRAINER_SCHEDULE_NOT_FOUND)
+            ?: return null
         return RetrieveTrainerDefaultLessonTimeResult.from(trainerScheduleInfo)
     }
 

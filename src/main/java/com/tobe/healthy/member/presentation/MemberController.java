@@ -27,6 +27,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -222,5 +224,18 @@ public class MemberController {
 				.data(memberService.getTrainerMapping(customMemberDetails.getMember()))
 				.message("매핑 여부가 조회되었습니다.")
 				.build();
+	}
+
+	@Operation(summary = "회원이 현재 비밀번호를 검증한다.",
+		responses = {
+			@ApiResponse(responseCode = "404", description = "현재 비밀번호가 일치하지 않습니다."),
+			@ApiResponse(responseCode = "200", description = "현재 비밀번호가 확인되었습니다.")
+		})
+	@PostMapping("/password")
+	public ResponseHandler<Long> validateCurrentPassword(@RequestBody String password, @AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<Long>builder()
+			.data(memberService.validateCurrentPassword(password, member.getMemberId()))
+			.message("비밀번호가 확인되었습니다.")
+			.build();
 	}
 }

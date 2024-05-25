@@ -101,6 +101,55 @@ class TrainerScheduleRepositoryImpl(
         }
     }
 
+    override fun findOneTrainerTodaySchedule(trainerId: Long): RetrieveTrainerScheduleByLessonDtResult? {
+        val results = queryFactory
+            .select(schedule)
+            .from(schedule)
+            .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
+            .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
+            .where(
+                schedule.lessonDt.eq(LocalDate.now()),
+                trainerIdEq(trainerId),
+                reservationStatusEq(COMPLETED),
+                delYnEq(false)
+            )
+            .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+            .fetch()
+
+        val scheduleCount = queryFactory
+            .select(schedule.count())
+            .from(schedule)
+            .where(
+                schedule.lessonDt.eq(LocalDate.now()),
+                trainerIdEq(trainerId),
+                reservationStatusEq(COMPLETED),
+                delYnEq(false)
+            )
+            .fetchOne()
+
+
+        val response = RetrieveTrainerScheduleByLessonInfoResult.from(results)
+
+        response.let {
+            val trainerTodaySchedule = RetrieveTrainerScheduleByLessonDtResult(
+                trainerName = response.trainerName,
+                scheduleTotalCount = scheduleCount!!,
+            )
+
+            response.schedule.forEach { (key) ->
+                response.schedule[key]?.filter {
+                    if (it?.lessonStartTime?.isBefore(LocalTime.now()) == true) {
+                        trainerTodaySchedule.before.add(it)
+                    } else {
+                        trainerTodaySchedule.after.add(it)
+                    }
+                }
+            }
+            return trainerTodaySchedule
+
+        }
+    }
+
     override fun findAvailableRegisterSchedule(request: CommandRegisterIndividualSchedule, trainerId: Long): Schedule? {
         return queryFactory
             .select(schedule)
