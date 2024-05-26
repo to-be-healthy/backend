@@ -6,4 +6,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface CourseHistoryRepositoryCustom {
     Page<CourseHistory> getCourseHistory(Long memberId, Long trainerId, Pageable pageable, String searchDate);
+    Long checkPaidOneLesson(Long trainerId, String searchDate);
+
 }

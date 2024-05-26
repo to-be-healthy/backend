@@ -3,6 +3,7 @@ package com.tobe.healthy.home.application;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
+import com.tobe.healthy.course.repository.CourseHistoryRepository;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
@@ -48,6 +49,7 @@ public class HomeService {
     private final TrainerScheduleRepository trainerScheduleRepository;
     private final MemberRepository memberRepository;
     private final CourseService courseService;
+    private final CourseHistoryRepository courseHistoryRepository;
 
     public StudentHomeResult getStudentHome(Long memberId) {
         //헬스장 정보
@@ -93,13 +95,17 @@ public class HomeService {
     public TrainerHomeResult getTrainerHome(RetrieveTrainerScheduleByLessonDt request, Long trainerId) {
         long mappingStudentCount = mappingRepository.countByTrainerId(trainerId);
 
-        // 우수회원 추가 필요
-        List<MemberInTeamResult> bestStudents = memberRepository.getBestStudent(trainerId);
+        // 우수회원
+        List<MemberInTeamResult> bestStudents = null;
+        Long paidCnt = courseHistoryRepository.checkPaidOneLesson(trainerId, getNowMonth());
+        if(paidCnt.intValue() == 0){
+            bestStudents = memberRepository.getBestStudent(trainerId);
 
-        //수강권
-        for (MemberInTeamResult bestStudent : bestStudents) {
-            CourseDto usingCourse = courseService.getNowUsingCourse(bestStudent.getMemberId());
-            bestStudent.setCourseId(usingCourse == null ? null : usingCourse.getCourseId());
+            //수강권
+            for (MemberInTeamResult bestStudent : bestStudents) {
+                CourseDto usingCourse = courseService.getNowUsingCourse(bestStudent.getMemberId());
+                bestStudent.setCourseId(usingCourse == null ? null : usingCourse.getCourseId());
+            }
         }
 
         RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId);

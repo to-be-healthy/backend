@@ -6,7 +6,9 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.course.domain.entity.CourseHistory;
+import com.tobe.healthy.course.domain.entity.CourseHistoryType;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -15,6 +17,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
+import static com.tobe.healthy.course.domain.entity.CourseHistoryType.ONE_LESSON;
 import static com.tobe.healthy.course.domain.entity.QCourse.course;
 import static com.tobe.healthy.course.domain.entity.QCourseHistory.courseHistory;
 
@@ -42,6 +45,22 @@ public class CourseHistoryRepositoryCustomImpl implements CourseHistoryRepositor
                 .limit(pageable.getPageSize())
                 .fetch();
         return PageableExecutionUtils.getPage(courseHistories, pageable, ()-> totalCnt );
+    }
+
+    @Override
+    public Long checkPaidOneLesson(Long trainerId, String searchDate) {
+        return queryFactory
+                .select(courseHistory.count())
+                .from(courseHistory)
+                .where(courseTrainerIdEq(trainerId), convertDateFormat(searchDate), typeEq(ONE_LESSON))
+                .fetchOne();
+    }
+
+    private BooleanExpression typeEq(CourseHistoryType type) {
+        if(!ObjectUtils.isEmpty(type)){
+            return courseHistory.type.eq(type);
+        }
+        return null;
     }
 
     private BooleanExpression courseMemberIdEq(Long memberId) {
