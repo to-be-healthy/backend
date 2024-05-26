@@ -50,7 +50,7 @@ public class DietController {
     })
     @PostMapping
     public ResponseHandler<DietDto> addDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                      @Valid DietAddCommand command) {
+                                                      @Valid @RequestBody DietAddCommand command) {
         return ResponseHandler.<DietDto>builder()
                 .data(dietService.addDiet(customMemberDetails.getMember(), command))
                 .message("식단기록이 등록되었습니다.")

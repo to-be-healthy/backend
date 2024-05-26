@@ -86,7 +86,7 @@ public class DietService {
     public DietDto addDiet(Member member, DietAddCommand command) {
         Long memberId = member.getId();
         DietType requestType = command.getType();
-        MultipartFile requestFile = command.getFile();
+        String requestFileUrl = command.getFile();
 
         Diet diet = dietRepository.findTop1ByCreateAtToday(memberId);
 
@@ -101,8 +101,9 @@ public class DietService {
                     .forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
         }
 
-        if (!command.isFast() && !ObjectUtils.isEmpty(requestFile)) {
-            fileService.uploadDietFile(diet, requestType, requestFile);
+        if (!command.isFast() && !ObjectUtils.isEmpty(requestFileUrl)){
+            dietFileRepository.save(DietFiles.create(diet, requestFileUrl, command.getType()));
+            redisService.deleteValues(TEMP_FILE_URI.getDescription() + requestFileUrl);
         }
 
         diet.changeFast(command.getType(), command.isFast());

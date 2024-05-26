@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class DietAddCommand {
 
     private DietType type;
-    private MultipartFile file;
+    private String file;
     private boolean fast;
 
 }
