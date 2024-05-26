@@ -15,6 +15,7 @@ public class MemberInTeamResult {
 	private int remainLessonCnt;
 	private String nickName;
 	private String fileUrl;
+	private Long courseId;
 
 	@QueryProjection
 	public MemberInTeamResult(Long memberId, String name, String userId, String email, int ranking, int lessonCnt, int remainLessonCnt, String nickName, String fileUrl) {

@@ -40,7 +40,6 @@ import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 @Transactional
 @Slf4j
 public class HomeService {
-    private final CourseRepository courseRepository;
     private final PointRepository pointRepository;
     private final StudentScheduleRepository studentScheduleRepository;
     private final LessonHistoryRepository lessonHistoryRepository;
@@ -96,6 +95,12 @@ public class HomeService {
 
         // 우수회원 추가 필요
         List<MemberInTeamResult> bestStudents = memberRepository.getBestStudent(trainerId);
+
+        //수강권
+        for (MemberInTeamResult bestStudent : bestStudents) {
+            CourseDto usingCourse = courseService.getNowUsingCourse(bestStudent.getMemberId());
+            bestStudent.setCourseId(usingCourse == null ? null : usingCourse.getCourseId());
+        }
 
         RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId);
 
