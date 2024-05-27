@@ -10,7 +10,7 @@ data class RetrieveTrainerDefaultLessonTimeResult(
     val lunchStartTime: String? = null,
     val lunchEndTime: String? = null,
     val lessonTime: Int,
-    val closedDays: MutableList<DayOfWeek> = mutableListOf()
+    val closedDays: MutableList<DayOfWeek?> = mutableListOf()
 ) {
     companion object {
         fun from(trainerScheduleInfo: TrainerScheduleInfo) : RetrieveTrainerDefaultLessonTimeResult {

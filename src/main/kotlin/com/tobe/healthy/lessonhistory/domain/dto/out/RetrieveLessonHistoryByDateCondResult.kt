@@ -13,51 +13,37 @@ import java.util.*
 
 @Schema(description = "수업 일지")
 data class RetrieveLessonHistoryByDateCondResult(
-    @Schema(description = "수업 일지 ID", example = "1")
     val id: Long?,
-    @Schema(description = "수업 일지 제목", example = "홍길동님 수업 일지입니다!")
-    val title: String,
-    @Schema(description = "수업 일지 내용", example = "오늘도 고생하셨습니다^^ 처음보다~")
-    val content: String,
-    @Schema(description = "수업 일지 총 댓글 수", example = "30")
-    val commentTotalCount: Int,
-    @Schema(description = "수업 일지 등록일")
-    val createdAt: LocalDateTime,
-    @Schema(description = "수업 일지 대상 학생", example = "아무개")
+    val title: String?,
+    val content: String?,
+    val commentTotalCount: Int?,
+    val createdAt: LocalDateTime?,
     val student: String?,
-    @Schema(description = "수업 일지 작성한 트레이너", example = "홍길동")
     val trainer: String?,
-    @Schema(description = "일정 ID", example = "1")
     val scheduleId: Long?,
-    @Schema(description = "수업 일자", example = "yy:mm:dd")
     val lessonDt: String?,
-    @Schema(description = "수업 시간", example = "10:00 ~ 10:50")
     val lessonTime: String?,
-    @Schema(description = "수업 참석 여부", example = "참석/미참석")
     val attendanceStatus: String?,
-    @Schema(description = "수업 일지 첨부파일")
     val files: MutableList<LessonHistoryFileResults> = mutableListOf(),
 ) {
 
     companion object {
         fun from(entity: LessonHistory?): RetrieveLessonHistoryByDateCondResult? {
-            entity?.let {
-                return RetrieveLessonHistoryByDateCondResult(
-                    id = entity?.id,
-                    title = entity.title,
-                    content = entity.content,
-                    commentTotalCount = entity.lessonHistoryComment.count(),
-                    createdAt = entity.createdAt,
-                    student = entity.student?.name,
-                    trainer = "${entity.trainer?.name} 트레이너",
-                    scheduleId = entity.schedule?.id,
-                    lessonDt = formatLessonDt(entity.schedule?.lessonDt),
-                    lessonTime = formatLessonTime(entity.schedule?.lessonStartTime, entity.schedule?.lessonEndTime),
-                    attendanceStatus = validateAttendanceStatus(entity.schedule?.lessonDt, entity.schedule?.lessonEndTime),
-                    files = entity.file.map {LessonHistoryFileResults.from(it) }.sortedBy { it.fileOrder }
-                        .toMutableList(),
-                )
-            } ?: return null
+            return RetrieveLessonHistoryByDateCondResult(
+                id = entity?.id,
+                title = entity?.title,
+                content = entity?.content,
+                commentTotalCount = entity?.lessonHistoryComment?.count(),
+                createdAt = entity?.createdAt,
+                student = entity?.student?.name,
+                trainer = "${entity?.trainer?.name} 트레이너",
+                scheduleId = entity?.schedule?.id,
+                lessonDt = formatLessonDt(entity?.schedule?.lessonDt),
+                lessonTime = formatLessonTime(entity?.schedule?.lessonStartTime, entity?.schedule?.lessonEndTime),
+                attendanceStatus = validateAttendanceStatus(entity?.schedule?.lessonDt, entity?.schedule?.lessonEndTime),
+                files = entity?.file?.map { LessonHistoryFileResults.from(it) }?.sortedBy { it.fileOrder }
+                    ?.toMutableList() ?: mutableListOf()
+            )
         }
 
         private fun validateAttendanceStatus(lessonDt: LocalDate?, lessonEndTime: LocalTime?): String? {

@@ -16,7 +16,7 @@ class TrainerScheduleClosedDaysInfo(
     val trainerScheduleInfo: TrainerScheduleInfo? = null,
 
     @Enumerated(STRING)
-    var closedDays: DayOfWeek,
+    var closedDays: DayOfWeek? = null,
 
     @Id
     @GeneratedValue(strategy = IDENTITY)

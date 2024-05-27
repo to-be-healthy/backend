@@ -12,6 +12,7 @@ import java.util.*
 data class RetrieveUnwrittenLessonHistory(
     val scheduleId: Long,
     val studentId: Long,
+    val studentName: String?,
     val lessonDt: String,
     val lessonTime: String,
     val reservationStatus: String
@@ -21,6 +22,7 @@ data class RetrieveUnwrittenLessonHistory(
             return RetrieveUnwrittenLessonHistory(
                 scheduleId = schedule.id,
                 studentId = schedule.applicant!!.id,
+                studentName = schedule.applicant?.name,
                 lessonDt = formatLessonDt(schedule.lessonDt),
                 lessonTime = formatLessonTime(schedule.lessonStartTime, schedule.lessonEndTime),
                 reservationStatus = formatReservationStatus(schedule.reservationStatus)
