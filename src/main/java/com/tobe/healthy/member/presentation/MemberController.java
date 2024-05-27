@@ -8,6 +8,7 @@ import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.member.application.MemberService;
+import com.tobe.healthy.member.domain.dto.in.ValidateCurrentPassword;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.dto.out.TrainerMappingResult;
 import com.tobe.healthy.point.application.PointService;
@@ -25,12 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -232,9 +228,9 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "현재 비밀번호가 확인되었습니다.")
 		})
 	@PostMapping("/password")
-	public ResponseHandler<Long> validateCurrentPassword(@RequestBody String password, @AuthenticationPrincipal CustomMemberDetails member) {
+	public ResponseHandler<Long> validateCurrentPassword(@RequestBody ValidateCurrentPassword request, @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Long>builder()
-			.data(memberService.validateCurrentPassword(password, member.getMemberId()))
+			.data(memberService.validateCurrentPassword(request, member.getMemberId()))
 			.message("비밀번호가 확인되었습니다.")
 			.build();
 	}

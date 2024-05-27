@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.redis.RedisKeyPrefix;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
 import com.tobe.healthy.member.domain.dto.in.RetrieveMemberId;
 import com.tobe.healthy.member.domain.dto.in.RetrieveMemberId.FindMemberIdResult;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
@@ -42,8 +43,8 @@ public class MemberAuthService {
         return true;
     }
 
-    public Boolean validateEmailDuplication(String email) {
-        memberRepository.findByEmail(email).ifPresent(m -> {
+    public Boolean validateEmailDuplication(CommandValidateEmail request) {
+        memberRepository.findByEmail(request.getEmail()).ifPresent(m -> {
             throw new CustomException(MEMBER_EMAIL_DUPLICATION);
         });
         return true;

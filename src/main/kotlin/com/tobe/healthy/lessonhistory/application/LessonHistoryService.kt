@@ -6,9 +6,11 @@ import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDateCond
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
+import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveUnwrittenLessonHistory
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.repository.MemberRepository
+import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 class LessonHistoryService(
     private val lessonHistoryRepository: LessonHistoryRepository,
     private val memberRepository: MemberRepository,
+    private val trainerScheduleRepository: TrainerScheduleRepository
 ) {
 
     fun findAllLessonHistory(
@@ -65,5 +68,10 @@ class LessonHistoryService(
         memberType: MemberType
     ): RetrieveLessonHistoryDetailResult? {
         return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, memberId, memberType)
+    }
+
+    fun findAllUnwrittenLessonHistory(memberId: Long): List<RetrieveUnwrittenLessonHistory> {
+        val schedules = trainerScheduleRepository.findAllUnwrittenLessonHistory(memberId)
+        return schedules.map { RetrieveUnwrittenLessonHistory.from(it) }
     }
 }

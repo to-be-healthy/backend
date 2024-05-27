@@ -7,6 +7,7 @@ import com.tobe.healthy.lessonhistory.application.LessonHistoryService
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDateCond
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
+import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveUnwrittenLessonHistory
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -69,6 +70,18 @@ class LessonHistoryController(
         return ApiResultResponse(
             message = "수업 일지 단건을 조회하였습니다.",
             data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member.memberId, member.memberType)
+        )
+    }
+
+    @Operation(summary = "수업일지를 작성하지 않은 수업들을 조회하였습니다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "수업일지를 작성하지 않은 수업들을 조회하였습니다."),
+        ])
+    @GetMapping("/unwritten")
+    fun findAllUnwrittenLessonHistory(@AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<List<RetrieveUnwrittenLessonHistory>> {
+        return ApiResultResponse(
+            message = "수업일지를 작성하지 않은 수업들을 조회하였습니다.",
+            data = lessonHistoryService.findAllUnwrittenLessonHistory(member.memberId)
         )
     }
 }

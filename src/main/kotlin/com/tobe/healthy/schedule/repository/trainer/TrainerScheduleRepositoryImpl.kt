@@ -3,6 +3,7 @@ package com.tobe.healthy.schedule.repository.trainer
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
+import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistory.lessonHistory
 import com.tobe.healthy.member.domain.entity.QMember
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterIndividualSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
@@ -12,8 +13,7 @@ import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonI
 import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
 import com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.DISABLED
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus.*
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
@@ -35,8 +35,7 @@ class TrainerScheduleRepositoryImpl(
             .from(schedule)
             .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
             .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
-            .leftJoin(schedule.scheduleWaiting, scheduleWaiting)
-            .on(scheduleWaitingDelYnEq(false))
+            .leftJoin(schedule.scheduleWaiting, scheduleWaiting).on(scheduleWaitingDelYnEq(false))
             .where(
                 lessonDtMonthEq(retrieveTrainerScheduleByLessonInfo.lessonDt),
                 lessonDtBetween(retrieveTrainerScheduleByLessonInfo.lessonStartDt, retrieveTrainerScheduleByLessonInfo.lessonEndDt),
@@ -61,7 +60,6 @@ class TrainerScheduleRepositoryImpl(
             .where(
                 lessonDtEq(queryTrainerSchedule.lessonDt),
                 trainerIdEq(trainerId),
-                reservationStatusEq(COMPLETED),
                 delYnEq(false)
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
@@ -73,7 +71,6 @@ class TrainerScheduleRepositoryImpl(
             .where(
                 lessonDtEq(queryTrainerSchedule.lessonDt),
                 trainerIdEq(trainerId),
-                reservationStatusEq(COMPLETED),
                 delYnEq(false)
             )
             .fetchOne()
@@ -155,7 +152,7 @@ class TrainerScheduleRepositoryImpl(
             .select(schedule)
             .from(schedule)
             .where(
-                lessonDtMonthEq(request),
+                lessonDtMonthEq(request.lessonDt),
                 lessonStartDtBefore(request.lessonEndTime),
                 lessonEndDtAfter(request.lessonStartTime),
                 trainerIdEq(trainerId),
@@ -216,10 +213,14 @@ class TrainerScheduleRepositoryImpl(
     }
 
     override fun findScheduleByTrainerId(scheduleId: Long, trainerId: Long): Schedule? {
-        return queryFactory.select(schedule).from(schedule)
+        return queryFactory
+            .select(schedule)
+            .from(schedule)
+            .leftJoin(schedule.scheduleWaiting).fetchJoin()
             .where(
                 scheduleIdEq(scheduleId),
                 trainerIdEq(trainerId),
+                reservationStatusEq(COMPLETED),
                 delYnEq(false)
             )
             .fetchOne()
@@ -249,6 +250,20 @@ class TrainerScheduleRepositoryImpl(
             .fetch()
     }
 
+    override fun findAllUnwrittenLessonHistory(memberId: Long): List<Schedule> {
+        return queryFactory
+            .select(schedule)
+            .from(schedule)
+            .leftJoin(schedule.lessonHistories, lessonHistory).fetchJoin()
+            .where(
+                trainerIdEq(memberId),
+                lessonHistory.isNull,
+                schedule.reservationStatus.`in`(COMPLETED, NO_SHOW),
+                delYnEq(false)
+            )
+            .fetch()
+    }
+
     private fun lessonEndDtAfter(startTime: LocalTime?): BooleanExpression? =
         schedule.lessonEndTime.after(startTime)
 
@@ -257,9 +272,6 @@ class TrainerScheduleRepositoryImpl(
 
     private fun scheduleWaitingDelYnEq(boolean: Boolean): BooleanExpression? =
         scheduleWaiting.delYn.eq(boolean)
-
-    private fun lessonDtMonthEq(request: CommandRegisterIndividualSchedule): BooleanExpression? =
-        schedule.lessonDt.eq(request.lessonDt)
 
     private fun lessonDtMonthEq(lessonDt: LocalDate): BooleanExpression? =
         schedule.lessonDt.eq(lessonDt)

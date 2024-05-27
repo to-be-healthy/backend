@@ -1,8 +1,5 @@
 package com.tobe.healthy.home.application;
 
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
-
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
@@ -26,12 +23,16 @@ import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import java.time.LocalDate;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 
 @Service
 @RequiredArgsConstructor
@@ -92,7 +93,6 @@ public class HomeService {
     public TrainerHomeResult getTrainerHome(Long trainerId) {
         long mappingStudentCount = mappingRepository.countByTrainerId(trainerId);
 
-        // 우수회원 추가 필요
         List<MemberInTeamResult> bestStudents = memberRepository.getBestStudent(trainerId);
 
         RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(trainerId);

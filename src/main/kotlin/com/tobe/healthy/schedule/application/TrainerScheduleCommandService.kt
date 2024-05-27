@@ -17,6 +17,7 @@ import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleClosedDaysInfo
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
 import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository
+import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -33,7 +34,8 @@ import java.time.temporal.TemporalAdjusters
 class TrainerScheduleCommandService(
     private val memberRepository: MemberRepository,
     private val trainerScheduleRepository: TrainerScheduleRepository,
-    private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository
+    private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository,
+    private val scheduleWaitingRepository: ScheduleWaitingRepository
 ) {
 
     fun registerSchedule(request: CommandRegisterSchedule, trainerId: Long): CommandRegisterScheduleResult {
@@ -141,7 +143,14 @@ class TrainerScheduleCommandService(
         // todo: 2024-05-05 일요일 오후 14:16 등록된 학생이 있는경우 푸시알림등으로 취소되었다는 알림이 필요 - seonwoo_jung
         val entity = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
-        entity.cancelTrainerSchedule()
+
+        entity.scheduleWaiting?.let {
+            entity.cancelMemberSchedule(it[0])
+            scheduleWaitingRepository.delete(it[0])
+        } ?: let {
+            entity.cancelMemberSchedule()
+        }
+
         return entity.lessonStartTime
     }
 

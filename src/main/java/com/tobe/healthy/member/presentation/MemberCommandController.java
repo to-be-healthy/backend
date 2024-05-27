@@ -56,7 +56,7 @@ public class MemberCommandController {
 			@ApiResponse(responseCode = "200", description = "비밀번호 변경이 완료 되었습니다.")
 	})
 	@PatchMapping("/password")
-	public ResponseHandler<Boolean> changePassword(@RequestBody CommandChangeMemberPassword request,
+	public ResponseHandler<Boolean> changePassword(@RequestBody @Valid CommandChangeMemberPassword request,
 												   @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberCommandService.changePassword(request, member.getMemberId()))
@@ -96,7 +96,7 @@ public class MemberCommandController {
 	})
 	@PatchMapping("/name")
 	public ResponseHandler<String> changeName(@Parameter(description = "변경할 이름", example = "홍길동") @RequestParam String name,
-											   @AuthenticationPrincipal CustomMemberDetails member) {
+											  @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<String>builder()
 				.data(memberCommandService.changeName(name, member.getMemberId()))
 				.message("이름이 변경되었습니다.")
@@ -151,7 +151,7 @@ public class MemberCommandController {
 			@ApiResponse(responseCode = "200", description = "이메일이 변경되었습니다.")
 	})
 	@PatchMapping("/email")
-	public ResponseHandler<Boolean> changeEmail(@RequestBody CommandChangeEmail commandChangeEmail,
+	public ResponseHandler<Boolean> changeEmail(@RequestBody @Valid CommandChangeEmail commandChangeEmail,
 												@AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberCommandService.changeEmail(commandChangeEmail, member.getMemberId()))

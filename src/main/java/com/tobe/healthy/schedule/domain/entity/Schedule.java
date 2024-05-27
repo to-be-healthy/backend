@@ -1,35 +1,28 @@
 package com.tobe.healthy.schedule.domain.entity;
 
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.DISABLED;
-import static jakarta.persistence.CascadeType.PERSIST;
-import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.FetchType.LAZY;
-import static jakarta.persistence.GenerationType.IDENTITY;
-import static lombok.AccessLevel.PROTECTED;
-
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.course.domain.entity.Course;
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
 import com.tobe.healthy.member.domain.entity.Member;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 import org.jetbrains.annotations.Nullable;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
+import static jakarta.persistence.CascadeType.PERSIST;
+import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
@@ -68,6 +61,9 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@JoinColumn(name = "course_id")
 	private Course course;
 
+	@OneToMany(fetch = LAZY, mappedBy = "schedule")
+	private List<LessonHistory> lessonHistories = new ArrayList<>();
+
 	public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, ReservationStatus reservationStatus) {
 		ScheduleBuilder reserve = Schedule.builder()
 				.lessonDt(date)
@@ -92,13 +88,14 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 		this.reservationStatus = COMPLETED;
 	}
 
-	public void cancelTrainerSchedule() {
-		this.applicant = null;
-	}
-
 	public void cancelMemberSchedule() {
 		this.reservationStatus = AVAILABLE;
 		this.applicant = null;
+	}
+
+	public void cancelMemberSchedule(ScheduleWaiting scheduleWaiting) {
+		this.reservationStatus = COMPLETED;
+		this.applicant = scheduleWaiting.getMember();
 	}
 
 	public void changeApplicantInSchedule(Member applicant) {

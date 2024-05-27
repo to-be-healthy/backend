@@ -22,4 +22,5 @@ interface TrainerScheduleRepositoryCustom {
     fun findScheduleByTrainerId(scheduleId: Long, trainerId: Long): Schedule?
     fun findAllByLessonDtAndTrainerId(lessonDt: String, trainerId: Long): List<Schedule?>
     fun findAllDisabledSchedule(lessonStartDt: LocalDate, lessonEndDt: LocalDate): List<Schedule?>
+    fun findAllUnwrittenLessonHistory(memberId: Long): List<Schedule>
 }
