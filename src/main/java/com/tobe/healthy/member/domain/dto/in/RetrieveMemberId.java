@@ -7,10 +7,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Data
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "아이디 찾기 DTO")
@@ -28,6 +30,7 @@ public class RetrieveMemberId {
 	private MemberType memberType;
 
 	@Data
+    @ToString
 	@AllArgsConstructor
 	public static class FindMemberIdResult {
 		private String userId;

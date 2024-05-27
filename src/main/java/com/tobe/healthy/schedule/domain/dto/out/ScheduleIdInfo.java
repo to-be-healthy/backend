@@ -3,8 +3,10 @@ package com.tobe.healthy.schedule.domain.dto.out;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 @Builder
 public class ScheduleIdInfo {
 	private Long studentId;

@@ -8,9 +8,11 @@ import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.SocialType;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 
 @Data
+@ToString
 @Builder
 public class MemberInfoResult {
 

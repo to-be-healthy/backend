@@ -2,10 +2,11 @@ package com.tobe.healthy.diet.domain.dto.in;
 
 import com.tobe.healthy.diet.domain.entity.DietType;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
+import lombok.ToString;
 
 
 @Data
+@ToString
 public class DietAddCommand {
 
     private DietType type;

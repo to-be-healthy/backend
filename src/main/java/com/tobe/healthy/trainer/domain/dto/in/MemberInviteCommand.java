@@ -4,8 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 public class MemberInviteCommand {
 
     @Schema(description = "이름" , example = "임채린")

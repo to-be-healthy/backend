@@ -6,8 +6,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 @AllArgsConstructor
 @Builder
 @Schema(description = "회원가입 성공 응답")

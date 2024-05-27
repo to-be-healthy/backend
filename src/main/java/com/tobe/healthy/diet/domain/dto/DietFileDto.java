@@ -4,8 +4,10 @@ import com.tobe.healthy.diet.domain.entity.DietFiles;
 import com.tobe.healthy.diet.domain.entity.DietType;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 @Builder
 public class DietFileDto {
 

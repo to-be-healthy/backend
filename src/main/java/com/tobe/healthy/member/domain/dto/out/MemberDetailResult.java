@@ -7,11 +7,13 @@ import com.tobe.healthy.gym.domain.dto.out.GymDto;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
+@ToString
 public class MemberDetailResult {
 	private Long memberId;
 	private String name;

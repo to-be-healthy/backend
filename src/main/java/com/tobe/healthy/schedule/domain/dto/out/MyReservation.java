@@ -3,11 +3,13 @@ package com.tobe.healthy.schedule.domain.dto.out;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
+@ToString
 @Builder
 public class MyReservation {
     private Long scheduleId;

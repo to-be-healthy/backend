@@ -2,17 +2,14 @@ package com.tobe.healthy.diet.domain.dto;
 
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.member.domain.dto.MemberDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.tobe.healthy.diet.domain.entity.DietType.BREAKFAST;
 
 @Data
+@ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
