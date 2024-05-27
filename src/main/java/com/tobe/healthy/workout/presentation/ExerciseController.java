@@ -73,10 +73,10 @@ public class ExerciseController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "운동 종류를 삭제한다.")
     })
-    @DeleteMapping("{exerciseCustomId}")
+    @DeleteMapping("/{exerciseId}")
     public ResponseHandler<Void> deleteExerciseCustom(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                      @Parameter(description = "커스텀 운동종류 ID") @PathVariable("exerciseCustomId") Long exerciseCustomId) {
-        exerciseService.deleteExerciseCustom(customMemberDetails.getMember(), exerciseCustomId);
+                                                      @Parameter(description = "운동종류 ID") @PathVariable("exerciseId") Long exerciseId) {
+        exerciseService.deleteExerciseCustom(customMemberDetails.getMember(), exerciseId);
         return ResponseHandler.<Void>builder()
                 .message("운동 종류가 삭제되었습니다.")
                 .build();

@@ -7,6 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface ExerciseRepositoryCustom {
 
-    Page<Exercise> getExercise(ExerciseCategory exerciseCategory, Pageable pageable);
+    Page<Exercise> getExercise(Long memberId, ExerciseCategory exerciseCategory, Pageable pageable);
 
 }
