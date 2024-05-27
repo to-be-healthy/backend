@@ -24,11 +24,11 @@ class LessonHistoryComment(
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "writer_id")
-    val writer: Member,
+    val writer: Member? = null,
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "lesson_history_id")
-    val lessonHistory: LessonHistory,
+    val lessonHistory: LessonHistory? = null,
 
     @OneToMany(fetch = LAZY, mappedBy = "lessonHistoryComment", cascade = [ALL])
     var files: MutableList<LessonHistoryFiles> = mutableListOf(),
@@ -36,13 +36,13 @@ class LessonHistoryComment(
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "lesson_history_comment_id")
-    val id: Long = 0,
+    val id: Long? = null,
 
     @ColumnDefault("false")
     var delYn: Boolean = false,
 
     @Transient
-    var replies: MutableList<LessonHistoryComment?> = mutableListOf(),
+    var replies: MutableList<LessonHistoryComment> = mutableListOf(),
 
     ) : BaseTimeEntity<LessonHistoryComment, Long>() {
 

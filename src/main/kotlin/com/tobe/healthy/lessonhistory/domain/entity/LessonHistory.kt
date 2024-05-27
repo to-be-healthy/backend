@@ -27,15 +27,15 @@ class LessonHistory(
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_id")
-    val trainer: Member,
+    val trainer: Member? = null,
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "student_id")
-    val student: Member,
+    val student: Member? = null,
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "schedule_id")
-    val schedule: Schedule,
+    val schedule: Schedule? = null,
 
     @Enumerated(STRING)
     var feedbackChecked: LessonHistoryReadStatus = UNREAD,
@@ -43,7 +43,7 @@ class LessonHistory(
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "lesson_history_id")
-    val id: Long = 0
+    val id: Long? = null
 ) : BaseTimeEntity<LessonHistory, Long>() {
 
     fun updateLessonHistory(title: String, content: String) {

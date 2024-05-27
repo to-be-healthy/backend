@@ -93,16 +93,14 @@ class LessonHistoryCommandService(
     fun deleteLessonHistory(lessonHistoryId: Long): Long {
         val findLessonHistory = findLessonHistory(lessonHistoryId)
 
-        lessonHistoryRepository.deleteById(findLessonHistory.id)
+        findLessonHistory.id?.let {
+            lessonHistoryRepository.deleteById(it)
+        }
 
         return lessonHistoryId
     }
 
-    fun registerLessonHistoryComment(
-        lessonHistoryId: Long,
-        request: CommandRegisterComment,
-        memberId: Long,
-    ): CommandRegisterCommentResult {
+    fun registerLessonHistoryComment(lessonHistoryId: Long?, request: CommandRegisterComment, memberId: Long): CommandRegisterCommentResult {
         val findMember = findMember(memberId)
 
         val lessonHistory = findLessonHistory(lessonHistoryId)
@@ -114,8 +112,8 @@ class LessonHistoryCommandService(
     }
 
     fun registerLessonHistoryReply(
-        lessonHistoryId: Long,
-        lessonHistoryCommentId: Long,
+        lessonHistoryId: Long?,
+        lessonHistoryCommentId: Long?,
         request: CommandRegisterComment,
         memberId: Long,
     ): CommandRegisterReplyResult {
@@ -123,10 +121,7 @@ class LessonHistoryCommandService(
 
         val lessonHistory = findLessonHistory(lessonHistoryId)
 
-        val order = lessonHistoryCommentRepository.findTopComment(
-            lessonHistory.id,
-            lessonHistoryCommentId
-        )
+        val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id, lessonHistoryCommentId)
 
         val parentComment = findLessonHistoryComment(lessonHistoryCommentId)
 
@@ -149,7 +144,7 @@ class LessonHistoryCommandService(
 
         comment.updateLessonHistoryComment(request.comment)
 
-        return CommandUpdateCommentResult.from(comment.lessonHistory.id, comment.id, comment.content)
+        return CommandUpdateCommentResult.from(comment.lessonHistory?.id, comment.id, comment.content)
     }
 
     fun deleteLessonHistoryComment(lessonHistoryCommentId: Long): Long {
@@ -163,7 +158,7 @@ class LessonHistoryCommandService(
 
     private fun registerFile(
         uploadFiles: MutableList<CommandUploadFileResult>?,
-        findMember: Member,
+        findMember: Member?,
         lessonHistory: LessonHistory?,
         lessonHistoryComment: LessonHistoryComment? = null
     ) {
@@ -249,12 +244,12 @@ class LessonHistoryCommandService(
         }
     }
 
-    private fun findLessonHistoryComment(lessonHistoryCommentId: Long) : LessonHistoryComment {
+    private fun findLessonHistoryComment(lessonHistoryCommentId: Long?) : LessonHistoryComment {
         return lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
             ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
     }
 
-    private fun findLessonHistory(lessonHistoryId: Long) = (lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
+    private fun findLessonHistory(lessonHistoryId: Long?) = (lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
         ?: throw CustomException(LESSON_HISTORY_NOT_FOUND))
 
     private fun findMember(memberId: Long?) : Member {

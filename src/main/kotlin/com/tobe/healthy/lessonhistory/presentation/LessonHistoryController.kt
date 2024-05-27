@@ -65,11 +65,11 @@ class LessonHistoryController(
             ApiResponse(responseCode = "404", description = "수업 일지를 찾을 수 없습니다."),
         ])
     @GetMapping("/{lessonHistoryId}")
-    fun findOneLessonHistory(@Parameter(description = "수업일지 ID", example = "1") @PathVariable lessonHistoryId: Long,
+    fun findOneLessonHistory(@PathVariable lessonHistoryId: Long,
                              @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RetrieveLessonHistoryDetailResult?> {
         return ApiResultResponse(
             message = "수업 일지 단건을 조회하였습니다.",
-            data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member.memberId, member.memberType)
+            data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member)
         )
     }
 

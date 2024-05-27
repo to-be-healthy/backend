@@ -13,7 +13,8 @@ import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonI
 import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
 import com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.*
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus.DISABLED
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
@@ -258,9 +259,11 @@ class TrainerScheduleRepositoryImpl(
             .where(
                 trainerIdEq(memberId),
                 lessonHistory.isNull,
-                schedule.reservationStatus.`in`(COMPLETED, NO_SHOW),
+                schedule.applicant.isNotNull,
+                reservationStatusEq(COMPLETED),
                 delYnEq(false)
             )
+            .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
     }
 

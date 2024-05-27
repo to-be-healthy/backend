@@ -3,8 +3,7 @@ package com.tobe.healthy.lessonhistory.repository
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
+import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDateCond
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
@@ -49,7 +48,7 @@ class LessonHistoryRepositoryImpl(
         return PageableExecutionUtils.getPage(contents, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
-    override fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): RetrieveLessonHistoryDetailResult? {
+    override fun findOneLessonHistory(lessonHistoryId: Long, member: CustomMemberDetails): RetrieveLessonHistoryDetailResult? {
         val entity = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
@@ -57,15 +56,17 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.trainer).fetchJoin()
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
-            .where(lessonHistory.id.eq(lessonHistoryId), validateMemberType(memberId, memberType))
+            .where(
+                lessonHistoryIdEq(lessonHistoryId),
+//                validateMemberType(memberId, memberType)
+            )
             .fetchOne()
 
-        entity?.let {
-            updateFeedbackCheckStatus(entity, memberId)
-        } ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+            return RetrieveLessonHistoryDetailResult.detailFrom(entity)
+        }
 
-        return RetrieveLessonHistoryDetailResult.detailFrom(entity)
-    }
+    private fun lessonHistoryIdEq(lessonHistoryId: Long): BooleanExpression? =
+        lessonHistory.id.eq(lessonHistoryId)
 
     override fun findAllLessonHistoryByMemberId(studentId: Long, request: RetrieveLessonHistoryByDateCond, pageable: Pageable): Page<RetrieveLessonHistoryByDateCondResult> {
         val entities = queryFactory
@@ -107,12 +108,9 @@ class LessonHistoryRepositoryImpl(
         return RetrieveLessonHistoryByDateCondResult.from(entity)
     }
 
-    private fun updateFeedbackCheckStatus(
-        results: LessonHistory,
-        memberId: Long,
-    ) {
-        if (results.student.id.equals(memberId)) {
-            results.updateFeedbackStatus(READ)
+    private fun updateFeedbackCheckStatus(result: LessonHistory, memberId: Long) {
+        if (result.student?.id?.equals(memberId) == true) {
+            result.updateFeedbackStatus(READ)
         }
     }
 

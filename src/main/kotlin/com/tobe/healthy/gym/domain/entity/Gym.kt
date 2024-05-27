@@ -22,7 +22,7 @@ class Gym(
     val joinCode: String,
 
     @OneToMany(fetch = LAZY, mappedBy = "gym")
-    val member: List<Member> = mutableListOf()
+    val member: MutableList<Member> = mutableListOf()
 
 ) : BaseTimeEntity<Gym, Long>() {
 

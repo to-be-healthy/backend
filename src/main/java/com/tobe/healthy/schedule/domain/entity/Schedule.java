@@ -129,4 +129,9 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	public void deleteCourse(){
 		this.course = null;
 	}
+
+	public void updateLessonDtToAvailableDay() {
+		this.reservationStatus = AVAILABLE;
+		this.applicant = null;
+	}
 }

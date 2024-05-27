@@ -10,7 +10,7 @@ class LessonHistoryCommentRepositoryImpl(
     private val queryFactory: JPAQueryFactory
 ) : LessonHistoryCommentRepositoryCustom {
 
-    override fun findTopComment(lessonHistoryId: Long): Int {
+    override fun findTopComment(lessonHistoryId: Long?): Int {
         val result = queryFactory
             .select(lessonHistoryComment.order.max().add(1))
             .from(lessonHistoryComment)
@@ -22,7 +22,7 @@ class LessonHistoryCommentRepositoryImpl(
         return result
     }
 
-    override fun findTopComment(lessonHistoryId: Long, lessonHistoryCommentId: Long): Int {
+    override fun findTopComment(lessonHistoryId: Long?, lessonHistoryCommentId: Long?): Int {
         return queryFactory
             .select(lessonHistoryComment.order.max().add(1))
             .from(lessonHistoryComment)
@@ -33,12 +33,12 @@ class LessonHistoryCommentRepositoryImpl(
             .fetchOne() ?: 1
     }
 
-    private fun parentCommentIdEq(lessonHistoryCommentParentId: Long): BooleanExpression? =
+    private fun parentCommentIdEq(lessonHistoryCommentParentId: Long?): BooleanExpression? =
         lessonHistoryComment.parent.id.eq(lessonHistoryCommentParentId)
 
     private fun parentCommentIdIsNull(): BooleanExpression =
         lessonHistoryComment.parent.isNull
 
-    private fun lessonHistoryIdEq(lessonHistoryId: Long): BooleanExpression =
+    private fun lessonHistoryIdEq(lessonHistoryId: Long?): BooleanExpression =
         lessonHistoryComment.lessonHistory.id.eq(lessonHistoryId)
 }

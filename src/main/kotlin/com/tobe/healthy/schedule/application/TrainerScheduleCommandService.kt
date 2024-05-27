@@ -6,10 +6,7 @@ import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterDefaultLessonTime
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterIndividualSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
-import com.tobe.healthy.schedule.domain.dto.out.CommandRegisterDefaultLessonTimeResult
-import com.tobe.healthy.schedule.domain.dto.out.CommandRegisterScheduleByStudentResult
-import com.tobe.healthy.schedule.domain.dto.out.CommandRegisterScheduleResult
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
+import com.tobe.healthy.schedule.domain.dto.out.*
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.DISABLED
@@ -57,9 +54,9 @@ class TrainerScheduleCommandService(
                 continue
             }
 
-            val isClosedDay = findTrainerSchedule.trainerScheduleClosedDays?.any {
+            val isClosedDay = findTrainerSchedule.trainerScheduleClosedDays.any {
                 it.closedDays == lessonDt.dayOfWeek
-            } ?: false
+            }
 
             if (isClosedDay) {
                 // 휴무일일 경우
@@ -139,7 +136,7 @@ class TrainerScheduleCommandService(
         }
     }
 
-    fun cancelTrainerSchedule(scheduleId: Long, trainerId: Long): LocalTime {
+    fun cancelTrainerSchedule(scheduleId: Long, trainerId: Long): CommandCancelStudentScheduleResult {
         // todo: 2024-05-05 일요일 오후 14:16 등록된 학생이 있는경우 푸시알림등으로 취소되었다는 알림이 필요 - seonwoo_jung
         val entity = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
@@ -151,7 +148,7 @@ class TrainerScheduleCommandService(
             entity.cancelMemberSchedule()
         }
 
-        return entity.lessonStartTime
+        return CommandCancelStudentScheduleResult.from(entity)
     }
 
     fun updateLessonDtToClosedDay(lessonDt: String, trainerId: Long): Boolean {
@@ -164,6 +161,7 @@ class TrainerScheduleCommandService(
         findSchedule.forEach {
             it?.updateLessonDtToClosedDay()
         }
+
         return true
     }
 
@@ -172,8 +170,8 @@ class TrainerScheduleCommandService(
 
         trainerScheduleInfoRepository.findByTrainerId(trainerId)?.let {
             it.changeDefaultLessonTime(request)
-            it.trainerScheduleClosedDays?.clear()
-            it.trainerScheduleClosedDays?.addAll(
+            it.trainerScheduleClosedDays.clear()
+            it.trainerScheduleClosedDays.addAll(
                 request.closedDays?.map { dayOfWeek ->
                     TrainerScheduleClosedDaysInfo.registerClosedDay(
                         dayOfWeek,
@@ -226,5 +224,25 @@ class TrainerScheduleCommandService(
 
     private fun isStartTimeEqualsLunchStartTime(lunchStartTime: LocalTime?, startTime: LocalTime): Boolean {
         return startTime == lunchStartTime
+    }
+
+    fun updateScheduleStatus(status: ReservationStatus, scheduleId: Long, memberId: Long): CommandScheduleStatusResult {
+        val schedule: Schedule
+        when (status) {
+            AVAILABLE -> {
+                schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, DISABLED, memberId)
+                    ?: throw CustomException(SCHEDULE_NOT_FOUND)
+                schedule.updateLessonDtToAvailableDay()
+            }
+            DISABLED -> {
+                schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, AVAILABLE, memberId)
+                    ?: throw CustomException(SCHEDULE_NOT_FOUND)
+                schedule.updateLessonDtToClosedDay()
+            }
+            else -> {
+                throw CustomException(RESERVATION_STATUS_NOT_FOUND)
+            }
+        }
+        return CommandScheduleStatusResult.from(schedule)
     }
 }
