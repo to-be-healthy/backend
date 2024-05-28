@@ -34,7 +34,8 @@ class LessonHistoryController(
     @GetMapping
     fun findAllLessonHistory(@ParameterObject request: RetrieveLessonHistoryByDateCond,
                              @ParameterObject pageable: Pageable,
-                             @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
+                             @AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
         return ApiResultResponse(
             message = "전체 수업 일지를 조회하였습니다.",
             data = lessonHistoryService.findAllLessonHistory(request, pageable, member.memberId)
@@ -49,7 +50,8 @@ class LessonHistoryController(
     fun findAllMyLessonHistory(
         @ParameterObject request: RetrieveLessonHistoryByDateCond,
         @ParameterObject pageable: Pageable,
-        @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
+        @AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
         return ApiResultResponse(
             message = "내 수업 일지를 조회하였습니다.",
             data = lessonHistoryService.findAllMyLessonHistory(request, pageable, member)
@@ -60,11 +62,12 @@ class LessonHistoryController(
         responses = [
             ApiResponse(responseCode = "200", description = "학생의 전체 수업 일지를 조회하였습니다.")
         ])
-    @GetMapping("/{studentId}")
+    @GetMapping("/student/{studentId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun findAllLessonHistoryByMemberId(@PathVariable studentId: Long,
                                        @ParameterObject request: RetrieveLessonHistoryByDateCond,
-                                       @ParameterObject pageable: Pageable): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
+                                       @ParameterObject pageable: Pageable
+    ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
         return ApiResultResponse(
             message = "학생의 수업 일지 전체를 조회하였습니다.",
             data = lessonHistoryService.findAllLessonHistoryByMemberId(studentId, request, pageable)
@@ -78,10 +81,11 @@ class LessonHistoryController(
         ])
     @GetMapping("/{lessonHistoryId}")
     fun findOneLessonHistory(@PathVariable lessonHistoryId: Long,
-                             @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RetrieveLessonHistoryDetailResult?> {
+                             @AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<RetrieveLessonHistoryDetailResult?> {
         return ApiResultResponse(
             message = "수업 일지 단건을 조회하였습니다.",
-            data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member)
+            data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member.memberId)
         )
     }
 
@@ -90,7 +94,8 @@ class LessonHistoryController(
             ApiResponse(responseCode = "200", description = "수업일지를 작성하지 않은 수업들을 조회하였습니다."),
         ])
     @GetMapping("/unwritten")
-    fun findAllUnwrittenLessonHistory(@AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<List<RetrieveUnwrittenLessonHistory>> {
+    fun findAllUnwrittenLessonHistory(@AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<List<RetrieveUnwrittenLessonHistory>> {
         return ApiResultResponse(
             message = "수업일지를 작성하지 않은 수업들을 조회하였습니다.",
             data = lessonHistoryService.findAllUnwrittenLessonHistory(member.memberId)

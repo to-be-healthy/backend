@@ -8,6 +8,7 @@ import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDat
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistory.lessonHistory
+import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistoryFiles.lessonHistoryFiles
 import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
 import io.micrometer.common.util.StringUtils
 import org.springframework.data.domain.Page
@@ -31,9 +32,11 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.trainer).fetchJoin()
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
+            .leftJoin(lessonHistory.files, lessonHistoryFiles).fetchJoin()
             .where(
                 convertDateFormat(request.searchDate),
-                lessonHistory.trainer.id.eq(memberId)
+                lessonHistory.trainer.id.eq(memberId),
+                lessonHistoryFiles.lessonHistoryComment.id.isNull
             )
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
@@ -45,9 +48,11 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.trainer)
             .innerJoin(lessonHistory.student)
             .innerJoin(lessonHistory.schedule)
+            .leftJoin(lessonHistory.files, lessonHistoryFiles)
             .where(
                 convertDateFormat(request.searchDate),
-                lessonHistory.trainer.id.eq(memberId)
+                lessonHistory.trainer.id.eq(memberId),
+                lessonHistoryFiles.lessonHistoryComment.id.isNull
             )
 
         return PageableExecutionUtils.getPage(results, pageable) { totalCount.fetchOne() ?: 0L }
@@ -55,7 +60,7 @@ class LessonHistoryRepositoryImpl(
 
     override fun findOneLessonHistory(
         lessonHistoryId: Long,
-        member: CustomMemberDetails
+        memberId: Long
     ): LessonHistory? {
         return queryFactory
             .selectDistinct(lessonHistory)
@@ -65,6 +70,7 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
             .where(
+                lessonHistory.trainer.id.eq(memberId),
                 lessonHistoryIdEq(lessonHistoryId)
             )
             .fetchOne()
@@ -84,9 +90,11 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.trainer).fetchJoin()
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
+            .leftJoin(lessonHistory.files, lessonHistoryFiles).fetchJoin()
             .where(
                 convertDateFormat(request.searchDate),
-                lessonHistory.student.id.eq(studentId)
+                lessonHistory.student.id.eq(studentId),
+                lessonHistoryFiles.lessonHistoryComment.id.isNull
             )
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
@@ -98,9 +106,11 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.trainer)
             .innerJoin(lessonHistory.student)
             .innerJoin(lessonHistory.schedule)
+            .leftJoin(lessonHistory.files, lessonHistoryFiles)
             .where(
                 convertDateFormat(request.searchDate),
-                lessonHistory.student.id.eq(studentId)
+                lessonHistory.student.id.eq(studentId),
+                lessonHistoryFiles.lessonHistoryComment.id.isNull
             )
 
         return PageableExecutionUtils.getPage(entities, pageable) { totalCount.fetchOne() ?: 0L }
@@ -132,9 +142,11 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.trainer).fetchJoin()
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
+            .leftJoin(lessonHistory.files, lessonHistoryFiles).fetchJoin()
             .where(
                 convertDateFormat(request.searchDate),
-                validateMemberType(member)
+                validateMemberType(member),
+                lessonHistoryFiles.lessonHistoryComment.id.isNull
             )
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
@@ -146,9 +158,11 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.trainer)
             .innerJoin(lessonHistory.student)
             .innerJoin(lessonHistory.schedule)
+            .leftJoin(lessonHistory.files, lessonHistoryFiles)
             .where(
                 convertDateFormat(request.searchDate),
-                validateMemberType(member)
+                validateMemberType(member),
+                lessonHistoryFiles.lessonHistoryComment.id.isNull
             )
 
         return PageableExecutionUtils.getPage(results, pageable) { totalCount.fetchOne() ?: 0L }
@@ -160,6 +174,18 @@ class LessonHistoryRepositoryImpl(
             .from(lessonHistory)
             .leftJoin(lessonHistory.files).fetchJoin()
             .where(lessonHistory.id.eq(lessonHistoryId))
+            .fetchOne()
+    }
+
+    override fun validateDuplicateLessonHistory(trainerId: Long, studentId: Long, scheduleId: Long): LessonHistory? {
+        return queryFactory
+            .select(lessonHistory)
+            .from(lessonHistory)
+            .where(
+                lessonHistory.trainer.id.eq(trainerId),
+                lessonHistory.student.id.eq(studentId),
+                lessonHistory.schedule.id.eq(scheduleId)
+            )
             .fetchOne()
     }
 

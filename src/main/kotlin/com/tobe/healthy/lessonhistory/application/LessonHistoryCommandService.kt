@@ -34,15 +34,15 @@ import org.springframework.web.multipart.MultipartFile
 @Service
 @Transactional
 class LessonHistoryCommandService(
-        private val lessonHistoryRepository: LessonHistoryRepository,
-        private val lessonHistoryFilesRepository: LessonHistoryFilesRepository,
-        private val memberRepository: MemberRepository,
-        private val trainerScheduleRepository: TrainerScheduleRepository,
-        private val lessonHistoryCommentRepository: LessonHistoryCommentRepository,
-        private val amazonS3: AmazonS3,
-        private val redisService: RedisService,
-        @Value("\${aws.s3.bucket-name}")
-        private val bucketName: String,
+    private val lessonHistoryRepository: LessonHistoryRepository,
+    private val lessonHistoryFilesRepository: LessonHistoryFilesRepository,
+    private val memberRepository: MemberRepository,
+    private val trainerScheduleRepository: TrainerScheduleRepository,
+    private val lessonHistoryCommentRepository: LessonHistoryCommentRepository,
+    private val amazonS3: AmazonS3,
+    private val redisService: RedisService,
+    @Value("\${aws.s3.bucket-name}")
+    private val bucketName: String,
 ) {
 
     fun registerLessonHistory(
@@ -52,6 +52,9 @@ class LessonHistoryCommandService(
         val student = findMember(request.studentId)
         val trainer = findMember(trainerId)
         val schedule = findSchedule(request.scheduleId)
+
+        lessonHistoryRepository.validateDuplicateLessonHistory(trainerId, student.id, schedule.id)
+            ?.let { throw IllegalArgumentException("이미 수업일지를 등록하였습니다.") }
 
         val lessonHistory = registerLessonHistory(request.title!!, request.content!!, student, trainer, schedule)
 
@@ -81,7 +84,11 @@ class LessonHistoryCommandService(
                             fileOrder = fileOrder++
                         )
                     )
-                    redisService.setValuesWithTimeout(TEMP_FILE_URI.description + fileUrl, memberId.toString(), FILE_TEMP_UPLOAD_TIMEOUT.description.toLong()) // 30분
+                    redisService.setValuesWithTimeout(
+                        TEMP_FILE_URI.description + fileUrl,
+                        memberId.toString(),
+                        FILE_TEMP_UPLOAD_TIMEOUT.description.toLong()
+                    ) // 30분
                 }
             }
         }
@@ -248,7 +255,7 @@ class LessonHistoryCommandService(
 
     private fun putFile(uploadFile: MultipartFile): String {
         val objectMetadata = createObjectMetadata(uploadFile.size, uploadFile.contentType)
-        val savedFileName =  createFileName("lesson-history/")
+        val savedFileName = createFileName("lesson-history/")
         amazonS3.putObject(
             bucketName,
             savedFileName,
@@ -260,7 +267,7 @@ class LessonHistoryCommandService(
         return fileUrl
     }
 
-    private fun findSchedule(scheduleId: Long?) : Schedule {
+    private fun findSchedule(scheduleId: Long?): Schedule {
         return trainerScheduleRepository.findByIdOrNull(scheduleId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
     }
@@ -281,7 +288,7 @@ class LessonHistoryCommandService(
         uploadFiles: MutableList<CommandUploadFileResult>,
         trainer: Member,
         lessonHistory: LessonHistory
-    ) : MutableList<LessonHistoryFiles> {
+    ): MutableList<LessonHistoryFiles> {
         val files = mutableListOf<LessonHistoryFiles>()
 
         uploadFiles.let {
@@ -309,17 +316,17 @@ class LessonHistoryCommandService(
         }
     }
 
-    private fun findLessonHistoryComment(lessonHistoryCommentId: Long?) : LessonHistoryComment {
-        return lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
+    private fun findLessonHistoryComment(lessonHistoryCommentId: Long): LessonHistoryComment {
+        return lessonHistoryCommentRepository.findCommentById(lessonHistoryCommentId)
             ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
     }
 
-    private fun findLessonHistory(lessonHistoryId: Long?) : LessonHistory {
+    private fun findLessonHistory(lessonHistoryId: Long?): LessonHistory {
         return lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
             ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
     }
 
-    private fun findMember(memberId: Long?) : Member {
+    private fun findMember(memberId: Long?): Member {
         return memberRepository.findByIdOrNull(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
     }

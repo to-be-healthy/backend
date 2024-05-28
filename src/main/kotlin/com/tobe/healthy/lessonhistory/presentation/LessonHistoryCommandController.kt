@@ -84,7 +84,8 @@ class LessonHistoryCommandController(
         ])
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @DeleteMapping("/{lessonHistoryId}")
-    fun deleteLessonHistory(@PathVariable lessonHistoryId: Long): ApiResultResponse<Long> {
+    fun deleteLessonHistory(@PathVariable lessonHistoryId: Long
+    ): ApiResultResponse<Long> {
         return ApiResultResponse(
             message = "수업 일지가 삭제되었습니다.",
             data = lessonHistoryCommandService.deleteLessonHistory(lessonHistoryId)
@@ -100,7 +101,8 @@ class LessonHistoryCommandController(
     @PostMapping("/{lessonHistoryId}/comment")
     fun registerLessonHistoryComment(@PathVariable lessonHistoryId: Long,
                                      @RequestBody @Valid request: CommandRegisterComment,
-                                     @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<CommandRegisterCommentResult> {
+                                     @AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<CommandRegisterCommentResult> {
         return ApiResultResponse(
             message = "댓글이 등록되었습니다.",
             data = lessonHistoryCommandService.registerLessonHistoryComment(lessonHistoryId, request, member.memberId)
@@ -117,7 +119,8 @@ class LessonHistoryCommandController(
     fun registerLessonHistoryComment(@PathVariable lessonHistoryId: Long,
                                      @PathVariable lessonHistoryCommentId: Long,
                                      @RequestBody @Valid request: CommandRegisterComment,
-                                     @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<CommandRegisterReplyResult> {
+                                     @AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<CommandRegisterReplyResult> {
         return ApiResultResponse(
             message = "대댓글이 등록되었습니다.",
             data = lessonHistoryCommandService.registerLessonHistoryReply(lessonHistoryId, lessonHistoryCommentId, request, member.memberId)
@@ -145,7 +148,8 @@ class LessonHistoryCommandController(
             ApiResponse(responseCode = "404", description = "수업 일지에 댓글을 찾을 수 없습니다.")
         ])
     @DeleteMapping("/comment/{lessonHistoryCommentId}")
-    fun deleteLessonHistoryComment(@PathVariable lessonHistoryCommentId: Long): ApiResultResponse<Long> {
+    fun deleteLessonHistoryComment(@PathVariable lessonHistoryCommentId: Long
+    ): ApiResultResponse<Long> {
         return ApiResultResponse(
             message = "댓글 1개가 삭제되었습니다.",
             data = lessonHistoryCommandService.deleteLessonHistoryComment(lessonHistoryCommentId)

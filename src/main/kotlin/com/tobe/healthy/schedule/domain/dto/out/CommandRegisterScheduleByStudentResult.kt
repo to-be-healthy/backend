@@ -12,11 +12,13 @@ data class CommandRegisterScheduleByStudentResult(
     val lessonEndTime: LocalTime,
     val studentName: String,
     val studentId: Long,
-    val trainerId: Long,
-    val waitingStudentId: Long? = null
+    val trainerId: Long
 ) {
     companion object {
-        fun from(schedule: Schedule, student: Member) : CommandRegisterScheduleByStudentResult {
+        fun from(
+            schedule: Schedule,
+            student: Member
+        ): CommandRegisterScheduleByStudentResult {
             return CommandRegisterScheduleByStudentResult(
                 scheduleId = schedule.id,
                 lessonDt = schedule.lessonDt,
@@ -24,8 +26,7 @@ data class CommandRegisterScheduleByStudentResult(
                 lessonEndTime = schedule.lessonEndTime,
                 studentId = student.id,
                 studentName = student.name,
-                trainerId = schedule.trainer.id,
-                waitingStudentId = schedule.scheduleWaiting?.get(0)?.member?.id
+                trainerId = schedule.trainer.id
             )
         }
     }

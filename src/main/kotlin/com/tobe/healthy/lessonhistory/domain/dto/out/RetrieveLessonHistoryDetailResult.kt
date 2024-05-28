@@ -48,15 +48,7 @@ data class RetrieveLessonHistoryDetailResult(
                     entity?.schedule?.lessonDt,
                     entity?.schedule?.lessonEndTime
                 ),
-                files = entity?.let {
-                    it.files.filter {
-                        comment -> comment.lessonHistoryComment == null
-                    }.map {
-                        files -> LessonHistoryFileResults.from(files)
-                    }.sortedBy {
-                        file -> file.fileOrder
-                    }.toMutableList()
-                } ?: mutableListOf()
+                files = entity?.let { it.files.filter { comment -> comment.lessonHistoryComment == null }.map { files -> LessonHistoryFileResults.from(files) }.sortedBy { file -> file.fileOrder }.toMutableList() } ?: mutableListOf()
             )
         }
 
@@ -115,11 +107,7 @@ data class RetrieveLessonHistoryDetailResult(
                     orderNum = entity?.order,
                     replies = entity?.replies?.map { replies -> from(replies) }?.toMutableList() ?: mutableListOf(),
                     parentId = entity?.parent?.id,
-                    files = entity?.let {
-                        it.files.map {
-                            files -> LessonHistoryFileResults.from(files)
-                        }?.toMutableList()
-                    } ?: mutableListOf(),
+                    files = entity?.let { it.files.map { files -> LessonHistoryFileResults.from(files) }?.toMutableList() } ?: mutableListOf(),
                     delYn = entity?.delYn,
                     createdAt = entity?.createdAt,
                     updatedAt = entity?.updatedAt

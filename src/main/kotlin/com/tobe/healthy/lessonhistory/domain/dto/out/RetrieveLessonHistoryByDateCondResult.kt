@@ -33,7 +33,7 @@ data class RetrieveLessonHistoryByDateCondResult(
                 id = entity?.id,
                 title = entity?.title,
                 content = entity?.content,
-                commentTotalCount = entity?.lessonHistoryComment?.count{ !it.delYn } ?: 0,
+                commentTotalCount = entity?.lessonHistoryComment?.count { !it.delYn } ?: 0,
                 createdAt = entity?.createdAt,
                 student = entity?.student?.name,
                 trainer = "${entity?.trainer?.name} 트레이너",
@@ -41,13 +41,7 @@ data class RetrieveLessonHistoryByDateCondResult(
                 lessonDt = formatLessonDt(entity?.schedule?.lessonDt),
                 lessonTime = formatLessonTime(entity?.schedule?.lessonStartTime, entity?.schedule?.lessonEndTime),
                 attendanceStatus = validateAttendanceStatus(entity?.schedule?.lessonDt, entity?.schedule?.lessonEndTime),
-                files = entity?.let {
-                    it.files.map {
-                        LessonHistoryFileResults.from(it)
-                    }.sortedBy {
-                        it.fileOrder
-                    }.toMutableList()
-                } ?: mutableListOf()
+                files = entity?.let { it.files.map { file -> LessonHistoryFileResults.from(file) }.sortedBy { file -> file.fileOrder }.toMutableList() } ?: mutableListOf()
             )
         }
 

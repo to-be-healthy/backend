@@ -89,8 +89,8 @@ class LessonHistoryService(
             } ?: null
     }
 
-    fun findOneLessonHistory(lessonHistoryId: Long, member: CustomMemberDetails): RetrieveLessonHistoryDetailResult? {
-        return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, member)
+    fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long): RetrieveLessonHistoryDetailResult? {
+        return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, memberId)
             ?.let { RetrieveLessonHistoryDetailResult.detailFrom(it) }
             ?: null
     }

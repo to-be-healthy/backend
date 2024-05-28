@@ -17,7 +17,8 @@ class LessonHistoryCommentRepositoryImpl(
             .from(lessonHistoryComment)
             .where(
                 lessonHistoryIdEq(lessonHistoryId),
-                parentCommentIdIsNull()
+                parentCommentIdIsNull(),
+                lessonHistoryComment.delYn.eq(false)
             )
             .fetchOne() ?: 1
         return result
@@ -29,7 +30,8 @@ class LessonHistoryCommentRepositoryImpl(
             .from(lessonHistoryComment)
             .where(
                 lessonHistoryIdEq(lessonHistoryId),
-                parentCommentIdEq(lessonHistoryCommentId)
+                parentCommentIdEq(lessonHistoryCommentId),
+                lessonHistoryComment.delYn.eq(false)
             )
             .fetchOne() ?: 1
     }
@@ -39,7 +41,21 @@ class LessonHistoryCommentRepositoryImpl(
             .select(lessonHistoryComment)
             .from(lessonHistoryComment)
             .leftJoin(lessonHistoryComment.files).fetchJoin()
-            .where(lessonHistoryComment.id.eq(lessonHistoryCommentId))
+            .where(
+                lessonHistoryComment.id.eq(lessonHistoryCommentId),
+                lessonHistoryComment.delYn.eq(false)
+            )
+            .fetchOne()
+    }
+
+    override fun findCommentById(lessonHistoryCommentId: Long): LessonHistoryComment? {
+        return queryFactory
+            .select(lessonHistoryComment)
+            .from(lessonHistoryComment)
+            .where(
+                lessonHistoryComment.id.eq(lessonHistoryCommentId),
+                lessonHistoryComment.delYn.eq(false)
+            )
             .fetchOne()
     }
 
