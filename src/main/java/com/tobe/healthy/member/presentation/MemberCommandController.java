@@ -12,7 +12,6 @@ import com.tobe.healthy.member.domain.dto.out.RegisterMemberProfileResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.AlarmType;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -95,7 +94,7 @@ public class MemberCommandController {
 			@ApiResponse(responseCode = "200", description = "이름이 변경되었습니다.")
 	})
 	@PatchMapping("/name")
-	public ResponseHandler<String> changeName(@Parameter(description = "변경할 이름", example = "홍길동") @RequestParam String name,
+	public ResponseHandler<String> changeName(@RequestParam String name,
 											  @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<String>builder()
 				.data(memberCommandService.changeName(name, member.getMemberId()))
@@ -139,7 +138,7 @@ public class MemberCommandController {
 	@PostMapping("/nickname/{studentId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ResponseHandler<Boolean> assignNickname(@PathVariable Long studentId,
-												   @Parameter(description = "등록할 닉네임", example = "홍박사") @RequestParam String nickname) {
+												   @RequestParam String nickname) {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberCommandService.assignNickname(nickname, studentId))
 				.message("닉네임을 지정하였습니다.")
@@ -165,8 +164,7 @@ public class MemberCommandController {
 					@ApiResponse(responseCode = "200", description = "스케줄 공지 보기 여부가 변경되었습니다.")
 			})
 	@PatchMapping("/schedule-notice")
-	public ResponseHandler<Boolean> changeScheduleNotice(@Parameter(description = "변경할 상태", example = "ENABLED")
-														 @RequestParam AlarmStatus alarmStatus,
+	public ResponseHandler<Boolean> changeScheduleNotice(@RequestParam AlarmStatus alarmStatus,
 														 @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberCommandService.changeScheduleNotice(alarmStatus, member.getMemberId()))

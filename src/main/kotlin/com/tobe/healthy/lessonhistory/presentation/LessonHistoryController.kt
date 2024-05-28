@@ -50,7 +50,7 @@ class LessonHistoryController(
         ])
     @GetMapping("/detail/{studentId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findAllLessonHistoryByMemberId(@Parameter(description = "학생 ID", example = "1") @PathVariable studentId: Long,
+    fun findAllLessonHistoryByMemberId(@PathVariable studentId: Long,
                                        @Parameter(content = [Content(schema = Schema(implementation = RetrieveLessonHistoryByDateCond::class))]) request: RetrieveLessonHistoryByDateCond,
                                        @ParameterObject pageable: Pageable): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult>> {
         return ApiResultResponse(

@@ -30,7 +30,7 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "사용 가능한 아이디입니다.")
 	})
 	@GetMapping("/validation/user-id")
-	public ResponseHandler<Boolean> validateUsernameDuplication(@RequestParam(name = "userId") String userId) {
+	public ResponseHandler<Boolean> validateUsernameDuplication(@RequestParam String userId) {
 		return ResponseHandler.<Boolean>builder()
 			.data(memberAuthService.validateUserIdDuplication(userId))
 			.message("사용할 수 있는 아이디입니다.")
