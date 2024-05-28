@@ -2,6 +2,7 @@ package com.tobe.healthy.member.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.member.application.MemberAuthService;
+import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
 import com.tobe.healthy.member.domain.dto.in.RetrieveMemberId;
 import com.tobe.healthy.member.domain.dto.in.RetrieveMemberId.FindMemberIdResult;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
@@ -29,7 +30,7 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "사용 가능한 아이디입니다.")
 	})
 	@GetMapping("/validation/user-id")
-	public ResponseHandler<Boolean> validateUsernameDuplication(@RequestParam(name = "userId") String userId) {
+	public ResponseHandler<Boolean> validateUsernameDuplication(@RequestParam String userId) {
 		return ResponseHandler.<Boolean>builder()
 			.data(memberAuthService.validateUserIdDuplication(userId))
 			.message("사용할 수 있는 아이디입니다.")
@@ -42,9 +43,9 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "사용 가능한 이메일입니다.")
 	})
 	@GetMapping("/validation/email")
-	public ResponseHandler<Boolean> validateEmailDuplication(@RequestParam String email) {
+	public ResponseHandler<Boolean> validateEmailDuplication(@RequestParam @Valid CommandValidateEmail request) {
 		return ResponseHandler.<Boolean>builder()
-			.data(memberAuthService.validateEmailDuplication(email))
+			.data(memberAuthService.validateEmailDuplication(request))
 			.message("사용 가능한 이메일입니다.")
 			.build();
 	}
@@ -55,7 +56,7 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "이메일 이름이 일치한 사용자 아이디를 반환한다.")
 	})
 	@PostMapping("/find/user-id")
-	public ResponseHandler<FindMemberIdResult> findUserId(@RequestBody RetrieveMemberId request) {
+	public ResponseHandler<FindMemberIdResult> findUserId(@RequestBody @Valid RetrieveMemberId request) {
 		return ResponseHandler.<FindMemberIdResult>builder()
 			.data(memberAuthService.findUserId(request))
 			.message("아이디 찾기에 성공하였습니다.")

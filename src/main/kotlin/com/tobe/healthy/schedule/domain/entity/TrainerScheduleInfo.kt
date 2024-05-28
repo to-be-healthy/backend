@@ -28,10 +28,10 @@ class TrainerScheduleInfo(
 
     @OneToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_id")
-    val trainer: Member,
+    val trainer: Member? = null,
 
     @OneToMany(fetch = LAZY, mappedBy = "trainerScheduleInfo", cascade = [ALL], orphanRemoval = true)
-    var trainerScheduleClosedDays: MutableList<TrainerScheduleClosedDaysInfo>? = mutableListOf(),
+    var trainerScheduleClosedDays: MutableList<TrainerScheduleClosedDaysInfo> = mutableListOf(),
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -40,7 +40,7 @@ class TrainerScheduleInfo(
 ) {
 
     fun registerTrainerScheduleClosedDays(trainerScheduleClosedDays: List<TrainerScheduleClosedDaysInfo>) {
-        this.trainerScheduleClosedDays?.addAll(trainerScheduleClosedDays)
+        this.trainerScheduleClosedDays.addAll(trainerScheduleClosedDays)
     }
 
     fun changeDefaultLessonTime(request: CommandRegisterDefaultLessonTime) {

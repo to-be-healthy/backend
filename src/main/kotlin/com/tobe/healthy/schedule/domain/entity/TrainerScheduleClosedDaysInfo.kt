@@ -13,7 +13,7 @@ class TrainerScheduleClosedDaysInfo(
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_schedule_info_id")
-    val trainerScheduleInfo: TrainerScheduleInfo,
+    val trainerScheduleInfo: TrainerScheduleInfo? = null,
 
     @Enumerated(STRING)
     var closedDays: DayOfWeek,

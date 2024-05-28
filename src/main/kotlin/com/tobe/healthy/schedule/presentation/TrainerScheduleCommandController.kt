@@ -6,10 +6,8 @@ import com.tobe.healthy.schedule.application.TrainerScheduleCommandService
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterDefaultLessonTime
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterIndividualSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
-import com.tobe.healthy.schedule.domain.dto.out.CommandRegisterDefaultLessonTimeResult
-import com.tobe.healthy.schedule.domain.dto.out.CommandRegisterScheduleByStudentResult
-import com.tobe.healthy.schedule.domain.dto.out.CommandRegisterScheduleResult
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo
+import com.tobe.healthy.schedule.domain.dto.out.*
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.NO_SHOW
 import io.swagger.v3.oas.annotations.Operation
@@ -78,18 +76,19 @@ class TrainerScheduleCommandController(
     }
 
     @Operation(
-        summary = "트레이너가 특정 일을 휴무일로 변경한다.", responses = [
-            ApiResponse(responseCode = "200", description = "해당 일을 휴무일로 변경하였습니다."),
+        summary = "트레이너가 특정 스케줄을 DISABLED/AVAILABLE로 변경한다.", responses = [
+            ApiResponse(responseCode = "200", description = "해당 스케줄을 변경하였습니다."),
             ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
-    ])
-    @PostMapping("/trainer/change-closed-day")
+        ])
+    @PostMapping("/trainer/{status}/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun cancelScheduleForTrainer(@RequestParam lessonDt: String,
+    fun changeScheduleForTrainer(@PathVariable status: ReservationStatus,
+                                 @PathVariable scheduleId: Long,
                                  @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
-    ): ApiResultResponse<Boolean> {
+    ): ApiResultResponse<CommandScheduleStatusResult> {
         return ApiResultResponse(
-            message = "휴무일로 변경되었습니다.",
-            data = trainerScheduleCommandService.updateLessonDtToClosedDay(lessonDt, customMemberDetails.memberId)
+            message = "해당 스케줄을 변경하였습니다.",
+            data = trainerScheduleCommandService.updateScheduleStatus(status, scheduleId, customMemberDetails.memberId)
         )
     }
 
@@ -119,9 +118,9 @@ class TrainerScheduleCommandController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun cancelScheduleForTrainer(@PathVariable scheduleId: Long,
                                  @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<Boolean> {
-        val lessonStartTime = trainerScheduleCommandService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId)
+        val scheduleResult = trainerScheduleCommandService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId)
         return ApiResultResponse(
-            message = "${lessonStartTime.format(DateTimeFormatter.ofPattern("a HH시 mm분"))} 수업이 취소되었습니다.",
+            message = "${scheduleResult.lessonStartTime.format(DateTimeFormatter.ofPattern("a HH시 mm분"))} 수업이 취소되었습니다.",
             data = true
         )
     }

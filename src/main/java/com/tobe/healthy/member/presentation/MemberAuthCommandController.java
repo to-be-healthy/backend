@@ -2,10 +2,7 @@ package com.tobe.healthy.member.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.member.application.MemberAuthCommandService;
-import com.tobe.healthy.member.domain.dto.in.CommandFindMemberPassword;
-import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
-import com.tobe.healthy.member.domain.dto.in.CommandLoginMember;
-import com.tobe.healthy.member.domain.dto.in.CommandSocialLogin;
+import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/auth/v1")
 @Slf4j
-@Valid
 @Tag(name = "01. 회원 인증 API", description = "인증/권한 없이 접근할 수 있는 회원 API")
 public class MemberAuthCommandController {
 
@@ -36,9 +32,9 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "이메일로 인증번호를 전송하였습니다.")
 	})
 	@PostMapping("/validation/send-email")
-	public ResponseHandler<String> sendEmailVerification(@RequestParam String email) {
+	public ResponseHandler<String> sendEmailVerification(@RequestBody @Valid CommandValidateEmail request) {
 		return ResponseHandler.<String>builder()
-			.data(memberAuthCommandService.sendEmailVerification(email))
+			.data(memberAuthCommandService.sendEmailVerification(request))
 			.message("이메일로 인증번호를 발송중이에요!")
 			.build();
 	}
@@ -68,7 +64,7 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
 	})
 	@PostMapping("/join")
-	public ResponseHandler<CommandJoinMemberResult> join(@RequestBody CommandJoinMember request) {
+	public ResponseHandler<CommandJoinMemberResult> join(@RequestBody @Valid CommandJoinMember request) {
 		return ResponseHandler.<CommandJoinMemberResult>builder()
 			.data(memberAuthCommandService.joinMember(request))
 			.message("회원가입이 완료되었습니다.")

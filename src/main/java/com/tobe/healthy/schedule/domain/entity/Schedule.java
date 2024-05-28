@@ -2,6 +2,7 @@ package com.tobe.healthy.schedule.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.course.domain.entity.Course;
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -60,6 +61,9 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@JoinColumn(name = "course_id")
 	private Course course;
 
+	@OneToMany(fetch = LAZY, mappedBy = "schedule")
+	private List<LessonHistory> lessonHistories = new ArrayList<>();
+
 	public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, ReservationStatus reservationStatus) {
 		ScheduleBuilder reserve = Schedule.builder()
 				.lessonDt(date)
@@ -84,14 +88,14 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 		this.reservationStatus = COMPLETED;
 	}
 
-	public void cancelTrainerSchedule() {
-		this.delYn = true;
-		this.applicant = null;
-	}
-
 	public void cancelMemberSchedule() {
 		this.reservationStatus = AVAILABLE;
 		this.applicant = null;
+	}
+
+	public void cancelMemberSchedule(ScheduleWaiting scheduleWaiting) {
+		this.reservationStatus = COMPLETED;
+		this.applicant = scheduleWaiting.getMember();
 	}
 
 	public void changeApplicantInSchedule(Member applicant) {
@@ -124,5 +128,10 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	public void deleteCourse(){
 		this.course = null;
+	}
+
+	public void updateLessonDtToAvailableDay() {
+		this.reservationStatus = AVAILABLE;
+		this.applicant = null;
 	}
 }

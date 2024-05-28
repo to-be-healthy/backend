@@ -79,19 +79,19 @@ public class MemberAuthCommandService {
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
-    public String sendEmailVerification(String email) {
-        memberRepository.findByEmail(email).ifPresent(e -> {
+    public String sendEmailVerification(CommandValidateEmail request) {
+        memberRepository.findByEmail(request.getEmail()).ifPresent(e -> {
             throw new CustomException(MEMBER_EMAIL_DUPLICATION);
         });
 
         String authKey = Utils.getAuthCode(6);
 
-        redisService.setValuesWithTimeout(email, authKey, EMAIL_AUTH_TIMEOUT); // 3분
+        redisService.setValuesWithTimeout(request.getEmail(), authKey, EMAIL_AUTH_TIMEOUT); // 3분
 
         // 3. 이메일에 인증번호 전송한다.
-        mailService.sendAuthMail(email, authKey);
+        mailService.sendAuthMail(request.getEmail(), authKey);
 
-        return email;
+        return request.getEmail();
     }
 
     public Boolean verifyEmailAuthNumber(String authNumber, String email) {

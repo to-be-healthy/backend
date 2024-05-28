@@ -90,7 +90,7 @@ class LessonHistoryServiceTest(
 
     fun createLessonHistoryComment(
         comment: String,
-        lessonHistoryId: Long,
+        lessonHistoryId: Long?,
         memberId: Long
     ): CommandRegisterCommentResult {
         return CommandRegisterComment(comment = comment, null).let {

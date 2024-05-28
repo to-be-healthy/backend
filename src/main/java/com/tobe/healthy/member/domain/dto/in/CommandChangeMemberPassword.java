@@ -13,10 +13,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @Schema(description = "비밀번호 변경 DTO")
 public class CommandChangeMemberPassword {
-	@Schema(description = "현재 비밀번호" , example = "12345678a")
-	@NotEmpty(message = "현재 비밀번호를 입력해 주세요.")
-	private String currPassword;
-
 	@Schema(description = "변경할 비밀번호" , example = "12345678aaa")
 	@NotEmpty(message = "변경할 비밀번호를 입력해 주세요.")
 	private String changePassword1;

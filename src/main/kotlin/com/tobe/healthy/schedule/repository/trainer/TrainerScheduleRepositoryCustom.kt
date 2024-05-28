@@ -14,6 +14,7 @@ import java.util.*
 interface TrainerScheduleRepositoryCustom {
     fun findAllSchedule(retrieveTrainerScheduleByLessonInfo: RetrieveTrainerScheduleByLessonInfo, trainerId: Long): RetrieveTrainerScheduleByLessonInfoResult?
     fun findOneTrainerTodaySchedule(queryTrainerSchedule: RetrieveTrainerScheduleByLessonDt, trainerId: Long): RetrieveTrainerScheduleByLessonDtResult?
+    fun findOneTrainerTodaySchedule(trainerId: Long): RetrieveTrainerScheduleByLessonDtResult?
     fun findAvailableRegisterSchedule(request: CommandRegisterIndividualSchedule, trainerId: Long): Schedule?
     fun validateRegisterSchedule(lessonDt: LocalDate, startTime: LocalTime, endTime: LocalTime, trainerId: Long): Long
     fun findAvailableWaitingId(scheduleId: Long): Optional<Schedule>
@@ -21,4 +22,5 @@ interface TrainerScheduleRepositoryCustom {
     fun findScheduleByTrainerId(scheduleId: Long, trainerId: Long): Schedule?
     fun findAllByLessonDtAndTrainerId(lessonDt: String, trainerId: Long): List<Schedule?>
     fun findAllDisabledSchedule(lessonStartDt: LocalDate, lessonEndDt: LocalDate): List<Schedule?>
+    fun findAllUnwrittenLessonHistory(memberId: Long): List<Schedule>
 }

@@ -28,13 +28,7 @@ class GymCommandService(
             ?: throw CustomException(GYM_NOT_FOUND)
 
         if (member.memberType == TRAINER) {
-            if (gym.joinCode != joinCode) {
-                throw CustomException(JOIN_CODE_NOT_VALID)
-            }
-        }
-
-        if (member.gym?.id == gym.id) {
-            throw CustomException(UNCHANGED_GYM_ID)
+            gym.validateJoinCode(joinCode)
         }
 
         member.registerGym(gym)

@@ -6,6 +6,7 @@ import com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_NOT_VALID
 import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.dto.`in`.CommandLoginMember
+import com.tobe.healthy.member.domain.dto.`in`.CommandValidateEmail
 import com.tobe.healthy.member.domain.dto.`in`.RetrieveMemberId
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.domain.entity.MemberType.STUDENT
@@ -49,7 +50,8 @@ class MemberServiceTest(
     }
 
     "유효한 이메일일 경우 인증번호를 전송한다" {
-        val email = memberAuthCommandService.sendEmailVerification("laborlawseon@gmail.com")
+        val request = CommandValidateEmail("laborlawseon@gmail.com")
+        val email = memberAuthCommandService.sendEmailVerification(request)
         redisService.getValues(email).length shouldBe 6
         email shouldBe "laborlawseon@gmail.com"
     }

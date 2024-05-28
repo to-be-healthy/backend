@@ -13,7 +13,7 @@ class MemberToken(
 
     @OneToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
-    val member: Member,
+    val member: Member? = null,
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
