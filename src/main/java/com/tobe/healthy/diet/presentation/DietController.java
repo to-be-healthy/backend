@@ -37,9 +37,9 @@ public class DietController {
     })
     @PostMapping("/file")
     public ResponseHandler<List<RegisterFile>> addDietFile(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                     @Valid List<MultipartFile> files) {
+                                                                     @Valid List<MultipartFile> uploadFiles) {
         return ResponseHandler.<List<RegisterFile>>builder()
-                .data(fileService.uploadFiles("diet", files, customMemberDetails.getMember()))
+                .data(fileService.uploadFiles("diet", uploadFiles, customMemberDetails.getMember()))
                 .message("첨부파일이 등록되었습니다.")
                 .build();
     }
@@ -50,7 +50,7 @@ public class DietController {
     })
     @PostMapping
     public ResponseHandler<DietDto> addDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                      @Valid DietAddCommand command) {
+                                                      @Valid @RequestBody DietAddCommand command) {
         return ResponseHandler.<DietDto>builder()
                 .data(dietService.addDiet(customMemberDetails.getMember(), command))
                 .message("식단기록이 등록되었습니다.")

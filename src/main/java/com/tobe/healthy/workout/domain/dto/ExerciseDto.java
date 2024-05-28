@@ -1,15 +1,12 @@
 package com.tobe.healthy.workout.domain.dto;
 
-import com.tobe.healthy.workout.domain.entity.Exercise;
-import com.tobe.healthy.workout.domain.entity.ExerciseCategory;
-import com.tobe.healthy.workout.domain.entity.PrimaryMuscle;
+import com.tobe.healthy.workout.domain.entity.exercise.Exercise;
+import com.tobe.healthy.workout.domain.entity.exercise.ExerciseCategory;
+import com.tobe.healthy.workout.domain.entity.exercise.ExerciseCustom;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Data
@@ -19,28 +16,27 @@ import java.util.List;
 public class ExerciseDto {
 
     private Long exerciseId;
-    private ExerciseCategory category;
-    private PrimaryMuscle primaryMuscle;
-    private String equipments;
-    private String forces;
-    private String levels;
-    private String mechanics;
+    private Long exerciseCustomId;
     private String names;
-    private String subId;
-    @Builder.Default
-    private List<String> instructions = new ArrayList<>();
+    private ExerciseCategory category;
+    private String muscles;
 
     public static ExerciseDto from(Exercise exercise) {
+        String secondaryMuscles = exercise.getSecondaryMuscle() == null ? "" : ", " + exercise.getSecondaryMuscle();
         return ExerciseDto.builder()
                 .exerciseId(exercise.getExerciseId())
-                .category(exercise.getCategory())
-                .primaryMuscle(exercise.getPrimaryMuscle())
-                .equipments(exercise.getEquipments())
-                .forces(exercise.getForces())
-                .levels(exercise.getLevels())
-                .mechanics(exercise.getMechanics())
                 .names(exercise.getNames())
-                .subId(exercise.getSubId())
+                .category(exercise.getCategory())
+                .muscles(exercise.getPrimaryMuscle() + secondaryMuscles)
+                .build();
+    }
+
+    public static ExerciseDto from(ExerciseCustom custom) {
+        return ExerciseDto.builder()
+                .exerciseCustomId(custom.getExerciseCustomId())
+                .names(custom.getNames())
+                .category(custom.getCategory())
+                .muscles(custom.getMuscles())
                 .build();
     }
 

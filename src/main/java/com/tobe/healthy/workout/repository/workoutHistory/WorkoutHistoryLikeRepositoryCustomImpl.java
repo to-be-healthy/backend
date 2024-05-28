@@ -1,4 +1,4 @@
-package com.tobe.healthy.workout.repository;
+package com.tobe.healthy.workout.repository.workoutHistory;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
-import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryLike.workoutHistoryLike;
+import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryLike.workoutHistoryLike;
 
 
 @Repository

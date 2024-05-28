@@ -3,6 +3,7 @@ package com.tobe.healthy.home.application;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
+import com.tobe.healthy.course.repository.CourseHistoryRepository;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
@@ -39,7 +40,6 @@ import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 @Transactional
 @Slf4j
 public class HomeService {
-    private final CourseRepository courseRepository;
     private final PointRepository pointRepository;
     private final StudentScheduleRepository studentScheduleRepository;
     private final LessonHistoryRepository lessonHistoryRepository;
@@ -48,6 +48,7 @@ public class HomeService {
     private final TrainerScheduleRepository trainerScheduleRepository;
     private final MemberRepository memberRepository;
     private final CourseService courseService;
+    private final CourseHistoryRepository courseHistoryRepository;
 
     public StudentHomeResult getStudentHome(Long memberId) {
         //헬스장 정보
@@ -93,6 +94,18 @@ public class HomeService {
     public TrainerHomeResult getTrainerHome(Long trainerId) {
         long mappingStudentCount = mappingRepository.countByTrainerId(trainerId);
 
+        // 우수회원
+        List<MemberInTeamResult> bestStudents = null;
+        Long paidCnt = courseHistoryRepository.checkPaidOneLesson(trainerId, getNowMonth());
+        if(paidCnt.intValue() == 0){
+            bestStudents = memberRepository.getBestStudent(trainerId);
+
+            //수강권
+            for (MemberInTeamResult bestStudent : bestStudents) {
+                CourseDto usingCourse = courseService.getNowUsingCourse(bestStudent.getMemberId());
+                bestStudent.setCourseId(usingCourse == null ? null : usingCourse.getCourseId());
+            }
+        }
         List<MemberInTeamResult> bestStudents = memberRepository.getBestStudent(trainerId);
 
         RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(trainerId);

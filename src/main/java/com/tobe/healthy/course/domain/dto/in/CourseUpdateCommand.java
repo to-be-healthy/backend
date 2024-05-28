@@ -22,7 +22,7 @@ public class CourseUpdateCommand {
     @NotNull
     private Calculation calculation;
 
-    @Schema(description = "증감 타입" , example = "COURSE_CREATE(수강권 생성), PLUS_ONE_LESSON(1회 수강권 지급), RESERVATION(수업 예약), RESERVATION_CANCEL(수업 예약 취소)")
+    @Schema(description = "증감 타입" , example = "COURSE_CREATE(수강권 생성), PLUS_CNT(횟수 추가), MINUS_CNT(횟수 차감), ONE_LESSON(1회 수강권 지급)")
     @NotNull
     private CourseHistoryType type;
 

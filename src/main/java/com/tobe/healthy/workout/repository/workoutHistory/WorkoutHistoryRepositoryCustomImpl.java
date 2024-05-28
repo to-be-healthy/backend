@@ -1,4 +1,4 @@
-package com.tobe.healthy.workout.repository;
+package com.tobe.healthy.workout.repository.workoutHistory;
 
 import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -8,8 +8,7 @@ import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.workout.domain.dto.out.QWorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistory;
-import com.tobe.healthy.workout.domain.entity.WorkoutHistoryFiles;
+import com.tobe.healthy.workout.domain.entity.workoutHistory.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,9 +18,10 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
-import static com.tobe.healthy.workout.domain.entity.QWorkoutHistory.workoutHistory;
-import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryFiles.workoutHistoryFiles;
-import static com.tobe.healthy.workout.domain.entity.QWorkoutHistoryLike.workoutHistoryLike;
+import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistory.workoutHistory;
+import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryFiles.workoutHistoryFiles;
+import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryLike.workoutHistoryLike;
+
 
 @Repository
 @RequiredArgsConstructor

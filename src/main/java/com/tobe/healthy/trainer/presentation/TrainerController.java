@@ -163,7 +163,7 @@ public class TrainerController {
     @GetMapping("/diets")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<CustomPaging<DietDto>> getDietByTrainer(@AuthenticationPrincipal CustomMemberDetails loginMember,
-                                                                   @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+                                                                   @Parameter(description = "조회할 날짜", example = "2024-12-01") @Param("searchDate") String searchDate,
                                                                    Pageable pageable) {
         return ResponseHandler.<CustomPaging<DietDto>>builder()
                 .data(dietService.getDietByTrainer(loginMember.getMemberId(), pageable, searchDate))

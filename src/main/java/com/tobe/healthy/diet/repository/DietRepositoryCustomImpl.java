@@ -49,12 +49,12 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
         Long totalCnt = queryFactory
                 .select(diet.count())
                 .from(diet)
-                .where(memberIdEq(memberId), delYnEq(false), convertDateFormat(searchDate))
+                .where(memberIdEq(memberId), delYnEq(false), convertDateFormat_YYYY_MM(searchDate))
                 .fetchOne();
         List<Diet> diets = queryFactory
                 .select(diet)
                 .from(diet)
-                .where(memberIdEq(memberId), delYnEq(false), convertDateFormat(searchDate))
+                .where(memberIdEq(memberId), delYnEq(false), convertDateFormat_YYYY_MM(searchDate))
                 .orderBy(diet.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -91,12 +91,12 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
         Long totalCnt = queryFactory
                 .select(diet.count())
                 .from(diet)
-                .where(dietTrainerIdEq(trainer), dietDeYnEq(false), convertDateFormat(searchDate))
+                .where(dietTrainerIdEq(trainer), dietDeYnEq(false), convertDateFormat_YYYY_MM_DD(searchDate))
                 .fetchOne();
         List<Diet> diets = queryFactory
                 .select(diet)
                 .from(diet)
-                .where(dietTrainerIdEq(trainer), dietDeYnEq(false), convertDateFormat(searchDate))
+                .where(dietTrainerIdEq(trainer), dietDeYnEq(false), convertDateFormat_YYYY_MM_DD(searchDate))
                 .orderBy(diet.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -116,12 +116,21 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
         return dietFiles.delYn.eq(bool);
     }
 
-    private BooleanExpression convertDateFormat(String searchDate) {
+    private BooleanExpression convertDateFormat_YYYY_MM(String searchDate) {
         if (ObjectUtils.isEmpty(searchDate)) return null;
         StringTemplate stringTemplate = Expressions.stringTemplate(
                 "DATE_FORMAT({0}, {1})"
                 , diet.createdAt
                 , ConstantImpl.create("%Y-%m"));
+        return stringTemplate.eq(searchDate);
+    }
+
+    private BooleanExpression convertDateFormat_YYYY_MM_DD(String searchDate) {
+        if (ObjectUtils.isEmpty(searchDate)) return null;
+        StringTemplate stringTemplate = Expressions.stringTemplate(
+                "DATE_FORMAT({0}, {1})"
+                , diet.createdAt
+                , ConstantImpl.create("%Y-%m-%d"));
         return stringTemplate.eq(searchDate);
     }
 
