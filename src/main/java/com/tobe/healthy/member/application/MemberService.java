@@ -37,10 +37,15 @@ public class MemberService {
         return new TrainerMappingResult(mapping != null);
     }
 
-    public Long validateCurrentPassword(ValidateCurrentPassword request, Long memberId) {
-        return memberRepository.findById(memberId)
-            .filter(member -> passwordEncoder.matches(request.getPassword(), member.getPassword()))
-            .map(Member::getId)
-            .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+    public Boolean validateCurrentPassword(ValidateCurrentPassword request, Long memberId) {
+        memberRepository.findById(memberId).ifPresentOrElse(
+            m -> {
+                if (!passwordEncoder.matches(request.getPassword(), m.getPassword())) {
+                    throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+                }
+            }, () -> {
+                throw new CustomException(MEMBER_NOT_FOUND);
+            });
+        return true;
     }
 }

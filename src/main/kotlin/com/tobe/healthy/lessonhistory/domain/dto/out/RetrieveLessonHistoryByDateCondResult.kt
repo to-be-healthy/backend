@@ -72,13 +72,9 @@ data class RetrieveLessonHistoryByDateCondResult(
         }
     }
 
-    @Schema(description = "수업 일지 첨부파일")
     data class LessonHistoryFileResults(
-        @Schema(description = "첨부한 파일 URL(AWS S3)", example = "https://~~~")
         val fileUrl: String,
-        @Schema(description = "첨부한 파일 순서", example = "0")
         val fileOrder: Int,
-        @Schema(description = "파일 등록 날짜", example = "2024-04-10 13:00:12")
         val createdAt: LocalDateTime,
     ) {
         companion object {

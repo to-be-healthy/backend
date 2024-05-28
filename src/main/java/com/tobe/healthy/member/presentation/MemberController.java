@@ -218,9 +218,9 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "현재 비밀번호가 확인되었습니다.")
 		})
 	@PostMapping("/password")
-	public ResponseHandler<Long> validateCurrentPassword(@RequestBody ValidateCurrentPassword request,
-														 @AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Long>builder()
+	public ResponseHandler<Boolean> validateCurrentPassword(@RequestBody ValidateCurrentPassword request,
+														 	@AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<Boolean>builder()
 			.data(memberService.validateCurrentPassword(request, member.getMemberId()))
 			.message("비밀번호가 확인되었습니다.")
 			.build();

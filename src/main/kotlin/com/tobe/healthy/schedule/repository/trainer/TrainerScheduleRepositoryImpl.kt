@@ -111,7 +111,10 @@ class TrainerScheduleRepositoryImpl(
                 reservationStatusEq(COMPLETED),
                 delYnEq(false)
             )
-            .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+            .orderBy(
+                schedule.lessonDt.asc(),
+                schedule.lessonStartTime.asc()
+            )
             .fetch()
 
         val scheduleCount = queryFactory
@@ -144,7 +147,6 @@ class TrainerScheduleRepositoryImpl(
                 }
             }
             return trainerTodaySchedule
-
         }
     }
 
