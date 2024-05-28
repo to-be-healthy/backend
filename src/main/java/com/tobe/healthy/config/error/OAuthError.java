@@ -2,11 +2,14 @@ package com.tobe.healthy.config.error;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 public class OAuthError {
 
 	@Data
+    @ToString
 	public static class KakaoError {
 		@JsonProperty("error")
 		private String error;
@@ -19,12 +22,14 @@ public class OAuthError {
 	}
 
 	@Data
+    @ToString
 	public static class NaverError {
 		private String resultcode;
 		private String message;
 	}
 
 	@Data
+    @ToString
 	public static class GoogleError {
 		@JsonProperty("error")
 		private String error;

@@ -6,7 +6,6 @@ import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
-import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
@@ -33,14 +32,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 
 
 @Service
@@ -120,7 +117,7 @@ public class TrainerService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         //식단
-        DietDto diet = dietService.getDietCreatedAtToday(memberId);
+        DietDto diet = dietService.getTodayDiet(memberId);
         MemberDetailResult result = memberRepository.getMemberOfTrainer(memberId);
         result.setDiet(diet);
 

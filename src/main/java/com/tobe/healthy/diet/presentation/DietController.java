@@ -4,7 +4,7 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
-import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
+import com.tobe.healthy.diet.domain.dto.in.DietAddCommandAtHome;
 import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
 import com.tobe.healthy.workout.application.FileService;
 import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,16 +45,41 @@ public class DietController {
                 .build();
     }
 
+    @Operation(summary = "홈에서 식단기록 등록", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
+    })
+    @PostMapping("/home-upload")
+    public ResponseHandler<DietDto> addDietAtHome(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                      @Valid @RequestBody DietAddCommandAtHome command) {
+        return ResponseHandler.<DietDto>builder()
+                .data(dietService.addDietAtHome(customMemberDetails.getMember(), command))
+                .message("식단기록이 등록되었습니다.")
+                .build();
+    }
+
     @Operation(summary = "식단기록 등록", responses = {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
     })
     @PostMapping
     public ResponseHandler<DietDto> addDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                      @Valid @RequestBody DietAddCommand command) {
+                                               @RequestBody @Valid DietUpdateCommand command) {
         return ResponseHandler.<DietDto>builder()
                 .data(dietService.addDiet(customMemberDetails.getMember(), command))
                 .message("식단기록이 등록되었습니다.")
+                .build();
+    }
+
+    @Operation(summary = "식단기록 상세 조회", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
+    })
+    @GetMapping("/today")
+    public ResponseHandler<DietDto> getTodayDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+        return ResponseHandler.<DietDto>builder()
+                .data(dietService.getTodayDiet(customMemberDetails.getMember().getId()))
+                .message("식단기록이 조회되었습니다.")
                 .build();
     }
 
@@ -118,6 +144,19 @@ public class DietController {
         return ResponseHandler.<DietDto>builder()
                 .data(dietService.updateDiet(customMemberDetails.getMember(), dietId, command))
                 .message("식단기록이 수정되었습니다.")
+                .build();
+    }
+
+    @Operation(summary = "이번달 식단 등록한 날짜 조회", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "업로드 날짜를 반환한다.")
+    })
+    @GetMapping("/upload-date")
+    public ResponseHandler<List<String>> getDietUploadDays(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                           @Parameter(description = "조회할 날짜", example = "2024-05") @Param("searchDate") String searchDate) {
+        return ResponseHandler.<List<String>>builder()
+                .data(dietService.getDietUploadDays(customMemberDetails.getMember().getId(), searchDate))
+                .message("업로드 날짜가 조회되었습니다.")
                 .build();
     }
 

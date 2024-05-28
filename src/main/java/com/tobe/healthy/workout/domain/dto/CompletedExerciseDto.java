@@ -3,13 +3,11 @@ package com.tobe.healthy.workout.domain.dto;
 import com.tobe.healthy.workout.domain.entity.workoutHistory.CompletedExercise;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 
 @Data
+@ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

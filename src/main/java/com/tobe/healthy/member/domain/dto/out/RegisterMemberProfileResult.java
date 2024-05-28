@@ -2,8 +2,10 @@ package com.tobe.healthy.member.domain.dto.out;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 @Builder
 public class RegisterMemberProfileResult {
     private String fileUrl;

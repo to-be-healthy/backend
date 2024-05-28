@@ -23,7 +23,7 @@ public class ExerciseRepositoryCustomImpl implements ExerciseRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Exercise> getExercise(ExerciseCategory exerciseCategory, Pageable pageable) {
+    public Page<Exercise> getExercise(Long memberId, ExerciseCategory exerciseCategory, Pageable pageable) {
         Long totalCnt = queryFactory
                 .select(exercise.count())
                 .from(exercise)
@@ -32,11 +32,11 @@ public class ExerciseRepositoryCustomImpl implements ExerciseRepositoryCustom {
         List<Exercise> exercises = queryFactory
                 .select(exercise)
                 .from(exercise)
-                .where(exerciseCategoryEq(exerciseCategory))
-                .groupBy(exercise.exerciseId)
-                .orderBy(exercise.exerciseId.asc())
+                .where(exerciseCategoryEq(exerciseCategory)
+                        , exercise.member.id.eq(memberId).or(exercise.member.id.isNull()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .orderBy(exercise.member.id.desc(), exercise.exerciseId.asc())
                 .fetch();
         return PageableExecutionUtils.getPage(exercises, pageable, ()-> totalCnt );
     }

@@ -1,18 +1,35 @@
 package com.tobe.healthy.diet.domain.dto.in;
 
-import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
+import lombok.ToString;
 
 
 @Data
+@ToString
 public class DietUpdateCommand {
 
+    @Schema(description = "아침 파일")
     private String breakfastFile;
+
+    @Schema(description = "점심 파일")
     private String lunchFile;
+
+    @Schema(description = "저녁 파일")
     private String dinnerFile;
+
+    @Schema(description = "아침 단식 여부" , example = "false")
     private boolean breakfastFast;
+
+    @Schema(description = "점심 단식 여부" , example = "false")
     private boolean lunchFast;
+
+    @Schema(description = "저녁 단식 여부" , example = "false")
     private boolean dinnerFast;
+
+    @Schema(description = "먹은 날짜" , example = "2024-05-28")
+    @NotEmpty(message = "날짜를 입력해 주세요.")
+    private String eatDate;
 
 }

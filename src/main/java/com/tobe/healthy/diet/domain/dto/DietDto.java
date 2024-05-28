@@ -2,17 +2,15 @@ package com.tobe.healthy.diet.domain.dto;
 
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.member.domain.dto.MemberDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.tobe.healthy.diet.domain.entity.DietType.BREAKFAST;
 
 @Data
+@ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,6 +22,7 @@ public class DietDto {
     private Long commentCnt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDate eatDate;
 
     @Builder.Default
     private DietDetailDto breakfast = new DietDetailDto();
@@ -41,6 +40,7 @@ public class DietDto {
                 .commentCnt(diet.getCommentCnt())
                 .createdAt(diet.getCreatedAt())
                 .updatedAt(diet.getUpdatedAt())
+                .eatDate(diet.getEatDate())
                 .build();
         dto.breakfast.setFast(diet.getFastBreakfast());
         dto.lunch.setFast(diet.getFastLunch());

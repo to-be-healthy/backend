@@ -9,8 +9,10 @@ import com.tobe.healthy.point.domain.dto.out.RankDto;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 @Builder
 public class StudentHomeResult {
 
