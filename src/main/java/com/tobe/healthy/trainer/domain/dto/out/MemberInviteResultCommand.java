@@ -2,8 +2,10 @@ package com.tobe.healthy.trainer.domain.dto.out;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 public class MemberInviteResultCommand {
 
     @Schema(description = "트레이너/회원정보 매핑 uuid")

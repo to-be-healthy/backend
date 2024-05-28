@@ -4,8 +4,10 @@ import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.AlarmType;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 @Builder
 public class MemberChangeAlarmResult {
     private String type;

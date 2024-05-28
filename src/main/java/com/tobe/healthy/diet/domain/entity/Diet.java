@@ -8,6 +8,8 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +59,8 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     @Builder.Default
     private Boolean fastDinner = false;
 
+    private LocalDate eatDate;
+
     @OneToMany(mappedBy = "diet", cascade = CascadeType.ALL)
     @Builder.Default
     private List<DietFiles> dietFiles = new ArrayList<>();
@@ -70,6 +74,17 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
         return Diet.builder()
                 .member(member)
                 .trainer(trainer)
+                .build();
+    }
+
+    public static Diet create(Member member, Member trainer, DietUpdateCommand command) {
+        return Diet.builder()
+                .member(member)
+                .trainer(trainer)
+                .fastBreakfast(command.isBreakfastFast())
+                .fastLunch(command.isLunchFast())
+                .fastDinner(command.isDinnerFast())
+                .eatDate(LocalDate.parse(command.getEatDate(), DateTimeFormatter.ISO_DATE))
                 .build();
     }
 
@@ -128,4 +143,7 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
         this.commentCnt = commentCnt;
     }
 
+    public void changeEatDate(String eatDate) {
+        this.eatDate = LocalDate.parse(eatDate, DateTimeFormatter.ISO_DATE);
+    }
 }

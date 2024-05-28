@@ -3,16 +3,14 @@ package com.tobe.healthy.diet.domain.dto;
 import com.tobe.healthy.diet.domain.entity.DietComment;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.workout.domain.dto.CommentMemberDto;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 
 @Data
+@ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

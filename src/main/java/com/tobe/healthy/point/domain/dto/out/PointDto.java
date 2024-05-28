@@ -3,11 +3,12 @@ package com.tobe.healthy.point.domain.dto.out;
 import com.tobe.healthy.point.domain.dto.PointHistoryDto;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@ToString
 @Builder
 public class PointDto {
 

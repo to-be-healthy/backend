@@ -4,8 +4,10 @@ import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 @Builder
 public class TrainerMemberMappingDto {
 

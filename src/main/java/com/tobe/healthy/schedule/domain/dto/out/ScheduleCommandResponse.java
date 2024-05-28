@@ -1,16 +1,13 @@
 package com.tobe.healthy.schedule.domain.dto.out;
 
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
-import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 
 @Data
+@ToString
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor

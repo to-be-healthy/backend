@@ -3,14 +3,12 @@ package com.tobe.healthy.point.domain.dto;
 import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.point.domain.entity.Point;
 import com.tobe.healthy.point.domain.entity.PointType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Data
+@ToString
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

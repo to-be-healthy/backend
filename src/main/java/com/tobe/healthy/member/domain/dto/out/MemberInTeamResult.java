@@ -2,9 +2,11 @@ package com.tobe.healthy.member.domain.dto.out;
 
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
+import lombok.ToString;
 
 
 @Data
+@ToString
 public class MemberInTeamResult {
 	private Long memberId;
 	private String name;

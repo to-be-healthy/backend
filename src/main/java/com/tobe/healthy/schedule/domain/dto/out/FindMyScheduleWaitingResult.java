@@ -3,11 +3,13 @@ package com.tobe.healthy.schedule.domain.dto.out;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
 @Data
+@ToString
 @Builder
 public class FindMyScheduleWaitingResult {
 

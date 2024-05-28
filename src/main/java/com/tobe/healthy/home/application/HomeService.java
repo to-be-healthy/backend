@@ -85,7 +85,7 @@ public class HomeService {
         RetrieveLessonHistoryByDateCondResult lessonHistory = lessonHistoryRepository.findTop1LessonHistoryByMemberId(memberId);
 
         //식단
-        DietDto diet = dietService.getDietCreatedAtToday(memberId);
+        DietDto diet = dietService.getTodayDiet(memberId);
 
         return StudentHomeResult.create(usingCourse, point, rank, myReservation, lessonHistory, diet, gym);
     }

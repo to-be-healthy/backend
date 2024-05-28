@@ -5,8 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 @Builder
 public class CourseAddCommand {
 

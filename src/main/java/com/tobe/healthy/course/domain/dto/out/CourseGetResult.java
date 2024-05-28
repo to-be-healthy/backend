@@ -4,10 +4,12 @@ import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.CourseHistoryDto;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
 @Data
+@ToString
 @Builder
 public class CourseGetResult {
 

@@ -7,8 +7,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "비밀번호 찾기 DTO")

@@ -5,11 +5,13 @@ import com.tobe.healthy.course.domain.entity.CourseHistoryType;
 import com.tobe.healthy.point.domain.entity.Calculation;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 
 @Data
+@ToString
 @Builder
 public class CourseHistoryDto {
 
