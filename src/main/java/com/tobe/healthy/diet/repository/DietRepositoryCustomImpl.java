@@ -32,13 +32,12 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
 
 
     @Override
-    public Diet getDietCreatedAtToday(Long memberId) {
-        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0, 0));
-        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59));
-
+    public Diet getTodayDiet(Long memberId) {
         return queryFactory.select(diet)
                 .from(diet)
-                .where(createdAtBetween(start, end), delYnEq(false), memberIdEq(memberId))
+                .where(convertEatDate_YYYY_MM_DD(LocalDate.now().toString())
+                        , delYnEq(false)
+                        , memberIdEq(memberId))
                 .orderBy(diet.createdAt.desc())
                 .limit(1)
                 .fetchOne();
@@ -49,11 +48,11 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
         return queryFactory
                 .select(Expressions.stringTemplate(
                         "DATE_FORMAT({0}, {1})"
-                        , diet.createdAt
+                        , diet.eatDate
                         , ConstantImpl.create("%Y-%m-%d"))).distinct()
                 .from(diet)
                 .where(memberIdEq(memberId), delYnEq(false), convertEatDate_YYYY_MM(searchDate))
-                .orderBy(diet.createdAt.asc())
+                .orderBy(diet.eatDate.asc())
                 .fetch();
     }
 
@@ -68,7 +67,7 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 .select(diet)
                 .from(diet)
                 .where(memberIdEq(memberId), delYnEq(false), convertEatDate_YYYY_MM(searchDate))
-                .orderBy(diet.createdAt.desc())
+                .orderBy(diet.eatDate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -82,21 +81,6 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 .where(dietFiles.diet.dietId.in(ids), dietFileDeYnEq(false))
                 .orderBy(dietFiles.createdAt.desc())
                 .fetch();
-    }
-
-    @Override
-    public Diet findTop1ByCreateAtToday(Long memberId) {
-        LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0, 0));
-        LocalDateTime end = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59));
-
-        return queryFactory.select(diet)
-                .from(diet)
-                .where(createdAtBetween(start, end)
-                        , delYnEq(false)
-                        , memberIdEq(memberId))
-                .orderBy(diet.createdAt.desc())
-                .limit(1)
-                .fetchOne();
     }
 
     @Override
@@ -138,6 +122,15 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
         return stringTemplate.eq(searchDate);
     }
 
+    private BooleanExpression convertEatDate_YYYY_MM_DD(String searchDate) {
+        if (ObjectUtils.isEmpty(searchDate)) return null;
+        StringTemplate stringTemplate = Expressions.stringTemplate(
+                "DATE_FORMAT({0}, {1})"
+                , diet.eatDate
+                , ConstantImpl.create("%Y-%m-%d"));
+        return stringTemplate.eq(searchDate);
+    }
+
     private BooleanExpression convertDateFormat_YYYY_MM_DD(String searchDate) {
         if (ObjectUtils.isEmpty(searchDate)) return null;
         StringTemplate stringTemplate = Expressions.stringTemplate(
@@ -149,13 +142,6 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
 
     private BooleanExpression delYnEq(boolean bool) {
         return diet.delYn.eq(bool);
-    }
-
-    private BooleanExpression createdAtBetween(LocalDateTime start, LocalDateTime end) {
-        if (!ObjectUtils.isEmpty(start) && !ObjectUtils.isEmpty(end)) {
-            return diet.createdAt.between(start, end);
-        }
-        return null;
     }
 
     private BooleanExpression memberIdEq(Long memberId) {

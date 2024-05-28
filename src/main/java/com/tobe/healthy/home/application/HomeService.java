@@ -4,7 +4,6 @@ import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.repository.CourseHistoryRepository;
-import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.gym.domain.dto.out.GymDto;
@@ -87,7 +86,7 @@ public class HomeService {
         RetrieveLessonHistoryByDateCondResult lessonHistory = lessonHistoryRepository.findTop1LessonHistoryByMemberId(memberId);
 
         //식단
-        DietDto diet = dietService.getDietCreatedAtToday(memberId);
+        DietDto diet = dietService.getTodayDiet(memberId);
 
         return StudentHomeResult.create(usingCourse, point, rank, myReservation, lessonHistory, diet, gym);
     }
