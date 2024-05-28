@@ -9,6 +9,9 @@ import java.util.*
 
 data class CommandScheduleStatusResult(
     val scheduleId: Long,
+    val studentId: Long?,
+    val studentName: String?,
+    val trainerId: Long?,
     val lessonDt: String,
     val lessonTime: String,
     val reservationStatus: ReservationStatus
@@ -17,6 +20,9 @@ data class CommandScheduleStatusResult(
         fun from(schedule: Schedule) : CommandScheduleStatusResult {
             return CommandScheduleStatusResult(
                 scheduleId = schedule.id!!,
+                studentId = schedule.applicant?.id,
+                studentName = schedule.applicant?.name,
+                trainerId = schedule.trainer?.id,
                 lessonDt = formatLessonDt(schedule.lessonDt),
                 lessonTime = formatLessonTime(schedule.lessonStartTime, schedule.lessonEndTime),
                 reservationStatus = schedule.reservationStatus
