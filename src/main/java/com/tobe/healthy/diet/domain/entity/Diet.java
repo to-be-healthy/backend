@@ -8,6 +8,7 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +57,8 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     @ColumnDefault("false")
     @Builder.Default
     private Boolean fastDinner = false;
+
+    private LocalDate eatDate;
 
     @OneToMany(mappedBy = "diet", cascade = CascadeType.ALL)
     @Builder.Default
@@ -128,4 +131,7 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
         this.commentCnt = commentCnt;
     }
 
+    public void changeEatDate(LocalDate eatDate) {
+        this.eatDate = eatDate;
+    }
 }

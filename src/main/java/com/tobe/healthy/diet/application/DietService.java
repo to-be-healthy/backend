@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -145,6 +146,7 @@ public class DietService {
         Diet diet = dietRepository.findByDietIdAndMemberIdAndDelYnFalse(dietId, member.getId())
                 .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
 
+        diet.changeEatDate(LocalDate.parse(command.getEatDate(), DateTimeFormatter.ISO_DATE));
         diet.changeFast(command);
         deleteOldFiles(diet, command);
 

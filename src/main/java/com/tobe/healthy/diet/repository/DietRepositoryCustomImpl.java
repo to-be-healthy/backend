@@ -52,7 +52,7 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                         , diet.createdAt
                         , ConstantImpl.create("%Y-%m-%d"))).distinct()
                 .from(diet)
-                .where(memberIdEq(memberId), delYnEq(false), convertDateFormat_YYYY_MM(searchDate))
+                .where(memberIdEq(memberId), delYnEq(false), convertEatDate_YYYY_MM(searchDate))
                 .orderBy(diet.createdAt.asc())
                 .fetch();
     }
@@ -62,12 +62,12 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
         Long totalCnt = queryFactory
                 .select(diet.count())
                 .from(diet)
-                .where(memberIdEq(memberId), delYnEq(false), convertDateFormat_YYYY_MM(searchDate))
+                .where(memberIdEq(memberId), delYnEq(false), convertEatDate_YYYY_MM(searchDate))
                 .fetchOne();
         List<Diet> diets = queryFactory
                 .select(diet)
                 .from(diet)
-                .where(memberIdEq(memberId), delYnEq(false), convertDateFormat_YYYY_MM(searchDate))
+                .where(memberIdEq(memberId), delYnEq(false), convertEatDate_YYYY_MM(searchDate))
                 .orderBy(diet.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -129,11 +129,11 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
         return dietFiles.delYn.eq(bool);
     }
 
-    private BooleanExpression convertDateFormat_YYYY_MM(String searchDate) {
+    private BooleanExpression convertEatDate_YYYY_MM(String searchDate) {
         if (ObjectUtils.isEmpty(searchDate)) return null;
         StringTemplate stringTemplate = Expressions.stringTemplate(
                 "DATE_FORMAT({0}, {1})"
-                , diet.createdAt
+                , diet.eatDate
                 , ConstantImpl.create("%Y-%m"));
         return stringTemplate.eq(searchDate);
     }
