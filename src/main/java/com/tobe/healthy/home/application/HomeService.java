@@ -4,7 +4,6 @@ import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.repository.CourseHistoryRepository;
-import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.gym.domain.dto.out.GymDto;
@@ -18,6 +17,7 @@ import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
 import com.tobe.healthy.point.repository.PointRepository;
+import com.tobe.healthy.schedule.domain.dto.in.RetrieveTrainerScheduleByLessonDt;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
@@ -91,7 +91,7 @@ public class HomeService {
         return StudentHomeResult.create(usingCourse, point, rank, myReservation, lessonHistory, diet, gym);
     }
 
-    public TrainerHomeResult getTrainerHome(Long trainerId) {
+    public TrainerHomeResult getTrainerHome(RetrieveTrainerScheduleByLessonDt request, Long trainerId) {
         long mappingStudentCount = mappingRepository.countByTrainerId(trainerId);
 
         // 우수회원
@@ -106,9 +106,8 @@ public class HomeService {
                 bestStudent.setCourseId(usingCourse == null ? null : usingCourse.getCourseId());
             }
         }
-        List<MemberInTeamResult> bestStudents = memberRepository.getBestStudent(trainerId);
 
-        RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(trainerId);
+        RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId);
 
         return TrainerHomeResult.builder()
                 .studentCount(mappingStudentCount)
