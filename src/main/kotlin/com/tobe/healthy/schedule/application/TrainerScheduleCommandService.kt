@@ -151,20 +151,6 @@ class TrainerScheduleCommandService(
         return CommandCancelStudentScheduleResult.from(entity)
     }
 
-    fun updateLessonDtToClosedDay(lessonDt: String, trainerId: Long): Boolean {
-        val findSchedule = trainerScheduleRepository.findAllByLessonDtAndTrainerId(lessonDt, trainerId)
-
-        if (findSchedule.isEmpty()) {
-            throw CustomException(SCHEDULE_NOT_FOUND)
-        }
-
-        findSchedule.forEach {
-            it?.updateLessonDtToClosedDay()
-        }
-
-        return true
-    }
-
     fun registerDefaultLessonTime(request: CommandRegisterDefaultLessonTime, trainerId: Long): CommandRegisterDefaultLessonTimeResult {
         val findTrainer = findMemberById(trainerId)
 

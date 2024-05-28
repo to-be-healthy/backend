@@ -6,7 +6,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDateCond
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
-import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryReadStatus.READ
 import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistory.lessonHistory
@@ -48,8 +47,8 @@ class LessonHistoryRepositoryImpl(
         return PageableExecutionUtils.getPage(contents, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
-    override fun findOneLessonHistory(lessonHistoryId: Long, member: CustomMemberDetails): RetrieveLessonHistoryDetailResult? {
-        val entity = queryFactory
+    override fun findOneLessonHistory(lessonHistoryId: Long, member: CustomMemberDetails): LessonHistory? {
+        return queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
             .leftJoin(lessonHistory.lessonHistoryComment).fetchJoin()
@@ -61,8 +60,6 @@ class LessonHistoryRepositoryImpl(
 //                validateMemberType(memberId, memberType)
             )
             .fetchOne()
-
-            return RetrieveLessonHistoryDetailResult.detailFrom(entity)
         }
 
     private fun lessonHistoryIdEq(lessonHistoryId: Long): BooleanExpression? =

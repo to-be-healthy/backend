@@ -2,6 +2,7 @@ package com.tobe.healthy.lessonhistory.application
 
 import com.tobe.healthy.common.CustomPagingResponse
 import com.tobe.healthy.config.error.CustomException
+import com.tobe.healthy.config.error.ErrorCode.LESSON_HISTORY_NOT_FOUND
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDateCond
@@ -64,7 +65,9 @@ class LessonHistoryService(
     }
 
     fun findOneLessonHistory(lessonHistoryId: Long, member: CustomMemberDetails): RetrieveLessonHistoryDetailResult? {
-        return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, member)
+        lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, member)?.let {
+            return RetrieveLessonHistoryDetailResult.detailFrom(it)
+        } ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
     }
 
     fun findAllUnwrittenLessonHistory(memberId: Long): List<RetrieveUnwrittenLessonHistory> {
