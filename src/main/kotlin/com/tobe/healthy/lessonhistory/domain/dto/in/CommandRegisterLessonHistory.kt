@@ -24,5 +24,5 @@ data class CommandRegisterLessonHistory(
     val scheduleId: Long?,
 
     @Schema(description = "등록할 파일", required = false)
-    val commandUploadFileResult: MutableList<CommandUploadFileResult>? = null
+    val uploadFiles: MutableList<CommandUploadFileResult> = mutableListOf()
 )

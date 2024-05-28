@@ -1,6 +1,7 @@
 package com.tobe.healthy.lessonhistory.domain.dto.out
 
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryComment
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryFiles
 
 data class CommandRegisterCommentResult(
     val lessonHistoryId: Long?,
@@ -8,15 +9,17 @@ data class CommandRegisterCommentResult(
     val writerId: Long?,
     val writerName: String?,
     val comment: String,
+    val files: MutableList<CommandUploadFileResult> = mutableListOf()
 ) {
     companion object {
-        fun from(lessonHistoryComment: LessonHistoryComment) : CommandRegisterCommentResult {
+        fun from(lessonHistoryComment: LessonHistoryComment, files: MutableList<LessonHistoryFiles>) : CommandRegisterCommentResult {
             return CommandRegisterCommentResult(
                 lessonHistoryId = lessonHistoryComment.lessonHistory?.id,
                 lessonHistoryCommentId = lessonHistoryComment?.id,
                 writerId = lessonHistoryComment.writer?.id,
                 writerName = lessonHistoryComment.writer?.name,
-                comment = lessonHistoryComment.content
+                comment = lessonHistoryComment.content,
+                files = files.map { CommandUploadFileResult.from(it) }.toMutableList()
             )
         }
     }

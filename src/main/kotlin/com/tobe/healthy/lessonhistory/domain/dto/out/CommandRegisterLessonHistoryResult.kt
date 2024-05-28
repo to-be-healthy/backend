@@ -1,6 +1,7 @@
 package com.tobe.healthy.lessonhistory.domain.dto.out
 
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryFiles
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -16,9 +17,10 @@ data class CommandRegisterLessonHistoryResult(
     val trainerName: String?,
     val studentId: Long?,
     val studentName: String?,
+    val files: MutableList<CommandUploadFileResult> = mutableListOf()
 ) {
     companion object {
-        fun from(lessonHistory: LessonHistory): CommandRegisterLessonHistoryResult {
+        fun from(lessonHistory: LessonHistory, files: MutableList<LessonHistoryFiles>): CommandRegisterLessonHistoryResult {
             return CommandRegisterLessonHistoryResult(
                 lessonHistoryId = lessonHistory?.id,
                 title = lessonHistory.title,
@@ -30,7 +32,8 @@ data class CommandRegisterLessonHistoryResult(
                 trainerId = lessonHistory.trainer?.id,
                 trainerName = lessonHistory.trainer?.name,
                 studentId = lessonHistory.student?.id,
-                studentName = lessonHistory.student?.name
+                studentName = lessonHistory.student?.name,
+                files = files.map { CommandUploadFileResult.from(it) }.toMutableList()
             )
         }
     }

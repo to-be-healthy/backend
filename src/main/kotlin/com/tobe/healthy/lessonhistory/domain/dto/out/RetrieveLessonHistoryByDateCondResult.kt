@@ -33,7 +33,7 @@ data class RetrieveLessonHistoryByDateCondResult(
                 id = entity?.id,
                 title = entity?.title,
                 content = entity?.content,
-                commentTotalCount = entity?.lessonHistoryComment?.count(),
+                commentTotalCount = entity?.lessonHistoryComment?.count{ !it.delYn } ?: 0,
                 createdAt = entity?.createdAt,
                 student = entity?.student?.name,
                 trainer = "${entity?.trainer?.name} 트레이너",
@@ -41,8 +41,13 @@ data class RetrieveLessonHistoryByDateCondResult(
                 lessonDt = formatLessonDt(entity?.schedule?.lessonDt),
                 lessonTime = formatLessonTime(entity?.schedule?.lessonStartTime, entity?.schedule?.lessonEndTime),
                 attendanceStatus = validateAttendanceStatus(entity?.schedule?.lessonDt, entity?.schedule?.lessonEndTime),
-                files = entity?.file?.map { LessonHistoryFileResults.from(it) }?.sortedBy { it.fileOrder }
-                    ?.toMutableList() ?: mutableListOf()
+                files = entity?.let {
+                    it.files.map {
+                        LessonHistoryFileResults.from(it)
+                    }.sortedBy {
+                        it.fileOrder
+                    }.toMutableList()
+                } ?: mutableListOf()
             )
         }
 
@@ -70,18 +75,18 @@ data class RetrieveLessonHistoryByDateCondResult(
     @Schema(description = "수업 일지 첨부파일")
     data class LessonHistoryFileResults(
         @Schema(description = "첨부한 파일 URL(AWS S3)", example = "https://~~~")
-        val fileUrl: String?,
+        val fileUrl: String,
         @Schema(description = "첨부한 파일 순서", example = "0")
-        val fileOrder: Int?,
+        val fileOrder: Int,
         @Schema(description = "파일 등록 날짜", example = "2024-04-10 13:00:12")
-        val createdAt: LocalDateTime?,
+        val createdAt: LocalDateTime,
     ) {
         companion object {
-            fun from(entity: LessonHistoryFiles?): LessonHistoryFileResults {
+            fun from(entity: LessonHistoryFiles): LessonHistoryFileResults {
                 return LessonHistoryFileResults(
-                    fileUrl = entity?.fileUrl,
-                    fileOrder = entity?.fileOrder,
-                    createdAt = entity?.createdAt
+                    fileUrl = entity.fileUrl,
+                    fileOrder = entity.fileOrder,
+                    createdAt = entity.createdAt
                 )
             }
         }

@@ -5,6 +5,7 @@ import com.tobe.healthy.member.domain.entity.Member
 import jakarta.persistence.*
 import jakarta.persistence.FetchType.LAZY
 import jakarta.persistence.GenerationType.IDENTITY
+import lombok.ToString
 
 @Entity
 class MemberToken(
@@ -13,6 +14,7 @@ class MemberToken(
 
     @OneToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
+    @ToString.Exclude
     val member: Member? = null,
 
     @Id

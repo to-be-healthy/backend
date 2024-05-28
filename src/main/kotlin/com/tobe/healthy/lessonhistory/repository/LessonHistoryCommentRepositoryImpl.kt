@@ -2,6 +2,7 @@ package com.tobe.healthy.lessonhistory.repository
 
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryComment
 import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistoryComment.lessonHistoryComment
 import org.springframework.stereotype.Repository
 
@@ -31,6 +32,15 @@ class LessonHistoryCommentRepositoryImpl(
                 parentCommentIdEq(lessonHistoryCommentId)
             )
             .fetchOne() ?: 1
+    }
+
+    override fun findLessonHistoryCommentWithFiles(lessonHistoryCommentId: Long): LessonHistoryComment? {
+        return queryFactory
+            .select(lessonHistoryComment)
+            .from(lessonHistoryComment)
+            .leftJoin(lessonHistoryComment.files).fetchJoin()
+            .where(lessonHistoryComment.id.eq(lessonHistoryCommentId))
+            .fetchOne()
     }
 
     private fun parentCommentIdEq(lessonHistoryCommentParentId: Long?): BooleanExpression? =

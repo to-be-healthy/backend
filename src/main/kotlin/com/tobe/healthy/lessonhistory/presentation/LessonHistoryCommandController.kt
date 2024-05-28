@@ -10,7 +10,6 @@ import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommandUpdateComment
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommandUpdateLessonHistory
 import com.tobe.healthy.lessonhistory.domain.dto.out.*
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -27,26 +26,16 @@ import org.springframework.web.multipart.MultipartFile
 class LessonHistoryCommandController(
     private val lessonHistoryCommandService: LessonHistoryCommandService
 ) {
-    @PostMapping("/register")
+    @PostMapping
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @Operation(summary = "수업 일지를 등록한다.",
         responses = [
-            ApiResponse(
-                responseCode = "200", description = "수업 일지를 등록하였습니다."),
-            ApiResponse(
-                responseCode = "404(1)", description = "학생을 찾을 수 없습니다.",
-                content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]),
-            ApiResponse(
-                responseCode = "404(2)", description = "트레이너를 찾을 수 없습니다.",
-                content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-            ),
-            ApiResponse(
-                responseCode = "404(3)", description = "일정을 찾을 수 없습니다.",
-                content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
-            ),
+            ApiResponse(responseCode = "200", description = "수업 일지를 등록하였습니다."),
+            ApiResponse(responseCode = "404(1)", description = "학생을 찾을 수 없습니다.", content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]),
+            ApiResponse(responseCode = "404(2)", description = "트레이너를 찾을 수 없습니다.", content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]),
+            ApiResponse(responseCode = "404(3)", description = "일정을 찾을 수 없습니다.", content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]),
         ])
-    fun registerLessonHistory(@Parameter(content = [Content(schema = Schema(implementation = CommandRegisterLessonHistory::class))])
-                              @RequestBody @Valid request: CommandRegisterLessonHistory,
+    fun registerLessonHistory(@RequestBody @Valid request: CommandRegisterLessonHistory,
                               @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandRegisterLessonHistoryResult> {
         return ApiResultResponse(
@@ -109,7 +98,6 @@ class LessonHistoryCommandController(
         ])
     @PostMapping("/{lessonHistoryId}/comment")
     fun registerLessonHistoryComment(@PathVariable lessonHistoryId: Long,
-                                     @Parameter(content = [Content(schema = Schema(implementation = CommandRegisterComment::class))])
                                      @RequestBody @Valid request: CommandRegisterComment,
                                      @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<CommandRegisterCommentResult> {
         return ApiResultResponse(
@@ -127,7 +115,6 @@ class LessonHistoryCommandController(
     @PostMapping("/{lessonHistoryId}/comment/{lessonHistoryCommentId}")
     fun registerLessonHistoryComment(@PathVariable lessonHistoryId: Long,
                                      @PathVariable lessonHistoryCommentId: Long,
-                                     @Parameter(content = [Content(schema = Schema(implementation = CommandRegisterComment::class))])
                                      @RequestBody @Valid request: CommandRegisterComment,
                                      @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<CommandRegisterReplyResult> {
         return ApiResultResponse(
