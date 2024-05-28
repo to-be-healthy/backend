@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -118,6 +119,19 @@ public class DietController {
         return ResponseHandler.<DietDto>builder()
                 .data(dietService.updateDiet(customMemberDetails.getMember(), dietId, command))
                 .message("식단기록이 수정되었습니다.")
+                .build();
+    }
+
+    @Operation(summary = "이번달 식단 등록한 날짜 조회", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "업로드 날짜를 반환한다.")
+    })
+    @GetMapping("/upload-date")
+    public ResponseHandler<List<String>> getDietUploadDays(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                           @Parameter(description = "조회할 날짜", example = "2024-05") @Param("searchDate") String searchDate) {
+        return ResponseHandler.<List<String>>builder()
+                .data(dietService.getDietUploadDays(customMemberDetails.getMember().getId(), searchDate))
+                .message("업로드 날짜가 조회되었습니다.")
                 .build();
     }
 

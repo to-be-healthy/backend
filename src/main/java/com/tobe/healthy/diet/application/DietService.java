@@ -23,8 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -216,6 +216,11 @@ public class DietService {
     private String getFileName(String url) {
         String[] arr = url.split("/");
         return arr[arr.length - 1];
+    }
+
+    public List<String> getDietUploadDays(Long memberId, String searchDate) {
+        List<String> days = dietRepository.getDietUploadDays(memberId, searchDate);
+        return ObjectUtils.isEmpty(days) ? null : days;
     }
 
 }

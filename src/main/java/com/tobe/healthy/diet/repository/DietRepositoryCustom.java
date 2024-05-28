@@ -20,4 +20,5 @@ public interface DietRepositoryCustom {
 
     Diet getDietCreatedAtToday(Long memberId);
 
+    List<String> getDietUploadDays(Long memberId, String searchDate);
 }

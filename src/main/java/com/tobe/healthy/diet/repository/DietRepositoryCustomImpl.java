@@ -45,6 +45,19 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
     }
 
     @Override
+    public List<String> getDietUploadDays(Long memberId, String searchDate) {
+        return queryFactory
+                .select(Expressions.stringTemplate(
+                        "DATE_FORMAT({0}, {1})"
+                        , diet.createdAt
+                        , ConstantImpl.create("%Y-%m-%d"))).distinct()
+                .from(diet)
+                .where(memberIdEq(memberId), delYnEq(false), convertDateFormat_YYYY_MM(searchDate))
+                .orderBy(diet.createdAt.asc())
+                .fetch();
+    }
+
+    @Override
     public Page<Diet> getDietOfMonth(Long memberId, Pageable pageable, String searchDate) {
         Long totalCnt = queryFactory
                 .select(diet.count())
