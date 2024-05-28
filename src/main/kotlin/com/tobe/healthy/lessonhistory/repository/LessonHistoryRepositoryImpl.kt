@@ -20,7 +20,11 @@ class LessonHistoryRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
 ) : LessonHistoryRepositoryCustom {
 
-    override fun findAllLessonHistory(request: RetrieveLessonHistoryByDateCond, pageable: Pageable, memberId: Long): Page<LessonHistory> {
+    override fun findAllLessonHistory(
+        request: RetrieveLessonHistoryByDateCond,
+        pageable: Pageable,
+        memberId: Long
+    ): Page<LessonHistory> {
         val results = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
@@ -49,7 +53,10 @@ class LessonHistoryRepositoryImpl(
         return PageableExecutionUtils.getPage(results, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
-    override fun findOneLessonHistory(lessonHistoryId: Long, member: CustomMemberDetails): LessonHistory? {
+    override fun findOneLessonHistory(
+        lessonHistoryId: Long,
+        member: CustomMemberDetails
+    ): LessonHistory? {
         return queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
@@ -66,14 +73,21 @@ class LessonHistoryRepositoryImpl(
     private fun lessonHistoryIdEq(lessonHistoryId: Long): BooleanExpression? =
         lessonHistory.id.eq(lessonHistoryId)
 
-    override fun findAllLessonHistoryByMemberId(studentId: Long, request: RetrieveLessonHistoryByDateCond, pageable: Pageable): Page<LessonHistory> {
+    override fun findAllLessonHistoryByMemberId(
+        studentId: Long,
+        request: RetrieveLessonHistoryByDateCond,
+        pageable: Pageable
+    ): Page<LessonHistory> {
         val entities = queryFactory
             .select(lessonHistory)
             .from(lessonHistory)
             .innerJoin(lessonHistory.trainer).fetchJoin()
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
-            .where(convertDateFormat(request.searchDate), lessonHistory.student.id.eq(studentId))
+            .where(
+                convertDateFormat(request.searchDate),
+                lessonHistory.student.id.eq(studentId)
+            )
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
             .fetch()
@@ -84,7 +98,10 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.trainer)
             .innerJoin(lessonHistory.student)
             .innerJoin(lessonHistory.schedule)
-            .where(convertDateFormat(request.searchDate), lessonHistory.student.id.eq(studentId))
+            .where(
+                convertDateFormat(request.searchDate),
+                lessonHistory.student.id.eq(studentId)
+            )
 
         return PageableExecutionUtils.getPage(entities, pageable) { totalCount.fetchOne() ?: 0L }
     }
@@ -104,7 +121,11 @@ class LessonHistoryRepositoryImpl(
         return RetrieveLessonHistoryByDateCondResult.from(entity)
     }
 
-    override fun findAllMyLessonHistory(request: RetrieveLessonHistoryByDateCond, pageable: Pageable, member: CustomMemberDetails): Page<LessonHistory> {
+    override fun findAllMyLessonHistory(
+        request: RetrieveLessonHistoryByDateCond,
+        pageable: Pageable,
+        member: CustomMemberDetails
+    ): Page<LessonHistory> {
         val results = queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)

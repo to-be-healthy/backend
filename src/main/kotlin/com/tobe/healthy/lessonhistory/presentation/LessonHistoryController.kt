@@ -60,7 +60,7 @@ class LessonHistoryController(
         responses = [
             ApiResponse(responseCode = "200", description = "학생의 전체 수업 일지를 조회하였습니다.")
         ])
-    @GetMapping("/detail/{studentId}")
+    @GetMapping("/{studentId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun findAllLessonHistoryByMemberId(@PathVariable studentId: Long,
                                        @ParameterObject request: RetrieveLessonHistoryByDateCond,

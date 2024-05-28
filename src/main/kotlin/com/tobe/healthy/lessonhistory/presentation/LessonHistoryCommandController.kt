@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile
 class LessonHistoryCommandController(
     private val lessonHistoryCommandService: LessonHistoryCommandService
 ) {
+
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @Operation(summary = "수업 일지를 등록한다.",

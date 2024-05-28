@@ -53,7 +53,8 @@ class TrainerScheduleCommandController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping
     fun registerSchedule(@RequestBody request: CommandRegisterSchedule,
-                         @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<CommandRegisterScheduleResult> {
+                         @AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<CommandRegisterScheduleResult> {
         return ApiResultResponse(
             message = "일정 등록에 성공하였습니다.",
             data = trainerScheduleCommandService.registerSchedule(request, member.memberId)
@@ -68,7 +69,8 @@ class TrainerScheduleCommandController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping("/individual")
     fun registerIndividualSchedule(@RequestBody request: CommandRegisterIndividualSchedule,
-                                   @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<Boolean> {
+                                   @AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "개별 일정 등록에 성공하였습니다.",
             data = trainerScheduleCommandService.registerIndividualSchedule(request, member.memberId)
@@ -102,7 +104,8 @@ class TrainerScheduleCommandController(
     @PostMapping("/{scheduleId}/{studentId}")
     fun registerScheduleForStudent(@PathVariable scheduleId: Long,
                                    @PathVariable studentId: Long,
-                                   @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<CommandRegisterScheduleByStudentResult> {
+                                   @AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<CommandRegisterScheduleByStudentResult> {
         return ApiResultResponse(
             message = "학생을 수업에 등록하였습니다.",
             data = trainerScheduleCommandService.registerScheduleForStudent(scheduleId, studentId, member.memberId)
@@ -117,7 +120,8 @@ class TrainerScheduleCommandController(
     @DeleteMapping("/trainer/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun cancelScheduleForTrainer(@PathVariable scheduleId: Long,
-                                 @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<Boolean> {
+                                 @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    ): ApiResultResponse<Boolean> {
         val scheduleResult = trainerScheduleCommandService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId)
         return ApiResultResponse(
             message = "${scheduleResult.lessonStartTime.format(DateTimeFormatter.ofPattern("a HH시 mm분"))} 수업이 취소되었습니다.",

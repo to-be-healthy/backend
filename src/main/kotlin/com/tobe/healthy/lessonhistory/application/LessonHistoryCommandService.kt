@@ -45,7 +45,10 @@ class LessonHistoryCommandService(
         private val bucketName: String,
 ) {
 
-    fun registerLessonHistory(request: CommandRegisterLessonHistory, trainerId: Long): CommandRegisterLessonHistoryResult {
+    fun registerLessonHistory(
+        request: CommandRegisterLessonHistory,
+        trainerId: Long
+    ): CommandRegisterLessonHistoryResult {
         val student = findMember(request.studentId)
         val trainer = findMember(trainerId)
         val schedule = findSchedule(request.scheduleId)
@@ -57,7 +60,11 @@ class LessonHistoryCommandService(
         return CommandRegisterLessonHistoryResult.from(lessonHistory, files)
     }
 
-    fun registerFilesOfLessonHistory(uploadFiles: MutableList<MultipartFile>, memberId: Long): List<CommandUploadFileResult> {
+    fun registerFilesOfLessonHistory(
+        uploadFiles: MutableList<MultipartFile>,
+        memberId: Long
+    ): List<CommandUploadFileResult> {
+
         val commandUploadFileResult = mutableListOf<CommandUploadFileResult>()
 
         var fileOrder = 1
@@ -81,7 +88,10 @@ class LessonHistoryCommandService(
         return commandUploadFileResult
     }
 
-    fun updateLessonHistory(lessonHistoryId: Long, request: CommandUpdateLessonHistory): CommandUpdateLessonHistoryResult {
+    fun updateLessonHistory(
+        lessonHistoryId: Long,
+        request: CommandUpdateLessonHistory
+    ): CommandUpdateLessonHistoryResult {
         val findLessonHistory = lessonHistoryRepository.findOneLessonHistoryWithFiles(lessonHistoryId)
             ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
@@ -98,7 +108,9 @@ class LessonHistoryCommandService(
         return CommandUpdateLessonHistoryResult.from(findLessonHistory, files)
     }
 
-    fun deleteLessonHistory(lessonHistoryId: Long): Long {
+    fun deleteLessonHistory(
+        lessonHistoryId: Long
+    ): Long {
         val findLessonHistory = findLessonHistory(lessonHistoryId)
 
         findLessonHistory.let {
@@ -109,7 +121,11 @@ class LessonHistoryCommandService(
         return lessonHistoryId
     }
 
-    fun registerLessonHistoryComment(lessonHistoryId: Long, request: CommandRegisterComment, memberId: Long): CommandRegisterCommentResult {
+    fun registerLessonHistoryComment(
+        lessonHistoryId: Long,
+        request: CommandRegisterComment,
+        memberId: Long
+    ): CommandRegisterCommentResult {
         val findMember = findMember(memberId)
 
         val lessonHistory = findLessonHistory(lessonHistoryId)
@@ -155,7 +171,10 @@ class LessonHistoryCommandService(
         return CommandRegisterReplyResult.from(entity, files)
     }
 
-    fun updateLessonHistoryComment(lessonHistoryCommentId: Long, request: CommandUpdateComment): CommandUpdateCommentResult {
+    fun updateLessonHistoryComment(
+        lessonHistoryCommentId: Long,
+        request: CommandUpdateComment
+    ): CommandUpdateCommentResult {
         lessonHistoryCommentRepository.findLessonHistoryCommentWithFiles(lessonHistoryCommentId)
             ?.let {
                 deleteAllFiles(it.files)
@@ -170,7 +189,9 @@ class LessonHistoryCommandService(
             } ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
     }
 
-    fun deleteLessonHistoryComment(lessonHistoryCommentId: Long): Long {
+    fun deleteLessonHistoryComment(
+        lessonHistoryCommentId: Long
+    ): Long {
 
         val findLessonHistoryComment = findLessonHistoryComment(lessonHistoryCommentId)
 
@@ -244,7 +265,13 @@ class LessonHistoryCommandService(
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
     }
 
-    private fun registerLessonHistory(title: String, content: String, student: Member, trainer: Member, schedule: Schedule): LessonHistory {
+    private fun registerLessonHistory(
+        title: String,
+        content: String,
+        student: Member,
+        trainer: Member,
+        schedule: Schedule
+    ): LessonHistory {
         val lessonHistory = LessonHistory.register(title, content, student, trainer, schedule)
         lessonHistoryRepository.save(lessonHistory)
         return lessonHistory
