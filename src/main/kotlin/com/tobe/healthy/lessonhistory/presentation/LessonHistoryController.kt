@@ -5,6 +5,7 @@ import com.tobe.healthy.common.CustomPagingResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonhistory.application.LessonHistoryService
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDateCond
+import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveUnwrittenLessonHistory
@@ -15,10 +16,7 @@ import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/lessonhistory/v1")
@@ -94,11 +92,13 @@ class LessonHistoryController(
             ApiResponse(responseCode = "200", description = "수업일지를 작성하지 않은 수업들을 조회하였습니다."),
         ])
     @GetMapping("/unwritten")
-    fun findAllUnwrittenLessonHistory(@AuthenticationPrincipal member: CustomMemberDetails
+    fun findAllUnwrittenLessonHistory(
+        @RequestBody request: UnwrittenLessonHistorySearchCond,
+        @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<List<RetrieveUnwrittenLessonHistory>> {
         return ApiResultResponse(
             message = "수업일지를 작성하지 않은 수업들을 조회하였습니다.",
-            data = lessonHistoryService.findAllUnwrittenLessonHistory(member.memberId)
+            data = lessonHistoryService.findAllUnwrittenLessonHistory(request, member.memberId)
         )
     }
 }

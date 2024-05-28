@@ -5,6 +5,7 @@ import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDateCond
+import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveUnwrittenLessonHistory
@@ -95,8 +96,8 @@ class LessonHistoryService(
             ?: null
     }
 
-    fun findAllUnwrittenLessonHistory(memberId: Long): List<RetrieveUnwrittenLessonHistory> {
-        return trainerScheduleRepository.findAllUnwrittenLessonHistory(memberId)
+    fun findAllUnwrittenLessonHistory(request: UnwrittenLessonHistorySearchCond, memberId: Long): List<RetrieveUnwrittenLessonHistory> {
+        return trainerScheduleRepository.findAllUnwrittenLessonHistory(request, memberId)
             .map { RetrieveUnwrittenLessonHistory.from(it) }
     }
 }
