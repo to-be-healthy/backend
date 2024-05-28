@@ -17,7 +17,6 @@ import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
 import com.tobe.healthy.point.repository.PointRepository;
-import com.tobe.healthy.schedule.domain.dto.in.RetrieveTrainerScheduleByLessonDt;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
@@ -91,7 +90,7 @@ public class HomeService {
         return StudentHomeResult.create(usingCourse, point, rank, myReservation, lessonHistory, diet, gym);
     }
 
-    public TrainerHomeResult getTrainerHome(RetrieveTrainerScheduleByLessonDt request, Long trainerId) {
+    public TrainerHomeResult getTrainerHome(Long trainerId) {
         long mappingStudentCount = mappingRepository.countByTrainerId(trainerId);
 
         // 우수회원
@@ -107,7 +106,7 @@ public class HomeService {
             }
         }
 
-        RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId);
+        RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(trainerId);
 
         return TrainerHomeResult.builder()
                 .studentCount(mappingStudentCount)
