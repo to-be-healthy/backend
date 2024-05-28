@@ -75,6 +75,18 @@ public class DietController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
     })
+    @GetMapping("/today")
+    public ResponseHandler<DietDto> getTodayDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+        return ResponseHandler.<DietDto>builder()
+                .data(dietService.getTodayDiet(customMemberDetails.getMember().getId()))
+                .message("식단기록이 조회되었습니다.")
+                .build();
+    }
+
+    @Operation(summary = "식단기록 상세 조회", responses = {
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+            @ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
+    })
     @GetMapping("/{dietId}")
     public ResponseHandler<DietDto> getDietDetail(@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
         return ResponseHandler.<DietDto>builder()
