@@ -49,7 +49,7 @@ public class DietController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
             @ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
     })
-    @PostMapping("/home-upload")
+    @PostMapping("/home")
     public ResponseHandler<DietDto> addDietAtHome(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                       @Valid @RequestBody DietAddCommandAtHome command) {
         return ResponseHandler.<DietDto>builder()
