@@ -2,6 +2,8 @@ package com.tobe.healthy.common.aop;
 
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
+import com.tobe.healthy.schedule.domain.dto.out.CommandCancelStudentScheduleResult;
+import com.tobe.healthy.schedule.domain.dto.out.CommandRegisterScheduleByStudentResult;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -37,16 +39,73 @@ public class CourseAspect {
     @Pointcut("execution(* com.tobe.healthy.schedule.application.CommonScheduleService.reserveSchedule(..))")
     private void reserveSchedule() {}
 
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleCommandService.registerScheduleForStudent(..))")
+    private void registerScheduleForStudent() {}
+
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleCommandService.cancelTrainerSchedule(..))")
+    private void cancelTrainerSchedule() {}
+
     /*
-    * 수업 취소
+    * 학생이 수업 취소
     */
     @AfterReturning(value = "cancelMemberSchedule()", returning = "returnValue")
-    public void updateCourseWhenCancelSchedule(JoinPoint joinPoint, Object returnValue) {
+    public void updateCourseByStudent(JoinPoint joinPoint, Object returnValue) {
         ScheduleIdInfo scheduleIdInfo = ((ScheduleIdInfo) returnValue);
         Long scheduleId = scheduleIdInfo.getScheduleId();
         Long studentId = scheduleIdInfo.getStudentId();
         Long waitingStudentId = scheduleIdInfo.getWaitingStudentId();
         Long trainerId = scheduleIdInfo.getTrainerId();
+
+        updateCourse(studentId, scheduleId, trainerId, waitingStudentId);
+    }
+
+    /*
+     * 트레이너가 학생의 수업 취소
+     */
+    @AfterReturning(value = "cancelTrainerSchedule()", returning = "returnValue")
+    public void updateCourseByTrainer(JoinPoint joinPoint, Object returnValue) {
+        CommandCancelStudentScheduleResult result = ((CommandCancelStudentScheduleResult) returnValue);
+        Long scheduleId = result.getScheduleId();
+        Long studentId = result.getStudentId();
+        Long waitingStudentId = result.getWaitingStudentId();
+        Long trainerId = result.getTrainerId();
+
+        updateCourse(studentId, scheduleId, trainerId, waitingStudentId);
+    }
+
+    /*
+     * 학생이 수업 예약
+     */
+    @AfterReturning(value = "reserveSchedule()", returning = "returnValue")
+    public void minusCourseByStudent(JoinPoint joinPoint, Object returnValue) {
+        ScheduleIdInfo scheduleIdInfo = ((ScheduleIdInfo) returnValue);
+        Long scheduleId = scheduleIdInfo.getScheduleId();
+        Long studentId = scheduleIdInfo.getStudentId();
+        Long trainerId = scheduleIdInfo.getTrainerId();
+
+        minusCourse(studentId, scheduleId, trainerId);
+    }
+
+    /*
+     * 트레이너가 학생의 수업 예약
+     */
+    @AfterReturning(value = "registerScheduleForStudent()", returning = "returnValue")
+    public void minusCourseByTrainer(JoinPoint joinPoint, Object returnValue) {
+        CommandRegisterScheduleByStudentResult result = ((CommandRegisterScheduleByStudentResult) returnValue);
+        Long scheduleId = result.getScheduleId();
+        Long studentId = result.getStudentId();
+        Long trainerId = result.getTrainerId();
+
+        minusCourse(studentId, scheduleId, trainerId);
+    }
+
+    private void minusCourse(Long studentId, Long scheduleId, Long trainerId) {
+        CourseService courseService = courseServiceObjectProvider.getObject();
+        CourseUpdateCommand command = CourseUpdateCommand.create(studentId, MINUS, RESERVATION, ONE_LESSON);
+        courseService.updateCourseByMember(scheduleId, trainerId, command);
+    }
+
+    private void updateCourse(Long studentId, Long scheduleId, Long trainerId, Long waitingStudentId) {
         CourseUpdateCommand command;
 
         //수업 취소자 수강권 +1
@@ -59,21 +118,6 @@ public class CourseAspect {
             command = CourseUpdateCommand.create(waitingStudentId, MINUS, RESERVATION, ONE_LESSON);
             courseService.updateCourseByMember(scheduleId, trainerId, command);
         }
-    }
-
-    /*
-     * 수업 예약
-     */
-    @AfterReturning(value = "reserveSchedule()", returning = "returnValue")
-    public void minusCourseWhenReserveSchedule(JoinPoint joinPoint, Object returnValue) {
-        ScheduleIdInfo scheduleIdInfo = ((ScheduleIdInfo) returnValue);
-        Long scheduleId = scheduleIdInfo.getScheduleId();
-        Long studentId = scheduleIdInfo.getStudentId();
-        Long trainerId = scheduleIdInfo.getTrainerId();
-
-        CourseService courseService = courseServiceObjectProvider.getObject();
-        CourseUpdateCommand command = CourseUpdateCommand.create(studentId, MINUS, RESERVATION, ONE_LESSON);
-        courseService.updateCourseByMember(scheduleId, trainerId, command);
     }
 
 }

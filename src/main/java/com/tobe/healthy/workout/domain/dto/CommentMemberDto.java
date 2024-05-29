@@ -11,20 +11,20 @@ import lombok.ToString;
 @Builder
 public class CommentMemberDto {
 
-    private Long id;
+    private Long memberId;
     private String name;
     private String fileUrl;
 
     public static CommentMemberDto from(Member member) {
         return CommentMemberDto.builder()
-                .id(member.getId())
+                .memberId(member.getId())
                 .name(member.getName())
                 .build();
     }
 
     public static CommentMemberDto create(Member member, MemberProfile memberProfile) {
         return CommentMemberDto.builder()
-                .id(member.getId())
+                .memberId(member.getId())
                 .name(member.getName())
                 .fileUrl(memberProfile.getFileUrl())
                 .build();

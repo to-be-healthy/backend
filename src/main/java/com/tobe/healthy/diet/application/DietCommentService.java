@@ -48,7 +48,7 @@ public class DietCommentService {
 
         Map<Long, List<DietCommentDto>> childByGroupList = child.stream()
                 .collect(Collectors.groupingBy(DietCommentDto::getParentId, Collectors.toList()));
-        return parent.stream().peek(p -> p.setReplies(childByGroupList.get(p.getCommentId()))).toList();
+        return parent.stream().peek(p -> p.setReplies(childByGroupList.get(p.getId()))).toList();
     }
 
     public void addComment(Long dietId, DietCommentAddCommand command, Member member) {

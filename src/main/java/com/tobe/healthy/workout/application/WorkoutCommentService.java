@@ -68,7 +68,7 @@ public class WorkoutCommentService {
 
         Map<Long, List<WorkoutHistoryCommentDto>> childByGroupList = child.stream()
                 .collect(Collectors.groupingBy(WorkoutHistoryCommentDto::getParentId, Collectors.toList()));
-        return parent.stream().peek(p -> p.setReplies(childByGroupList.get(p.getCommentId()))).toList();
+        return parent.stream().peek(p -> p.setReplies(childByGroupList.get(p.getId()))).toList();
     }
 
     public void deleteComment(Member member, Long workoutHistoryId, Long commentId) {

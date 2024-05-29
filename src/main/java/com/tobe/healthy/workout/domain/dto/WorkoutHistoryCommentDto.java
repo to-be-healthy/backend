@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class WorkoutHistoryCommentDto {
 
-    private Long commentId;
+    private Long id;
     private CommentMemberDto member;
     private String content;
     private LocalDateTime createdAt;
@@ -30,7 +30,7 @@ public class WorkoutHistoryCommentDto {
 
     public static WorkoutHistoryCommentDto from(WorkoutHistoryComment comment) {
         return WorkoutHistoryCommentDto.builder()
-                .commentId(comment.getCommentId())
+                .id(comment.getCommentId())
                 .member(CommentMemberDto.from(comment.getMember()))
                 .content(comment.getDelYn() ? "삭제된 댓글입니다." : comment.getContent())
                 .createdAt(comment.getCreatedAt())
@@ -43,7 +43,7 @@ public class WorkoutHistoryCommentDto {
 
     public static WorkoutHistoryCommentDto create(WorkoutHistoryComment comment, MemberProfile memberProfile) {
         return WorkoutHistoryCommentDto.builder()
-                .commentId(comment.getCommentId())
+                .id(comment.getCommentId())
                 .member(CommentMemberDto.create(comment.getMember(), memberProfile))
                 .content(comment.getDelYn() ? "삭제된 댓글입니다." : comment.getContent())
                 .createdAt(comment.getCreatedAt())

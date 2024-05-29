@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class DietCommentDto {
 
-    private Long commentId;
+    private Long id;
     private CommentMemberDto member;
     private String content;
     private LocalDateTime createdAt;
@@ -32,7 +32,7 @@ public class DietCommentDto {
 
     public static DietCommentDto from(DietComment comment) {
         return DietCommentDto.builder()
-                .commentId(comment.getCommentId())
+                .id(comment.getCommentId())
                 .member(CommentMemberDto.from(comment.getMember()))
                 .content(comment.getDelYn() ? "삭제된 댓글입니다." : comment.getContent())
                 .createdAt(comment.getCreatedAt())
@@ -45,7 +45,7 @@ public class DietCommentDto {
 
     public static DietCommentDto create(DietComment comment, MemberProfile memberProfile) {
         return DietCommentDto.builder()
-                .commentId(comment.getCommentId())
+                .id(comment.getCommentId())
                 .member(CommentMemberDto.create(comment.getMember(), memberProfile))
                 .content(comment.getDelYn() ? "삭제된 댓글입니다." : comment.getContent())
                 .createdAt(comment.getCreatedAt())
