@@ -4,12 +4,11 @@ import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterDefaultLessonTime
-import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterIndividualSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
+import com.tobe.healthy.schedule.domain.dto.`in`.CommandUpdateScheduleStatus
 import com.tobe.healthy.schedule.domain.dto.out.*
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.AVAILABLE
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.DISABLED
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus.*
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleClosedDaysInfo
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
@@ -35,123 +34,10 @@ class TrainerScheduleCommandService(
     private val scheduleWaitingRepository: ScheduleWaitingRepository
 ) {
 
-    fun registerSchedule(request: CommandRegisterSchedule, trainerId: Long): CommandRegisterScheduleResult {
-        val trainer = findMemberById(trainerId)
-
-        val findTrainerSchedule = trainerScheduleInfoRepository.findByTrainerId(trainerId)
-            ?: throw CustomException(TRAINER_SCHEDULE_NOT_FOUND)
-
-        var lessonDt = request.lessonStartDt
-        var startTime = findTrainerSchedule.lessonStartTime
-        val schedules = mutableListOf<Schedule>()
-
-        while (!lessonDt.isAfter(request.lessonEndDt)) {
-            var endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
-
-            if (endTime.isAfter(findTrainerSchedule.lessonEndTime)) {
-                startTime = findTrainerSchedule.lessonStartTime
-                lessonDt = lessonDt.plusDays(ONE_DAY)
-                continue
-            }
-
-            val isClosedDay = findTrainerSchedule.trainerScheduleClosedDays.any {
-                it.closedDays == lessonDt.dayOfWeek
-            }
-
-            if (isClosedDay) {
-                // 휴무일일 경우
-                while (!startTime.isAfter(endTime)) {
-                    val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, DISABLED)
-                    schedules.add(schedule)
-                    startTime = endTime
-                    endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
-                }
-                startTime = findTrainerSchedule.lessonStartTime
-                lessonDt = lessonDt.plusDays(ONE_DAY)
-                continue
-            }
-
-            // 점심시간일 경우
-            if (isStartTimeEqualsLunchStartTime(findTrainerSchedule.lunchStartTime, startTime)) {
-                val duration = between(findTrainerSchedule.lunchStartTime, findTrainerSchedule.lunchEndTime)
-                startTime = startTime.plusMinutes(duration.toMinutes())
-                continue
-            }
-
-            isScheduleExisting(lessonDt, startTime, endTime, trainerId)
-
-            val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, AVAILABLE)
-            schedules.add(schedule)
-
-            startTime = endTime
-        }
-
-        trainerScheduleRepository.saveAll(schedules)
-
-        return CommandRegisterScheduleResult.from(schedules, findTrainerSchedule)
-    }
-
-    private fun isScheduleExisting(
-        lessonDt: LocalDate,
-        startTime: LocalTime,
-        endTime: LocalTime,
+    fun registerDefaultLessonTime(
+        request: CommandRegisterDefaultLessonTime,
         trainerId: Long
-    ) {
-        val isDuplicateSchedule =
-            trainerScheduleRepository.validateRegisterSchedule(
-                lessonDt,
-                startTime,
-                endTime,
-                trainerId
-            )
-
-        if (isDuplicateSchedule > 0) {
-            throw CustomException(SCHEDULE_ALREADY_EXISTS)
-        }
-    }
-
-    fun updateReservationStatusToNoShow(reservationStatus: ReservationStatus, scheduleId: Long, trainerId: Long): ScheduleIdInfo {
-        val schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, reservationStatus, trainerId)
-            ?: throw CustomException(SCHEDULE_NOT_FOUND)
-        schedule.updateReservationStatusToNoShow(reservationStatus)
-        return ScheduleIdInfo.from(schedule)
-    }
-
-    fun registerIndividualSchedule(request: CommandRegisterIndividualSchedule, trainerId: Long): Boolean {
-        trainerScheduleRepository.findAvailableRegisterSchedule(request, trainerId)?.let {
-            throw CustomException(SCHEDULE_ALREADY_EXISTS)
-        } ?: let {
-            val trainer = memberRepository.findByIdOrNull(trainerId)
-                ?: throw CustomException(MEMBER_NOT_FOUND)
-
-            val entity = Schedule.registerSchedule(
-                request.lessonDt,
-                trainer,
-                request.lessonStartTime,
-                request.lessonEndTime,
-                AVAILABLE,
-            )
-            trainerScheduleRepository.save(entity)
-            return true
-        }
-    }
-
-    fun cancelTrainerSchedule(scheduleId: Long, trainerId: Long): CommandCancelStudentScheduleResult {
-        // todo: 2024-05-05 일요일 오후 14:16 등록된 학생이 있는경우 푸시알림등으로 취소되었다는 알림이 필요 - seonwoo_jung
-        val entity = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, trainerId)
-            ?: throw CustomException(SCHEDULE_NOT_FOUND)
-
-        entity.scheduleWaiting?.let {
-            entity.cancelMemberSchedule(it[0])
-            scheduleWaitingRepository.delete(it[0])
-        } ?: let {
-            entity.cancelMemberSchedule()
-        }
-
-        return CommandCancelStudentScheduleResult.from(entity)
-    }
-
-    fun registerDefaultLessonTime(request: CommandRegisterDefaultLessonTime, trainerId: Long): CommandRegisterDefaultLessonTimeResult {
+    ): CommandRegisterDefaultLessonTimeResult {
         val findTrainer = findMemberById(trainerId)
 
         trainerScheduleInfoRepository.findByTrainerId(trainerId)?.let {
@@ -185,11 +71,117 @@ class TrainerScheduleCommandService(
         return CommandRegisterDefaultLessonTimeResult.from(request)
     }
 
-    private fun findMemberById(trainerId: Long) = (memberRepository.findByIdOrNull(trainerId)
-        ?: throw CustomException(MEMBER_NOT_FOUND))
+    fun registerSchedule(
+        request: CommandRegisterSchedule,
+        trainerId: Long
+    ): CommandRegisterScheduleResult {
+        val trainer = findMemberById(trainerId)
 
-    fun registerScheduleForStudent(scheduleId: Long, studentId: Long, trainerId: Long): CommandRegisterScheduleByStudentResult {
-        val schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, AVAILABLE, trainerId)
+        val findTrainerSchedule = trainerScheduleInfoRepository.findByTrainerId(trainerId)
+            ?: throw CustomException(TRAINER_SCHEDULE_NOT_FOUND)
+
+        var lessonDt = request.lessonStartDt
+        var startTime = findTrainerSchedule.lessonStartTime
+        val schedules = mutableListOf<Schedule>()
+
+        while (!lessonDt.isAfter(request.lessonEndDt)) {
+            var endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
+
+            if (endTime.isAfter(findTrainerSchedule.lessonEndTime)) {
+                startTime = findTrainerSchedule.lessonStartTime
+                lessonDt = lessonDt.plusDays(ONE_DAY)
+                continue
+            }
+
+            val isClosedDay = findTrainerSchedule.trainerScheduleClosedDays.any {
+                it.closedDays == lessonDt.dayOfWeek
+            }
+
+            // 휴무일일 경우
+            if (isClosedDay) {
+                while (!startTime.isAfter(endTime)) {
+                    val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, DISABLED)
+                    schedules.add(schedule)
+                    startTime = endTime
+                    endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
+                }
+                startTime = findTrainerSchedule.lessonStartTime
+                lessonDt = lessonDt.plusDays(ONE_DAY)
+                continue
+            }
+
+            // 점심시간일 경우
+            if (isStartTimeEqualsLunchStartTime(findTrainerSchedule.lunchStartTime, startTime)) {
+                val duration = between(findTrainerSchedule.lunchStartTime, findTrainerSchedule.lunchEndTime)
+                val schedule = Schedule.registerSchedule(lessonDt, trainer, findTrainerSchedule.lunchStartTime, findTrainerSchedule.lunchEndTime, DISABLED)
+                schedules.add(schedule)
+                startTime = startTime.plusMinutes(duration.toMinutes())
+                continue
+            }
+
+            isScheduleExisting(lessonDt, startTime, endTime, trainerId)
+
+            val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, AVAILABLE)
+            schedules.add(schedule)
+
+            startTime = endTime
+        }
+
+        trainerScheduleRepository.saveAll(schedules)
+
+        return CommandRegisterScheduleResult.from(schedules, findTrainerSchedule)
+    }
+
+    fun updateScheduleStatus(
+        request: CommandUpdateScheduleStatus,
+        status: ReservationStatus,
+        memberId: Long
+    ): List<CommandScheduleStatusResult> {
+
+        var schedules: List<Schedule>
+
+        when (status) {
+
+            AVAILABLE -> {
+                schedules = trainerScheduleRepository.findAllSchedule(request.scheduleIds, DISABLED, memberId)
+
+                if (schedules.isNullOrEmpty()) {
+                    throw CustomException(SCHEDULE_NOT_FOUND)
+                }
+                schedules.forEach {
+                    it.updateLessonDtToAvailableDay()
+                }
+            }
+
+            DISABLED -> {
+                schedules = trainerScheduleRepository.findAllSchedule(request.scheduleIds, listOf(AVAILABLE, COMPLETED), memberId)
+
+                if (schedules.isNullOrEmpty()) {
+                    throw CustomException(SCHEDULE_NOT_FOUND)
+                }
+
+                schedules.forEach {
+                    it.updateScheduleToDisabled()
+                    if (!it.scheduleWaiting.isNullOrEmpty()) {
+                        scheduleWaitingRepository.deleteAll(it.scheduleWaiting!!)
+                    }
+                }
+            }
+
+            else -> {
+                throw CustomException(RESERVATION_STATUS_NOT_FOUND)
+            }
+        }
+        return schedules.map { CommandScheduleStatusResult.from(it) }
+    }
+
+    fun registerStudentInTrainerSchedule(
+        scheduleId: Long,
+        studentId: Long,
+        trainerId: Long
+    ): CommandRegisterScheduleByStudentResult {
+
+        val schedule = trainerScheduleRepository.findAllSchedule(scheduleId, AVAILABLE, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
 
         val findStudent = memberRepository.findById(studentId)
@@ -199,6 +191,58 @@ class TrainerScheduleCommandService(
 
         return CommandRegisterScheduleByStudentResult.from(schedule, findStudent)
     }
+
+    fun cancelStudentReservation(
+        scheduleId: Long,
+        trainerId: Long
+    ): CommandCancelStudentReservationResult {
+
+        // todo: 2024-05-05 일요일 오후 14:16 등록된 학생이 있는경우 푸시알림등으로 취소되었다는 알림이 필요 - seonwoo_jung
+        val entity = trainerScheduleRepository.findAllSchedule(scheduleId, trainerId)
+            ?: throw CustomException(SCHEDULE_NOT_FOUND)
+
+        if (!entity.scheduleWaiting.isNullOrEmpty()) {
+            entity.cancelMemberSchedule(entity.scheduleWaiting!![0])
+            scheduleWaitingRepository.delete(entity.scheduleWaiting!![0])
+        } else {
+            entity.cancelMemberSchedule()
+        }
+
+        return CommandCancelStudentReservationResult.from(entity)
+    }
+
+    fun updateReservationStatusToNoShow(
+        reservationStatus: ReservationStatus,
+        scheduleId: Long,
+        trainerId: Long
+    ): ScheduleIdInfo {
+        val schedule = trainerScheduleRepository.findAllSchedule(scheduleId, reservationStatus, trainerId)
+            ?: throw CustomException(SCHEDULE_NOT_FOUND)
+        schedule.updateReservationStatusToNoShow(reservationStatus)
+        return ScheduleIdInfo.from(schedule)
+    }
+
+    private fun isScheduleExisting(
+        lessonDt: LocalDate,
+        startTime: LocalTime,
+        endTime: LocalTime,
+        trainerId: Long
+    ) {
+        val isDuplicateSchedule =
+            trainerScheduleRepository.validateRegisterSchedule(
+                lessonDt,
+                startTime,
+                endTime,
+                trainerId
+            )
+
+        if (isDuplicateSchedule > 0) {
+            throw CustomException(SCHEDULE_ALREADY_EXISTS)
+        }
+    }
+
+    private fun findMemberById(trainerId: Long) = (memberRepository.findByIdOrNull(trainerId)
+        ?: throw CustomException(MEMBER_NOT_FOUND))
 
     fun deleteDisabledSchedule() {
         val today = LocalDate.now()
@@ -210,25 +254,5 @@ class TrainerScheduleCommandService(
 
     private fun isStartTimeEqualsLunchStartTime(lunchStartTime: LocalTime?, startTime: LocalTime): Boolean {
         return startTime == lunchStartTime
-    }
-
-    fun updateScheduleStatus(status: ReservationStatus, scheduleId: Long, memberId: Long): CommandScheduleStatusResult {
-        val schedule: Schedule
-        when (status) {
-            AVAILABLE -> {
-                schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, DISABLED, memberId)
-                    ?: throw CustomException(SCHEDULE_NOT_FOUND)
-                schedule.updateLessonDtToAvailableDay()
-            }
-            DISABLED -> {
-                schedule = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, AVAILABLE, memberId)
-                    ?: throw CustomException(SCHEDULE_NOT_FOUND)
-                schedule.updateLessonDtToClosedDay()
-            }
-            else -> {
-                throw CustomException(RESERVATION_STATUS_NOT_FOUND)
-            }
-        }
-        return CommandScheduleStatusResult.from(schedule)
     }
 }

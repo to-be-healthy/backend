@@ -32,15 +32,11 @@ public class ScheduleWaitingRepositoryImpl implements ScheduleWaitingRepositoryC
 				.innerJoin(scheduleWaiting.schedule, schedule).fetchJoin()
 				.innerJoin(scheduleWaiting.member, new QMember("member")).fetchJoin()
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.where(scheduleWaitingMemberIdEq(memberId), delYnFalse(),
+				.where(scheduleWaitingMemberIdEq(memberId),
 						lessonDateTimeAfterYesterday())
 				.orderBy(scheduleWaiting.schedule.lessonDt.asc(), scheduleWaiting.schedule.lessonStartTime.asc())
 				.fetch();
 		return results.stream().map(MyScheduleWaiting::from).collect(toList());
-	}
-
-	private BooleanExpression delYnFalse() {
-		return scheduleWaiting.delYn.isFalse();
 	}
 
 	private BooleanExpression scheduleWaitingMemberIdEq(Long memberId) {
