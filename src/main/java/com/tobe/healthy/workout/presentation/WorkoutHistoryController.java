@@ -129,11 +129,11 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
     })
     @GetMapping("/my-gym")
-    public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistoryMyGym(@AuthenticationPrincipal CustomMemberDetails loginMember,
+    public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistoryMyGym(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                                    @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
                                                                                    Pageable pageable) {
         return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
-                .data(workoutService.getWorkoutHistoryMyGym(loginMember.getMemberId(), pageable, searchDate))
+                .data(workoutService.getWorkoutHistoryMyGym(customMemberDetails.getMember(), pageable, searchDate))
                 .message("운동기록이 조회되었습니다.")
                 .build();
     }

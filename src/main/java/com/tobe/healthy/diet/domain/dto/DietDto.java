@@ -1,7 +1,9 @@
 package com.tobe.healthy.diet.domain.dto;
 
+import com.querydsl.core.annotations.QueryProjection;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.member.domain.entity.Member;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -23,6 +25,7 @@ public class DietDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDate eatDate;
+    private boolean liked;
 
     @Builder.Default
     private DietDetailDto breakfast = new DietDetailDto();
@@ -56,6 +59,16 @@ public class DietDto {
                 case DINNER -> this.dinner.setDietFile(file);
             }
         }
+    }
+
+    @QueryProjection
+    public DietDto(Long dietId, Member member, boolean liked, Long likeCnt, Long commentCnt, LocalDate eatDate) {
+        this.dietId = dietId;
+        this.member = MemberDto.from(member);
+        this.liked = liked;
+        this.likeCnt = likeCnt;
+        this.commentCnt = commentCnt;
+        this.eatDate = eatDate;
     }
 
 }

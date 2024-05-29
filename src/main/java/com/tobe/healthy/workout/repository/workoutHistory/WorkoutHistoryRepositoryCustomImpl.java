@@ -34,7 +34,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         Long totalCnt = queryFactory
                 .select(workoutHistory.count())
                 .from(workoutHistory)
-                .where(workoutHistory.member.id.eq(memberId), historyDeYnEq(false), convertDateFormat(searchDate))
+                .where(memberIdEq(memberId), historyDeYnEq(false), convertDateFormat(searchDate))
                 .fetchOne();
         List<WorkoutHistoryDto> workoutHistories = queryFactory
                 .select(new QWorkoutHistoryDto(workoutHistory.workoutHistoryId, workoutHistory.content, workoutHistory.member
@@ -44,7 +44,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
                 .leftJoin(workoutHistoryLike)
                 .on(workoutHistory.workoutHistoryId.eq(workoutHistoryLike.workoutHistoryLikePK.workoutHistory.workoutHistoryId)
                         , workoutHistoryLike.workoutHistoryLikePK.member.id.eq(loginMemberId))
-                .where(workoutHistory.member.id.eq(memberId), historyDeYnEq(false), convertDateFormat(searchDate))
+                .where(memberIdEq(memberId), historyDeYnEq(false), convertDateFormat(searchDate))
                 .orderBy(workoutHistory.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -52,33 +52,54 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         return PageableExecutionUtils.getPage(workoutHistories, pageable, ()-> totalCnt );
     }
 
+    private static BooleanExpression memberIdEq(Long memberId) {
+        return workoutHistory.member.id.eq(memberId);
+    }
+
     @Override
-    public Page<WorkoutHistory> getWorkoutHistoryByGym(Long gymId, Pageable pageable, String searchDate) {
+    public Page<WorkoutHistoryDto> getWorkoutHistoryByGym(Long loginMemberId, Long gymId, Pageable pageable, String searchDate) {
         Long totalCnt = queryFactory
                 .select(workoutHistory.count())
                 .from(workoutHistory)
-                .where(workoutHistory.gym.id.eq(gymId), historyDeYnEq(false),
-                        convertDateFormat(searchDate), viewMySelfEq(false))
+                .where(gymIdEq(gymId)
+                        , historyDeYnEq(false)
+                        , convertDateFormat(searchDate)
+                        , viewMySelfEq(false))
                 .fetchOne();
-        List<WorkoutHistory> workoutHistories =  queryFactory
-                .select(workoutHistory)
+        List<WorkoutHistoryDto> workoutHistories = queryFactory
+                .select(new QWorkoutHistoryDto(workoutHistory.workoutHistoryId, workoutHistory.content, workoutHistory.member
+                        , isLiked()
+                        , workoutHistory.likeCnt, workoutHistory.commentCnt, workoutHistory.viewMySelf))
                 .from(workoutHistory)
-                .where(workoutHistory.gym.id.eq(gymId), historyDeYnEq(false),
-                        convertDateFormat(searchDate), viewMySelfEq(false))
+                .leftJoin(workoutHistoryLike)
+                .on(workoutHistory.workoutHistoryId.eq(workoutHistoryLike.workoutHistoryLikePK.workoutHistory.workoutHistoryId)
+                        , workoutHistoryLike.workoutHistoryLikePK.member.id.eq(loginMemberId))
+                .where(gymIdEq(gymId)
+                        , historyDeYnEq(false)
+                        , convertDateFormat(searchDate)
+                        , viewMySelfEq(false))
                 .orderBy(workoutHistory.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
         return PageableExecutionUtils.getPage(workoutHistories, pageable, ()-> totalCnt );
+    }
+
+    private static BooleanExpression gymIdEq(Long gymId) {
+        return workoutHistory.gym.id.eq(gymId);
     }
 
     @Override
     public List<WorkoutHistoryFiles> getWorkoutHistoryFile(List<Long> ids) {
         return queryFactory.select(workoutHistoryFiles)
                 .from(workoutHistoryFiles)
-                .where(workoutHistoryFiles.workoutHistory.workoutHistoryId.in(ids), historyFileDeYnEq(false))
+                .where(historyIdIn(ids), historyFileDeYnEq(false))
                 .orderBy(workoutHistoryFiles.createdAt.asc(), workoutHistoryFiles.fileOrder.asc())
                 .fetch();
+    }
+
+    private static BooleanExpression historyIdIn(List<Long> ids) {
+        return workoutHistoryFiles.workoutHistory.workoutHistoryId.in(ids);
     }
 
     private BooleanExpression isLiked() {
