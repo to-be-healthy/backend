@@ -8,6 +8,7 @@ import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.DietFileDto;
 import com.tobe.healthy.diet.domain.dto.in.DietAddCommandAtHome;
 import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
+import com.tobe.healthy.diet.domain.dto.out.DietUploadDaysResult;
 import com.tobe.healthy.diet.domain.entity.*;
 import com.tobe.healthy.diet.repository.DietFileRepository;
 import com.tobe.healthy.diet.repository.DietLikeRepository;
@@ -252,9 +253,11 @@ public class DietService {
         return arr[arr.length - 1];
     }
 
-    public List<String> getDietUploadDays(Long memberId, String searchDate) {
+    public DietUploadDaysResult getDietUploadDays(Long memberId, String searchDate) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         List<String> days = dietRepository.getDietUploadDays(memberId, searchDate);
-        return ObjectUtils.isEmpty(days) ? null : days;
+        return DietUploadDaysResult.create(member.getDietNoticeStatus(), days);
     }
 
 }

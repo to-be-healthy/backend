@@ -6,6 +6,7 @@ import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.in.DietAddCommandAtHome;
 import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
+import com.tobe.healthy.diet.domain.dto.out.DietUploadDaysResult;
 import com.tobe.healthy.workout.application.FileService;
 import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
 import io.swagger.v3.oas.annotations.Operation;
@@ -153,9 +154,9 @@ public class DietController {
             @ApiResponse(responseCode = "200", description = "업로드 날짜를 반환한다.")
     })
     @GetMapping("/upload-date")
-    public ResponseHandler<List<String>> getDietUploadDays(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                           @Parameter(description = "조회할 날짜", example = "2024-05") @Param("searchDate") String searchDate) {
-        return ResponseHandler.<List<String>>builder()
+    public ResponseHandler<DietUploadDaysResult> getDietUploadDays(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                   @Parameter(description = "조회할 날짜", example = "2024-05") @Param("searchDate") String searchDate) {
+        return ResponseHandler.<DietUploadDaysResult>builder()
                 .data(dietService.getDietUploadDays(customMemberDetails.getMember().getId(), searchDate))
                 .message("업로드 날짜가 조회되었습니다.")
                 .build();

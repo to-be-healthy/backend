@@ -201,4 +201,11 @@ public class MemberCommandService {
             throw new CustomException(MEMBER_NAME_NOT_VALID);
         }
     }
+
+    public Boolean changeDietNotice(AlarmStatus alarmStatus, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        member.changeDietNotice(alarmStatus);
+        return true;
+    }
 }
