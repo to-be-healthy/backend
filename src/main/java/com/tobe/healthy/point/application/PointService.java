@@ -1,5 +1,6 @@
 package com.tobe.healthy.point.application;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.entity.Course;
@@ -90,12 +91,17 @@ public class PointService {
         pointRepository.save(Point.create(member, type, calculation, point));
     }
 
-    public PointDto getPoint(Long memberId, String searchDate, Pageable pageable) {
+    public CustomPaging getPoint(Long memberId, String searchDate, Pageable pageable) {
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         Page<Point> histories = pointRepository.getPoint(memberId, searchDate, pageable);
         int monthPoint = pointRepository.getPointOfSearchMonth(memberId, searchDate);
         int totalPoint = pointRepository.getTotalPoint(memberId, searchDate);
-        return PointDto.create(searchDate, monthPoint, totalPoint, histories.map(PointHistoryDto::from).stream().toList());
+
+        List<PointHistoryDto> content = histories.map(PointHistoryDto::from).stream().toList();
+        CustomPaging customPaging = new CustomPaging(content, histories.getPageable().getPageNumber(),
+                histories.getPageable().getPageSize(), histories.getTotalPages(), histories.getTotalElements(), histories.isLast());
+        customPaging.setMainData(PointDto.create(searchDate, monthPoint, totalPoint));
+        return customPaging;
     }
 }

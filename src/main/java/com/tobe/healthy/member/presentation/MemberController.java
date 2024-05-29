@@ -151,10 +151,10 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "수강권 정보를 반환한다.")
 	})
 	@GetMapping("/course")
-	public ResponseHandler<CourseGetResult> getMyCourse(String searchDate,
+	public ResponseHandler<CustomPaging> getMyCourse(String searchDate,
 														Pageable pageable,
 														@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<CourseGetResult>builder()
+		return ResponseHandler.<CustomPaging>builder()
 				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, customMemberDetails.getMemberId(), searchDate))
 				.message("수강권이 조회되었습니다.")
 				.build();
@@ -166,11 +166,11 @@ public class MemberController {
 	})
 	@GetMapping("/{memberId}/course")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<CourseGetResult> getCourse(@PathVariable Long memberId,
+	public ResponseHandler<CustomPaging> getCourse(@PathVariable Long memberId,
 													  String searchDate,
 													  Pageable pageable,
 													  @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<CourseGetResult>builder()
+		return ResponseHandler.<CustomPaging>builder()
 				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, memberId, searchDate))
 				.message("수강권이 조회되었습니다.")
 				.build();
@@ -181,8 +181,8 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "포인트 및 히스토리를 반환한다.")
 	})
 	@GetMapping("/point")
-	public ResponseHandler<PointDto> getMyPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails, String searchDate, Pageable pageable) {
-		return ResponseHandler.<PointDto>builder()
+	public ResponseHandler<CustomPaging> getMyPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails, String searchDate, Pageable pageable) {
+		return ResponseHandler.<CustomPaging>builder()
 				.data(pointService.getPoint(customMemberDetails.getMember().getId(), searchDate, pageable))
 				.message("포인트가 조회되었습니다.")
 				.build();
@@ -194,8 +194,8 @@ public class MemberController {
 	})
 	@GetMapping("/{memberId}/point")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<PointDto> getPoint(@PathVariable Long memberId, String searchDate, Pageable pageable) {
-		return ResponseHandler.<PointDto>builder()
+	public ResponseHandler<CustomPaging> getPoint(@PathVariable Long memberId, String searchDate, Pageable pageable) {
+		return ResponseHandler.<CustomPaging>builder()
 				.data(pointService.getPoint(memberId, searchDate, pageable))
 				.message("포인트가 조회되었습니다.")
 				.build();
