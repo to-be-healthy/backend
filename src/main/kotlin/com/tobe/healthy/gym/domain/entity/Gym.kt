@@ -6,10 +6,12 @@ import com.tobe.healthy.member.domain.entity.Member
 import jakarta.persistence.*
 import jakarta.persistence.FetchType.LAZY
 import jakarta.persistence.GenerationType.IDENTITY
+import lombok.ToString
 import org.hibernate.annotations.DynamicUpdate
 
 @Entity
 @DynamicUpdate
+@ToString
 class Gym(
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -22,6 +24,7 @@ class Gym(
     val joinCode: String,
 
     @OneToMany(fetch = LAZY, mappedBy = "gym")
+    @ToString.Exclude
     val member: MutableList<Member> = mutableListOf()
 
 ) : BaseTimeEntity<Gym, Long>() {

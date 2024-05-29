@@ -38,7 +38,9 @@ class GymController(
         responses = [ApiResponse(responseCode = "200", description = "헬스장에 모든 트레이너 조회완료")],
     )
     @GetMapping("/{gymId}/trainers")
-    fun findAllTrainersByGym(@PathVariable(name = "gymId") gymId: Long): ApiResultResponse<List<TrainersByGymResult?>> {
+    fun findAllTrainersByGym(
+        @PathVariable gymId: Long
+    ): ApiResultResponse<List<TrainersByGymResult?>> {
         return ApiResultResponse(
             data = gymService.findAllTrainersByGym(gymId),
             message = "헬스장의 모든 트레이너들을 조회하였습니다."

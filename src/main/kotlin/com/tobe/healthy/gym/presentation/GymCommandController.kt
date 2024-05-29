@@ -6,7 +6,6 @@ import com.tobe.healthy.gym.application.GymCommandService
 import com.tobe.healthy.gym.domain.dto.out.CommandRegisterGymResult
 import com.tobe.healthy.gym.domain.dto.out.CommandSelectMyGymResult
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -24,7 +23,8 @@ class GymCommandController(
         responses = [ApiResponse(responseCode = "200", description = "헬스장을 등록하였습니다.")],
     )
     @PostMapping
-    fun registerGym(@Parameter(description = "헬스장 이름") @RequestParam name: String): ApiResultResponse<CommandRegisterGymResult> {
+    fun registerGym(@RequestParam name: String
+    ): ApiResultResponse<CommandRegisterGymResult> {
         return ApiResultResponse(
             data = gymCommandService.registerGym(name),
             message = "헬스장을 등록하였습니다."
@@ -41,9 +41,10 @@ class GymCommandController(
         ],
     )
     @PostMapping("/{gymId}")
-    fun selectMyGym(@Parameter(description = "헬스장 ID") @PathVariable gymId: Long,
-                    @Parameter(description = "6자리 난수로 구성된 헬스장 가입 번호") joinCode: String?,
-                    @AuthenticationPrincipal member: CustomMemberDetails,
+    fun selectMyGym(
+        @PathVariable gymId: Long,
+        joinCode: String?,
+        @AuthenticationPrincipal member: CustomMemberDetails,
     ): ApiResultResponse<CommandSelectMyGymResult> {
         return ApiResultResponse(
             data = gymCommandService.selectMyGym(gymId, joinCode, member.memberId),

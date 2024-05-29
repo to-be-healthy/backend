@@ -1,5 +1,6 @@
 package com.tobe.healthy.schedule.repository.trainer
 
+import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterIndividualSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
@@ -22,5 +23,5 @@ interface TrainerScheduleRepositoryCustom {
     fun findScheduleByTrainerId(scheduleId: Long, trainerId: Long): Schedule?
     fun findAllByLessonDtAndTrainerId(lessonDt: String, trainerId: Long): List<Schedule?>
     fun findAllDisabledSchedule(lessonStartDt: LocalDate, lessonEndDt: LocalDate): List<Schedule?>
-    fun findAllUnwrittenLessonHistory(memberId: Long): List<Schedule>
+    fun findAllUnwrittenLessonHistory(request: UnwrittenLessonHistorySearchCond, memberId: Long): List<Schedule>
 }

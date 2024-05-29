@@ -1,5 +1,6 @@
 package com.tobe.healthy.lessonhistory.domain.dto.out
 
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.NO_SHOW
@@ -15,7 +16,8 @@ data class RetrieveUnwrittenLessonHistory(
     val studentName: String?,
     val lessonDt: String,
     val lessonTime: String,
-    val reservationStatus: String
+    val reservationStatus: String,
+    val reviewStatus: String
 ) {
     companion object {
         fun from(schedule: Schedule) : RetrieveUnwrittenLessonHistory {
@@ -25,8 +27,13 @@ data class RetrieveUnwrittenLessonHistory(
                 studentName = schedule.applicant?.name,
                 lessonDt = formatLessonDt(schedule.lessonDt),
                 lessonTime = formatLessonTime(schedule.lessonStartTime, schedule.lessonEndTime),
-                reservationStatus = formatReservationStatus(schedule.reservationStatus)
+                reservationStatus = formatReservationStatus(schedule.reservationStatus),
+                reviewStatus = validateReviewStatus(schedule.lessonHistories)
             )
+        }
+
+        private fun validateReviewStatus(lessonHistories: List<LessonHistory>): String {
+            return if (lessonHistories.isEmpty()) "미작성" else "작성"
         }
 
         private fun formatLessonTime(lessonStartTime: LocalTime, lessonEndTime: LocalTime): String {

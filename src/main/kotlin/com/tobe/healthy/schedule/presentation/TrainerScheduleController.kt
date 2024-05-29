@@ -34,7 +34,9 @@ class TrainerScheduleController(
     )
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @GetMapping("/default-lesson-time")
-    fun findDefaultSchedule(@AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<RetrieveTrainerDefaultLessonTimeResult?> {
+    fun findDefaultSchedule(
+        @AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<RetrieveTrainerDefaultLessonTimeResult?> {
         return ApiResultResponse(
             message = "기본 수업 시간 조회에 성공하였습니다.",
             data = trainerScheduleService.findDefaultLessonTime(member.memberId)
@@ -50,7 +52,8 @@ class TrainerScheduleController(
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun findAllSchedule(@ParameterObject retrieveTrainerScheduleByLessonInfo: RetrieveTrainerScheduleByLessonInfo,
-                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<RetrieveTrainerScheduleByLessonInfoResult?> {
+                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    ): ApiResultResponse<RetrieveTrainerScheduleByLessonInfoResult?> {
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
             data = trainerScheduleService.findAllSchedule(retrieveTrainerScheduleByLessonInfo, customMemberDetails.memberId)
@@ -66,7 +69,8 @@ class TrainerScheduleController(
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun findOneSchedule(queryTrainerSchedule: RetrieveTrainerScheduleByLessonDt,
-                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails): ApiResultResponse<RetrieveTrainerScheduleByLessonDtResult?> {
+                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    ): ApiResultResponse<RetrieveTrainerScheduleByLessonDtResult?> {
         return ApiResultResponse(
             message = "특정 날짜의 일정을 조회했습니다.",
             data = trainerScheduleService.findOneTrainerTodaySchedule(queryTrainerSchedule, customMemberDetails.memberId)

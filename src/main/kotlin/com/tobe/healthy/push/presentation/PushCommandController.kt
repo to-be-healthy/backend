@@ -18,7 +18,8 @@ class PushCommandController(
 
     @PostMapping("/register")
     fun registerFcmToken(@RequestBody request: CommandRegisterToken,
-                         @AuthenticationPrincipal member: CustomMemberDetails): ApiResultResponse<CommandRegisterTokenResult> {
+                         @AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<CommandRegisterTokenResult> {
         return ApiResultResponse(
             message = "토큰을 저장하였습니다.",
             data = pushCommandService.registerFcmToken(request, member.memberId)
@@ -26,7 +27,9 @@ class PushCommandController(
     }
 
     @PostMapping
-    fun sendPushAlarm(@RequestBody request: CommandSendNotification): ApiResultResponse<CommandSendNotificationResult> {
+    fun sendPushAlarm(
+        @RequestBody request: CommandSendNotification
+    ): ApiResultResponse<CommandSendNotificationResult> {
         return ApiResultResponse(
             message = "푸시 전송에 성공하였습니다.",
             data = pushCommandService.sendPushAlarm(request)

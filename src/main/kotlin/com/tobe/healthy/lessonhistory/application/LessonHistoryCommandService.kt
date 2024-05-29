@@ -34,88 +34,121 @@ import org.springframework.web.multipart.MultipartFile
 @Service
 @Transactional
 class LessonHistoryCommandService(
-        private val lessonHistoryRepository: LessonHistoryRepository,
-        private val lessonHistoryFilesRepository: LessonHistoryFilesRepository,
-        private val memberRepository: MemberRepository,
-        private val trainerScheduleRepository: TrainerScheduleRepository,
-        private val lessonHistoryCommentRepository: LessonHistoryCommentRepository,
-        private val amazonS3: AmazonS3,
-        private val redisService: RedisService,
-        @Value("\${aws.s3.bucket-name}")
-        private val bucketName: String,
+    private val lessonHistoryRepository: LessonHistoryRepository,
+    private val lessonHistoryFilesRepository: LessonHistoryFilesRepository,
+    private val memberRepository: MemberRepository,
+    private val trainerScheduleRepository: TrainerScheduleRepository,
+    private val lessonHistoryCommentRepository: LessonHistoryCommentRepository,
+    private val amazonS3: AmazonS3,
+    private val redisService: RedisService,
+    @Value("\${aws.s3.bucket-name}")
+    private val bucketName: String,
 ) {
 
-    fun registerLessonHistory(request: CommandRegisterLessonHistory, trainerId: Long): CommandRegisterLessonHistoryResult {
+    fun registerLessonHistory(
+        request: CommandRegisterLessonHistory,
+        trainerId: Long
+    ): CommandRegisterLessonHistoryResult {
         val student = findMember(request.studentId)
         val trainer = findMember(trainerId)
         val schedule = findSchedule(request.scheduleId)
 
+        lessonHistoryRepository.validateDuplicateLessonHistory(trainerId, student.id, schedule.id)
+            ?.let { throw IllegalArgumentException("이미 수업일지를 등록하였습니다.") }
+
         val lessonHistory = registerLessonHistory(request.title!!, request.content!!, student, trainer, schedule)
 
-        registerFiles(request.commandUploadFileResult, trainer, lessonHistory)
+        val files = registerFiles(request.uploadFiles, trainer, lessonHistory)
 
-        return CommandRegisterLessonHistoryResult.from(lessonHistory)
+        return CommandRegisterLessonHistoryResult.from(lessonHistory, files)
     }
 
-    fun registerFilesOfLessonHistory(uploadFiles: MutableList<MultipartFile>, memberId: Long): List<CommandUploadFileResult> {
+    fun registerFilesOfLessonHistory(
+        uploadFiles: MutableList<MultipartFile>,
+        memberId: Long
+    ): List<CommandUploadFileResult> {
+
         val commandUploadFileResult = mutableListOf<CommandUploadFileResult>()
 
         var fileOrder = 1
+
         uploadFiles.let {
             checkMaximumFileCount(it.size)
 
             for (uploadFile in it) {
                 if (!uploadFile.isEmpty) {
                     val fileUrl = putFile(uploadFile)
-                    commandUploadFileResult.add(CommandUploadFileResult(fileUrl = fileUrl, fileOrder = fileOrder++))
-                    redisService.setValuesWithTimeout(TEMP_FILE_URI.description + fileUrl, memberId.toString(), FILE_TEMP_UPLOAD_TIMEOUT.description.toLong()) // 30분
+                    commandUploadFileResult.add(
+                        CommandUploadFileResult(
+                            fileUrl = fileUrl,
+                            fileOrder = fileOrder++
+                        )
+                    )
+                    redisService.setValuesWithTimeout(
+                        TEMP_FILE_URI.description + fileUrl,
+                        memberId.toString(),
+                        FILE_TEMP_UPLOAD_TIMEOUT.description.toLong()
+                    ) // 30분
                 }
             }
         }
-
         return commandUploadFileResult
     }
 
-    fun updateLessonHistory(lessonHistoryId: Long, request: CommandUpdateLessonHistory): CommandUpdateLessonHistoryResult {
-        val findLessonHistory = findLessonHistory(lessonHistoryId)
+    fun updateLessonHistory(
+        lessonHistoryId: Long,
+        request: CommandUpdateLessonHistory
+    ): CommandUpdateLessonHistoryResult {
+        val findLessonHistory = lessonHistoryRepository.findOneLessonHistoryWithFiles(lessonHistoryId)
+            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
         findLessonHistory.updateLessonHistory(request.title!!, request.content!!)
 
-        registerFile(
-            uploadFiles = request.commandUploadFileResult,
-            findMember = findLessonHistory.trainer,
+        findLessonHistory.files.clear()
+
+        val files = registerFile(
+            uploadFiles = request.uploadFiles,
+            findMember = findLessonHistory.trainer!!,
             lessonHistory = findLessonHistory
         )
 
-        return CommandUpdateLessonHistoryResult.from(findLessonHistory.id, findLessonHistory.title, findLessonHistory.content)
+        return CommandUpdateLessonHistoryResult.from(findLessonHistory, files)
     }
 
-    fun deleteLessonHistory(lessonHistoryId: Long): Long {
+    fun deleteLessonHistory(
+        lessonHistoryId: Long
+    ): Long {
         val findLessonHistory = findLessonHistory(lessonHistoryId)
 
-        findLessonHistory.id?.let {
-            lessonHistoryRepository.deleteById(it)
+        findLessonHistory.let {
+            deleteAllFiles(it.files)
+            lessonHistoryRepository.deleteById(it.id!!)
         }
 
         return lessonHistoryId
     }
 
-    fun registerLessonHistoryComment(lessonHistoryId: Long?, request: CommandRegisterComment, memberId: Long): CommandRegisterCommentResult {
+    fun registerLessonHistoryComment(
+        lessonHistoryId: Long,
+        request: CommandRegisterComment,
+        memberId: Long
+    ): CommandRegisterCommentResult {
         val findMember = findMember(memberId)
 
         val lessonHistory = findLessonHistory(lessonHistoryId)
 
         val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id)
         val lessonHistoryComment = registerComment(order, request, findMember, lessonHistory)
-        registerFile(request.commandUploadFileResult, findMember, lessonHistory, lessonHistoryComment)
-        return CommandRegisterCommentResult.from(lessonHistoryComment)
+        val files = registerFile(request.uploadFiles, findMember, lessonHistory, lessonHistoryComment)
+
+        return CommandRegisterCommentResult.from(lessonHistoryComment, files)
     }
 
     fun registerLessonHistoryReply(
-        lessonHistoryId: Long?,
-        lessonHistoryCommentId: Long?,
+        lessonHistoryId: Long,
+        lessonHistoryCommentId: Long,
         request: CommandRegisterComment,
-        memberId: Long,
+        memberId: Long
     ): CommandRegisterReplyResult {
         val findMember = findMember(memberId)
 
@@ -127,29 +160,49 @@ class LessonHistoryCommandService(
 
         val entity = LessonHistoryComment(
             order = order,
-            content = request.comment!!,
+            content = request.content!!,
             writer = findMember,
             lessonHistory = lessonHistory,
             parent = parentComment
         )
 
         lessonHistoryCommentRepository.save(entity)
-        registerFile(request.commandUploadFileResult, findMember, lessonHistory, entity)
 
-        return CommandRegisterReplyResult.from(entity)
+        val files = registerFile(
+            request.uploadFiles,
+            findMember,
+            lessonHistory,
+            entity
+        )
+
+        return CommandRegisterReplyResult.from(entity, files)
     }
 
-    fun updateLessonHistoryComment(lessonHistoryCommentId: Long, request: CommandUpdateComment): CommandUpdateCommentResult {
-        val comment = findLessonHistoryComment(lessonHistoryCommentId)
+    fun updateLessonHistoryComment(
+        lessonHistoryCommentId: Long,
+        request: CommandUpdateComment
+    ): CommandUpdateCommentResult {
+        lessonHistoryCommentRepository.findLessonHistoryCommentWithFiles(lessonHistoryCommentId)
+            ?.let {
+                deleteAllFiles(it.files)
 
-        comment.updateLessonHistoryComment(request.comment)
+                it.updateLessonHistoryComment(
+                    request.content,
+                    request.uploadFiles
+                )
 
-        return CommandUpdateCommentResult.from(comment.lessonHistory?.id, comment.id, comment.content)
+                return CommandUpdateCommentResult.from(it)
+
+            } ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
     }
 
-    fun deleteLessonHistoryComment(lessonHistoryCommentId: Long): Long {
+    fun deleteLessonHistoryComment(
+        lessonHistoryCommentId: Long
+    ): Long {
 
         val findLessonHistoryComment = findLessonHistoryComment(lessonHistoryCommentId)
+
+        deleteAllFiles(findLessonHistoryComment.files)
 
         findLessonHistoryComment.deleteComment()
 
@@ -157,13 +210,15 @@ class LessonHistoryCommandService(
     }
 
     private fun registerFile(
-        uploadFiles: MutableList<CommandUploadFileResult>?,
-        findMember: Member?,
-        lessonHistory: LessonHistory?,
+        uploadFiles: MutableList<CommandUploadFileResult>,
+        findMember: Member,
+        lessonHistory: LessonHistory,
         lessonHistoryComment: LessonHistoryComment? = null
-    ) {
+    ): MutableList<LessonHistoryFiles> {
 
-        uploadFiles?.let {
+        val files = mutableListOf<LessonHistoryFiles>()
+
+        uploadFiles.let {
             checkMaximumFileCount(it.size)
             for (uploadFile in it) {
                 val file = LessonHistoryFiles(
@@ -173,9 +228,12 @@ class LessonHistoryCommandService(
                     fileUrl = uploadFile.fileUrl,
                     fileOrder = uploadFile.fileOrder,
                 )
-                lessonHistoryFilesRepository.save(file)
+                files.add(file)
             }
         }
+        lessonHistoryFilesRepository.saveAll(files)
+
+        return files
     }
 
     private fun registerComment(
@@ -184,11 +242,12 @@ class LessonHistoryCommandService(
         findMember: Member,
         lessonHistory: LessonHistory
     ): LessonHistoryComment {
+
         val entity = LessonHistoryComment(
             order = order,
-            content = request.comment!!,
+            content = request.content!!,
             writer = findMember,
-            lessonHistory = lessonHistory,
+            lessonHistory = lessonHistory
         )
         lessonHistoryCommentRepository.save(entity)
         return entity
@@ -196,7 +255,7 @@ class LessonHistoryCommandService(
 
     private fun putFile(uploadFile: MultipartFile): String {
         val objectMetadata = createObjectMetadata(uploadFile.size, uploadFile.contentType)
-        val savedFileName =  createFileName("lesson-history/")
+        val savedFileName = createFileName("lesson-history/")
         amazonS3.putObject(
             bucketName,
             savedFileName,
@@ -208,19 +267,31 @@ class LessonHistoryCommandService(
         return fileUrl
     }
 
-    private fun findSchedule(scheduleId: Long?) =
-        (trainerScheduleRepository.findByIdOrNull(scheduleId)
-            ?: throw CustomException(SCHEDULE_NOT_FOUND))
+    private fun findSchedule(scheduleId: Long?): Schedule {
+        return trainerScheduleRepository.findByIdOrNull(scheduleId)
+            ?: throw CustomException(SCHEDULE_NOT_FOUND)
+    }
 
-    private fun registerLessonHistory(title: String, content: String, student: Member, trainer: Member, schedule: Schedule): LessonHistory {
+    private fun registerLessonHistory(
+        title: String,
+        content: String,
+        student: Member,
+        trainer: Member,
+        schedule: Schedule
+    ): LessonHistory {
         val lessonHistory = LessonHistory.register(title, content, student, trainer, schedule)
         lessonHistoryRepository.save(lessonHistory)
         return lessonHistory
     }
 
-    private fun registerFiles(uploadFiles: MutableList<CommandUploadFileResult>?, trainer: Member, lessonHistory: LessonHistory) {
-        uploadFiles?.let {
+    private fun registerFiles(
+        uploadFiles: MutableList<CommandUploadFileResult>,
+        trainer: Member,
+        lessonHistory: LessonHistory
+    ): MutableList<LessonHistoryFiles> {
+        val files = mutableListOf<LessonHistoryFiles>()
 
+        uploadFiles.let {
             checkMaximumFileCount(it.size)
 
             for (uploadFile in it) {
@@ -230,12 +301,13 @@ class LessonHistoryCommandService(
                     fileUrl = uploadFile.fileUrl,
                     fileOrder = uploadFile.fileOrder,
                 )
-
-                lessonHistoryFilesRepository.save(file)
-
+                files.add(file)
                 redisService.deleteValues(TEMP_FILE_URI.description + uploadFile.fileUrl)
             }
+
+            lessonHistoryFilesRepository.saveAll(files)
         }
+        return files
     }
 
     private fun checkMaximumFileCount(uploadFilesSize: Int) {
@@ -244,16 +316,28 @@ class LessonHistoryCommandService(
         }
     }
 
-    private fun findLessonHistoryComment(lessonHistoryCommentId: Long?) : LessonHistoryComment {
-        return lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
+    private fun findLessonHistoryComment(lessonHistoryCommentId: Long): LessonHistoryComment {
+        return lessonHistoryCommentRepository.findCommentById(lessonHistoryCommentId)
             ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
     }
 
-    private fun findLessonHistory(lessonHistoryId: Long?) = (lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
-        ?: throw CustomException(LESSON_HISTORY_NOT_FOUND))
+    private fun findLessonHistory(lessonHistoryId: Long?): LessonHistory {
+        return lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
+            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
+    }
 
-    private fun findMember(memberId: Long?) : Member {
-        return memberRepository.findByIdOrNull(memberId) ?: throw CustomException(MEMBER_NOT_FOUND)
+    private fun findMember(memberId: Long?): Member {
+        return memberRepository.findByIdOrNull(memberId)
+            ?: throw CustomException(MEMBER_NOT_FOUND)
+    }
+
+    private fun deleteAllFiles(files: MutableList<LessonHistoryFiles>) {
+        files.forEach {
+            it.fileUrl.let { fileUrl ->
+                amazonS3.deleteObject(bucketName, fileUrl)
+            }
+        }
+        lessonHistoryFilesRepository.deleteAll(files)
     }
 }
 

@@ -3,6 +3,7 @@ package com.tobe.healthy.schedule.repository.trainer
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
+import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
 import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistory.lessonHistory
 import com.tobe.healthy.member.domain.entity.QMember
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterIndividualSchedule
@@ -111,7 +112,10 @@ class TrainerScheduleRepositoryImpl(
                 reservationStatusEq(COMPLETED),
                 delYnEq(false)
             )
-            .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+            .orderBy(
+                schedule.lessonDt.asc(),
+                schedule.lessonStartTime.asc()
+            )
             .fetch()
 
         val scheduleCount = queryFactory
@@ -144,7 +148,6 @@ class TrainerScheduleRepositoryImpl(
                 }
             }
             return trainerTodaySchedule
-
         }
     }
 
@@ -251,16 +254,16 @@ class TrainerScheduleRepositoryImpl(
             .fetch()
     }
 
-    override fun findAllUnwrittenLessonHistory(memberId: Long): List<Schedule> {
+    override fun findAllUnwrittenLessonHistory(request: UnwrittenLessonHistorySearchCond, memberId: Long): List<Schedule> {
         return queryFactory
             .select(schedule)
             .from(schedule)
             .leftJoin(schedule.lessonHistories, lessonHistory).fetchJoin()
             .where(
                 trainerIdEq(memberId),
-                lessonHistory.isNull,
                 schedule.applicant.isNotNull,
                 reservationStatusEq(COMPLETED),
+                lessonDateTimeEq(request.lessonDateTime),
                 delYnEq(false)
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
@@ -312,5 +315,10 @@ class TrainerScheduleRepositoryImpl(
     private fun lessonDtEq(lessonDt: String): BooleanExpression? {
         val formattedDate = stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", schedule.lessonDt)
         return formattedDate.eq(lessonDt)
+    }
+
+    private fun lessonDateTimeEq(lessonDateTime: String?): BooleanExpression? {
+        val formattedDate = stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", schedule.lessonDt)
+        return formattedDate.eq(lessonDateTime)
     }
 }

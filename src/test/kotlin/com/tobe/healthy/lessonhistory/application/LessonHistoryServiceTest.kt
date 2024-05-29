@@ -51,8 +51,7 @@ class LessonHistoryServiceTest(
             title = "수업일지 테스트 제목",
             content = "수업일지 테스트 내용",
             studentId = student.id,
-            scheduleId = schedule.id,
-            null
+            scheduleId = schedule.id
         )
 
         val result = lessonHistoryCommandService.registerLessonHistory(request, trainer.id)
@@ -80,11 +79,11 @@ class LessonHistoryServiceTest(
     "수업일지에 댓글을 작성한다" {
         val result = createLessonHistory(student.id, trainer.id, schedule.id, "수업일지 제목", "수업일지 내용")
 
-        val commentRequest = CommandRegisterComment(comment = "수업일지 테스트 댓글", null)
+        val commentRequest = CommandRegisterComment(content = "수업일지 테스트 댓글")
         val response =
-            lessonHistoryCommandService.registerLessonHistoryComment(result.lessonHistoryId, commentRequest, student.id)
+            lessonHistoryCommandService.registerLessonHistoryComment(result.lessonHistoryId!!, commentRequest, student.id)
 
-        response.comment shouldBe commentRequest.comment
+        response.comment shouldBe commentRequest.content
         response.writerId shouldBe student.id
     }
 
@@ -93,8 +92,8 @@ class LessonHistoryServiceTest(
         lessonHistoryId: Long?,
         memberId: Long
     ): CommandRegisterCommentResult {
-        return CommandRegisterComment(comment = comment, null).let {
-            lessonHistoryCommandService.registerLessonHistoryComment(lessonHistoryId, it, memberId)
+        return CommandRegisterComment(content = comment).let {
+            lessonHistoryCommandService.registerLessonHistoryComment(lessonHistoryId!!, it, memberId)
         }
     }
 
@@ -103,9 +102,9 @@ class LessonHistoryServiceTest(
         val result = createLessonHistory(student.id, trainer.id, schedule.id, "수업일지 제목", "수업일지 내용")
         val response = createLessonHistoryComment("수업일지 테스트 댓글1", result.lessonHistoryId, student.id)
         val resultReply = lessonHistoryCommandService.registerLessonHistoryReply(
-            result.lessonHistoryId,
-            response.lessonHistoryCommentId,
-            CommandRegisterComment("대댓글!", null),
+            result.lessonHistoryId!!,
+            response.lessonHistoryCommentId!!,
+            CommandRegisterComment("대댓글!"),
             trainer.id
         )
 

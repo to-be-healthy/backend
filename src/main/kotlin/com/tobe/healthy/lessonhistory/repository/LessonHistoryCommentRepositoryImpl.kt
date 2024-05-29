@@ -2,6 +2,7 @@ package com.tobe.healthy.lessonhistory.repository
 
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryComment
 import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistoryComment.lessonHistoryComment
 import org.springframework.stereotype.Repository
 
@@ -16,7 +17,8 @@ class LessonHistoryCommentRepositoryImpl(
             .from(lessonHistoryComment)
             .where(
                 lessonHistoryIdEq(lessonHistoryId),
-                parentCommentIdIsNull()
+                parentCommentIdIsNull(),
+                lessonHistoryComment.delYn.eq(false)
             )
             .fetchOne() ?: 1
         return result
@@ -28,9 +30,33 @@ class LessonHistoryCommentRepositoryImpl(
             .from(lessonHistoryComment)
             .where(
                 lessonHistoryIdEq(lessonHistoryId),
-                parentCommentIdEq(lessonHistoryCommentId)
+                parentCommentIdEq(lessonHistoryCommentId),
+                lessonHistoryComment.delYn.eq(false)
             )
             .fetchOne() ?: 1
+    }
+
+    override fun findLessonHistoryCommentWithFiles(lessonHistoryCommentId: Long): LessonHistoryComment? {
+        return queryFactory
+            .select(lessonHistoryComment)
+            .from(lessonHistoryComment)
+            .leftJoin(lessonHistoryComment.files).fetchJoin()
+            .where(
+                lessonHistoryComment.id.eq(lessonHistoryCommentId),
+                lessonHistoryComment.delYn.eq(false)
+            )
+            .fetchOne()
+    }
+
+    override fun findCommentById(lessonHistoryCommentId: Long): LessonHistoryComment? {
+        return queryFactory
+            .select(lessonHistoryComment)
+            .from(lessonHistoryComment)
+            .where(
+                lessonHistoryComment.id.eq(lessonHistoryCommentId),
+                lessonHistoryComment.delYn.eq(false)
+            )
+            .fetchOne()
     }
 
     private fun parentCommentIdEq(lessonHistoryCommentParentId: Long?): BooleanExpression? =

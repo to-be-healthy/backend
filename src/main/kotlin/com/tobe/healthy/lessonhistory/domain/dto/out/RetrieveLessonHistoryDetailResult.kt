@@ -31,30 +31,13 @@ data class RetrieveLessonHistoryDetailResult(
 ) {
 
     companion object {
-        fun from(entity: LessonHistory): RetrieveLessonHistoryDetailResult {
-            return RetrieveLessonHistoryDetailResult(
-                id = entity.id,
-                title = entity.title,
-                content = entity.content,
-                commentTotalCount = entity.lessonHistoryComment.count(),
-                createdAt = entity.createdAt,
-                student = entity.student?.name,
-                trainer = "${entity.trainer?.name} 트레이너",
-                scheduleId = entity.schedule?.id,
-                lessonDt = formatLessonDt(entity.schedule?.lessonDt),
-                lessonTime = formatLessonTime(entity.schedule?.lessonStartTime, entity.schedule?.lessonEndTime),
-                attendanceStatus = validateAttendanceStatus(entity.schedule?.lessonDt, entity.schedule?.lessonEndTime),
-                files = entity.file.map { LessonHistoryFileResults.from(it) }.sortedBy { it.fileOrder }.toMutableList()
-            )
-        }
-
         fun detailFrom(entity: LessonHistory?): RetrieveLessonHistoryDetailResult? {
             return RetrieveLessonHistoryDetailResult(
                 id = entity?.id,
                 title = entity?.title,
                 content = entity?.content,
                 comments = sortLessonHistoryComment(entity?.lessonHistoryComment),
-                commentTotalCount = entity?.lessonHistoryComment?.let { comment -> comment.count { comment -> comment?.delYn == true } },
+                commentTotalCount = entity?.lessonHistoryComment?.count { !it.delYn } ?: 0,
                 createdAt = entity?.createdAt,
                 student = entity?.student?.name,
                 trainer = entity?.trainer?.name?.let { name -> "$name 트레이너" },
@@ -65,11 +48,7 @@ data class RetrieveLessonHistoryDetailResult(
                     entity?.schedule?.lessonDt,
                     entity?.schedule?.lessonEndTime
                 ),
-                files = entity?.file
-                    ?.filter { file -> file?.lessonHistoryComment == null }
-                    ?.map { file -> LessonHistoryFileResults.from(file) }
-                    ?.sortedBy { file -> file.fileOrder }
-                    ?.toMutableList() ?: mutableListOf()
+                files = entity?.let { it.files.filter { comment -> comment.lessonHistoryComment == null }.map { files -> LessonHistoryFileResults.from(files) }.sortedBy { file -> file.fileOrder }.toMutableList() } ?: mutableListOf()
             )
         }
 
@@ -113,8 +92,8 @@ data class RetrieveLessonHistoryDetailResult(
         val member: LessonHistoryCommentMemberResult?,
         val orderNum: Int?,
         val parentId: Long?,
-        val replies: MutableList<LessonHistoryCommentCommandResult?> = mutableListOf(),
-        val files: MutableList<LessonHistoryFileResults?> = mutableListOf(),
+        val replies: MutableList<LessonHistoryCommentCommandResult> = mutableListOf(),
+        val files: MutableList<LessonHistoryFileResults> = mutableListOf(),
         val delYn: Boolean?,
         val createdAt: LocalDateTime?,
         val updatedAt: LocalDateTime?
@@ -128,7 +107,7 @@ data class RetrieveLessonHistoryDetailResult(
                     orderNum = entity?.order,
                     replies = entity?.replies?.map { replies -> from(replies) }?.toMutableList() ?: mutableListOf(),
                     parentId = entity?.parent?.id,
-                    files = entity?.files?.map { files -> LessonHistoryFileResults.from(files) }?.toMutableList() ?: mutableListOf(),
+                    files = entity?.let { it.files.map { files -> LessonHistoryFileResults.from(files) }?.toMutableList() } ?: mutableListOf(),
                     delYn = entity?.delYn,
                     createdAt = entity?.createdAt,
                     updatedAt = entity?.updatedAt
