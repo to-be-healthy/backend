@@ -10,6 +10,7 @@ import com.tobe.healthy.diet.domain.dto.in.DietAddCommandAtHome;
 import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
 import com.tobe.healthy.diet.domain.dto.out.DietUploadDaysResult;
 import com.tobe.healthy.diet.domain.entity.*;
+import com.tobe.healthy.diet.repository.DietCommentRepository;
 import com.tobe.healthy.diet.repository.DietFileRepository;
 import com.tobe.healthy.diet.repository.DietLikeRepository;
 import com.tobe.healthy.diet.repository.DietRepository;
@@ -18,7 +19,6 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryLikePK;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,6 +50,7 @@ public class DietService {
     private final FileService fileService;
     private final MemberRepository memberRepository;
     private final RedisService redisService;
+    private final DietCommentRepository commentRepository;
 
     public DietDto getTodayDiet(Long memberId) {
         Diet diet = dietRepository.getTodayDiet(memberId);
@@ -116,8 +116,13 @@ public class DietService {
         diet.changeFast(command.getType(), command.isFast());
         DietDto dietDto = DietDto.from(diet);
         setDietFile(dietDto, List.of(diet.getDietId()));
-        if(isClean(dietDto)) diet.deleteDiet();
+
+        if(isClean(dietDto) && commentNotExists(diet)) diet.deleteDiet();
         return dietDto;
+    }
+
+    private boolean commentNotExists(Diet diet) {
+        return commentRepository.countByDietAndDelYnFalse(diet) == 0L;
     }
 
     private boolean isClean(DietDto dietDto) {

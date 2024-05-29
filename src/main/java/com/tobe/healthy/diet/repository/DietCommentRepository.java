@@ -13,5 +13,6 @@ public interface DietCommentRepository extends JpaRepository<DietComment, Long>,
     Long countByDiet(Diet diet);
     Optional<DietComment> findByCommentIdAndDelYnFalse(@Param("commentId") Long parentCommentId);
     Optional<DietComment> findByCommentIdAndMemberIdAndDelYnFalse(Long commentId, Long memberId);
+    Long countByDietAndDelYnFalse(Diet diet);
 
 }

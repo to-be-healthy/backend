@@ -1,5 +1,6 @@
 package com.tobe.healthy.common;
 
+import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.schedule.application.TrainerScheduleCommandService;
 import lombok.RequiredArgsConstructor;
@@ -30,4 +31,5 @@ public class Scheduler {
         trainerScheduleCommandService.deleteDisabledSchedule();
         log.info("========== 트레이너의 DISABLED 스케줄 삭제 스케줄러 작동 완료 ==========");
     }
+
 }
