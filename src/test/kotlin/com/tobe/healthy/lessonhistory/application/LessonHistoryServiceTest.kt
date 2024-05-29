@@ -83,7 +83,7 @@ class LessonHistoryServiceTest(
         val response =
             lessonHistoryCommandService.registerLessonHistoryComment(result.lessonHistoryId!!, commentRequest, student.id)
 
-        response.comment shouldBe commentRequest.content
+        response.content shouldBe commentRequest.content
         response.writerId shouldBe student.id
     }
 

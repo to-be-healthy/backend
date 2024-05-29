@@ -270,6 +270,25 @@ class TrainerScheduleRepositoryImpl(
             .fetch()
     }
 
+    override fun findAllSimpleLessonHistoryByMemberId(studentId: Long, trainerId: Long): List<Schedule> {
+        return queryFactory
+            .select(schedule)
+            .from(schedule)
+            .leftJoin(schedule.lessonHistories, lessonHistory).fetchJoin()
+            .where(
+                schedule.applicant.id.eq(studentId),
+                trainerIdEq(trainerId),
+                schedule.applicant.isNotNull,
+                reservationStatusEq(COMPLETED),
+                delYnEq(false)
+            )
+            .orderBy(
+                schedule.lessonDt.asc(),
+                schedule.lessonStartTime.asc()
+            )
+            .fetch()
+    }
+
     private fun lessonEndDtAfter(startTime: LocalTime?): BooleanExpression? =
         schedule.lessonEndTime.after(startTime)
 

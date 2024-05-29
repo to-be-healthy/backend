@@ -8,6 +8,7 @@ import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDat
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
+import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveSimpleLessonHistoryResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveUnwrittenLessonHistory
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.member.repository.MemberRepository
@@ -99,5 +100,14 @@ class LessonHistoryService(
     fun findAllUnwrittenLessonHistory(request: UnwrittenLessonHistorySearchCond, memberId: Long): List<RetrieveUnwrittenLessonHistory> {
         return trainerScheduleRepository.findAllUnwrittenLessonHistory(request, memberId)
             .map { RetrieveUnwrittenLessonHistory.from(it) }
+    }
+
+    fun findAllSimpleLessonHistoryByMemberId(
+        studentId: Long,
+        trainerId: Long
+    ): List<RetrieveSimpleLessonHistoryResult>? {
+        return trainerScheduleRepository.findAllSimpleLessonHistoryByMemberId(studentId, trainerId)?.let {
+            it.map { schedule -> RetrieveSimpleLessonHistoryResult.from(schedule) }
+        } ?: null
     }
 }
