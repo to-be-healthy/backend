@@ -1,5 +1,6 @@
 package com.tobe.healthy.workout.presentation;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.workout.application.WorkoutCommentService;
@@ -33,9 +34,9 @@ public class WorkoutCommentController {
             @ApiResponse(responseCode = "200", description = "운동기록의 댓글, 페이징을 반환한다.")
     })
     @GetMapping("/{workoutHistoryId}/comments")
-    public ResponseHandler<List<WorkoutHistoryCommentDto>> getCommentsByHistoryId(@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId,
+    public ResponseHandler<CustomPaging<WorkoutHistoryCommentDto>> getCommentsByHistoryId(@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId,
                                                                                   Pageable pageable) {
-        return ResponseHandler.<List<WorkoutHistoryCommentDto>>builder()
+        return ResponseHandler.<CustomPaging<WorkoutHistoryCommentDto>>builder()
                 .data(commentService.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable))
                 .message("댓글이 조회되었습니다.")
                 .build();

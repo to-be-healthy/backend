@@ -1,5 +1,6 @@
 package com.tobe.healthy.diet.presentation;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.diet.application.DietCommentService;
@@ -33,9 +34,9 @@ public class DietCommentController {
             @ApiResponse(responseCode = "200", description = "식단기록의 댓글, 페이징을 반환한다.")
     })
     @GetMapping("/{dietId}/comments")
-    public ResponseHandler<List<DietCommentDto>> getCommentsByDietId(@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
+    public ResponseHandler<CustomPaging<DietCommentDto>> getCommentsByDietId(@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
                                                                                   Pageable pageable) {
-        return ResponseHandler.<List<DietCommentDto>>builder()
+        return ResponseHandler.<CustomPaging<DietCommentDto>>builder()
                 .data(commentService.getCommentsByDietId(dietId, pageable))
                 .message("댓글이 조회되었습니다.")
                 .build();
