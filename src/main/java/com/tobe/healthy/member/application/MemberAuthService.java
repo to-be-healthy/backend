@@ -64,7 +64,8 @@ public class MemberAuthService {
         Long trainerId = Long.valueOf(map.get("trainerId"));
         String name = map.get("name");
         int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
-        Member member = memberRepository.findByMemberIdWithGym(trainerId);
+        Member member = memberRepository.findByIdAndDelYnFalse(trainerId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         return InvitationMappingResult.create(member, name, lessonCnt);
     }
 

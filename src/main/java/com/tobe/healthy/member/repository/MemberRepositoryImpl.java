@@ -42,34 +42,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    @Override
-    public Member findByMemberIdWithGym(Long trainerId) {
-        Tuple tuple = queryFactory
-                .select(member, gym)
-                .from(member)
-                .leftJoin(member.gym, gym).fetchJoin()
-                .where(memberIdEq(trainerId), memberDelYnEq(false))
-                .fetchOne();
-        Member m = tuple.get(member);
-        m.registerGym(tuple.get(gym));
-        return m;
-    }
-
-    @Override
-    public Member findByMemberIdWithProfileAndGym(Long memberId) {
-        Tuple tuple = queryFactory
-                .select(member, memberProfile, gym)
-                .from(member)
-                .leftJoin(member.memberProfile, memberProfile).fetchJoin()
-                .leftJoin(member.gym, gym).fetchJoin()
-                .where(memberIdEq(memberId),memberDelYnEq(false))
-                .fetchOne();
-        Member m = tuple.get(member);
-        m.registerProfile(tuple.get(memberProfile));
-        m.registerGym(tuple.get(gym));
-        return m;
-    }
-
     public List<MemberInTeamResult> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
         return queryFactory
                 .select(new QMemberInTeamResult(member.id, member.name, member.userId, member.email,

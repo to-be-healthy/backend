@@ -48,7 +48,8 @@ public class WorkoutHistoryService {
 
 
     public WorkoutHistoryDto addWorkoutHistory(Member member, HistoryAddCommand command) {
-        Member result = memberRepository.findByMemberIdWithGym(member.getId());
+        Member result = memberRepository.findByIdAndDelYnFalse(member.getId())
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         WorkoutHistory history = WorkoutHistory.create(command, member, result.getGym());
         workoutHistoryRepository.save(history);
         saveCompletedExercises(history, command);
@@ -173,7 +174,8 @@ public class WorkoutHistoryService {
     }
 
     public CustomPaging<WorkoutHistoryDto> getWorkoutHistoryMyGym(Long studentId, Pageable pageable, String searchDate) {
-        Member member = memberRepository.findByMemberIdWithGym(studentId);
+        Member member = memberRepository.findByIdAndDelYnFalse(studentId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         Page<WorkoutHistory> pageDtos = workoutHistoryRepository.getWorkoutHistoryByGym(member.getGym().getId(), pageable, searchDate);
         List<WorkoutHistoryDto> historiesDto = pageDtos.map(WorkoutHistoryDto::from).stream().toList();
         List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());

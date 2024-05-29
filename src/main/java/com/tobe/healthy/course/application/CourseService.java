@@ -99,13 +99,12 @@ public class CourseService {
     }
 
     public CourseGetResult getCourse(Member loginMember, Pageable pageable, Long memberId, String searchDate) {
-        memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         Long trainerId = TRAINER.equals(loginMember.getMemberType()) ? loginMember.getId() : null;
         Page<CourseHistory> histories = courseHistoryRepository.getCourseHistory(memberId, trainerId, pageable, searchDate);
         List<CourseHistoryDto> courseHistoryDtos = histories.map(CourseHistoryDto::from).stream().toList();
-        Member member = memberRepository.findByMemberIdWithGym(memberId);
         return CourseGetResult.create(getNowUsingCourse(memberId), courseHistoryDtos.isEmpty() ? null : courseHistoryDtos, member.getGym().getName());
     }
 
