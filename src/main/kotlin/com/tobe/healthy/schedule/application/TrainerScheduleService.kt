@@ -16,18 +16,25 @@ class TrainerScheduleService(
     private val trainerScheduleRepository: TrainerScheduleRepository,
     private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository
 ) {
-    fun findDefaultLessonTime(trainerId: Long): RetrieveTrainerDefaultLessonTimeResult? {
+    fun findDefaultLessonTime(
+        trainerId: Long
+    ): RetrieveTrainerDefaultLessonTimeResult? {
         val trainerScheduleInfo = trainerScheduleInfoRepository.findByTrainerId(trainerId)
-            ?: return null
         return RetrieveTrainerDefaultLessonTimeResult.from(trainerScheduleInfo)
     }
 
-    fun findAllSchedule(retrieveTrainerScheduleByLessonInfo: RetrieveTrainerScheduleByLessonInfo, trainerId: Long): RetrieveTrainerScheduleByLessonInfoResult? {
-        return trainerScheduleRepository.findAllSchedule(retrieveTrainerScheduleByLessonInfo, trainerId)
+    fun findAllSchedule(
+        request: RetrieveTrainerScheduleByLessonInfo,
+        trainerId: Long
+    ): RetrieveTrainerScheduleByLessonInfoResult? {
+        return trainerScheduleRepository.findAllSchedule(request, trainerId)
     }
 
-    fun findOneTrainerTodaySchedule(queryTrainerSchedule: RetrieveTrainerScheduleByLessonDt, trainerId: Long): RetrieveTrainerScheduleByLessonDtResult? {
-        return trainerScheduleRepository.findOneTrainerTodaySchedule(queryTrainerSchedule, trainerId)
+    fun findOneTrainerTodaySchedule(
+        request: RetrieveTrainerScheduleByLessonDt,
+        trainerId: Long
+    ): RetrieveTrainerScheduleByLessonDtResult? {
+        return trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId)
     }
 }
 

@@ -5,10 +5,10 @@ import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,17 +28,23 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @DynamicUpdate
+@AllArgsConstructor
+@Builder
 public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
 	@Column(name = "schedule_id")
 	private Long id;
+
 	private LocalDate lessonDt;
+
 	private LocalTime lessonStartTime;
+
 	private LocalTime lessonEndTime;
 
 	@Enumerated(STRING)
+	@Builder.Default
 	private ReservationStatus reservationStatus = AVAILABLE;
 
 	@ManyToOne(fetch = LAZY, cascade = PERSIST)
@@ -52,16 +58,15 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@OneToMany(fetch = LAZY, mappedBy = "schedule", orphanRemoval = true)
 	@Nullable
+	@Builder.Default
 	private List<ScheduleWaiting> scheduleWaiting = new ArrayList<>();
-
-	@ColumnDefault("false")
-	private boolean delYn = false;
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "course_id")
 	private Course course;
 
 	@OneToMany(fetch = LAZY, mappedBy = "schedule")
+	@Builder.Default
 	private List<LessonHistory> lessonHistories = new ArrayList<>();
 
 	public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, ReservationStatus reservationStatus) {
@@ -77,10 +82,6 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	public void updateReservationStatusToNoShow(ReservationStatus reservationStatus) {
 		this.reservationStatus = reservationStatus;
-	}
-
-	public void revertReservationStatusToNoShow() {
-		this.reservationStatus = COMPLETED;
 	}
 
 	public void registerSchedule(Member member) {
@@ -102,22 +103,7 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 		this.applicant = applicant;
 	}
 
-	@Builder
-	public Schedule(Long id, LocalDate lessonDt, LocalTime lessonStartTime, LocalTime lessonEndTime,
-					ReservationStatus reservationStatus, Member trainer, @Nullable Member applicant,
-					@Nullable List<ScheduleWaiting> scheduleWaiting, boolean delYn) {
-		this.id = id;
-		this.lessonDt = lessonDt;
-		this.lessonStartTime = lessonStartTime;
-		this.lessonEndTime = lessonEndTime;
-		this.reservationStatus = reservationStatus;
-		this.trainer = trainer;
-		this.applicant = applicant;
-		this.scheduleWaiting = scheduleWaiting;
-		this.delYn = delYn;
-	}
-
-	public void updateLessonDtToClosedDay() {
+	public void updateScheduleToDisabled() {
 		this.reservationStatus = DISABLED;
 		this.applicant = null;
 	}

@@ -9,18 +9,18 @@ data class RetrieveTrainerDefaultLessonTimeResult(
     val lessonEndTime: String?,
     val lunchStartTime: String? = null,
     val lunchEndTime: String? = null,
-    val lessonTime: Int,
+    val lessonTime: Int?,
     val closedDays: MutableList<DayOfWeek?> = mutableListOf()
 ) {
     companion object {
-        fun from(trainerScheduleInfo: TrainerScheduleInfo) : RetrieveTrainerDefaultLessonTimeResult {
+        fun from(trainerScheduleInfo: TrainerScheduleInfo?) : RetrieveTrainerDefaultLessonTimeResult {
             return RetrieveTrainerDefaultLessonTimeResult(
-                lessonStartTime = dateTimeFormat(trainerScheduleInfo.lessonStartTime),
-                lessonEndTime = dateTimeFormat(trainerScheduleInfo.lessonEndTime),
-                lunchStartTime = dateTimeFormat(trainerScheduleInfo.lunchStartTime),
-                lunchEndTime = dateTimeFormat(trainerScheduleInfo.lunchEndTime),
-                lessonTime = trainerScheduleInfo.lessonTime.description,
-                closedDays = trainerScheduleInfo.trainerScheduleClosedDays.map { it.closedDays }.toMutableList()
+                lessonStartTime = dateTimeFormat(trainerScheduleInfo?.lessonStartTime),
+                lessonEndTime = dateTimeFormat(trainerScheduleInfo?.lessonEndTime),
+                lunchStartTime = dateTimeFormat(trainerScheduleInfo?.lunchStartTime),
+                lunchEndTime = dateTimeFormat(trainerScheduleInfo?.lunchEndTime),
+                lessonTime = trainerScheduleInfo?.lessonTime?.description,
+                closedDays = trainerScheduleInfo?.trainerScheduleClosedDays?.map { it.closedDays }?.toMutableList() ?: mutableListOf()
             )
         }
     }

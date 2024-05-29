@@ -1,6 +1,5 @@
 package com.tobe.healthy.member.repository;
 
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -26,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.tobe.healthy.course.domain.entity.QCourse.course;
-import static com.tobe.healthy.gym.domain.entity.QGym.gym;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static com.tobe.healthy.member.domain.entity.QMember.member;
@@ -143,7 +141,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .on(member.id.eq(trainerMemberMapping.member.id))
                 .leftJoin(schedule)
                 .on(member.id.eq(schedule.applicant.id)
-                        , scheduleDelYnEq(false)
                         , scheduleReservationStatusEq(COMPLETED)
                         , lessonDateTimeAfterNow())
                 .where(memberIdEq(memberId), memberDelYnEq(false))
@@ -156,10 +153,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return schedule.reservationStatus.eq(status);
     }
 
-    private BooleanExpression scheduleDelYnEq(boolean bool) {
-        return schedule.delYn.eq(bool);
-    }
-    
     @Override
     public List<Member> findAllTrainerByGym(Long gymId) {
         return queryFactory.select(member)

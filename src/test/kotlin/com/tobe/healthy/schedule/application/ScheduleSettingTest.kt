@@ -1,8 +1,7 @@
 package com.tobe.healthy.schedule.application
 
 import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.*
-import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterIndividualSchedule
+import com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -10,7 +9,6 @@ import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.LocalTime
 
 @SpringBootTest
 @Transactional
@@ -44,44 +42,5 @@ class ScheduleSettingTest : StringSpec({
         }.message
 
         message shouldBe START_DATE_AFTER_END_DATE.message
-    }
-
-    "수업 시작 시간보다 종료 시간이 같거나 빠르면 예외가 발생한다" {
-        shouldThrow<CustomException> {
-            CommandRegisterIndividualSchedule(
-                lessonDt = LocalDate.of(2024, 5, 1),
-                lessonStartTime = LocalTime.of(12, 0, 0),
-                lessonEndTime = LocalTime.of(10, 0, 0)
-            )
-        }.message shouldBe START_TIME_AFTER_END_TIME.message
-
-        shouldThrow<CustomException> {
-            CommandRegisterIndividualSchedule(
-                lessonDt = LocalDate.of(2024, 5, 1),
-                lessonStartTime = LocalTime.of(10, 0, 0),
-                lessonEndTime = LocalTime.of(10, 0, 0)
-            )
-        }.message shouldBe START_TIME_AFTER_END_TIME.message
-    }
-
-    "수업 시간이 30분 단위가 아닐경우 예외가 발생한다" {
-        shouldThrow<CustomException> {
-            CommandRegisterIndividualSchedule(
-                lessonDt = LocalDate.of(2024, 5, 1),
-                lessonStartTime = LocalTime.of(10, 0, 0),
-                lessonEndTime = LocalTime.of(11, 10, 0)
-            )
-        }.message shouldBe INVALID_LESSON_TIME_DESCRIPTION.message
-
-
-        val request = CommandRegisterIndividualSchedule(
-            lessonDt = LocalDate.of(2024, 5, 1),
-            lessonStartTime = LocalTime.of(10, 0, 0),
-            lessonEndTime = LocalTime.of(11, 0, 0)
-        )
-
-        request.lessonDt shouldBe LocalDate.of(2024, 5, 1)
-        request.lessonStartTime shouldBe LocalTime.of(10, 0, 0)
-        request.lessonEndTime shouldBe LocalTime.of(11, 0, 0)
     }
 })

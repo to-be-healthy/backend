@@ -6,7 +6,6 @@ import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.QMember;
-import com.tobe.healthy.schedule.domain.dto.in.RetrieveTrainerScheduleByLessonInfo;
 import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
@@ -40,8 +39,8 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.from(schedule)
 				.leftJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
 				.leftJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
-				.leftJoin(schedule.scheduleWaiting, scheduleWaiting).on(scheduleWaiting.delYn.isFalse())
-				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), delYnFalse(), scheduleTrainerIdEq(trainerId)
+				.leftJoin(schedule.scheduleWaiting, scheduleWaiting)
+				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), scheduleTrainerIdEq(trainerId)
 				, scheduleReservationStatusForStudent())
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
@@ -59,7 +58,7 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 			.from(schedule)
 			.leftJoin(schedule.trainer, trainer).fetchJoin()
 			.leftJoin(schedule.scheduleWaiting, scheduleWaiting).fetchJoin()
-			.where(scheduleApplicantIdEq(memberId), scheduleDelYnFalse(), scheduleWaitingDelYnFalse())
+			.where(scheduleApplicantIdEq(memberId))
 			.orderBy(schedule.lessonDt.desc(), schedule.lessonStartTime.asc())
 			.fetch();
 		return fetch.stream()
@@ -101,10 +100,6 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.or(schedule.lessonDt.goe(LocalDate.now()).and(schedule.lessonStartTime.after(LocalTime.now())));
 	}
 
-	private BooleanExpression scheduleDelYnFalse() {
-		return schedule.delYn.isFalse();
-	}
-
 	private BooleanExpression lessonDtBetween(StudentScheduleCond searchCond) {
 		if (!ObjectUtils.isEmpty(searchCond.getLessonStartDt()) && !ObjectUtils.isEmpty(searchCond.getLessonEndDt())) {
 			return schedule.lessonDt.between(searchCond.getLessonStartDt(), searchCond.getLessonEndDt());
@@ -122,14 +117,6 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 
 	private BooleanExpression scheduleTrainerIdEq(Long trainerId) {
 		return schedule.trainer.id.eq(trainerId);
-	}
-
-	private BooleanExpression scheduleWaitingDelYnFalse() {
-		return scheduleWaiting.delYn.isFalse();
-	}
-
-	private BooleanExpression delYnFalse() {
-		return schedule.delYn.eq(false);
 	}
 
 	private BooleanExpression scheduleApplicantIdEq(Long memberId) {
