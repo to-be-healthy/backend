@@ -52,7 +52,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         return PageableExecutionUtils.getPage(workoutHistories, pageable, ()-> totalCnt );
     }
 
-    private static BooleanExpression memberIdEq(Long memberId) {
+    private BooleanExpression memberIdEq(Long memberId) {
         return workoutHistory.member.id.eq(memberId);
     }
 
@@ -85,7 +85,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         return PageableExecutionUtils.getPage(workoutHistories, pageable, ()-> totalCnt );
     }
 
-    private static BooleanExpression gymIdEq(Long gymId) {
+    private BooleanExpression gymIdEq(Long gymId) {
         return workoutHistory.gym.id.eq(gymId);
     }
 
@@ -98,7 +98,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
                 .fetch();
     }
 
-    private static BooleanExpression historyIdIn(List<Long> ids) {
+    private BooleanExpression historyIdIn(List<Long> ids) {
         return workoutHistoryFiles.workoutHistory.workoutHistoryId.in(ids);
     }
 
