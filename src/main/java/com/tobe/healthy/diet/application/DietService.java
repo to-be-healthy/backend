@@ -56,9 +56,9 @@ public class DietService {
         return setDietFile(DietDto.from(diet), ids);
     }
 
-    public CustomPaging<DietDto> getDiet(Long memberId, Pageable pageable, String searchDate) {
-        Page<Diet> pageDtos = dietRepository.getDietOfMonth(memberId, pageable, searchDate);
-        List<DietDto> dietDtos = pageDtos.map(DietDto::from).stream().toList();
+    public CustomPaging<DietDto> getDiet(Long loginMemberId, Long memberId, Pageable pageable, String searchDate) {
+        Page<DietDto> pageDtos = dietRepository.getDietOfMonth(loginMemberId, memberId, pageable, searchDate);
+        List<DietDto> dietDtos = pageDtos.stream().toList();
         List<Long> ids = dietDtos.stream().map(DietDto::getDietId).collect(Collectors.toList());
         List<DietDto> content = setDietFile(dietDtos, ids);
         return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),

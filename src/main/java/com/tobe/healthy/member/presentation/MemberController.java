@@ -109,7 +109,7 @@ public class MemberController {
 														  Pageable pageable,
 														  @AuthenticationPrincipal CustomMemberDetails loginMember) {
 		return ResponseHandler.<CustomPaging<DietDto>>builder()
-				.data(dietService.getDiet(loginMember.getMemberId(), pageable, searchDate))
+				.data(dietService.getDiet(loginMember.getMemberId(), loginMember.getMemberId(), pageable, searchDate))
 				.message("식단기록 조회되었습니다.")
 				.build();
 	}
@@ -119,11 +119,12 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/{memberId}/diets")
-	public ResponseHandler<CustomPaging<DietDto>> getDiet(@PathVariable Long memberId,
+	public ResponseHandler<CustomPaging<DietDto>> getDiet(@AuthenticationPrincipal CustomMemberDetails loginMember,
+														  @PathVariable Long memberId,
 														  String searchDate,
 														  Pageable pageable) {
 		return ResponseHandler.<CustomPaging<DietDto>>builder()
-				.data(dietService.getDiet(memberId, pageable, searchDate))
+				.data(dietService.getDiet(loginMember.getMemberId(), memberId, pageable, searchDate))
 				.message("식단기록 조회되었습니다.")
 				.build();
 	}

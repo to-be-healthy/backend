@@ -1,5 +1,6 @@
 package com.tobe.healthy.diet.repository;
 
+import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietFiles;
 import com.tobe.healthy.member.domain.entity.Member;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public interface DietRepositoryCustom {
 
-    Page<Diet> getDietOfMonth(Long memberId, Pageable pageable, String searchDate);
+    Page<DietDto> getDietOfMonth(Long loginMemberId, Long memberId, Pageable pageable, String searchDate);
 
     List<DietFiles> getDietFile(List<Long> ids);
 

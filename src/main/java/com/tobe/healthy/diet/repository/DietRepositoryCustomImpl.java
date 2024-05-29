@@ -2,11 +2,16 @@ package com.tobe.healthy.diet.repository;
 
 import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tobe.healthy.diet.domain.dto.DietDto;
+import com.tobe.healthy.diet.domain.dto.QDietDto;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietFiles;
+import com.tobe.healthy.diet.domain.entity.QDiet;
+import com.tobe.healthy.diet.domain.entity.QDietLike;
 import com.tobe.healthy.member.domain.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +27,9 @@ import java.util.List;
 
 import static com.tobe.healthy.diet.domain.entity.QDiet.diet;
 import static com.tobe.healthy.diet.domain.entity.QDietFiles.dietFiles;
+import static com.tobe.healthy.diet.domain.entity.QDietLike.dietLike;
+import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistory.workoutHistory;
+import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryLike.workoutHistoryLike;
 
 
 @Repository
@@ -57,21 +65,33 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
     }
 
     @Override
-    public Page<Diet> getDietOfMonth(Long memberId, Pageable pageable, String searchDate) {
+    public Page<DietDto> getDietOfMonth(Long loginMemberId, Long memberId, Pageable pageable, String searchDate) {
         Long totalCnt = queryFactory
                 .select(diet.count())
                 .from(diet)
                 .where(memberIdEq(memberId), delYnEq(false), convertEatDate_YYYY_MM(searchDate))
                 .fetchOne();
-        List<Diet> diets = queryFactory
-                .select(diet)
+        List<DietDto> diets = queryFactory
+                .select(new QDietDto(diet.dietId, diet.member
+                    , isLiked()
+                    , diet.likeCnt, diet.commentCnt, diet.eatDate))
                 .from(diet)
+                .leftJoin(dietLike)
+                .on(diet.dietId.eq(dietLike.dietLikePK.diet.dietId)
+                        , dietLike.dietLikePK.member.id.eq(loginMemberId))
                 .where(memberIdEq(memberId), delYnEq(false), convertEatDate_YYYY_MM(searchDate))
                 .orderBy(diet.eatDate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
         return PageableExecutionUtils.getPage(diets, pageable, () -> totalCnt);
+    }
+
+    private BooleanExpression isLiked() {
+        return new CaseBuilder()
+                .when(dietLike.dietLikePK.member.id.isNotNull())
+                .then(true)
+                .otherwise(false).as("is_liked");
     }
 
     @Override
