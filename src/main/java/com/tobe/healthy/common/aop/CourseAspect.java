@@ -2,7 +2,7 @@ package com.tobe.healthy.common.aop;
 
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
-import com.tobe.healthy.schedule.domain.dto.out.CommandCancelStudentScheduleResult;
+import com.tobe.healthy.schedule.domain.dto.out.CommandCancelStudentReservationResult;
 import com.tobe.healthy.schedule.domain.dto.out.CommandRegisterScheduleByStudentResult;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -39,11 +39,11 @@ public class CourseAspect {
     @Pointcut("execution(* com.tobe.healthy.schedule.application.CommonScheduleService.reserveSchedule(..))")
     private void reserveSchedule() {}
 
-    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleCommandService.registerScheduleForStudent(..))")
-    private void registerScheduleForStudent() {}
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleCommandService.registerStudentInTrainerSchedule(..))")
+    private void registerStudentInTrainerSchedule() {}
 
-    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleCommandService.cancelTrainerSchedule(..))")
-    private void cancelTrainerSchedule() {}
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleCommandService.cancelStudentReservation(..))")
+    private void cancelStudentReservation() {}
 
     /*
     * 학생이 수업 취소
@@ -62,9 +62,9 @@ public class CourseAspect {
     /*
      * 트레이너가 학생의 수업 취소
      */
-    @AfterReturning(value = "cancelTrainerSchedule()", returning = "returnValue")
+    @AfterReturning(value = "cancelStudentReservation()", returning = "returnValue")
     public void updateCourseByTrainer(JoinPoint joinPoint, Object returnValue) {
-        CommandCancelStudentScheduleResult result = ((CommandCancelStudentScheduleResult) returnValue);
+        CommandCancelStudentReservationResult result = ((CommandCancelStudentReservationResult) returnValue);
         Long scheduleId = result.getScheduleId();
         Long studentId = result.getStudentId();
         Long waitingStudentId = result.getWaitingStudentId();
@@ -89,7 +89,7 @@ public class CourseAspect {
     /*
      * 트레이너가 학생의 수업 예약
      */
-    @AfterReturning(value = "registerScheduleForStudent()", returning = "returnValue")
+    @AfterReturning(value = "registerStudentInTrainerSchedule()", returning = "returnValue")
     public void minusCourseByTrainer(JoinPoint joinPoint, Object returnValue) {
         CommandRegisterScheduleByStudentResult result = ((CommandRegisterScheduleByStudentResult) returnValue);
         Long scheduleId = result.getScheduleId();
