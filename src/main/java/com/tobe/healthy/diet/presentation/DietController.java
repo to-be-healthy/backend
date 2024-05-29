@@ -88,9 +88,10 @@ public class DietController {
             @ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
     })
     @GetMapping("/{dietId}")
-    public ResponseHandler<DietDto> getDietDetail(@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
+    public ResponseHandler<DietDto> getDietDetail(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                  @Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
         return ResponseHandler.<DietDto>builder()
-                .data(dietService.getDietDetail(dietId))
+                .data(dietService.getDietDetail(customMemberDetails.getMemberId(), dietId))
                 .message("식단기록이 조회되었습니다.")
                 .build();
     }

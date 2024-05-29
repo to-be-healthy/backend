@@ -17,6 +17,7 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
+import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryLikePK;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,8 +54,11 @@ public class DietService {
     public DietDto getTodayDiet(Long memberId) {
         Diet diet = dietRepository.getTodayDiet(memberId);
         if (diet == null) return new DietDto();
-        List<Long> ids = List.of(diet.getDietId());
-        return setDietFile(DietDto.from(diet), ids);
+        DietDto dietDto = DietDto.from(diet);
+        dietLikeRepository.findById(DietLikePK.create(diet, diet.getMember()))
+                .ifPresent(i -> {dietDto.setLiked(true);});
+        setDietFile(dietDto, List.of(diet.getDietId()));
+        return dietDto;
     }
 
     public CustomPaging<DietDto> getDiet(Long loginMemberId, Long memberId, Pageable pageable, String searchDate) {
@@ -108,7 +113,8 @@ public class DietService {
 
         diet.changeEatDate(command.getEatDate());
         diet.changeFast(command.getType(), command.isFast());
-        DietDto dietDto = setDietFile(DietDto.from(diet), List.of(diet.getDietId()));
+        DietDto dietDto = DietDto.from(diet);
+        setDietFile(dietDto, List.of(diet.getDietId()));
         if(isClean(dietDto)) diet.deleteDiet();
         return dietDto;
     }
@@ -122,17 +128,17 @@ public class DietService {
                 && (!dinner.getFast() && dinner.getDietFile()==null);
     }
 
-    public DietDto getDietDetail(Long dietId) {
-        Diet diet = dietRepository.findByDietIdAndDelYnFalse(dietId)
-                .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
-        return setDietFile(DietDto.from(diet), List.of(dietId));
+    public DietDto getDietDetail(Long loginMemberId, Long dietId) {
+        DietDto dietDto = dietRepository.getDietById(loginMemberId, dietId);
+        if(dietDto == null) throw new CustomException(DIET_NOT_FOUND);
+        setDietFile(dietDto, List.of(dietId));
+        return dietDto;
     }
 
-    private DietDto setDietFile(DietDto dietDto, List<Long> ids) {
+    private void setDietFile(DietDto dietDto, List<Long> ids) {
         List<DietFiles> files = dietRepository.getDietFile(ids);
         List<DietFileDto> filesDto = files.stream().map(DietFileDto::from).collect(Collectors.toList());
         dietDto.setDietFiles(filesDto);
-        return dietDto;
     }
 
     private List<DietDto> setDietFile(List<DietDto> dietDtos, List<Long> ids) {
@@ -158,7 +164,9 @@ public class DietService {
         Member trainer = mapping == null ? null : mapping.getTrainer();
         Diet diet = dietRepository.save(Diet.create(member, trainer, command));
         uploadDietFiles(diet, command);
-        return setDietFile(DietDto.from(diet), List.of(diet.getDietId()));
+        DietDto dietDto = DietDto.from(diet);
+        setDietFile(dietDto, List.of(diet.getDietId()));
+        return dietDto;
     }
 
     public DietDto updateDiet(Member member, Long dietId, DietUpdateCommand command) {
@@ -170,7 +178,9 @@ public class DietService {
         deleteOldFiles(diet, command);
         uploadDietFiles(diet, command);
 
-        return setDietFile(DietDto.from(diet), List.of(diet.getDietId()));
+        DietDto dietDto = DietDto.from(diet);
+        setDietFile(dietDto, List.of(diet.getDietId()));
+        return dietDto;
     }
 
     private void uploadDietFiles(Diet diet, DietUpdateCommand command) {

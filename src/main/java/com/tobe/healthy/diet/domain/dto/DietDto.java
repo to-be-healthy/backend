@@ -69,6 +69,9 @@ public class DietDto {
         this.likeCnt = likeCnt;
         this.commentCnt = commentCnt;
         this.eatDate = eatDate;
+        this.breakfast = new DietDetailDto();
+        this.lunch = new DietDetailDto();
+        this.dinner = new DietDetailDto();
     }
 
 }

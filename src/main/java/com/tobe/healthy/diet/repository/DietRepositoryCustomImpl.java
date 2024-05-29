@@ -14,6 +14,7 @@ import com.tobe.healthy.diet.domain.entity.QDiet;
 import com.tobe.healthy.diet.domain.entity.QDietLike;
 import com.tobe.healthy.member.domain.entity.Member;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -65,6 +66,19 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
     }
 
     @Override
+    public DietDto getDietById(Long loginMemberId, Long dietId) {
+        return queryFactory.select(new QDietDto(diet.dietId, diet.member
+                        , isLiked()
+                        , diet.likeCnt, diet.commentCnt, diet.eatDate))
+                .from(diet)
+                .leftJoin(dietLike)
+                .on(diet.dietId.eq(dietLike.dietLikePK.diet.dietId)
+                        , dietLike.dietLikePK.member.id.eq(loginMemberId))
+                .where(dietIdEq(dietId), delYnEq(false))
+                .fetchOne();
+    }
+
+    @Override
     public Page<DietDto> getDietOfMonth(Long loginMemberId, Long memberId, Pageable pageable, String searchDate) {
         Long totalCnt = queryFactory
                 .select(diet.count())
@@ -85,13 +99,6 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
         return PageableExecutionUtils.getPage(diets, pageable, () -> totalCnt);
-    }
-
-    private BooleanExpression isLiked() {
-        return new CaseBuilder()
-                .when(dietLike.dietLikePK.member.id.isNotNull())
-                .then(true)
-                .otherwise(false).as("is_liked");
     }
 
     @Override
@@ -119,6 +126,17 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
         return PageableExecutionUtils.getPage(diets, pageable, () -> totalCnt);
+    }
+
+    private BooleanExpression isLiked() {
+        return new CaseBuilder()
+                .when(dietLike.dietLikePK.member.id.isNotNull())
+                .then(true)
+                .otherwise(false).as("is_liked");
+    }
+
+    private BooleanExpression dietIdEq(Long dietId) {
+        return diet.dietId.eq(dietId);
     }
 
     private BooleanExpression dietTrainerIdEq(Member trainer) {
