@@ -4,8 +4,8 @@ import com.tobe.healthy.ApiResultResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.schedule.application.TrainerScheduleCommandService
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterDefaultLessonTime
-import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterIndividualSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
+import com.tobe.healthy.schedule.domain.dto.`in`.CommandUpdateScheduleStatus
 import com.tobe.healthy.schedule.domain.dto.out.*
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
@@ -63,38 +63,21 @@ class TrainerScheduleCommandController(
         )
     }
 
-    @Operation(summary = "트레이너가 일정을 개별 등록한다.", responses = [
-            ApiResponse(responseCode = "200", description = "일정 등록 성공"),
-            ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
-            ApiResponse(responseCode = "400", description = "이미 등록된 일정이 존재합니다.")
-    ])
-    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    @PostMapping("/individual")
-    fun registerIndividualSchedule(
-        @RequestBody request: CommandRegisterIndividualSchedule,
-        @AuthenticationPrincipal member: CustomMemberDetails
-    ): ApiResultResponse<Boolean> {
-        return ApiResultResponse(
-            message = "개별 일정 등록에 성공하였습니다.",
-            data = trainerScheduleCommandService.registerIndividualSchedule(request, member.memberId)
-        )
-    }
-
     @Operation(
         summary = "트레이너가 특정 스케줄을 DISABLED/AVAILABLE로 변경한다.", responses = [
             ApiResponse(responseCode = "200", description = "해당 스케줄을 변경하였습니다."),
             ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
         ])
-    @PostMapping("/trainer/{status}/{scheduleId}")
+    @PostMapping("/trainer/{status}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun changeScheduleForTrainer(
         @PathVariable status: ReservationStatus,
-        @PathVariable scheduleId: Long,
+        @RequestBody request: CommandUpdateScheduleStatus,
         @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
-    ): ApiResultResponse<CommandScheduleStatusResult> {
+    ): ApiResultResponse<List<CommandScheduleStatusResult>> {
         return ApiResultResponse(
-            message = "해당 스케줄을 변경하였습니다.",
-            data = trainerScheduleCommandService.updateScheduleStatus(status, scheduleId, customMemberDetails.memberId)
+            message = "해당 스케줄을 ${status}로 변경하였습니다.",
+            data = trainerScheduleCommandService.updateScheduleStatus(request, status, customMemberDetails.memberId)
         )
     }
 
@@ -106,14 +89,14 @@ class TrainerScheduleCommandController(
     ])
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping("/{scheduleId}/{studentId}")
-    fun registerScheduleForStudent(
+    fun registerStudentInTrainerSchedule(
         @PathVariable scheduleId: Long,
         @PathVariable studentId: Long,
         @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandRegisterScheduleByStudentResult> {
         return ApiResultResponse(
             message = "학생을 수업에 등록하였습니다.",
-            data = trainerScheduleCommandService.registerScheduleForStudent(scheduleId, studentId, member.memberId)
+            data = trainerScheduleCommandService.registerStudentInTrainerSchedule(scheduleId, studentId, member.memberId)
         )
     }
 
@@ -128,7 +111,7 @@ class TrainerScheduleCommandController(
         @PathVariable scheduleId: Long,
         @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<Boolean> {
-        val scheduleResult = trainerScheduleCommandService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId)
+        val scheduleResult = trainerScheduleCommandService.cancelStudentReservation(scheduleId, customMemberDetails.memberId)
         return ApiResultResponse(
             message = "${scheduleResult.lessonStartTime.format(DateTimeFormatter.ofPattern("a HH시 mm분"))} 수업이 취소되었습니다.",
             data = true

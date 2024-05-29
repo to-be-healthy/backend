@@ -3,10 +3,10 @@ package com.tobe.healthy.schedule.domain.entity;
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 
 import static jakarta.persistence.FetchType.LAZY;
@@ -17,6 +17,8 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @DynamicUpdate
+@AllArgsConstructor
+@Builder
 public class ScheduleWaiting extends BaseTimeEntity<ScheduleWaiting, Long> {
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
@@ -31,20 +33,10 @@ public class ScheduleWaiting extends BaseTimeEntity<ScheduleWaiting, Long> {
 	@JoinColumn(name = "member_id")
 	private Member member;
 
-	@ColumnDefault("false")
-	private final boolean delYn = false;
-
 	public static ScheduleWaiting register(Member member, Schedule schedule) {
 		return ScheduleWaiting.builder()
 			.schedule(schedule)
 			.member(member)
 			.build();
-	}
-
-	@Builder
-	public ScheduleWaiting(Long id, Schedule schedule, Member member) {
-		this.id = id;
-		this.schedule = schedule;
-		this.member = member;
 	}
 }
