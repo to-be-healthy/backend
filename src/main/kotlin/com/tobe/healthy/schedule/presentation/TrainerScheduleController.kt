@@ -51,8 +51,9 @@ class TrainerScheduleController(
     )
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findAllSchedule(@ParameterObject retrieveTrainerScheduleByLessonInfo: RetrieveTrainerScheduleByLessonInfo,
-                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    fun findAllSchedule(
+        @ParameterObject retrieveTrainerScheduleByLessonInfo: RetrieveTrainerScheduleByLessonInfo,
+        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<RetrieveTrainerScheduleByLessonInfoResult?> {
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
@@ -68,8 +69,9 @@ class TrainerScheduleController(
     )
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findOneSchedule(queryTrainerSchedule: RetrieveTrainerScheduleByLessonDt,
-                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    fun findOneSchedule(
+        queryTrainerSchedule: RetrieveTrainerScheduleByLessonDt,
+        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<RetrieveTrainerScheduleByLessonDtResult?> {
         return ApiResultResponse(
             message = "특정 날짜의 일정을 조회했습니다.",

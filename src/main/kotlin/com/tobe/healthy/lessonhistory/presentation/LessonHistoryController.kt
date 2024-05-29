@@ -8,6 +8,7 @@ import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDat
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
+import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveSimpleLessonHistoryResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveUnwrittenLessonHistory
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -30,9 +31,10 @@ class LessonHistoryController(
             ApiResponse(responseCode = "200", description = "전체 수업 일지를 조회하였습니다.")
         ])
     @GetMapping
-    fun findAllLessonHistory(@ParameterObject request: RetrieveLessonHistoryByDateCond,
-                             @ParameterObject pageable: Pageable,
-                             @AuthenticationPrincipal member: CustomMemberDetails
+    fun findAllLessonHistory(
+        @ParameterObject request: RetrieveLessonHistoryByDateCond,
+        @ParameterObject pageable: Pageable,
+        @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
         return ApiResultResponse(
             message = "전체 수업 일지를 조회하였습니다.",
@@ -62,13 +64,30 @@ class LessonHistoryController(
         ])
     @GetMapping("/student/{studentId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findAllLessonHistoryByMemberId(@PathVariable studentId: Long,
-                                       @ParameterObject request: RetrieveLessonHistoryByDateCond,
-                                       @ParameterObject pageable: Pageable
+    fun findAllLessonHistoryByMemberId(
+        @PathVariable studentId: Long,
+        @ParameterObject request: RetrieveLessonHistoryByDateCond,
+        @ParameterObject pageable: Pageable
     ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
         return ApiResultResponse(
             message = "학생의 수업 일지 전체를 조회하였습니다.",
             data = lessonHistoryService.findAllLessonHistoryByMemberId(studentId, request, pageable)
+        )
+    }
+
+    @Operation(summary = "작성할 수업일지를 조회한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "작성할 수업일지를 조회하였습니다.")
+        ])
+    @GetMapping("/simple/student/{studentId}")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    fun findAllSimpleLessonHistoryByMemberId(
+        @PathVariable studentId: Long,
+        @AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<List<RetrieveSimpleLessonHistoryResult>?> {
+        return ApiResultResponse(
+            message = "학생의 수업 일지 전체를 조회하였습니다.",
+            data = lessonHistoryService.findAllSimpleLessonHistoryByMemberId(studentId, member.memberId)
         )
     }
 
@@ -78,8 +97,9 @@ class LessonHistoryController(
             ApiResponse(responseCode = "404", description = "수업 일지를 찾을 수 없습니다."),
         ])
     @GetMapping("/{lessonHistoryId}")
-    fun findOneLessonHistory(@PathVariable lessonHistoryId: Long,
-                             @AuthenticationPrincipal member: CustomMemberDetails
+    fun findOneLessonHistory(
+        @PathVariable lessonHistoryId: Long,
+        @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<RetrieveLessonHistoryDetailResult?> {
         return ApiResultResponse(
             message = "수업 일지 단건을 조회하였습니다.",

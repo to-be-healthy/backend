@@ -34,8 +34,9 @@ class TrainerScheduleCommandController(
     ])
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping("/default-lesson-time")
-    fun registerDefaultSchedule(@RequestBody request: CommandRegisterDefaultLessonTime,
-                                @AuthenticationPrincipal member: CustomMemberDetails
+    fun registerDefaultSchedule(
+        @RequestBody request: CommandRegisterDefaultLessonTime,
+        @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandRegisterDefaultLessonTimeResult> {
         return ApiResultResponse(
             message = "기본 수업 시간이 설정되었습니다.",
@@ -52,8 +53,9 @@ class TrainerScheduleCommandController(
     ])
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping
-    fun registerSchedule(@RequestBody request: CommandRegisterSchedule,
-                         @AuthenticationPrincipal member: CustomMemberDetails
+    fun registerSchedule(
+        @RequestBody request: CommandRegisterSchedule,
+        @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandRegisterScheduleResult> {
         return ApiResultResponse(
             message = "일정 등록에 성공하였습니다.",
@@ -68,8 +70,9 @@ class TrainerScheduleCommandController(
     ])
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping("/individual")
-    fun registerIndividualSchedule(@RequestBody request: CommandRegisterIndividualSchedule,
-                                   @AuthenticationPrincipal member: CustomMemberDetails
+    fun registerIndividualSchedule(
+        @RequestBody request: CommandRegisterIndividualSchedule,
+        @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "개별 일정 등록에 성공하였습니다.",
@@ -84,9 +87,10 @@ class TrainerScheduleCommandController(
         ])
     @PostMapping("/trainer/{status}/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun changeScheduleForTrainer(@PathVariable status: ReservationStatus,
-                                 @PathVariable scheduleId: Long,
-                                 @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    fun changeScheduleForTrainer(
+        @PathVariable status: ReservationStatus,
+        @PathVariable scheduleId: Long,
+        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<CommandScheduleStatusResult> {
         return ApiResultResponse(
             message = "해당 스케줄을 변경하였습니다.",
@@ -102,9 +106,10 @@ class TrainerScheduleCommandController(
     ])
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping("/{scheduleId}/{studentId}")
-    fun registerScheduleForStudent(@PathVariable scheduleId: Long,
-                                   @PathVariable studentId: Long,
-                                   @AuthenticationPrincipal member: CustomMemberDetails
+    fun registerScheduleForStudent(
+        @PathVariable scheduleId: Long,
+        @PathVariable studentId: Long,
+        @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandRegisterScheduleByStudentResult> {
         return ApiResultResponse(
             message = "학생을 수업에 등록하였습니다.",
@@ -119,8 +124,9 @@ class TrainerScheduleCommandController(
     ])
     @DeleteMapping("/trainer/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun cancelScheduleForTrainer(@PathVariable scheduleId: Long,
-                                 @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    fun cancelScheduleForTrainer(
+        @PathVariable scheduleId: Long,
+        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<Boolean> {
         val scheduleResult = trainerScheduleCommandService.cancelTrainerSchedule(scheduleId, customMemberDetails.memberId)
         return ApiResultResponse(
@@ -135,8 +141,9 @@ class TrainerScheduleCommandController(
     ])
     @DeleteMapping("/no-show/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun updateReservationStatusToNoShow(@PathVariable scheduleId: Long,
-                                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    fun updateReservationStatusToNoShow(
+        @PathVariable scheduleId: Long,
+        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<ScheduleIdInfo> {
         return ApiResultResponse(
             message = "노쇼 처리되었습니다.",
@@ -150,8 +157,9 @@ class TrainerScheduleCommandController(
     ])
     @PostMapping("/no-show/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun revertReservationStatusToNoShow(@PathVariable scheduleId: Long,
-                                        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    fun revertReservationStatusToNoShow(
+        @PathVariable scheduleId: Long,
+        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<ScheduleIdInfo> {
         return ApiResultResponse(
             message = "노쇼 처리가 취소되었습니다.",

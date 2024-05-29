@@ -8,7 +8,7 @@ data class CommandRegisterCommentResult(
     val lessonHistoryCommentId: Long?,
     val writerId: Long?,
     val writerName: String?,
-    val comment: String,
+    val content: String,
     val files: MutableList<CommandUploadFileResult> = mutableListOf()
 ) {
     companion object {
@@ -18,7 +18,7 @@ data class CommandRegisterCommentResult(
                 lessonHistoryCommentId = lessonHistoryComment?.id,
                 writerId = lessonHistoryComment.writer?.id,
                 writerName = lessonHistoryComment.writer?.name,
-                comment = lessonHistoryComment.content,
+                content = lessonHistoryComment.content,
                 files = files.map { CommandUploadFileResult.from(it) }.toMutableList()
             )
         }
