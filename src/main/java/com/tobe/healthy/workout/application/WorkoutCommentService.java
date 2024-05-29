@@ -57,8 +57,10 @@ public class WorkoutCommentService {
 
     public List<WorkoutHistoryCommentDto> getCommentsByWorkoutHistoryId(Long workoutHistoryId, Pageable pageable) {
         List<WorkoutHistoryComment> comments = commentRepository.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable).stream().toList();
-        if(comments.isEmpty()) return null;
+        return settingReplyFormat(comments);
+    }
 
+    private List<WorkoutHistoryCommentDto> settingReplyFormat(List<WorkoutHistoryComment> comments) {
         List<WorkoutHistoryCommentDto> dtos = comments.stream()
                 .map(c -> WorkoutHistoryCommentDto.create(c, c.getMember().getMemberProfile())).toList();
         Map<Boolean, List<WorkoutHistoryCommentDto>> dtos2 = dtos.stream()

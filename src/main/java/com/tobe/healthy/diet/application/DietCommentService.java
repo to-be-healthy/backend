@@ -34,7 +34,6 @@ public class DietCommentService {
 
     public List<DietCommentDto> getCommentsByDietId(Long dietId, Pageable pageable) {
         List<DietComment> comments = commentRepository.getCommentsByDietId(dietId, pageable).stream().toList();
-        if(comments.isEmpty()) return null;
         return settingReplyFormat(comments);
     }
 
