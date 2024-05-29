@@ -17,7 +17,7 @@ data class CommandCancelStudentScheduleResult(
                 trainerId = schedule.trainer.id,
                 scheduleId = schedule.id,
                 lessonStartTime = schedule.lessonStartTime,
-                waitingStudentId = schedule.scheduleWaiting?.get(0)?.member?.id
+                waitingStudentId = schedule.scheduleWaiting?.firstOrNull()?.member?.id
             )
         }
     }

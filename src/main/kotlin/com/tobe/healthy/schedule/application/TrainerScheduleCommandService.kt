@@ -141,10 +141,10 @@ class TrainerScheduleCommandService(
         val entity = trainerScheduleRepository.findScheduleByTrainerId(scheduleId, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
 
-        entity.scheduleWaiting?.let {
-            entity.cancelMemberSchedule(it[0])
-            scheduleWaitingRepository.delete(it[0])
-        } ?: let {
+        if (!entity.scheduleWaiting.isNullOrEmpty()) {
+            entity.cancelMemberSchedule(entity.scheduleWaiting!![0])
+            scheduleWaitingRepository.delete(entity.scheduleWaiting!![0])
+        } else {
             entity.cancelMemberSchedule()
         }
 
