@@ -37,9 +37,10 @@ data class RetrieveUnwrittenLessonHistory(
         }
 
         private fun formatLessonTime(lessonStartTime: LocalTime, lessonEndTime: LocalTime): String {
-            val formatter = DateTimeFormatter.ofPattern("HH:mm")
-            val startTime = lessonStartTime.format(formatter)
-            val endTime = lessonEndTime.format(formatter)
+            val startTimeFormatter = DateTimeFormatter.ofPattern("a hh:mm")
+            val endTimeFormatter = DateTimeFormatter.ofPattern("hh:mm")
+            val startTime = lessonStartTime.format(startTimeFormatter)
+            val endTime = lessonEndTime.format(endTimeFormatter)
             return "${startTime} - ${endTime}"
         }
 

@@ -253,7 +253,7 @@ class TrainerScheduleRepositoryImpl(
                 trainerIdEq(memberId),
                 schedule.applicant.isNotNull,
                 reservationStatusEq(COMPLETED),
-                lessonDateTimeEq(request.lessonDateTime),
+                lessonDateTimeEq(request.lessonDate),
                 applicantIdEq(request.studentId)
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
@@ -330,10 +330,10 @@ class TrainerScheduleRepositoryImpl(
         return formattedDate.eq(lessonDt)
     }
 
-    private fun lessonDateTimeEq(lessonDateTime: String?): BooleanExpression? {
-        return lessonDateTime?.let {
+    private fun lessonDateTimeEq(lessonDate: String?): BooleanExpression? {
+        return lessonDate?.let {
             val formattedDate = stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", schedule.lessonDt)
-            return formattedDate.eq(lessonDateTime)
+            return formattedDate.eq(lessonDate)
         } ?: null
     }
 }
