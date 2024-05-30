@@ -1,5 +1,6 @@
 package com.tobe.healthy.course.application;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.CourseHistoryDto;
@@ -98,14 +99,20 @@ public class CourseService {
         courseRepository.deleteByCourseIdAndTrainerId(courseId, trainerId);
     }
 
-    public CourseGetResult getCourse(Member loginMember, Pageable pageable, Long memberId, String searchDate) {
+    public CustomPaging getCourse(Member loginMember, Pageable pageable, Long memberId, String searchDate) {
         Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         Long trainerId = TRAINER.equals(loginMember.getMemberType()) ? loginMember.getId() : null;
         Page<CourseHistory> histories = courseHistoryRepository.getCourseHistory(memberId, trainerId, pageable, searchDate);
         List<CourseHistoryDto> courseHistoryDtos = histories.map(CourseHistoryDto::from).stream().toList();
-        return CourseGetResult.create(getNowUsingCourse(memberId), courseHistoryDtos.isEmpty() ? null : courseHistoryDtos, member.getGym().getName());
+
+        CustomPaging customPaging = new CustomPaging(courseHistoryDtos, histories.getPageable().getPageNumber(),
+                histories.getPageable().getPageSize(), histories.getTotalPages(), histories.getTotalElements(), histories.isLast());
+
+        CourseGetResult courseGetResult = CourseGetResult.create(getNowUsingCourse(memberId), member.getGym().getName());
+        customPaging.setMainData(courseGetResult);
+        return customPaging;
     }
 
     public CourseDto getNowUsingCourse(Long memberId){

@@ -6,6 +6,7 @@ import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.dto.DietDetailDto;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.DietFileDto;
+import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
 import com.tobe.healthy.diet.domain.dto.in.DietAddCommandAtHome;
 import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
 import com.tobe.healthy.diet.domain.dto.out.DietUploadDaysResult;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -90,6 +92,9 @@ public class DietService {
     }
 
     public DietDto addDietAtHome(Member member, DietAddCommandAtHome command) {
+        if(!LocalDate.now().toString().equals(command.getEatDate())){
+            throw new CustomException(DATE_NOT_VALID);
+        }
         Long memberId = member.getId();
         DietType requestType = command.getType();
         String requestFileUrl = command.getFile();
@@ -165,11 +170,14 @@ public class DietService {
         diet.getDietFiles().forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
     }
 
-    public DietDto addDiet(Member member, DietUpdateCommand command) {
+    public DietDto addDiet(Member member, DietAddCommand command) {
+        DietUploadDaysResult result = getDietUploadDays(member.getId(), null);
+        if(result.getUploadDays().contains(command.getEatDate())) throw new CustomException(DIET_ALREADY_EXISTS);
+
         TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId()).orElse(null);
         Member trainer = mapping == null ? null : mapping.getTrainer();
         Diet diet = dietRepository.save(Diet.create(member, trainer, command));
-        uploadDietFiles(diet, command);
+        uploadNewFiles(diet, command);
         DietDto dietDto = DietDto.from(diet);
         setDietFile(dietDto, List.of(diet.getDietId()));
         return dietDto;
@@ -179,17 +187,16 @@ public class DietService {
         Diet diet = dietRepository.findByDietIdAndMemberIdAndDelYnFalse(dietId, member.getId())
                 .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
 
-        diet.changeEatDate(command.getEatDate());
         diet.changeFast(command);
         deleteOldFiles(diet, command);
-        uploadDietFiles(diet, command);
+        uploadNewFiles(diet, command);
 
         DietDto dietDto = DietDto.from(diet);
         setDietFile(dietDto, List.of(diet.getDietId()));
         return dietDto;
     }
 
-    private void uploadDietFiles(Diet diet, DietUpdateCommand command) {
+    private void uploadNewFiles(Diet diet, DietUpdateCommand command) {
         //아침 파일
         if (!command.isBreakfastFast() && !ObjectUtils.isEmpty(command.getBreakfastFile())){
             dietFileRepository.save(DietFiles.create(diet, command.getBreakfastFile(), BREAKFAST));

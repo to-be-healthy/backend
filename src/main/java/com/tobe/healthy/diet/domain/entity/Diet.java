@@ -1,6 +1,7 @@
 package com.tobe.healthy.diet.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
 import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
@@ -77,7 +78,7 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
                 .build();
     }
 
-    public static Diet create(Member member, Member trainer, DietUpdateCommand command) {
+    public static Diet create(Member member, Member trainer, DietAddCommand command) {
         return Diet.builder()
                 .member(member)
                 .trainer(trainer)

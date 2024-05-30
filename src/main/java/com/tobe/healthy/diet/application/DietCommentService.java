@@ -1,5 +1,6 @@
 package com.tobe.healthy.diet.application;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.dto.DietCommentDto;
 import com.tobe.healthy.diet.domain.dto.in.DietCommentAddCommand;
@@ -10,6 +11,7 @@ import com.tobe.healthy.diet.repository.DietRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,10 +34,11 @@ public class DietCommentService {
     private final DietRepository dietRepository;
 
 
-    public List<DietCommentDto> getCommentsByDietId(Long dietId, Pageable pageable) {
-        List<DietComment> comments = commentRepository.getCommentsByDietId(dietId, pageable).stream().toList();
-        if(comments.isEmpty()) return null;
-        return settingReplyFormat(comments);
+    public CustomPaging<DietCommentDto> getCommentsByDietId(Long dietId, Pageable pageable) {
+        Page<DietComment> pageDtos = commentRepository.getCommentsByDietId(dietId, pageable);
+        List<DietComment> comments = pageDtos.stream().toList();
+        return new CustomPaging(settingReplyFormat(comments), pageDtos.getPageable().getPageNumber(),
+                pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 
     private List<DietCommentDto> settingReplyFormat(List<DietComment> comments) {

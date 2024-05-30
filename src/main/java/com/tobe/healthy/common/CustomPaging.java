@@ -15,6 +15,8 @@ public class CustomPaging<T> {
     private int totalPages;
     private Long totalElements;
     private Boolean isLast;
+    private T mainData;
+
 
     public CustomPaging(List<T> content, int pageNumber, int pageSize, int totalPages, Long totalElements, Boolean isLast) {
         this.content = content.isEmpty() ? null : content;
@@ -24,4 +26,5 @@ public class CustomPaging<T> {
         this.totalElements = totalElements;
         this.isLast = isLast;
     }
+
 }

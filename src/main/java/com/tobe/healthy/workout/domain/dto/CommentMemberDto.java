@@ -23,10 +23,13 @@ public class CommentMemberDto {
     }
 
     public static CommentMemberDto create(Member member, MemberProfile memberProfile) {
-        return CommentMemberDto.builder()
+        CommentMemberDtoBuilder builder = CommentMemberDto.builder()
                 .memberId(member.getId())
-                .name(member.getName())
-                .fileUrl(memberProfile.getFileUrl())
-                .build();
+                .name(member.getName());
+
+        if(memberProfile != null){
+            builder.fileUrl(memberProfile.getFileUrl());
+        }
+        return builder.build();
     }
 }

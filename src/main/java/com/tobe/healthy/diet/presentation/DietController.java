@@ -4,6 +4,7 @@ import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
+import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
 import com.tobe.healthy.diet.domain.dto.in.DietAddCommandAtHome;
 import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
 import com.tobe.healthy.diet.domain.dto.out.DietUploadDaysResult;
@@ -65,7 +66,7 @@ public class DietController {
     })
     @PostMapping
     public ResponseHandler<DietDto> addDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                               @RequestBody @Valid DietUpdateCommand command) {
+                                               @RequestBody @Valid DietAddCommand command) {
         return ResponseHandler.<DietDto>builder()
                 .data(dietService.addDiet(customMemberDetails.getMember(), command))
                 .message("식단기록이 등록되었습니다.")

@@ -76,15 +76,19 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
                 .build();
     }
 
-    public void updateContent(String content){
+    public void changeContent(String content){
         this.content = content;
     }
 
-    public void updateLikeCnt(Long likeCnt){
+    public void changeViewMySelf(boolean viewMySelf){
+        this.viewMySelf = viewMySelf;
+    }
+
+    public void changeLikeCnt(Long likeCnt){
         this.likeCnt = likeCnt;
     }
 
-    public void updateCommentCnt(Long commentCnt){
+    public void changeCommentCnt(Long commentCnt){
         this.commentCnt = commentCnt;
     }
 

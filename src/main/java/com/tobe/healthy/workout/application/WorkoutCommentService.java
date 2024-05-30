@@ -1,5 +1,6 @@
 package com.tobe.healthy.workout.application;
 
+import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryCommentDto;
@@ -10,6 +11,7 @@ import com.tobe.healthy.workout.repository.workoutHistory.WorkoutHistoryCommentR
 import com.tobe.healthy.workout.repository.workoutHistory.WorkoutHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +47,7 @@ public class WorkoutCommentService {
             orderNum = parentComment.getOrderNum();
         }
         commentRepository.save(WorkoutHistoryComment.create(history, member, command, depth, orderNum));
-        history.updateCommentCnt(++commentCnt);
+        history.changeCommentCnt(++commentCnt);
     }
 
     public WorkoutHistoryCommentDto updateComment(Member member, Long workoutHistoryId, Long commentId, HistoryCommentAddCommand command) {
@@ -55,10 +57,14 @@ public class WorkoutCommentService {
         return WorkoutHistoryCommentDto.from(comment);
     }
 
-    public List<WorkoutHistoryCommentDto> getCommentsByWorkoutHistoryId(Long workoutHistoryId, Pageable pageable) {
-        List<WorkoutHistoryComment> comments = commentRepository.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable).stream().toList();
-        if(comments.isEmpty()) return null;
+    public CustomPaging<WorkoutHistoryCommentDto> getCommentsByWorkoutHistoryId(Long workoutHistoryId, Pageable pageable) {
+        Page<WorkoutHistoryComment> pageDtos = commentRepository.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable);
+        List<WorkoutHistoryComment> comments = pageDtos.stream().toList();
+        return new CustomPaging(settingReplyFormat(comments), pageDtos.getPageable().getPageNumber(),
+                pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
+    }
 
+    private List<WorkoutHistoryCommentDto> settingReplyFormat(List<WorkoutHistoryComment> comments) {
         List<WorkoutHistoryCommentDto> dtos = comments.stream()
                 .map(c -> WorkoutHistoryCommentDto.create(c, c.getMember().getMemberProfile())).toList();
         Map<Boolean, List<WorkoutHistoryCommentDto>> dtos2 = dtos.stream()
