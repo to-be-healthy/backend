@@ -43,7 +43,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         List<WorkoutHistoryDto> workoutHistories = queryFactory
                 .select(new QWorkoutHistoryDto(workoutHistory.workoutHistoryId, workoutHistory.content, workoutHistory.member
                         , isLiked()
-                        , workoutHistory.likeCnt, workoutHistory.commentCnt, workoutHistory.viewMySelf, member.memberProfile))
+                        , workoutHistory.likeCnt, workoutHistory.commentCnt, workoutHistory.viewMySelf, workoutHistory.createdAt, member.memberProfile))
                 .from(workoutHistory)
                 .leftJoin(workoutHistory.member, member)
                 .leftJoin(member.memberProfile, profileId)
@@ -76,7 +76,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         List<WorkoutHistoryDto> workoutHistories = queryFactory
                 .select(new QWorkoutHistoryDto(workoutHistory.workoutHistoryId, workoutHistory.content, workoutHistory.member
                         , isLiked()
-                        , workoutHistory.likeCnt, workoutHistory.commentCnt, workoutHistory.viewMySelf, member.memberProfile))
+                        , workoutHistory.likeCnt, workoutHistory.commentCnt, workoutHistory.viewMySelf, workoutHistory.createdAt, member.memberProfile))
                 .from(workoutHistory)
                 .leftJoin(workoutHistory.member, member)
                 .leftJoin(member.memberProfile, profileId)

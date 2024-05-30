@@ -12,6 +12,7 @@ import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistory;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class WorkoutHistoryDto {
     private Long likeCnt;
     private Long commentCnt;
     private boolean viewMySelf;
+    private LocalDateTime createdAt;
 
     @Builder.Default
     @JsonIgnore
@@ -56,6 +58,7 @@ public class WorkoutHistoryDto {
                 .likeCnt(history.getLikeCnt())
                 .commentCnt(history.getCommentCnt())
                 .viewMySelf(history.getViewMySelf())
+                .createdAt(history.getCreatedAt())
                 .build();
     }
 
@@ -67,17 +70,19 @@ public class WorkoutHistoryDto {
                 .likeCnt(history.getLikeCnt())
                 .commentCnt(history.getCommentCnt())
                 .viewMySelf(history.getViewMySelf())
+                .createdAt(history.getCreatedAt())
                 .build();
     }
 
     @QueryProjection
-    public WorkoutHistoryDto(Long workoutHistoryId, String content, Member member, boolean liked, Long likeCnt, Long commentCnt, boolean viewMySelf, MemberProfile profile) {
+    public WorkoutHistoryDto(Long workoutHistoryId, String content, Member member, boolean liked, Long likeCnt, Long commentCnt, boolean viewMySelf, LocalDateTime createdAt, MemberProfile profile) {
         this.workoutHistoryId = workoutHistoryId;
         this.content = content;
         this.member = MemberDto.create(member, profile);
         this.liked = liked;
         this.likeCnt = likeCnt;
         this.commentCnt = commentCnt;
+        this.createdAt = createdAt;
         this.viewMySelf = viewMySelf;
     }
 
