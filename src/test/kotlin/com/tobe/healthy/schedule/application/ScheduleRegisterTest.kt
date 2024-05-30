@@ -20,8 +20,8 @@ class ScheduleRegisterTest(
         val trainer = memberRepository.findByUserId("healthy-trainer0").get()
 
         val request = CommandRegisterSchedule(
-            lessonStartDt = LocalDate.of(2024, 5, 1),
-            lessonEndDt = LocalDate.of(2024, 5, 30),
+            lessonStartDt = LocalDate.of(2024, 6, 1),
+            lessonEndDt = LocalDate.of(2024, 6, 30),
         )
         val result = trainerScheduleCommandService.registerSchedule(request, trainer.id)
 

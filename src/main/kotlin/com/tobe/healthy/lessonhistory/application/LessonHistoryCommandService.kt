@@ -53,10 +53,12 @@ class LessonHistoryCommandService(
         val trainer = findMember(trainerId)
         val schedule = findSchedule(request.scheduleId)
 
-        lessonHistoryRepository.validateDuplicateLessonHistory(trainerId, student.id, schedule.id)
-            ?.let { throw IllegalArgumentException("이미 수업일지를 등록하였습니다.") }
+        if (lessonHistoryRepository.validateDuplicateLessonHistory(trainerId, student.id, schedule.id)) {
+            throw IllegalArgumentException("이미 수업일지를 등록하였습니다.")
+        }
 
-        val lessonHistory = registerLessonHistory(request.title!!, request.content!!, student, trainer, schedule)
+        val lessonHistory = LessonHistory.register(request.title!!, request.content!!, student, trainer, schedule)
+        lessonHistoryRepository.save(lessonHistory)
 
         val files = registerFiles(request.uploadFiles, trainer, lessonHistory)
 

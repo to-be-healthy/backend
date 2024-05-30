@@ -83,6 +83,7 @@ class TrainerScheduleCommandService(
         var startTime = trainerScheduleInfo.lessonStartTime
         val schedules = mutableListOf<Schedule>()
 
+        // 일정 등록 시작
         while (!lessonDt.isAfter(request.lessonEndDt)) {
             var endTime = startTime.plusMinutes(trainerScheduleInfo.lessonTime.description.toLong())
 
@@ -92,12 +93,8 @@ class TrainerScheduleCommandService(
                 continue
             }
 
-            val isClosedDay = trainerScheduleInfo.trainerScheduleClosedDays.any {
-                it.closedDays == lessonDt.dayOfWeek
-            }
-
             // 휴무일일 경우
-            if (isClosedDay) {
+            if (isClosedDay(trainerScheduleInfo, lessonDt)) {
                 while (!startTime.isAfter(endTime)) {
                     val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, DISABLED)
                     schedules.add(schedule)
@@ -127,6 +124,15 @@ class TrainerScheduleCommandService(
         trainerScheduleRepository.saveAll(schedules)
 
         return CommandRegisterScheduleResult.from(schedules, trainerScheduleInfo)
+    }
+
+    private fun isClosedDay(
+        trainerScheduleInfo: TrainerScheduleInfo,
+        lessonDt: LocalDate
+    ): Boolean {
+        return trainerScheduleInfo.trainerScheduleClosedDays.any {
+            it.closedDays == lessonDt.dayOfWeek
+        }
     }
 
     fun updateScheduleStatus(

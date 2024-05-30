@@ -177,16 +177,17 @@ class LessonHistoryRepositoryImpl(
             .fetchOne()
     }
 
-    override fun validateDuplicateLessonHistory(trainerId: Long, studentId: Long, scheduleId: Long): LessonHistory? {
-        return queryFactory
-            .select(lessonHistory)
+    override fun validateDuplicateLessonHistory(trainerId: Long, studentId: Long, scheduleId: Long): Boolean {
+        val count = queryFactory
+            .select(lessonHistory.count())
             .from(lessonHistory)
             .where(
                 lessonHistory.trainer.id.eq(trainerId),
                 lessonHistory.student.id.eq(studentId),
                 lessonHistory.schedule.id.eq(scheduleId)
             )
-            .fetchOne()
+            .fetchOne() ?: 0
+        return count > 0
     }
 
     private fun validateMemberType(member: CustomMemberDetails): BooleanExpression {
