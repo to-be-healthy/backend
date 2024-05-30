@@ -4,7 +4,6 @@ import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus.ABSEN
 import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus.ATTENDED
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryFiles
-import com.tobe.healthy.log
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -28,24 +27,24 @@ data class RetrieveLessonHistoryByDateCondResult(
 ) {
 
     companion object {
-        @JvmStatic
         fun from(entity: LessonHistory?): RetrieveLessonHistoryByDateCondResult? {
-            log.info { "entity: $entity"}
-            return RetrieveLessonHistoryByDateCondResult(
-                id = entity?.id,
-                title = entity?.title,
-                content = entity?.content,
-                commentTotalCount = entity?.lessonHistoryComment?.count { !it.delYn } ?: 0,
-                createdAt = entity?.createdAt,
-                studentId = entity?.student?.id,
-                student = entity?.student?.name,
-                trainer = "${entity?.trainer?.name} 트레이너",
-                scheduleId = entity?.schedule?.id,
-                lessonDt = formatLessonDt(entity?.schedule?.lessonDt),
-                lessonTime = formatLessonTime(entity?.schedule?.lessonStartTime, entity?.schedule?.lessonEndTime),
-                attendanceStatus = validateAttendanceStatus(entity?.schedule?.lessonDt, entity?.schedule?.lessonEndTime),
-                files = entity?.files?.map { file -> LessonHistoryFileResults.from(file) }?.sortedBy { file -> file.fileOrder }?.toMutableList() ?: mutableListOf()
-            )
+            entity?.let {
+                return RetrieveLessonHistoryByDateCondResult(
+                    id = entity.id,
+                    title = entity.title,
+                    content = entity.content,
+                    commentTotalCount = entity.lessonHistoryComment?.count { !it.delYn },
+                    createdAt = entity.createdAt,
+                    studentId = entity.student?.id,
+                    student = entity.student?.name,
+                    trainer = "${entity.trainer?.name} 트레이너",
+                    scheduleId = entity.schedule?.id,
+                    lessonDt = formatLessonDt(entity.schedule?.lessonDt),
+                    lessonTime = formatLessonTime(entity.schedule?.lessonStartTime, entity?.schedule?.lessonEndTime),
+                    attendanceStatus = validateAttendanceStatus(entity.schedule?.lessonDt, entity.schedule?.lessonEndTime),
+                    files = entity.files?.map { file -> LessonHistoryFileResults.from(file) }?.sortedBy { file -> file.fileOrder }?.toMutableList() ?: mutableListOf()
+                )
+            } ?: return null
         }
 
         private fun validateAttendanceStatus(lessonDt: LocalDate?, lessonEndTime: LocalTime?): String? {
