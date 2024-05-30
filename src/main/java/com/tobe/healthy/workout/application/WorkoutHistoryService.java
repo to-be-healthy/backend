@@ -81,7 +81,10 @@ public class WorkoutHistoryService {
         WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndDelYnFalse(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         List<Long> ids = List.of(workoutHistoryId);
-        WorkoutHistoryDto historyDto = WorkoutHistoryDto.from(history);
+
+        Member member = memberRepository.findByIdAndDelYnFalse(history.getMember().getId())
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        WorkoutHistoryDto historyDto = WorkoutHistoryDto.create(history, member.getMemberProfile());
         setHistoryFile(historyDto, ids);
         setHistoryExercise(historyDto, ids);
         return historyDto;

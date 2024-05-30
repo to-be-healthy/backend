@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.querydsl.core.annotations.QueryProjection;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
@@ -47,6 +48,17 @@ public class WorkoutHistoryDto {
                 return builder.build();
     }
 
+    public static WorkoutHistoryDto create(WorkoutHistory history, MemberProfile memberProfile) {
+        return WorkoutHistoryDto.builder()
+                .workoutHistoryId(history.getWorkoutHistoryId())
+                .content(history.getContent())
+                .member(MemberDto.create(history.getMember(), memberProfile))
+                .likeCnt(history.getLikeCnt())
+                .commentCnt(history.getCommentCnt())
+                .viewMySelf(history.getViewMySelf())
+                .build();
+    }
+
     public static WorkoutHistoryDto from(WorkoutHistory history) {
         return WorkoutHistoryDto.builder()
                 .workoutHistoryId(history.getWorkoutHistoryId())
@@ -59,10 +71,10 @@ public class WorkoutHistoryDto {
     }
 
     @QueryProjection
-    public WorkoutHistoryDto(Long workoutHistoryId, String content, Member member, boolean liked, Long likeCnt, Long commentCnt, boolean viewMySelf) {
+    public WorkoutHistoryDto(Long workoutHistoryId, String content, Member member, boolean liked, Long likeCnt, Long commentCnt, boolean viewMySelf, MemberProfile profile) {
         this.workoutHistoryId = workoutHistoryId;
         this.content = content;
-        this.member = MemberDto.from(member);
+        this.member = MemberDto.create(member, profile);
         this.liked = liked;
         this.likeCnt = likeCnt;
         this.commentCnt = commentCnt;

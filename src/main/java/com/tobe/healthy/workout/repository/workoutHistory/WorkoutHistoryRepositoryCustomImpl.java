@@ -6,6 +6,7 @@ import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tobe.healthy.member.domain.entity.QMemberProfile;
 import com.tobe.healthy.workout.domain.dto.out.QWorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.workoutHistory.*;
@@ -18,6 +19,8 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
+import static com.tobe.healthy.diet.domain.entity.QDietComment.dietComment;
+import static com.tobe.healthy.member.domain.entity.QMember.member;
 import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistory.workoutHistory;
 import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryFiles.workoutHistoryFiles;
 import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryLike.workoutHistoryLike;
@@ -31,6 +34,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
 
     @Override
     public Page<WorkoutHistoryDto> getWorkoutHistoryOfMonth(Long loginMemberId, Long memberId, Pageable pageable, String searchDate) {
+        QMemberProfile profileId = new QMemberProfile("profileId");
         Long totalCnt = queryFactory
                 .select(workoutHistory.count())
                 .from(workoutHistory)
@@ -39,8 +43,10 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         List<WorkoutHistoryDto> workoutHistories = queryFactory
                 .select(new QWorkoutHistoryDto(workoutHistory.workoutHistoryId, workoutHistory.content, workoutHistory.member
                         , isLiked()
-                        , workoutHistory.likeCnt, workoutHistory.commentCnt, workoutHistory.viewMySelf))
+                        , workoutHistory.likeCnt, workoutHistory.commentCnt, workoutHistory.viewMySelf, member.memberProfile))
                 .from(workoutHistory)
+                .leftJoin(workoutHistory.member, member)
+                .leftJoin(member.memberProfile, profileId)
                 .leftJoin(workoutHistoryLike)
                 .on(workoutHistory.workoutHistoryId.eq(workoutHistoryLike.workoutHistoryLikePK.workoutHistory.workoutHistoryId)
                         , workoutHistoryLike.workoutHistoryLikePK.member.id.eq(loginMemberId))
@@ -58,6 +64,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
 
     @Override
     public Page<WorkoutHistoryDto> getWorkoutHistoryByGym(Long loginMemberId, Long gymId, Pageable pageable, String searchDate) {
+        QMemberProfile profileId = new QMemberProfile("profileId");
         Long totalCnt = queryFactory
                 .select(workoutHistory.count())
                 .from(workoutHistory)
@@ -69,8 +76,10 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         List<WorkoutHistoryDto> workoutHistories = queryFactory
                 .select(new QWorkoutHistoryDto(workoutHistory.workoutHistoryId, workoutHistory.content, workoutHistory.member
                         , isLiked()
-                        , workoutHistory.likeCnt, workoutHistory.commentCnt, workoutHistory.viewMySelf))
+                        , workoutHistory.likeCnt, workoutHistory.commentCnt, workoutHistory.viewMySelf, member.memberProfile))
                 .from(workoutHistory)
+                .leftJoin(workoutHistory.member, member)
+                .leftJoin(member.memberProfile, profileId)
                 .leftJoin(workoutHistoryLike)
                 .on(workoutHistory.workoutHistoryId.eq(workoutHistoryLike.workoutHistoryLikePK.workoutHistory.workoutHistoryId)
                         , workoutHistoryLike.workoutHistoryLikePK.member.id.eq(loginMemberId))
