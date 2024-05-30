@@ -16,7 +16,7 @@ data class CommandRegisterReplyResult(
         fun from(lessonHistoryComment: LessonHistoryComment, files: MutableList<LessonHistoryFiles>) : CommandRegisterReplyResult {
             return CommandRegisterReplyResult(
                 lessonHistoryId = lessonHistoryComment.lessonHistory?.id,
-                commentId = lessonHistoryComment?.id,
+                commentId = lessonHistoryComment.id,
                 content = lessonHistoryComment.content,
                 files = files.map { CommandUploadFileResult.from(it) }.toMutableList(),
                 order = lessonHistoryComment.order,

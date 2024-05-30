@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.repository.trainer
+package com.tobe.healthy.schedule.repository
 
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
@@ -12,11 +12,11 @@ import java.time.LocalDate
 import java.util.*
 
 interface TrainerScheduleRepositoryCustom {
-    fun findAllSchedule(request: RetrieveTrainerScheduleByLessonInfo, trainerId: Long): List<Schedule>
-    fun findOneTrainerTodaySchedule(queryTrainerSchedule: RetrieveTrainerScheduleByLessonDt, trainerId: Long): RetrieveTrainerScheduleByLessonDtResult?
+    fun findOneTrainerTodaySchedule(request: RetrieveTrainerScheduleByLessonDt, trainerId: Long): RetrieveTrainerScheduleByLessonDtResult?
     fun findOneTrainerTodaySchedule(trainerId: Long): RetrieveTrainerScheduleByLessonDtResult?
     fun validateDuplicateSchedule(trainerScheduleInfo: TrainerScheduleInfo, request: CommandRegisterSchedule, trainerId: Long): Boolean
     fun findAvailableWaitingId(scheduleId: Long): Optional<Schedule>
+    fun findAllSchedule(request: RetrieveTrainerScheduleByLessonInfo, trainerId: Long): List<Schedule>
     fun findAllSchedule(scheduleIds: List<Long>, reservationStatus: ReservationStatus, trainerId: Long): List<Schedule>
     fun findAllSchedule(scheduleIds: List<Long>, reservationStatus: List<ReservationStatus>, trainerId: Long): List<Schedule>
     fun findAllSchedule(scheduleId: Long, reservationStatus: ReservationStatus, trainerId: Long): Schedule?

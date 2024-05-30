@@ -15,6 +15,7 @@ data class RetrieveUnwrittenLessonHistory(
     val lessonDt: String?,
     val lessonTime: String,
     val reservationStatus: String,
+    val lessonHistoryId: Long?,
     val reviewStatus: String
 ) {
     companion object {
@@ -26,6 +27,7 @@ data class RetrieveUnwrittenLessonHistory(
                 lessonDt = formatLessonDt(schedule.lessonDt),
                 lessonTime = formatLessonTimeWithAMPM(schedule.lessonStartTime, schedule.lessonEndTime),
                 reservationStatus = formatReservationStatus(schedule.reservationStatus),
+                lessonHistoryId = schedule.lessonHistories.firstOrNull()?.id,
                 reviewStatus = validateReviewStatus(schedule.lessonHistories)
             )
         }

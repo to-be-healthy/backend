@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.repository;
+package com.tobe.healthy.schedule.repository.common;
 
 
 public interface CommonScheduleRepositoryCustom {

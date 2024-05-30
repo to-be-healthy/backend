@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.repository.trainer
+package com.tobe.healthy.schedule.repository
 
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
@@ -88,7 +88,7 @@ class TrainerScheduleRepositoryImpl(
 
             response.schedule.forEach { (key) ->
                 response.schedule[key]?.filter {
-                    if (it?.lessonStartTime?.isBefore(LocalTime.now()) == true) {
+                    if (it.lessonStartTime?.isBefore(LocalTime.now()) == true) {
                         trainerTodaySchedule.before.add(it)
                     } else {
                         trainerTodaySchedule.after.add(it)
@@ -138,7 +138,7 @@ class TrainerScheduleRepositoryImpl(
 
             response.schedule.forEach { (key) ->
                 response.schedule[key]?.filter {
-                    if (it?.lessonStartTime?.isBefore(LocalTime.now()) == true) {
+                    if (it.lessonStartTime?.isBefore(LocalTime.now()) == true) {
                         trainerTodaySchedule.before.add(it)
                     } else {
                         trainerTodaySchedule.after.add(it)
@@ -271,7 +271,7 @@ class TrainerScheduleRepositoryImpl(
     private fun applicantIdEq(studentId: Long?): BooleanExpression? {
         return studentId?.let {
             schedule.applicant.id.eq(studentId)
-        } ?: null
+        }
     }
 
     override fun findAllSimpleLessonHistoryByMemberId(studentId: Long, trainerId: Long): List<Schedule> {
@@ -333,7 +333,7 @@ class TrainerScheduleRepositoryImpl(
         return lessonDate?.let {
             val formattedDate = stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", schedule.lessonDt)
             return formattedDate.eq(lessonDate)
-        } ?: null
+        }
     }
 }
 

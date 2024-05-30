@@ -7,6 +7,7 @@ import com.tobe.healthy.push.domain.dto.`in`.CommandRegisterToken
 import com.tobe.healthy.push.domain.dto.`in`.CommandSendNotification
 import com.tobe.healthy.push.domain.dto.out.CommandRegisterTokenResult
 import com.tobe.healthy.push.domain.dto.out.CommandSendNotificationResult
+import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
@@ -17,8 +18,9 @@ class PushCommandController(
 ) {
 
     @PostMapping("/register")
-    fun registerFcmToken(@RequestBody request: CommandRegisterToken,
-                         @AuthenticationPrincipal member: CustomMemberDetails
+    fun registerFcmToken(
+        @RequestBody @Valid request: CommandRegisterToken,
+        @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandRegisterTokenResult> {
         return ApiResultResponse(
             message = "토큰을 저장하였습니다.",
@@ -28,7 +30,7 @@ class PushCommandController(
 
     @PostMapping
     fun sendPushAlarm(
-        @RequestBody request: CommandSendNotification
+        @RequestBody @Valid request: CommandSendNotification
     ): ApiResultResponse<CommandSendNotificationResult> {
         return ApiResultResponse(
             message = "푸시 전송에 성공하였습니다.",
@@ -37,8 +39,9 @@ class PushCommandController(
     }
 
     @PostMapping("/{memberId}")
-    fun sendPushAlarm(@PathVariable memberId: Long,
-                      @RequestBody request: CommandSendNotification
+    fun sendPushAlarm(
+        @PathVariable memberId: Long,
+        @RequestBody request: CommandSendNotification
     ): ApiResultResponse<CommandSendNotificationResult> {
         return ApiResultResponse(
             message = "푸시 전송에 성공하였습니다.",

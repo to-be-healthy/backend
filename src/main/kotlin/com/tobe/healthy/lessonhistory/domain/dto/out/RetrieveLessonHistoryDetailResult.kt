@@ -32,24 +32,23 @@ data class RetrieveLessonHistoryDetailResult(
 
     companion object {
         fun detailFrom(entity: LessonHistory?): RetrieveLessonHistoryDetailResult? {
-            return RetrieveLessonHistoryDetailResult(
-                id = entity?.id,
-                title = entity?.title,
-                content = entity?.content,
-                comments = sortLessonHistoryComment(entity?.lessonHistoryComment),
-                commentTotalCount = entity?.lessonHistoryComment?.count { !it.delYn } ?: 0,
-                createdAt = entity?.createdAt,
-                student = entity?.student?.name,
-                trainer = entity?.trainer?.name?.let { name -> "$name 트레이너" },
-                scheduleId = entity?.schedule?.id,
-                lessonDt = formatLessonDt(entity?.schedule?.lessonDt),
-                lessonTime = formatLessonTime(entity?.schedule?.lessonStartTime, entity?.schedule?.lessonEndTime),
-                attendanceStatus = validateAttendanceStatus(
-                    entity?.schedule?.lessonDt,
-                    entity?.schedule?.lessonEndTime
-                ),
-                files = entity?.let { it.files.filter { comment -> comment.lessonHistoryComment == null }.map { files -> LessonHistoryFileResults.from(files) }.sortedBy { file -> file.fileOrder }.toMutableList() } ?: mutableListOf()
-            )
+            return entity?.let {
+                return RetrieveLessonHistoryDetailResult(
+                    id = it.id,
+                    title = it.title,
+                    content = it.content,
+                    comments = sortLessonHistoryComment(it.lessonHistoryComment),
+                    commentTotalCount = it.lessonHistoryComment.count { comment -> !comment.delYn },
+                    createdAt = it.createdAt,
+                    student = it.student?.name,
+                    trainer = it.trainer?.name?.let { name -> "$name 트레이너" },
+                    scheduleId = it.schedule?.id,
+                    lessonDt = formatLessonDt(it.schedule?.lessonDt),
+                    lessonTime = formatLessonTime(it.schedule?.lessonStartTime, it.schedule?.lessonEndTime),
+                    attendanceStatus = validateAttendanceStatus(it.schedule?.lessonDt, it.schedule?.lessonEndTime),
+                    files = it.files.filter { comment -> comment.lessonHistoryComment == null }.map { files -> LessonHistoryFileResults.from(files) }.sortedBy { file -> file.fileOrder }.toMutableList()
+                )
+            }
         }
 
         private fun sortLessonHistoryComment(comments: MutableList<LessonHistoryComment>?): MutableList<LessonHistoryCommentCommandResult?> {
@@ -95,7 +94,7 @@ data class RetrieveLessonHistoryDetailResult(
                     orderNum = entity?.order,
                     replies = entity?.replies?.map { replies -> from(replies) }?.toMutableList() ?: mutableListOf(),
                     parentId = entity?.parent?.id,
-                    files = entity?.let { it.files.map { files -> LessonHistoryFileResults.from(files) }?.toMutableList() } ?: mutableListOf(),
+                    files = entity?.files?.map { files -> LessonHistoryFileResults.from(files) }?.toMutableList() ?: mutableListOf(),
                     delYn = entity?.delYn,
                     createdAt = entity?.createdAt,
                     updatedAt = entity?.updatedAt

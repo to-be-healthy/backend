@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.repository.schedulewaiting;
+package com.tobe.healthy.schedule.repository.waiting;
 
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import org.springframework.data.jpa.repository.EntityGraph;

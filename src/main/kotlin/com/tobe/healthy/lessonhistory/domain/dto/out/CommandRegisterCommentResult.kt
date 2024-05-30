@@ -15,7 +15,7 @@ data class CommandRegisterCommentResult(
         fun from(lessonHistoryComment: LessonHistoryComment, files: MutableList<LessonHistoryFiles>) : CommandRegisterCommentResult {
             return CommandRegisterCommentResult(
                 lessonHistoryId = lessonHistoryComment.lessonHistory?.id,
-                lessonHistoryCommentId = lessonHistoryComment?.id,
+                lessonHistoryCommentId = lessonHistoryComment.id,
                 writerId = lessonHistoryComment.writer?.id,
                 writerName = lessonHistoryComment.writer?.name,
                 content = lessonHistoryComment.content,

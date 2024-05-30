@@ -6,7 +6,7 @@ import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerDefaultLessonTime
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonInfoResult
 import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository
-import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
+import com.tobe.healthy.schedule.repository.TrainerScheduleRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -38,5 +38,3 @@ class TrainerScheduleService(
         return trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId)
     }
 }
-
-const val ONE_DAY = 1L

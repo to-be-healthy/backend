@@ -193,10 +193,10 @@ class LessonHistoryRepositoryImpl(
     private fun validateMemberType(member: CustomMemberDetails): BooleanExpression {
         return when (member.memberType) {
             TRAINER -> {
-                return lessonHistory.trainer.id.eq(member.memberId)
+                lessonHistory.trainer.id.eq(member.memberId)
             }
             else -> {
-                return lessonHistory.student.id.eq(member.memberId)
+                lessonHistory.student.id.eq(member.memberId)
             }
         }
     }

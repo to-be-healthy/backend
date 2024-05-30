@@ -1,10 +1,9 @@
-package com.tobe.healthy.schedule.repository;
+package com.tobe.healthy.schedule.repository.common;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 

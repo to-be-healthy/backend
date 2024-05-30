@@ -13,8 +13,8 @@ import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleClosedDaysInfo
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
 import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository
-import com.tobe.healthy.schedule.repository.schedulewaiting.ScheduleWaitingRepository
-import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
+import com.tobe.healthy.schedule.repository.TrainerScheduleRepository
+import com.tobe.healthy.schedule.repository.waiting.ScheduleWaitingRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -261,5 +261,9 @@ class TrainerScheduleCommandService(
 
     private fun isStartTimeEqualsLunchStartTime(lunchStartTime: LocalTime?, startTime: LocalTime): Boolean {
         return startTime == lunchStartTime
+    }
+
+    companion object {
+        const val ONE_DAY = 1L
     }
 }

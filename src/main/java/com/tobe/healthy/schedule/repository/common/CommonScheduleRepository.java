@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.repository;
+package com.tobe.healthy.schedule.repository.common;
 
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import jakarta.persistence.LockModeType;
