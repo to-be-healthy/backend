@@ -1,5 +1,7 @@
 package com.tobe.healthy.lessonhistory.domain.dto.out
 
+import com.tobe.healthy.common.LessonTimeFormatter.formatLessonDt
+import com.tobe.healthy.common.LessonTimeFormatter.formatLessonTime
 import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus.ABSENT
 import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus.ATTENDED
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
@@ -10,8 +12,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.util.*
 
 @Schema(description = "수업 일지 상세 조회 응답 DTO")
 data class RetrieveLessonHistoryDetailResult(
@@ -71,18 +71,6 @@ data class RetrieveLessonHistoryDetailResult(
                 return ATTENDED.description
             }
             return ABSENT.description
-        }
-
-        private fun formatLessonTime(lessonStartTime: LocalTime?, lessonEndTime: LocalTime?): String {
-            val formatter = DateTimeFormatter.ofPattern("HH:mm")
-            val startTime = lessonStartTime?.format(formatter)
-            val endTime = lessonEndTime?.format(formatter)
-            return "${startTime} - ${endTime}"
-        }
-
-        private fun formatLessonDt(lessonDt: LocalDate?): String? {
-            val formatter = DateTimeFormatter.ofPattern("MM월 dd일 E요일", Locale.KOREAN)
-            return lessonDt?.format(formatter)
         }
     }
 

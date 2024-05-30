@@ -53,7 +53,7 @@ class TrainerScheduleCommandController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping
     fun registerSchedule(
-        @RequestBody request: CommandRegisterSchedule,
+        @RequestBody @Valid request: CommandRegisterSchedule,
         @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandRegisterScheduleResult> {
         return ApiResultResponse(
@@ -71,7 +71,7 @@ class TrainerScheduleCommandController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun changeScheduleForTrainer(
         @PathVariable status: ReservationStatus,
-        @RequestBody request: CommandUpdateScheduleStatus,
+        @RequestBody @Valid request: CommandUpdateScheduleStatus,
         @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<List<CommandScheduleStatusResult>> {
         return ApiResultResponse(

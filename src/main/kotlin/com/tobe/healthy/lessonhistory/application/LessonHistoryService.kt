@@ -90,7 +90,6 @@ class LessonHistoryService(
     fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long): RetrieveLessonHistoryDetailResult? {
         return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, memberId)
             ?.let { RetrieveLessonHistoryDetailResult.detailFrom(it) }
-            ?: null
     }
 
     fun findAllUnwrittenLessonHistory(

@@ -84,7 +84,7 @@ class TrainerScheduleCommandService(
         val schedules = mutableListOf<Schedule>()
 
         // 일정 등록 시작
-        while (!lessonDt.isAfter(request.lessonEndDt)) {
+        while (!lessonDt!!.isAfter(request.lessonEndDt)) {
             var endTime = startTime.plusMinutes(trainerScheduleInfo.lessonTime.description.toLong())
 
             if (endTime.isAfter(trainerScheduleInfo.lessonEndTime)) {
@@ -146,9 +146,9 @@ class TrainerScheduleCommandService(
         when (status) {
 
             AVAILABLE -> {
-                schedules = trainerScheduleRepository.findAllSchedule(request.scheduleIds, DISABLED, memberId)
+                schedules = trainerScheduleRepository.findAllSchedule(request.scheduleIds!!, DISABLED, memberId)
 
-                if (schedules.isNullOrEmpty()) {
+                if (schedules.isEmpty()) {
                     throw CustomException(SCHEDULE_NOT_FOUND)
                 }
                 schedules.forEach {
@@ -157,9 +157,9 @@ class TrainerScheduleCommandService(
             }
 
             DISABLED -> {
-                schedules = trainerScheduleRepository.findAllSchedule(request.scheduleIds, listOf(AVAILABLE, COMPLETED), memberId)
+                schedules = trainerScheduleRepository.findAllSchedule(request.scheduleIds!!, listOf(AVAILABLE, COMPLETED), memberId)
 
-                if (schedules.isNullOrEmpty()) {
+                if (schedules.isEmpty()) {
                     throw CustomException(SCHEDULE_NOT_FOUND)
                 }
 

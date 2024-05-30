@@ -1,6 +1,6 @@
 package com.tobe.healthy.schedule.domain.dto.out
 
-import com.tobe.healthy.common.TimeFormatter.Companion.dateTimeFormat
+import com.tobe.healthy.common.LessonTimeFormatter.formatLessonTime
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
 import java.time.DayOfWeek
 
@@ -15,10 +15,10 @@ data class RetrieveTrainerDefaultLessonTimeResult(
     companion object {
         fun from(trainerScheduleInfo: TrainerScheduleInfo?) : RetrieveTrainerDefaultLessonTimeResult {
             return RetrieveTrainerDefaultLessonTimeResult(
-                lessonStartTime = dateTimeFormat(trainerScheduleInfo?.lessonStartTime),
-                lessonEndTime = dateTimeFormat(trainerScheduleInfo?.lessonEndTime),
-                lunchStartTime = dateTimeFormat(trainerScheduleInfo?.lunchStartTime),
-                lunchEndTime = dateTimeFormat(trainerScheduleInfo?.lunchEndTime),
+                lessonStartTime = formatLessonTime(trainerScheduleInfo?.lessonStartTime),
+                lessonEndTime = formatLessonTime(trainerScheduleInfo?.lessonEndTime),
+                lunchStartTime = formatLessonTime(trainerScheduleInfo?.lunchStartTime),
+                lunchEndTime = formatLessonTime(trainerScheduleInfo?.lunchEndTime),
                 lessonTime = trainerScheduleInfo?.lessonTime?.description,
                 closedDays = trainerScheduleInfo?.trainerScheduleClosedDays?.map { it.closedDays }?.toMutableList() ?: mutableListOf()
             )
