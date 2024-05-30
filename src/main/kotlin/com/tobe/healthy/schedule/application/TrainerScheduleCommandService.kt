@@ -40,7 +40,7 @@ class TrainerScheduleCommandService(
     ): CommandRegisterDefaultLessonTimeResult {
         val findTrainer = findMemberById(trainerId)
 
-        trainerScheduleInfoRepository.findByTrainerId(trainerId)?.let {
+        trainerScheduleInfoRepository.findOneByTrainerId(trainerId)?.let {
             it.changeDefaultLessonTime(request)
             it.trainerScheduleClosedDays.clear()
             it.trainerScheduleClosedDays.addAll(
@@ -77,7 +77,7 @@ class TrainerScheduleCommandService(
     ): CommandRegisterScheduleResult {
         val trainer = findMemberById(trainerId)
 
-        val findTrainerSchedule = trainerScheduleInfoRepository.findByTrainerId(trainerId)
+        val findTrainerSchedule = trainerScheduleInfoRepository.findOneByTrainerId(trainerId)
             ?: throw CustomException(TRAINER_SCHEDULE_NOT_FOUND)
 
         var lessonDt = request.lessonStartDt
