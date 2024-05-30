@@ -2,6 +2,7 @@ package com.tobe.healthy.schedule.application;
 
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
+import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -33,7 +34,6 @@ public class ScheduleWaitingService {
 	private final MemberRepository memberRepository;
 	private final TrainerScheduleRepository trainerScheduleRepository;
 	private final ScheduleWaitingRepository scheduleWaitingRepository;
-	private final CourseRepository courseRepository;
 	private final CourseService courseService;
 
 	public String registerScheduleWaiting(Long scheduleId, Long memberId) {
@@ -43,6 +43,9 @@ public class ScheduleWaitingService {
 
 		Schedule findSchedule = trainerScheduleRepository.findAvailableWaitingId(scheduleId)
 			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+
+		CourseDto usingCourse = courseService.getNowUsingCourse(memberId);
+		if(usingCourse == null) throw new CustomException(COURSE_NOT_FOUND);
 
 		LocalDateTime lessonDateTime = LocalDateTime.of(findSchedule.getLessonDt(), findSchedule.getLessonStartTime());
 
