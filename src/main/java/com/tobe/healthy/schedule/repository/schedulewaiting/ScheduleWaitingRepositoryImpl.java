@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.repository.schedule_waiting;
+package com.tobe.healthy.schedule.repository.schedulewaiting;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;

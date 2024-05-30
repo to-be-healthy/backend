@@ -13,7 +13,7 @@ import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleClosedDaysInfo
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
 import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository
-import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository
+import com.tobe.healthy.schedule.repository.schedulewaiting.ScheduleWaitingRepository
 import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -201,6 +201,8 @@ class TrainerScheduleCommandService(
         val entity = trainerScheduleRepository.findAllSchedule(scheduleId, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
 
+        val applicant = entity.applicant
+
         if (!entity.scheduleWaiting.isNullOrEmpty()) {
             entity.cancelMemberSchedule(entity.scheduleWaiting!![0])
             scheduleWaitingRepository.delete(entity.scheduleWaiting!![0])
@@ -208,17 +210,26 @@ class TrainerScheduleCommandService(
             entity.cancelMemberSchedule()
         }
 
-        return CommandCancelStudentReservationResult.from(entity)
+        return CommandCancelStudentReservationResult.from(entity, applicant)
     }
 
     fun updateReservationStatusToNoShow(
-        reservationStatus: ReservationStatus,
         scheduleId: Long,
         trainerId: Long
     ): ScheduleIdInfo {
-        val schedule = trainerScheduleRepository.findAllSchedule(scheduleId, reservationStatus, trainerId)
+        val schedule = trainerScheduleRepository.findAllSchedule(scheduleId, COMPLETED, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
-        schedule.updateReservationStatusToNoShow(reservationStatus)
+        schedule.updateReservationStatusToNoShow(NO_SHOW)
+        return ScheduleIdInfo.from(schedule)
+    }
+
+    fun cancelReservationStatusToNoShow(
+        scheduleId: Long,
+        trainerId: Long
+    ): ScheduleIdInfo {
+        val schedule = trainerScheduleRepository.findAllSchedule(scheduleId, NO_SHOW, trainerId)
+            ?: throw CustomException(SCHEDULE_NOT_FOUND)
+        schedule.updateReservationStatusToNoShow(COMPLETED)
         return ScheduleIdInfo.from(schedule)
     }
 

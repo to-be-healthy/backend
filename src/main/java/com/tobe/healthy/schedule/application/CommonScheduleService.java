@@ -7,7 +7,7 @@ import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import com.tobe.healthy.schedule.repository.CommonScheduleRepository;
-import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository;
+import com.tobe.healthy.schedule.repository.schedulewaiting.ScheduleWaitingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

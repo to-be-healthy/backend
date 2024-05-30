@@ -8,8 +8,6 @@ import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandUpdateScheduleStatus
 import com.tobe.healthy.schedule.domain.dto.out.*
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.NO_SHOW
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -130,7 +128,7 @@ class TrainerScheduleCommandController(
     ): ApiResultResponse<ScheduleIdInfo> {
         return ApiResultResponse(
             message = "노쇼 처리되었습니다.",
-            data = trainerScheduleCommandService.updateReservationStatusToNoShow(NO_SHOW, scheduleId, customMemberDetails.memberId)
+            data = trainerScheduleCommandService.updateReservationStatusToNoShow(scheduleId, customMemberDetails.memberId)
         )
     }
 
@@ -146,7 +144,7 @@ class TrainerScheduleCommandController(
     ): ApiResultResponse<ScheduleIdInfo> {
         return ApiResultResponse(
             message = "노쇼 처리가 취소되었습니다.",
-            data = trainerScheduleCommandService.updateReservationStatusToNoShow(COMPLETED, scheduleId, customMemberDetails.memberId)
+            data = trainerScheduleCommandService.cancelReservationStatusToNoShow(scheduleId, customMemberDetails.memberId)
         )
     }
 }
