@@ -21,7 +21,6 @@ import org.springframework.util.ObjectUtils
 import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
-
 @Repository
 class TrainerScheduleRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
@@ -254,10 +253,17 @@ class TrainerScheduleRepositoryImpl(
                 trainerIdEq(memberId),
                 schedule.applicant.isNotNull,
                 reservationStatusEq(COMPLETED),
-                lessonDateTimeEq(request.lessonDateTime)
+                lessonDateTimeEq(request.lessonDateTime),
+                applicantIdEq(request.studentId)
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
+    }
+
+    private fun applicantIdEq(studentId: Long?): BooleanExpression? {
+        return studentId?.let {
+            schedule.applicant.id.eq(studentId)
+        } ?: null
     }
 
     override fun findAllSimpleLessonHistoryByMemberId(studentId: Long, trainerId: Long): List<Schedule> {
@@ -325,7 +331,10 @@ class TrainerScheduleRepositoryImpl(
     }
 
     private fun lessonDateTimeEq(lessonDateTime: String?): BooleanExpression? {
-        val formattedDate = stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", schedule.lessonDt)
-        return formattedDate.eq(lessonDateTime)
+        return lessonDateTime?.let {
+            val formattedDate = stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", schedule.lessonDt)
+            return formattedDate.eq(lessonDateTime)
+        } ?: null
     }
 }
+
