@@ -20,7 +20,7 @@ data class CommandRegisterDefaultLessonTimeResult(
                 lunchStartTime = dateTimeFormat(request.lunchStartTime),
                 lunchEndTime = dateTimeFormat(request.lunchEndTime),
                 closedDays = request.closedDays,
-                lessonTime = request.lessonTime
+                lessonTime = request.lessonTime!!
             )
         }
     }

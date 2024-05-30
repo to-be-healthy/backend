@@ -27,7 +27,8 @@ class TrainerScheduleService(
         request: RetrieveTrainerScheduleByLessonInfo,
         trainerId: Long
     ): RetrieveTrainerScheduleByLessonInfoResult? {
-        return trainerScheduleRepository.findAllSchedule(request, trainerId)
+        val schedules = trainerScheduleRepository.findAllSchedule(request, trainerId)
+        return RetrieveTrainerScheduleByLessonInfoResult.from(schedules)
     }
 
     fun findOneTrainerTodaySchedule(

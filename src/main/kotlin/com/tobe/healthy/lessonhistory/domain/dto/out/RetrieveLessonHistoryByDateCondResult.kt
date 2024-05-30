@@ -4,14 +4,13 @@ import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus.ABSEN
 import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus.ATTENDED
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryFiles
-import io.swagger.v3.oas.annotations.media.Schema
+import com.tobe.healthy.log
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-@Schema(description = "수업 일지")
 data class RetrieveLessonHistoryByDateCondResult(
     val id: Long?,
     val title: String?,
@@ -29,7 +28,9 @@ data class RetrieveLessonHistoryByDateCondResult(
 ) {
 
     companion object {
+        @JvmStatic
         fun from(entity: LessonHistory?): RetrieveLessonHistoryByDateCondResult? {
+            log.info { "entity: $entity"}
             return RetrieveLessonHistoryByDateCondResult(
                 id = entity?.id,
                 title = entity?.title,
@@ -43,7 +44,7 @@ data class RetrieveLessonHistoryByDateCondResult(
                 lessonDt = formatLessonDt(entity?.schedule?.lessonDt),
                 lessonTime = formatLessonTime(entity?.schedule?.lessonStartTime, entity?.schedule?.lessonEndTime),
                 attendanceStatus = validateAttendanceStatus(entity?.schedule?.lessonDt, entity?.schedule?.lessonEndTime),
-                files = entity?.let { it.files.map { file -> LessonHistoryFileResults.from(file) }.sortedBy { file -> file.fileOrder }.toMutableList() } ?: mutableListOf()
+                files = entity?.files?.map { file -> LessonHistoryFileResults.from(file) }?.sortedBy { file -> file.fileOrder }?.toMutableList() ?: mutableListOf()
             )
         }
 

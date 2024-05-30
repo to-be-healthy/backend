@@ -21,11 +21,14 @@ class TrainerScheduleClosedDaysInfo(
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "trainer_schedule_closed_days_id")
-    val id: Long = 0
+    val id: Long? = null
 ) {
 
     companion object {
-        fun registerClosedDay(dayOfWeek: DayOfWeek, trainerScheduleInfo: TrainerScheduleInfo): TrainerScheduleClosedDaysInfo {
+        fun registerClosedDay(
+            dayOfWeek: DayOfWeek,
+            trainerScheduleInfo: TrainerScheduleInfo
+        ): TrainerScheduleClosedDaysInfo {
             return TrainerScheduleClosedDaysInfo(
                 trainerScheduleInfo = trainerScheduleInfo,
                 closedDays = dayOfWeek

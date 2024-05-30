@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
 import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistory.lessonHistory
 import com.tobe.healthy.member.domain.entity.QMember
+import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
@@ -16,39 +17,42 @@ import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.DISABLED
 import com.tobe.healthy.schedule.domain.entity.Schedule
+import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
 import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
+
 @Repository
 class TrainerScheduleRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
 ) : TrainerScheduleRepositoryCustom {
 
     override fun findAllSchedule(
-        retrieveTrainerScheduleByLessonInfo: RetrieveTrainerScheduleByLessonInfo,
+        request: RetrieveTrainerScheduleByLessonInfo,
         trainerId: Long
-    ): RetrieveTrainerScheduleByLessonInfoResult? {
-        val results = queryFactory
+    ): List<Schedule> {
+        return queryFactory
             .select(schedule)
             .from(schedule)
             .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
             .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
             .leftJoin(schedule.scheduleWaiting, scheduleWaiting).fetchJoin()
             .where(
-                lessonDtMonthEq(retrieveTrainerScheduleByLessonInfo.lessonDt),
-                lessonDtBetween(retrieveTrainerScheduleByLessonInfo.lessonStartDt, retrieveTrainerScheduleByLessonInfo.lessonEndDt),
+                lessonDtMonthEq(request.lessonDt),
+                lessonDtBetween(
+                    request.lessonStartDt,
+                    request.lessonEndDt
+                ),
                 trainerIdEq(trainerId)
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
-
-        return RetrieveTrainerScheduleByLessonInfoResult.from(results)
     }
 
     override fun findOneTrainerTodaySchedule(
-        queryTrainerSchedule: RetrieveTrainerScheduleByLessonDt,
+        request: RetrieveTrainerScheduleByLessonDt,
         trainerId: Long
     ): RetrieveTrainerScheduleByLessonDtResult? {
         val results = queryFactory
@@ -57,8 +61,9 @@ class TrainerScheduleRepositoryImpl(
             .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
             .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
             .where(
-                lessonDtEq(queryTrainerSchedule.lessonDt),
-                trainerIdEq(trainerId)
+                lessonDtEq(request.lessonDt),
+                trainerIdEq(trainerId),
+                reservationStatusEq(COMPLETED)
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
@@ -67,11 +72,11 @@ class TrainerScheduleRepositoryImpl(
             .select(schedule.count())
             .from(schedule)
             .where(
-                lessonDtEq(queryTrainerSchedule.lessonDt),
-                trainerIdEq(trainerId)
+                lessonDtEq(request.lessonDt),
+                trainerIdEq(trainerId),
+                reservationStatusEq(COMPLETED)
             )
             .fetchOne()
-
 
         val response = RetrieveTrainerScheduleByLessonInfoResult.from(results)
 
@@ -144,22 +149,22 @@ class TrainerScheduleRepositoryImpl(
         }
     }
 
-    override fun validateRegisterSchedule(
-        lessonDt: LocalDate,
-        startTime: LocalTime,
-        endTime: LocalTime,
-        trainerId: Long,
-    ): Long {
-        return queryFactory
+    override fun validateDuplicateSchedule(
+        trainerScheduleInfo: TrainerScheduleInfo,
+        request: CommandRegisterSchedule,
+        trainerId: Long
+    ): Boolean {
+        val count = queryFactory
             .select(schedule.count())
             .from(schedule)
             .where(
-                lessonDtMonthEq(lessonDt),
+                lessonDtBetween(request.lessonStartDt, request.lessonEndDt),
                 trainerIdEq(trainerId),
-                lessonStartDtBefore(endTime),
-                lessonEndDtAfter(startTime)
+                schedule.lessonStartTime.between(trainerScheduleInfo.lessonStartTime, trainerScheduleInfo.lessonEndTime),
+                schedule.lessonEndTime.between(trainerScheduleInfo.lessonStartTime, trainerScheduleInfo.lessonEndTime)
             )
-            .fetchOne()!!
+            .fetchOne() ?: 0L
+        return count > 0
     }
 
     override fun findAvailableWaitingId(scheduleId: Long): Optional<Schedule> {
@@ -244,7 +249,10 @@ class TrainerScheduleRepositoryImpl(
             .fetch()
     }
 
-    override fun findAllUnwrittenLessonHistory(request: UnwrittenLessonHistorySearchCond, memberId: Long): List<Schedule> {
+    override fun findAllUnwrittenLessonHistory(
+        request: UnwrittenLessonHistorySearchCond,
+        memberId: Long
+    ): List<Schedule> {
         return queryFactory
             .select(schedule)
             .from(schedule)

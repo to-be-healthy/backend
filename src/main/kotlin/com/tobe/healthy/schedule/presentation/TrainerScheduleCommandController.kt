@@ -11,6 +11,7 @@ import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -33,7 +34,7 @@ class TrainerScheduleCommandController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping("/default-lesson-time")
     fun registerDefaultSchedule(
-        @RequestBody request: CommandRegisterDefaultLessonTime,
+        @RequestBody @Valid request: CommandRegisterDefaultLessonTime,
         @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandRegisterDefaultLessonTimeResult> {
         return ApiResultResponse(
@@ -108,11 +109,11 @@ class TrainerScheduleCommandController(
     fun cancelScheduleForTrainer(
         @PathVariable scheduleId: Long,
         @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
-    ): ApiResultResponse<Boolean> {
+    ): ApiResultResponse<CommandCancelStudentReservationResult> {
         val scheduleResult = trainerScheduleCommandService.cancelStudentReservation(scheduleId, customMemberDetails.memberId)
         return ApiResultResponse(
             message = "${scheduleResult.lessonStartTime.format(DateTimeFormatter.ofPattern("a HH시 mm분"))} 수업이 취소되었습니다.",
-            data = true
+            data = scheduleResult
         )
     }
 

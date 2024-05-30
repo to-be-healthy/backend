@@ -14,22 +14,22 @@ data class RetrieveTrainerScheduleByLessonInfoResult(
 ) {
     companion object {
         private const val DEFAULT_DURATION = 60.0
-        fun from(schedule: MutableList<Schedule?>): RetrieveTrainerScheduleByLessonInfoResult {
+        fun from(schedule: List<Schedule>): RetrieveTrainerScheduleByLessonInfoResult {
             return schedule.let {
                 val groupingData = schedule.groupBy { it?.lessonDt }
                     .mapValues { entry ->
                         entry.value.map { schedule ->
                             LessonDetailResult(
-                                scheduleId = schedule?.id,
-                                duration = Duration.between(schedule?.lessonStartTime, schedule?.lessonEndTime)
+                                scheduleId = schedule.id,
+                                duration = Duration.between(schedule.lessonStartTime, schedule.lessonEndTime)
                                     .toMinutes() / DEFAULT_DURATION,
-                                lessonStartTime = schedule?.lessonStartTime,
-                                lessonEndTime = schedule?.lessonEndTime,
-                                reservationStatus = schedule?.reservationStatus,
-                                applicantId = schedule?.applicant?.id,
-                                applicantName = schedule?.applicant?.name,
-                                waitingStudentId = schedule?.scheduleWaiting?.firstOrNull()?.member?.id,
-                                waitingStudentName = schedule?.scheduleWaiting?.firstOrNull()?.member?.name
+                                lessonStartTime = schedule.lessonStartTime,
+                                lessonEndTime = schedule.lessonEndTime,
+                                reservationStatus = schedule.reservationStatus,
+                                applicantId = schedule.applicant?.id,
+                                applicantName = schedule.applicant?.name,
+                                waitingStudentId = schedule.scheduleWaiting?.firstOrNull()?.member?.id,
+                                waitingStudentName = schedule.scheduleWaiting?.firstOrNull()?.member?.name
                             )
                         }
                     }
