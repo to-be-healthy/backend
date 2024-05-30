@@ -177,7 +177,7 @@ public class DietService {
         TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId()).orElse(null);
         Member trainer = mapping == null ? null : mapping.getTrainer();
         Diet diet = dietRepository.save(Diet.create(member, trainer, command));
-        uploadDietFiles(diet, command);
+        uploadNewFiles(diet, command);
         DietDto dietDto = DietDto.from(diet);
         setDietFile(dietDto, List.of(diet.getDietId()));
         return dietDto;
@@ -189,14 +189,14 @@ public class DietService {
 
         diet.changeFast(command);
         deleteOldFiles(diet, command);
-        uploadDietFiles(diet, command);
+        uploadNewFiles(diet, command);
 
         DietDto dietDto = DietDto.from(diet);
         setDietFile(dietDto, List.of(diet.getDietId()));
         return dietDto;
     }
 
-    private void uploadDietFiles(Diet diet, DietUpdateCommand command) {
+    private void uploadNewFiles(Diet diet, DietUpdateCommand command) {
         //아침 파일
         if (!command.isBreakfastFast() && !ObjectUtils.isEmpty(command.getBreakfastFile())){
             dietFileRepository.save(DietFiles.create(diet, command.getBreakfastFile(), BREAKFAST));

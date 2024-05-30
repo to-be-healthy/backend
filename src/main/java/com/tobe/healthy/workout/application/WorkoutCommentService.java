@@ -47,7 +47,7 @@ public class WorkoutCommentService {
             orderNum = parentComment.getOrderNum();
         }
         commentRepository.save(WorkoutHistoryComment.create(history, member, command, depth, orderNum));
-        history.updateCommentCnt(++commentCnt);
+        history.changeCommentCnt(++commentCnt);
     }
 
     public WorkoutHistoryCommentDto updateComment(Member member, Long workoutHistoryId, Long commentId, HistoryCommentAddCommand command) {
