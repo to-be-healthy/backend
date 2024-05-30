@@ -6,7 +6,6 @@ import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -78,7 +77,7 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "로그인에 성공하고, Access Token, Refresh Token, userId, Role을 반환한다.")
 	})
 	@PostMapping("/login")
-	public ResponseHandler<Tokens> login(@RequestBody CommandLoginMember request) {
+	public ResponseHandler<Tokens> login(@RequestBody @Valid CommandLoginMember request) {
 		return ResponseHandler.<Tokens>builder()
 			.data(memberAuthCommandService.login(request))
 			.message("로그인 되었습니다.")
@@ -93,8 +92,8 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token, userId, Role을 반환한다.")
 	})
 	@PostMapping("/refresh-token")
-	public ResponseHandler<Tokens> refreshToken(@Parameter(description = "아이디") @RequestParam String userId,
-												@Parameter(description = "갱신 토큰") @RequestParam String refreshToken) {
+	public ResponseHandler<Tokens> refreshToken(@RequestParam String userId,
+												@RequestParam String refreshToken) {
 		return ResponseHandler.<Tokens>builder()
 			.data(memberAuthCommandService.refreshToken(userId, refreshToken))
 			.message("토큰이 갱신되었습니다.")
@@ -108,7 +107,7 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "등록된 이메일로 초기화 비밀번호를 전송한다.")
 	})
 	@PostMapping("/find/password")
-	public ResponseHandler<String> findMemberPW(@RequestBody CommandFindMemberPassword request) {
+	public ResponseHandler<String> findMemberPW(@RequestBody @Valid CommandFindMemberPassword request) {
 		String email = memberAuthCommandService.findMemberPW(request);
 		return ResponseHandler.<String>builder()
 			.data(email)

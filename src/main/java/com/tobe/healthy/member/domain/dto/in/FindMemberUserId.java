@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "아이디 찾기 DTO")
-public class RetrieveMemberId {
+public class FindMemberUserId {
 	@Schema(description = "이메일" , example = "to-be-healthy@gmail.com")
 	@NotEmpty(message = "이메일을 입력해 주세요.")
 	@Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$", message = "올바른 이메일 형식을 입력해 주세요.")
@@ -34,7 +34,7 @@ public class RetrieveMemberId {
 	@Data
     @ToString
 	@AllArgsConstructor
-	public static class FindMemberIdResult {
+	public static class FindMemberUserIdResult {
 		private String userId;
 		private LocalDateTime createdAt;
 	}

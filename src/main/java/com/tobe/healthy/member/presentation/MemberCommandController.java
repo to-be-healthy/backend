@@ -150,10 +150,10 @@ public class MemberCommandController {
 			@ApiResponse(responseCode = "200", description = "이메일이 변경되었습니다.")
 	})
 	@PatchMapping("/email")
-	public ResponseHandler<Boolean> changeEmail(@RequestBody @Valid CommandChangeEmail commandChangeEmail,
+	public ResponseHandler<Boolean> changeEmail(@RequestBody @Valid CommandChangeEmail request,
 												@AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
-				.data(memberCommandService.changeEmail(commandChangeEmail, member.getMemberId()))
+				.data(memberCommandService.changeEmail(request, member.getMemberId()))
 				.message("이메일이 변경되었습니다.")
 				.build();
 	}

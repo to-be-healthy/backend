@@ -4,7 +4,6 @@ import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.course.application.CourseService;
-import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.member.application.MemberService;
@@ -12,7 +11,6 @@ import com.tobe.healthy.member.domain.dto.in.ValidateCurrentPassword;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.dto.out.TrainerMappingResult;
 import com.tobe.healthy.point.application.PointService;
-import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -221,7 +219,7 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "현재 비밀번호가 확인되었습니다.")
 		})
 	@PostMapping("/password")
-	public ResponseHandler<Boolean> validateCurrentPassword(@RequestBody ValidateCurrentPassword request,
+	public ResponseHandler<Boolean> validateCurrentPassword(@RequestBody @Valid ValidateCurrentPassword request,
 														 	@AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 			.data(memberService.validateCurrentPassword(request, member.getMemberId()))
