@@ -40,35 +40,31 @@ class TrainerScheduleCommandService(
     ): CommandRegisterDefaultLessonTimeResult {
         val findTrainer = findMemberById(trainerId)
 
-        trainerScheduleInfoRepository.findOneByTrainerId(trainerId)?.let {
-            it.changeDefaultLessonTime(request)
-            it.trainerScheduleClosedDays.clear()
-            it.trainerScheduleClosedDays.addAll(
-                request.closedDays?.map { dayOfWeek ->
-                    TrainerScheduleClosedDaysInfo.registerClosedDay(
-                        dayOfWeek,
-                        it,
-                    )
-                }?.toMutableList() ?: mutableListOf(),
-            )
-        } ?: let {
-            val trainerScheduleInfo = TrainerScheduleInfo.registerDefaultLessonTime(request, findTrainer)
-            val trainerScheduleClosedDaysInfos = mutableListOf<TrainerScheduleClosedDaysInfo>()
+        trainerScheduleInfoRepository.findOneByTrainerId(trainerId)
+            ?.let {
+                val closedDays = createTrainerScheduleClosedDays(request, it)
+                it.changeDefaultLessonTime(request, closedDays)
+            }
+            ?: let {
+                val trainerScheduleInfo = TrainerScheduleInfo.registerDefaultLessonTime(request, findTrainer)
 
-            request.closedDays?.forEach { dayOfWeek ->
-                trainerScheduleClosedDaysInfos.add(
-                    TrainerScheduleClosedDaysInfo.registerClosedDay(
-                        dayOfWeek,
-                        trainerScheduleInfo,
-                    ),
-                )
+                val closedDays = createTrainerScheduleClosedDays(request, trainerScheduleInfo)
+
+                trainerScheduleInfo.trainerScheduleClosedDays.addAll(closedDays)
+
+                trainerScheduleInfoRepository.save(trainerScheduleInfo)
             }
 
-            trainerScheduleInfo.registerTrainerScheduleClosedDays(trainerScheduleClosedDaysInfos)
-            trainerScheduleInfoRepository.save(trainerScheduleInfo)
-        }
-
         return CommandRegisterDefaultLessonTimeResult.from(request)
+    }
+
+    private fun createTrainerScheduleClosedDays(
+        request: CommandRegisterDefaultLessonTime,
+        trainerScheduleInfo: TrainerScheduleInfo
+    ): MutableList<TrainerScheduleClosedDaysInfo> {
+        return request.closedDays?.map {
+                closedDay -> TrainerScheduleClosedDaysInfo.registerClosedDay(closedDay, trainerScheduleInfo)
+        }?.toMutableList() ?: mutableListOf()
     }
 
     fun registerSchedule(
@@ -77,23 +73,26 @@ class TrainerScheduleCommandService(
     ): CommandRegisterScheduleResult {
         val trainer = findMemberById(trainerId)
 
-        val findTrainerSchedule = trainerScheduleInfoRepository.findOneByTrainerId(trainerId)
+        val trainerScheduleInfo = trainerScheduleInfoRepository.findOneByTrainerId(trainerId)
             ?: throw CustomException(TRAINER_SCHEDULE_NOT_FOUND)
 
+        // 이미 등록된 일정이 있는지 조회
+        isScheduleExisting(trainerScheduleInfo, request, trainerId)
+
         var lessonDt = request.lessonStartDt
-        var startTime = findTrainerSchedule.lessonStartTime
+        var startTime = trainerScheduleInfo.lessonStartTime
         val schedules = mutableListOf<Schedule>()
 
         while (!lessonDt.isAfter(request.lessonEndDt)) {
-            var endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
+            var endTime = startTime.plusMinutes(trainerScheduleInfo.lessonTime.description.toLong())
 
-            if (endTime.isAfter(findTrainerSchedule.lessonEndTime)) {
-                startTime = findTrainerSchedule.lessonStartTime
+            if (endTime.isAfter(trainerScheduleInfo.lessonEndTime)) {
+                startTime = trainerScheduleInfo.lessonStartTime
                 lessonDt = lessonDt.plusDays(ONE_DAY)
                 continue
             }
 
-            val isClosedDay = findTrainerSchedule.trainerScheduleClosedDays.any {
+            val isClosedDay = trainerScheduleInfo.trainerScheduleClosedDays.any {
                 it.closedDays == lessonDt.dayOfWeek
             }
 
@@ -103,23 +102,21 @@ class TrainerScheduleCommandService(
                     val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, DISABLED)
                     schedules.add(schedule)
                     startTime = endTime
-                    endTime = startTime.plusMinutes(findTrainerSchedule.lessonTime.description.toLong())
+                    endTime = startTime.plusMinutes(trainerScheduleInfo.lessonTime.description.toLong())
                 }
-                startTime = findTrainerSchedule.lessonStartTime
+                startTime = trainerScheduleInfo.lessonStartTime
                 lessonDt = lessonDt.plusDays(ONE_DAY)
                 continue
             }
 
             // 점심시간일 경우
-            if (isStartTimeEqualsLunchStartTime(findTrainerSchedule.lunchStartTime, startTime)) {
-                val duration = between(findTrainerSchedule.lunchStartTime, findTrainerSchedule.lunchEndTime)
-                val schedule = Schedule.registerSchedule(lessonDt, trainer, findTrainerSchedule.lunchStartTime, findTrainerSchedule.lunchEndTime, DISABLED)
+            if (isStartTimeEqualsLunchStartTime(trainerScheduleInfo.lunchStartTime, startTime)) {
+                val duration = between(trainerScheduleInfo.lunchStartTime, trainerScheduleInfo.lunchEndTime)
+                val schedule = Schedule.registerSchedule(lessonDt, trainer, trainerScheduleInfo.lunchStartTime, trainerScheduleInfo.lunchEndTime, DISABLED)
                 schedules.add(schedule)
                 startTime = startTime.plusMinutes(duration.toMinutes())
                 continue
             }
-
-            isScheduleExisting(lessonDt, startTime, endTime, trainerId)
 
             val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, AVAILABLE)
             schedules.add(schedule)
@@ -129,7 +126,7 @@ class TrainerScheduleCommandService(
 
         trainerScheduleRepository.saveAll(schedules)
 
-        return CommandRegisterScheduleResult.from(schedules, findTrainerSchedule)
+        return CommandRegisterScheduleResult.from(schedules, trainerScheduleInfo)
     }
 
     fun updateScheduleStatus(
@@ -138,7 +135,7 @@ class TrainerScheduleCommandService(
         memberId: Long
     ): List<CommandScheduleStatusResult> {
 
-        var schedules: List<Schedule>
+        val schedules: List<Schedule>
 
         when (status) {
 
@@ -234,20 +231,13 @@ class TrainerScheduleCommandService(
     }
 
     private fun isScheduleExisting(
-        lessonDt: LocalDate,
-        startTime: LocalTime,
-        endTime: LocalTime,
+        trainerScheduleInfo: TrainerScheduleInfo,
+        request: CommandRegisterSchedule,
         trainerId: Long
     ) {
-        val isDuplicateSchedule =
-            trainerScheduleRepository.validateRegisterSchedule(
-                lessonDt,
-                startTime,
-                endTime,
-                trainerId
-            )
+        val isDuplicateSchedule = trainerScheduleRepository.validateDuplicateSchedule(trainerScheduleInfo, request, trainerId)
 
-        if (isDuplicateSchedule > 0) {
+        if (isDuplicateSchedule) {
             throw CustomException(SCHEDULE_ALREADY_EXISTS)
         }
     }

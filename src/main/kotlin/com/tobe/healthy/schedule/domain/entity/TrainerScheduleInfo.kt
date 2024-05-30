@@ -36,30 +36,31 @@ class TrainerScheduleInfo(
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "trainer_schedule_info_id")
-    val id: Long = 0
+    val id: Long? = null
 ) {
 
-    fun registerTrainerScheduleClosedDays(trainerScheduleClosedDays: List<TrainerScheduleClosedDaysInfo>) {
-        this.trainerScheduleClosedDays.addAll(trainerScheduleClosedDays)
-    }
-
-    fun changeDefaultLessonTime(request: CommandRegisterDefaultLessonTime) {
+    fun changeDefaultLessonTime(request: CommandRegisterDefaultLessonTime, closedDays: MutableList<TrainerScheduleClosedDaysInfo>) {
         this.lessonStartTime = request.lessonStartTime
         this.lessonEndTime = request.lessonEndTime
         this.lunchStartTime = request.lunchStartTime
         this.lunchEndTime = request.lunchEndTime
-        this.lessonTime = fromDescription(request.lessonTime)
+        this.lessonTime = fromDescription(request.lessonTime!!)
+        this.trainerScheduleClosedDays.clear()
+        this.trainerScheduleClosedDays.addAll(closedDays)
     }
 
     companion object {
-        fun registerDefaultLessonTime(request: CommandRegisterDefaultLessonTime, trainer: Member): TrainerScheduleInfo {
+        fun registerDefaultLessonTime(
+            request: CommandRegisterDefaultLessonTime,
+            trainer: Member
+        ): TrainerScheduleInfo {
             return TrainerScheduleInfo(
                 lessonStartTime = request.lessonStartTime,
                 lessonEndTime = request.lessonEndTime,
                 lunchStartTime = request.lunchStartTime,
                 lunchEndTime = request.lunchEndTime,
-                lessonTime = fromDescription(request.lessonTime),
-                trainer = trainer
+                lessonTime = fromDescription(request.lessonTime!!),
+                trainer = trainer,
             )
         }
         fun fromDescription(description: Int): LessonTime {
