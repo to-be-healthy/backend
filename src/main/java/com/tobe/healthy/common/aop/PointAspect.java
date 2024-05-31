@@ -37,10 +37,10 @@ public class PointAspect {
     @Pointcut("execution(* com.tobe.healthy.diet.application.DietService.addDiet(..))")
     private void addDiet() {}
 
-    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleService.updateReservationStatusToNoShow(..))")
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleCommandService.updateReservationStatusToNoShow(..))")
     private void updateReservationStatusToNoShow() {}
 
-    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleService.revertReservationStatusToNoShow(..))")
+    @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleCommandService.cancelReservationStatusToNoShow(..))")
     private void revertReservationStatusToNoShow() {}
 
     /*

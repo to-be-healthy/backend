@@ -13,6 +13,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,6 +82,10 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	}
 
 	public void updateReservationStatusToNoShow(ReservationStatus reservationStatus) {
+		LocalDateTime lessonDateStartTime = LocalDateTime.of(lessonDt, lessonStartTime);
+		if (LocalDateTime.now().isBefore(lessonDateStartTime)) {
+			throw new IllegalArgumentException("수업 시작 이전에는 노쇼 처리를 할 수 없습니다.");
+		}
 		this.reservationStatus = reservationStatus;
 	}
 
@@ -90,11 +95,18 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	}
 
 	public void cancelMemberSchedule() {
+		LocalDateTime lessonDateStartTime = LocalDateTime.of(lessonDt, lessonStartTime);
+		if (LocalDateTime.now().isAfter(lessonDateStartTime)) {
+			throw new IllegalArgumentException("수업 시작 이후에는 예약 취소가 불가능합니다.");
+		}
 		this.reservationStatus = AVAILABLE;
 		this.applicant = null;
 	}
 
 	public void cancelMemberSchedule(ScheduleWaiting scheduleWaiting) {
+		if (lessonStartTime.isAfter(LocalTime.now())) {
+			throw new IllegalArgumentException("수업 시작 이후에는 예약 취소가 불가능합니다.");
+		}
 		this.reservationStatus = COMPLETED;
 		this.applicant = scheduleWaiting.getMember();
 	}

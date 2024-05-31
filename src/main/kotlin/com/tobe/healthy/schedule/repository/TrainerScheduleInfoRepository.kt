@@ -4,5 +4,5 @@ import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface TrainerScheduleInfoRepository : JpaRepository<TrainerScheduleInfo, Long> {
-    fun findByTrainerId(trainerId: Long): TrainerScheduleInfo?
+    fun findOneByTrainerId(trainerId: Long): TrainerScheduleInfo?
 }

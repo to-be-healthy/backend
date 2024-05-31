@@ -14,5 +14,5 @@ interface LessonHistoryRepositoryCustom {
     fun findTop1LessonHistoryByMemberId(studentId: Long): RetrieveLessonHistoryByDateCondResult?
     fun findAllMyLessonHistory(request: RetrieveLessonHistoryByDateCond, pageable: Pageable, member: CustomMemberDetails): Page<LessonHistory>
     fun findOneLessonHistoryWithFiles(lessonHistoryId: Long): LessonHistory?
-    fun validateDuplicateLessonHistory(trainerId: Long, studentId: Long, scheduleId: Long): LessonHistory?
+    fun validateDuplicateLessonHistory(trainerId: Long, studentId: Long, scheduleId: Long): Boolean
 }

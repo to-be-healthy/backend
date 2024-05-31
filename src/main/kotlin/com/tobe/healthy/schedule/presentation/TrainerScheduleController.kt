@@ -34,12 +34,12 @@ class TrainerScheduleController(
     )
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @GetMapping("/default-lesson-time")
-    fun findDefaultSchedule(
+    fun findOneDefaultLessonTime(
         @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<RetrieveTrainerDefaultLessonTimeResult?> {
         return ApiResultResponse(
             message = "기본 수업 시간 조회에 성공하였습니다.",
-            data = trainerScheduleService.findDefaultLessonTime(member.memberId)
+            data = trainerScheduleService.findOneDefaultLessonTime(member.memberId)
         )
     }
 
@@ -70,12 +70,12 @@ class TrainerScheduleController(
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun findOneSchedule(
-        queryTrainerSchedule: RetrieveTrainerScheduleByLessonDt,
+        request: RetrieveTrainerScheduleByLessonDt,
         @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<RetrieveTrainerScheduleByLessonDtResult?> {
         return ApiResultResponse(
             message = "특정 날짜의 일정을 조회했습니다.",
-            data = trainerScheduleService.findOneTrainerTodaySchedule(queryTrainerSchedule, customMemberDetails.memberId)
+            data = trainerScheduleService.findOneTrainerTodaySchedule(request, customMemberDetails.memberId)
         )
     }
 }

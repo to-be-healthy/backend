@@ -45,7 +45,7 @@ public class JwtTokenGenerator {
 
         redisService.setValuesWithTimeout(member.getUserId(), refreshToken, getRefreshTokenValid(nowInMilliseconds).getTime());
 
-        return new Tokens(accessToken, refreshToken, member.getUserId(), member.getMemberType(), member.getGym());
+        return new Tokens(member.getId(), accessToken, refreshToken, member.getUserId(), member.getMemberType(), member.getGym());
     }
 
     private Date getRefreshTokenValid(long nowInMilliseconds) {
@@ -59,7 +59,7 @@ public class JwtTokenGenerator {
     public Tokens exchangeAccessToken(Long memberId, String userId, MemberType memberType, String refreshToken, Gym gym) {
         long nowInMilliseconds = new Date().getTime();
         String changedAccessToken = createAccessToken(memberId, userId, memberType.name(), getAccessTokenValid(nowInMilliseconds), gym);
-        return new Tokens(changedAccessToken, refreshToken, userId, memberType, gym);
+        return new Tokens(memberId, changedAccessToken, refreshToken, userId, memberType, gym);
     }
 
     private String createAccessToken(Long memberId, String userId, String memberType, Date expiry, Gym gym) {

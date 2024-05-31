@@ -19,8 +19,8 @@ import com.tobe.healthy.point.domain.dto.out.RankDto;
 import com.tobe.healthy.point.repository.PointRepository;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult;
+import com.tobe.healthy.schedule.repository.TrainerScheduleRepository;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
-import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +53,7 @@ public class HomeService {
         //헬스장 정보
         Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        GymDto gym = member.getGym() == null ? null : GymDto.Companion.from(member.getGym());
+        GymDto gym = member.getGym() == null ? null : GymDto.from(member.getGym());
 
 
         //트레이너 매핑 여부

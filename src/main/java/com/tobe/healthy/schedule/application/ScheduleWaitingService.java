@@ -3,15 +3,14 @@ package com.tobe.healthy.schedule.application;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
-import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.schedule.domain.dto.out.FindMyScheduleWaitingResult;
 import com.tobe.healthy.schedule.domain.dto.out.MyScheduleWaiting;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
-import com.tobe.healthy.schedule.repository.schedule_waiting.ScheduleWaitingRepository;
-import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository;
+import com.tobe.healthy.schedule.repository.TrainerScheduleRepository;
+import com.tobe.healthy.schedule.repository.waiting.ScheduleWaitingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
-import static com.tobe.healthy.schedule.application.TrainerScheduleServiceKt.ONE_DAY;
+import static com.tobe.healthy.schedule.application.TrainerScheduleCommandService.ONE_DAY;
 import static java.time.LocalTime.NOON;
 
 @Service

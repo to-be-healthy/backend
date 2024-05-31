@@ -1,4 +1,4 @@
-package com.tobe.healthy.schedule.repository.schedule_waiting;
+package com.tobe.healthy.schedule.repository.waiting;
 
 import com.tobe.healthy.schedule.domain.dto.out.MyScheduleWaiting;
 

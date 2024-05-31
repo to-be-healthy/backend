@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotBlank
 data class CommandUpdateComment(
     @Schema(description = "수정할 댓글 내용", example = "트레이너님 휴대폰 그만봐", required = true)
     @field:NotBlank(message = "내용을 입력해 주세요.")
-    val content: String,
+    val content: String?,
 
     @Schema(description = "등록할 파일", required = false)
     val uploadFiles: MutableList<CommandUploadFileResult> = mutableListOf()

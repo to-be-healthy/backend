@@ -71,12 +71,12 @@ class LessonHistoryCommandController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun updateLessonHistory(
         @PathVariable lessonHistoryId: Long,
-        @RequestBody @Valid commandUpdateLessonHistory: CommandUpdateLessonHistory,
+        @RequestBody @Valid request: CommandUpdateLessonHistory,
         @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandUpdateLessonHistoryResult> {
         return ApiResultResponse(
             message = "수업 일지가 수정되었습니다.",
-            data = lessonHistoryCommandService.updateLessonHistory(lessonHistoryId, commandUpdateLessonHistory)
+            data = lessonHistoryCommandService.updateLessonHistory(lessonHistoryId, request)
         )
     }
 

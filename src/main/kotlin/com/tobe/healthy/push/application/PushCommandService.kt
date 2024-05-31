@@ -9,9 +9,9 @@ import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
 import com.tobe.healthy.log
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.push.domain.dto.`in`.CommandRegisterToken
-import com.tobe.healthy.push.domain.dto.`in`.CommandSendNotification
+import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarm
 import com.tobe.healthy.push.domain.dto.out.CommandRegisterTokenResult
-import com.tobe.healthy.push.domain.dto.out.CommandSendNotificationResult
+import com.tobe.healthy.push.domain.dto.out.CommandSendPushAlarmResult
 import com.tobe.healthy.push.domain.entity.MemberToken
 import com.tobe.healthy.push.repository.MemberTokenRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -30,21 +30,21 @@ class PushCommandService(
         val findMember = memberRepository.findByIdOrNull(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
-        memberTokenRepository.findByMemberId(findMember.id)?.let {
-            it.changeToken(request.token)
-        } ?: let {
-            val memberToken = MemberToken.register(findMember, request.token)
-            memberTokenRepository.save(memberToken)
-        }
+        memberTokenRepository.findByMemberId(findMember.id)
+            ?.changeToken(request.token!!)
+            ?: let {
+                val memberToken = MemberToken.register(findMember, request.token!!)
+                memberTokenRepository.save(memberToken)
+            }
 
         return CommandRegisterTokenResult(
             name = findMember.name,
-            token = request.token
+            token = request.token!!
         )
     }
 
-    fun sendPushAlarm(request: CommandSendNotification): CommandSendNotificationResult {
-        val message = createMessage(request.token, request.title, request.message)
+    fun sendPushAlarm(request: CommandSendPushAlarm): CommandSendPushAlarmResult {
+        val message = createMessage(request.token!!, request.title!!, request.message!!)
 
         val response = FirebaseMessaging
             .getInstance()
@@ -53,33 +53,29 @@ class PushCommandService(
 
         log.info("Sent message: ${response}")
 
-        return CommandSendNotificationResult.from(
+        return CommandSendPushAlarmResult.from(
             request.title,
             request.message
         )
     }
 
-    private fun createMessage(token: String?, title: String, message: String): Message? =
-        Message.builder()
+    private fun createMessage(token: String, title: String, message: String): Message {
+        return Message.builder()
             .setToken(token)
             .setWebpushConfig(
                 WebpushConfig.builder()
                     .putHeader("ttl", "300")
-                    .setNotification(
-                        WebpushNotification(
-                            title,
-                            message
-                        )
-                    )
+                    .setNotification(WebpushNotification(title, message))
                     .build()
             )
             .build()
+    }
 
-    fun sendPushAlarm(memberId: Long, request: CommandSendNotification): CommandSendNotificationResult {
+    fun sendPushAlarm(memberId: Long, request: CommandSendPushAlarm): CommandSendPushAlarmResult {
         val findMemberToken = memberTokenRepository.findByMemberId(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
-        val message = createMessage(findMemberToken.token, request.title, request.message)
+        val message = createMessage(findMemberToken.token, request.title!!, request.message!!)
 
         val response = FirebaseMessaging
             .getInstance()
@@ -88,7 +84,7 @@ class PushCommandService(
 
         log.info("Sent message: ${response}")
 
-        return CommandSendNotificationResult.from(
+        return CommandSendPushAlarmResult.from(
             request.title,
             request.message
         )

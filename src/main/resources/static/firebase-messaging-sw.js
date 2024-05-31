@@ -1,5 +1,5 @@
-importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
-importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js');
+importScripts('https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js');
+importScripts('https://www.gstatic.com/firebasejs/10.4.0/firebase-messaging.js');
 
 firebase.initializeApp({
     apiKey: "AIzaSyCCvaGdXas6LuaCNPeZ9FMCNqhR5VbaL2U",
@@ -14,10 +14,8 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-    console.log(
-        '[firebase-messaging-sw.js] Received background message ',
-        payload
-    );
+    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+
     // Customize notification here
     const notificationTitle = 'Background Message Title';
     const notificationOptions = {
@@ -26,4 +24,13 @@ messaging.onBackgroundMessage((payload) => {
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+self.addEventListener('push', function(event) {
+    var message = event.data ? event.data.json() : {};
+    event.waitUntil(
+        self.registration.showNotification(message.title, {
+            body: message.body
+        })
+    );
 });

@@ -6,7 +6,7 @@ import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerDefaultLessonTime
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonInfoResult
 import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository
-import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
+import com.tobe.healthy.schedule.repository.TrainerScheduleRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,10 +16,10 @@ class TrainerScheduleService(
     private val trainerScheduleRepository: TrainerScheduleRepository,
     private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository
 ) {
-    fun findDefaultLessonTime(
+    fun findOneDefaultLessonTime(
         trainerId: Long
     ): RetrieveTrainerDefaultLessonTimeResult? {
-        val trainerScheduleInfo = trainerScheduleInfoRepository.findByTrainerId(trainerId)
+        val trainerScheduleInfo = trainerScheduleInfoRepository.findOneByTrainerId(trainerId)
         return RetrieveTrainerDefaultLessonTimeResult.from(trainerScheduleInfo)
     }
 
@@ -27,7 +27,8 @@ class TrainerScheduleService(
         request: RetrieveTrainerScheduleByLessonInfo,
         trainerId: Long
     ): RetrieveTrainerScheduleByLessonInfoResult? {
-        return trainerScheduleRepository.findAllSchedule(request, trainerId)
+        val schedules = trainerScheduleRepository.findAllSchedule(request, trainerId)
+        return RetrieveTrainerScheduleByLessonInfoResult.from(schedules)
     }
 
     fun findOneTrainerTodaySchedule(
@@ -37,5 +38,3 @@ class TrainerScheduleService(
         return trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId)
     }
 }
-
-const val ONE_DAY = 1L

@@ -5,7 +5,6 @@ import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.ScheduleWaitingService;
 import com.tobe.healthy.schedule.domain.dto.out.FindMyScheduleWaitingResult;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -31,7 +30,7 @@ public class ScheduleWaitingController {
             })
     @PostMapping("/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
-    public ResponseHandler<Boolean> registerScheduleWaiting(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
+    public ResponseHandler<Boolean> registerScheduleWaiting(@PathVariable Long scheduleId,
                                                             @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
         String scheduleTime = scheduleWaitingService.registerScheduleWaiting(scheduleId, customMemberDetails.getMemberId());
         return ResponseHandler.<Boolean>builder()
@@ -46,7 +45,7 @@ public class ScheduleWaitingController {
             })
     @DeleteMapping("/{scheduleId}")
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
-    public ResponseHandler<Boolean> cancelScheduleWaiting(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
+    public ResponseHandler<Boolean> cancelScheduleWaiting(@PathVariable Long scheduleId,
                                                           @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
         String scheduleTime = scheduleWaitingService.cancelScheduleWaiting(scheduleId, customMemberDetails.getMemberId());
         return ResponseHandler.<Boolean>builder()

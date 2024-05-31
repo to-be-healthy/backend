@@ -22,7 +22,7 @@ data class CommandRegisterLessonHistoryResult(
     companion object {
         fun from(lessonHistory: LessonHistory, files: MutableList<LessonHistoryFiles>): CommandRegisterLessonHistoryResult {
             return CommandRegisterLessonHistoryResult(
-                lessonHistoryId = lessonHistory?.id,
+                lessonHistoryId = lessonHistory.id,
                 title = lessonHistory.title,
                 content = lessonHistory.content,
                 scheduleId = lessonHistory.schedule?.id,

@@ -6,8 +6,8 @@ import com.tobe.healthy.common.redis.RedisKeyPrefix;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
-import com.tobe.healthy.member.domain.dto.in.RetrieveMemberId;
-import com.tobe.healthy.member.domain.dto.in.RetrieveMemberId.FindMemberIdResult;
+import com.tobe.healthy.member.domain.dto.in.FindMemberUserId;
+import com.tobe.healthy.member.domain.dto.in.FindMemberUserId.FindMemberUserIdResult;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -50,13 +50,13 @@ public class MemberAuthService {
         return true;
     }
 
-    public FindMemberIdResult findUserId(RetrieveMemberId request) {
+    public FindMemberUserIdResult findUserId(FindMemberUserId request) {
         Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        return new FindMemberIdResult(
+
+        return new FindMemberUserIdResult(
             member.getUserId().substring(0, member.getUserId().length() - 2) + "**",
-                  member.getCreatedAt()
-        );
+                  member.getCreatedAt());
     }
 
     public InvitationMappingResult getInvitationMapping(String uuid) {

@@ -7,7 +7,7 @@ import com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_NOT_VALID
 import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.dto.`in`.CommandLoginMember
 import com.tobe.healthy.member.domain.dto.`in`.CommandValidateEmail
-import com.tobe.healthy.member.domain.dto.`in`.RetrieveMemberId
+import com.tobe.healthy.member.domain.dto.`in`.FindMemberUserId
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.domain.entity.MemberType.STUDENT
 import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
@@ -115,7 +115,7 @@ class MemberServiceTest(
     }
 
     "회원이 아이디를 찾는다" {
-        val request = RetrieveMemberId(
+        val request = FindMemberUserId(
             "healthy-trainer0@gmail.com",
             "healthy-trainer",
             TRAINER

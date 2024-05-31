@@ -5,7 +5,6 @@ import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.CommonScheduleService;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -31,7 +30,7 @@ public class CommonScheduleController {
                     @ApiResponse(responseCode = "404(2)", description = "신청 할 수 없는 수업입니다.")
             })
     @PostMapping("/{scheduleId}")
-    public ResponseHandler<ScheduleIdInfo> reserveSchedule(@Parameter(description = "수업 일정 아이디") @PathVariable Long scheduleId,
+    public ResponseHandler<ScheduleIdInfo> reserveSchedule(@PathVariable Long scheduleId,
                                                            @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
         ScheduleIdInfo result = commonScheduleService.reserveSchedule(scheduleId, customMemberDetails.getMemberId());
         return ResponseHandler.<ScheduleIdInfo>builder()
@@ -46,7 +45,7 @@ public class CommonScheduleController {
                     @ApiResponse(responseCode = "404", description = "해당 수업이 존재하지 않습니다.")
             })
     @DeleteMapping("/{scheduleId}")
-    public ResponseHandler<ScheduleIdInfo> cancelScheduleForMember(@Parameter(description = "일정 아이디", example = "1") @PathVariable Long scheduleId,
+    public ResponseHandler<ScheduleIdInfo> cancelScheduleForMember(@PathVariable Long scheduleId,
                                                                    @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
         ScheduleIdInfo result = commonScheduleService.cancelMemberSchedule(scheduleId, customMemberDetails.getMemberId());
         return ResponseHandler.<ScheduleIdInfo>builder()

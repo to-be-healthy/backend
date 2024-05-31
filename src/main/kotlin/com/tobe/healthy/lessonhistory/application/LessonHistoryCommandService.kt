@@ -24,7 +24,7 @@ import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.domain.entity.Schedule
-import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
+import com.tobe.healthy.schedule.repository.TrainerScheduleRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -53,10 +53,12 @@ class LessonHistoryCommandService(
         val trainer = findMember(trainerId)
         val schedule = findSchedule(request.scheduleId)
 
-        lessonHistoryRepository.validateDuplicateLessonHistory(trainerId, student.id, schedule.id)
-            ?.let { throw IllegalArgumentException("이미 수업일지를 등록하였습니다.") }
+        if (lessonHistoryRepository.validateDuplicateLessonHistory(trainerId, student.id, schedule.id)) {
+            throw IllegalArgumentException("이미 수업일지를 등록하였습니다.")
+        }
 
-        val lessonHistory = registerLessonHistory(request.title!!, request.content!!, student, trainer, schedule)
+        val lessonHistory = LessonHistory.register(request.title!!, request.content!!, student, trainer, schedule)
+        lessonHistoryRepository.save(lessonHistory)
 
         val files = registerFiles(request.uploadFiles, trainer, lessonHistory)
 
@@ -187,7 +189,7 @@ class LessonHistoryCommandService(
                 deleteAllFiles(it.files)
 
                 it.updateLessonHistoryComment(
-                    request.content,
+                    request.content!!,
                     request.uploadFiles
                 )
 
@@ -270,18 +272,6 @@ class LessonHistoryCommandService(
     private fun findSchedule(scheduleId: Long?): Schedule {
         return trainerScheduleRepository.findByIdOrNull(scheduleId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
-    }
-
-    private fun registerLessonHistory(
-        title: String,
-        content: String,
-        student: Member,
-        trainer: Member,
-        schedule: Schedule
-    ): LessonHistory {
-        val lessonHistory = LessonHistory.register(title, content, student, trainer, schedule)
-        lessonHistoryRepository.save(lessonHistory)
-        return lessonHistory
     }
 
     private fun registerFiles(

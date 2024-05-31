@@ -3,7 +3,7 @@ package com.tobe.healthy.schedule.application
 import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
-import com.tobe.healthy.schedule.repository.trainer.TrainerScheduleRepository
+import com.tobe.healthy.schedule.repository.TrainerScheduleRepository
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import jakarta.persistence.EntityManager

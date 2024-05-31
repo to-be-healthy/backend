@@ -8,11 +8,10 @@ import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandUpdateScheduleStatus
 import com.tobe.healthy.schedule.domain.dto.out.*
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus.NO_SHOW
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -35,7 +34,7 @@ class TrainerScheduleCommandController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping("/default-lesson-time")
     fun registerDefaultSchedule(
-        @RequestBody request: CommandRegisterDefaultLessonTime,
+        @RequestBody @Valid request: CommandRegisterDefaultLessonTime,
         @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandRegisterDefaultLessonTimeResult> {
         return ApiResultResponse(
@@ -54,7 +53,7 @@ class TrainerScheduleCommandController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @PostMapping
     fun registerSchedule(
-        @RequestBody request: CommandRegisterSchedule,
+        @RequestBody @Valid request: CommandRegisterSchedule,
         @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandRegisterScheduleResult> {
         return ApiResultResponse(
@@ -72,7 +71,7 @@ class TrainerScheduleCommandController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun changeScheduleForTrainer(
         @PathVariable status: ReservationStatus,
-        @RequestBody request: CommandUpdateScheduleStatus,
+        @RequestBody @Valid request: CommandUpdateScheduleStatus,
         @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<List<CommandScheduleStatusResult>> {
         return ApiResultResponse(
@@ -110,11 +109,11 @@ class TrainerScheduleCommandController(
     fun cancelScheduleForTrainer(
         @PathVariable scheduleId: Long,
         @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
-    ): ApiResultResponse<Boolean> {
+    ): ApiResultResponse<CommandCancelStudentReservationResult> {
         val scheduleResult = trainerScheduleCommandService.cancelStudentReservation(scheduleId, customMemberDetails.memberId)
         return ApiResultResponse(
             message = "${scheduleResult.lessonStartTime.format(DateTimeFormatter.ofPattern("a HH시 mm분"))} 수업이 취소되었습니다.",
-            data = true
+            data = scheduleResult
         )
     }
 
@@ -130,7 +129,7 @@ class TrainerScheduleCommandController(
     ): ApiResultResponse<ScheduleIdInfo> {
         return ApiResultResponse(
             message = "노쇼 처리되었습니다.",
-            data = trainerScheduleCommandService.updateReservationStatusToNoShow(NO_SHOW, scheduleId, customMemberDetails.memberId)
+            data = trainerScheduleCommandService.updateReservationStatusToNoShow(scheduleId, customMemberDetails.memberId)
         )
     }
 
@@ -146,7 +145,7 @@ class TrainerScheduleCommandController(
     ): ApiResultResponse<ScheduleIdInfo> {
         return ApiResultResponse(
             message = "노쇼 처리가 취소되었습니다.",
-            data = trainerScheduleCommandService.updateReservationStatusToNoShow(COMPLETED, scheduleId, customMemberDetails.memberId)
+            data = trainerScheduleCommandService.cancelReservationStatusToNoShow(scheduleId, customMemberDetails.memberId)
         )
     }
 }
