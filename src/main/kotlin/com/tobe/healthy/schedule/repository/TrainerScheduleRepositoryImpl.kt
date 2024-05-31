@@ -1,6 +1,7 @@
 package com.tobe.healthy.schedule.repository
 
 import com.querydsl.core.types.dsl.BooleanExpression
+import com.querydsl.core.types.dsl.DatePath
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
@@ -20,6 +21,7 @@ import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
@@ -160,11 +162,16 @@ class TrainerScheduleRepositoryImpl(
             .where(
                 lessonDtBetween(request.lessonStartDt, request.lessonEndDt),
                 trainerIdEq(trainerId),
+                notDayOfWeek(schedule.lessonDt, trainerScheduleInfo.trainerScheduleClosedDays.map { it.closedDays }),
                 schedule.lessonStartTime.between(trainerScheduleInfo.lessonStartTime, trainerScheduleInfo.lessonEndTime),
                 schedule.lessonEndTime.between(trainerScheduleInfo.lessonStartTime, trainerScheduleInfo.lessonEndTime)
             )
             .fetchOne() ?: 0L
         return count > 0
+    }
+
+    private fun notDayOfWeek(dateTimePath: DatePath<LocalDate>, dayOfWeek: List<DayOfWeek>): BooleanExpression {
+        return dateTimePath.dayOfWeek().notIn(dayOfWeek.map { it.value })
     }
 
     override fun findAvailableWaitingId(scheduleId: Long): Optional<Schedule> {

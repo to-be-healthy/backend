@@ -65,12 +65,7 @@ class PushCommandService(
             .setWebpushConfig(
                 WebpushConfig.builder()
                     .putHeader("ttl", "300")
-                    .setNotification(
-                        WebpushNotification(
-                            title,
-                            message
-                        )
-                    )
+                    .setNotification(WebpushNotification(title, message))
                     .build()
             )
             .build()

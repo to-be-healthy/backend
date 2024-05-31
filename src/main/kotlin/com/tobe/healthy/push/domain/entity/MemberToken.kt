@@ -21,6 +21,7 @@ class MemberToken(
     @GeneratedValue(strategy = IDENTITY)
     @Column(name = "member_token_id")
     val id: Long? = null
+
 ) : BaseTimeEntity<MemberToken, Long>() {
 
     fun changeToken(token: String) {
