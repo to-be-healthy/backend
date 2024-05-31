@@ -69,7 +69,7 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
     public DietDto getDietById(Long loginMemberId, Long dietId) {
         return queryFactory.select(new QDietDto(diet.dietId, diet.member
                         , isLiked()
-                        , diet.likeCnt, diet.commentCnt, diet.eatDate))
+                        , diet.likeCnt, diet.commentCnt, diet.eatDate, diet.fastBreakfast, diet.fastLunch, diet.fastDinner))
                 .from(diet)
                 .leftJoin(dietLike)
                 .on(diet.dietId.eq(dietLike.dietLikePK.diet.dietId)
@@ -88,7 +88,7 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
         List<DietDto> diets = queryFactory
                 .select(new QDietDto(diet.dietId, diet.member
                     , isLiked()
-                    , diet.likeCnt, diet.commentCnt, diet.eatDate))
+                    , diet.likeCnt, diet.commentCnt, diet.eatDate, diet.fastBreakfast, diet.fastLunch, diet.fastDinner))
                 .from(diet)
                 .leftJoin(dietLike)
                 .on(diet.dietId.eq(dietLike.dietLikePK.diet.dietId)

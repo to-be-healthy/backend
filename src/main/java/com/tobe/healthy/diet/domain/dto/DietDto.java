@@ -62,16 +62,16 @@ public class DietDto {
     }
 
     @QueryProjection
-    public DietDto(Long dietId, Member member, boolean liked, Long likeCnt, Long commentCnt, LocalDate eatDate) {
+    public DietDto(Long dietId, Member member, boolean liked, Long likeCnt, Long commentCnt, LocalDate eatDate, boolean fastBreakfast, boolean fastLunch, boolean fastDinner) {
         this.dietId = dietId;
         this.member = MemberDto.from(member);
         this.liked = liked;
         this.likeCnt = likeCnt;
         this.commentCnt = commentCnt;
         this.eatDate = eatDate;
-        this.breakfast = new DietDetailDto();
-        this.lunch = new DietDetailDto();
-        this.dinner = new DietDetailDto();
+        this.breakfast = new DietDetailDto(fastBreakfast);
+        this.lunch = new DietDetailDto(fastLunch);
+        this.dinner = new DietDetailDto(fastDinner);
     }
 
 }

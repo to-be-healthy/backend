@@ -13,4 +13,7 @@ public class DietDetailDto {
     private Boolean fast = false;
     private DietFileDto dietFile;
 
+    public DietDetailDto(Boolean fast) {
+        this.fast = fast;
+    }
 }
