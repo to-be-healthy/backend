@@ -1,12 +1,12 @@
 package com.tobe.healthy.push.domain.dto.out
 
-data class CommandSendNotificationResult(
+data class CommandSendPushAlarmResult(
     val title: String,
     val message: String
 ) {
     companion object {
-        fun from(title: String, message: String): CommandSendNotificationResult {
-            return CommandSendNotificationResult(
+        fun from(title: String, message: String): CommandSendPushAlarmResult {
+            return CommandSendPushAlarmResult(
                 title = title,
                 message = message
             )

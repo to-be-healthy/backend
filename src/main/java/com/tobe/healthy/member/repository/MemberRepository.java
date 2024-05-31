@@ -33,6 +33,9 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 	@Query("select m from Member m where m.id = :memberId and m.delYn = false")
 	Optional<Member> findById(Long memberId);
 
+	@Query("select m from Member m where m.id in(:memberIds) and m.delYn = false")
+	List<Member> findAllById(List<Long> memberIds);
+
 	@EntityGraph(attributePaths = {"gym"})
 	Optional<Member> findByIdAndMemberTypeAndDelYnFalse(Long memberId, MemberType memberType);
 

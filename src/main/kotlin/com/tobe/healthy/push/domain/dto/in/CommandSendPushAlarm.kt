@@ -2,7 +2,7 @@ package com.tobe.healthy.push.domain.dto.`in`
 
 import jakarta.validation.constraints.NotBlank
 
-data class CommandSendNotification(
+data class CommandSendPushAlarm(
     @field:NotBlank(message = "제목을 입력해 주세요.")
     val title: String?,
 
