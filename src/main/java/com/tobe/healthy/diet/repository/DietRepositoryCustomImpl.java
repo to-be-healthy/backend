@@ -53,14 +53,14 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
     }
 
     @Override
-    public List<String> getDietUploadDays(Long memberId, String searchDate) {
+    public List<String> getDietUploadDays(Long memberId, LocalDate startDate, LocalDate endDate) {
         return queryFactory
                 .select(Expressions.stringTemplate(
                         "DATE_FORMAT({0}, {1})"
                         , diet.eatDate
                         , ConstantImpl.create("%Y-%m-%d"))).distinct()
                 .from(diet)
-                .where(memberIdEq(memberId), delYnEq(false), convertEatDate_YYYY_MM(searchDate))
+                .where(memberIdEq(memberId), delYnEq(false), eatDateBetween(startDate, endDate))
                 .orderBy(diet.eatDate.asc())
                 .fetch();
     }
@@ -158,6 +158,13 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 , diet.eatDate
                 , ConstantImpl.create("%Y-%m"));
         return stringTemplate.eq(searchDate);
+    }
+
+    private BooleanExpression eatDateBetween(LocalDate startDate, LocalDate endDate) {
+        if (!ObjectUtils.isEmpty(startDate) && !ObjectUtils.isEmpty(endDate)) {
+            return diet.eatDate.between(startDate, endDate);
+        }
+        return null;
     }
 
     private BooleanExpression convertEatDate_YYYY_MM_DD(String searchDate) {

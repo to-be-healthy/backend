@@ -171,7 +171,7 @@ public class DietService {
     }
 
     public DietDto addDiet(Member member, DietAddCommand command) {
-        DietUploadDaysResult result = getDietUploadDays(member.getId(), null);
+        DietUploadDaysResult result = getDietUploadDays(member.getId(), null, null);
         if(result.getUploadDays().contains(command.getEatDate())) throw new CustomException(DIET_ALREADY_EXISTS);
 
         TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId()).orElse(null);
@@ -265,10 +265,10 @@ public class DietService {
         return arr[arr.length - 1];
     }
 
-    public DietUploadDaysResult getDietUploadDays(Long memberId, String searchDate) {
+    public DietUploadDaysResult getDietUploadDays(Long memberId, LocalDate startDate, LocalDate endDate) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        List<String> days = dietRepository.getDietUploadDays(memberId, searchDate);
+        List<String> days = dietRepository.getDietUploadDays(memberId, startDate, endDate);
         return DietUploadDaysResult.create(member.getDietNoticeStatus(), days);
     }
 

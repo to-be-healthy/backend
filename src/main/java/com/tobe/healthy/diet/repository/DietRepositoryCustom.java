@@ -7,6 +7,7 @@ import com.tobe.healthy.member.domain.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface DietRepositoryCustom {
@@ -19,7 +20,7 @@ public interface DietRepositoryCustom {
 
     Diet getTodayDiet(Long memberId);
 
-    List<String> getDietUploadDays(Long memberId, String searchDate);
+    List<String> getDietUploadDays(Long memberId, LocalDate startDate, LocalDate endDate);
 
     DietDto getDietById(Long loginMemberId, Long dietId);
 }
