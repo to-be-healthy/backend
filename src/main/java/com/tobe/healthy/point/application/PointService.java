@@ -76,11 +76,7 @@ public class PointService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         //수강권 잔여 횟수가 0 && 마지막 PT일자 지난 경우 포인트 미지급
-        if(DIET == type || WORKOUT == type){
-            Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(member.getId(), 0);
-            MyReservation myNextReservation = studentScheduleRepository.findMyNextReservation(memberId);
-            if(optCourse.isEmpty() && myNextReservation == null) return;
-        }
+        if(checkInvalidCourse(memberId, type, member)) return;
 
         if(PLUS == calculation){
             LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
@@ -89,6 +85,15 @@ public class PointService {
             if(0 < cnt) return;
         }
         pointRepository.save(Point.create(member, type, calculation, point));
+    }
+
+    private boolean checkInvalidCourse(Long memberId, PointType type, Member member) {
+        if(DIET == type || WORKOUT == type){
+            Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(member.getId(), 0);
+            MyReservation myNextReservation = studentScheduleRepository.findMyNextReservation(memberId);
+            if(optCourse.isEmpty() && myNextReservation == null) return true;
+        }
+        return false;
     }
 
     public CustomPaging getPoint(Long memberId, String searchDate, Pageable pageable) {

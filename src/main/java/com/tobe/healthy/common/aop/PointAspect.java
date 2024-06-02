@@ -12,6 +12,8 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 import static com.tobe.healthy.point.domain.entity.PointType.*;
@@ -34,7 +36,7 @@ public class PointAspect {
     @Pointcut("execution(* com.tobe.healthy.workout.application.WorkoutHistoryService.addWorkoutHistory(..))")
     private void addWorkoutHistory() {}
 
-    @Pointcut("execution(* com.tobe.healthy.diet.application.DietService.addDiet(..))")
+    @Pointcut("execution(* com.tobe.healthy.diet.application.DietService.addDiet*(..))")
     private void addDiet() {}
 
     @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleCommandService.updateReservationStatusToNoShow(..))")
@@ -59,7 +61,10 @@ public class PointAspect {
      */
     @AfterReturning(value = "addDiet()", returning = "returnValue")
     public void plusPointWhenPostDiet(JoinPoint joinPoint, Object returnValue) {
-        Long memberId = ((DietDto) returnValue).getMember().getId();
+        DietDto dietDto = (DietDto) returnValue;
+        Long memberId = dietDto.getMember().getId();
+        if(!dietDto.getEatDate().isEqual(LocalDate.now())) return;
+
         PointService pointService = pointServiceProvider.getObject();
         pointService.updatePoint(memberId, DIET, PLUS, ONE_POINT);
     }
