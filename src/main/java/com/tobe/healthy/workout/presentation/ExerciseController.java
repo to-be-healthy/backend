@@ -49,9 +49,10 @@ public class ExerciseController {
     @GetMapping
     public ResponseHandler<CustomPaging<ExerciseDto>> getExercise(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                   @Parameter(description = "카테고리") @RequestParam(required = false) ExerciseCategory exerciseCategory,
+                                                                  @Parameter(description = "검색할 이름", example = "임채린") @RequestParam(required = false) String searchValue,
                                                                   Pageable pageable) {
         return ResponseHandler.<CustomPaging<ExerciseDto>>builder()
-                .data(exerciseService.getExercise(customMemberDetails.getMember(), exerciseCategory, pageable))
+                .data(exerciseService.getExercise(customMemberDetails.getMember(), exerciseCategory, pageable, searchValue))
                 .message("운동 종류가 조회되었습니다.")
                 .build();
     }
