@@ -8,7 +8,6 @@ import com.tobe.healthy.notification.domain.dto.`in`.RetrieveNotification
 import com.tobe.healthy.notification.domain.dto.out.CommandSendNotificationResult
 import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationDetailResult
 import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedDotResult
-import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -21,7 +20,7 @@ class NotificationController(
 
     @PostMapping
     fun sendNotification(
-        @RequestBody @Valid request: CommandSendNotification,
+        @RequestBody request: CommandSendNotification,
         @AuthenticationPrincipal member: CustomMemberDetails
     ) : ApiResultResponse<CommandSendNotificationResult> {
         return ApiResultResponse(
@@ -32,7 +31,7 @@ class NotificationController(
 
     @GetMapping
     fun findAllNotification(
-        @ParameterObject @Valid request: RetrieveNotification,
+        @ParameterObject request: RetrieveNotification,
         @AuthenticationPrincipal member: CustomMemberDetails
     ) : ApiResultResponse<RetrieveNotificationWithRedDotResult> {
         return ApiResultResponse(

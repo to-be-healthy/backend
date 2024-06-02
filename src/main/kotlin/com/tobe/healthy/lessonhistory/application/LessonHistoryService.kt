@@ -29,10 +29,10 @@ class LessonHistoryService(
     fun findAllLessonHistory(
         request: RetrieveLessonHistoryByDateCond,
         pageable: Pageable,
-        memberId: Long
+        member: CustomMemberDetails
     ): CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?> {
 
-        val contents = lessonHistoryRepository.findAllLessonHistory(request, pageable, memberId)
+        val contents = lessonHistoryRepository.findAllLessonHistory(request, pageable, member.memberId, member.memberType)
             .map { lessonHistory -> RetrieveLessonHistoryByDateCondResult.from(lessonHistory) }
 
         return CustomPagingResponse(
@@ -87,8 +87,8 @@ class LessonHistoryService(
         )
     }
 
-    fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long): RetrieveLessonHistoryDetailResult? {
-        return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, memberId)
+    fun findOneLessonHistory(lessonHistoryId: Long, member: CustomMemberDetails): RetrieveLessonHistoryDetailResult? {
+        return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, member.memberId, member.memberType)
             ?.let { RetrieveLessonHistoryDetailResult.detailFrom(it) }
     }
 

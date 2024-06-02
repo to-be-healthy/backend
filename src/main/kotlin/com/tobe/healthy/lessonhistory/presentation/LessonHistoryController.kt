@@ -41,7 +41,7 @@ class LessonHistoryController(
     ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
         return ApiResultResponse(
             message = "전체 수업 일지를 조회하였습니다.",
-            data = lessonHistoryService.findAllLessonHistory(request, pageable, member.memberId)
+            data = lessonHistoryService.findAllLessonHistory(request, pageable, member)
         )
     }
 
@@ -106,7 +106,7 @@ class LessonHistoryController(
     ): ApiResultResponse<RetrieveLessonHistoryDetailResult?> {
         return ApiResultResponse(
             message = "수업 일지 단건을 조회하였습니다.",
-            data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member.memberId)
+            data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member)
         )
     }
 
