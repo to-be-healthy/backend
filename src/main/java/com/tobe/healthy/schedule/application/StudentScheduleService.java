@@ -4,7 +4,6 @@ import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.schedule.domain.dto.in.RetrieveTrainerScheduleByLessonInfo;
 import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
@@ -104,8 +103,13 @@ public class StudentScheduleService {
 				&& schedule.getWaitingByName()!=null;
 	}
 
-	public MyReservationResponse findAllMyReservation(Long memberId, StudentScheduleCond searchCond) {
-		List<MyReservation> result = studentScheduleRepository.findAllMyReservation(memberId, searchCond);
+	public MyReservationResponse findMyNewReservation(Long memberId, StudentScheduleCond searchCond) {
+		List<MyReservation> result = studentScheduleRepository.findMyNewReservation(memberId, searchCond);
 		return MyReservationResponse.create(courseService.getNowUsingCourse(memberId), result);
+	}
+
+	public MyReservationResponse findMyOldReservation(Long memberId, StudentScheduleCond searchCond, String searchDate) {
+		List<MyReservation> result = studentScheduleRepository.findMyOldReservation(memberId, searchCond, searchDate);
+		return MyReservationResponse.create(null, result);
 	}
 }

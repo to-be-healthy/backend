@@ -9,12 +9,14 @@ import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,17 +61,33 @@ public class StudentScheduleController {
                 .build();
     }
 
-    @Operation(summary = "학생이 내 예약을 조회한다.", description = "학생이 내 예약을 조회한다.",
+    @Operation(summary = "학생이 다가오는 예약을 조회한다.", description = "학생이 내 예약을 조회한다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "학생이 내 예약을 조회하였습니다.")
             })
-    @GetMapping("/my-reservation")
+    @GetMapping("/my-reservation/new")
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
-    public ResponseHandler<MyReservationResponse> findAllMyReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    public ResponseHandler<MyReservationResponse> findMyNewReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                        @ParameterObject StudentScheduleCond searchCond) {
         return ResponseHandler.<MyReservationResponse>builder()
-                .data(studentScheduleService.findAllMyReservation(customMemberDetails.getMemberId(), searchCond))
+                .data(studentScheduleService.findMyNewReservation(customMemberDetails.getMemberId(), searchCond))
                 .message("학생이 내 예약을 조회하였습니다.")
                 .build();
     }
+
+    @Operation(summary = "학생이 지난 예약을 조회한다.", description = "학생이 내 예약을 조회한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "학생이 내 예약을 조회하였습니다.")
+            })
+    @GetMapping("/my-reservation/old")
+    @PreAuthorize("hasAuthority('ROLE_STUDENT')")
+    public ResponseHandler<MyReservationResponse> findMyOldReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                       @ParameterObject StudentScheduleCond searchCond,
+                                                                       @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate) {
+        return ResponseHandler.<MyReservationResponse>builder()
+                .data(studentScheduleService.findMyOldReservation(customMemberDetails.getMemberId(), searchCond, searchDate))
+                .message("학생이 내 예약을 조회하였습니다.")
+                .build();
+    }
+
 }
