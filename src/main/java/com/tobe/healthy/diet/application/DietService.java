@@ -193,6 +193,7 @@ public class DietService {
 
         DietDto dietDto = DietDto.from(diet);
         setDietFile(dietDto, List.of(diet.getDietId()));
+        if(isClean(dietDto)) throw new CustomException(DIET_NOT_VALID);
         return dietDto;
     }
 

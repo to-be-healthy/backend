@@ -43,6 +43,7 @@ public enum ErrorCode {
     LIKE_ALREADY_EXISTS(BAD_REQUEST, "C_031", "이미 좋아요 하였습니다."),
     DATE_NOT_VALID(BAD_REQUEST, "C_032", "날짜가 유효하지 않습니다."),
     DIET_ALREADY_EXISTS(BAD_REQUEST, "C_033", "해당 날짜에 식단기록이 존재합니다."),
+    DIET_NOT_VALID(BAD_REQUEST, "C_034", "사진 및 단식을 등록해주세요."),
 
     MEMBER_NAME_LENGTH_NOT_VALID(BAD_REQUEST, "C_050", "이름은 최소 2자 이상 입력해 주세요."),
     MEMBER_NAME_NOT_VALID(BAD_REQUEST, "C_051", "이름은 한글 또는 영어만 입력할 수 있습니다."),
