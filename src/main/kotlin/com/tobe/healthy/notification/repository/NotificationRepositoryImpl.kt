@@ -1,6 +1,6 @@
 package com.tobe.healthy.notification.repository
 
-import com.querydsl.core.types.Projections
+import com.querydsl.core.types.Projections.constructor
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.notification.domain.dto.out.NotificationRedDotStatusResult
@@ -45,11 +45,12 @@ class NotificationRepositoryImpl(
     override fun findAllRedDotStatus(notificationType: List<NotificationType>?, receiverId: Long): List<NotificationRedDotStatusResult> {
         return queryFactory
             .select(
-                Projections.constructor(
+                constructor(
                     NotificationRedDotStatusResult::class.java,
                     notification.notificationType,
                     notification.count().gt(0)
-            ))
+                )
+            )
             .from(notification)
             .where(
                 notificationTypeNotIn(notificationType),
