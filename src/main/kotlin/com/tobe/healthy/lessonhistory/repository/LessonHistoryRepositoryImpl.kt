@@ -9,6 +9,7 @@ import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDate
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistory.lessonHistory
 import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistoryFiles.lessonHistoryFiles
+import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
 import io.micrometer.common.util.StringUtils
 import org.springframework.data.domain.Page
@@ -24,7 +25,8 @@ class LessonHistoryRepositoryImpl(
     override fun findAllLessonHistory(
         request: RetrieveLessonHistoryByDateCond,
         pageable: Pageable,
-        memberId: Long
+        memberId: Long,
+        memberType: MemberType
     ): Page<LessonHistory> {
         val results = queryFactory
             .selectDistinct(lessonHistory)
@@ -35,7 +37,7 @@ class LessonHistoryRepositoryImpl(
             .leftJoin(lessonHistory.files, lessonHistoryFiles).fetchJoin()
             .where(
                 convertDateFormat(request.searchDate),
-                lessonHistory.trainer.id.eq(memberId),
+                validateMemberTypeAndMemberIdEq(memberId, memberType),
                 lessonHistoryFiles.lessonHistoryComment.id.isNull
             )
             .offset(pageable.offset)
@@ -51,7 +53,7 @@ class LessonHistoryRepositoryImpl(
             .leftJoin(lessonHistory.files, lessonHistoryFiles)
             .where(
                 convertDateFormat(request.searchDate),
-                lessonHistory.trainer.id.eq(memberId),
+                validateMemberTypeAndMemberIdEq(memberId, memberType),
                 lessonHistoryFiles.lessonHistoryComment.id.isNull
             )
 
@@ -60,7 +62,8 @@ class LessonHistoryRepositoryImpl(
 
     override fun findOneLessonHistory(
         lessonHistoryId: Long,
-        memberId: Long
+        memberId: Long,
+        memberType: MemberType
     ): LessonHistory? {
         return queryFactory
             .selectDistinct(lessonHistory)
@@ -70,7 +73,7 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
             .where(
-                lessonHistory.trainer.id.eq(memberId),
+                validateMemberTypeAndMemberIdEq(memberId, memberType),
                 lessonHistoryIdEq(lessonHistoryId)
             )
             .fetchOne()
@@ -145,7 +148,7 @@ class LessonHistoryRepositoryImpl(
             .leftJoin(lessonHistory.files, lessonHistoryFiles).fetchJoin()
             .where(
                 convertDateFormat(request.searchDate),
-                validateMemberType(member),
+                validateMemberTypeAndMemberIdEq(member.memberId, member.memberType),
                 lessonHistoryFiles.lessonHistoryComment.id.isNull
             )
             .offset(pageable.offset)
@@ -161,7 +164,7 @@ class LessonHistoryRepositoryImpl(
             .leftJoin(lessonHistory.files, lessonHistoryFiles)
             .where(
                 convertDateFormat(request.searchDate),
-                validateMemberType(member),
+                validateMemberTypeAndMemberIdEq(member.memberId, member.memberType),
                 lessonHistoryFiles.lessonHistoryComment.id.isNull
             )
 
@@ -190,15 +193,16 @@ class LessonHistoryRepositoryImpl(
         return count > 0
     }
 
-    private fun validateMemberType(member: CustomMemberDetails): BooleanExpression {
-        return when (member.memberType) {
+    private fun validateMemberTypeAndMemberIdEq(memberId: Long, memberType: MemberType): BooleanExpression? {
+        return when (memberType) {
             TRAINER -> {
-                lessonHistory.trainer.id.eq(member.memberId)
+                lessonHistory.trainer.id.eq(memberId)
             }
             else -> {
-                lessonHistory.student.id.eq(member.memberId)
+                lessonHistory.student.id.eq(memberId)
             }
         }
+
     }
 
     private fun convertDateFormat(searchDate: String?): BooleanExpression? {
