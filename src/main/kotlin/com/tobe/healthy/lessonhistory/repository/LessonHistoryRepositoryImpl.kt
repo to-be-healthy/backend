@@ -22,6 +22,17 @@ class LessonHistoryRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
 ) : LessonHistoryRepositoryCustom {
 
+    override fun findById(lessonHistoryId: Long, memberId: Long, memberType: MemberType): LessonHistory? {
+        return queryFactory
+            .select(lessonHistory)
+            .from(lessonHistory)
+            .where(
+                lessonHistory.id.eq(lessonHistoryId),
+                validateMemberTypeAndMemberIdEq(memberId, memberType)
+            )
+            .fetchOne()
+    }
+
     override fun findAllLessonHistory(
         request: RetrieveLessonHistoryByDateCond,
         pageable: Pageable,
@@ -174,12 +185,18 @@ class LessonHistoryRepositoryImpl(
         return PageableExecutionUtils.getPage(results, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
-    override fun findOneLessonHistoryWithFiles(lessonHistoryId: Long): LessonHistory? {
+    override fun findOneLessonHistoryWithFiles(
+        lessonHistoryId: Long,
+        trainerId: Long
+    ): LessonHistory? {
         return queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
             .leftJoin(lessonHistory.files).fetchJoin()
-            .where(lessonHistory.id.eq(lessonHistoryId))
+            .where(
+                lessonHistory.id.eq(lessonHistoryId),
+                lessonHistory.trainer.id.eq(trainerId)
+            )
             .fetchOne()
     }
 

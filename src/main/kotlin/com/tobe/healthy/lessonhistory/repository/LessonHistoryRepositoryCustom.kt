@@ -9,11 +9,12 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 
 interface LessonHistoryRepositoryCustom {
+    fun findById(lessonHistoryId: Long, memberId: Long, memberType: MemberType): LessonHistory?
     fun findAllLessonHistory(request: RetrieveLessonHistoryByDateCond, pageable: Pageable, memberId: Long, memberType: MemberType): Page<LessonHistory>
     fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long, memberType: MemberType): LessonHistory?
     fun findAllLessonHistoryByMemberId(studentId: Long, request: RetrieveLessonHistoryByDateCond, trainerId: Long, pageable: Pageable): Page<LessonHistory>
     fun findTop1LessonHistoryByMemberId(studentId: Long): RetrieveLessonHistoryByDateCondResult?
     fun findAllMyLessonHistory(request: RetrieveLessonHistoryByDateCond, pageable: Pageable, member: CustomMemberDetails): Page<LessonHistory>
-    fun findOneLessonHistoryWithFiles(lessonHistoryId: Long): LessonHistory?
+    fun findOneLessonHistoryWithFiles(lessonHistoryId: Long, trainerId: Long): LessonHistory?
     fun validateDuplicateLessonHistory(trainerId: Long, studentId: Long, scheduleId: Long): Boolean
 }

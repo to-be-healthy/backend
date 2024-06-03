@@ -76,7 +76,7 @@ class LessonHistoryCommandController(
     ): ApiResultResponse<CommandUpdateLessonHistoryResult> {
         return ApiResultResponse(
             message = "수업 일지가 수정되었습니다.",
-            data = lessonHistoryCommandService.updateLessonHistory(lessonHistoryId, request)
+            data = lessonHistoryCommandService.updateLessonHistory(lessonHistoryId, request, member.memberId)
         )
     }
 
@@ -88,11 +88,12 @@ class LessonHistoryCommandController(
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @DeleteMapping("/{lessonHistoryId}")
     fun deleteLessonHistory(
-        @PathVariable lessonHistoryId: Long
+        @PathVariable lessonHistoryId: Long,
+        @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<Long> {
         return ApiResultResponse(
             message = "수업 일지가 삭제되었습니다.",
-            data = lessonHistoryCommandService.deleteLessonHistory(lessonHistoryId)
+            data = lessonHistoryCommandService.deleteLessonHistory(lessonHistoryId, member.memberId)
         )
     }
 
@@ -110,7 +111,7 @@ class LessonHistoryCommandController(
     ): ApiResultResponse<CommandRegisterCommentResult> {
         return ApiResultResponse(
             message = "댓글이 등록되었습니다.",
-            data = lessonHistoryCommandService.registerLessonHistoryComment(lessonHistoryId, request, member.memberId)
+            data = lessonHistoryCommandService.registerLessonHistoryComment(lessonHistoryId, request, member)
         )
     }
 
@@ -129,7 +130,7 @@ class LessonHistoryCommandController(
     ): ApiResultResponse<CommandRegisterReplyResult> {
         return ApiResultResponse(
             message = "대댓글이 등록되었습니다.",
-            data = lessonHistoryCommandService.registerLessonHistoryReply(lessonHistoryId, lessonHistoryCommentId, request, member.memberId)
+            data = lessonHistoryCommandService.registerLessonHistoryReply(lessonHistoryId, lessonHistoryCommentId, request, member)
         )
     }
 
@@ -141,11 +142,12 @@ class LessonHistoryCommandController(
     @PatchMapping("/comment/{lessonHistoryCommentId}")
     fun updateLessonHistoryComment(
         @PathVariable lessonHistoryCommentId: Long,
-        @RequestBody @Valid request: CommandUpdateComment
+        @RequestBody @Valid request: CommandUpdateComment,
+        @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandUpdateCommentResult> {
         return ApiResultResponse(
             message = "댓글이 수정되었습니다.",
-            data = lessonHistoryCommandService.updateLessonHistoryComment(lessonHistoryCommentId, request)
+            data = lessonHistoryCommandService.updateLessonHistoryComment(lessonHistoryCommentId, request, member)
         )
     }
 
@@ -156,11 +158,12 @@ class LessonHistoryCommandController(
         ])
     @DeleteMapping("/comment/{lessonHistoryCommentId}")
     fun deleteLessonHistoryComment(
-        @PathVariable lessonHistoryCommentId: Long
+        @PathVariable lessonHistoryCommentId: Long,
+        @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<Long> {
         return ApiResultResponse(
             message = "댓글 1개가 삭제되었습니다.",
-            data = lessonHistoryCommandService.deleteLessonHistoryComment(lessonHistoryCommentId)
+            data = lessonHistoryCommandService.deleteLessonHistoryComment(lessonHistoryCommentId, member.memberId)
         )
     }
 }
