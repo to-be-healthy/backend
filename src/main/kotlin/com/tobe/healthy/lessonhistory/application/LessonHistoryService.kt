@@ -8,7 +8,6 @@ import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDat
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
-import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveSimpleLessonHistoryResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveUnwrittenLessonHistory
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.member.repository.MemberRepository
@@ -33,25 +32,6 @@ class LessonHistoryService(
     ): CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?> {
 
         val contents = lessonHistoryRepository.findAllLessonHistory(request, pageable, member.memberId, member.memberType)
-            .map { lessonHistory -> RetrieveLessonHistoryByDateCondResult.from(lessonHistory) }
-
-        return CustomPagingResponse(
-            content = contents.content,
-            pageNumber = contents.pageable.pageNumber,
-            pageSize = contents.pageable.pageSize,
-            totalPages = contents.totalPages,
-            totalElements = contents.totalElements,
-            isLast = contents.isLast,
-        )
-    }
-
-    fun findAllMyLessonHistory(
-        request: RetrieveLessonHistoryByDateCond,
-        pageable: Pageable,
-        member: CustomMemberDetails
-    ): CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?> {
-
-        val contents = lessonHistoryRepository.findAllMyLessonHistory(request, pageable, member)
             .map { lessonHistory -> RetrieveLessonHistoryByDateCondResult.from(lessonHistory) }
 
         return CustomPagingResponse(
@@ -99,13 +79,5 @@ class LessonHistoryService(
     ): List<RetrieveUnwrittenLessonHistory> {
         return trainerScheduleRepository.findAllUnwrittenLessonHistory(request, memberId)
             .map { RetrieveUnwrittenLessonHistory.from(it) }
-    }
-
-    fun findAllSimpleLessonHistoryByMemberId(
-        studentId: Long,
-        trainerId: Long
-    ): List<RetrieveSimpleLessonHistoryResult>? {
-        return trainerScheduleRepository.findAllSimpleLessonHistoryByMemberId(studentId, trainerId)
-            .map { schedule -> RetrieveSimpleLessonHistoryResult.from(schedule) }
     }
 }
