@@ -58,7 +58,7 @@ class LessonHistoryCommandService(
             throw IllegalArgumentException("이미 수업일지를 등록하였습니다.")
         }
 
-        val lessonHistory = LessonHistory.register(request.title!!, request.content!!, student, trainer, schedule)
+        val lessonHistory = LessonHistory.register(request.title, request.content, student, trainer, schedule)
         lessonHistoryRepository.save(lessonHistory)
 
         val files = registerFiles(request.uploadFiles, trainer, lessonHistory)
@@ -201,10 +201,10 @@ class LessonHistoryCommandService(
 
     fun deleteLessonHistoryComment(
         lessonHistoryCommentId: Long,
-        memberId: Long
+        writerId: Long
     ): Long {
 
-        val comment = lessonHistoryCommentRepository.findById(lessonHistoryCommentId, memberId)
+        val comment = lessonHistoryCommentRepository.findById(lessonHistoryCommentId, writerId)
             ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
 
         deleteAllFiles(comment.files)
@@ -312,11 +312,6 @@ class LessonHistoryCommandService(
     private fun findLessonHistoryComment(lessonHistoryCommentId: Long): LessonHistoryComment {
         return lessonHistoryCommentRepository.findCommentById(lessonHistoryCommentId)
             ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
-    }
-
-    private fun findLessonHistory(lessonHistoryId: Long?): LessonHistory {
-        return lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
-            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
     }
 
     private fun findMember(memberId: Long?): Member {

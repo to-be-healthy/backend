@@ -5,5 +5,4 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface LessonHistoryRepository : JpaRepository<LessonHistory, Long>, LessonHistoryRepositoryCustom {
     fun findByIdAndTrainerId(lessonHistoryId: Long, trainerId: Long): LessonHistory?
-    fun findByIdAndStudentId(lessonHistoryId: Long, applicantId: Long): LessonHistory?
 }

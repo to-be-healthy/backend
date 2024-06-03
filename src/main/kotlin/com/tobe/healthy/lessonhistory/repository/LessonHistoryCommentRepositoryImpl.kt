@@ -38,7 +38,7 @@ class LessonHistoryCommentRepositoryImpl(
 
     override fun findLessonHistoryCommentWithFiles(
         lessonHistoryCommentId: Long,
-        memberId: Long
+        writerId: Long
     ): LessonHistoryComment? {
         return queryFactory
             .select(lessonHistoryComment)
@@ -47,7 +47,7 @@ class LessonHistoryCommentRepositoryImpl(
             .where(
                 lessonHistoryComment.id.eq(lessonHistoryCommentId),
                 lessonHistoryComment.delYn.eq(false),
-                lessonHistoryComment.writer.id.eq(memberId)
+                lessonHistoryComment.writer.id.eq(writerId)
             )
             .fetchOne()
     }
@@ -63,14 +63,14 @@ class LessonHistoryCommentRepositoryImpl(
             .fetchOne()
     }
 
-    override fun findById(lessonHistoryCommentId: Long, memberId: Long): LessonHistoryComment? {
+    override fun findById(lessonHistoryCommentId: Long, writerId: Long): LessonHistoryComment? {
         return queryFactory
             .select(lessonHistoryComment)
             .from(lessonHistoryComment)
             .where(
                 lessonHistoryComment.id.eq(lessonHistoryCommentId),
                 lessonHistoryComment.delYn.eq(false),
-                lessonHistoryComment.writer.id.eq(memberId)
+                lessonHistoryComment.writer.id.eq(writerId)
             )
             .fetchOne()
     }
