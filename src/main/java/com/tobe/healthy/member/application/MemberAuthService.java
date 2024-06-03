@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static com.tobe.healthy.common.Utils.validateUserId;
 import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
 import static io.micrometer.common.util.StringUtils.isEmpty;
 
 @Service
@@ -51,12 +52,18 @@ public class MemberAuthService {
     }
 
     public FindMemberUserIdResult findUserId(FindMemberUserId request) {
-        Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
+
+        Member member = memberRepository.findIdByEmailAndName(request.getEmail(), request.getName(), request.getMemberType())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-        return new FindMemberUserIdResult(
-            member.getUserId().substring(0, member.getUserId().length() - 2) + "**",
-                  member.getCreatedAt());
+        if (member.getSocialType() != NONE) {
+            return FindMemberUserIdResult.from(
+                    member,
+                    String.format("%s은 %s 계정으로 가입되어 있습니다.", member.getEmail(), member.getSocialType().getDescription())
+            );
+        }
+
+        return FindMemberUserIdResult.from(member, "아이디 찾기에 성공하였습니다.");
     }
 
     public InvitationMappingResult getInvitationMapping(String uuid) {

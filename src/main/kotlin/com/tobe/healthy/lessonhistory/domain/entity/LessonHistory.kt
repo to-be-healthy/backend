@@ -58,10 +58,6 @@ class LessonHistory(
         this.content = content
     }
 
-    fun updateFeedbackStatus(feedbackStatus: LessonHistoryReadStatus) {
-        this.feedbackChecked = feedbackStatus
-    }
-
     companion object {
         fun register(title: String, content: String, student: Member, trainer: Member, schedule: Schedule): LessonHistory {
             return LessonHistory(

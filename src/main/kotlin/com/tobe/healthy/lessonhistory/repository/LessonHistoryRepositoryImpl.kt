@@ -22,6 +22,17 @@ class LessonHistoryRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
 ) : LessonHistoryRepositoryCustom {
 
+    override fun findById(lessonHistoryId: Long, memberId: Long, memberType: MemberType): LessonHistory? {
+        return queryFactory
+            .select(lessonHistory)
+            .from(lessonHistory)
+            .where(
+                lessonHistory.id.eq(lessonHistoryId),
+                validateMemberTypeAndMemberIdEq(memberId, memberType)
+            )
+            .fetchOne()
+    }
+
     override fun findAllLessonHistory(
         request: RetrieveLessonHistoryByDateCond,
         pageable: Pageable,
@@ -85,6 +96,7 @@ class LessonHistoryRepositoryImpl(
     override fun findAllLessonHistoryByMemberId(
         studentId: Long,
         request: RetrieveLessonHistoryByDateCond,
+        trainerId: Long,
         pageable: Pageable
     ): Page<LessonHistory> {
         val entities = queryFactory
@@ -97,7 +109,8 @@ class LessonHistoryRepositoryImpl(
             .where(
                 convertDateFormat(request.searchDate),
                 lessonHistory.student.id.eq(studentId),
-                lessonHistoryFiles.lessonHistoryComment.id.isNull
+                lessonHistoryFiles.lessonHistoryComment.id.isNull,
+                lessonHistory.trainer.id.eq(trainerId)
             )
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
@@ -113,7 +126,8 @@ class LessonHistoryRepositoryImpl(
             .where(
                 convertDateFormat(request.searchDate),
                 lessonHistory.student.id.eq(studentId),
-                lessonHistoryFiles.lessonHistoryComment.id.isNull
+                lessonHistoryFiles.lessonHistoryComment.id.isNull,
+                lessonHistory.trainer.id.eq(trainerId)
             )
 
         return PageableExecutionUtils.getPage(entities, pageable) { totalCount.fetchOne() ?: 0L }
@@ -171,12 +185,18 @@ class LessonHistoryRepositoryImpl(
         return PageableExecutionUtils.getPage(results, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
-    override fun findOneLessonHistoryWithFiles(lessonHistoryId: Long): LessonHistory? {
+    override fun findOneLessonHistoryWithFiles(
+        lessonHistoryId: Long,
+        trainerId: Long
+    ): LessonHistory? {
         return queryFactory
             .selectDistinct(lessonHistory)
             .from(lessonHistory)
             .leftJoin(lessonHistory.files).fetchJoin()
-            .where(lessonHistory.id.eq(lessonHistoryId))
+            .where(
+                lessonHistory.id.eq(lessonHistoryId),
+                lessonHistory.trainer.id.eq(trainerId)
+            )
             .fetchOne()
     }
 

@@ -3,6 +3,7 @@ package com.tobe.healthy.member.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.member.application.MemberAuthCommandService;
 import com.tobe.healthy.member.domain.dto.in.*;
+import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 import io.swagger.v3.oas.annotations.Operation;
@@ -107,11 +108,13 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "등록된 이메일로 초기화 비밀번호를 전송한다.")
 	})
 	@PostMapping("/find/password")
-	public ResponseHandler<String> findMemberPW(@RequestBody @Valid CommandFindMemberPassword request) {
-		String email = memberAuthCommandService.findMemberPW(request);
-		return ResponseHandler.<String>builder()
-			.data(email)
-			.message(email + "으로 비밀번호 재설정 링크가 발송되었습니다.")
+	public ResponseHandler<CommandFindMemberPasswordResult> findMemberPW(@RequestBody @Valid CommandFindMemberPassword request) {
+
+		CommandFindMemberPasswordResult findMemberPasswordResult = memberAuthCommandService.findMemberPW(request);
+
+		return ResponseHandler.<CommandFindMemberPasswordResult>builder()
+			.data(findMemberPasswordResult)
+			.message(findMemberPasswordResult.getMessage())
 			.build();
 	}
 

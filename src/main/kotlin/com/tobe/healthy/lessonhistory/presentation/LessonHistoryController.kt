@@ -70,11 +70,12 @@ class LessonHistoryController(
     fun findAllLessonHistoryByMemberId(
         @PathVariable studentId: Long,
         @ParameterObject request: RetrieveLessonHistoryByDateCond,
-        @ParameterObject pageable: Pageable
+        @ParameterObject pageable: Pageable,
+        @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
         return ApiResultResponse(
             message = "학생의 수업 일지 전체를 조회하였습니다.",
-            data = lessonHistoryService.findAllLessonHistoryByMemberId(studentId, request, pageable)
+            data = lessonHistoryService.findAllLessonHistoryByMemberId(studentId, request, member, pageable)
         )
     }
 
