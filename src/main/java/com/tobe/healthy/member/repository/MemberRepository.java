@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
-	@Query("select m from Member m where m.email = :email and m.socialType = 'NONE' and m.delYn = false")
+	@Query("select m from Member m where m.email = :email and m.delYn = false")
     Optional<Member> findByEmail(String email);
 
 	@Query("select m from Member m where m.email = :email and m.socialType = :socialType and m.delYn = false")
@@ -24,11 +24,11 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 	@Query("select m from Member m where m.userId = :userId and m.delYn = false")
 	Optional<Member> findByUserId(String userId);
 
-	@Query("select m from Member m where m.email = :email and m.name = :name and m.memberType = :memberType and m.delYn = false")
-	Optional<Member> findIdByEmailAndName(String email, String name, MemberType memberType);
+	@Query("select m from Member m where m.email = :email and m.name = :name and m.delYn = false")
+	Optional<Member> findIdByEmailAndName(String email, String name);
 
-	@Query("select m from Member m where m.email = :email and m.name = :name and m.memberType = :memberType and m.delYn = false")
-	Optional<Member> findPasswordByEmailAndName(String email, String name, MemberType memberType);
+	@Query("select m from Member m where m.email = :email and m.name = :name and m.delYn = false")
+	Optional<Member> findPasswordByEmailAndName(String email, String name);
 
 	@Query("select m from Member m where m.id = :memberId and m.delYn = false")
 	Optional<Member> findById(Long memberId);

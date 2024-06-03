@@ -53,7 +53,7 @@ public class MemberAuthService {
 
     public FindMemberUserIdResult findUserId(FindMemberUserId request) {
 
-        Member member = memberRepository.findIdByEmailAndName(request.getEmail(), request.getName(), request.getMemberType())
+        Member member = memberRepository.findIdByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         if (member.getSocialType() != NONE) {
