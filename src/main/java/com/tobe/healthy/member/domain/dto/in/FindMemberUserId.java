@@ -1,14 +1,14 @@
 package com.tobe.healthy.member.domain.dto.in;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.member.domain.entity.SocialType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -34,8 +34,22 @@ public class FindMemberUserId {
 	@Data
     @ToString
 	@AllArgsConstructor
+	@Builder
 	public static class FindMemberUserIdResult {
+
 		private String userId;
 		private LocalDateTime createdAt;
+		private SocialType socialType;
+		@JsonIgnore
+		private String message;
+
+		public static FindMemberUserIdResult from(Member member, String message) {
+			return FindMemberUserIdResult.builder()
+					.userId(member.getUserId().substring(0, member.getUserId().length() - 2) + "**")
+					.createdAt(member.getCreatedAt())
+					.socialType(member.getSocialType())
+					.message(message)
+					.build();
+		}
 	}
 }

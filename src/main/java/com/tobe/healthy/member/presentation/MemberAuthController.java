@@ -57,9 +57,10 @@ public class MemberAuthController {
 	})
 	@PostMapping("/find/user-id")
 	public ResponseHandler<FindMemberUserIdResult> findUserId(@RequestBody @Valid FindMemberUserId request) {
+		FindMemberUserIdResult userIdResult = memberAuthService.findUserId(request);
 		return ResponseHandler.<FindMemberUserIdResult>builder()
-			.data(memberAuthService.findUserId(request))
-			.message("아이디 찾기에 성공하였습니다.")
+			.data(userIdResult)
+			.message(userIdResult.getMessage())
 			.build();
 	}
 

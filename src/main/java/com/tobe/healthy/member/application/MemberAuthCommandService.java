@@ -18,6 +18,7 @@ import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
 import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
+import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
@@ -140,17 +141,30 @@ public class MemberAuthCommandService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         return tokenGenerator.exchangeAccessToken(member.getId(),
+                                                  member.getName(),
                                                   member.getUserId(),
                                                   member.getMemberType(),
                                                   refreshToken,
                                                   member.getGym());
     }
 
-    public String findMemberPW(CommandFindMemberPassword request) {
-        Member member = memberRepository.findByUserIdAndName(request.getUserId(), request.getName())
+    public CommandFindMemberPasswordResult findMemberPW(CommandFindMemberPassword request) {
+        Member member = memberRepository.findPasswordByEmailAndName(request.getEmail(), request.getName(), request.getMemberType())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        if (member.getSocialType() != NONE) {
+            return CommandFindMemberPasswordResult.from(
+                    member,
+                    String.format("%s은 %s 계정으로 가입되어 있습니다.", member.getEmail(), member.getSocialType().getDescription())
+            );
+        }
+
         sendResetPassword(member.getEmail(), member);
-        return member.getEmail();
+
+        return CommandFindMemberPasswordResult.from(
+                member,
+                String.format("%s으로 초기화된 비밀번호가 발송되었습니다.", member.getEmail())
+        );
     }
 
     public CommandJoinMemberResult joinWithInvitation(CommandJoinMember request) {
