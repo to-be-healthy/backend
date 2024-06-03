@@ -67,13 +67,14 @@ class LessonHistoryService(
     fun findAllLessonHistoryByMemberId(
         studentId: Long,
         request: RetrieveLessonHistoryByDateCond,
+        member: CustomMemberDetails,
         pageable: Pageable
     ): CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?> {
 
         val findMember = memberRepository.findByIdOrNull(studentId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
-        val contents = lessonHistoryRepository.findAllLessonHistoryByMemberId(findMember.id, request, pageable)
+        val contents = lessonHistoryRepository.findAllLessonHistoryByMemberId(findMember.id, request, member.memberId, pageable)
             .map { lessonHistory -> RetrieveLessonHistoryByDateCondResult.from(lessonHistory) }
 
         return CustomPagingResponse(

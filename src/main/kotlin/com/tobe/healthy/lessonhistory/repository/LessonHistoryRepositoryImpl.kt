@@ -85,6 +85,7 @@ class LessonHistoryRepositoryImpl(
     override fun findAllLessonHistoryByMemberId(
         studentId: Long,
         request: RetrieveLessonHistoryByDateCond,
+        trainerId: Long,
         pageable: Pageable
     ): Page<LessonHistory> {
         val entities = queryFactory
@@ -97,7 +98,8 @@ class LessonHistoryRepositoryImpl(
             .where(
                 convertDateFormat(request.searchDate),
                 lessonHistory.student.id.eq(studentId),
-                lessonHistoryFiles.lessonHistoryComment.id.isNull
+                lessonHistoryFiles.lessonHistoryComment.id.isNull,
+                lessonHistory.trainer.id.eq(trainerId)
             )
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
@@ -113,7 +115,8 @@ class LessonHistoryRepositoryImpl(
             .where(
                 convertDateFormat(request.searchDate),
                 lessonHistory.student.id.eq(studentId),
-                lessonHistoryFiles.lessonHistoryComment.id.isNull
+                lessonHistoryFiles.lessonHistoryComment.id.isNull,
+                lessonHistory.trainer.id.eq(trainerId)
             )
 
         return PageableExecutionUtils.getPage(entities, pageable) { totalCount.fetchOne() ?: 0L }
