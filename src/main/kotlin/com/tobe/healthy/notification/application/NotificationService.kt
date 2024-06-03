@@ -41,7 +41,7 @@ class NotificationService(
 
         receivers.forEach { receiver ->
 
-            pushCommandService.sendPushAlarm(CommandSendPushAlarm(receiver.memberToken?.token, request.title, request.content))
+            pushCommandService.sendPushAlarm(CommandSendPushAlarm(receiver.memberToken?.firstOrNull()?.token, request.title, request.content))
 
             val notification = Notification.create(
                 title = request.title,

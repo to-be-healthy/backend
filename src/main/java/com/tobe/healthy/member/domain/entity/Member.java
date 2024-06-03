@@ -104,9 +104,10 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@Nullable
 	private Gym gym;
 
-	@OneToOne(fetch = LAZY, mappedBy = "member")
+	@OneToMany(fetch = LAZY, mappedBy = "member")
 	@Nullable
-	private MemberToken memberToken;
+	@Builder.Default
+	private final List<MemberToken> memberToken = new ArrayList<>();
 
 	@OneToMany(fetch = LAZY, mappedBy = "trainer")
 	@Builder.Default

@@ -3,6 +3,7 @@ package com.tobe.healthy.member.application;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.dto.in.ValidateCurrentPassword;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
+import com.tobe.healthy.member.domain.dto.out.RetrieveTrainerInfo;
 import com.tobe.healthy.member.domain.dto.out.TrainerMappingResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -47,5 +48,11 @@ public class MemberService {
                 throw new CustomException(MEMBER_NOT_FOUND);
             });
         return true;
+    }
+
+    public RetrieveTrainerInfo findMyTrainerInfo(Long studentId) {
+        return mappingRepository.findTrainerInfoByMemberId(studentId)
+                .map(RetrieveTrainerInfo::from)
+                .orElse(null);
     }
 }

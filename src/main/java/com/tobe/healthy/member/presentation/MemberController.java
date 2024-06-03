@@ -9,6 +9,7 @@ import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.member.application.MemberService;
 import com.tobe.healthy.member.domain.dto.in.ValidateCurrentPassword;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
+import com.tobe.healthy.member.domain.dto.out.RetrieveTrainerInfo;
 import com.tobe.healthy.member.domain.dto.out.TrainerMappingResult;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
@@ -210,6 +211,19 @@ public class MemberController {
 		return ResponseHandler.<TrainerMappingResult>builder()
 				.data(memberService.getTrainerMapping(customMemberDetails.getMember()))
 				.message("매핑 여부가 조회되었습니다.")
+				.build();
+	}
+
+	@Operation(summary = "학생이 내 트레이너 정보 조회", responses = {
+			@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
+			@ApiResponse(responseCode = "200", description = "내 트레이너 정보를 반환한다.")
+	})
+	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
+	@GetMapping("/trainer-mapping/info")
+	public ResponseHandler<RetrieveTrainerInfo> findMyTrainerInfo(@AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<RetrieveTrainerInfo>builder()
+				.data(memberService.findMyTrainerInfo(member.getMemberId()))
+				.message("내 트레이너 정보를 조회하였습니다.")
 				.build();
 	}
 
