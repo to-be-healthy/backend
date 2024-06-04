@@ -12,11 +12,11 @@ import java.util.Optional;
 
 
 public interface MemberRepositoryCustom {
-
     List<MemberInTeamResult> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable);
     Page<Member> findAllUnattachedMembers(Long gymId, String searchValue, String sortValue, Pageable pageable);
     MemberDetailResult getMemberOfTrainer(Long memberId);
     List<Member> findAllTrainerByGym(@Param("gymId") Long gymId);
     List<MemberInTeamResult> getBestStudent(Long trainerId);
     Optional<Member> findMemberById(Long memberId);
+    List<Member> findMemberTokenById(List<Long> memberId);
 }

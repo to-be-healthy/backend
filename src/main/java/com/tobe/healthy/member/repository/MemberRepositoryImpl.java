@@ -167,6 +167,16 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public List<Member> findMemberTokenById(List<Long> memberId) {
+        return queryFactory
+                .select(member)
+                .from(member)
+                .leftJoin(member.memberToken).fetchJoin()
+                .where(member.id.in(memberId))
+                .fetch();
+    }
+
     private Predicate lessonDateTimeAfterNow() {
         return schedule.lessonDt.after(LocalDate.now())
                 .or(schedule.lessonDt.goe(LocalDate.now()).and(schedule.lessonStartTime.after(LocalTime.now())));

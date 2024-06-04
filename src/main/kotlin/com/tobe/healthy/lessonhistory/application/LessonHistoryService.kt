@@ -8,7 +8,6 @@ import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDat
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
-import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveSimpleLessonHistoryResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveUnwrittenLessonHistory
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.member.repository.MemberRepository
@@ -29,29 +28,10 @@ class LessonHistoryService(
     fun findAllLessonHistory(
         request: RetrieveLessonHistoryByDateCond,
         pageable: Pageable,
-        memberId: Long
-    ): CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?> {
-
-        val contents = lessonHistoryRepository.findAllLessonHistory(request, pageable, memberId)
-            .map { lessonHistory -> RetrieveLessonHistoryByDateCondResult.from(lessonHistory) }
-
-        return CustomPagingResponse(
-            content = contents.content,
-            pageNumber = contents.pageable.pageNumber,
-            pageSize = contents.pageable.pageSize,
-            totalPages = contents.totalPages,
-            totalElements = contents.totalElements,
-            isLast = contents.isLast,
-        )
-    }
-
-    fun findAllMyLessonHistory(
-        request: RetrieveLessonHistoryByDateCond,
-        pageable: Pageable,
         member: CustomMemberDetails
     ): CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?> {
 
-        val contents = lessonHistoryRepository.findAllMyLessonHistory(request, pageable, member)
+        val contents = lessonHistoryRepository.findAllLessonHistory(request, pageable, member.memberId, member.memberType)
             .map { lessonHistory -> RetrieveLessonHistoryByDateCondResult.from(lessonHistory) }
 
         return CustomPagingResponse(
@@ -67,13 +47,14 @@ class LessonHistoryService(
     fun findAllLessonHistoryByMemberId(
         studentId: Long,
         request: RetrieveLessonHistoryByDateCond,
+        member: CustomMemberDetails,
         pageable: Pageable
     ): CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?> {
 
         val findMember = memberRepository.findByIdOrNull(studentId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
-        val contents = lessonHistoryRepository.findAllLessonHistoryByMemberId(findMember.id, request, pageable)
+        val contents = lessonHistoryRepository.findAllLessonHistoryByMemberId(findMember.id, request, member.memberId, pageable)
             .map { lessonHistory -> RetrieveLessonHistoryByDateCondResult.from(lessonHistory) }
 
         return CustomPagingResponse(
@@ -87,8 +68,8 @@ class LessonHistoryService(
         )
     }
 
-    fun findOneLessonHistory(lessonHistoryId: Long, memberId: Long): RetrieveLessonHistoryDetailResult? {
-        return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, memberId)
+    fun findOneLessonHistory(lessonHistoryId: Long, member: CustomMemberDetails): RetrieveLessonHistoryDetailResult? {
+        return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, member.memberId, member.memberType)
             ?.let { RetrieveLessonHistoryDetailResult.detailFrom(it) }
     }
 
@@ -98,13 +79,5 @@ class LessonHistoryService(
     ): List<RetrieveUnwrittenLessonHistory> {
         return trainerScheduleRepository.findAllUnwrittenLessonHistory(request, memberId)
             .map { RetrieveUnwrittenLessonHistory.from(it) }
-    }
-
-    fun findAllSimpleLessonHistoryByMemberId(
-        studentId: Long,
-        trainerId: Long
-    ): List<RetrieveSimpleLessonHistoryResult>? {
-        return trainerScheduleRepository.findAllSimpleLessonHistoryByMemberId(studentId, trainerId)
-            .map { schedule -> RetrieveSimpleLessonHistoryResult.from(schedule) }
     }
 }

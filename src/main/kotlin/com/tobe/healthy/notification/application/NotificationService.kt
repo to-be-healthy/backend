@@ -11,6 +11,8 @@ import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedD
 import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedDotResult.RetrieveNotificationResult
 import com.tobe.healthy.notification.domain.entity.Notification
 import com.tobe.healthy.notification.repository.NotificationRepository
+import com.tobe.healthy.push.application.PushCommandService
+import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarm
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,7 +20,8 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class NotificationService(
     private val notificationRepository: NotificationRepository,
-    private val memberRepository: MemberRepository
+    private val memberRepository: MemberRepository,
+    private val pushCommandService: PushCommandService
 ) {
     fun sendNotification(
         request: CommandSendNotification,
@@ -28,7 +31,7 @@ class NotificationService(
         val sender = memberRepository.findById(memberId)
             .orElseThrow { throw CustomException(MEMBER_NOT_FOUND) }
 
-        val receivers = memberRepository.findAllById(request.receiverIds)
+        val receivers = memberRepository.findMemberTokenById(request.receiverIds)
 
         val notifications = mutableListOf<Notification>()
 
@@ -37,13 +40,17 @@ class NotificationService(
         }
 
         receivers.forEach { receiver ->
+
+            pushCommandService.sendPushAlarm(CommandSendPushAlarm(receiver.memberToken?.firstOrNull()?.token, request.title, request.content))
+
             val notification = Notification.create(
-                title = request.title!!,
-                content = request.content!!,
-                notificationType = request.notificationType!!,
+                title = request.title,
+                content = request.content,
+                notificationType = request.notificationType,
                 sender = sender,
                 receiver = receiver
             )
+
             notifications.add(notification)
         }
 

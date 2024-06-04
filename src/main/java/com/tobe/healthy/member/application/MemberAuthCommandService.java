@@ -18,6 +18,7 @@ import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
 import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
+import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
@@ -140,17 +141,30 @@ public class MemberAuthCommandService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         return tokenGenerator.exchangeAccessToken(member.getId(),
+                                                  member.getName(),
                                                   member.getUserId(),
                                                   member.getMemberType(),
                                                   refreshToken,
                                                   member.getGym());
     }
 
-    public String findMemberPW(CommandFindMemberPassword request) {
-        Member member = memberRepository.findByUserIdAndName(request.getUserId(), request.getName())
+    public CommandFindMemberPasswordResult findMemberPW(CommandFindMemberPassword request) {
+        Member member = memberRepository.findPasswordByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        if (member.getSocialType() != NONE) {
+            return CommandFindMemberPasswordResult.from(
+                    member,
+                    String.format("%s은 %s 계정으로 가입되어 있습니다.", member.getEmail(), member.getSocialType().getDescription())
+            );
+        }
+
         sendResetPassword(member.getEmail(), member);
-        return member.getEmail();
+
+        return CommandFindMemberPasswordResult.from(
+                member,
+                String.format("%s으로 초기화된 비밀번호가 발송되었습니다.", member.getEmail())
+        );
     }
 
     public CommandJoinMemberResult joinWithInvitation(CommandJoinMember request) {
@@ -177,10 +191,13 @@ public class MemberAuthCommandService {
             throw new CustomException(MEMBER_NOT_FOUND);
         }
 
-        Member member = Member.join(authorization.getResponse().getEmail(),
+        Member member = Member.join(
+                authorization.getResponse().getEmail(),
                 authorization.getResponse().getName(),
                 request.getMemberType(),
-                NAVER);
+                NAVER
+        );
+
         MemberProfile profile = getProfile(authorization.getResponse().getProfileImage(), member);
         member.setMemberProfile(profile);
         memberRepository.save(member);
@@ -189,6 +206,7 @@ public class MemberAuthCommandService {
         if (StringUtils.isNotEmpty(request.getUuid())) {
             mappingTrainerAndStudent(member, request.getUuid(), authorization.getResponse().getName(), true);
         }
+
         return tokenGenerator.create(member);
     }
 
@@ -201,6 +219,7 @@ public class MemberAuthCommandService {
             if (findMember.get().getMemberType().equals(request.getMemberType())) {
                 return tokenGenerator.create(findMember.get());
             }
+
             throw new CustomException(MEMBER_NOT_FOUND);
         }
 
@@ -213,6 +232,7 @@ public class MemberAuthCommandService {
         if (StringUtils.isNotEmpty(request.getUuid())) {
             mappingTrainerAndStudent(member, request.getUuid(), response.getNickname(), true);
         }
+
         return tokenGenerator.create(member);
     }
 

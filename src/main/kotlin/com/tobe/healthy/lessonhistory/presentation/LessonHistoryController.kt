@@ -8,7 +8,6 @@ import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDat
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
-import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveSimpleLessonHistoryResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveUnwrittenLessonHistory
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -41,56 +40,7 @@ class LessonHistoryController(
     ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
         return ApiResultResponse(
             message = "전체 수업 일지를 조회하였습니다.",
-            data = lessonHistoryService.findAllLessonHistory(request, pageable, member.memberId)
-        )
-    }
-
-    @Operation(summary = "내 수업일지를 조회한다.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "내 수업 일지를 조회하였습니다.")
-        ])
-    @GetMapping("/my")
-    fun findAllMyLessonHistory(
-        @ParameterObject request: RetrieveLessonHistoryByDateCond,
-        @ParameterObject pageable: Pageable,
-        @AuthenticationPrincipal member: CustomMemberDetails
-    ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
-        return ApiResultResponse(
-            message = "내 수업 일지를 조회하였습니다.",
-            data = lessonHistoryService.findAllMyLessonHistory(request, pageable, member)
-        )
-    }
-
-    @Operation(summary = "학생의 수업일지 전체를 조회한다.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "학생의 전체 수업 일지를 조회하였습니다.")
-        ])
-    @GetMapping("/student/{studentId}")
-    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findAllLessonHistoryByMemberId(
-        @PathVariable studentId: Long,
-        @ParameterObject request: RetrieveLessonHistoryByDateCond,
-        @ParameterObject pageable: Pageable
-    ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
-        return ApiResultResponse(
-            message = "학생의 수업 일지 전체를 조회하였습니다.",
-            data = lessonHistoryService.findAllLessonHistoryByMemberId(studentId, request, pageable)
-        )
-    }
-
-    @Operation(summary = "작성할 수업일지를 조회한다.",
-        responses = [
-            ApiResponse(responseCode = "200", description = "작성할 수업일지를 조회하였습니다.")
-        ])
-    @GetMapping("/simple/student/{studentId}")
-    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findAllSimpleLessonHistoryByMemberId(
-        @PathVariable studentId: Long,
-        @AuthenticationPrincipal member: CustomMemberDetails
-    ): ApiResultResponse<List<RetrieveSimpleLessonHistoryResult>?> {
-        return ApiResultResponse(
-            message = "학생의 수업 일지 전체를 조회하였습니다.",
-            data = lessonHistoryService.findAllSimpleLessonHistoryByMemberId(studentId, member.memberId)
+            data = lessonHistoryService.findAllLessonHistory(request, pageable, member)
         )
     }
 
@@ -106,7 +56,25 @@ class LessonHistoryController(
     ): ApiResultResponse<RetrieveLessonHistoryDetailResult?> {
         return ApiResultResponse(
             message = "수업 일지 단건을 조회하였습니다.",
-            data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member.memberId)
+            data = lessonHistoryService.findOneLessonHistory(lessonHistoryId, member)
+        )
+    }
+
+    @Operation(summary = "학생의 수업일지 전체를 조회한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "학생의 전체 수업 일지를 조회하였습니다.")
+        ])
+    @GetMapping("/student/{studentId}")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    fun findAllLessonHistoryByMemberId(
+        @PathVariable studentId: Long,
+        @ParameterObject request: RetrieveLessonHistoryByDateCond,
+        @ParameterObject pageable: Pageable,
+        @AuthenticationPrincipal member: CustomMemberDetails
+    ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
+        return ApiResultResponse(
+            message = "학생의 수업 일지 전체를 조회하였습니다.",
+            data = lessonHistoryService.findAllLessonHistoryByMemberId(studentId, request, member, pageable)
         )
     }
 

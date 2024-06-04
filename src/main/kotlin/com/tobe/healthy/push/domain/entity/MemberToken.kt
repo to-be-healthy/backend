@@ -12,7 +12,7 @@ class MemberToken(
 
     var token: String,
 
-    @OneToOne(fetch = LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
     @ToString.Exclude
     val member: Member? = null,

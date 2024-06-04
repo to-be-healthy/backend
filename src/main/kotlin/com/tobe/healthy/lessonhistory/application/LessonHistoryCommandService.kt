@@ -9,6 +9,7 @@ import com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI
 import com.tobe.healthy.common.redis.RedisService
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
+import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommandRegisterComment
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommandRegisterLessonHistory
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommandUpdateComment
@@ -57,7 +58,7 @@ class LessonHistoryCommandService(
             throw IllegalArgumentException("이미 수업일지를 등록하였습니다.")
         }
 
-        val lessonHistory = LessonHistory.register(request.title!!, request.content!!, student, trainer, schedule)
+        val lessonHistory = LessonHistory.register(request.title, request.content, student, trainer, schedule)
         lessonHistoryRepository.save(lessonHistory)
 
         val files = registerFiles(request.uploadFiles, trainer, lessonHistory)
@@ -99,12 +100,13 @@ class LessonHistoryCommandService(
 
     fun updateLessonHistory(
         lessonHistoryId: Long,
-        request: CommandUpdateLessonHistory
+        request: CommandUpdateLessonHistory,
+        trainerId: Long
     ): CommandUpdateLessonHistoryResult {
-        val findLessonHistory = lessonHistoryRepository.findOneLessonHistoryWithFiles(lessonHistoryId)
+        val findLessonHistory = lessonHistoryRepository.findOneLessonHistoryWithFiles(lessonHistoryId, trainerId)
             ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
-        findLessonHistory.updateLessonHistory(request.title!!, request.content!!)
+        findLessonHistory.updateLessonHistory(request.title, request.content)
 
         findLessonHistory.files.clear()
 
@@ -118,14 +120,14 @@ class LessonHistoryCommandService(
     }
 
     fun deleteLessonHistory(
-        lessonHistoryId: Long
+        lessonHistoryId: Long,
+        trainerId: Long
     ): Long {
-        val findLessonHistory = findLessonHistory(lessonHistoryId)
+        val lessonHistory = lessonHistoryRepository.findByIdAndTrainerId(lessonHistoryId, trainerId)
+            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
-        findLessonHistory.let {
-            deleteAllFiles(it.files)
-            lessonHistoryRepository.deleteById(it.id!!)
-        }
+        deleteAllFiles(lessonHistory.files)
+        lessonHistoryRepository.deleteById(lessonHistory.id!!)
 
         return lessonHistoryId
     }
@@ -133,11 +135,12 @@ class LessonHistoryCommandService(
     fun registerLessonHistoryComment(
         lessonHistoryId: Long,
         request: CommandRegisterComment,
-        memberId: Long
+        member: CustomMemberDetails
     ): CommandRegisterCommentResult {
-        val findMember = findMember(memberId)
+        val findMember = findMember(member.memberId)
 
-        val lessonHistory = findLessonHistory(lessonHistoryId)
+        val lessonHistory = lessonHistoryRepository.findById(lessonHistoryId, member.memberId, member.memberType)
+            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
         val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id)
         val lessonHistoryComment = registerComment(order, request, findMember, lessonHistory)
@@ -150,11 +153,12 @@ class LessonHistoryCommandService(
         lessonHistoryId: Long,
         lessonHistoryCommentId: Long,
         request: CommandRegisterComment,
-        memberId: Long
+        member: CustomMemberDetails
     ): CommandRegisterReplyResult {
-        val findMember = findMember(memberId)
+        val findMember = findMember(member.memberId)
 
-        val lessonHistory = findLessonHistory(lessonHistoryId)
+        val lessonHistory = lessonHistoryRepository.findById(lessonHistoryId, member.memberId, member.memberType)
+            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
         val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id, lessonHistoryCommentId)
 
@@ -182,31 +186,30 @@ class LessonHistoryCommandService(
 
     fun updateLessonHistoryComment(
         lessonHistoryCommentId: Long,
-        request: CommandUpdateComment
+        request: CommandUpdateComment,
+        member: CustomMemberDetails
     ): CommandUpdateCommentResult {
-        lessonHistoryCommentRepository.findLessonHistoryCommentWithFiles(lessonHistoryCommentId)
-            ?.let {
-                deleteAllFiles(it.files)
+        val comment = lessonHistoryCommentRepository.findLessonHistoryCommentWithFiles(lessonHistoryCommentId, member.memberId)
+            ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
 
-                it.updateLessonHistoryComment(
-                    request.content!!,
-                    request.uploadFiles
-                )
+        deleteAllFiles(comment.files)
 
-                return CommandUpdateCommentResult.from(it)
+        comment.updateLessonHistoryComment(request.content, request.uploadFiles)
 
-            } ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
+        return CommandUpdateCommentResult.from(comment)
     }
 
     fun deleteLessonHistoryComment(
-        lessonHistoryCommentId: Long
+        lessonHistoryCommentId: Long,
+        writerId: Long
     ): Long {
 
-        val findLessonHistoryComment = findLessonHistoryComment(lessonHistoryCommentId)
+        val comment = lessonHistoryCommentRepository.findById(lessonHistoryCommentId, writerId)
+            ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
 
-        deleteAllFiles(findLessonHistoryComment.files)
+        deleteAllFiles(comment.files)
 
-        findLessonHistoryComment.deleteComment()
+        comment.deleteComment()
 
         return lessonHistoryCommentId
     }
@@ -309,11 +312,6 @@ class LessonHistoryCommandService(
     private fun findLessonHistoryComment(lessonHistoryCommentId: Long): LessonHistoryComment {
         return lessonHistoryCommentRepository.findCommentById(lessonHistoryCommentId)
             ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
-    }
-
-    private fun findLessonHistory(lessonHistoryId: Long?): LessonHistory {
-        return lessonHistoryRepository.findByIdOrNull(lessonHistoryId)
-            ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
     }
 
     private fun findMember(memberId: Long?): Member {

@@ -10,7 +10,7 @@ import com.tobe.healthy.schedule.domain.entity.Schedule
 
 data class RetrieveUnwrittenLessonHistory(
     val scheduleId: Long,
-    val studentId: Long,
+    val studentId: Long?,
     val studentName: String?,
     val lessonDt: String?,
     val lessonTime: String,
@@ -22,7 +22,7 @@ data class RetrieveUnwrittenLessonHistory(
         fun from(schedule: Schedule) : RetrieveUnwrittenLessonHistory {
             return RetrieveUnwrittenLessonHistory(
                 scheduleId = schedule.id,
-                studentId = schedule.applicant!!.id,
+                studentId = schedule.applicant?.id,
                 studentName = schedule.applicant?.name,
                 lessonDt = formatLessonDt(schedule.lessonDt),
                 lessonTime = formatLessonTimeWithAMPM(schedule.lessonStartTime, schedule.lessonEndTime),

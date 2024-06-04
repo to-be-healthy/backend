@@ -6,6 +6,9 @@ import com.querydsl.core.types.dsl.Expressions.stringTemplate
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
 import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistory.lessonHistory
+import com.tobe.healthy.lessonhistory.domain.entity.WritingStatus
+import com.tobe.healthy.lessonhistory.domain.entity.WritingStatus.UNWRITTEN
+import com.tobe.healthy.lessonhistory.domain.entity.WritingStatus.WRITTEN
 import com.tobe.healthy.member.domain.entity.QMember
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
@@ -269,10 +272,23 @@ class TrainerScheduleRepositoryImpl(
                 schedule.applicant.isNotNull,
                 reservationStatusEq(COMPLETED),
                 lessonDateTimeEq(request.lessonDate),
-                applicantIdEq(request.studentId)
+                applicantIdEq(request.studentId),
+                writtenStatusEq(request.writingStatus)
             )
             .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
             .fetch()
+    }
+
+    private fun writtenStatusEq(writingStatus: WritingStatus?): BooleanExpression? {
+        return when (writingStatus) {
+            WRITTEN -> {
+                lessonHistory.isNotNull
+            }
+            UNWRITTEN -> {
+                lessonHistory.isNull
+            }
+            else -> null
+        }
     }
 
     private fun applicantIdEq(studentId: Long?): BooleanExpression? {
