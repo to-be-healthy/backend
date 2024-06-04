@@ -2,6 +2,7 @@ package com.tobe.healthy.lessonhistory.application
 
 import com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI
 import com.tobe.healthy.common.redis.RedisService
+import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommandRegisterComment
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommandRegisterLessonHistory
 import com.tobe.healthy.lessonhistory.domain.dto.out.CommandRegisterCommentResult
@@ -81,7 +82,7 @@ class LessonHistoryServiceTest(
 
         val commentRequest = CommandRegisterComment(content = "수업일지 테스트 댓글")
         val response =
-            lessonHistoryCommandService.registerLessonHistoryComment(result.lessonHistoryId!!, commentRequest, student.id)
+            lessonHistoryCommandService.registerLessonHistoryComment(result.lessonHistoryId!!, commentRequest, CustomMemberDetails(student))
 
         response.content shouldBe commentRequest.content
         response.writerId shouldBe student.id
@@ -93,7 +94,7 @@ class LessonHistoryServiceTest(
         memberId: Long
     ): CommandRegisterCommentResult {
         return CommandRegisterComment(content = comment).let {
-            lessonHistoryCommandService.registerLessonHistoryComment(lessonHistoryId!!, it, memberId)
+            lessonHistoryCommandService.registerLessonHistoryComment(lessonHistoryId!!, it, CustomMemberDetails(student))
         }
     }
 
@@ -105,7 +106,7 @@ class LessonHistoryServiceTest(
             result.lessonHistoryId!!,
             response.lessonHistoryCommentId!!,
             CommandRegisterComment("대댓글!"),
-            trainer.id
+            CustomMemberDetails(student)
         )
 
         resultReply.content shouldBe "대댓글!"

@@ -3,13 +3,14 @@ package com.tobe.healthy.notification.repository
 import com.querydsl.core.types.Projections.constructor
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
+import com.tobe.healthy.member.domain.entity.QMember.member
 import com.tobe.healthy.notification.domain.dto.out.NotificationRedDotStatusResult
 import com.tobe.healthy.notification.domain.entity.Notification
-import com.tobe.healthy.notification.domain.entity.NotificationType
+import com.tobe.healthy.notification.domain.entity.NotificationCategory
 import com.tobe.healthy.notification.domain.entity.QNotification.notification
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Slice
-import org.springframework.data.domain.SliceImpl
+import org.springframework.data.support.PageableExecutionUtils
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
 
@@ -20,16 +21,19 @@ class NotificationRepositoryImpl(
 ) : NotificationRepositoryCustom {
 
     override fun findAllByNotificationType(
-        notificationType: NotificationType,
+        notificationCategory: NotificationCategory,
         receiverId: Long,
         pageable: Pageable
-    ): Slice<Notification> {
-        val contents = queryFactory
+    ): Page<Notification> {
+
+        val results = queryFactory
             .select(notification)
             .from(notification)
-            .innerJoin(notification.sender).fetchJoin()
+            .innerJoin(notification.sender, member).fetchJoin()
+            .leftJoin(member.memberProfile).fetchJoin()
+            .leftJoin(notification.lessonHistory).fetchJoin()
             .where(
-                notificationTypeEq(notificationType),
+                notificationCategoryEq(notificationCategory),
                 notification.receiver.id.eq(receiverId)
             )
             .offset(pageable.offset)
@@ -37,44 +41,40 @@ class NotificationRepositoryImpl(
             .orderBy(notification.id.desc())
             .fetch()
 
-        return if (hasNext(contents.size, pageable.pageSize)) {
-            SliceImpl(contents.subList(0, pageable.pageSize), pageable, hasNext(contents.size, pageable.pageSize))
-        } else {
-            SliceImpl(contents, pageable, hasNext(contents.size, pageable.pageSize))
-        }
-    }
-
-    private fun hasNext(contentSize: Int, pageSize: Int): Boolean {
-        return contentSize > pageSize
-    }
-
-    override fun findOneById(notificationId: Long, receiverId: Long): Notification? {
-        return queryFactory
-            .select(notification)
+        val totalCount = queryFactory
+            .select(notification.count())
             .from(notification)
+            .innerJoin(notification.sender, member)
+            .leftJoin(member.memberProfile)
+            .leftJoin(notification.lessonHistory)
             .where(
-                notification.id.eq(notificationId),
+                notificationCategoryEq(notificationCategory),
                 notification.receiver.id.eq(receiverId)
             )
-            .fetchOne()
+
+        return PageableExecutionUtils.getPage(results, pageable) { totalCount.fetchOne() ?: 0L }
     }
 
-    override fun findAllRedDotStatus(notificationType: NotificationType, receiverId: Long): List<NotificationRedDotStatusResult> {
+    override fun findAllRedDotStatus(
+        notificationCategory: NotificationCategory,
+        receiverId: Long
+    ): List<NotificationRedDotStatusResult> {
+
         return queryFactory
             .select(
                 constructor(
                     NotificationRedDotStatusResult::class.java,
-                    notification.notificationType,
+                    notification.notificationCategory,
                     notification.count().gt(0)
                 )
             )
             .from(notification)
             .where(
-                notificationTypeNq(notificationType),
+                notificationCategoryNq(notificationCategory),
                 notification.receiver.id.eq(receiverId),
                 notification.isRead.eq(false)
             )
-            .groupBy(notification.notificationType)
+            .groupBy(notification.notificationCategory)
             .fetch()
     }
 
@@ -90,17 +90,17 @@ class NotificationRepositoryImpl(
         return count > 0
     }
 
-    private fun notificationTypeEq(notificationType: NotificationType): BooleanExpression? {
-        if (ObjectUtils.isEmpty(notificationType)) {
+    private fun notificationCategoryEq(notificationCategory: NotificationCategory): BooleanExpression? {
+        if (ObjectUtils.isEmpty(notificationCategory)) {
             return null
         }
-        return notification.notificationType.`in`(notificationType)
+        return notification.notificationCategory.eq(notificationCategory)
     }
 
-    private fun notificationTypeNq(notificationType: NotificationType): BooleanExpression? {
-        if (ObjectUtils.isEmpty(notificationType)) {
+    private fun notificationCategoryNq(notificationCategory: NotificationCategory): BooleanExpression? {
+        if (ObjectUtils.isEmpty(notificationCategory)) {
             return null
         }
-        return notification.notificationType.`in`(notificationType)
+        return notification.notificationCategory.ne(notificationCategory)
     }
 }

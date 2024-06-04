@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -25,8 +27,8 @@ public class MemberProfile extends BaseTimeEntity<MemberProfile, Long> {
 	@Column(name = "member_profile_id")
 	private Long id;
 
-	@OneToOne(mappedBy = "memberProfile", fetch = LAZY)
-	private Member member;
+	@OneToMany(mappedBy = "memberProfile", fetch = LAZY)
+	private final List<Member> member = new ArrayList<>();
 
 	@Nullable
 	private String fileUrl;
@@ -34,10 +36,13 @@ public class MemberProfile extends BaseTimeEntity<MemberProfile, Long> {
 	private String fileName;
 
 	public static MemberProfile create(String fileName, String fileUrl, Member member) {
-		return MemberProfile.builder()
-			.fileName(fileName)
-			.fileUrl(fileUrl)
-			.member(member)
-			.build();
+		MemberProfile memberProfile = MemberProfile.builder()
+				.fileName(fileName)
+				.fileUrl(fileUrl)
+				.build();
+
+		memberProfile.getMember().add(member);
+
+		return memberProfile;
 	}
 }

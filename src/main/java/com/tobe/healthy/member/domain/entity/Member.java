@@ -64,7 +64,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@Builder.Default
 	private int weight = 0;
 
-	@OneToOne(fetch = LAZY, cascade = ALL, orphanRemoval = true)
+	@ManyToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "member_profile_id")
 	@Nullable
 	private MemberProfile memberProfile;

@@ -222,7 +222,6 @@ class LessonHistoryRepositoryImpl(
                 lessonHistory.student.id.eq(memberId)
             }
         }
-
     }
 
     private fun convertDateFormat(searchDate: String?): BooleanExpression? {

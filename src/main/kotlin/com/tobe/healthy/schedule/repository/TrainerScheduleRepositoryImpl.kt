@@ -22,6 +22,9 @@ import com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus.DISABLED
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.support.PageableExecutionUtils
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
 import java.time.DayOfWeek
@@ -166,7 +169,10 @@ class TrainerScheduleRepositoryImpl(
                 lessonDtBetween(request.lessonStartDt, request.lessonEndDt),
                 trainerIdEq(trainerId),
                 notDayOfWeek(schedule.lessonDt, trainerScheduleInfo.trainerScheduleClosedDays.map { it.closedDays }),
-                schedule.lessonStartTime.between(trainerScheduleInfo.lessonStartTime, trainerScheduleInfo.lessonEndTime),
+                schedule.lessonStartTime.between(
+                    trainerScheduleInfo.lessonStartTime,
+                    trainerScheduleInfo.lessonEndTime
+                ),
                 schedule.lessonEndTime.between(trainerScheduleInfo.lessonStartTime, trainerScheduleInfo.lessonEndTime)
             )
             .fetchOne() ?: 0L
@@ -284,9 +290,11 @@ class TrainerScheduleRepositoryImpl(
             WRITTEN -> {
                 lessonHistory.isNotNull
             }
+
             UNWRITTEN -> {
                 lessonHistory.isNull
             }
+
             else -> null
         }
     }
@@ -314,6 +322,40 @@ class TrainerScheduleRepositoryImpl(
             )
             .fetch()
     }
+
+    override fun findAllScheduleByStduentId(
+        studentId: Long,
+        pageable: Pageable,
+        trainerId: Long
+    ): Page<Schedule> {
+        val results = queryFactory
+            .select(schedule)
+            .from(schedule)
+            .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
+            .where(
+                schedule.applicant.id.eq(studentId),
+                trainerIdEq(trainerId)
+            )
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
+            .orderBy(
+                schedule.lessonDt.desc(),
+                schedule.lessonStartTime.desc()
+            )
+            .fetch()
+
+        val totalCount = queryFactory
+            .select(schedule.count())
+            .from(schedule)
+            .leftJoin(schedule.applicant, QMember("applicant"))
+            .where(
+                schedule.applicant.id.eq(studentId),
+                trainerIdEq(trainerId),
+            )
+
+        return PageableExecutionUtils.getPage(results, pageable) { totalCount.fetchOne() ?: 0L }
+    }
+
     private fun scheduleIdIn(scheduleIds: List<Long>): BooleanExpression? =
         schedule.id.`in`(scheduleIds)
 

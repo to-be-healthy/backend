@@ -46,16 +46,15 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                         trainerMemberMapping.ranking, course.totalLessonCnt, course.remainLessonCnt,
                         member.nickname, memberProfile.fileUrl))
                 .from(trainerMemberMapping)
-                .innerJoin(trainerMemberMapping.member, member)
-                .on(trainerMemberMapping.member.id.eq(member.id))
+                .innerJoin(trainerMemberMapping.member, member).on(trainerMemberMapping.member.id.eq(member.id))
                 .leftJoin(member.memberProfile, memberProfile)
-                .on(memberProfile.member.memberProfile.eq(member.memberProfile))
-                .leftJoin(course)
-                .on(course.member.id.eq(member.id), course.remainLessonCnt.gt(0))
-                .where(mappingTrainerIdEq(trainerId)
-                        , memberTypeEq(STUDENT)
-                        , memberDelYnEq(false)
-                        , nameLike(searchValue))
+                .leftJoin(course).on(course.member.id.eq(member.id), course.remainLessonCnt.gt(0))
+                .where(
+                        mappingTrainerIdEq(trainerId),
+                        memberTypeEq(STUDENT),
+                        memberDelYnEq(false),
+                        nameLike(searchValue)
+                )
                 .orderBy(sortBy(sortValue))
                 .fetch();
     }

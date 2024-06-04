@@ -8,6 +8,8 @@ import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonD
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import java.time.LocalDate
 import java.util.*
 
@@ -24,4 +26,5 @@ interface TrainerScheduleRepositoryCustom {
     fun findAllDisabledSchedule(lessonStartDt: LocalDate, lessonEndDt: LocalDate): List<Schedule?>
     fun findAllUnwrittenLessonHistory(request: UnwrittenLessonHistorySearchCond, memberId: Long): List<Schedule>
     fun findAllSimpleLessonHistoryByMemberId(studentId: Long, trainerId: Long): List<Schedule>
+    fun findAllScheduleByStduentId(studentId: Long, pageable: Pageable, trainerId: Long): Page<Schedule>
 }

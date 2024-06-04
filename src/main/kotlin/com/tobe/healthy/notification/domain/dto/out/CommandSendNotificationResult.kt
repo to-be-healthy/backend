@@ -9,7 +9,7 @@ data class CommandSendNotificationResult(
     val content: String?,
     val senderId: Long?,
     val senderName: String?,
-    val receiverIds: List<NotificationReciverInfo>,
+    val receivers: List<NotificationReciverInfo>,
 ) {
     companion object {
         fun from(notifications: MutableList<Notification>): CommandSendNotificationResult {
@@ -19,7 +19,7 @@ data class CommandSendNotificationResult(
                 content = notifications.firstOrNull()?.content,
                 senderId = notifications.firstOrNull()?.sender?.id,
                 senderName = notifications.firstOrNull()?.sender?.name,
-                receiverIds = notifications.map { NotificationReciverInfo.from(it.receiver) }
+                receivers = notifications.map { NotificationReciverInfo.from(it.receiver) }
             )
         }
     }

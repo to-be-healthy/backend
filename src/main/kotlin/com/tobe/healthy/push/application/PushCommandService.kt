@@ -44,6 +44,7 @@ class PushCommandService(
     }
 
     fun sendPushAlarm(request: CommandSendPushAlarm): CommandSendPushAlarmResult {
+
         val message = createMessage(request.token, request.title, request.message)
 
         val response = FirebaseMessaging

@@ -411,7 +411,9 @@ public class MemberAuthCommandService {
                     objectMetadata
             );
             String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+
             return MemberProfile.create(savedFileName, fileUrl, member);
+
         } catch (IOException e) {
             log.error("error => {}", e.getStackTrace()[0]);
             throw new CustomException(FILE_UPLOAD_ERROR);
@@ -425,7 +427,9 @@ public class MemberAuthCommandService {
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
             String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+
             return MemberProfile.create(savedFileName, fileUrl, member);
+
         } catch (IOException e) {
             log.error("error => {}", e.getStackTrace()[0]);
             throw new CustomException(FILE_UPLOAD_ERROR);

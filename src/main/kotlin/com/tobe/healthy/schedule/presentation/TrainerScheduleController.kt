@@ -1,10 +1,12 @@
 package com.tobe.healthy.schedule.presentation
 
 import com.tobe.healthy.ApiResultResponse
+import com.tobe.healthy.common.KotlinCustomPaging
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.schedule.application.TrainerScheduleService
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
+import com.tobe.healthy.schedule.domain.dto.out.RetrieveApplicantSchedule
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerDefaultLessonTimeResult
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonInfoResult
@@ -12,9 +14,12 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springdoc.core.annotations.ParameterObject
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -76,6 +81,25 @@ class TrainerScheduleController(
         return ApiResultResponse(
             message = "특정 날짜의 일정을 조회했습니다.",
             data = trainerScheduleService.findOneTrainerTodaySchedule(request, customMemberDetails.memberId)
+        )
+    }
+
+    @Operation(
+        summary = "트레이너가 학생의 일정을 조회한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "트레이너가 학생의 일정 조회 완료")
+        ]
+    )
+    @GetMapping("/{studentId}")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    fun findAllScheduleByStduentId(
+        @PathVariable studentId: Long,
+        @ParameterObject @PageableDefault(size = 10) pageable: Pageable,
+        @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
+    ): ApiResultResponse<KotlinCustomPaging<RetrieveApplicantSchedule>> {
+        return ApiResultResponse(
+            message = "학생의 일정을 조회했습니다.",
+            data = trainerScheduleService.findAllScheduleByStduentId(studentId, pageable, customMemberDetails.memberId)
         )
     }
 }
