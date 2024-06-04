@@ -73,7 +73,7 @@ public class WorkoutHistoryService {
         List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
         historiesDto = setHistoryListFile(historiesDto, ids);
         List<WorkoutHistoryDto> content = setHistoryListExercise(historiesDto, ids);
-        return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
+        return new CustomPaging<>(content, pageDtos.getPageable().getPageNumber(),
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 
@@ -206,7 +206,7 @@ public class WorkoutHistoryService {
         List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
         historiesDto = setHistoryListFile(historiesDto, ids);
         List<WorkoutHistoryDto> content = setHistoryListExercise(historiesDto, ids);
-        return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
+        return new CustomPaging<>(content, pageDtos.getPageable().getPageNumber(),
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 

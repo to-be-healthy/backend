@@ -37,7 +37,7 @@ public class DietCommentService {
     public CustomPaging<DietCommentDto> getCommentsByDietId(Long dietId, Pageable pageable) {
         Page<DietComment> pageDtos = commentRepository.getCommentsByDietId(dietId, pageable);
         List<DietComment> comments = pageDtos.stream().toList();
-        return new CustomPaging(settingReplyFormat(comments), pageDtos.getPageable().getPageNumber(),
+        return new CustomPaging<>(settingReplyFormat(comments), pageDtos.getPageable().getPageNumber(),
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 

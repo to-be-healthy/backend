@@ -69,7 +69,7 @@ public class DietService {
         List<DietDto> dietDtos = pageDtos.stream().toList();
         List<Long> ids = dietDtos.stream().map(DietDto::getDietId).collect(Collectors.toList());
         List<DietDto> content = setDietFile(dietDtos, ids);
-        return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
+        return new CustomPaging<>(content, pageDtos.getPageable().getPageNumber(),
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 
@@ -257,7 +257,7 @@ public class DietService {
         List<DietDto> dietDtos = pageDtos.map(DietDto::from).stream().toList();
         List<Long> ids = dietDtos.stream().map(DietDto::getDietId).collect(Collectors.toList());
         List<DietDto> content = setDietFile(dietDtos, ids);
-        return new CustomPaging(content, pageDtos.getPageable().getPageNumber(),
+        return new CustomPaging<>(content, pageDtos.getPageable().getPageNumber(),
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 

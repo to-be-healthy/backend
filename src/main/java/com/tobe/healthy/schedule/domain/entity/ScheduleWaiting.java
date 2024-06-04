@@ -39,4 +39,5 @@ public class ScheduleWaiting extends BaseTimeEntity<ScheduleWaiting, Long> {
 			.member(member)
 			.build();
 	}
+
 }

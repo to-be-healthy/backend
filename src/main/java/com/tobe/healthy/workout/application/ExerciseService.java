@@ -28,8 +28,8 @@ public class ExerciseService {
 
     private final ExerciseRepository exerciseRepository;
 
-    public CustomPaging<ExerciseDto> getExercise(Member member, ExerciseCategory exerciseCategory, Pageable pageable) {
-        Page<Exercise> exercises = exerciseRepository.getExercise(member.getId(), exerciseCategory, pageable);
+    public CustomPaging<ExerciseDto> getExercise(Member member, ExerciseCategory exerciseCategory, Pageable pageable, String searchValue) {
+        Page<Exercise> exercises = exerciseRepository.getExercise(member.getId(), exerciseCategory, pageable, searchValue);
         List<ExerciseDto> exerciseDtos = exercises.map(ExerciseDto::from).stream().toList();
 
         return new CustomPaging(exerciseDtos, exercises.getPageable().getPageNumber(),

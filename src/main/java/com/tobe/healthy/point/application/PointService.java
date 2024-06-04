@@ -104,7 +104,7 @@ public class PointService {
         int totalPoint = pointRepository.getTotalPoint(memberId, searchDate);
 
         List<PointHistoryDto> content = histories.map(PointHistoryDto::from).stream().toList();
-        CustomPaging customPaging = new CustomPaging(content, histories.getPageable().getPageNumber(),
+        CustomPaging customPaging = new CustomPaging<>(content, histories.getPageable().getPageNumber(),
                 histories.getPageable().getPageSize(), histories.getTotalPages(), histories.getTotalElements(), histories.isLast());
         customPaging.setMainData(PointDto.create(searchDate, monthPoint, totalPoint));
         return customPaging;

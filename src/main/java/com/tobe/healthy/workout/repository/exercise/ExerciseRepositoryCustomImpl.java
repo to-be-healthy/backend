@@ -13,6 +13,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
+import static com.tobe.healthy.member.domain.entity.QMember.member;
 import static com.tobe.healthy.workout.domain.entity.exercise.QExercise.exercise;
 
 
@@ -23,22 +24,30 @@ public class ExerciseRepositoryCustomImpl implements ExerciseRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Exercise> getExercise(Long memberId, ExerciseCategory exerciseCategory, Pageable pageable) {
+    public Page<Exercise> getExercise(Long memberId, ExerciseCategory exerciseCategory, Pageable pageable, String searchValue) {
         Long totalCnt = queryFactory
                 .select(exercise.count())
                 .from(exercise)
-                .where(exerciseCategoryEq(exerciseCategory))
+                .where(exerciseCategoryEq(exerciseCategory), nameLike(searchValue))
                 .fetchOne();
         List<Exercise> exercises = queryFactory
                 .select(exercise)
                 .from(exercise)
                 .where(exerciseCategoryEq(exerciseCategory)
-                        , exercise.member.id.eq(memberId).or(exercise.member.id.isNull()))
+                        , exercise.member.id.eq(memberId).or(exercise.member.id.isNull())
+                        , nameLike(searchValue))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(exercise.member.id.desc(), exercise.exerciseId.asc())
                 .fetch();
         return PageableExecutionUtils.getPage(exercises, pageable, ()-> totalCnt );
+    }
+
+    private BooleanExpression nameLike(String name) {
+        if (!ObjectUtils.isEmpty(name)) {
+            return exercise.names.containsIgnoreCase(name);
+        }
+        return null;
     }
 
     private BooleanExpression exerciseCategoryEq(ExerciseCategory category) {

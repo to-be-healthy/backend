@@ -10,6 +10,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -44,33 +45,31 @@ public class CourseAspect {
 
     @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleCommandService.cancelStudentReservation(..))")
     private void cancelStudentReservation() {}
-
+    
     /*
     * 학생이 수업 취소
     */
     @AfterReturning(value = "cancelMemberSchedule()", returning = "returnValue")
-    public void updateCourseByStudent(JoinPoint joinPoint, Object returnValue) {
+    public void plusCourseByStudent(JoinPoint joinPoint, Object returnValue) {
         ScheduleIdInfo scheduleIdInfo = ((ScheduleIdInfo) returnValue);
         Long scheduleId = scheduleIdInfo.getScheduleId();
         Long studentId = scheduleIdInfo.getStudentId();
-        Long waitingStudentId = scheduleIdInfo.getWaitingStudentId();
         Long trainerId = scheduleIdInfo.getTrainerId();
 
-        updateCourse(studentId, scheduleId, trainerId, waitingStudentId);
+        plusCourse(studentId, scheduleId, trainerId);
     }
 
     /*
      * 트레이너가 학생의 수업 취소
      */
     @AfterReturning(value = "cancelStudentReservation()", returning = "returnValue")
-    public void updateCourseByTrainer(JoinPoint joinPoint, Object returnValue) {
+    public void plusCourseByTrainer(JoinPoint joinPoint, Object returnValue) {
         CommandCancelStudentReservationResult result = ((CommandCancelStudentReservationResult) returnValue);
         Long scheduleId = result.getScheduleId();
         Long studentId = result.getStudentId();
-        Long waitingStudentId = result.getWaitingStudentId();
         Long trainerId = result.getTrainerId();
 
-        updateCourse(studentId, scheduleId, trainerId, waitingStudentId);
+        plusCourse(studentId, scheduleId, trainerId);
     }
 
     /*
@@ -105,19 +104,10 @@ public class CourseAspect {
         courseService.updateCourseByMember(scheduleId, trainerId, command);
     }
 
-    private void updateCourse(Long studentId, Long scheduleId, Long trainerId, Long waitingStudentId) {
-        CourseUpdateCommand command;
-
-        //수업 취소자 수강권 +1
+    private void plusCourse(Long studentId, Long scheduleId, Long trainerId) {
         CourseService courseService = courseServiceObjectProvider.getObject();
-        command = CourseUpdateCommand.create(studentId, PLUS, RESERVATION_CANCEL, ONE_LESSON);
+        CourseUpdateCommand command = CourseUpdateCommand.create(studentId, PLUS, RESERVATION_CANCEL, ONE_LESSON);
         courseService.updateCourseByMember(scheduleId, trainerId, command);
-
-        //수업 대기자 수강권 -1
-        if(!ObjectUtils.isEmpty(waitingStudentId)){
-            command = CourseUpdateCommand.create(waitingStudentId, MINUS, RESERVATION, ONE_LESSON);
-            courseService.updateCourseByMember(scheduleId, trainerId, command);
-        }
     }
 
 }
