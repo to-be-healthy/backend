@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
-import static jakarta.persistence.CascadeType.*;
+import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -96,8 +96,8 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	}
 
 	public void cancelMemberSchedule() {
-		LocalDateTime lessonDateStartTime = LocalDateTime.of(lessonDt, lessonStartTime);
-		if (LocalDateTime.now().isAfter(lessonDateStartTime)) {
+		LocalDateTime lessonStartDateTime = LocalDateTime.of(lessonDt, lessonStartTime);
+		if (LocalDateTime.now().isAfter(lessonStartDateTime)) {
 			throw new IllegalArgumentException("수업 시작 이후에는 예약 취소가 불가능합니다.");
 		}
 		this.reservationStatus = AVAILABLE;

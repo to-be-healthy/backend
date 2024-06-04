@@ -1,5 +1,7 @@
 package com.tobe.healthy.schedule.application
 
+import com.tobe.healthy.common.event.CustomEventPublisher
+import com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.member.repository.MemberRepository
@@ -31,7 +33,8 @@ class TrainerScheduleCommandService(
     private val memberRepository: MemberRepository,
     private val trainerScheduleRepository: TrainerScheduleRepository,
     private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository,
-    private val scheduleWaitingRepository: ScheduleWaitingRepository
+    private val scheduleWaitingRepository: ScheduleWaitingRepository,
+    private val eventPublisher: CustomEventPublisher<Long>
 ) {
 
     fun registerDefaultLessonTime(
@@ -204,16 +207,11 @@ class TrainerScheduleCommandService(
         val entity = trainerScheduleRepository.findAllSchedule(scheduleId, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
 
-        val applicant = entity.applicant
+        entity.cancelMemberSchedule()
 
-        if (!entity.scheduleWaiting.isNullOrEmpty()) {
-            entity.cancelMemberSchedule(entity.scheduleWaiting!![0])
-            scheduleWaitingRepository.delete(entity.scheduleWaiting!![0])
-        } else {
-            entity.cancelMemberSchedule()
-        }
+        eventPublisher.publish(entity.id, SCHEDULE_CANCEL)
 
-        return CommandCancelStudentReservationResult.from(entity, applicant)
+        return CommandCancelStudentReservationResult.from(entity)
     }
 
     fun updateReservationStatusToNoShow(
