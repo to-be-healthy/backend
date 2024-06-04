@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
-import static jakarta.persistence.CascadeType.PERSIST;
+import static jakarta.persistence.CascadeType.*;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -70,7 +70,8 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@Builder.Default
 	private List<LessonHistory> lessonHistories = new ArrayList<>();
 
-	public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, ReservationStatus reservationStatus) {
+
+    public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, ReservationStatus reservationStatus) {
 		ScheduleBuilder reserve = Schedule.builder()
 				.lessonDt(date)
 				.lessonStartTime(startTime)

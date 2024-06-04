@@ -19,4 +19,5 @@ public interface CommonScheduleRepository extends JpaRepository<Schedule, Long>,
 	@EntityGraph(attributePaths = {"trainer"})
 	@Query("select s from Schedule s where s.id = :scheduleId and s.reservationStatus = 'AVAILABLE' and s.applicant is null")
 	Optional<Schedule> findAvailableScheduleById(Long scheduleId);
+
 }
