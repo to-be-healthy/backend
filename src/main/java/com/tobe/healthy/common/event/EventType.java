@@ -7,8 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum EventType {
 
-    SCHEDULE_CANCEL_BY_STUDENT("학생이 수업을 취소한 경우"),
-    SCHEDULE_CANCEL_BY_TRAINER("트레이너가 학생의 수업을 취소한 경우");
+    SCHEDULE_CANCEL("트레이너 또는 학생이 수업을 취소한 경우");
 
     private final String description;
 

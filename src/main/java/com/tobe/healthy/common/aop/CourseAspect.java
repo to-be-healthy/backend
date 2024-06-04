@@ -59,20 +59,18 @@ public class CourseAspect {
         plusCourse(studentId, scheduleId, trainerId);
     }
 
-//    /*
-//     * 트레이너가 학생의 수업 취소
-//     */
-//    @AfterReturning(value = "cancelStudentReservation()", returning = "returnValue")
-//    public void plusCourseByTrainer(JoinPoint joinPoint, Object returnValue) {
-//        CommandCancelStudentReservationResult result = ((CommandCancelStudentReservationResult) returnValue);
-//        Long scheduleId = result.getScheduleId();
-//        Long studentId = result.getStudentId();
-//        Long waitingStudentId = result.getWaitingStudentId();
-//        Long trainerId = result.getTrainerId();
-//
-//        updateCourse(studentId, scheduleId, trainerId, waitingStudentId);
-//
-//    }
+    /*
+     * 트레이너가 학생의 수업 취소
+     */
+    @AfterReturning(value = "cancelStudentReservation()", returning = "returnValue")
+    public void plusCourseByTrainer(JoinPoint joinPoint, Object returnValue) {
+        CommandCancelStudentReservationResult result = ((CommandCancelStudentReservationResult) returnValue);
+        Long scheduleId = result.getScheduleId();
+        Long studentId = result.getStudentId();
+        Long trainerId = result.getTrainerId();
+
+        plusCourse(studentId, scheduleId, trainerId);
+    }
 
     /*
      * 학생이 수업 예약

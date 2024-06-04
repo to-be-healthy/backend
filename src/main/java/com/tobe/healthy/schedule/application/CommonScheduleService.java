@@ -7,7 +7,6 @@ import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.repository.common.CommonScheduleRepository;
-import com.tobe.healthy.schedule.repository.waiting.ScheduleWaitingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,10 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.Map;
 
-import static com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL_BY_STUDENT;
+import static com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static java.time.LocalTime.NOON;
 
@@ -56,7 +53,7 @@ public class CommonScheduleService {
 
         ScheduleIdInfo idInfo = ScheduleIdInfo.create(schedule, getScheduleTimeText(schedule.getLessonStartTime()));
         schedule.cancelMemberSchedule();
-        eventPublisher.publish(scheduleId, SCHEDULE_CANCEL_BY_STUDENT);
+        eventPublisher.publish(scheduleId, SCHEDULE_CANCEL);
         return idInfo;
     }
 
