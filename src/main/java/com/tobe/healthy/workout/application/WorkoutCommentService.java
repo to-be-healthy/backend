@@ -60,7 +60,7 @@ public class WorkoutCommentService {
     public CustomPaging<WorkoutHistoryCommentDto> getCommentsByWorkoutHistoryId(Long workoutHistoryId, Pageable pageable) {
         Page<WorkoutHistoryComment> pageDtos = commentRepository.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable);
         List<WorkoutHistoryComment> comments = pageDtos.stream().toList();
-        return new CustomPaging(settingReplyFormat(comments), pageDtos.getPageable().getPageNumber(),
+        return new CustomPaging<>(settingReplyFormat(comments), pageDtos.getPageable().getPageNumber(),
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 

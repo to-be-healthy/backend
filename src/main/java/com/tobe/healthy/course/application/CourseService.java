@@ -105,7 +105,7 @@ public class CourseService {
         Page<CourseHistory> histories = courseHistoryRepository.getCourseHistory(memberId, trainerId, pageable, searchDate);
         List<CourseHistoryDto> courseHistoryDtos = histories.map(CourseHistoryDto::from).stream().toList();
 
-        CustomPaging customPaging = new CustomPaging(courseHistoryDtos, histories.getPageable().getPageNumber(),
+        CustomPaging customPaging = new CustomPaging<>(courseHistoryDtos, histories.getPageable().getPageNumber(),
                 histories.getPageable().getPageSize(), histories.getTotalPages(), histories.getTotalElements(), histories.isLast());
 
         CourseGetResult courseGetResult = CourseGetResult.create(getNowUsingCourse(memberId), member.getGym().getName());

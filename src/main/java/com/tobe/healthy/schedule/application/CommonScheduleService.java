@@ -1,13 +1,12 @@
 package com.tobe.healthy.schedule.application;
 
+import com.tobe.healthy.common.event.CustomEventPublisher;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import com.tobe.healthy.schedule.repository.common.CommonScheduleRepository;
-import com.tobe.healthy.schedule.repository.waiting.ScheduleWaitingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,8 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Optional;
 
+import static com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static java.time.LocalTime.NOON;
 
@@ -25,9 +24,11 @@ import static java.time.LocalTime.NOON;
 @Transactional
 @Slf4j
 public class CommonScheduleService {
+
+    private final CustomEventPublisher<Long> eventPublisher;
+
     private final MemberRepository memberRepository;
     private final CommonScheduleRepository commonScheduleRepository;
-    private final ScheduleWaitingRepository scheduleWaitingRepository;
 
     public ScheduleIdInfo reserveSchedule(Long scheduleId, Long memberId) {
         Member member = memberRepository.findById(memberId)
@@ -50,22 +51,10 @@ public class CommonScheduleService {
         LocalDateTime before24Hour = LocalDateTime.of(schedule.getLessonDt().minusDays(1), schedule.getLessonStartTime());
         if (LocalDateTime.now().isAfter(before24Hour)) throw new CustomException(RESERVATION_CANCEL_NOT_VALID);
 
-        // 대기 테이블에 인원이 있으면 수정하기
-        Optional<ScheduleWaiting> waitingScheduleOpt = scheduleWaitingRepository.findByScheduleId(scheduleId);
-        if (waitingScheduleOpt.isPresent()) {
-            ScheduleWaiting scheduleWaiting = waitingScheduleOpt.get();
-            changeApplicantAndDeleteWaiting(scheduleWaiting, schedule);
-            return ScheduleIdInfo.create(memberId, schedule, scheduleWaiting.getMember().getId(), getScheduleTimeText(schedule.getLessonStartTime()));
-        } else {
-            ScheduleIdInfo idInfo = ScheduleIdInfo.create(schedule, getScheduleTimeText(schedule.getLessonStartTime()));
-            schedule.cancelMemberSchedule();
-            return idInfo;
-        }
-    }
-
-    private void changeApplicantAndDeleteWaiting(ScheduleWaiting scheduleWaiting, Schedule schedule) {
-        schedule.changeApplicantInSchedule(scheduleWaiting.getMember());
-        scheduleWaitingRepository.delete(scheduleWaiting);
+        ScheduleIdInfo idInfo = ScheduleIdInfo.create(schedule, getScheduleTimeText(schedule.getLessonStartTime()));
+        schedule.cancelMemberSchedule();
+        eventPublisher.publish(scheduleId, SCHEDULE_CANCEL);
+        return idInfo;
     }
 
     private String getScheduleTimeText(LocalTime lessonStartTime){
