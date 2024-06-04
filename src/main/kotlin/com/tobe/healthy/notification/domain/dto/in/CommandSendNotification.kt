@@ -7,5 +7,5 @@ data class CommandSendNotification(
     val content: String,
     val receiverIds: List<Long>,
     val notificationType: NotificationType,
-    val lessonHistoryId: Long? = null,
+    val lessonHistoryId: Long?,
 )

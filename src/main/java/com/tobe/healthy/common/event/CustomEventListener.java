@@ -4,6 +4,11 @@ import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.course.repository.CourseRepository;
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.notification.application.NotificationService;
+import com.tobe.healthy.notification.domain.dto.in.CommandSendNotification;
+import com.tobe.healthy.notification.domain.entity.NotificationType;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import com.tobe.healthy.schedule.repository.common.CommonScheduleRepository;
@@ -16,9 +21,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
-import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
 import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 
@@ -33,13 +40,16 @@ public class CustomEventListener {
     private final CourseRepository courseRepository;
     private final CommonScheduleRepository commonScheduleRepository;
     private final ScheduleWaitingRepository scheduleWaitingRepository;
+    private final NotificationService notificationService;
+    private final MemberRepository memberRepository;
 
     @Async
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     @TransactionalEventListener
     public void handleEvent(CustomEvent event) {
-        switch (event.getType()){
+        switch (event.getType()) {
             case SCHEDULE_CANCEL -> changeWaitingToCompleted((Long) event.getResult());
+            case NOTIFICATION_RESERVE -> notifyScheduleReservation((Long) event.getResult());
         }
     }
 
@@ -64,6 +74,21 @@ public class CustomEventListener {
                     commonScheduleRepository.save(schedule);
                 });
         }
+    }
+
+    public void notifyScheduleReservation(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        CommandSendNotification notification = new CommandSendNotification(
+                "예약",
+                String.format("%s님이 수업을 신청했드앙", member.getName()),
+                List.of(memberId),
+                NotificationType.RESERVE,
+                null
+        );
+
+        notificationService.sendNotification(notification, 542);
     }
 
     private boolean isBefore24Hour(Schedule schedule){

@@ -3,6 +3,7 @@ package com.tobe.healthy.notification.application
 import com.tobe.healthy.common.KotlinCustomPaging
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
@@ -45,7 +46,11 @@ class NotificationService(
             throw IllegalArgumentException("수신자의 ID가 존재하지 않습니다.")
         }
 
-        val lessonHistory = lessonHistoryRepository.findByIdOrNull(request.lessonHistoryId)
+        var lessonHistory: LessonHistory? = null
+
+        request.lessonHistoryId?.let {
+            lessonHistory = lessonHistoryRepository.findByIdOrNull(request.lessonHistoryId)
+        }
 
         receivers.stream().forEach { receiver ->
 

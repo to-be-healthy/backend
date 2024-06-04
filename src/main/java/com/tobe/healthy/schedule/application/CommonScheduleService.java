@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import static com.tobe.healthy.common.event.EventType.NOTIFICATION_RESERVE;
 import static com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static java.time.LocalTime.NOON;
@@ -41,6 +42,9 @@ public class CommonScheduleService {
         if (LocalDateTime.now().isAfter(before30Minutes)) throw new CustomException(RESERVATION_NOT_VALID);
 
         schedule.registerSchedule(member);
+
+        eventPublisher.publish(member.getId(), NOTIFICATION_RESERVE);
+
         return ScheduleIdInfo.create(schedule, getScheduleTimeText(schedule.getLessonStartTime()));
     }
 
