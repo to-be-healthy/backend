@@ -3,12 +3,8 @@ package com.tobe.healthy.member.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.member.application.MemberCommandService;
-import com.tobe.healthy.member.domain.dto.in.CommandChangeEmail;
-import com.tobe.healthy.member.domain.dto.in.CommandChangeMemberPassword;
-import com.tobe.healthy.member.domain.dto.in.CommandUpdateMemo;
-import com.tobe.healthy.member.domain.dto.out.DeleteMemberProfileResult;
-import com.tobe.healthy.member.domain.dto.out.MemberChangeAlarmResult;
-import com.tobe.healthy.member.domain.dto.out.RegisterMemberProfileResult;
+import com.tobe.healthy.member.domain.dto.in.*;
+import com.tobe.healthy.member.domain.dto.out.*;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.AlarmType;
 import io.swagger.v3.oas.annotations.Operation;
@@ -94,10 +90,13 @@ public class MemberCommandController {
 			@ApiResponse(responseCode = "200", description = "이름이 변경되었습니다.")
 	})
 	@PatchMapping("/name")
-	public ResponseHandler<String> changeName(@RequestParam String name,
-											  @AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<String>builder()
-				.data(memberCommandService.changeName(name, member.getMemberId()))
+	public ResponseHandler<CommandChangeNameResult> changeName(
+			@RequestBody @Valid CommandChangeName request,
+			@AuthenticationPrincipal CustomMemberDetails member
+	) {
+
+		return ResponseHandler.<CommandChangeNameResult>builder()
+				.data(memberCommandService.changeName(request, member.getMemberId()))
 				.message("이름이 변경되었습니다.")
 				.build();
 	}
@@ -137,10 +136,10 @@ public class MemberCommandController {
 	})
 	@PostMapping("/nickname/{studentId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<Boolean> assignNickname(@PathVariable Long studentId,
-												   @RequestParam String nickname) {
-		return ResponseHandler.<Boolean>builder()
-				.data(memberCommandService.assignNickname(nickname, studentId))
+	public ResponseHandler<CommandAssignNicknameResult> assignNickname(@PathVariable Long studentId,
+																	   @RequestBody @Valid CommandAssignNickname request) {
+		return ResponseHandler.<CommandAssignNicknameResult>builder()
+				.data(memberCommandService.assignNickname(request, studentId))
 				.message("닉네임을 지정하였습니다.")
 				.build();
 	}

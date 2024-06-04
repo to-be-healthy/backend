@@ -7,8 +7,12 @@ import com.tobe.healthy.notification.domain.dto.out.NotificationRedDotStatusResu
 import com.tobe.healthy.notification.domain.entity.Notification
 import com.tobe.healthy.notification.domain.entity.NotificationType
 import com.tobe.healthy.notification.domain.entity.QNotification.notification
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Slice
+import org.springframework.data.domain.SliceImpl
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
+
 
 @Repository
 class NotificationRepositoryImpl(
@@ -16,19 +20,32 @@ class NotificationRepositoryImpl(
 ) : NotificationRepositoryCustom {
 
     override fun findAllByNotificationType(
-        notificationType: List<NotificationType>?,
-        receiverId: Long
-    ): List<Notification> {
-        return queryFactory
+        notificationType: NotificationType,
+        receiverId: Long,
+        pageable: Pageable
+    ): Slice<Notification> {
+        val contents = queryFactory
             .select(notification)
             .from(notification)
             .innerJoin(notification.sender).fetchJoin()
             .where(
-                notificationTypeIn(notificationType),
+                notificationTypeEq(notificationType),
                 notification.receiver.id.eq(receiverId)
             )
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
             .orderBy(notification.id.desc())
             .fetch()
+
+        return if (hasNext(contents.size, pageable.pageSize)) {
+            SliceImpl(contents.subList(0, pageable.pageSize), pageable, hasNext(contents.size, pageable.pageSize))
+        } else {
+            SliceImpl(contents, pageable, hasNext(contents.size, pageable.pageSize))
+        }
+    }
+
+    private fun hasNext(contentSize: Int, pageSize: Int): Boolean {
+        return contentSize > pageSize
     }
 
     override fun findOneById(notificationId: Long, receiverId: Long): Notification? {
@@ -42,7 +59,7 @@ class NotificationRepositoryImpl(
             .fetchOne()
     }
 
-    override fun findAllRedDotStatus(notificationType: List<NotificationType>?, receiverId: Long): List<NotificationRedDotStatusResult> {
+    override fun findAllRedDotStatus(notificationType: NotificationType, receiverId: Long): List<NotificationRedDotStatusResult> {
         return queryFactory
             .select(
                 constructor(
@@ -53,7 +70,7 @@ class NotificationRepositoryImpl(
             )
             .from(notification)
             .where(
-                notificationTypeNotIn(notificationType),
+                notificationTypeNq(notificationType),
                 notification.receiver.id.eq(receiverId),
                 notification.isRead.eq(false)
             )
@@ -61,17 +78,29 @@ class NotificationRepositoryImpl(
             .fetch()
     }
 
-    private fun notificationTypeIn(notificationType: List<NotificationType>?): BooleanExpression? {
+    override fun findRedDotStatus(receiverId: Long): Boolean {
+        val count = queryFactory
+            .select(notification.count())
+            .from(notification)
+            .where(
+                notification.receiver.id.eq(receiverId),
+                notification.isRead.eq(false)
+            )
+            .fetchOne() ?: 0
+        return count > 0
+    }
+
+    private fun notificationTypeEq(notificationType: NotificationType): BooleanExpression? {
         if (ObjectUtils.isEmpty(notificationType)) {
             return null
         }
         return notification.notificationType.`in`(notificationType)
     }
 
-    private fun notificationTypeNotIn(notificationType: List<NotificationType>?): BooleanExpression? {
+    private fun notificationTypeNq(notificationType: NotificationType): BooleanExpression? {
         if (ObjectUtils.isEmpty(notificationType)) {
             return null
         }
-        return notification.notificationType.notIn(notificationType)
+        return notification.notificationType.`in`(notificationType)
     }
 }

@@ -9,6 +9,8 @@ import com.tobe.healthy.notification.domain.dto.out.CommandSendNotificationResul
 import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationDetailResult
 import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedDotResult
 import org.springdoc.core.annotations.ParameterObject
+import org.springframework.data.domain.Pageable
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
@@ -19,6 +21,7 @@ class NotificationController(
 ) {
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun sendNotification(
         @RequestBody request: CommandSendNotification,
         @AuthenticationPrincipal member: CustomMemberDetails
@@ -32,11 +35,12 @@ class NotificationController(
     @GetMapping
     fun findAllNotification(
         @ParameterObject request: RetrieveNotification,
-        @AuthenticationPrincipal member: CustomMemberDetails
+        @AuthenticationPrincipal member: CustomMemberDetails,
+        @ParameterObject pageable: Pageable
     ) : ApiResultResponse<RetrieveNotificationWithRedDotResult> {
         return ApiResultResponse(
             message = "전체 알림을 조회하였습니다.",
-            data = notificationService.findAllNotification(request, member.memberId)
+            data = notificationService.findAllNotification(request, member.memberId, pageable)
         )
     }
 
@@ -48,6 +52,16 @@ class NotificationController(
         return ApiResultResponse(
             message = "알림 상세 조회하였습니다.",
             data = notificationService.findOneNotification(notificationId, member.memberId)
+        )
+    }
+
+    @GetMapping("/red-dot")
+    fun findNotificationWithRedDot(
+        @AuthenticationPrincipal member: CustomMemberDetails
+    ) : ApiResultResponse<Boolean> {
+        return ApiResultResponse(
+            message = "red-dot 상태를 조회하였습니다.",
+            data = notificationService.findRedDotStatus(member.memberId)
         )
     }
 }

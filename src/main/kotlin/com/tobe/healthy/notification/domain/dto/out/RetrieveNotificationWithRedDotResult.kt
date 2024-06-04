@@ -2,18 +2,19 @@ package com.tobe.healthy.notification.domain.dto.out
 
 import com.tobe.healthy.notification.domain.entity.Notification
 import com.tobe.healthy.notification.domain.entity.NotificationType
+import org.springframework.data.domain.Slice
 
 data class RetrieveNotificationWithRedDotResult(
-    val notificationResult: List<RetrieveNotificationResult>,
+    val notificationResult: Slice<RetrieveNotificationResult>,
     val redDotStatus: List<NotificationRedDotStatusResult>
 ) {
     companion object {
         fun from(
-            notifications: List<RetrieveNotificationResult>,
+            notifications: Slice<Notification>,
             redDotStatus: List<NotificationRedDotStatusResult>
         ) : RetrieveNotificationWithRedDotResult {
             return RetrieveNotificationWithRedDotResult(
-                notificationResult = notifications,
+                notificationResult = notifications.map { RetrieveNotificationResult.from(it) },
                 redDotStatus = redDotStatus
             )
         }
@@ -36,7 +37,7 @@ data class RetrieveNotificationWithRedDotResult(
                     notificationId = notification.id,
                     senderId = notification.sender.id,
                     senderName = notification.sender.name,
-                    senderProfile = notification.sender?.memberProfile?.fileUrl,
+                    senderProfile = notification.sender.memberProfile?.fileUrl,
                     title = notification.title,
                     content = notification.content,
                     notificationType = notification.notificationType,

@@ -8,11 +8,11 @@ import com.tobe.healthy.notification.domain.dto.`in`.RetrieveNotification
 import com.tobe.healthy.notification.domain.dto.out.CommandSendNotificationResult
 import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationDetailResult
 import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedDotResult
-import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedDotResult.RetrieveNotificationResult
 import com.tobe.healthy.notification.domain.entity.Notification
 import com.tobe.healthy.notification.repository.NotificationRepository
 import com.tobe.healthy.push.application.PushCommandService
 import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarm
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -25,10 +25,10 @@ class NotificationService(
 ) {
     fun sendNotification(
         request: CommandSendNotification,
-        memberId: Long
+        senderId: Long
     ): CommandSendNotificationResult {
 
-        val sender = memberRepository.findById(memberId)
+        val sender = memberRepository.findById(senderId)
             .orElseThrow { throw CustomException(MEMBER_NOT_FOUND) }
 
         val receivers = memberRepository.findMemberTokenById(request.receiverIds)
@@ -39,19 +39,25 @@ class NotificationService(
             throw IllegalArgumentException("수신자를 입력해 주세요.")
         }
 
-        receivers.forEach { receiver ->
+        receivers.stream().forEach { receiver ->
 
-            pushCommandService.sendPushAlarm(CommandSendPushAlarm(receiver.memberToken?.firstOrNull()?.token, request.title, request.content))
-
-            val notification = Notification.create(
-                title = request.title,
-                content = request.content,
-                notificationType = request.notificationType,
-                sender = sender,
-                receiver = receiver
-            )
-
-            notifications.add(notification)
+            if (!receiver.memberToken.isNullOrEmpty()) {
+                pushCommandService.sendPushAlarm(
+                    CommandSendPushAlarm(
+                        request.title,
+                        request.content,
+                        receiver.memberToken!![0].token,
+                    )
+                )
+                val notification = Notification.create(
+                    title = request.title,
+                    content = request.content,
+                    notificationType = request.notificationType,
+                    sender = sender,
+                    receiver = receiver
+                )
+                notifications.add(notification)
+            }
         }
 
         notificationRepository.saveAll(notifications)
@@ -61,10 +67,10 @@ class NotificationService(
 
     fun findAllNotification(
         request: RetrieveNotification,
-        receiverId: Long
+        receiverId: Long,
+        pageable: Pageable
     ): RetrieveNotificationWithRedDotResult {
-        val notification = notificationRepository.findAllByNotificationType(request.notificationType, receiverId)
-            .map { RetrieveNotificationResult.from(it) }
+        val notification = notificationRepository.findAllByNotificationType(request.notificationType, receiverId, pageable)
 
         val redDotStatus = notificationRepository.findAllRedDotStatus(request.notificationType, receiverId)
 
@@ -82,5 +88,9 @@ class NotificationService(
         notification.readNotification()
 
         return RetrieveNotificationDetailResult.from(notification)
+    }
+
+    fun findRedDotStatus(memberId: Long): Boolean {
+        return notificationRepository.findRedDotStatus(memberId)
     }
 }

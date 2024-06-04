@@ -1,37 +1,18 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.common.Utils.createFileName;
-import static com.tobe.healthy.common.Utils.createObjectMetadata;
-import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_LENGTH_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NAME_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_MAPPED;
-import static com.tobe.healthy.config.error.ErrorCode.NOT_MATCH_PASSWORD;
-import static com.tobe.healthy.config.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
-import static io.micrometer.common.util.StringUtils.isEmpty;
-
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.tobe.healthy.common.Utils;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.member.domain.dto.in.CommandChangeEmail;
-import com.tobe.healthy.member.domain.dto.in.CommandChangeMemberPassword;
-import com.tobe.healthy.member.domain.dto.in.CommandUpdateMemo;
-import com.tobe.healthy.member.domain.dto.out.DeleteMemberProfileResult;
-import com.tobe.healthy.member.domain.dto.out.MemberChangeAlarmResult;
-import com.tobe.healthy.member.domain.dto.out.RegisterMemberProfileResult;
+import com.tobe.healthy.member.domain.dto.in.*;
+import com.tobe.healthy.member.domain.dto.out.*;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.AlarmType;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
-import java.io.IOException;
-import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +21,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import static com.tobe.healthy.common.Utils.createFileName;
+import static com.tobe.healthy.common.Utils.createObjectMetadata;
+import static com.tobe.healthy.config.error.ErrorCode.*;
+import static io.micrometer.common.util.StringUtils.isEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -128,12 +117,12 @@ public class MemberCommandService {
         return DeleteMemberProfileResult.from(fileUrl, fileName);
     }
 
-    public String changeName(String name, Long memberId) {
+    public CommandChangeNameResult changeName(CommandChangeName request, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        validateName(name);
-        member.changeName(name);
-        return name;
+        validateName(request.getName());
+        member.changeName(request.getName());
+        return CommandChangeNameResult.from(member);
     }
 
     public MemberChangeAlarmResult changeAlarm(AlarmType alarmType, AlarmStatus alarmStatus, Long memberId) {
@@ -151,11 +140,11 @@ public class MemberCommandService {
         mapping.changeMemo(command.getMemo());
     }
 
-    public Boolean assignNickname(String nickname, Long studentId) {
+    public CommandAssignNicknameResult assignNickname(CommandAssignNickname request, Long studentId) {
         Member member = memberRepository.findById(studentId)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        member.assignNickname(nickname);
-        return true;
+        member.assignNickname(request.getNickname());
+        return CommandAssignNicknameResult.from(member);
     }
 
     public Boolean changeEmail(CommandChangeEmail request, Long memberId) {

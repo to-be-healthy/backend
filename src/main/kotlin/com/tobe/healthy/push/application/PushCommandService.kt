@@ -44,7 +44,7 @@ class PushCommandService(
     }
 
     fun sendPushAlarm(request: CommandSendPushAlarm): CommandSendPushAlarmResult {
-        val message = createMessage(request.token!!, request.title!!, request.message!!)
+        val message = createMessage(request.token, request.title, request.message)
 
         val response = FirebaseMessaging
             .getInstance()
@@ -75,7 +75,7 @@ class PushCommandService(
         val findMemberToken = memberTokenRepository.findByMemberId(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
-        val message = createMessage(findMemberToken.token, request.title!!, request.message!!)
+        val message = createMessage(findMemberToken.token, request.title, request.message)
 
         val response = FirebaseMessaging
             .getInstance()
