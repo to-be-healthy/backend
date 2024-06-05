@@ -13,8 +13,12 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 Notification.requestPermission().then(function (permission) {
-    return messaging.getToken();
+    const token = messaging.getToken();
+    $('#token').html(token);
+    return token;
+
 }).then(async function (token) {
+    $('#token').html(token);
     console.log(token);
 })
 
