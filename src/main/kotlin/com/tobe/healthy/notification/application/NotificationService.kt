@@ -1,7 +1,7 @@
 package com.tobe.healthy.notification.application
 
 import com.tobe.healthy.common.KotlinCustomPaging
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
+import com.tobe.healthy.common.NotificationSenderInfo
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
@@ -34,28 +34,19 @@ class NotificationService(
 
         val receivers = memberRepository.findMemberTokenById(request.receiverIds)
 
-        val notifications = mutableListOf<Notification>()
-
         if (receivers.isEmpty()) {
             throw IllegalArgumentException("수신자의 ID가 존재하지 않습니다.")
         }
 
-        var lessonHistory: LessonHistory? = null
-
-        request.lessonHistoryId?.let {
-            lessonHistory = lessonHistoryRepository.findByIdOrNull(request.lessonHistoryId)
+        val lessonHistory = request.lessonHistoryId?.let { id ->
+            lessonHistoryRepository.findByIdOrNull(id)
         }
 
-        receivers.stream().forEach { receiver ->
+        val notifications = mutableListOf<Notification>()
 
-            if (!receiver.memberToken.isNullOrEmpty()) {
-                pushCommandService.sendPushAlarm(
-                    CommandSendPushAlarm(
-                        request.title,
-                        request.content,
-                        receiver.memberToken!![0].token,
-                    )
-                )
+        receivers.forEach { receiver ->
+            receiver.memberToken.firstOrNull()?.token?.let { token ->
+                pushCommandService.sendPushAlarm(CommandSendPushAlarm(request.title, request.content, token))
 
                 val notification = Notification.create(
                     title = request.title,
@@ -93,7 +84,8 @@ class NotificationService(
             totalPages = notification.totalPages,
             totalElements = notification.totalElements,
             isLast = notification.isLast,
-            redDotStatus = results.redDotStatus
+            redDotStatus = results.redDotStatus,
+            sender = NotificationSenderInfo.getSenderInfo()
         )
     }
 
