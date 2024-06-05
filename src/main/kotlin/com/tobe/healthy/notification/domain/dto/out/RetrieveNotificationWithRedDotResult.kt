@@ -22,9 +22,6 @@ data class RetrieveNotificationWithRedDotResult(
     data class RetrieveNotificationResult(
         val notificationId: Long?,
         val notificationCategoryAndType: String,
-        val senderId: Long,
-        val senderName: String,
-        val senderProfile: String?,
         val title: String,
         val content: String,
         val createdAt: String,
@@ -36,9 +33,6 @@ data class RetrieveNotificationWithRedDotResult(
                 return RetrieveNotificationResult(
                     notificationId = notification.id,
                     notificationCategoryAndType = "${notification.notificationCategory.name + "-" + notification.notificationType.name}",
-                    senderId = notification.sender.id,
-                    senderName = notification.sender.name,
-                    senderProfile = notification.sender.memberProfile?.fileUrl,
                     title = notification.title,
                     content = notification.content,
                     createdAt = notification.createdAt.toString(),

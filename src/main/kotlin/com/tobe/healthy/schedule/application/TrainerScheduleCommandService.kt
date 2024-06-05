@@ -207,8 +207,7 @@ class TrainerScheduleCommandService(
                 RESERVE.description,
                 String.format("%s 트레이너가 %s님을 %s 예약에 등록했어요.", schedule.trainer.name, schedule.applicant!!.name, LocalDateTime.of(schedule.lessonDt, schedule.lessonStartTime).format(formatter)),
                 listOf(schedule.applicant!!.id),
-                RESERVE,
-            null
+                RESERVE
         )
 
         notificationPublisher.publish(notification, EventType.SCHEDULE_NOTIFICATION)
@@ -221,7 +220,6 @@ class TrainerScheduleCommandService(
         trainerId: Long
     ): CommandCancelStudentReservationResult {
 
-        // todo: 2024-05-05 일요일 오후 14:16 등록된 학생이 있는경우 푸시알림등으로 취소되었다는 알림이 필요 - seonwoo_jung
         val schedule = trainerScheduleRepository.findAllSchedule(scheduleId, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
 
@@ -235,8 +233,7 @@ class TrainerScheduleCommandService(
             CANCEL.description,
             String.format("%s 트레이너가 %s님의 %s 예약을 취소했어요.", schedule.trainer.name, applicantName, LocalDateTime.of(schedule.lessonDt, schedule.lessonStartTime).format(formatter)),
             listOf(applicantId!!),
-            CANCEL,
-            null
+            CANCEL
         )
 
         notificationPublisher.publish(notification, EventType.SCHEDULE_NOTIFICATION)

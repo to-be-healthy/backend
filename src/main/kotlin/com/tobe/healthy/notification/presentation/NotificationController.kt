@@ -4,35 +4,23 @@ import com.tobe.healthy.ApiResultResponse
 import com.tobe.healthy.common.KotlinCustomPaging
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.notification.application.NotificationService
-import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
 import com.tobe.healthy.notification.domain.dto.out.CommandNotificationStatusResult
-import com.tobe.healthy.notification.domain.dto.out.CommandSendNotificationResult
 import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedDotResult.RetrieveNotificationResult
 import com.tobe.healthy.notification.domain.entity.NotificationCategory
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/notification/v1")
 class NotificationController(
     private val notificationService: NotificationService
 ) {
-
-    @PostMapping
-    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun sendNotification(
-        @RequestBody request: CommandSendNotification,
-        @AuthenticationPrincipal member: CustomMemberDetails
-    ) : ApiResultResponse<CommandSendNotificationResult> {
-        return ApiResultResponse(
-            message = "알림 전송에 성공하였습니다.",
-            data = notificationService.sendNotification(request, member.memberId)
-        )
-    }
 
     @GetMapping("/all/{notificationCategory}")
     fun findAllNotification(

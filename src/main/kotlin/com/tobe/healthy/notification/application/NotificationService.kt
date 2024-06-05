@@ -1,8 +1,6 @@
 package com.tobe.healthy.notification.application
 
 import com.tobe.healthy.common.KotlinCustomPaging
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.member.repository.MemberRepository
@@ -30,13 +28,9 @@ class NotificationService(
     private val lessonHistoryRepository: LessonHistoryRepository
 ) {
 
-    fun sendNotification(
-        request: CommandSendNotification,
-        senderId: Long
+    fun sendNotificationFromSystem(
+        request: CommandSendNotification
     ): CommandSendNotificationResult {
-
-        val sender = memberRepository.findById(senderId)
-            .orElseThrow { throw CustomException(MEMBER_NOT_FOUND) }
 
         val receivers = memberRepository.findMemberTokenById(request.receiverIds)
 
@@ -68,7 +62,6 @@ class NotificationService(
                     content = request.content,
                     notificationCategory = request.notificationType.category,
                     notificationType = request.notificationType,
-                    sender = sender,
                     receiver = receiver,
                     lessonHistory = lessonHistory
                 )

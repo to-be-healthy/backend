@@ -47,8 +47,7 @@ public class CustomEventListener {
     public void handleEvent(CustomEvent event) {
         switch (event.getType()) {
             case SCHEDULE_CANCEL -> changeWaitingToCompleted((Long) event.getResult());
-            case SCHEDULE_NOTIFICATION -> notifyScheduleReservation((CommandSendNotification) event.getResult());
-            case LESSON_HISTORY_NOTIFICATION -> notifyLessonHistory((CommandSendNotification) event.getResult());
+            case SCHEDULE_NOTIFICATION, LESSON_HISTORY_NOTIFICATION -> sendNotification((CommandSendNotification) event.getResult());
         }
     }
 
@@ -79,19 +78,15 @@ public class CustomEventListener {
                             null
                     );
 
-                    notifyScheduleReservation(request);
+                    sendNotification(request);
 
                     commonScheduleRepository.save(schedule);
                 });
         }
     }
 
-    public void notifyScheduleReservation(CommandSendNotification request) {
-        notificationService.sendNotification(request, 542);
-    }
-
-    public void notifyLessonHistory(CommandSendNotification request) {
-        notificationService.sendNotification(request, 542);
+    private void sendNotification(CommandSendNotification request) {
+        notificationService.sendNotificationFromSystem(request);
     }
 
     private boolean isBefore24Hour(Schedule schedule){

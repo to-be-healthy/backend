@@ -7,8 +7,6 @@ data class CommandSendNotificationResult(
     val notificationId: Long?,
     val title: String?,
     val content: String?,
-    val senderId: Long?,
-    val senderName: String?,
     val receivers: List<NotificationReciverInfo>,
 ) {
     companion object {
@@ -17,8 +15,6 @@ data class CommandSendNotificationResult(
                 notificationId = notifications.firstOrNull()?.id,
                 title = notifications.firstOrNull()?.title,
                 content = notifications.firstOrNull()?.content,
-                senderId = notifications.firstOrNull()?.sender?.id,
-                senderName = notifications.firstOrNull()?.sender?.name,
                 receivers = notifications.map { NotificationReciverInfo.from(it.receiver) }
             )
         }

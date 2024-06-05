@@ -3,7 +3,6 @@ package com.tobe.healthy.notification.repository
 import com.querydsl.core.types.Projections.constructor
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.jpa.impl.JPAQueryFactory
-import com.tobe.healthy.member.domain.entity.QMember.member
 import com.tobe.healthy.notification.domain.dto.out.NotificationRedDotStatusResult
 import com.tobe.healthy.notification.domain.entity.Notification
 import com.tobe.healthy.notification.domain.entity.NotificationCategory
@@ -29,8 +28,6 @@ class NotificationRepositoryImpl(
         val results = queryFactory
             .select(notification)
             .from(notification)
-            .innerJoin(notification.sender, member).fetchJoin()
-            .leftJoin(member.memberProfile).fetchJoin()
             .leftJoin(notification.lessonHistory).fetchJoin()
             .where(
                 notificationCategoryEq(notificationCategory),
@@ -44,8 +41,6 @@ class NotificationRepositoryImpl(
         val totalCount = queryFactory
             .select(notification.count())
             .from(notification)
-            .innerJoin(notification.sender, member)
-            .leftJoin(member.memberProfile)
             .leftJoin(notification.lessonHistory)
             .where(
                 notificationCategoryEq(notificationCategory),
