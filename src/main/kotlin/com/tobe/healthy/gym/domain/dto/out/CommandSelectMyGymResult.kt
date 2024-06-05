@@ -3,7 +3,7 @@ package com.tobe.healthy.gym.domain.dto.out
 import com.tobe.healthy.gym.domain.entity.Gym
 
 data class CommandSelectMyGymResult(
-    val id: Long,
+    val id: Long?,
     val name: String
 ) {
     companion object {

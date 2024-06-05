@@ -14,11 +14,6 @@ import org.hibernate.annotations.DynamicUpdate
 @DynamicUpdate
 @ToString
 class Gym(
-    @Id
-    @GeneratedValue(strategy = IDENTITY)
-    @Column(name = "gym_id")
-    val id: Long = 0,
-
     val name: String,
 
     @Column(length = 6)
@@ -26,7 +21,12 @@ class Gym(
 
     @OneToMany(fetch = LAZY, mappedBy = "gym")
     @ToString.Exclude
-    val member: MutableList<Member> = mutableListOf()
+    val member: MutableList<Member> = mutableListOf(),
+
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
+    @Column(name = "gym_id")
+    val id: Long? = null,
 
 ) : BaseTimeEntity<Gym, Long>() {
 
