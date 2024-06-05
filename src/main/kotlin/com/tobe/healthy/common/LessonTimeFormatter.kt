@@ -30,4 +30,9 @@ object LessonTimeFormatter {
         val formatter = DateTimeFormatter.ofPattern("MM월 dd일 E요일", Locale.KOREAN)
         return lessonDt?.format(formatter)
     }
+
+    @JvmStatic
+    fun lessonStartDateTimeFormatter(): DateTimeFormatter {
+        return DateTimeFormatter.ofPattern("M월 d일(E) h시")
+    }
 }

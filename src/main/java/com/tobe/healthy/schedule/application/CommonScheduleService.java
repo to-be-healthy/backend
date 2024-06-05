@@ -18,8 +18,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static com.tobe.healthy.common.event.EventType.NOTIFICATION;
 import static com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL;
-import static com.tobe.healthy.common.event.EventType.SCHEDULE_NOTIFICATION;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.CANCEL;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.RESERVE;
@@ -60,7 +60,7 @@ public class CommonScheduleService {
                 null
         );
 
-        notificationPublisher.publish(notification, SCHEDULE_NOTIFICATION);
+        notificationPublisher.publish(notification, NOTIFICATION);
 
         return ScheduleIdInfo.create(schedule, getScheduleTimeText(schedule.getLessonStartTime()));
     }
@@ -81,7 +81,7 @@ public class CommonScheduleService {
                 null
         );
 
-        notificationPublisher.publish(notification, SCHEDULE_NOTIFICATION);
+        notificationPublisher.publish(notification, NOTIFICATION);
 
         ScheduleIdInfo idInfo = ScheduleIdInfo.create(schedule, getScheduleTimeText(schedule.getLessonStartTime()));
         schedule.cancelMemberSchedule();

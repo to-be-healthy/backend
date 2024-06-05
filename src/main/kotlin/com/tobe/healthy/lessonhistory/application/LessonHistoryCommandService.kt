@@ -6,7 +6,7 @@ import com.tobe.healthy.common.FileUpload.FILE_TEMP_UPLOAD_TIMEOUT
 import com.tobe.healthy.common.Utils.createFileName
 import com.tobe.healthy.common.Utils.createObjectMetadata
 import com.tobe.healthy.common.event.CustomEventPublisher
-import com.tobe.healthy.common.event.EventType.LESSON_HISTORY_NOTIFICATION
+import com.tobe.healthy.common.event.EventType.NOTIFICATION
 import com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI
 import com.tobe.healthy.common.redis.RedisService
 import com.tobe.healthy.config.error.CustomException
@@ -77,7 +77,7 @@ class LessonHistoryCommandService(
             lessonHistory.id
         )
 
-        notificationPublisher.publish(notification, LESSON_HISTORY_NOTIFICATION)
+        notificationPublisher.publish(notification, NOTIFICATION)
 
         return CommandRegisterLessonHistoryResult.from(lessonHistory, files)
     }
@@ -171,7 +171,7 @@ class LessonHistoryCommandService(
                 lessonHistory.id
         )
 
-        notificationPublisher.publish(notification, LESSON_HISTORY_NOTIFICATION)
+        notificationPublisher.publish(notification, NOTIFICATION)
 
         return CommandRegisterCommentResult.from(lessonHistoryComment, files)
     }
@@ -208,7 +208,7 @@ class LessonHistoryCommandService(
             lessonHistory.id
         )
 
-        notificationPublisher.publish(notification, LESSON_HISTORY_NOTIFICATION)
+        notificationPublisher.publish(notification, NOTIFICATION)
 
         lessonHistoryCommentRepository.save(entity)
 

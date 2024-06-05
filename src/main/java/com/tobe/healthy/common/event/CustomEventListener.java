@@ -18,10 +18,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
+import static com.tobe.healthy.common.LessonTimeFormatter.lessonStartDateTimeFormatter;
 import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.WAITING;
@@ -32,7 +32,6 @@ import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 @RequiredArgsConstructor
 public class CustomEventListener {
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M월 d일(E) h시");
     private final int ONE_LESSON = 1;
 
     private final CourseService courseService;
@@ -47,7 +46,7 @@ public class CustomEventListener {
     public void handleEvent(CustomEvent event) {
         switch (event.getType()) {
             case SCHEDULE_CANCEL -> changeWaitingToCompleted((Long) event.getResult());
-            case SCHEDULE_NOTIFICATION, LESSON_HISTORY_NOTIFICATION -> sendNotification((CommandSendNotification) event.getResult());
+            case NOTIFICATION -> sendNotification((CommandSendNotification) event.getResult());
         }
     }
 
@@ -72,7 +71,7 @@ public class CustomEventListener {
 
                     CommandSendNotification request = new CommandSendNotification(
                             WAITING.getDescription(),
-                            String.format("%s 대기 중이던 예약이 확정되었어요!", LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)),
+                            String.format("%s 대기 중이던 예약이 확정되었어요!", LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(lessonStartDateTimeFormatter())),
                             List.of(schedule.getApplicant().getId()),
                             WAITING,
                             null

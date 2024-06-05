@@ -1,7 +1,7 @@
 package com.tobe.healthy.schedule.application
 
 import com.tobe.healthy.common.event.CustomEventPublisher
-import com.tobe.healthy.common.event.EventType
+import com.tobe.healthy.common.event.EventType.NOTIFICATION
 import com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
@@ -210,7 +210,7 @@ class TrainerScheduleCommandService(
                 RESERVE
         )
 
-        notificationPublisher.publish(notification, EventType.SCHEDULE_NOTIFICATION)
+        notificationPublisher.publish(notification, NOTIFICATION)
 
         return CommandRegisterScheduleByStudentResult.from(schedule, findStudent)
     }
@@ -236,7 +236,7 @@ class TrainerScheduleCommandService(
             CANCEL
         )
 
-        notificationPublisher.publish(notification, EventType.SCHEDULE_NOTIFICATION)
+        notificationPublisher.publish(notification, NOTIFICATION)
 
         eventPublisher.publish(schedule.id, SCHEDULE_CANCEL)
 
