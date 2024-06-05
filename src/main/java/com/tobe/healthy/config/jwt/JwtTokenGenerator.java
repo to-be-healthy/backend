@@ -66,8 +66,8 @@ public class JwtTokenGenerator {
         Map<String, Object> claims = createClaims(memberId, userId, memberType, gym);
         return Jwts.builder()
                 .claims(claims)
-                .setIssuedAt(new Date())
-                .setExpiration(expiry)
+                .issuedAt(new Date())
+                .expiration(expiry)
                 .signWith(key, HS256)
                 .compact();
     }
@@ -75,9 +75,9 @@ public class JwtTokenGenerator {
     private String createRefreshToken(Long memberId, String userId, Date expiry, String memberType, Gym gym) {
         Map<String, Object> claims = createClaims(memberId, userId, memberType, gym);
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(new Date())
-                .setExpiration(expiry)
+                .claims(claims)
+                .issuedAt(new Date())
+                .expiration(expiry)
                 .signWith(key, HS256)
                 .compact();
     }
