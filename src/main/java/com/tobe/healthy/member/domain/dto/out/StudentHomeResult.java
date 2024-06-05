@@ -23,8 +23,9 @@ public class StudentHomeResult {
     private RetrieveLessonHistoryByDateCondResult lessonHistory;
     private DietDto diet;
     private GymDto gym;
+    private Boolean redDotStatus;
 
-    public static StudentHomeResult create(CourseDto course, PointDto point, RankDto rank, MyReservation myReservation, RetrieveLessonHistoryByDateCondResult lessonHistory, DietDto diet, GymDto gym) {
+    public static StudentHomeResult create(CourseDto course, PointDto point, RankDto rank, MyReservation myReservation, RetrieveLessonHistoryByDateCondResult lessonHistory, DietDto diet, GymDto gym, Boolean redDotStatus) {
         return StudentHomeResult.builder()
                 .course(course)
                 .point(point)
@@ -33,6 +34,7 @@ public class StudentHomeResult {
                 .lessonHistory(lessonHistory)
                 .diet(diet)
                 .gym(gym)
+                .redDotStatus(redDotStatus)
                 .build();
     }
 }

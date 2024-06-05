@@ -14,6 +14,7 @@ import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
 import com.tobe.healthy.member.domain.dto.out.TrainerHomeResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.notification.application.NotificationService;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
 import com.tobe.healthy.point.repository.PointRepository;
@@ -33,6 +34,7 @@ import java.util.List;
 
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +50,7 @@ public class HomeService {
     private final MemberRepository memberRepository;
     private final CourseService courseService;
     private final CourseHistoryRepository courseHistoryRepository;
+    private final NotificationService notificationService;
 
     public StudentHomeResult getStudentHome(Long memberId) {
         //헬스장 정보
@@ -87,10 +90,21 @@ public class HomeService {
         //식단
         DietDto diet = dietService.getTodayDiet(memberId);
 
-        return StudentHomeResult.create(usingCourse, point, rank, myReservation, lessonHistory, diet, gym);
+        // 알림 레드닷 여부
+        boolean redDotStatus = notificationService.findRedDotStatus(memberId);
+
+        return StudentHomeResult.create(usingCourse, point, rank, myReservation, lessonHistory, diet, gym, redDotStatus);
     }
 
     public TrainerHomeResult getTrainerHome(Long trainerId) {
+
+        // 사용자 정보
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        //헬스장 정보
+        GymDto gym = member.getGym() == null ? null : GymDto.from(member.getGym());
+
         long mappingStudentCount = mappingRepository.countByTrainerId(trainerId);
 
         // 우수회원
@@ -108,10 +122,15 @@ public class HomeService {
 
         RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(trainerId);
 
+        // 알림 레드닷 여부
+        boolean redDotStatus = notificationService.findRedDotStatus(trainerId);
+
         return TrainerHomeResult.builder()
                 .studentCount(mappingStudentCount)
                 .bestStudents(bestStudents)
                 .todaySchedule(trainerTodaySchedule)
+                .gym(gym)
+                .redDotStatus(redDotStatus)
                 .build();
     }
 
