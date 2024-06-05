@@ -97,5 +97,4 @@ public class CustomEventListener {
         CourseUpdateCommand command = CourseUpdateCommand.create(studentId, MINUS, RESERVATION, ONE_LESSON);
         courseService.updateCourseByMember(scheduleId, trainerId, command);
     }
-
 }
