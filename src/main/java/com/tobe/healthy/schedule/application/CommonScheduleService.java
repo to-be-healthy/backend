@@ -4,6 +4,7 @@ import com.tobe.healthy.common.event.CustomEventPublisher;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.notification.domain.dto.in.CommandSendNotification;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.repository.common.CommonScheduleRepository;
@@ -14,10 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-import static com.tobe.healthy.common.event.EventType.NOTIFICATION_RESERVE;
 import static com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL;
+import static com.tobe.healthy.common.event.EventType.SCHEDULE_NOTIFICATION;
 import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.notification.domain.entity.NotificationType.CANCEL;
+import static com.tobe.healthy.notification.domain.entity.NotificationType.RESERVE;
 import static java.time.LocalTime.NOON;
 
 @Service
@@ -26,7 +31,10 @@ import static java.time.LocalTime.NOON;
 @Slf4j
 public class CommonScheduleService {
 
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M월 d일(E) h시");
+
     private final CustomEventPublisher<Long> eventPublisher;
+    private final CustomEventPublisher<CommandSendNotification> notificationPublisher;
 
     private final MemberRepository memberRepository;
     private final CommonScheduleRepository commonScheduleRepository;
@@ -43,7 +51,16 @@ public class CommonScheduleService {
 
         schedule.registerSchedule(member);
 
-        eventPublisher.publish(member.getId(), NOTIFICATION_RESERVE);
+        // 일정 신청시 알림
+        CommandSendNotification notification = new CommandSendNotification(
+                RESERVE.getDescription(),
+                String.format("%s님이 %s에 예약했어요.", schedule.getApplicant().getName(), LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)),
+                List.of(schedule.getApplicant().getId()),
+                RESERVE,
+                null
+        );
+
+        notificationPublisher.publish(notification, SCHEDULE_NOTIFICATION);
 
         return ScheduleIdInfo.create(schedule, getScheduleTimeText(schedule.getLessonStartTime()));
     }
@@ -55,8 +72,21 @@ public class CommonScheduleService {
         LocalDateTime before24Hour = LocalDateTime.of(schedule.getLessonDt().minusDays(1), schedule.getLessonStartTime());
         if (LocalDateTime.now().isAfter(before24Hour)) throw new CustomException(RESERVATION_CANCEL_NOT_VALID);
 
+        // 일정 취소시 알림
+        CommandSendNotification notification = new CommandSendNotification(
+                CANCEL.getDescription(),
+                String.format("%s님이 %s 예약을 취소했어요.", schedule.getApplicant().getName(), LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)),
+                List.of(schedule.getApplicant().getId()),
+                CANCEL,
+                null
+        );
+
+        notificationPublisher.publish(notification, SCHEDULE_NOTIFICATION);
+
         ScheduleIdInfo idInfo = ScheduleIdInfo.create(schedule, getScheduleTimeText(schedule.getLessonStartTime()));
         schedule.cancelMemberSchedule();
+
+
         eventPublisher.publish(scheduleId, SCHEDULE_CANCEL);
         return idInfo;
     }

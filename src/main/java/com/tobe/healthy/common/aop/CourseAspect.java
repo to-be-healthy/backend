@@ -10,10 +10,8 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION_CANCEL;
@@ -35,20 +33,24 @@ public class CourseAspect {
     }
 
     @Pointcut("execution(* com.tobe.healthy.schedule.application.CommonScheduleService.cancelMemberSchedule(..))")
-    private void cancelMemberSchedule() {}
+    private void cancelMemberSchedule() {
+    }
 
     @Pointcut("execution(* com.tobe.healthy.schedule.application.CommonScheduleService.reserveSchedule(..))")
-    private void reserveSchedule() {}
+    private void reserveSchedule() {
+    }
 
     @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleCommandService.registerStudentInTrainerSchedule(..))")
-    private void registerStudentInTrainerSchedule() {}
+    private void registerStudentInTrainerSchedule() {
+    }
 
     @Pointcut("execution(* com.tobe.healthy.schedule.application.TrainerScheduleCommandService.cancelStudentReservation(..))")
-    private void cancelStudentReservation() {}
-    
+    private void cancelStudentReservation() {
+    }
+
     /*
-    * 학생이 수업 취소
-    */
+     * 학생이 수업 취소
+     */
     @AfterReturning(value = "cancelMemberSchedule()", returning = "returnValue")
     public void plusCourseByStudent(JoinPoint joinPoint, Object returnValue) {
         ScheduleIdInfo scheduleIdInfo = ((ScheduleIdInfo) returnValue);

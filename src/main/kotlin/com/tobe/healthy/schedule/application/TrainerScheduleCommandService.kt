@@ -1,10 +1,14 @@
 package com.tobe.healthy.schedule.application
 
 import com.tobe.healthy.common.event.CustomEventPublisher
+import com.tobe.healthy.common.event.EventType
 import com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.member.repository.MemberRepository
+import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
+import com.tobe.healthy.notification.domain.entity.NotificationType.CANCEL
+import com.tobe.healthy.notification.domain.entity.NotificationType.RESERVE
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterDefaultLessonTime
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandUpdateScheduleStatus
@@ -24,7 +28,9 @@ import java.time.DayOfWeek.MONDAY
 import java.time.DayOfWeek.SUNDAY
 import java.time.Duration.between
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
 @Service
@@ -34,6 +40,7 @@ class TrainerScheduleCommandService(
     private val trainerScheduleRepository: TrainerScheduleRepository,
     private val trainerScheduleInfoRepository: TrainerScheduleInfoRepository,
     private val scheduleWaitingRepository: ScheduleWaitingRepository,
+    private val notificationPublisher: CustomEventPublisher<CommandSendNotification>,
     private val eventPublisher: CustomEventPublisher<Long>
 ) {
 
@@ -195,6 +202,17 @@ class TrainerScheduleCommandService(
 
         schedule.registerSchedule(findStudent)
 
+        // 트레이너가 일정 등록시 학생에게 알림
+        val notification = CommandSendNotification(
+                RESERVE.description,
+                String.format("%s 트레이너가 %s님을 %s 예약에 등록했어요.", schedule.trainer.name, schedule.applicant!!.name, LocalDateTime.of(schedule.lessonDt, schedule.lessonStartTime).format(formatter)),
+                listOf(schedule.applicant!!.id),
+                RESERVE,
+            null
+        )
+
+        notificationPublisher.publish(notification, EventType.SCHEDULE_NOTIFICATION)
+
         return CommandRegisterScheduleByStudentResult.from(schedule, findStudent)
     }
 
@@ -204,14 +222,28 @@ class TrainerScheduleCommandService(
     ): CommandCancelStudentReservationResult {
 
         // todo: 2024-05-05 일요일 오후 14:16 등록된 학생이 있는경우 푸시알림등으로 취소되었다는 알림이 필요 - seonwoo_jung
-        val entity = trainerScheduleRepository.findAllSchedule(scheduleId, trainerId)
+        val schedule = trainerScheduleRepository.findAllSchedule(scheduleId, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
 
-        entity.cancelMemberSchedule()
+        val applicantId = schedule.applicant?.id
+        val applicantName = schedule.applicant?.name
 
-        eventPublisher.publish(entity.id, SCHEDULE_CANCEL)
+        schedule.cancelMemberSchedule()
 
-        return CommandCancelStudentReservationResult.from(entity)
+        // 트레이너가 일정 등록시 학생에게 알림
+        val notification = CommandSendNotification(
+            CANCEL.description,
+            String.format("%s 트레이너가 %s님의 %s 예약을 취소했어요.", schedule.trainer.name, applicantName, LocalDateTime.of(schedule.lessonDt, schedule.lessonStartTime).format(formatter)),
+            listOf(applicantId!!),
+            CANCEL,
+            null
+        )
+
+        notificationPublisher.publish(notification, EventType.SCHEDULE_NOTIFICATION)
+
+        eventPublisher.publish(schedule.id, SCHEDULE_CANCEL)
+
+        return CommandCancelStudentReservationResult.from(schedule, applicantId, applicantName)
     }
 
     fun updateReservationStatusToNoShow(
@@ -263,5 +295,6 @@ class TrainerScheduleCommandService(
 
     companion object {
         const val ONE_DAY = 1L
+        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("M월 d일(E) h시")
     }
 }

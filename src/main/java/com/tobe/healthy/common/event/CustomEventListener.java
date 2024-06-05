@@ -4,11 +4,8 @@ import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.course.repository.CourseRepository;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.notification.application.NotificationService;
 import com.tobe.healthy.notification.domain.dto.in.CommandSendNotification;
-import com.tobe.healthy.notification.domain.entity.NotificationType;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import com.tobe.healthy.schedule.repository.common.CommonScheduleRepository;
@@ -21,12 +18,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
+import static com.tobe.healthy.notification.domain.entity.NotificationType.WAITING;
 import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 
 @Slf4j
@@ -34,6 +32,7 @@ import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 @RequiredArgsConstructor
 public class CustomEventListener {
 
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M월 d일(E) h시");
     private final int ONE_LESSON = 1;
 
     private final CourseService courseService;
@@ -41,7 +40,6 @@ public class CustomEventListener {
     private final CommonScheduleRepository commonScheduleRepository;
     private final ScheduleWaitingRepository scheduleWaitingRepository;
     private final NotificationService notificationService;
-    private final MemberRepository memberRepository;
 
     @Async
     @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -49,7 +47,8 @@ public class CustomEventListener {
     public void handleEvent(CustomEvent event) {
         switch (event.getType()) {
             case SCHEDULE_CANCEL -> changeWaitingToCompleted((Long) event.getResult());
-            case NOTIFICATION_RESERVE -> notifyScheduleReservation((Long) event.getResult());
+            case SCHEDULE_NOTIFICATION -> notifyScheduleReservation((CommandSendNotification) event.getResult());
+            case LESSON_HISTORY_NOTIFICATION -> notifyLessonHistory((CommandSendNotification) event.getResult());
         }
     }
 
@@ -71,24 +70,28 @@ public class CustomEventListener {
                 .ifPresent(i -> {
                     minusCourse(waitingMemberId, scheduleId, schedule.getTrainer().getId());
                     schedule.registerSchedule(scheduleWaiting.getMember());
+
+                    CommandSendNotification request = new CommandSendNotification(
+                            WAITING.getDescription(),
+                            String.format("%s 대기 중이던 예약이 확정되었어요!", LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)),
+                            List.of(schedule.getApplicant().getId()),
+                            WAITING,
+                            null
+                    );
+
+                    notifyScheduleReservation(request);
+
                     commonScheduleRepository.save(schedule);
                 });
         }
     }
 
-    public void notifyScheduleReservation(Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+    public void notifyScheduleReservation(CommandSendNotification request) {
+        notificationService.sendNotification(request, 542);
+    }
 
-        CommandSendNotification notification = new CommandSendNotification(
-                "예약",
-                String.format("%s님이 수업을 신청했드앙", member.getName()),
-                List.of(memberId),
-                NotificationType.RESERVE,
-                null
-        );
-
-        notificationService.sendNotification(notification, 542);
+    public void notifyLessonHistory(CommandSendNotification request) {
+        notificationService.sendNotification(request, 542);
     }
 
     private boolean isBefore24Hour(Schedule schedule){

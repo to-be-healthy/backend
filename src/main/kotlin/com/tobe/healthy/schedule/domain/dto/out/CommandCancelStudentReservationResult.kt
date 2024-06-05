@@ -10,18 +10,20 @@ data class CommandCancelStudentReservationResult(
     val trainerId: Long,
     val trainerName: String,
     val studentId: Long?,
-    val studentName: String?
+    val studentName: String?,
+    val waitingStudentId: Long? = null
 ) {
     companion object {
-        fun from(schedule: Schedule) : CommandCancelStudentReservationResult {
+        fun from(schedule: Schedule, applicantId: Long?, applicantName: String?) : CommandCancelStudentReservationResult {
             return CommandCancelStudentReservationResult(
                 scheduleId = schedule.id,
                 lessonStartTime = schedule.lessonStartTime,
                 lessonEndTime = schedule.lessonEndTime,
                 trainerId = schedule.trainer.id,
                 trainerName = "${schedule.trainer.name} 트레이너",
-                studentId = schedule.scheduleWaiting?.firstOrNull()?.member?.id,
-                studentName = schedule.scheduleWaiting?.firstOrNull()?.member?.name
+                studentId = applicantId,
+                studentName = applicantName,
+                waitingStudentId = schedule.scheduleWaiting?.firstOrNull()?.id
             )
         }
     }

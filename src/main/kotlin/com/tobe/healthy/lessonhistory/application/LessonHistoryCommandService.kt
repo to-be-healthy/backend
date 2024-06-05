@@ -5,6 +5,8 @@ import com.tobe.healthy.common.FileUpload.FILE_MAXIMUM_UPLOAD_SIZE
 import com.tobe.healthy.common.FileUpload.FILE_TEMP_UPLOAD_TIMEOUT
 import com.tobe.healthy.common.Utils.createFileName
 import com.tobe.healthy.common.Utils.createObjectMetadata
+import com.tobe.healthy.common.event.CustomEventPublisher
+import com.tobe.healthy.common.event.EventType.LESSON_HISTORY_NOTIFICATION
 import com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI
 import com.tobe.healthy.common.redis.RedisService
 import com.tobe.healthy.config.error.CustomException
@@ -24,6 +26,8 @@ import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
+import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
+import com.tobe.healthy.notification.domain.entity.NotificationType.*
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository
 import org.springframework.beans.factory.annotation.Value
@@ -44,6 +48,7 @@ class LessonHistoryCommandService(
     private val redisService: RedisService,
     @Value("\${aws.s3.bucket-name}")
     private val bucketName: String,
+    private val notificationPublisher: CustomEventPublisher<CommandSendNotification>
 ) {
 
     fun registerLessonHistory(
@@ -62,6 +67,17 @@ class LessonHistoryCommandService(
         lessonHistoryRepository.save(lessonHistory)
 
         val files = registerFiles(request.uploadFiles, trainer, lessonHistory)
+
+        // 학생에게 수업일지 작성 알림
+        val notification = CommandSendNotification(
+            WRITE.description,
+            String.format("트레이너가 새로운 수업일지를 작성하였습니다."),
+            listOf(lessonHistory.student?.id!!),
+            WRITE,
+            lessonHistory.id
+        )
+
+        notificationPublisher.publish(notification, LESSON_HISTORY_NOTIFICATION)
 
         return CommandRegisterLessonHistoryResult.from(lessonHistory, files)
     }
@@ -146,6 +162,17 @@ class LessonHistoryCommandService(
         val lessonHistoryComment = registerComment(order, request, findMember, lessonHistory)
         val files = registerFile(request.uploadFiles, findMember, lessonHistory, lessonHistoryComment)
 
+        // 게시글 작성자에게 알림
+        val notification = CommandSendNotification(
+                COMMENT.description,
+                String.format("내 게시글에 새로운 댓글이 달렸어요."),
+                listOf(lessonHistory.trainer!!.id!!),
+                COMMENT,
+                lessonHistory.id
+        )
+
+        notificationPublisher.publish(notification, LESSON_HISTORY_NOTIFICATION)
+
         return CommandRegisterCommentResult.from(lessonHistoryComment, files)
     }
 
@@ -171,6 +198,17 @@ class LessonHistoryCommandService(
             lessonHistory = lessonHistory,
             parent = parentComment
         )
+
+        // 댓글 작성자에게 알림
+        val notification = CommandSendNotification(
+            REPLY.description,
+            String.format("내 댓글에 새로운 답글이 달렸어요."),
+            listOf(parentComment.writer?.id!!),
+            REPLY,
+            lessonHistory.id
+        )
+
+        notificationPublisher.publish(notification, LESSON_HISTORY_NOTIFICATION)
 
         lessonHistoryCommentRepository.save(entity)
 

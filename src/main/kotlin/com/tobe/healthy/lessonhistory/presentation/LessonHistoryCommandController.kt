@@ -115,7 +115,7 @@ class LessonHistoryCommandController(
         )
     }
 
-    @Operation(summary = "수업일지에 답글을 등록한다.",
+    @Operation(summary = "수업일지 댓글에 대댓글을 등록한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "수업 일지에 대댓글이 등록되었습니다."),
             ApiResponse(responseCode = "404(1)", description = "회원을 찾을 수 없습니다."),
