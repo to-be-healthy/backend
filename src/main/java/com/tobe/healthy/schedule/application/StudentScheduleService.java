@@ -2,7 +2,6 @@ package com.tobe.healthy.schedule.application;
 
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
-import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
@@ -33,7 +32,6 @@ import static java.time.LocalTime.NOON;
 public class StudentScheduleService {
 
 	private final StudentScheduleRepository studentScheduleRepository;
-	private final CourseRepository courseRepository;
 	private final TrainerMemberMappingRepository mappingRepository;
 	private final CourseService courseService;
 

@@ -37,8 +37,7 @@ class GymCommandService(
         return CommandRegisterGymResult.from(gym)
     }
 
-    fun selectMyGym(gymId: Long, request: CommandSelectMyGym, memberId: Long
-    ): CommandSelectMyGymResult {
+    fun selectMyGym(gymId: Long, request: CommandSelectMyGym, memberId: Long): CommandSelectMyGymResult {
 
         val member = memberRepository.findByIdOrNull(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)

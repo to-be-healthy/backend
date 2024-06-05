@@ -3,17 +3,14 @@ package com.tobe.healthy.schedule.repository.common;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Optional;
 
 import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
-
 
 @Repository
 @RequiredArgsConstructor
@@ -28,13 +25,6 @@ public class CommonScheduleRepositoryCustomImpl implements CommonScheduleReposit
                 .from(schedule)
                 .where(memberIdEq(memberId), courseIdEq(courseId), lessonDateTimeBeforeNow())
                 .fetchOne();
-    }
-
-    private BooleanExpression scheduleIdEq(Long scheduleId) {
-        if(!ObjectUtils.isEmpty(scheduleId)){
-            return schedule.id.eq(scheduleId);
-        }
-        return null;
     }
 
     private BooleanExpression courseIdEq(Long courseId) {
@@ -55,5 +45,4 @@ public class CommonScheduleRepositoryCustomImpl implements CommonScheduleReposit
         return schedule.lessonDt.before(LocalDate.now())
                 .or(schedule.lessonDt.loe(LocalDate.now()).and(schedule.lessonStartTime.before(LocalTime.now())));
     }
-
 }

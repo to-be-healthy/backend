@@ -70,7 +70,6 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@Builder.Default
 	private List<LessonHistory> lessonHistories = new ArrayList<>();
 
-
     public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, ReservationStatus reservationStatus) {
 		ScheduleBuilder reserve = Schedule.builder()
 				.lessonDt(date)
@@ -102,18 +101,6 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 		}
 		this.reservationStatus = AVAILABLE;
 		this.applicant = null;
-	}
-
-	public void cancelMemberSchedule(ScheduleWaiting scheduleWaiting) {
-		if (lessonStartTime.isAfter(LocalTime.now())) {
-			throw new IllegalArgumentException("수업 시작 이후에는 예약 취소가 불가능합니다.");
-		}
-		this.reservationStatus = COMPLETED;
-		this.applicant = scheduleWaiting.getMember();
-	}
-
-	public void changeApplicantInSchedule(Member applicant) {
-		this.applicant = applicant;
 	}
 
 	public void updateScheduleToDisabled() {

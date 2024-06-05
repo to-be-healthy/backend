@@ -13,5 +13,4 @@ public interface StudentScheduleRepositoryCustom {
 	List<MyReservation> findMyNewReservation(Long memberId, StudentScheduleCond searchCond);
 	List<MyReservation> findMyOldReservation(Long memberId, StudentScheduleCond searchCond, String searchDate);
 	MyReservation findMyNextReservation(Long memberId);
-
 }

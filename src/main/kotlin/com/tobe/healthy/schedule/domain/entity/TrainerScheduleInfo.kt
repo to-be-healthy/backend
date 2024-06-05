@@ -64,7 +64,7 @@ class TrainerScheduleInfo(
             )
         }
         fun fromDescription(description: Int): LessonTime {
-            for (lessonTime in LessonTime.values()) {
+            for (lessonTime in LessonTime.entries) {
                 if (lessonTime.description == description) {
                     return lessonTime
                 }

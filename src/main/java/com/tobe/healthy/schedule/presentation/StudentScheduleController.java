@@ -3,7 +3,6 @@ package com.tobe.healthy.schedule.presentation;
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.StudentScheduleService;
-import com.tobe.healthy.schedule.domain.dto.in.RetrieveTrainerScheduleByLessonInfo;
 import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;

@@ -23,7 +23,6 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
-import static com.tobe.healthy.point.domain.entity.QPoint.point1;
 import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
 import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting;
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
@@ -160,5 +159,4 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				, ConstantImpl.create("%Y-%m"));
 		return stringTemplate.eq(searchDate);
 	}
-
 }
