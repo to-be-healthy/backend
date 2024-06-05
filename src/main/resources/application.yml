@@ -127,9 +127,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "prometheus"
   server:
-    port: 7070
+    port: ${ACTUATOR_SECRET_PORT}
+    base-path: ${ACTUATOR_SECRET_PATH}
 
 info:
   app:
