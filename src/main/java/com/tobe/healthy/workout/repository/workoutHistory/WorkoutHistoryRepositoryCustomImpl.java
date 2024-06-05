@@ -9,7 +9,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.QMemberProfile;
 import com.tobe.healthy.workout.domain.dto.out.QWorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.entity.workoutHistory.*;
+import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryFiles;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,12 +19,10 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
-import static com.tobe.healthy.diet.domain.entity.QDietComment.dietComment;
 import static com.tobe.healthy.member.domain.entity.QMember.member;
 import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistory.workoutHistory;
 import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryFiles.workoutHistoryFiles;
 import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryLike.workoutHistoryLike;
-
 
 @Repository
 @RequiredArgsConstructor

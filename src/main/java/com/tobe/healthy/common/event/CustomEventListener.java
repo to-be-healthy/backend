@@ -44,9 +44,9 @@ public class CustomEventListener {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     @TransactionalEventListener
     public void handleEvent(CustomEvent event) {
-        switch (event.getType()) {
-            case SCHEDULE_CANCEL -> changeWaitingToCompleted((Long) event.getResult());
-            case NOTIFICATION -> sendNotification((CommandSendNotification) event.getResult());
+        switch (event.type()) {
+            case SCHEDULE_CANCEL -> changeWaitingToCompleted((Long) event.result());
+            case NOTIFICATION -> sendNotification((CommandSendNotification) event.result());
         }
     }
 

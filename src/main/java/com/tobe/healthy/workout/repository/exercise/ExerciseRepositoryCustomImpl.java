@@ -13,9 +13,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
-import static com.tobe.healthy.member.domain.entity.QMember.member;
 import static com.tobe.healthy.workout.domain.entity.exercise.QExercise.exercise;
-
 
 @Repository
 @RequiredArgsConstructor
@@ -40,7 +38,7 @@ public class ExerciseRepositoryCustomImpl implements ExerciseRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .orderBy(exercise.member.id.desc(), exercise.exerciseId.asc())
                 .fetch();
-        return PageableExecutionUtils.getPage(exercises, pageable, ()-> totalCnt );
+        return PageableExecutionUtils.getPage(exercises, pageable, () -> totalCnt);
     }
 
     private BooleanExpression nameLike(String name) {
@@ -51,7 +49,7 @@ public class ExerciseRepositoryCustomImpl implements ExerciseRepositoryCustom {
     }
 
     private BooleanExpression exerciseCategoryEq(ExerciseCategory category) {
-        if (!ObjectUtils.isEmpty(category)){
+        if (!ObjectUtils.isEmpty(category)) {
             return exercise.category.eq(category);
         }
         return null;

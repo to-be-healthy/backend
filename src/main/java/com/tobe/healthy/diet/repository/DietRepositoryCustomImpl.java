@@ -10,11 +10,8 @@ import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.QDietDto;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietFiles;
-import com.tobe.healthy.diet.domain.entity.QDiet;
-import com.tobe.healthy.diet.domain.entity.QDietLike;
 import com.tobe.healthy.member.domain.entity.Member;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -22,15 +19,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 import static com.tobe.healthy.diet.domain.entity.QDiet.diet;
 import static com.tobe.healthy.diet.domain.entity.QDietFiles.dietFiles;
 import static com.tobe.healthy.diet.domain.entity.QDietLike.dietLike;
-import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistory.workoutHistory;
-import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryLike.workoutHistoryLike;
 
 
 @Repository
@@ -87,8 +80,8 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 .fetchOne();
         List<DietDto> diets = queryFactory
                 .select(new QDietDto(diet.dietId, diet.member
-                    , isLiked()
-                    , diet.likeCnt, diet.commentCnt, diet.eatDate, diet.fastBreakfast, diet.fastLunch, diet.fastDinner))
+                        , isLiked()
+                        , diet.likeCnt, diet.commentCnt, diet.eatDate, diet.fastBreakfast, diet.fastLunch, diet.fastDinner))
                 .from(diet)
                 .leftJoin(dietLike)
                 .on(diet.dietId.eq(dietLike.dietLikePK.diet.dietId)

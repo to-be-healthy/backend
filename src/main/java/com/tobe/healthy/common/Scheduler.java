@@ -1,6 +1,5 @@
 package com.tobe.healthy.common;
 
-import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.schedule.application.TrainerScheduleCommandService;
 import lombok.RequiredArgsConstructor;
