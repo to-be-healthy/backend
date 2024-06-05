@@ -31,15 +31,15 @@ class PushCommandService(
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
         memberTokenRepository.findByMemberId(findMember.id)
-            ?.changeToken(request.token!!)
+            ?.changeToken(request.token)
             ?: let {
-                val memberToken = MemberToken.register(findMember, request.token!!)
+                val memberToken = MemberToken.register(findMember, request.token)
                 memberTokenRepository.save(memberToken)
             }
 
         return CommandRegisterTokenResult(
             name = findMember.name,
-            token = request.token!!
+            token = request.token
         )
     }
 

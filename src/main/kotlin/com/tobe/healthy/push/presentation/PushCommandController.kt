@@ -19,7 +19,7 @@ class PushCommandController(
 
     @PostMapping("/register")
     fun registerFcmToken(
-        @RequestBody @Valid request: CommandRegisterToken,
+        @RequestBody request: CommandRegisterToken,
         @AuthenticationPrincipal member: CustomMemberDetails
     ): ApiResultResponse<CommandRegisterTokenResult> {
         return ApiResultResponse(

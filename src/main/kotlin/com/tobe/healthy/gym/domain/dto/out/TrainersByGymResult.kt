@@ -8,7 +8,7 @@ data class TrainersByGymResult(
     val userId: String,
     val email: String,
     val name: String,
-    val memberProfile: MemberProfile? = null
+    val profile: MemberProfileResult
 ) {
     companion object {
         fun from(member: Member): TrainersByGymResult {
@@ -17,8 +17,23 @@ data class TrainersByGymResult(
                 userId = member.userId,
                 email = member.email,
                 name = member.name,
-                memberProfile = member.memberProfile
+                profile = MemberProfileResult.from(member.memberProfile)
             )
         }
     }
+
+    data class MemberProfileResult(
+        val id: Long?,
+        val fileUrl: String?
+    ) {
+        companion object {
+            fun from(memberProfile: MemberProfile?): MemberProfileResult {
+                return MemberProfileResult(
+                    id = memberProfile?.id,
+                    fileUrl = memberProfile?.fileUrl
+                )
+            }
+        }
+    }
+
 }

@@ -154,7 +154,8 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
 
     @Override
     public List<Member> findAllTrainerByGym(Long gymId) {
-        return queryFactory.select(member)
+        return queryFactory
+                .select(member)
                 .from(member)
                 .leftJoin(member.memberProfile).fetchJoin()
                 .where(

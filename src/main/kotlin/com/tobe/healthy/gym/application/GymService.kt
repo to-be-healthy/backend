@@ -14,10 +14,12 @@ class GymService(
     private val gymRepository: GymRepository,
 ) {
     fun findAllGym(): List<GymResult> {
-        return gymRepository.findAll().map { GymResult.from(it) }
+        return gymRepository.findAll()
+            .map { GymResult.from(it) }
     }
 
     fun findAllTrainersByGym(gymId: Long): List<TrainersByGymResult?> {
-        return memberRepository.findAllTrainerByGym(gymId).map { TrainersByGymResult.from(it) }
+        return memberRepository.findAllTrainerByGym(gymId)
+            .map { TrainersByGymResult.from(it) }
     }
 }
