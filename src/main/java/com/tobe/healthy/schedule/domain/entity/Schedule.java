@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
+import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
@@ -57,7 +58,7 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@Nullable
 	private Member applicant;
 
-	@OneToMany(fetch = LAZY, mappedBy = "schedule", orphanRemoval = true)
+	@OneToMany(fetch = LAZY, mappedBy = "schedule", orphanRemoval = true, cascade = ALL)
 	@Nullable
 	@Builder.Default
 	private List<ScheduleWaiting> scheduleWaiting = new ArrayList<>();

@@ -30,5 +30,4 @@ public class Scheduler {
         trainerScheduleCommandService.deleteDisabledSchedule();
         log.info("========== 트레이너의 DISABLED 스케줄 삭제 스케줄러 작동 완료 ==========");
     }
-
 }

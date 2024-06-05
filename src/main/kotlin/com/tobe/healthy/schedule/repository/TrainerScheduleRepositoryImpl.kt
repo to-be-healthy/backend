@@ -258,6 +258,7 @@ class TrainerScheduleRepositoryImpl(
         return queryFactory
             .select(schedule)
             .from(schedule)
+            .leftJoin(schedule.scheduleWaiting).fetchJoin()
             .where(
                 lessonDtBetween(lessonStartDt, lessonEndDt),
                 reservationStatusEq(DISABLED)
