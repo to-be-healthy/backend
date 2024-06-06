@@ -1,15 +1,18 @@
 package com.tobe.healthy.config.error;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-import static org.springframework.http.HttpStatus.*;
-
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
-    MEMBER_NOT_FOUND(NOT_FOUND, "C_000", "회원이 존재하지 않습니다."),
+    MEMBER_NOT_FOUND(NOT_FOUND, "C_000", "로그인에 실패했어요."),
     MEMBER_EMAIL_DUPLICATION(BAD_REQUEST, "C_001", "이미 가입된 이메일 주소입니다."),
     ACCESS_TOKEN_EXPIRED(BAD_REQUEST, "C_002", "토큰이 만료되었습니다."),
     HANDLE_ACCESS_DENIED(FORBIDDEN, "C_003", "권한이 없습니다."),
