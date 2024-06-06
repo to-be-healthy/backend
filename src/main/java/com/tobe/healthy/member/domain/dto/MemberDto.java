@@ -2,7 +2,11 @@ package com.tobe.healthy.member.domain.dto;
 
 import com.tobe.healthy.gym.domain.dto.out.GymDto;
 import com.tobe.healthy.gym.domain.entity.Gym;
-import com.tobe.healthy.member.domain.entity.*;
+import com.tobe.healthy.member.domain.entity.AlarmStatus;
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberProfile;
+import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.member.domain.entity.SocialType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
@@ -35,9 +39,6 @@ public class MemberDto {
 			.userId(member.getUserId())
 			.email(member.getEmail())
 			.name(member.getName())
-			.age(member.getAge())
-			.height(member.getHeight())
-			.weight(member.getWeight())
 			.delYn(member.isDelYn())
 			.memberType(member.getMemberType())
 			.pushAlarmStatus(member.getPushAlarmStatus())
@@ -52,9 +53,6 @@ public class MemberDto {
 				.userId(member.getUserId())
 				.email(member.getEmail())
 				.name(member.getName())
-				.age(member.getAge())
-				.height(member.getHeight())
-				.weight(member.getWeight())
 				.delYn(member.isDelYn())
 				.memberType(member.getMemberType())
 				.pushAlarmStatus(member.getPushAlarmStatus())
