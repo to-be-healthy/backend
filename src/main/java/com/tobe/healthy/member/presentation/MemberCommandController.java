@@ -178,7 +178,7 @@ public class MemberCommandController {
 			})
 	@PatchMapping("/diet-notice")
 	public ResponseHandler<Boolean> changeDietNotice(@RequestParam AlarmStatus alarmStatus,
-														 @AuthenticationPrincipal CustomMemberDetails member) {
+													 @AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 				.data(memberCommandService.changeDietNotice(alarmStatus, member.getMemberId()))
 				.message("식단 공지 보기 여부가 변경되었습니다.")

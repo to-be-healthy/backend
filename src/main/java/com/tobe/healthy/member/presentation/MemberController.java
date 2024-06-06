@@ -153,8 +153,8 @@ public class MemberController {
 	})
 	@GetMapping("/course")
 	public ResponseHandler<CustomPaging> getMyCourse(String searchDate,
-														Pageable pageable,
-														@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+													 Pageable pageable,
+													 @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<CustomPaging>builder()
 				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, customMemberDetails.getMemberId(), searchDate))
 				.message("수강권이 조회되었습니다.")
@@ -168,9 +168,9 @@ public class MemberController {
 	@GetMapping("/{memberId}/course")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ResponseHandler<CustomPaging> getCourse(@PathVariable Long memberId,
-													  String searchDate,
-													  Pageable pageable,
-													  @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+												   String searchDate,
+												   Pageable pageable,
+												   @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<CustomPaging>builder()
 				.data(courseService.getCourse(customMemberDetails.getMember(), pageable, memberId, searchDate))
 				.message("수강권이 조회되었습니다.")

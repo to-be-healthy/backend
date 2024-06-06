@@ -95,14 +95,15 @@ public class MemberAuthCommandService {
         return request.getEmail();
     }
 
-    public Boolean verifyEmailAuthNumber(String authNumber, String email) {
-        String value = redisService.getValues(email);
+    public Boolean verifyEmailAuthNumber(CommandVerification request) {
+        String value = redisService.getValues(request.getEmail());
 
-        if (isEmpty(value) || !value.equals(authNumber)) {
+        if (isEmpty(value) || !value.equals(request.getEmailKey())) {
             throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
         }
 
-        redisService.deleteValues(email);
+        redisService.deleteValues(request.getEmail());
+
         return true;
     }
 
@@ -126,25 +127,25 @@ public class MemberAuthCommandService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
     }
 
-    public Tokens refreshToken(String userId, String refreshToken) {
-        String result = redisService.getValues(userId);
+    public Tokens refreshToken(CommandRefreshToken request) {
+        String result = redisService.getValues(request.getUserId());
 
         if (isEmpty(result)) {
             throw new CustomException(REFRESH_TOKEN_NOT_FOUND);
         }
 
-        if (!result.equals(refreshToken)) {
+        if (!result.equals(request.getRefreshToken())) {
             throw new CustomException(REFRESH_TOKEN_NOT_VALID);
         }
 
-        Member member = memberRepository.findByUserId(userId)
+        Member member = memberRepository.findByUserId(request.getUserId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         return tokenGenerator.exchangeAccessToken(member.getId(),
                                                   member.getName(),
                                                   member.getUserId(),
                                                   member.getMemberType(),
-                                                  refreshToken,
+                                                  request.getRefreshToken(),
                                                   member.getGym());
     }
 

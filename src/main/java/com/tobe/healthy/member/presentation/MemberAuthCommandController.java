@@ -14,7 +14,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,9 +48,9 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "이메일 인증번호가 일치합니다.")
 	})
 	@PostMapping("/validation/confirm-email")
-	public ResponseHandler<Boolean> verifyAuthMail(@RequestParam String email, @RequestParam String emailKey) {
+	public ResponseHandler<Boolean> verifyAuthMail(@RequestBody @Valid CommandVerification reuqest) {
 		return ResponseHandler.<Boolean>builder()
-			.data(memberAuthCommandService.verifyEmailAuthNumber(emailKey, email))
+			.data(memberAuthCommandService.verifyEmailAuthNumber(reuqest))
 			.message("인증번호가 확인되었습니다.")
 			.build();
 	}
@@ -93,10 +96,9 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token, userId, Role을 반환한다.")
 	})
 	@PostMapping("/refresh-token")
-	public ResponseHandler<Tokens> refreshToken(@RequestParam String userId,
-												@RequestParam String refreshToken) {
+	public ResponseHandler<Tokens> refreshToken(@RequestBody @Valid CommandRefreshToken request) {
 		return ResponseHandler.<Tokens>builder()
-			.data(memberAuthCommandService.refreshToken(userId, refreshToken))
+			.data(memberAuthCommandService.refreshToken(request))
 			.message("토큰이 갱신되었습니다.")
 			.build();
 	}
@@ -130,7 +132,7 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
 	})
 	@PostMapping("/invitation/join")
-	public ResponseHandler<CommandJoinMemberResult> joinWithInvitation(@RequestBody CommandJoinMember request) {
+	public ResponseHandler<CommandJoinMemberResult> joinWithInvitation(@RequestBody @Valid CommandJoinMember request) {
 		return ResponseHandler.<CommandJoinMemberResult>builder()
 			.data(memberAuthCommandService.joinWithInvitation(request))
 			.message("회원가입이 완료되었습니다.")

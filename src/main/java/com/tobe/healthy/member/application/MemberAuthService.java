@@ -38,9 +38,11 @@ public class MemberAuthService {
         if (validateUserId(userId)) {
             throw new CustomException(MEMBER_ID_NOT_VALID);
         }
+
         memberRepository.findByUserId(userId).ifPresent(m -> {
             throw new CustomException(MEMBER_ID_DUPLICATION);
         });
+
         return true;
     }
 

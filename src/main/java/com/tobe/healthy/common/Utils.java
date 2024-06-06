@@ -2,6 +2,7 @@ package com.tobe.healthy.common;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -41,7 +42,7 @@ public class Utils {
     }
 
     public static boolean validateUserId(String userId) {
-        return userId.length() < 4;
+        return userId.length() < 4 || !StringUtils.hasText(userId);
     }
 
     public static <T extends Number> ObjectMetadata createObjectMetadata(T fileSize, String contentType) {
