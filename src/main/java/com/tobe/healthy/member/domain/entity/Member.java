@@ -52,18 +52,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	private String name;
 
-	@ColumnDefault("0")
-	@Builder.Default
-	private int age = 0;
-
-	@ColumnDefault("0")
-	@Builder.Default
-	private int height = 0;
-
-	@ColumnDefault("0")
-	@Builder.Default
-	private int weight = 0;
-
 	@ManyToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "member_profile_id")
 	@Nullable
@@ -154,10 +142,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 				.build();
 	}
 
-	public void registerProfile(MemberProfile memberProfileId) {
-		this.memberProfile = memberProfileId;
-	}
-
 	public void resetPassword(String password) {
 		this.password = password;
 	}
@@ -200,18 +184,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	public void changeDietNotice(AlarmStatus alarmStatus) {
 		this.dietNoticeStatus = alarmStatus;
-	}
-
-	public void changeAge(int age){
-		this.age = age;
-	}
-
-	public void changeHeight(int height){
-		this.height = height;
-	}
-
-	public void changeWeight(int weight){
-		this.weight = weight;
 	}
 
 	public void assignNickname(String nickname) {
