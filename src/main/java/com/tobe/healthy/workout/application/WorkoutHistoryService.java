@@ -199,7 +199,9 @@ public class WorkoutHistoryService {
     }
 
     private void uploadNewFiles(WorkoutHistory history, List<RegisterFile> files) {
-        for (RegisterFile fileInfo : files) {
+        for (int i = 0; i < files.size(); i++) {
+            RegisterFile fileInfo = files.get(i);
+            fileInfo.setFileOrder(i+1);
             workoutFileRepository.save(WorkoutHistoryFiles.create(history, fileInfo.getFileUrl(), fileInfo.getFileOrder()));
             redisService.deleteValues(TEMP_FILE_URI.getDescription() + fileInfo.getFileUrl());
         }
