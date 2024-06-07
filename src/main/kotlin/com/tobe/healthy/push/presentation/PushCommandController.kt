@@ -7,7 +7,6 @@ import com.tobe.healthy.push.domain.dto.`in`.CommandRegisterToken
 import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarm
 import com.tobe.healthy.push.domain.dto.out.CommandRegisterTokenResult
 import com.tobe.healthy.push.domain.dto.out.CommandSendPushAlarmResult
-import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
@@ -30,7 +29,7 @@ class PushCommandController(
 
     @PostMapping
     fun sendPushAlarm(
-        @RequestBody @Valid request: CommandSendPushAlarm
+        @RequestBody request: CommandSendPushAlarm
     ): ApiResultResponse<CommandSendPushAlarmResult> {
         return ApiResultResponse(
             message = "푸시 전송에 성공하였습니다.",
