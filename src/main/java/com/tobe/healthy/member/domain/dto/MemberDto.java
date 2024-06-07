@@ -10,6 +10,7 @@ import com.tobe.healthy.member.domain.entity.SocialType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.util.ObjectUtils;
 
 
 @Data
@@ -48,7 +49,7 @@ public class MemberDto {
 	}
 
 	public static MemberDto create(Member member, MemberProfile memberProfile) {
-		return MemberDto.builder()
+		MemberDtoBuilder builder = MemberDto.builder()
 				.id(member.getId())
 				.userId(member.getUserId())
 				.email(member.getEmail())
@@ -57,24 +58,33 @@ public class MemberDto {
 				.memberType(member.getMemberType())
 				.pushAlarmStatus(member.getPushAlarmStatus())
 				.feedbackAlarmStatus(member.getFeedbackAlarmStatus())
-				.socialType(member.getSocialType())
-				.profile(ProfileDto.from(memberProfile)).build();
+				.socialType(member.getSocialType());
+
+		if(memberProfile != null){
+			builder.profile(ProfileDto.from(memberProfile));
+		}
+		return builder.build();
 	}
 
 	public static MemberDto create(Member member, MemberProfile memberProfile, Gym gym) {
-		return MemberDto.builder()
-			.id(member.getId())
-			.userId(member.getUserId())
-			.email(member.getEmail())
-			.name(member.getName())
-			.delYn(member.isDelYn())
-			.profile(ProfileDto.from(memberProfile))
-			.memberType(member.getMemberType())
-			.pushAlarmStatus(member.getPushAlarmStatus())
-			.feedbackAlarmStatus(member.getFeedbackAlarmStatus())
-			.gym(GymDto.from(gym))
-			.socialType(member.getSocialType())
-			.build();
+		MemberDtoBuilder builder = MemberDto.builder()
+				.id(member.getId())
+				.userId(member.getUserId())
+				.email(member.getEmail())
+				.name(member.getName())
+				.delYn(member.isDelYn())
+				.memberType(member.getMemberType())
+				.pushAlarmStatus(member.getPushAlarmStatus())
+				.feedbackAlarmStatus(member.getFeedbackAlarmStatus())
+				.socialType(member.getSocialType());
+
+		if(memberProfile != null){
+			builder.profile(ProfileDto.from(memberProfile));
+		}
+		if(member.getGym() != null){
+			builder.gym(GymDto.from(gym));
+		}
+		return builder.build();
 	}
 
 }
