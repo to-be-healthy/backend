@@ -22,6 +22,7 @@ import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -68,8 +69,8 @@ public class DietService {
         Page<DietDto> pageDtos = dietRepository.getDietOfMonth(loginMemberId, memberId, pageable, searchDate);
         List<DietDto> dietDtos = pageDtos.stream().toList();
         List<Long> ids = dietDtos.stream().map(DietDto::getDietId).collect(Collectors.toList());
-        List<DietDto> content = setDietFile(dietDtos, ids);
-        return new CustomPaging<>(content, pageDtos.getPageable().getPageNumber(),
+        setDietFile(dietDtos, ids);
+        return new CustomPaging<>(dietDtos, pageDtos.getPageable().getPageNumber(),
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
 
@@ -152,13 +153,12 @@ public class DietService {
         dietDto.setDietFiles(filesDto);
     }
 
-    private List<DietDto> setDietFile(List<DietDto> dietDtos, List<Long> ids) {
+    private void setDietFile(List<DietDto> dietDtos, List<Long> ids) {
         List<DietFiles> files = dietRepository.getDietFile(ids);
-        return dietDtos.stream().map(d -> {
+        dietDtos.stream().peek(d -> {
             List<DietFileDto> thisFiles = files.stream().map(DietFileDto::from)
                     .filter(f -> f.getDietId().equals(d.getDietId())).collect(Collectors.toList());
             d.setDietFiles(thisFiles);
-            return d;
         }).collect(Collectors.toList());
     }
 
@@ -254,11 +254,21 @@ public class DietService {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
         Page<Diet> pageDtos = dietRepository.getDietByTrainer(trainer, pageable, searchDate);
-        List<DietDto> dietDtos = pageDtos.map(DietDto::from).stream().toList();
+        List<DietDto> dietDtos = setFeedbackChecked(trainerId, pageDtos);
         List<Long> ids = dietDtos.stream().map(DietDto::getDietId).collect(Collectors.toList());
-        List<DietDto> content = setDietFile(dietDtos, ids);
-        return new CustomPaging<>(content, pageDtos.getPageable().getPageNumber(),
+        setDietFile(dietDtos, ids);
+        return new CustomPaging<>(dietDtos, pageDtos.getPageable().getPageNumber(),
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
+    }
+
+    private List<DietDto> setFeedbackChecked(Long trainerId, Page<Diet> pageDtos) {
+        List<DietDto> dietDtos = pageDtos.map(diet -> {
+            DietDto dto = DietDto.from(diet);
+            Long feedbackCnt = commentRepository.countByDietAndMemberIdAndDelYnFalse(diet, trainerId);
+            dto.setFeedbackChecked(0 < feedbackCnt);
+            return dto;
+        }).stream().toList();
+        return dietDtos;
     }
 
     private String getFileName(String url) {

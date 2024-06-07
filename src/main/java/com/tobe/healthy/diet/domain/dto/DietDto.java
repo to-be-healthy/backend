@@ -5,6 +5,7 @@ import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.Member;
 import lombok.*;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ public class DietDto {
     private LocalDateTime updatedAt;
     private LocalDate eatDate;
     private boolean liked;
+    private boolean feedbackChecked;
 
     @Builder.Default
     private DietDetailDto breakfast = new DietDetailDto();

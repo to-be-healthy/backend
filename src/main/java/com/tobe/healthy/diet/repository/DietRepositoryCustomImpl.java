@@ -1,15 +1,19 @@
 package com.tobe.healthy.diet.repository;
 
 import com.querydsl.core.types.ConstantImpl;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.QDietDto;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietFiles;
+import com.tobe.healthy.diet.domain.entity.QDietComment;
 import com.tobe.healthy.member.domain.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +26,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static com.tobe.healthy.diet.domain.entity.QDiet.diet;
+import static com.tobe.healthy.diet.domain.entity.QDietComment.dietComment;
 import static com.tobe.healthy.diet.domain.entity.QDietFiles.dietFiles;
 import static com.tobe.healthy.diet.domain.entity.QDietLike.dietLike;
 
@@ -108,12 +113,12 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
         Long totalCnt = queryFactory
                 .select(diet.count())
                 .from(diet)
-                .where(dietTrainerIdEq(trainer), dietDeYnEq(false), convertDateFormat_YYYY_MM_DD(searchDate))
+                .where(dietTrainerIdEq(trainer), dietDeYnEq(false), convertEatDate_YYYY_MM_DD(searchDate))
                 .fetchOne();
         List<Diet> diets = queryFactory
                 .select(diet)
                 .from(diet)
-                .where(dietTrainerIdEq(trainer), dietDeYnEq(false), convertDateFormat_YYYY_MM_DD(searchDate))
+                .where(dietTrainerIdEq(trainer), dietDeYnEq(false), convertEatDate_YYYY_MM_DD(searchDate))
                 .orderBy(diet.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -165,15 +170,6 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
         StringTemplate stringTemplate = Expressions.stringTemplate(
                 "DATE_FORMAT({0}, {1})"
                 , diet.eatDate
-                , ConstantImpl.create("%Y-%m-%d"));
-        return stringTemplate.eq(searchDate);
-    }
-
-    private BooleanExpression convertDateFormat_YYYY_MM_DD(String searchDate) {
-        if (ObjectUtils.isEmpty(searchDate)) return null;
-        StringTemplate stringTemplate = Expressions.stringTemplate(
-                "DATE_FORMAT({0}, {1})"
-                , diet.createdAt
                 , ConstantImpl.create("%Y-%m-%d"));
         return stringTemplate.eq(searchDate);
     }
