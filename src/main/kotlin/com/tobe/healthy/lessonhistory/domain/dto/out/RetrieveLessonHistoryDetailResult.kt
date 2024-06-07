@@ -46,7 +46,7 @@ data class RetrieveLessonHistoryDetailResult(
                     lessonDt = formatLessonDt(it.schedule?.lessonDt),
                     lessonTime = formatLessonTime(it.schedule?.lessonStartTime, it.schedule?.lessonEndTime),
                     attendanceStatus = validateAttendanceStatus(it.schedule?.lessonDt, it.schedule?.lessonEndTime),
-                    files = it.files.filter { comment -> comment.lessonHistoryComment == null }.map { files -> LessonHistoryFileResults.from(files) }.sortedBy { file -> file.fileOrder }.toMutableList()
+                    files = it.files.filter { comment -> comment.lessonHistoryComment == null }.map { files -> LessonHistoryFileResults.from(files) }.sortedBy { file -> file.createdAt }.toMutableList()
                 )
             }
         }
