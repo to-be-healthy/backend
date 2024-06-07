@@ -1,6 +1,7 @@
 package com.tobe.healthy.lessonhistory.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryReadStatus.READ
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryReadStatus.UNREAD
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.schedule.domain.entity.Schedule
@@ -56,6 +57,10 @@ class LessonHistory(
     fun updateLessonHistory(title: String, content: String) {
         this.title = title
         this.content = content
+    }
+
+    fun updateFeedbackChecked() {
+        this.feedbackChecked = READ
     }
 
     companion object {

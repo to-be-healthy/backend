@@ -10,6 +10,7 @@ import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDate
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveUnwrittenLessonHistory
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
+import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository
 import org.springframework.data.domain.Pageable
@@ -68,9 +69,16 @@ class LessonHistoryService(
         )
     }
 
+    @Transactional
     fun findOneLessonHistory(lessonHistoryId: Long, member: CustomMemberDetails): RetrieveLessonHistoryDetailResult? {
         return lessonHistoryRepository.findOneLessonHistory(lessonHistoryId, member.memberId, member.memberType)
-            ?.let { RetrieveLessonHistoryDetailResult.detailFrom(it) }
+            ?.let {
+                if (member.memberType == MemberType.STUDENT) {
+                    it.updateFeedbackChecked()
+                }
+
+                RetrieveLessonHistoryDetailResult.detailFrom(it)
+            }
     }
 
     fun findAllUnwrittenLessonHistory(
