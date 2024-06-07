@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
-    MEMBER_NOT_FOUND(NOT_FOUND, "C_000", "로그인에 실패했어요."),
+    MEMBER_NOT_FOUND(NOT_FOUND, "C_000", "회원이 존재하지 않습니다."),
     MEMBER_EMAIL_DUPLICATION(BAD_REQUEST, "C_001", "이미 가입된 이메일 주소입니다."),
     ACCESS_TOKEN_EXPIRED(BAD_REQUEST, "C_002", "토큰이 만료되었습니다."),
     HANDLE_ACCESS_DENIED(FORBIDDEN, "C_003", "권한이 없습니다."),
@@ -47,6 +47,7 @@ public enum ErrorCode {
     DATE_NOT_VALID(BAD_REQUEST, "C_032", "날짜가 유효하지 않습니다."),
     DIET_ALREADY_EXISTS(BAD_REQUEST, "C_033", "해당 날짜에 식단기록이 존재합니다."),
     DIET_NOT_VALID(BAD_REQUEST, "C_034", "사진 및 단식을 등록해주세요."),
+    MEMBER_LOGIN_FAILED(NOT_FOUND, "C_035", "로그인에 실패했어요."),
 
     MEMBER_NAME_LENGTH_NOT_VALID(BAD_REQUEST, "C_050", "이름은 최소 2자 이상 입력해 주세요."),
     MEMBER_NAME_NOT_VALID(BAD_REQUEST, "C_051", "이름은 한글 또는 영어만 입력할 수 있습니다."),
