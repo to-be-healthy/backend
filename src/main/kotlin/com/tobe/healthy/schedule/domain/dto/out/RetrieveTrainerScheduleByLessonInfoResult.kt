@@ -40,9 +40,14 @@ data class RetrieveTrainerScheduleByLessonInfoResult(
             }
         }
 
-        private fun calculateDuration(schedule: Schedule) =
-            Duration.between(schedule.lessonStartTime, schedule.lessonEndTime)
-                .toMinutes() / DEFAULT_DURATION
+        private fun calculateDuration(schedule: Schedule): Double {
+            val duration = Duration.between(schedule.lessonStartTime, schedule.lessonEndTime).toMinutes() / DEFAULT_DURATION
+            return if (duration < 0) {
+                duration.plus(24)
+            } else {
+                duration
+            }
+        }
     }
 
     @JsonSerialize(using = LessonDetailResultSerializer::class)

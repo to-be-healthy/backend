@@ -90,11 +90,11 @@ class TrainerScheduleRepositoryImpl(
 
         response.let {
             val trainerTodaySchedule = RetrieveTrainerScheduleByLessonDtResult(
-                trainerName = response?.trainerName,
+                trainerName = response.trainerName,
                 scheduleTotalCount = scheduleCount!!,
             )
 
-            response?.schedule?.forEach { (key) ->
+            response.schedule?.forEach { (key) ->
                 response.schedule[key]?.filter {
                     if (it.lessonStartTime?.isBefore(LocalTime.now()) == true) {
                         trainerTodaySchedule.before.add(it)
@@ -140,11 +140,11 @@ class TrainerScheduleRepositoryImpl(
 
         response.let {
             val trainerTodaySchedule = RetrieveTrainerScheduleByLessonDtResult(
-                trainerName = response?.trainerName,
+                trainerName = response.trainerName,
                 scheduleTotalCount = scheduleCount!!,
             )
 
-            response?.schedule?.forEach { (key) ->
+            response.schedule?.forEach { (key) ->
                 response.schedule[key]?.filter {
                     if (it.lessonStartTime?.isBefore(LocalTime.now()) == true) {
                         trainerTodaySchedule.before.add(it)

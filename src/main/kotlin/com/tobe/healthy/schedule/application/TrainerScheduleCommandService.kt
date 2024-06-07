@@ -6,6 +6,7 @@ import com.tobe.healthy.common.event.EventType.NOTIFICATION
 import com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.*
+import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
 import com.tobe.healthy.notification.domain.entity.NotificationType.CANCEL
@@ -72,8 +73,8 @@ class TrainerScheduleCommandService(
         request: CommandRegisterDefaultLessonTime,
         trainerScheduleInfo: TrainerScheduleInfo
     ): MutableList<TrainerScheduleClosedDaysInfo> {
-        return request.closedDays?.map {
-                closedDay -> TrainerScheduleClosedDaysInfo.registerClosedDay(closedDay, trainerScheduleInfo)
+        return request.closedDays?.map { closedDay ->
+            TrainerScheduleClosedDaysInfo.registerClosedDay(closedDay, trainerScheduleInfo)
         }?.toMutableList() ?: mutableListOf()
     }
 
@@ -89,51 +90,42 @@ class TrainerScheduleCommandService(
         // 이미 등록된 일정이 있는지 조회
         isScheduleExisting(trainerScheduleInfo, request, trainerId)
 
+        // 등록 시작 일자
         var lessonDt = request.lessonStartDt
-        var startTime = trainerScheduleInfo.lessonStartTime
+        val lessonEndDt = request.lessonEndDt
+        val lessonTime = trainerScheduleInfo.lessonTime.description.toLong()
+
         val schedules = mutableListOf<Schedule>()
 
         // 일정 등록 시작
-        while (!lessonDt!!.isAfter(request.lessonEndDt)) {
-            var endTime = startTime.plusMinutes(trainerScheduleInfo.lessonTime.description.toLong())
+        while (!lessonDt.isAfter(lessonEndDt)) {
 
-            if (endTime.isAfter(trainerScheduleInfo.lessonEndTime)) {
-                startTime = trainerScheduleInfo.lessonStartTime
-                lessonDt = lessonDt.plusDays(ONE_DAY)
-                continue
-            }
+            var defaultLessonStartTime = LocalDateTime.of(lessonDt, trainerScheduleInfo.lessonStartTime)
+            var defaultLessonEndTime = LocalDateTime.of(lessonDt, trainerScheduleInfo.lessonEndTime)
+            var dayLessonStartTime = LocalDateTime.of(lessonDt, LocalTime.of(6, 0))
+            var dayLessonEndTime = LocalDateTime.of(lessonDt.plusDays(1), LocalTime.of(0, 0))
 
             // 휴무일일 경우
             if (isClosedDay(trainerScheduleInfo, lessonDt)) {
-                while (!startTime.isAfter(endTime)) {
-                    val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, DISABLED)
-                    schedules.add(schedule)
-                    startTime = endTime
-                    endTime = startTime.plusMinutes(trainerScheduleInfo.lessonTime.description.toLong())
-                }
-                startTime = trainerScheduleInfo.lessonStartTime
+                generateDisabledSchedules(schedules, lessonDt, trainer, dayLessonStartTime, dayLessonEndTime, lessonTime)
                 lessonDt = lessonDt.plusDays(ONE_DAY)
                 continue
             }
 
-            // 점심시간일 경우
-            if (isStartTimeEqualsLunchStartTime(trainerScheduleInfo.lunchStartTime, startTime)) {
-                val duration = between(trainerScheduleInfo.lunchStartTime, trainerScheduleInfo.lunchEndTime)
-                val schedule = Schedule.registerSchedule(lessonDt, trainer, trainerScheduleInfo.lunchStartTime, trainerScheduleInfo.lunchEndTime, DISABLED)
-                schedules.add(schedule)
-                startTime = startTime.plusMinutes(duration.toMinutes())
-                continue
-            }
+            generateDisabledSchedules(schedules, lessonDt, trainer, dayLessonStartTime, defaultLessonStartTime, lessonTime)
+            generateAvailableSchedules(schedules, lessonDt, trainer, defaultLessonStartTime, defaultLessonEndTime, trainerScheduleInfo, lessonTime)
+            generateDisabledSchedules(schedules, lessonDt, trainer, defaultLessonEndTime, dayLessonEndTime, lessonTime)
 
-            val schedule = Schedule.registerSchedule(lessonDt, trainer, startTime, endTime, AVAILABLE)
-            schedules.add(schedule)
-
-            startTime = endTime
+            lessonDt = lessonDt.plusDays(ONE_DAY)
         }
 
         trainerScheduleRepository.saveAll(schedules)
 
         return CommandRegisterScheduleResult.from(schedules, trainerScheduleInfo)
+    }
+
+    private fun isStartTimeEqualsLunchStartTime(lunchStartTime: LocalTime?, startTime: LocalTime): Boolean {
+        return startTime == lunchStartTime
     }
 
     private fun isClosedDay(
@@ -167,7 +159,11 @@ class TrainerScheduleCommandService(
             }
 
             DISABLED -> {
-                schedules = trainerScheduleRepository.findAllSchedule(request.scheduleIds!!, listOf(AVAILABLE, COMPLETED), memberId)
+                schedules = trainerScheduleRepository.findAllSchedule(
+                    request.scheduleIds!!,
+                    listOf(AVAILABLE, COMPLETED),
+                    memberId
+                )
 
                 if (schedules.isEmpty()) {
                     throw CustomException(SCHEDULE_NOT_FOUND)
@@ -204,14 +200,15 @@ class TrainerScheduleCommandService(
 
         // 트레이너가 일정 등록시 학생에게 알림
         val notification = CommandSendNotification(
-                RESERVE.description,
-                String.format("%s 트레이너가 %s님을 %s 예약에 등록했어요.",
-                    schedule.trainer.name,
-                    schedule.applicant!!.name,
-                    LocalDateTime.of(schedule.lessonDt, schedule.lessonStartTime).format(lessonStartDateTimeFormatter())
-                ),
-                listOf(schedule.applicant!!.id),
-                RESERVE
+            RESERVE.description,
+            String.format(
+                "%s 트레이너가 %s님을 %s 예약에 등록했어요.",
+                schedule.trainer.name,
+                schedule.applicant!!.name,
+                LocalDateTime.of(schedule.lessonDt, schedule.lessonStartTime).format(lessonStartDateTimeFormatter())
+            ),
+            listOf(schedule.applicant!!.id),
+            RESERVE
         )
 
         notificationPublisher.publish(notification, NOTIFICATION)
@@ -235,7 +232,8 @@ class TrainerScheduleCommandService(
         // 트레이너가 일정 등록시 학생에게 알림
         val notification = CommandSendNotification(
             CANCEL.description,
-            String.format("%s 트레이너가 %s님의 %s 예약을 취소했어요.",
+            String.format(
+                "%s 트레이너가 %s님의 %s 예약을 취소했어요.",
                 schedule.trainer.name,
                 applicantName,
                 LocalDateTime.of(schedule.lessonDt, schedule.lessonStartTime).format(lessonStartDateTimeFormatter())
@@ -276,7 +274,8 @@ class TrainerScheduleCommandService(
         request: CommandRegisterSchedule,
         trainerId: Long
     ) {
-        val isDuplicateSchedule = trainerScheduleRepository.validateDuplicateSchedule(trainerScheduleInfo, request, trainerId)
+        val isDuplicateSchedule =
+            trainerScheduleRepository.validateDuplicateSchedule(trainerScheduleInfo, request, trainerId)
 
         if (isDuplicateSchedule) {
             throw CustomException(SCHEDULE_ALREADY_EXISTS)
@@ -294,8 +293,48 @@ class TrainerScheduleCommandService(
         trainerScheduleRepository.deleteAll(disabledSchedule)
     }
 
-    private fun isStartTimeEqualsLunchStartTime(lunchStartTime: LocalTime?, startTime: LocalTime): Boolean {
-        return startTime == lunchStartTime
+    private fun generateDisabledSchedules(
+        schedules: MutableList<Schedule>,
+        lessonDt: LocalDate,
+        trainer: Member,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        lessonTime: Long
+    ) {
+        var currentTime = startTime
+        while (currentTime.isBefore(endTime)) {
+            val schedule = Schedule.registerSchedule(lessonDt, trainer, currentTime.toLocalTime(), currentTime.plusMinutes(lessonTime).toLocalTime(), DISABLED)
+            schedules.add(schedule)
+            currentTime = currentTime.plusMinutes(lessonTime)
+        }
+    }
+
+    private fun generateAvailableSchedules(
+        schedules: MutableList<Schedule>,
+        lessonDt: LocalDate,
+        trainer: Member,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        trainerScheduleInfo: TrainerScheduleInfo,
+        lessonTime: Long
+    ) {
+        var currentTime = startTime
+        while (currentTime.isBefore(endTime)) {
+            if (isStartTimeEqualsLunchStartTime(trainerScheduleInfo.lunchStartTime, currentTime.toLocalTime())) {
+                val duration = between(trainerScheduleInfo.lunchStartTime, trainerScheduleInfo.lunchEndTime)
+                schedules.add(Schedule.registerSchedule(lessonDt, trainer, trainerScheduleInfo.lunchStartTime, trainerScheduleInfo.lunchEndTime, DISABLED))
+                currentTime = currentTime.plusMinutes(duration.toMinutes())
+            } else {
+                schedules.add(Schedule.registerSchedule(
+                    lessonDt,
+                    trainer,
+                    currentTime.toLocalTime(),
+                    currentTime.plusMinutes(lessonTime).toLocalTime(),
+                    AVAILABLE
+                ))
+                currentTime = currentTime.plusMinutes(lessonTime)
+            }
+        }
     }
 
     companion object {
