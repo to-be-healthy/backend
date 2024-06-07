@@ -71,10 +71,10 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/me/workout-histories")
-	public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistory(String searchDate,
+	public ResponseHandler<CustomPaging> getWorkoutHistory(String searchDate,
 																			  Pageable pageable,
 																			  @AuthenticationPrincipal CustomMemberDetails loginMember) {
-		return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
+		return ResponseHandler.<CustomPaging>builder()
 				.data(workoutService.getWorkoutHistory(loginMember.getMember(), loginMember.getMemberId(), pageable, searchDate))
 				.message("운동기록이 조회되었습니다.")
 				.build();
@@ -85,10 +85,10 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/{memberId}/workout-histories")
-	public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistory(@PathVariable Long memberId, String searchDate,
+	public ResponseHandler<CustomPaging> getWorkoutHistory(@PathVariable Long memberId, String searchDate,
 																			  @AuthenticationPrincipal CustomMemberDetails loginMember,
 																			  Pageable pageable) {
-		return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
+		return ResponseHandler.<CustomPaging>builder()
 				.data(workoutService.getWorkoutHistory(loginMember.getMember(), memberId, pageable, searchDate))
 				.message("운동기록이 조회되었습니다.")
 				.build();
