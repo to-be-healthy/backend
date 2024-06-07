@@ -5,12 +5,9 @@ import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_NOT_VALID
 import com.tobe.healthy.log
-import com.tobe.healthy.member.domain.dto.`in`.CommandLoginMember
-import com.tobe.healthy.member.domain.dto.`in`.CommandValidateEmail
-import com.tobe.healthy.member.domain.dto.`in`.FindMemberUserId
+import com.tobe.healthy.member.domain.dto.`in`.*
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.domain.entity.MemberType.STUDENT
-import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
 import com.tobe.healthy.member.repository.MemberRepository
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -80,7 +77,8 @@ class MemberServiceTest(
                 STUDENT
             )
         )
-        val refreshToken = memberAuthCommandService.refreshToken(student.userId, token.refreshToken)
+
+        val refreshToken = memberAuthCommandService.refreshToken(CommandRefreshToken(student.userId, token.refreshToken))
 
         token.userId shouldBe refreshToken.userId
         token.accessToken shouldNotBe refreshToken.accessToken
@@ -109,17 +107,13 @@ class MemberServiceTest(
     }
 
     "회원이 닉네임을 변경한다" {
-        val changeName = memberCommandService.changeName("미미미누", student.id)
-        log.info { "변경된 닉네임: ${changeName}"}
-        changeName shouldBe "미미미누"
+        val changeName = memberCommandService.changeName(CommandChangeName("미미미누"), student.id)
+        log.info { "변경된 닉네임: ${changeName.name}"}
+        changeName.name shouldBe "미미미누"
     }
 
     "회원이 아이디를 찾는다" {
-        val request = FindMemberUserId(
-            "healthy-trainer0@gmail.com",
-            "healthy-trainer",
-            TRAINER
-        )
+        val request = FindMemberUserId("healthy-trainer0@gmail.com", "healthy-trainer")
         val response = memberAuthService.findUserId(request)
         log.info { "response: ${response}" }
     }

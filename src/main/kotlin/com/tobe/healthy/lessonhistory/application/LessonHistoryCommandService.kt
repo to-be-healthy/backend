@@ -28,6 +28,7 @@ import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
 import com.tobe.healthy.notification.domain.entity.NotificationType.*
+import com.tobe.healthy.notification.repository.NotificationRepository
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository
 import org.springframework.beans.factory.annotation.Value
@@ -48,7 +49,8 @@ class LessonHistoryCommandService(
     private val redisService: RedisService,
     @Value("\${aws.s3.bucket-name}")
     private val bucketName: String,
-    private val notificationPublisher: CustomEventPublisher<CommandSendNotification>
+    private val notificationPublisher: CustomEventPublisher<CommandSendNotification>,
+    private val notificationRepository: NotificationRepository
 ) {
 
     fun registerLessonHistory(
@@ -143,6 +145,9 @@ class LessonHistoryCommandService(
             ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
         deleteAllFiles(lessonHistory.files)
+
+        notificationRepository.nullifyLessonHistoryId(lessonHistory.id!!)
+
         lessonHistoryRepository.deleteById(lessonHistory.id!!)
 
         return lessonHistoryId
