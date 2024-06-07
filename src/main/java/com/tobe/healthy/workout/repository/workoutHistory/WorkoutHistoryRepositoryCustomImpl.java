@@ -101,7 +101,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         return queryFactory.select(workoutHistoryFiles)
                 .from(workoutHistoryFiles)
                 .where(historyIdIn(ids), historyFileDeYnEq(false))
-                .orderBy(workoutHistoryFiles.createdAt.asc(), workoutHistoryFiles.fileOrder.asc())
+                .orderBy(workoutHistoryFiles.fileOrder.asc())
                 .fetch();
     }
 
