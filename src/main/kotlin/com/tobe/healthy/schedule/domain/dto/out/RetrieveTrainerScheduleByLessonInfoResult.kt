@@ -10,7 +10,7 @@ import java.time.LocalTime
 
 data class RetrieveTrainerScheduleByLessonInfoResult(
     val trainerName: String?,
-    val schedule: Map<LocalDate, List<LessonDetailResult>>
+    val schedule: Map<LocalDate, List<LessonDetailResult>>?
 ) {
     companion object {
         private const val DEFAULT_DURATION = 60.0
@@ -35,7 +35,7 @@ data class RetrieveTrainerScheduleByLessonInfoResult(
 
                 RetrieveTrainerScheduleByLessonInfoResult(
                     trainerName = schedule.firstOrNull()?.trainer?.name?.let { "${it} 트레이너" },
-                    schedule = groupingSchedules
+                    schedule = groupingSchedules.ifEmpty { null }
                 )
             }
         }
