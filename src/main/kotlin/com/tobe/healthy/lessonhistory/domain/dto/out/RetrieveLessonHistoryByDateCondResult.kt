@@ -42,7 +42,7 @@ data class RetrieveLessonHistoryByDateCondResult(
                     lessonDt = formatLessonDt(entity.schedule?.lessonDt),
                     lessonTime = formatLessonTime(entity.schedule?.lessonStartTime, entity.schedule?.lessonEndTime),
                     attendanceStatus = validateAttendanceStatus(entity.schedule?.lessonDt, entity.schedule?.lessonEndTime),
-                    files = entity.files.map { file -> LessonHistoryFileResults.from(file) }.sortedBy { file -> file.fileOrder }.toMutableList()
+                    files = entity.files.map { file -> LessonHistoryFileResults.from(file) }.sortedBy { file -> file.createdAt }.toMutableList()
                 )
             } ?: return null
         }
