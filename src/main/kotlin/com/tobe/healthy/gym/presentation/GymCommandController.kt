@@ -44,7 +44,7 @@ class GymCommandController(
     @PostMapping("/{gymId}")
     fun selectMyGym(
         @PathVariable gymId: Long,
-        @RequestBody request: CommandSelectMyGym,
+        @RequestBody request: CommandSelectMyGym?,
         @AuthenticationPrincipal member: CustomMemberDetails,
     ): ApiResultResponse<CommandSelectMyGymResult> {
         return ApiResultResponse(
