@@ -38,6 +38,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 
 
 @Service
@@ -64,9 +66,9 @@ public class TrainerService {
     }
 
     public TrainerMemberMappingDto mappingMemberAndTrainer(Long trainerId, Long memberId) {
-        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, MemberType.TRAINER)
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
-        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         mappingRepository.findByTrainerIdAndMemberId(trainerId, memberId)
                 .ifPresent(i -> {throw new CustomException(MEMBER_ALREADY_MAPPED);});
@@ -80,7 +82,7 @@ public class TrainerService {
     }
 
     public MemberInviteResultCommand inviteMember(MemberInviteCommand command, Member trainer) {
-        memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), MemberType.TRAINER)
+        memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), TRAINER)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         String name = command.getName();
@@ -88,7 +90,9 @@ public class TrainerService {
 
         String uuid = System.currentTimeMillis() + "-" + UUID.randomUUID();
         String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
-        String invitationLink = "https://www.to-be-healthy.site/invite?uuid=" + uuid;
+        String invitationLink = "https://www.to-be-healthy.site/invite?type={type}&uuid={uuid}"
+                .replace("{type}", STUDENT.getCode().toLowerCase())
+                .replace("{uuid}", uuid);
 
         Map<String, String> invitedMapping = new HashMap<>() {{
             put("trainerId", trainer.getId().toString());
@@ -111,9 +115,9 @@ public class TrainerService {
     }
 
     public MemberDetailResult getMemberOfTrainer(Member trainer, Long memberId) {
-        memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), MemberType.TRAINER)
+        memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
-        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         //식단
@@ -150,7 +154,7 @@ public class TrainerService {
     }
 
     public void deleteStudentOfTrainer(Member trainer, Long memberId) {
-        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, MemberType.STUDENT)
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         CourseDto courseDto = courseService.getNowUsingCourse(memberId);
 
