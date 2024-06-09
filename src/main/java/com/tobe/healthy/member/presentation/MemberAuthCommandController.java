@@ -120,25 +120,6 @@ public class MemberAuthCommandController {
 			.build();
 	}
 
-	@Operation(summary = "초대링크 회원가입", responses = {
-			@ApiResponse(responseCode = "400(1)", description = "이름의 길이는 2자 이상이여야 합니다."),
-			@ApiResponse(responseCode = "400(2)", description = "이름은 한글 또는 영어만 입력할 수 있습니다."),
-			@ApiResponse(responseCode = "400(3)", description = "확인 비밀번호가 일치하지 않습니다."),
-			@ApiResponse(responseCode = "400(4)", description = "비밀번호는 영어 대/소문자와 숫자로 구성된 8자리 이상 문자여야 합니다."),
-			@ApiResponse(responseCode = "400(5)", description = "아이디에 한글을 포함할 수 없습니다."),
-			@ApiResponse(responseCode = "400(6)", description = "이미 등록된 아이디입니다."),
-			@ApiResponse(responseCode = "400(7)", description = "이미 등록된 이메일입니다."),
-			@ApiResponse(responseCode = "400(8)", description = "초대가입 회원 이름이 일치하지 않습니다."),
-			@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
-	})
-	@PostMapping("/invitation/join")
-	public ResponseHandler<CommandJoinMemberResult> joinWithInvitation(@RequestBody @Valid CommandJoinMember request) {
-		return ResponseHandler.<CommandJoinMemberResult>builder()
-			.data(memberAuthCommandService.joinWithInvitation(request))
-			.message("회원가입이 완료되었습니다.")
-			.build();
-	}
-
 	@Operation(summary = "네이버 소셜 로그인", description = "인가코드로 네이버에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.",
 		responses = {
 			@ApiResponse(responseCode = "500(1)", description = "네이버 소셜서버와 연동중 에러가 발생하였습니다."),

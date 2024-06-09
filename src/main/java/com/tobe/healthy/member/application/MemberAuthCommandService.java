@@ -145,7 +145,11 @@ public class MemberAuthCommandService {
         Member member = Member.join(request, password);
         memberRepository.save(member);
 
-        return CommandJoinMemberResult.from(member);
+        if(StringUtils.isEmpty(request.getUserId())){
+            return CommandJoinMemberResult.from(member);
+        }else{ //초대가입
+            return joinWithInvitation(request, CommandJoinMemberResult.from(member));
+        }
     }
 
     public Tokens login(CommandLoginMember request) {
@@ -196,8 +200,7 @@ public class MemberAuthCommandService {
         );
     }
 
-    public CommandJoinMemberResult joinWithInvitation(CommandJoinMember request) {
-        CommandJoinMemberResult result = joinMember(request);
+    public CommandJoinMemberResult joinWithInvitation(CommandJoinMember request, CommandJoinMemberResult result) {
         Member member = memberRepository.findById(result.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
