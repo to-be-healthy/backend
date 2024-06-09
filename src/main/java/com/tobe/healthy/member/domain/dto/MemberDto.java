@@ -22,9 +22,6 @@ public class MemberDto {
 	private String userId;
 	private String email;
 	private String name;
-	private int age;
-	private int height;
-	private int weight;
 	private boolean delYn;
 
 	private ProfileDto profile;
