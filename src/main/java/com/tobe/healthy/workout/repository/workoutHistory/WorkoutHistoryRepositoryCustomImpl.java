@@ -6,6 +6,7 @@ import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tobe.healthy.diet.domain.dto.QDietDto;
 import com.tobe.healthy.member.domain.entity.QMemberProfile;
 import com.tobe.healthy.workout.domain.dto.out.QWorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
@@ -18,7 +19,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.Optional;
 
+import static com.tobe.healthy.diet.domain.entity.QDiet.diet;
+import static com.tobe.healthy.diet.domain.entity.QDietLike.dietLike;
 import static com.tobe.healthy.member.domain.entity.QMember.member;
 import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistory.workoutHistory;
 import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryFiles.workoutHistoryFiles;
@@ -56,10 +60,6 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         return PageableExecutionUtils.getPage(workoutHistories, pageable, ()-> totalCnt );
     }
 
-    private BooleanExpression memberIdEq(Long memberId) {
-        return workoutHistory.member.id.eq(memberId);
-    }
-
     @Override
     public Page<WorkoutHistoryDto> getWorkoutHistoryByGym(Long loginMemberId, Long gymId, Pageable pageable, String searchDate) {
         QMemberProfile profileId = new QMemberProfile("profileId");
@@ -92,10 +92,6 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
         return PageableExecutionUtils.getPage(workoutHistories, pageable, ()-> totalCnt );
     }
 
-    private BooleanExpression gymIdEq(Long gymId) {
-        return workoutHistory.gym.id.eq(gymId);
-    }
-
     @Override
     public List<WorkoutHistoryFiles> getWorkoutHistoryFile(List<Long> ids) {
         return queryFactory.select(workoutHistoryFiles)
@@ -105,8 +101,48 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
                 .fetch();
     }
 
+    @Override
+    public WorkoutHistoryDto findByWorkoutHistoryId(Long loginMemberId, Long workoutHistoryId) {
+        QMemberProfile profileId = new QMemberProfile("profileId");
+        return queryFactory.select(new QWorkoutHistoryDto(workoutHistory.workoutHistoryId, workoutHistory.content, workoutHistory.member
+                        , isLiked()
+                        , workoutHistory.likeCnt, workoutHistory.commentCnt, workoutHistory.viewMySelf, workoutHistory.createdAt, member.memberProfile))
+                .from(workoutHistory)
+                .leftJoin(workoutHistory.member, member)
+                .leftJoin(member.memberProfile, profileId)
+                .leftJoin(workoutHistoryLike)
+                .on(workoutHistory.workoutHistoryId.eq(workoutHistoryLike.workoutHistoryLikePK.workoutHistory.workoutHistoryId)
+                        , workoutHistoryLike.workoutHistoryLikePK.member.id.eq(loginMemberId))
+                .where(workoutHistoryIdEq(workoutHistoryId), historyDeYnEq(false))
+                .fetchOne();
+    }
+
+    private BooleanExpression gymIdEq(Long gymId) {
+        if (!ObjectUtils.isEmpty(gymId)){
+            return workoutHistory.gym.id.eq(gymId);
+        }
+        return null;
+    }
+
+    private BooleanExpression memberIdEq(Long memberId) {
+        if (!ObjectUtils.isEmpty(memberId)){
+            return workoutHistory.member.id.eq(memberId);
+        }
+        return null;
+    }
+
+    private static BooleanExpression workoutHistoryIdEq(Long workoutHistoryId) {
+        if (!ObjectUtils.isEmpty(workoutHistoryId)){
+            return workoutHistory.workoutHistoryId.eq(workoutHistoryId);
+        }
+        return null;
+    }
+
     private BooleanExpression historyIdIn(List<Long> ids) {
-        return workoutHistoryFiles.workoutHistory.workoutHistoryId.in(ids);
+        if (!ObjectUtils.isEmpty(ids)){
+            return workoutHistoryFiles.workoutHistory.workoutHistoryId.in(ids);
+        }
+        return null;
     }
 
     private BooleanExpression isLiked() {
@@ -117,15 +153,24 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     }
 
     private BooleanExpression historyDeYnEq(boolean bool) {
-        return workoutHistory.delYn.eq(bool);
+        if(!ObjectUtils.isEmpty(bool)){
+            return workoutHistory.delYn.eq(bool);
+        }
+        return null;
     }
 
     private BooleanExpression viewMySelfEq(boolean bool) {
-        return workoutHistory.viewMySelf.eq(bool);
+        if(!ObjectUtils.isEmpty(bool)){
+            return workoutHistory.viewMySelf.eq(bool);
+        }
+        return null;
     }
 
     private BooleanExpression historyFileDeYnEq(boolean bool) {
-        return workoutHistoryFiles.delYn.eq(bool);
+        if(!ObjectUtils.isEmpty(bool)){
+            return workoutHistoryFiles.delYn.eq(bool);
+        }
+        return null;
     }
 
     private BooleanExpression convertDateFormat(String searchDate) {
