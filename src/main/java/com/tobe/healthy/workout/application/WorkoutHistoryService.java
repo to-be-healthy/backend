@@ -84,14 +84,9 @@ public class WorkoutHistoryService {
         return customPaging;
     }
 
-    public WorkoutHistoryDto getWorkoutHistoryDetail(Long workoutHistoryId) {
-        WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndDelYnFalse(workoutHistoryId)
-                .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
+    public WorkoutHistoryDto getWorkoutHistoryDetail(Member loginMember, Long workoutHistoryId) {
+        WorkoutHistoryDto historyDto = workoutHistoryRepository.findByWorkoutHistoryId(loginMember.getId(), workoutHistoryId);
         List<Long> ids = List.of(workoutHistoryId);
-
-        Member member = memberRepository.findByIdAndDelYnFalse(history.getMember().getId())
-                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        WorkoutHistoryDto historyDto = WorkoutHistoryDto.create(history, member.getMemberProfile());
         setHistoryFile(historyDto, ids);
         setHistoryExercise(historyDto, ids);
         return historyDto;

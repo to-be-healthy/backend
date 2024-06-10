@@ -134,19 +134,31 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
     }
 
     private BooleanExpression dietIdEq(Long dietId) {
-        return diet.dietId.eq(dietId);
+        if (!ObjectUtils.isEmpty(dietId)){
+            return diet.dietId.eq(dietId);
+        }
+        return null;
     }
 
     private BooleanExpression dietTrainerIdEq(Member trainer) {
-        return diet.trainer.id.eq(trainer.getId());
+        if (!ObjectUtils.isEmpty(trainer)){
+            return diet.trainer.id.eq(trainer.getId());
+        }
+        return null;
     }
 
     private BooleanExpression dietDeYnEq(boolean bool) {
-        return diet.delYn.eq(bool);
+        if (!ObjectUtils.isEmpty(bool)){
+            return diet.delYn.eq(bool);
+        }
+        return null;
     }
 
     private BooleanExpression dietFileDeYnEq(boolean bool) {
-        return dietFiles.delYn.eq(bool);
+        if (!ObjectUtils.isEmpty(bool)){
+            return dietFiles.delYn.eq(bool);
+        }
+        return null;
     }
 
     private BooleanExpression convertEatDate_YYYY_MM(String searchDate) {
@@ -175,11 +187,17 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
     }
 
     private BooleanExpression delYnEq(boolean bool) {
-        return diet.delYn.eq(bool);
+        if (!ObjectUtils.isEmpty(bool)){
+            return diet.delYn.eq(bool);
+        }
+        return null;
     }
 
     private BooleanExpression memberIdEq(Long memberId) {
-        return diet.member.id.eq(memberId);
+        if (!ObjectUtils.isEmpty(memberId)){
+            return diet.member.id.eq(memberId);
+        }
+        return null;
     }
 
 }

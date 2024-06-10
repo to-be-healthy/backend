@@ -65,9 +65,10 @@ public class WorkoutHistoryController {
             @ApiResponse(responseCode = "200", description = "운동기록 상세정보를 반환한다.")
     })
     @GetMapping("/{workoutHistoryId}")
-    public ResponseHandler<WorkoutHistoryDto> getWorkoutHistoryDetail(@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId) {
+    public ResponseHandler<WorkoutHistoryDto> getWorkoutHistoryDetail(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                      @Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId) {
         return ResponseHandler.<WorkoutHistoryDto>builder()
-                .data(workoutService.getWorkoutHistoryDetail(workoutHistoryId))
+                .data(workoutService.getWorkoutHistoryDetail(customMemberDetails.getMember(), workoutHistoryId))
                 .message("운동기록이 조회되었습니다.")
                 .build();
     }
