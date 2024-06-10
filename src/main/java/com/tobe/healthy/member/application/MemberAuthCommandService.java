@@ -145,7 +145,7 @@ public class MemberAuthCommandService {
         Member member = Member.join(request, password);
         memberRepository.save(member);
 
-        if(StringUtils.isEmpty(request.getUserId())){
+        if(StringUtils.isEmpty(request.getUuid())){
             return CommandJoinMemberResult.from(member);
         }else{ //초대가입
             return joinWithInvitation(request, CommandJoinMemberResult.from(member));
