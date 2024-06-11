@@ -77,12 +77,14 @@ public class CourseHistoryRepositoryCustomImpl implements CourseHistoryRepositor
     }
 
     private BooleanExpression convertDateFormat(String searchDate) {
-        if (ObjectUtils.isEmpty(searchDate)) return null;
-        StringTemplate stringTemplate = Expressions.stringTemplate(
-                "DATE_FORMAT({0}, {1})"
-                , courseHistory.createdAt
-                , ConstantImpl.create("%Y-%m"));
-        return stringTemplate.eq(searchDate);
+        if (!ObjectUtils.isEmpty(searchDate)){
+            StringTemplate stringTemplate = Expressions.stringTemplate(
+                    "DATE_FORMAT({0}, {1})"
+                    , courseHistory.createdAt
+                    , ConstantImpl.create("%Y-%m"));
+            return stringTemplate.eq(searchDate);
+        }
+        return null;
     }
 
 }

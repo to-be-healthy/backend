@@ -9,6 +9,7 @@ import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -40,7 +41,10 @@ public class ScheduleWaitingRepositoryImpl implements ScheduleWaitingRepositoryC
 	}
 
 	private BooleanExpression scheduleWaitingMemberIdEq(Long memberId) {
-		return scheduleWaiting.member.id.eq(memberId);
+		if(!ObjectUtils.isEmpty(memberId)){
+			return scheduleWaiting.member.id.eq(memberId);
+		}
+		return null;
 	}
 
 	private Predicate lessonDateTimeAfterYesterday() {
