@@ -7,6 +7,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.util.Locale;
 import java.util.TimeZone;
 
 import static java.util.TimeZone.getTimeZone;
@@ -23,5 +24,6 @@ public class HealthyApplication {
     @PostConstruct
     public void setTimeZone() {
         TimeZone.setDefault(getTimeZone("Asia/Seoul"));
+        Locale.setDefault(Locale.KOREA);
     }
 }
