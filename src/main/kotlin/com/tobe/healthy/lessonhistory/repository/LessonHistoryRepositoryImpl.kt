@@ -51,6 +51,7 @@ class LessonHistoryRepositoryImpl(
                 validateMemberTypeAndMemberIdEq(memberId, memberType),
                 lessonHistoryFiles.lessonHistoryComment.id.isNull
             )
+            .orderBy(lessonHistory.id.desc())
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
             .fetch()
@@ -114,6 +115,7 @@ class LessonHistoryRepositoryImpl(
             )
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
+            .orderBy(lessonHistory.id.desc())
             .fetch()
 
         val totalCount = queryFactory
