@@ -159,14 +159,13 @@ public class TrainerService {
         CourseDto courseDto = courseService.getNowUsingCourse(memberId);
 
         //수강권 횟수가 남아있는 경우 삭제 불가
-        if(courseDto != null){
-            if(isRemainLessonCnt(courseDto)) throw new CustomException(COURSE_ALREADY_EXISTS);
-            courseService.deleteCourse(trainer.getId(), courseDto.getCourseId());
+        if(courseDto != null && isRemainLessonCnt(courseDto)){
+            throw new CustomException(COURSE_ALREADY_EXISTS);
         }
         mappingRepository.deleteByTrainerIdAndMemberId(trainer.getId(), member.getId());
     }
 
     private boolean isRemainLessonCnt(CourseDto courseDto){
-        return courseDto.getCompletedLessonCnt()<courseDto.getTotalLessonCnt();
+        return courseDto.getCompletedLessonCnt() != courseDto.getTotalLessonCnt();
     }
 }

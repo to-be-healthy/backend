@@ -147,9 +147,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	}
 
 	public void registerGym(Gym gym) {
-		if (this.gym == gym) {
-			throw new CustomException(UNCHANGED_GYM_ID);
-		}
 		this.gym = gym;
 	}
 
