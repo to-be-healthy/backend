@@ -62,7 +62,13 @@ public class SecurityConfig {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedHeaders(Collections.singletonList("*"));
             config.setAllowedMethods(Collections.singletonList("*"));
-            config.setAllowedOriginPatterns(List.of("http://localhost:3000", "https://api.to-be-healthy.site", "https://to-be-healthy.site", "https://www.to-be-healthy.site"));
+            config.setAllowedOriginPatterns(List.of(
+                    "http://localhost:3000",
+                    "https://api.to-be-healthy.site",
+                    "https://dev-api.to-be-healthy.site",
+                    "https://www.to-be-healthy.site",
+                    "https://www-dev.to-be-healthy.site"
+            ));
             config.setAllowCredentials(true);
             return config;
         };
