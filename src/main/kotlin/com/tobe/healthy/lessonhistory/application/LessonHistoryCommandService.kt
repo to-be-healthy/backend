@@ -194,7 +194,8 @@ class LessonHistoryCommandService(
 
         val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id, lessonHistoryCommentId)
 
-        val parentComment = findLessonHistoryComment(lessonHistoryCommentId)
+        val parentComment = lessonHistoryCommentRepository.findByIdOrNull(lessonHistoryCommentId)
+            ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
 
         val entity = LessonHistoryComment(
             order = order,
