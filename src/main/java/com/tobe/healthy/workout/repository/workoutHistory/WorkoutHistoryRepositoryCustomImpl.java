@@ -87,7 +87,7 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     }
 
     @Override
-    public Page<WorkoutHistoryDto> getWorkoutHistoryByGym(Long loginMemberId, Long gymId, Pageable pageable, String searchDate) {
+    public Page<WorkoutHistoryDto> getWorkoutHistoryOnCommunity(Long loginMemberId, Long gymId, Pageable pageable, String searchDate) {
         QMemberProfile profileId = new QMemberProfile("profileId");
         Long totalCnt = queryFactory
                 .select(workoutHistory.count())

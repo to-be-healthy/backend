@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -73,21 +74,6 @@ public class WorkoutHistoryService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         Page<WorkoutHistoryDto> pageDtos = workoutHistoryRepository.getWorkoutHistoryOfMonth(loginMember.getId(), memberId, pageable, searchDate);
-        List<WorkoutHistoryDto> historiesDto = pageDtos.stream().toList();
-        List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
-        historiesDto = setHistoryListFile(historiesDto, ids);
-        List<WorkoutHistoryDto> content = setHistoryListExercise(historiesDto, ids);
-        CustomPaging customPaging = new CustomPaging<>(content, pageDtos.getPageable().getPageNumber(),
-                pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
-        customPaging.setMainData(MemberDto.from(member));
-        return customPaging;
-    }
-
-    public CustomPaging getWorkoutHistoryOnCommunityByMember(Member loginMember, Long memberId, Pageable pageable, String searchDate) {
-        Member member = memberRepository.findByIdAndDelYnFalse(memberId)
-                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-
-        Page<WorkoutHistoryDto> pageDtos = workoutHistoryRepository.getWorkoutHistoryOnCommunityByMember(loginMember.getId(), memberId, pageable, searchDate);
         List<WorkoutHistoryDto> historiesDto = pageDtos.stream().toList();
         List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
         historiesDto = setHistoryListFile(historiesDto, ids);
@@ -216,10 +202,15 @@ public class WorkoutHistoryService {
         }
     }
 
-    public CustomPaging<WorkoutHistoryDto> getWorkoutHistoryOnCommunity(Member loginMember, Pageable pageable, String searchDate) {
+    public CustomPaging<WorkoutHistoryDto> getWorkoutHistoryOnCommunity(Long memberId, Member loginMember, Pageable pageable, String searchDate) {
         Member member = memberRepository.findByIdAndDelYnFalse(loginMember.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        Page<WorkoutHistoryDto> pageDtos = workoutHistoryRepository.getWorkoutHistoryByGym(loginMember.getId(), member.getGym().getId(), pageable, searchDate);
+        Page<WorkoutHistoryDto> pageDtos;
+        if(ObjectUtils.isEmpty(memberId)){ //커뮤니티 목록 조회
+            pageDtos = workoutHistoryRepository.getWorkoutHistoryOnCommunity(loginMember.getId(), member.getGym().getId(), pageable, searchDate);
+        }else{ //커뮤니티 학생 한명의 목록 조회
+            pageDtos = workoutHistoryRepository.getWorkoutHistoryOnCommunityByMember(loginMember.getId(), memberId, pageable, searchDate);
+        }
         List<WorkoutHistoryDto> historiesDto = pageDtos.stream().toList();
         List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
         historiesDto = setHistoryListFile(historiesDto, ids);
