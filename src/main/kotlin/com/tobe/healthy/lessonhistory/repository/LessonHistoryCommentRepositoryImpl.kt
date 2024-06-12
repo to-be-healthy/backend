@@ -17,8 +17,7 @@ class LessonHistoryCommentRepositoryImpl(
             .from(lessonHistoryComment)
             .where(
                 lessonHistoryIdEq(lessonHistoryId),
-                parentCommentIdIsNull(),
-                lessonHistoryComment.delYn.eq(false)
+                parentCommentIdIsNull()
             )
             .fetchOne() ?: 1
         return result
