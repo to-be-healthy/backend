@@ -7,7 +7,7 @@ import com.tobe.healthy.common.NotificationSenderInfo.SenderInfo
 import com.tobe.healthy.notification.domain.dto.out.NotificationRedDotStatusResult
 
 data class KotlinCustomPaging<T>(
-    var content: List<T>,
+    var content: List<T>?,
     val pageNumber: Int,
     val pageSize: Int,
     val totalPages: Int,

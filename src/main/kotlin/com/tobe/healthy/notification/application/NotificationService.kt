@@ -78,7 +78,7 @@ class NotificationService(
         val results = RetrieveNotificationWithRedDotResult.from(notification, redDotStatus)
 
         return KotlinCustomPaging(
-            content = results.content,
+            content = results.content.ifEmpty { null },
             pageNumber = notification.pageable.pageNumber,
             pageSize = notification.pageable.pageSize,
             totalPages = notification.totalPages,
