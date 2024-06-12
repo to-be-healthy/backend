@@ -125,18 +125,4 @@ public class WorkoutHistoryController {
                 .build();
     }
 
-    @Operation(summary = "같은 헬스장 학생들의 운동기록 목록 조회하기", responses = {
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-            @ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
-    })
-    @GetMapping("/my-gym")
-    public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistoryMyGym(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                                   @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
-                                                                                   Pageable pageable) {
-        return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
-                .data(workoutService.getWorkoutHistoryMyGym(customMemberDetails.getMember(), pageable, searchDate))
-                .message("운동기록이 조회되었습니다.")
-                .build();
-    }
-
 }

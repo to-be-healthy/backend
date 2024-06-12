@@ -61,6 +61,32 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     }
 
     @Override
+    public Page<WorkoutHistoryDto> getWorkoutHistoryOnCommunityByMember(Long loginMemberId, Long memberId, Pageable pageable, String searchDate) {
+        QMemberProfile profileId = new QMemberProfile("profileId");
+        Long totalCnt = queryFactory
+                .select(workoutHistory.count())
+                .from(workoutHistory)
+                .where(memberIdEq(memberId), historyDeYnEq(false), convertDateFormat(searchDate))
+                .fetchOne();
+        List<WorkoutHistoryDto> workoutHistories = queryFactory
+                .select(new QWorkoutHistoryDto(workoutHistory.workoutHistoryId, workoutHistory.content, workoutHistory.member
+                        , isLiked()
+                        , workoutHistory.likeCnt, workoutHistory.commentCnt, workoutHistory.viewMySelf, workoutHistory.createdAt, member.memberProfile))
+                .from(workoutHistory)
+                .leftJoin(workoutHistory.member, member)
+                .leftJoin(member.memberProfile, profileId)
+                .leftJoin(workoutHistoryLike)
+                .on(workoutHistory.workoutHistoryId.eq(workoutHistoryLike.workoutHistoryLikePK.workoutHistory.workoutHistoryId)
+                        , workoutHistoryLike.workoutHistoryLikePK.member.id.eq(loginMemberId))
+                .where(memberIdEq(memberId), historyDeYnEq(false), convertDateFormat(searchDate), viewMySelfEq(false))
+                .orderBy(workoutHistory.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+        return PageableExecutionUtils.getPage(workoutHistories, pageable, ()-> totalCnt );
+    }
+
+    @Override
     public Page<WorkoutHistoryDto> getWorkoutHistoryByGym(Long loginMemberId, Long gymId, Pageable pageable, String searchDate) {
         QMemberProfile profileId = new QMemberProfile("profileId");
         Long totalCnt = queryFactory
