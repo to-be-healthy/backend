@@ -137,11 +137,17 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	}
 
 	private BooleanExpression scheduleTrainerIdEq(Long trainerId) {
-		return schedule.trainer.id.eq(trainerId);
+		if(!ObjectUtils.isEmpty(trainerId)){
+			return schedule.trainer.id.eq(trainerId);
+		}
+		return null;
 	}
 
 	private BooleanExpression scheduleApplicantIdEq(Long memberId) {
-		return schedule.applicant.id.eq(memberId);
+		if(!ObjectUtils.isEmpty(memberId)){
+			return schedule.applicant.id.eq(memberId);
+		}
+		return null;
 	}
 
 	private Predicate courseIdEq(StudentScheduleCond searchCond) {
@@ -152,11 +158,13 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	}
 
 	private BooleanExpression convertDateFormat(String searchDate) {
-		if (ObjectUtils.isEmpty(searchDate)) return null;
-		StringTemplate stringTemplate = Expressions.stringTemplate(
-				"DATE_FORMAT({0}, {1})"
-				, schedule.lessonDt
-				, ConstantImpl.create("%Y-%m"));
-		return stringTemplate.eq(searchDate);
+		if (!ObjectUtils.isEmpty(searchDate)){
+			StringTemplate stringTemplate = Expressions.stringTemplate(
+					"DATE_FORMAT({0}, {1})"
+					, schedule.lessonDt
+					, ConstantImpl.create("%Y-%m"));
+			return stringTemplate.eq(searchDate);
+		}
+		return null;
 	}
 }

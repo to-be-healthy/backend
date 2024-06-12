@@ -43,16 +43,21 @@ public class PointRepositoryCustomImpl implements PointRepositoryCustom {
     }
 
     private BooleanExpression pointMemberIdEq(Long memberId) {
-        return point1.member.id.eq(memberId);
+        if(!ObjectUtils.isEmpty(memberId)){
+            return point1.member.id.eq(memberId);
+        }
+        return null;
     }
 
     private BooleanExpression convertDateFormat(String searchDate) {
-        if (ObjectUtils.isEmpty(searchDate)) return null;
-        StringTemplate stringTemplate = Expressions.stringTemplate(
-                "DATE_FORMAT({0}, {1})"
-                , point1.createdAt
-                , ConstantImpl.create("%Y-%m"));
-        return stringTemplate.eq(searchDate);
+        if (!ObjectUtils.isEmpty(searchDate)){
+            StringTemplate stringTemplate = Expressions.stringTemplate(
+                    "DATE_FORMAT({0}, {1})"
+                    , point1.createdAt
+                    , ConstantImpl.create("%Y-%m"));
+            return stringTemplate.eq(searchDate);
+        }
+        return null;
     }
 
 }

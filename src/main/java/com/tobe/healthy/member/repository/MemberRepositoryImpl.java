@@ -149,7 +149,10 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     }
 
     private BooleanExpression scheduleReservationStatusEq(ReservationStatus status) {
-        return schedule.reservationStatus.eq(status);
+        if(!ObjectUtils.isEmpty(status)){
+            return schedule.reservationStatus.eq(status);
+        }
+        return null;
     }
 
     @Override
@@ -204,19 +207,31 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
     }
 
     private BooleanExpression memberDelYnEq(boolean bool) {
-        return member.delYn.eq(bool);
+        if(!ObjectUtils.isEmpty(bool)){
+            return member.delYn.eq(bool);
+        }
+        return null;
     }
 
     private BooleanExpression mappingTrainerIdEq(Long trainerId) {
-        return trainerMemberMapping.trainer.id.eq(trainerId);
+        if(!ObjectUtils.isEmpty(trainerId)){
+            return trainerMemberMapping.trainer.id.eq(trainerId);
+        }
+        return null;
     }
 
     private BooleanExpression memberTypeEq(MemberType memberType) {
-        return member.memberType.eq(memberType);
+        if(!ObjectUtils.isEmpty(memberType)){
+            return member.memberType.eq(memberType);
+        }
+        return null;
     }
 
     private BooleanExpression memberGymIdEq(Long gymId) {
-        return member.gym.id.eq(gymId);
+        if(!ObjectUtils.isEmpty(gymId)){
+            return member.gym.id.eq(gymId);
+        }
+        return null;
     }
 
 }
