@@ -54,6 +54,7 @@ class LessonHistoryRepositoryImpl(
             .orderBy(lessonHistory.id.desc())
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
+            .orderBy(lessonHistory.id.desc())
             .fetch()
 
         val totalCount = queryFactory
@@ -169,6 +170,7 @@ class LessonHistoryRepositoryImpl(
             )
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
+            .orderBy(lessonHistory.id.desc())
             .fetch()
 
         val totalCount = queryFactory
