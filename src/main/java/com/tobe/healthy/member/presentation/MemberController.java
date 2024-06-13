@@ -233,7 +233,7 @@ public class MemberController {
 		})
 	@PostMapping("/password")
 	public ResponseHandler<Boolean> validateCurrentPassword(@RequestBody @Valid ValidateCurrentPassword request,
-														 	@AuthenticationPrincipal CustomMemberDetails member) {
+															@AuthenticationPrincipal CustomMemberDetails member) {
 		return ResponseHandler.<Boolean>builder()
 			.data(memberService.validateCurrentPassword(request, member.getMemberId()))
 			.message("비밀번호가 확인되었습니다.")

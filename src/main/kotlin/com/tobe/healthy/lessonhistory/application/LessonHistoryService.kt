@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 @Transactional(readOnly = true)
@@ -86,6 +87,7 @@ class LessonHistoryService(
         memberId: Long
     ): List<RetrieveUnwrittenLessonHistory> {
         return trainerScheduleRepository.findAllUnwrittenLessonHistory(request, memberId)
+            .filter { LocalDateTime.now().isAfter(LocalDateTime.of(it.lessonDt, it.lessonEndTime)) }
             .map { RetrieveUnwrittenLessonHistory.from(it) }
     }
 }

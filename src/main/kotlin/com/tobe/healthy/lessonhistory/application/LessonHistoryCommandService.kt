@@ -36,6 +36,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import java.time.LocalDateTime
 
 @Service
 @Transactional
@@ -60,6 +61,10 @@ class LessonHistoryCommandService(
         val student = findMember(request.studentId)
         val trainer = findMember(trainerId)
         val schedule = findSchedule(request.scheduleId)
+
+        if (LocalDateTime.now().isBefore(LocalDateTime.of(schedule.lessonDt, schedule.lessonEndTime))) {
+            throw IllegalArgumentException("수업이 끝나기 전에 수업일지를 작성할 수 없습니다.")
+        }
 
         if (lessonHistoryRepository.validateDuplicateLessonHistory(trainerId, student.id, schedule.id)) {
             throw IllegalArgumentException("이미 수업일지를 등록하였습니다.")
