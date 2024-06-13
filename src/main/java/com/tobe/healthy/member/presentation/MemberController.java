@@ -71,8 +71,8 @@ public class MemberController {
 	})
 	@GetMapping("/me/workout-histories")
 	public ResponseHandler<CustomPaging> getWorkoutHistory(String searchDate,
-														   Pageable pageable,
-														   @AuthenticationPrincipal CustomMemberDetails loginMember) {
+																			  Pageable pageable,
+																			  @AuthenticationPrincipal CustomMemberDetails loginMember) {
 		return ResponseHandler.<CustomPaging>builder()
 				.data(workoutService.getWorkoutHistory(loginMember.getMember(), loginMember.getMemberId(), pageable, searchDate))
 				.message("운동기록이 조회되었습니다.")
@@ -85,8 +85,8 @@ public class MemberController {
 	})
 	@GetMapping("/{memberId}/workout-histories")
 	public ResponseHandler<CustomPaging> getWorkoutHistory(@PathVariable Long memberId, String searchDate,
-														   @AuthenticationPrincipal CustomMemberDetails loginMember,
-														   Pageable pageable) {
+																			  @AuthenticationPrincipal CustomMemberDetails loginMember,
+																			  Pageable pageable) {
 		return ResponseHandler.<CustomPaging>builder()
 				.data(workoutService.getWorkoutHistory(loginMember.getMember(), memberId, pageable, searchDate))
 				.message("운동기록이 조회되었습니다.")
