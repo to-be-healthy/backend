@@ -10,18 +10,21 @@ import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
+import com.tobe.healthy.schedule.application.StudentScheduleService;
+import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
+import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
 import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
 import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
 import com.tobe.healthy.trainer.domain.dto.out.MemberInviteResultCommand;
-import com.tobe.healthy.workout.application.WorkoutHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
@@ -39,7 +42,7 @@ import java.util.List;
 public class TrainerController {
 
     private final TrainerService trainerService;
-    private final WorkoutHistoryService workoutService;
+    private final StudentScheduleService studentScheduleService;
     private final MemberCommandService memberCommandService;
     private final DietService dietService;
 
@@ -168,6 +171,37 @@ public class TrainerController {
         return ResponseHandler.<CustomPaging<DietDto>>builder()
                 .data(dietService.getDietByTrainer(loginMember.getMemberId(), pageable, searchDate))
                 .message("식단기록이 조회되었습니다.")
+                .build();
+    }
+
+    @Operation(summary = "트레이너가 학생의 다가오는 예약을 조회한다.", description = "트레이너가 학생의 다가오는 예약을 조회한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "트레이너가 학생의 다가오는 예약을 조회하였습니다.")
+            })
+    @GetMapping("/reservation/new")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    public ResponseHandler<MyReservationResponse> findNewReservationByTrainer(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                     @ParameterObject StudentScheduleCond searchCond,
+                                                                     @Param("memberId") Long memberId) {
+        return ResponseHandler.<MyReservationResponse>builder()
+                .data(studentScheduleService.findNewReservationByTrainer(customMemberDetails.getMemberId(), memberId, searchCond))
+                .message("학생이 내 예약을 조회하였습니다.")
+                .build();
+    }
+
+    @Operation(summary = "트레이너가 학생의 지난 예약을 조회한다.", description = "트레이너가 학생의 지난 예약을 조회한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "학생이 내 예약을 조회하였습니다.")
+            })
+    @GetMapping("/reservation/old")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    public ResponseHandler<MyReservationResponse> findOldReservationByTrainer(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                       @ParameterObject StudentScheduleCond searchCond,
+                                                                       @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
+                                                                       @Param("memberId") Long memberId) {
+        return ResponseHandler.<MyReservationResponse>builder()
+                .data(studentScheduleService.findOldReservationByTrainer(customMemberDetails.getMemberId(), memberId, searchCond, searchDate))
+                .message("학생의 예약을 조회하였습니다.")
                 .build();
     }
 }

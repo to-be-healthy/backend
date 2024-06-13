@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_MAPPED;
 import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_MAPPED;
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
 import static java.time.LocalTime.NOON;
@@ -101,13 +102,25 @@ public class StudentScheduleService {
 				&& schedule.getWaitingByName()!=null;
 	}
 
-	public MyReservationResponse findMyNewReservation(Long memberId, StudentScheduleCond searchCond) {
-		List<MyReservation> result = studentScheduleRepository.findMyNewReservation(memberId, searchCond);
+	public MyReservationResponse findNewReservationByTrainer(Long trainerId, Long memberId, StudentScheduleCond searchCond) {
+		mappingRepository.findByTrainerIdAndMemberId(trainerId, memberId)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
+		return findNewReservation(memberId, searchCond);
+	}
+
+	public MyReservationResponse findNewReservation(Long memberId, StudentScheduleCond searchCond) {
+		List<MyReservation> result = studentScheduleRepository.findNewReservation(memberId, searchCond);
 		return MyReservationResponse.create(courseService.getNowUsingCourse(memberId), result);
 	}
 
-	public MyReservationResponse findMyOldReservation(Long memberId, StudentScheduleCond searchCond, String searchDate) {
-		List<MyReservation> result = studentScheduleRepository.findMyOldReservation(memberId, searchCond, searchDate);
+	public MyReservationResponse findOldReservationByTrainer(Long trainerId, Long memberId, StudentScheduleCond searchCond, String searchDate) {
+		mappingRepository.findByTrainerIdAndMemberId(trainerId, memberId)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
+		return findOldReservation(memberId, searchCond, searchDate);
+	}
+
+	public MyReservationResponse findOldReservation(Long memberId, StudentScheduleCond searchCond, String searchDate) {
+		List<MyReservation> result = studentScheduleRepository.findOldReservation(memberId, searchCond, searchDate);
 		return MyReservationResponse.create(null, result);
 	}
 }

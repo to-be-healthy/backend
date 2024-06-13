@@ -83,7 +83,7 @@ public class CourseService {
         }else{
             //해당 수강권으로 예약된 수업 조회
             StudentScheduleCond searchCond = new StudentScheduleCond(null, null, null, courseId);
-            List<MyReservation> result = studentScheduleRepository.findMyNewReservation(memberId, searchCond);
+            List<MyReservation> result = studentScheduleRepository.findNewReservation(memberId, searchCond);
 
             //수업 취소
             result.forEach(r -> commonScheduleService.cancelMemberSchedule(r.getScheduleId(), memberId));

@@ -10,7 +10,7 @@ import java.util.List;
 public interface StudentScheduleRepositoryCustom {
 	List<ScheduleCommandResult> findAllSchedule(StudentScheduleCond searchCond, Long trainerId, Member member);
 	List<ScheduleCommandResult> findAllByApplicantId(Long memberId);
-	List<MyReservation> findMyNewReservation(Long memberId, StudentScheduleCond searchCond);
-	List<MyReservation> findMyOldReservation(Long memberId, StudentScheduleCond searchCond, String searchDate);
+	List<MyReservation> findNewReservation(Long memberId, StudentScheduleCond searchCond);
+	List<MyReservation> findOldReservation(Long memberId, StudentScheduleCond searchCond, String searchDate);
 	MyReservation findMyNextReservation(Long memberId);
 }
