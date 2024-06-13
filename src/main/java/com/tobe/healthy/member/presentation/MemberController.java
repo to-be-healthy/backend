@@ -13,7 +13,6 @@ import com.tobe.healthy.member.domain.dto.out.RetrieveTrainerInfo;
 import com.tobe.healthy.member.domain.dto.out.TrainerMappingResult;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -72,8 +71,8 @@ public class MemberController {
 	})
 	@GetMapping("/me/workout-histories")
 	public ResponseHandler<CustomPaging> getWorkoutHistory(String searchDate,
-																			  Pageable pageable,
-																			  @AuthenticationPrincipal CustomMemberDetails loginMember) {
+														   Pageable pageable,
+														   @AuthenticationPrincipal CustomMemberDetails loginMember) {
 		return ResponseHandler.<CustomPaging>builder()
 				.data(workoutService.getWorkoutHistory(loginMember.getMember(), loginMember.getMemberId(), pageable, searchDate))
 				.message("운동기록이 조회되었습니다.")
@@ -86,8 +85,8 @@ public class MemberController {
 	})
 	@GetMapping("/{memberId}/workout-histories")
 	public ResponseHandler<CustomPaging> getWorkoutHistory(@PathVariable Long memberId, String searchDate,
-																			  @AuthenticationPrincipal CustomMemberDetails loginMember,
-																			  Pageable pageable) {
+														   @AuthenticationPrincipal CustomMemberDetails loginMember,
+														   Pageable pageable) {
 		return ResponseHandler.<CustomPaging>builder()
 				.data(workoutService.getWorkoutHistory(loginMember.getMember(), memberId, pageable, searchDate))
 				.message("운동기록이 조회되었습니다.")
