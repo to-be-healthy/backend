@@ -1,5 +1,6 @@
 package com.tobe.healthy.trainer.application;
 
+import com.tobe.healthy.common.Utils;
 import com.tobe.healthy.common.redis.RedisKeyPrefix;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.error.CustomException;
@@ -56,7 +57,6 @@ public class TrainerService {
     private final CourseService courseService;
     private final CourseRepository courseRepository;
     private final PointRepository pointRepository;
-    private final MemberAuthCommandService memberAuthCommandService;
 
     private static final int ONE_DAY = 24 * 60 * 60 * 1000;
 
@@ -88,7 +88,7 @@ public class TrainerService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         String name = command.getName();
-        memberAuthCommandService.validateName(name);
+        validateName(name);
         int lessonCnt = command.getLessonCnt();
 
         String uuid = System.currentTimeMillis() + "-" + UUID.randomUUID();
@@ -104,6 +104,16 @@ public class TrainerService {
         }};
         redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), ONE_DAY); // 1days
         return new MemberInviteResultCommand(uuid, invitationLink);
+    }
+
+    private void validateName(String name) {
+        if (Utils.validateNameLength(name)) {
+            throw new CustomException(MEMBER_NAME_LENGTH_NOT_VALID);
+        }
+
+        if (Utils.validateNameFormat(name)) {
+            throw new CustomException(MEMBER_NAME_NOT_VALID);
+        }
     }
 
     public List<MemberInTeamResult> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue, Pageable pageable) {
