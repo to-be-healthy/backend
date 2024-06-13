@@ -60,31 +60,31 @@ public class StudentScheduleController {
                 .build();
     }
 
-    @Operation(summary = "학생이 다가오는 예약을 조회한다.", description = "학생이 내 예약을 조회한다.",
+    @Operation(summary = "학생이 다가오는 예약을 조회한다.", description = "학생이 다가오는 예약을 조회한다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "학생이 내 예약을 조회하였습니다.")
             })
     @GetMapping("/my-reservation/new")
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
-    public ResponseHandler<MyReservationResponse> findMyNewReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    public ResponseHandler<MyReservationResponse> findNewReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                        @ParameterObject StudentScheduleCond searchCond) {
         return ResponseHandler.<MyReservationResponse>builder()
-                .data(studentScheduleService.findMyNewReservation(customMemberDetails.getMemberId(), searchCond))
+                .data(studentScheduleService.findNewReservation(customMemberDetails.getMemberId(), searchCond))
                 .message("학생이 내 예약을 조회하였습니다.")
                 .build();
     }
 
-    @Operation(summary = "학생이 지난 예약을 조회한다.", description = "학생이 내 예약을 조회한다.",
+    @Operation(summary = "학생이 지난 예약을 조회한다.", description = "학생이 지난 예약을 조회한다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "학생이 내 예약을 조회하였습니다.")
             })
     @GetMapping("/my-reservation/old")
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
-    public ResponseHandler<MyReservationResponse> findMyOldReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    public ResponseHandler<MyReservationResponse> findOldReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                        @ParameterObject StudentScheduleCond searchCond,
                                                                        @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate) {
         return ResponseHandler.<MyReservationResponse>builder()
-                .data(studentScheduleService.findMyOldReservation(customMemberDetails.getMemberId(), searchCond, searchDate))
+                .data(studentScheduleService.findOldReservation(customMemberDetails.getMemberId(), searchCond, searchDate))
                 .message("학생이 내 예약을 조회하였습니다.")
                 .build();
     }

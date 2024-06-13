@@ -70,7 +70,7 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	}
 
 	@Override
-	public List<MyReservation> findMyNewReservation(Long memberId, StudentScheduleCond searchCond) {
+	public List<MyReservation> findNewReservation(Long memberId, StudentScheduleCond searchCond) {
 		List<Schedule> schedules = queryFactory.select(schedule)
 				.from(schedule)
 				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
@@ -82,7 +82,7 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	}
 
 	@Override
-	public List<MyReservation> findMyOldReservation(Long memberId, StudentScheduleCond searchCond, String searchDate) {
+	public List<MyReservation> findOldReservation(Long memberId, StudentScheduleCond searchCond, String searchDate) {
 		List<Schedule> schedules = queryFactory.select(schedule)
 				.from(schedule)
 				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
