@@ -2,6 +2,7 @@ package com.tobe.healthy.notification.repository
 
 import com.querydsl.core.types.Projections.constructor
 import com.querydsl.core.types.dsl.BooleanExpression
+import com.querydsl.core.types.dsl.CaseBuilder
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.notification.domain.dto.out.NotificationRedDotStatusResult
 import com.tobe.healthy.notification.domain.entity.Notification
@@ -60,14 +61,20 @@ class NotificationRepositoryImpl(
                 constructor(
                     NotificationRedDotStatusResult::class.java,
                     notification.notificationCategory,
-                    notification.count().gt(0)
+                    CaseBuilder()
+                        .`when`(CaseBuilder()
+                                .`when`(notification.receiver.id.eq(receiverId).and(notification.isRead.eq(false)))
+                                .then(1)
+                                .otherwise(0)
+                                .sum().gt(0)
+                        )
+                        .then(true)
+                        .otherwise(false)
                 )
             )
             .from(notification)
             .where(
                 notificationCategoryNq(notificationCategory),
-                notification.receiver.id.eq(receiverId),
-                notification.isRead.eq(false)
             )
             .groupBy(notification.notificationCategory)
             .fetch()
