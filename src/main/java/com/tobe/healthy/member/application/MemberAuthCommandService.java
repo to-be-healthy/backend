@@ -403,7 +403,7 @@ public class MemberAuthCommandService {
         }
     }
 
-    private void validateName(String name) {
+    public void validateName(String name) {
         if (Utils.validateNameLength(name)) {
             throw new CustomException(MEMBER_NAME_LENGTH_NOT_VALID);
         }

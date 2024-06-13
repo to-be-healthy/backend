@@ -10,6 +10,7 @@ import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.gym.domain.dto.out.GymDto;
+import com.tobe.healthy.member.application.MemberAuthCommandService;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
@@ -55,6 +56,7 @@ public class TrainerService {
     private final CourseService courseService;
     private final CourseRepository courseRepository;
     private final PointRepository pointRepository;
+    private final MemberAuthCommandService memberAuthCommandService;
 
     private static final int ONE_DAY = 24 * 60 * 60 * 1000;
 
@@ -86,6 +88,7 @@ public class TrainerService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         String name = command.getName();
+        memberAuthCommandService.validateName(name);
         int lessonCnt = command.getLessonCnt();
 
         String uuid = System.currentTimeMillis() + "-" + UUID.randomUUID();
