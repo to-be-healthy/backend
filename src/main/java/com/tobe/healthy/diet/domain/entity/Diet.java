@@ -147,4 +147,8 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     public void changeEatDate(String eatDate) {
         this.eatDate = LocalDate.parse(eatDate, DateTimeFormatter.ISO_DATE);
     }
+
+    public void changeTrainer(Member trainer) {
+        this.trainer = trainer;
+    }
 }

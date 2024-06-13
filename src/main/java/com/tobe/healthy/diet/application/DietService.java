@@ -23,6 +23,7 @@ import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -102,10 +103,10 @@ public class DietService {
 
         Diet diet = dietRepository.getTodayDiet(memberId);
 
-        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId).orElse(null);
-        Member trainer = mapping == null ? null : mapping.getTrainer();
+        Member trainer = getMappedTrainer(memberId);
         if (ObjectUtils.isEmpty(diet)) diet = dietRepository.save(Diet.create(member, trainer));
 
+        diet.changeTrainer(trainer);
         diet.deleteFile(requestType);
         if (!ObjectUtils.isEmpty(diet.getDietFiles())) {
             diet.getDietFiles().stream()
@@ -174,8 +175,7 @@ public class DietService {
         List<String> uploadDays = dietRepository.getDietUploadDays(member.getId(), null, null);
         if(uploadDays.contains(command.getEatDate())) throw new CustomException(DIET_ALREADY_EXISTS);
 
-        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(member.getId()).orElse(null);
-        Member trainer = mapping == null ? null : mapping.getTrainer();
+        Member trainer = getMappedTrainer(member.getId());
         Diet diet = dietRepository.save(Diet.create(member, trainer, command));
         uploadNewFiles(diet, command);
         DietDto dietDto = DietDto.from(diet);
@@ -183,10 +183,16 @@ public class DietService {
         return dietDto;
     }
 
+    private @Nullable Member getMappedTrainer(Long memberId) {
+        TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId).orElse(null);
+        return mapping == null ? null : mapping.getTrainer();
+    }
+
     public DietDto updateDiet(Member member, Long dietId, DietUpdateCommand command) {
         Diet diet = dietRepository.findByDietIdAndMemberIdAndDelYnFalse(dietId, member.getId())
                 .orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
 
+        diet.changeTrainer(getMappedTrainer(member.getId()));
         diet.changeFast(command);
         deleteOldFiles(diet, command);
         uploadNewFiles(diet, command);
