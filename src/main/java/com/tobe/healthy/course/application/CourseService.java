@@ -4,6 +4,7 @@ import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.CourseHistoryDto;
+import com.tobe.healthy.course.domain.dto.CourseStatus;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
 import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
@@ -33,9 +34,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.course.domain.dto.CourseStatus.*;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.COURSE_CREATE;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
+import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 
 
@@ -124,6 +127,16 @@ public class CourseService {
         return null;
     }
 
+    public CourseStatus getCourseStatus(CourseDto courseDto){
+        if(courseDto == null){
+            return NONE;
+        }else if(courseDto.getRemainLessonCnt() == 0){
+            return EXPIRED;
+        }else{
+            return USING;
+        }
+    }
+
     public void updateCourseByTrainer(Long trainerId, Long courseId, CourseUpdateCommand command) {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
@@ -143,11 +156,20 @@ public class CourseService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
-        Course course = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(member.getId(), 0)
+
+        CourseDto usingCourse = getNowUsingCourse(member.getId());
+        CourseStatus courseStatus = getCourseStatus(usingCourse);
+        Calculation calculation = command.getCalculation();
+        switch (calculation){
+            case PLUS: if(NONE.equals(courseStatus)) throw new CustomException(LESSON_CNT_NOT_VALID);
+            case MINUS: if(NONE.equals(courseStatus) || EXPIRED.equals(courseStatus)) throw new CustomException(LESSON_CNT_NOT_VALID);
+        }
+
+        Course course = courseRepository.findById(usingCourse.getCourseId())
                     .orElseThrow(() -> new CustomException(LESSON_CNT_NOT_VALID));
 
         updateCourse(command, trainer, course);
-        updateScheduleCourse(scheduleId, course, command.getCalculation());
+        updateScheduleCourse(scheduleId, course, calculation);
     }
 
     private void updateCourse(CourseUpdateCommand command, Member trainer, Course course) {

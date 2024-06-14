@@ -2,7 +2,9 @@ package com.tobe.healthy.point.application;
 
 import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
+import com.tobe.healthy.course.domain.dto.CourseStatus;
 import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
@@ -35,6 +37,8 @@ import java.util.stream.Collectors;
 
 import static com.tobe.healthy.config.error.ErrorCode.LESSON_CNT_NOT_VALID;
 import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.course.domain.dto.CourseStatus.NONE;
+import static com.tobe.healthy.course.domain.dto.CourseStatus.USING;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 import static com.tobe.healthy.point.domain.entity.PointType.DIET;
@@ -52,6 +56,7 @@ public class PointService {
     private final MemberRepository memberRepository;
     private final StudentScheduleRepository studentScheduleRepository;
     private final CourseRepository courseRepository;
+    private final CourseService courseService;
 
     public void updateMemberRank() {
         List<Long> trainerIds = mappingRepository.findAllTrainerIds();
@@ -89,9 +94,10 @@ public class PointService {
 
     private boolean checkInvalidCourse(Long memberId, PointType type, Member member) {
         if(DIET == type || WORKOUT == type){
-            Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(member.getId(), 0);
+            CourseDto usingCourse = courseService.getNowUsingCourse(member.getId());
+            CourseStatus courseStatus = courseService.getCourseStatus(usingCourse);
             MyReservation myNextReservation = studentScheduleRepository.findMyNextReservation(memberId);
-            if(optCourse.isEmpty() && myNextReservation == null) return true;
+            return !USING.equals(courseStatus) && myNextReservation == null;
         }
         return false;
     }
