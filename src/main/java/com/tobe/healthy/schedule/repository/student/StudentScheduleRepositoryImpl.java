@@ -23,6 +23,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
+import static com.tobe.healthy.diet.domain.entity.QDiet.diet;
 import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
 import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting;
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
@@ -105,15 +106,16 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	}
 
 	@Override
-	public List<MyReservation> findMyReservationBlueDot(Long memberId, StudentScheduleCond searchCond) {
-		List<Schedule> schedules = queryFactory.select(schedule)
+	public List<String> findMyReservationBlueDot(Long memberId, StudentScheduleCond searchCond) {
+		return queryFactory
+				.select(Expressions.stringTemplate(
+						"DATE_FORMAT({0}, {1})"
+						, schedule.lessonDt
+						, ConstantImpl.create("%Y-%m-%d"))).distinct()
 				.from(schedule)
-				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
-				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
 				.where(scheduleApplicantIdEq(memberId), lessonDtBetween(searchCond))
-				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+				.orderBy(schedule.lessonDt.asc())
 				.fetch();
-		return schedules.stream().map(MyReservation::from).collect(toList());
 	}
 
 	private BooleanExpression scheduleReservationStatusForStudent() {

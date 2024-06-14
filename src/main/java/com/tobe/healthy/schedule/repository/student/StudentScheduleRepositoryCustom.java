@@ -13,6 +13,6 @@ public interface StudentScheduleRepositoryCustom {
 	List<MyReservation> findNewReservation(Long memberId, StudentScheduleCond searchCond);
 	List<MyReservation> findOldReservation(Long memberId, String searchDate);
 	MyReservation findMyNextReservation(Long memberId);
-	List<MyReservation> findMyReservationBlueDot(Long memberId, StudentScheduleCond searchCond);
+	List<String> findMyReservationBlueDot(Long memberId, StudentScheduleCond searchCond);
 
 }

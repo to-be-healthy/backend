@@ -4,10 +4,7 @@ import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
-import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
-import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.domain.dto.out.*;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
@@ -124,8 +121,8 @@ public class StudentScheduleService {
 		return MyReservationResponse.create(null, result);
 	}
 
-	public MyReservationResponse findMyReservationBlueDot(Long memberId, StudentScheduleCond searchCond) {
-		List<MyReservation> result = studentScheduleRepository.findMyReservationBlueDot(memberId, searchCond);
-		return MyReservationResponse.create(null, result);
+	public ReservationDaysResult findMyReservationBlueDot(Long memberId, StudentScheduleCond searchCond) {
+		List<String> days = studentScheduleRepository.findMyReservationBlueDot(memberId, searchCond);
+		return ReservationDaysResult.from(days);
 	}
 }

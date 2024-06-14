@@ -7,6 +7,7 @@ import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.domain.dto.out.ReservationDaysResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -94,9 +95,9 @@ public class StudentScheduleController {
             })
     @GetMapping("/my-reservation")
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
-    public ResponseHandler<MyReservationResponse> findMyReservationBlueDot(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+    public ResponseHandler<ReservationDaysResult> findMyReservationBlueDot(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
                                                                            @ParameterObject StudentScheduleCond searchCond) {
-        return ResponseHandler.<MyReservationResponse>builder()
+        return ResponseHandler.<ReservationDaysResult>builder()
                 .data(studentScheduleService.findMyReservationBlueDot(customMemberDetails.getMemberId(), searchCond))
                 .message("학생이 내 예약을 조회하였습니다.")
                 .build();
