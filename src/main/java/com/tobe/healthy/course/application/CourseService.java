@@ -160,9 +160,14 @@ public class CourseService {
         CourseDto usingCourse = getNowUsingCourse(member.getId());
         CourseStatus courseStatus = getCourseStatus(usingCourse);
         Calculation calculation = command.getCalculation();
+
         switch (calculation){
-            case PLUS: if(NONE.equals(courseStatus)) throw new CustomException(LESSON_CNT_NOT_VALID);
-            case MINUS: if(NONE.equals(courseStatus) || EXPIRED.equals(courseStatus)) throw new CustomException(LESSON_CNT_NOT_VALID);
+            case PLUS:
+                if(NONE.equals(courseStatus)) throw new CustomException(LESSON_CNT_NOT_VALID);
+                break;
+            case MINUS:
+                if(NONE.equals(courseStatus) || EXPIRED.equals(courseStatus)) throw new CustomException(LESSON_CNT_NOT_VALID);
+                break;
         }
 
         Course course = courseRepository.findById(usingCourse.getCourseId())

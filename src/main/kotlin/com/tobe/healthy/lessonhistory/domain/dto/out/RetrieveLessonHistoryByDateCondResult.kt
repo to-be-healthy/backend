@@ -6,6 +6,7 @@ import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus.ABSEN
 import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus.ATTENDED
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryFiles
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryReadStatus
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -19,10 +20,12 @@ data class RetrieveLessonHistoryByDateCondResult(
     val studentId: Long?,
     val student: String?,
     val trainer: String?,
+    val trainerProfile: String?,
     val scheduleId: Long?,
     val lessonDt: String?,
     val lessonTime: String?,
     val attendanceStatus: String?,
+    val feedbackChecked: LessonHistoryReadStatus?,
     val files: MutableList<LessonHistoryFileResults> = mutableListOf(),
 ) {
 
@@ -39,10 +42,12 @@ data class RetrieveLessonHistoryByDateCondResult(
                     studentId = entity.student?.id,
                     student = entity.student?.name,
                     trainer = "${entity.trainer?.name} 트레이너",
+                    trainerProfile = "${entity.trainer?.memberProfile?.fileUrl}",
                     scheduleId = entity.schedule?.id,
                     lessonDt = formatLessonDt(entity.schedule?.lessonDt),
                     lessonTime = formatLessonTime(entity.schedule?.lessonStartTime, entity.schedule?.lessonEndTime),
                     attendanceStatus = validateAttendanceStatus(entity.schedule?.lessonDt, entity.schedule?.lessonEndTime),
+                    feedbackChecked = entity.feedbackChecked,
                     files = entity.files.map { file -> LessonHistoryFileResults.from(file) }.sortedBy { file -> file.createdAt }.toMutableList()
                 )
             }
@@ -59,10 +64,12 @@ data class RetrieveLessonHistoryByDateCondResult(
                     studentId = entity.student?.id,
                     student = entity.student?.name,
                     trainer = "${entity.trainer?.name} 트레이너",
+                    trainerProfile = "${entity.trainer?.memberProfile?.fileUrl}",
                     scheduleId = entity.schedule?.id,
                     lessonDt = formatLessonDt(entity.schedule?.lessonDt),
                     lessonTime = formatLessonTime(entity.schedule?.lessonStartTime, entity.schedule?.lessonEndTime),
                     attendanceStatus = validateAttendanceStatus(entity.schedule?.lessonDt, entity.schedule?.lessonEndTime),
+                    feedbackChecked = entity.feedbackChecked,
                     files = entity.files.filter { it.lessonHistoryComment == null }.map { file -> LessonHistoryFileResults.from(file) }.sortedBy { file -> file.createdAt }.toMutableList()
                 )
             }
