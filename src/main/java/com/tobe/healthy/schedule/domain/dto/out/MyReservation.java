@@ -4,6 +4,7 @@ import com.tobe.healthy.schedule.domain.entity.Schedule;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -17,15 +18,19 @@ public class MyReservation {
     private LocalTime lessonStartTime;
     private LocalTime lessonEndTime;
     private String trainerName;
+    private String trainerProfile;
     private String reservationStatus;
 
     public static MyReservation from(Schedule schedule) {
-        return MyReservation.builder().scheduleId(schedule.getId())
+        MyReservationBuilder builder = MyReservation.builder().scheduleId(schedule.getId())
                 .lessonDt(schedule.getLessonDt())
                 .lessonStartTime(schedule.getLessonStartTime())
                 .lessonEndTime(schedule.getLessonEndTime())
                 .trainerName(schedule.getTrainer().getName() + " 트레이너")
-                .reservationStatus(schedule.getReservationStatus().name())
-                .build();
+                .reservationStatus(schedule.getReservationStatus().name());
+        if(!ObjectUtils.isEmpty(schedule.getTrainer().getMemberProfile())){
+            builder.trainerProfile(schedule.getTrainer().getMemberProfile().getFileUrl());
+        }
+        return builder.build();
     }
 }
