@@ -27,8 +27,9 @@ data class RetrieveLessonHistoryByDateCondResult(
 ) {
 
     companion object {
-        fun from(entity: LessonHistory?): RetrieveLessonHistoryByDateCondResult? {
-            entity?.let {
+
+        fun top1From(entity: LessonHistory?) : RetrieveLessonHistoryByDateCondResult? {
+            return entity?.let {
                 return RetrieveLessonHistoryByDateCondResult(
                     id = entity.id,
                     title = entity.title,
@@ -44,7 +45,27 @@ data class RetrieveLessonHistoryByDateCondResult(
                     attendanceStatus = validateAttendanceStatus(entity.schedule?.lessonDt, entity.schedule?.lessonEndTime),
                     files = entity.files.map { file -> LessonHistoryFileResults.from(file) }.sortedBy { file -> file.createdAt }.toMutableList()
                 )
-            } ?: return null
+            }
+        }
+
+        fun from(entity: LessonHistory): RetrieveLessonHistoryByDateCondResult {
+            entity.let {
+                return RetrieveLessonHistoryByDateCondResult(
+                    id = entity.id,
+                    title = entity.title,
+                    content = entity.content,
+                    commentTotalCount = entity.lessonHistoryComment.count { !it.delYn },
+                    createdAt = entity.createdAt,
+                    studentId = entity.student?.id,
+                    student = entity.student?.name,
+                    trainer = "${entity.trainer?.name} 트레이너",
+                    scheduleId = entity.schedule?.id,
+                    lessonDt = formatLessonDt(entity.schedule?.lessonDt),
+                    lessonTime = formatLessonTime(entity.schedule?.lessonStartTime, entity.schedule?.lessonEndTime),
+                    attendanceStatus = validateAttendanceStatus(entity.schedule?.lessonDt, entity.schedule?.lessonEndTime),
+                    files = entity.files.filter { it.lessonHistoryComment == null }.map { file -> LessonHistoryFileResults.from(file) }.sortedBy { file -> file.createdAt }.toMutableList()
+                )
+            }
         }
 
         private fun validateAttendanceStatus(lessonDt: LocalDate?, lessonEndTime: LocalTime?): String {
