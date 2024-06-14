@@ -24,6 +24,7 @@ import java.util.Optional;
 import static com.tobe.healthy.common.LessonTimeFormatter.lessonStartDateTimeFormatter;
 import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
+import static com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.WAITING;
 import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 
@@ -74,6 +75,7 @@ public class CustomEventListener {
                             String.format("%s 대기 중이던 예약이 확정되었어요!", LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(lessonStartDateTimeFormatter())),
                             List.of(schedule.getApplicant().getId()),
                             WAITING,
+                            SCHEDULE,
                             null
                     );
 

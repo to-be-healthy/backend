@@ -9,6 +9,7 @@ import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
+import com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE
 import com.tobe.healthy.notification.domain.entity.NotificationType.CANCEL
 import com.tobe.healthy.notification.domain.entity.NotificationType.RESERVE
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterDefaultLessonTime
@@ -200,15 +201,16 @@ class TrainerScheduleCommandService(
 
         // 트레이너가 일정 등록시 학생에게 알림
         val notification = CommandSendNotification(
-            RESERVE.description,
-            String.format(
+            title = RESERVE.description,
+            content = String.format(
                 "%s 트레이너가 %s님을 %s 예약에 등록했어요.",
                 schedule.trainer.name,
                 schedule.applicant!!.name,
                 LocalDateTime.of(schedule.lessonDt, schedule.lessonStartTime).format(lessonStartDateTimeFormatter())
             ),
-            listOf(schedule.applicant!!.id),
-            RESERVE
+            receiverIds = listOf(schedule.applicant!!.id),
+            notificationType = RESERVE,
+            notificationCategory = SCHEDULE
         )
 
         notificationPublisher.publish(notification, NOTIFICATION)
@@ -231,15 +233,16 @@ class TrainerScheduleCommandService(
 
         // 트레이너가 일정 등록시 학생에게 알림
         val notification = CommandSendNotification(
-            CANCEL.description,
-            String.format(
+            title = CANCEL.description,
+            content = String.format(
                 "%s 트레이너가 %s님의 %s 예약을 취소했어요.",
                 schedule.trainer.name,
                 applicantName,
                 LocalDateTime.of(schedule.lessonDt, schedule.lessonStartTime).format(lessonStartDateTimeFormatter())
             ),
-            listOf(applicantId!!),
-            CANCEL
+            receiverIds = listOf(applicantId!!),
+            notificationType = CANCEL,
+            notificationCategory = SCHEDULE
         )
 
         notificationPublisher.publish(notification, NOTIFICATION)

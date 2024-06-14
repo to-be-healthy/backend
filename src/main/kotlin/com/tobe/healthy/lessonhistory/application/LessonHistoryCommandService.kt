@@ -27,8 +27,8 @@ import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
+import com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE
 import com.tobe.healthy.notification.domain.entity.NotificationType.*
-import com.tobe.healthy.notification.repository.NotificationRepository
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository
 import org.springframework.beans.factory.annotation.Value
@@ -51,13 +51,13 @@ class LessonHistoryCommandService(
     @Value("\${aws.s3.bucket-name}")
     private val bucketName: String,
     private val notificationPublisher: CustomEventPublisher<CommandSendNotification>,
-    private val notificationRepository: NotificationRepository
 ) {
 
     fun registerLessonHistory(
         request: CommandRegisterLessonHistory,
         trainerId: Long
     ): CommandRegisterLessonHistoryResult {
+
         val student = findMember(request.studentId)
         val trainer = findMember(trainerId)
         val schedule = findSchedule(request.scheduleId)
@@ -77,11 +77,12 @@ class LessonHistoryCommandService(
 
         // 학생에게 수업일지 작성 알림
         val notification = CommandSendNotification(
-            WRITE.description,
-            String.format("트레이너가 새로운 수업일지를 작성하였습니다."),
-            listOf(lessonHistory.student?.id!!),
-            WRITE,
-            lessonHistory.id
+            title = WRITE.description,
+            content = String.format("트레이너가 새로운 수업일지를 작성하였습니다."),
+            receiverIds = listOf(lessonHistory.student?.id!!),
+            notificationType = WRITE,
+            notificationCategory = SCHEDULE,
+            targetId = lessonHistory.id
         )
 
         notificationPublisher.publish(notification, NOTIFICATION)
@@ -151,8 +152,6 @@ class LessonHistoryCommandService(
 
         deleteAllFiles(lessonHistory.files)
 
-        notificationRepository.nullifyLessonHistoryId(lessonHistory.id!!)
-
         lessonHistoryRepository.deleteById(lessonHistory.id!!)
 
         return lessonHistoryId
@@ -174,11 +173,12 @@ class LessonHistoryCommandService(
 
         // 게시글 작성자에게 알림
         val notification = CommandSendNotification(
-                COMMENT.description,
-                String.format("내 게시글에 새로운 댓글이 달렸어요."),
-                listOf(lessonHistory.trainer!!.id!!),
-                COMMENT,
-                lessonHistory.id
+                title = COMMENT.description,
+                content = String.format("내 게시글에 새로운 댓글이 달렸어요."),
+                receiverIds = listOf(lessonHistory.trainer!!.id!!),
+                notificationType = COMMENT,
+                notificationCategory = SCHEDULE,
+                targetId = lessonHistory.id
         )
 
         notificationPublisher.publish(notification, NOTIFICATION)
@@ -212,11 +212,12 @@ class LessonHistoryCommandService(
 
         // 댓글 작성자에게 알림
         val notification = CommandSendNotification(
-            REPLY.description,
-            String.format("내 댓글에 새로운 답글이 달렸어요."),
-            listOf(parentComment.writer?.id!!),
-            REPLY,
-            lessonHistory.id
+            title = REPLY.description,
+            content = String.format("내 댓글에 새로운 답글이 달렸어요."),
+            receiverIds = listOf(parentComment.writer?.id!!),
+            notificationType = REPLY,
+            notificationCategory = SCHEDULE,
+            targetId = lessonHistory.id
         )
 
         notificationPublisher.publish(notification, NOTIFICATION)
@@ -356,11 +357,6 @@ class LessonHistoryCommandService(
         if (uploadFilesSize > FILE_MAXIMUM_UPLOAD_SIZE.description) {
             throw CustomException(EXCEED_MAXIMUM_NUMBER_OF_FILES)
         }
-    }
-
-    private fun findLessonHistoryComment(lessonHistoryCommentId: Long): LessonHistoryComment {
-        return lessonHistoryCommentRepository.findCommentById(lessonHistoryCommentId)
-            ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
     }
 
     private fun findMember(memberId: Long?): Member {

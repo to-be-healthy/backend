@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import static com.tobe.healthy.common.event.EventType.NOTIFICATION;
 import static com.tobe.healthy.config.error.ErrorCode.COMMENT_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_NOT_FOUND;
+import static com.tobe.healthy.notification.domain.entity.NotificationCategory.COMMUNITY;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.COMMENT;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.REPLY;
 
@@ -63,6 +64,7 @@ public class WorkoutCommentService {
                     String.format("내 게시글에 새로운 댓글이 달렸어요."),
                     List.of(history.getMember().getId()),
                     COMMENT,
+                    COMMUNITY,
                     history.getWorkoutHistoryId()
             );
 
@@ -73,6 +75,7 @@ public class WorkoutCommentService {
                     String.format("내 댓글에 새로운 답글이 달렸어요."),
                     List.of(history.getMember().getId()),
                     REPLY,
+                    COMMUNITY,
                     history.getWorkoutHistoryId()
             );
         }
