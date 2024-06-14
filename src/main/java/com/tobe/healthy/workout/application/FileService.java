@@ -81,6 +81,7 @@ public class FileService {
                     String fileUrl = amazonS3.getUrl(bucketName, savedThumFileName).toString();
                     redisService.setValuesWithTimeout(TEMP_FILE_URI.getDescription() + fileUrl, member.getId().toString(), FILE_TEMP_UPLOAD_TIMEOUT); // 30분
                     uploadFile.add(new RegisterFile(fileUrl, ++fileOrder));
+                    if(thumnail.exists()) thumnail.delete();
                 } catch (Exception e) {
                     log.error("error => {}", e.getStackTrace()[0]);
                 }
@@ -120,7 +121,6 @@ public class FileService {
         String thumbName = THUMB_PREFIX + fileName;
         File thumbFile = new File(thumbName);
         ImageIO.write(destImg, "jpg", thumbFile);
-
         return thumbFile;
     }
 
