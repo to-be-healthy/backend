@@ -89,7 +89,7 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
 				.where(scheduleApplicantIdEq(memberId), lessonDateTimeBeforeNow(), convertDateFormat(searchDate))
-				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+				.orderBy(schedule.lessonDt.desc(), schedule.lessonStartTime.desc())
 				.fetch();
 		return schedules.stream().map(MyReservation::from).collect(toList());
 	}
