@@ -1,11 +1,11 @@
 package com.tobe.healthy.lessonhistory.application
 
-import com.tobe.healthy.common.CustomPagingResponse
 import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDateCond
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
+import com.tobe.healthy.lessonhistory.domain.dto.out.CustomRetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveUnwrittenLessonHistory
@@ -13,7 +13,6 @@ import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository
-import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,45 +28,28 @@ class LessonHistoryService(
 
     fun findAllLessonHistory(
         request: RetrieveLessonHistoryByDateCond,
-        pageable: Pageable,
         member: CustomMemberDetails
-    ): CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?> {
+    ): CustomRetrieveLessonHistoryByDateCondResult {
 
-        val contents = lessonHistoryRepository.findAllLessonHistory(request, pageable, member.memberId, member.memberType)
+        val contents = lessonHistoryRepository.findAllLessonHistory(request, member.memberId, member.memberType)
             .map { lessonHistory -> RetrieveLessonHistoryByDateCondResult.from(lessonHistory) }
 
-        return CustomPagingResponse(
-            content = contents.content,
-            pageNumber = contents.pageable.pageNumber,
-            pageSize = contents.pageable.pageSize,
-            totalPages = contents.totalPages,
-            totalElements = contents.totalElements,
-            isLast = contents.isLast,
-        )
+        return CustomRetrieveLessonHistoryByDateCondResult.from(contents)
     }
 
     fun findAllLessonHistoryByMemberId(
         studentId: Long,
         request: RetrieveLessonHistoryByDateCond,
-        member: CustomMemberDetails,
-        pageable: Pageable
-    ): CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?> {
+        member: CustomMemberDetails
+    ): CustomRetrieveLessonHistoryByDateCondResult {
 
         val findMember = memberRepository.findByIdOrNull(studentId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
-        val contents = lessonHistoryRepository.findAllLessonHistoryByMemberId(findMember.id, request, member.memberId, pageable)
+        val contents = lessonHistoryRepository.findAllLessonHistoryByMemberId(findMember.id, request, member.memberId)
             .map { lessonHistory -> RetrieveLessonHistoryByDateCondResult.from(lessonHistory) }
 
-        return CustomPagingResponse(
-            findMember.name,
-            contents.content,
-            contents.pageable.pageNumber,
-            contents.pageable.pageSize,
-            contents.totalPages,
-            contents.totalElements,
-            contents.isLast
-        )
+        return CustomRetrieveLessonHistoryByDateCondResult.from(contents)
     }
 
     @Transactional

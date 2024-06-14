@@ -1,19 +1,17 @@
 package com.tobe.healthy.lessonhistory.presentation
 
 import com.tobe.healthy.ApiResultResponse
-import com.tobe.healthy.common.CustomPagingResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonhistory.application.LessonHistoryService
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.RetrieveLessonHistoryByDateCond
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySearchCond
-import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryByDateCondResult
+import com.tobe.healthy.lessonhistory.domain.dto.out.CustomRetrieveLessonHistoryByDateCondResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveLessonHistoryDetailResult
 import com.tobe.healthy.lessonhistory.domain.dto.out.RetrieveUnwrittenLessonHistory
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springdoc.core.annotations.ParameterObject
-import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
@@ -35,12 +33,11 @@ class LessonHistoryController(
     @GetMapping
     fun findAllLessonHistory(
         @ParameterObject request: RetrieveLessonHistoryByDateCond,
-        @ParameterObject pageable: Pageable,
         @AuthenticationPrincipal member: CustomMemberDetails
-    ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
+    ): ApiResultResponse<CustomRetrieveLessonHistoryByDateCondResult> {
         return ApiResultResponse(
             message = "전체 수업 일지를 조회하였습니다.",
-            data = lessonHistoryService.findAllLessonHistory(request, pageable, member)
+            data = lessonHistoryService.findAllLessonHistory(request, member)
         )
     }
 
@@ -69,12 +66,11 @@ class LessonHistoryController(
     fun findAllLessonHistoryByMemberId(
         @PathVariable studentId: Long,
         @ParameterObject request: RetrieveLessonHistoryByDateCond,
-        @ParameterObject pageable: Pageable,
         @AuthenticationPrincipal member: CustomMemberDetails
-    ): ApiResultResponse<CustomPagingResponse<RetrieveLessonHistoryByDateCondResult?>> {
+    ): ApiResultResponse<CustomRetrieveLessonHistoryByDateCondResult> {
         return ApiResultResponse(
             message = "학생의 수업 일지 전체를 조회하였습니다.",
-            data = lessonHistoryService.findAllLessonHistoryByMemberId(studentId, request, member, pageable)
+            data = lessonHistoryService.findAllLessonHistoryByMemberId(studentId, request, member)
         )
     }
 
