@@ -28,7 +28,7 @@ data class RetrieveNotificationWithRedDotResult(
         val content: String,
         val createdAt: String,
         val isRead: Boolean,
-        val lessonHistoryId: Long? = null
+        val targetId: Long? = null
     ) {
         companion object {
             fun from(notification: Notification) : RetrieveNotificationResult {
@@ -41,7 +41,7 @@ data class RetrieveNotificationWithRedDotResult(
                     content = notification.content,
                     createdAt = notification.createdAt.toString(),
                     isRead = notification.isRead,
-                    lessonHistoryId = notification.lessonHistory?.id
+                    targetId = notification.id
                 )
             }
         }

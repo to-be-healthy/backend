@@ -2,7 +2,6 @@ package com.tobe.healthy.notification.application
 
 import com.tobe.healthy.common.KotlinCustomPaging
 import com.tobe.healthy.common.NotificationSenderInfo
-import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
 import com.tobe.healthy.notification.domain.dto.out.CommandNotificationStatusResult
@@ -11,11 +10,13 @@ import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedD
 import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedDotResult.RetrieveNotificationResult
 import com.tobe.healthy.notification.domain.entity.Notification
 import com.tobe.healthy.notification.domain.entity.NotificationCategory
+import com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE
+import com.tobe.healthy.notification.domain.entity.NotificationType.FEEDBACK
 import com.tobe.healthy.notification.repository.NotificationRepository
 import com.tobe.healthy.push.application.PushCommandService
 import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarm
+import com.tobe.healthy.schedule.repository.TrainerScheduleRepository
 import org.springframework.data.domain.Pageable
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -25,7 +26,7 @@ class NotificationService(
     private val notificationRepository: NotificationRepository,
     private val memberRepository: MemberRepository,
     private val pushCommandService: PushCommandService,
-    private val lessonHistoryRepository: LessonHistoryRepository
+    private val trainerScheduleRepository: TrainerScheduleRepository
 ) {
 
     fun sendNotificationFromSystem(
@@ -38,10 +39,6 @@ class NotificationService(
             throw IllegalArgumentException("수신자의 ID가 존재하지 않습니다.")
         }
 
-        val lessonHistory = request.lessonHistoryId?.let { id ->
-            lessonHistoryRepository.findByIdOrNull(id)
-        }
-
         val notifications = mutableListOf<Notification>()
 
         receivers.forEach { receiver ->
@@ -51,10 +48,10 @@ class NotificationService(
                 val notification = Notification.create(
                     title = request.title,
                     content = request.content,
-                    notificationCategory = request.notificationType.category,
+                    notificationCategory = request.notificationCategory,
                     notificationType = request.notificationType,
                     receiver = receiver,
-                    lessonHistory = lessonHistory
+                    targetId = request.targetId
                 )
                 notifications.add(notification)
             }
@@ -104,5 +101,19 @@ class NotificationService(
         notification.updateNotificationStatus()
 
         return CommandNotificationStatusResult.from(notification)
+    }
+
+    fun sendFeedbackNotificationToTrainer() {
+        trainerScheduleRepository.findAllFeedbackNotificationToTrainer().forEach {
+            sendNotificationFromSystem(
+                CommandSendNotification(
+                    title = FEEDBACK.description,
+                    content = String.format("${it.count}명의 회원님에 대한 수업 피드백을 작성해 주세요!"),
+                    receiverIds = listOf(it.trainerId),
+                    notificationType = FEEDBACK,
+                    notificationCategory = SCHEDULE
+                )
+            )
+        }
     }
 }

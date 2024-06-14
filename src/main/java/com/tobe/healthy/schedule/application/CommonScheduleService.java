@@ -21,6 +21,7 @@ import java.util.List;
 import static com.tobe.healthy.common.event.EventType.NOTIFICATION;
 import static com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL;
 import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.CANCEL;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.RESERVE;
 import static java.time.LocalTime.NOON;
@@ -57,6 +58,7 @@ public class CommonScheduleService {
                 String.format("%s님이 %s에 예약했어요.", schedule.getApplicant().getName(), LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)),
                 List.of(schedule.getApplicant().getId()),
                 RESERVE,
+                SCHEDULE,
                 null
         );
 
@@ -78,6 +80,7 @@ public class CommonScheduleService {
                 String.format("%s님이 %s 예약을 취소했어요.", schedule.getApplicant().getName(), LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)),
                 List.of(schedule.getApplicant().getId()),
                 CANCEL,
+                SCHEDULE,
                 null
         );
 

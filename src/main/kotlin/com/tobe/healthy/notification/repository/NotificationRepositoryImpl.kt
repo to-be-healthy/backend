@@ -29,7 +29,6 @@ class NotificationRepositoryImpl(
         val results = queryFactory
             .select(notification)
             .from(notification)
-            .leftJoin(notification.lessonHistory).fetchJoin()
             .where(
                 notificationCategoryEq(notificationCategory),
                 notification.receiver.id.eq(receiverId)
@@ -42,7 +41,6 @@ class NotificationRepositoryImpl(
         val totalCount = queryFactory
             .select(notification.count())
             .from(notification)
-            .leftJoin(notification.lessonHistory)
             .where(
                 notificationCategoryEq(notificationCategory),
                 notification.receiver.id.eq(receiverId)

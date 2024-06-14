@@ -1,5 +1,6 @@
 package com.tobe.healthy.schedule.repository
 
+import com.querydsl.core.types.Projections.constructor
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.DatePath
 import com.querydsl.core.types.dsl.Expressions.stringTemplate
@@ -13,6 +14,7 @@ import com.tobe.healthy.member.domain.entity.QMember
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
+import com.tobe.healthy.schedule.domain.dto.out.FeedbackNotificationToTrainer
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonInfoResult
 import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
@@ -355,6 +357,26 @@ class TrainerScheduleRepositoryImpl(
             )
 
         return PageableExecutionUtils.getPage(results, pageable) { totalCount.fetchOne() ?: 0L }
+    }
+
+    override fun findAllFeedbackNotificationToTrainer(): List<FeedbackNotificationToTrainer> {
+        return queryFactory
+            .select(
+                constructor(
+                    FeedbackNotificationToTrainer::class.java,
+                    schedule.trainer.id,
+                    schedule.count()
+                )
+            )
+            .from(schedule)
+            .leftJoin(schedule.lessonHistories, lessonHistory)
+            .where(
+                lessonHistory.isNull,
+                schedule.lessonDt.eq(LocalDate.now()),
+                schedule.reservationStatus.eq(COMPLETED)
+            )
+            .groupBy(schedule.trainer.id)
+            .fetch()
     }
 
     private fun scheduleIdIn(scheduleIds: List<Long>): BooleanExpression? =

@@ -4,6 +4,7 @@ import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySear
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
+import com.tobe.healthy.schedule.domain.dto.out.FeedbackNotificationToTrainer
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
 import com.tobe.healthy.schedule.domain.entity.Schedule
@@ -27,4 +28,5 @@ interface TrainerScheduleRepositoryCustom {
     fun findAllUnwrittenLessonHistory(request: UnwrittenLessonHistorySearchCond, memberId: Long): List<Schedule>
     fun findAllSimpleLessonHistoryByMemberId(studentId: Long, trainerId: Long): List<Schedule>
     fun findAllScheduleByStduentId(studentId: Long, pageable: Pageable, trainerId: Long): Page<Schedule>
+    fun findAllFeedbackNotificationToTrainer(): List<FeedbackNotificationToTrainer>
 }

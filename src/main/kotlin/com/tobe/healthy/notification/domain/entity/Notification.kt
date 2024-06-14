@@ -1,7 +1,6 @@
 package com.tobe.healthy.notification.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.notification.domain.entity.NotificationSenderType.SYSTEM
 import jakarta.persistence.*
@@ -31,9 +30,7 @@ class Notification(
     @JoinColumn(name = "receiver_id")
     val receiver: Member? = null,
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "lesson_history_id")
-    val lessonHistory: LessonHistory? = null,
+    val targetId: Long? = null,
 
     var isRead: Boolean = false,
 
@@ -49,13 +46,7 @@ class Notification(
     }
 
     companion object {
-        fun create(
-            title: String,
-            content: String,
-            notificationCategory: NotificationCategory,
-            notificationType: NotificationType,
-            receiver: Member,
-            lessonHistory: LessonHistory? = null
+        fun create(title: String, content: String, notificationCategory: NotificationCategory, notificationType: NotificationType, receiver: Member, targetId: Long? = null
         ): Notification {
             return Notification(
                 title = title,
@@ -63,7 +54,7 @@ class Notification(
                 notificationCategory = notificationCategory,
                 notificationType = notificationType,
                 receiver = receiver,
-                lessonHistory = lessonHistory
+                targetId = targetId
             )
         }
     }

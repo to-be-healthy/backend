@@ -1,5 +1,6 @@
 package com.tobe.healthy.notification.domain.dto.`in`
 
+import com.tobe.healthy.notification.domain.entity.NotificationCategory
 import com.tobe.healthy.notification.domain.entity.NotificationType
 
 data class CommandSendNotification(
@@ -7,5 +8,6 @@ data class CommandSendNotification(
     val content: String,
     val receiverIds: List<Long>,
     val notificationType: NotificationType,
-    val lessonHistoryId: Long? = null,
+    val notificationCategory: NotificationCategory,
+    val targetId: Long? = null,
 )
