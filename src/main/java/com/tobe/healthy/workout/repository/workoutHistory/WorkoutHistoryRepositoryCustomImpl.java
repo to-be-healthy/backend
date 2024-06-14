@@ -61,12 +61,16 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
     }
 
     @Override
-    public Page<WorkoutHistoryDto> getWorkoutHistoryOnCommunityByMember(Long loginMemberId, Long memberId, Pageable pageable, String searchDate) {
+    public Page<WorkoutHistoryDto> getWorkoutHistoryOnCommunityByMember(Long loginMemberId, Long gymId, Long memberId, Pageable pageable, String searchDate) {
         QMemberProfile profileId = new QMemberProfile("profileId");
         Long totalCnt = queryFactory
                 .select(workoutHistory.count())
                 .from(workoutHistory)
-                .where(memberIdEq(memberId), historyDeYnEq(false), convertDateFormat(searchDate))
+                .where(gymIdEq(gymId)
+                        , memberIdEq(memberId)
+                        , historyDeYnEq(false)
+                        , convertDateFormat(searchDate)
+                        , viewMySelfEq(false))
                 .fetchOne();
         List<WorkoutHistoryDto> workoutHistories = queryFactory
                 .select(new QWorkoutHistoryDto(workoutHistory.workoutHistoryId, workoutHistory.content, workoutHistory.member
@@ -78,7 +82,11 @@ public class WorkoutHistoryRepositoryCustomImpl implements WorkoutHistoryReposit
                 .leftJoin(workoutHistoryLike)
                 .on(workoutHistory.workoutHistoryId.eq(workoutHistoryLike.workoutHistoryLikePK.workoutHistory.workoutHistoryId)
                         , workoutHistoryLike.workoutHistoryLikePK.member.id.eq(loginMemberId))
-                .where(memberIdEq(memberId), historyDeYnEq(false), convertDateFormat(searchDate), viewMySelfEq(false))
+                .where(gymIdEq(gymId)
+                        , memberIdEq(memberId)
+                        , historyDeYnEq(false)
+                        , convertDateFormat(searchDate)
+                        , viewMySelfEq(false))
                 .orderBy(workoutHistory.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
