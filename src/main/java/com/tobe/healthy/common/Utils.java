@@ -8,7 +8,11 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class Utils {
-    public static final Integer EMAIL_AUTH_TIMEOUT = 3 * 60 * 1000;
+    public static final Integer EMAIL_AUTH_TIMEOUT = 3 * 60 * 1000; // 3분
+    public static final Long FILE_TEMP_UPLOAD_TIMEOUT = 30 * 60 * 1000L; // 30분
+
+    public static final String THUMB_PREFIX = "THUMB_";
+
 
     public static String getAuthCode(int num) {
         return RandomStringUtils.randomNumeric(num);

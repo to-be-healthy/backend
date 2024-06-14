@@ -104,7 +104,7 @@ class LessonHistoryRepositoryImpl(
             .innerJoin(lessonHistory.student).fetchJoin()
             .innerJoin(lessonHistory.schedule).fetchJoin()
             .where(lessonHistory.student.id.eq(studentId))
-            .orderBy(lessonHistory.createdAt.desc())
+            .orderBy(lessonHistory.schedule.lessonDt.desc())
             .limit(1)
             .fetchOne()
 

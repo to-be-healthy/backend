@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tobe.healthy.common.Utils.THUMB_PREFIX;
 import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.diet.domain.entity.DietType.*;
@@ -62,7 +63,7 @@ public class DietService {
         DietDto dietDto = DietDto.from(diet);
         dietLikeRepository.findById(DietLikePK.create(diet, diet.getMember()))
                 .ifPresent(i -> {dietDto.setLiked(true);});
-        setDietFile(dietDto, List.of(diet.getDietId()));
+        setDietFileToThumnail(dietDto, List.of(diet.getDietId()));
         return dietDto;
     }
 
@@ -70,7 +71,7 @@ public class DietService {
         Page<DietDto> pageDtos = dietRepository.getDietOfMonth(loginMemberId, memberId, pageable, searchDate);
         List<DietDto> dietDtos = pageDtos.stream().toList();
         List<Long> ids = dietDtos.stream().map(DietDto::getDietId).collect(Collectors.toList());
-        setDietFile(dietDtos, ids);
+        setDietFileToThumnail(dietDtos, ids);
         return new CustomPaging<>(dietDtos, pageDtos.getPageable().getPageNumber(),
                 pageDtos.getPageable().getPageSize(), pageDtos.getTotalPages(), pageDtos.getTotalElements(), pageDtos.isLast());
     }
@@ -99,7 +100,7 @@ public class DietService {
         }
         Long memberId = member.getId();
         DietType requestType = command.getType();
-        String requestFileUrl = command.getFile();
+        String thumnailFileUrl = command.getFile();
 
         Diet diet = dietRepository.getTodayDiet(memberId);
 
@@ -114,15 +115,16 @@ public class DietService {
                     .forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
         }
 
-        if (!command.isFast() && !ObjectUtils.isEmpty(requestFileUrl)){
-            dietFileRepository.save(DietFiles.create(diet, requestFileUrl, command.getType()));
-            redisService.deleteValues(TEMP_FILE_URI.getDescription() + requestFileUrl);
+        if (!command.isFast() && !ObjectUtils.isEmpty(thumnailFileUrl)){
+            String originalFileUrl = getOriginalFileUrl(thumnailFileUrl);
+            dietFileRepository.save(DietFiles.create(diet, originalFileUrl, command.getType()));
+            redisService.deleteValues(TEMP_FILE_URI.getDescription() + thumnailFileUrl);
         }
 
         diet.changeEatDate(command.getEatDate());
         diet.changeFast(command.getType(), command.isFast());
         DietDto dietDto = DietDto.from(diet);
-        setDietFile(dietDto, List.of(diet.getDietId()));
+        setDietFileToThumnail(dietDto, List.of(diet.getDietId()));
 
         if(isClean(dietDto) && commentNotExists(diet)) diet.deleteDiet();
         return dietDto;
@@ -160,6 +162,21 @@ public class DietService {
             List<DietFileDto> thisFiles = files.stream().map(DietFileDto::from)
                     .filter(f -> f.getDietId().equals(d.getDietId())).collect(Collectors.toList());
             d.setDietFiles(thisFiles);
+        }).collect(Collectors.toList());
+    }
+
+    private void setDietFileToThumnail(DietDto dietDto, List<Long> ids) {
+        List<DietFiles> files = dietRepository.getDietFile(ids);
+        List<DietFileDto> filesDto = files.stream().map(DietFileDto::from).collect(Collectors.toList());
+        dietDto.setDietFilesToThumnail(filesDto);
+    }
+
+    private void setDietFileToThumnail(List<DietDto> dietDtos, List<Long> ids) {
+        List<DietFiles> files = dietRepository.getDietFile(ids);
+        dietDtos.stream().peek(d -> {
+            List<DietFileDto> thisFiles = files.stream().map(DietFileDto::from)
+                    .filter(f -> f.getDietId().equals(d.getDietId())).collect(Collectors.toList());
+            d.setDietFilesToThumnail(thisFiles);
         }).collect(Collectors.toList());
     }
 
@@ -206,8 +223,10 @@ public class DietService {
     private void uploadNewFiles(Diet diet, DietUpdateCommand command) {
         //아침 파일
         if (!command.isBreakfastFast() && !ObjectUtils.isEmpty(command.getBreakfastFile())){
-            dietFileRepository.save(DietFiles.create(diet, command.getBreakfastFile(), BREAKFAST));
-            redisService.deleteValues(TEMP_FILE_URI.getDescription() + command.getBreakfastFile());
+            String thumnailFileUrl = command.getBreakfastFile();
+            String originalFileUrl = getOriginalFileUrl(thumnailFileUrl);
+            dietFileRepository.save(DietFiles.create(diet, originalFileUrl, BREAKFAST));
+            redisService.deleteValues(TEMP_FILE_URI.getDescription() + thumnailFileUrl);
         }else{
             List<DietFiles> files = diet.getDietFiles().stream().filter(f -> BREAKFAST.equals(f.getType())).toList();
             if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(getFileName(files.get(0).getFileUrl()));
@@ -215,8 +234,10 @@ public class DietService {
 
         //점심 파일
         if (!command.isLunchFast() && !ObjectUtils.isEmpty(command.getLunchFile())){
-            dietFileRepository.save(DietFiles.create(diet, command.getLunchFile(), LUNCH));
-            redisService.deleteValues(TEMP_FILE_URI.getDescription() + command.getLunchFile());
+            String thumnailFileUrl = command.getLunchFile();
+            String originalFileUrl = getOriginalFileUrl(thumnailFileUrl);
+            dietFileRepository.save(DietFiles.create(diet, originalFileUrl, LUNCH));
+            redisService.deleteValues(TEMP_FILE_URI.getDescription() + thumnailFileUrl);
         }else{
             List<DietFiles> files = diet.getDietFiles().stream().filter(f -> LUNCH.equals(f.getType())).toList();
             if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(getFileName(files.get(0).getFileUrl()));
@@ -224,12 +245,18 @@ public class DietService {
 
         //저녁 파일
         if (!command.isDinnerFast() && !ObjectUtils.isEmpty(command.getDinnerFile())){
-            dietFileRepository.save(DietFiles.create(diet, command.getDinnerFile(), DINNER));
-            redisService.deleteValues(TEMP_FILE_URI.getDescription() + command.getDinnerFile());
+            String thumnailFileUrl = command.getDinnerFile();
+            String originalFileUrl = getOriginalFileUrl(thumnailFileUrl);
+            dietFileRepository.save(DietFiles.create(diet, originalFileUrl, DINNER));
+            redisService.deleteValues(TEMP_FILE_URI.getDescription() + thumnailFileUrl);
         }else{
             List<DietFiles> files = diet.getDietFiles().stream().filter(f -> DINNER.equals(f.getType())).toList();
             if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(getFileName(files.get(0).getFileUrl()));
         }
+    }
+
+    private String getOriginalFileUrl(String thumnailFileUrl) {
+        return thumnailFileUrl.replace(THUMB_PREFIX, "");
     }
 
     private void deleteOldFiles(Diet diet, DietUpdateCommand command) {

@@ -63,6 +63,16 @@ public class DietDto {
         }
     }
 
+    public void setDietFilesToThumnail(List<DietFileDto> filesDto) {
+        for(DietFileDto file : filesDto){
+            switch (file.getType()){
+                case BREAKFAST -> this.breakfast.setDietFileToThumnail(file);
+                case LUNCH -> this.lunch.setDietFileToThumnail(file);
+                case DINNER -> this.dinner.setDietFileToThumnail(file);
+            }
+        }
+    }
+
     @QueryProjection
     public DietDto(Long dietId, Member member, boolean liked, Long likeCnt, Long commentCnt, LocalDate eatDate, boolean fastBreakfast, boolean fastLunch, boolean fastDinner) {
         this.dietId = dietId;
