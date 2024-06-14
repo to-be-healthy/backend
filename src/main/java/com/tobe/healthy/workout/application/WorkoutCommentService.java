@@ -1,8 +1,10 @@
 package com.tobe.healthy.workout.application;
 
 import com.tobe.healthy.common.CustomPaging;
+import com.tobe.healthy.common.event.CustomEventPublisher;
 import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.notification.domain.dto.in.CommandSendNotification;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryCommentDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryCommentAddCommand;
 import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistory;
@@ -20,8 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.tobe.healthy.common.event.EventType.NOTIFICATION;
 import static com.tobe.healthy.config.error.ErrorCode.COMMENT_NOT_FOUND;
 import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_NOT_FOUND;
+import static com.tobe.healthy.notification.domain.entity.NotificationType.COMMENT;
+import static com.tobe.healthy.notification.domain.entity.NotificationType.REPLY;
 
 @Service
 @Transactional
@@ -31,6 +36,7 @@ public class WorkoutCommentService {
 
     private final WorkoutHistoryRepository workoutHistoryRepository;
     private final WorkoutHistoryCommentRepository commentRepository;
+    private final CustomEventPublisher<CommandSendNotification> notificationPublisher;
 
     public void addComment(Long workoutHistoryId, HistoryCommentAddCommand command, Member member) {
         WorkoutHistory history = workoutHistoryRepository.findById(workoutHistoryId)
@@ -46,7 +52,31 @@ public class WorkoutCommentService {
             depth = parentComment.getDepth()+1;
             orderNum = parentComment.getOrderNum();
         }
+
         commentRepository.save(WorkoutHistoryComment.create(history, member, command, depth, orderNum));
+
+        // 댓글
+        CommandSendNotification notification;
+        if (command.getParentCommentId() == null) {
+            notification = new CommandSendNotification(
+                    COMMENT.getDescription(),
+                    String.format("내 게시글에 새로운 댓글이 달렸어요."),
+                    List.of(history.getMember().getId()),
+                    COMMENT,
+                    history.getWorkoutHistoryId()
+            );
+
+        } else {
+            // 답글
+            notification = new CommandSendNotification(
+                    COMMENT.getDescription(),
+                    String.format("내 댓글에 새로운 답글이 달렸어요."),
+                    List.of(history.getMember().getId()),
+                    REPLY,
+                    history.getWorkoutHistoryId()
+            );
+        }
+        notificationPublisher.publish(notification, NOTIFICATION);
         history.changeCommentCnt(++commentCnt);
     }
 
