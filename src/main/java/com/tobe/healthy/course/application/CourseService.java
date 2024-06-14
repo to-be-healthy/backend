@@ -160,6 +160,7 @@ public class CourseService {
         CourseDto usingCourse = getNowUsingCourse(member.getId());
         CourseStatus courseStatus = getCourseStatus(usingCourse);
         Calculation calculation = command.getCalculation();
+
         switch (calculation){
             case PLUS:
                 if(NONE.equals(courseStatus)) throw new CustomException(LESSON_CNT_NOT_VALID);
