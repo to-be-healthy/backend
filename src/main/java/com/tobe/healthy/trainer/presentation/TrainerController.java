@@ -196,11 +196,10 @@ public class TrainerController {
     @GetMapping("/reservation/old")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     public ResponseHandler<MyReservationResponse> findOldReservationByTrainer(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                       @ParameterObject StudentScheduleCond searchCond,
                                                                        @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
                                                                        @Param("memberId") Long memberId) {
         return ResponseHandler.<MyReservationResponse>builder()
-                .data(studentScheduleService.findOldReservationByTrainer(customMemberDetails.getMemberId(), memberId, searchCond, searchDate))
+                .data(studentScheduleService.findOldReservationByTrainer(customMemberDetails.getMemberId(), memberId, searchDate))
                 .message("학생의 예약을 조회하였습니다.")
                 .build();
     }

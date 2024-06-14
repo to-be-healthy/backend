@@ -113,14 +113,19 @@ public class StudentScheduleService {
 		return MyReservationResponse.create(courseService.getNowUsingCourse(memberId), result);
 	}
 
-	public MyReservationResponse findOldReservationByTrainer(Long trainerId, Long memberId, StudentScheduleCond searchCond, String searchDate) {
+	public MyReservationResponse findOldReservationByTrainer(Long trainerId, Long memberId, String searchDate) {
 		mappingRepository.findByTrainerIdAndMemberId(trainerId, memberId)
 				.orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
-		return findOldReservation(memberId, searchCond, searchDate);
+		return findOldReservation(memberId, searchDate);
 	}
 
-	public MyReservationResponse findOldReservation(Long memberId, StudentScheduleCond searchCond, String searchDate) {
-		List<MyReservation> result = studentScheduleRepository.findOldReservation(memberId, searchCond, searchDate);
+	public MyReservationResponse findOldReservation(Long memberId, String searchDate) {
+		List<MyReservation> result = studentScheduleRepository.findOldReservation(memberId, searchDate);
+		return MyReservationResponse.create(null, result);
+	}
+
+	public MyReservationResponse findMyReservationBlueDot(Long memberId, StudentScheduleCond searchCond) {
+		List<MyReservation> result = studentScheduleRepository.findMyReservationBlueDot(memberId, searchCond);
 		return MyReservationResponse.create(null, result);
 	}
 }

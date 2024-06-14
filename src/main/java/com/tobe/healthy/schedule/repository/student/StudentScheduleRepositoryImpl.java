@@ -82,13 +82,12 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	}
 
 	@Override
-	public List<MyReservation> findOldReservation(Long memberId, StudentScheduleCond searchCond, String searchDate) {
+	public List<MyReservation> findOldReservation(Long memberId, String searchDate) {
 		List<Schedule> schedules = queryFactory.select(schedule)
 				.from(schedule)
 				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
 				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.where(scheduleApplicantIdEq(memberId), lessonDateTimeBeforeNow(), lessonDtEq(searchCond)
-						, courseIdEq(searchCond), convertDateFormat(searchDate))
+				.where(scheduleApplicantIdEq(memberId), lessonDateTimeBeforeNow(), convertDateFormat(searchDate))
 				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 				.fetch();
 		return schedules.stream().map(MyReservation::from).collect(toList());
@@ -103,6 +102,18 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 				.limit(1)
 				.fetchOne();
 		return result==null ? null : MyReservation.from(result);
+	}
+
+	@Override
+	public List<MyReservation> findMyReservationBlueDot(Long memberId, StudentScheduleCond searchCond) {
+		List<Schedule> schedules = queryFactory.select(schedule)
+				.from(schedule)
+				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
+				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
+				.where(scheduleApplicantIdEq(memberId), lessonDtBetween(searchCond))
+				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+				.fetch();
+		return schedules.stream().map(MyReservation::from).collect(toList());
 	}
 
 	private BooleanExpression scheduleReservationStatusForStudent() {

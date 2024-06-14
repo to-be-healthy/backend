@@ -11,6 +11,8 @@ public interface StudentScheduleRepositoryCustom {
 	List<ScheduleCommandResult> findAllSchedule(StudentScheduleCond searchCond, Long trainerId, Member member);
 	List<ScheduleCommandResult> findAllByApplicantId(Long memberId);
 	List<MyReservation> findNewReservation(Long memberId, StudentScheduleCond searchCond);
-	List<MyReservation> findOldReservation(Long memberId, StudentScheduleCond searchCond, String searchDate);
+	List<MyReservation> findOldReservation(Long memberId, String searchDate);
 	MyReservation findMyNextReservation(Long memberId);
+	List<MyReservation> findMyReservationBlueDot(Long memberId, StudentScheduleCond searchCond);
+
 }

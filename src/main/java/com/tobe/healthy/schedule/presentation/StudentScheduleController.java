@@ -81,10 +81,23 @@ public class StudentScheduleController {
     @GetMapping("/my-reservation/old")
     @PreAuthorize("hasAuthority('ROLE_STUDENT')")
     public ResponseHandler<MyReservationResponse> findOldReservation(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-                                                                       @ParameterObject StudentScheduleCond searchCond,
                                                                        @Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate) {
         return ResponseHandler.<MyReservationResponse>builder()
-                .data(studentScheduleService.findOldReservation(customMemberDetails.getMemberId(), searchCond, searchDate))
+                .data(studentScheduleService.findOldReservation(customMemberDetails.getMemberId(), searchDate))
+                .message("학생이 내 예약을 조회하였습니다.")
+                .build();
+    }
+
+    @Operation(summary = "학생 예약한 날짜 블루닷 표시", description = "학생 예약한 날짜 블루닷 표시를 조회한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "학생 예약한 날짜 블루닷 표시를 조회한다.")
+            })
+    @GetMapping("/my-reservation")
+    @PreAuthorize("hasAuthority('ROLE_STUDENT')")
+    public ResponseHandler<MyReservationResponse> findMyReservationBlueDot(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                           @ParameterObject StudentScheduleCond searchCond) {
+        return ResponseHandler.<MyReservationResponse>builder()
+                .data(studentScheduleService.findMyReservationBlueDot(customMemberDetails.getMemberId(), searchCond))
                 .message("학생이 내 예약을 조회하였습니다.")
                 .build();
     }
