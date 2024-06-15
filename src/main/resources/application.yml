@@ -107,10 +107,10 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
 
-decorator:
-  datasource:
-    p6spy:
-      enable-logging: true
+#decorator:
+#  datasource:
+#    p6spy:
+#      enable-logging: true
 
 management:
   info:
