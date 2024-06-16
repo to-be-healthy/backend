@@ -56,10 +56,9 @@ public class DietRepositoryCustomImpl implements DietRepositoryCustom {
                 .select(Expressions.stringTemplate(
                         "DATE_FORMAT({0}, {1})"
                         , diet.eatDate
-                        , ConstantImpl.create("%Y-%m-%d"))).distinct()
+                        , ConstantImpl.create("%Y-%m-%d")))
                 .from(diet)
                 .where(memberIdEq(memberId), delYnEq(false), eatDateBetween(startDate, endDate))
-                .orderBy(diet.eatDate.asc())
                 .fetch();
     }
 

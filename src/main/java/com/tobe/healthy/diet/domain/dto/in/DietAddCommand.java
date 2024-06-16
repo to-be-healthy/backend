@@ -3,11 +3,13 @@ package com.tobe.healthy.diet.domain.dto.in;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 
 @Data
 @ToString
+@EqualsAndHashCode(callSuper=false)
 public class DietAddCommand extends DietUpdateCommand{
 
     @Schema(description = "먹은 날짜" , example = "2024-05-28")
