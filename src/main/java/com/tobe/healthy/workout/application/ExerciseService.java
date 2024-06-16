@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.tobe.healthy.config.error.ErrorCode.EXERCISE_NOT_FOUND;
+import static com.tobe.healthy.config.error.ErrorCode.*;
 
 
 @Service
@@ -37,6 +37,8 @@ public class ExerciseService {
     }
 
     public void addExerciseCustom(Member member, CustomExerciseAddCommand command) {
+        exerciseRepository.findByMemberIdAndCategoryAndNames(member.getId(), command.getCategory(), command.getNames())
+                .ifPresent(i -> { throw new CustomException(EXERCISE_ALREADY_EXISTS); });
         exerciseRepository.save(Exercise.create(member, command));
     }
 
