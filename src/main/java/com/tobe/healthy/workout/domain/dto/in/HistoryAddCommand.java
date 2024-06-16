@@ -18,7 +18,6 @@ import java.util.List;
 public class HistoryAddCommand {
 
     @Schema(description = "게시글 내용" , example = "오운완~!!")
-    @NotEmpty(message = "내용을 입력해 주세요.")
     private String content;
 
     @Schema(description = "완료한 운동 목록")
