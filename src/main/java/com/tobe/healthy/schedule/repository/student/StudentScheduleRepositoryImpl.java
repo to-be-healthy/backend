@@ -114,7 +114,6 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 						, ConstantImpl.create("%Y-%m-%d"))).distinct()
 				.from(schedule)
 				.where(scheduleApplicantIdEq(memberId), lessonDtBetween(searchCond))
-				.orderBy(schedule.lessonDt.asc())
 				.fetch();
 	}
 
