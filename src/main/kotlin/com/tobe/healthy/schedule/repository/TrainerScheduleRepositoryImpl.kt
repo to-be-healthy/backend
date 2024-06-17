@@ -96,17 +96,15 @@ class TrainerScheduleRepositoryImpl(
                 scheduleTotalCount = scheduleCount!!,
             )
 
-            response.schedule?.forEach { (key) ->
-                response.schedule[key]?.filter {
-                    if (it.lessonStartTime?.isBefore(LocalTime.now()) == true) {
-                        trainerTodaySchedule.before.add(it)
-                    } else {
-                        trainerTodaySchedule.after.add(it)
-                    }
+            response.schedule?.forEach { (key, value) ->
+                value.filter {
+                    it.lessonStartTime?.isAfter(LocalTime.now()) == true
+                }.forEach {
+                    trainerTodaySchedule.schedule.add(it)
                 }
             }
+            
             return trainerTodaySchedule
-
         }
     }
 
@@ -146,13 +144,11 @@ class TrainerScheduleRepositoryImpl(
                 scheduleTotalCount = scheduleCount!!,
             )
 
-            response.schedule?.forEach { (key) ->
-                response.schedule[key]?.filter {
-                    if (it.lessonStartTime?.isBefore(LocalTime.now()) == true) {
-                        trainerTodaySchedule.before.add(it)
-                    } else {
-                        trainerTodaySchedule.after.add(it)
-                    }
+            response.schedule?.forEach { (key, value) ->
+                value.filter {
+                    it.lessonStartTime?.isAfter(LocalTime.now()) == true
+                }.forEach {
+                    trainerTodaySchedule.schedule.add(it)
                 }
             }
             return trainerTodaySchedule
