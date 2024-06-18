@@ -15,6 +15,10 @@ public class Utils {
         return RandomStringUtils.randomNumeric(num);
     }
 
+    public static String createFileName() {
+        return System.currentTimeMillis() + "-" + UUID.randomUUID();
+    }
+
     public static String createFileName(String path) {
         return path + System.currentTimeMillis() + "-" + UUID.randomUUID();
     }
