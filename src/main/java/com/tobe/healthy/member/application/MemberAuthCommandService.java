@@ -131,7 +131,7 @@ public class MemberAuthCommandService {
         }
 
         if (!request.getMemberType().equals(member.getMemberType())) {
-            throw new IllegalArgumentException(String.format("%s로 가입한 사용자입니다.", member.getMemberType().getDescription()));
+            throw new IllegalArgumentException(String.format("%s로 가입한 사용자입니다.", member.getTransformedMemberType()));
         }
 
         return tokenGenerator.create(member);
@@ -281,7 +281,7 @@ public class MemberAuthCommandService {
     private boolean isJoinMember(Member member, SocialType google, MemberType memberType) {
         if (member.getSocialType().equals(google)) {
             if (!member.getMemberType().equals(memberType)) {
-                throw new IllegalArgumentException(String.format("%s로 가입한 사용자입니다.", member.getMemberType().getDescription()));
+                throw new IllegalArgumentException(String.format("%s로 가입한 사용자입니다.", member.getTransformedMemberType()));
             }
             return true;
         }

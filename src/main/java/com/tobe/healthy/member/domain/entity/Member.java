@@ -1,7 +1,6 @@
 package com.tobe.healthy.member.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
 import com.tobe.healthy.push.domain.entity.MemberToken;
@@ -20,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.tobe.healthy.config.error.ErrorCode.UNCHANGED_GYM_ID;
 import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.CascadeType.PERSIST;
@@ -197,6 +196,13 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	public void registerProfile(String fileName, String fileUrl) {
 		this.memberProfile = MemberProfile.create(fileName, fileUrl, this);
+	}
+
+	public String getTransformedMemberType() {
+		return switch (this.memberType) {
+			case TRAINER -> TRAINER.getDescription();
+			case STUDENT -> "회원으";
+		};
 	}
 
 	public void deleteProfile() {
