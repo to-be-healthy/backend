@@ -20,9 +20,7 @@ import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberProfile;
-import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.member.domain.entity.*;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import io.jsonwebtoken.impl.Base64UrlCodec;
@@ -117,18 +115,26 @@ public class MemberAuthCommandService {
         Member member = Member.join(request, password);
         memberRepository.save(member);
 
-        if(StringUtils.isEmpty(request.getUuid())){
+        if (StringUtils.isEmpty(request.getUuid())) {
             return CommandJoinMemberResult.from(member);
-        }else{ //초대가입
+        } else { //초대가입
             return joinWithInvitation(request, CommandJoinMemberResult.from(member));
         }
     }
 
     public Tokens login(CommandLoginMember request) {
-        return memberRepository.findByUserId(request.getUserId(), request.getMemberType())
-                .filter(member -> passwordEncoder.matches(request.getPassword(), member.getPassword()))
-                .map(tokenGenerator::create)
+        Member member = memberRepository.findByUserId(request.getUserId())
                 .orElseThrow(() -> new CustomException(MEMBER_LOGIN_FAILED));
+
+        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+            throw new CustomException(MEMBER_LOGIN_FAILED);
+        }
+
+        if (!request.getMemberType().equals(member.getMemberType())) {
+            throw new IllegalArgumentException(String.format("%s로 가입한 사용자입니다.", member.getMemberType()));
+        }
+
+        return tokenGenerator.create(member);
     }
 
     public Tokens refreshToken(CommandRefreshToken request) {
@@ -146,11 +152,11 @@ public class MemberAuthCommandService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         return tokenGenerator.exchangeAccessToken(member.getId(),
-                                                  member.getName(),
-                                                  member.getUserId(),
-                                                  member.getMemberType(),
-                                                  request.getRefreshToken(),
-                                                  member.getGym());
+                member.getName(),
+                member.getUserId(),
+                member.getMemberType(),
+                request.getRefreshToken(),
+                member.getGym());
     }
 
     public CommandFindMemberPasswordResult findMemberPW(CommandFindMemberPassword request) {
@@ -185,14 +191,12 @@ public class MemberAuthCommandService {
 
         NaverUserInfo authorization = getNaverUserInfo(response);
 
-        Optional<Member> findMember =
-                memberRepository.findByEmail(authorization.getResponse().getEmail());
+        Optional<Member> findMember = memberRepository.findByEmail(authorization.getResponse().getEmail());
 
         if (findMember.isPresent()) {
-            if (findMember.get().getMemberType().equals(request.getMemberType()) && findMember.get().getSocialType().equals(NAVER)) {
+            if (isJoinMember(findMember.get(), NAVER, request.getMemberType())) {
                 return tokenGenerator.create(findMember.get());
             }
-            throw new CustomException(MEMBER_NOT_FOUND);
         }
 
         Member member = Member.join(
@@ -220,11 +224,9 @@ public class MemberAuthCommandService {
         Optional<Member> findMember = memberRepository.findByEmail(response.getEmail());
 
         if (findMember.isPresent()) {
-            if (findMember.get().getMemberType().equals(request.getMemberType()) && findMember.get().getSocialType().equals(KAKAO)) {
+            if (isJoinMember(findMember.get(), KAKAO, request.getMemberType())) {
                 return tokenGenerator.create(findMember.get());
             }
-
-            throw new CustomException(MEMBER_NOT_FOUND);
         }
 
         Member member = Member.join(response.getEmail(), response.getNickname(), request.getMemberType(), KAKAO);
@@ -257,11 +259,11 @@ public class MemberAuthCommandService {
         String picture = idToken.get("picture");
 
         Optional<Member> findMember = memberRepository.findByEmail(email);
+
         if (findMember.isPresent()) {
-            if (findMember.get().getMemberType().equals(request.getMemberType()) && findMember.get().getSocialType().equals(GOOGLE)) {
+            if (isJoinMember(findMember.get(), GOOGLE, request.getMemberType())) {
                 return tokenGenerator.create(findMember.get());
             }
-            throw new CustomException(MEMBER_NOT_FOUND);
         }
 
         Member member = Member.join(email, name, request.getMemberType(), GOOGLE);
@@ -274,6 +276,16 @@ public class MemberAuthCommandService {
             mappingTrainerAndStudent(member, request.getUuid(), name, true);
         }
         return tokenGenerator.create(member);
+    }
+
+    private boolean isJoinMember(Member member, SocialType google, MemberType memberType) {
+        if (member.getSocialType().equals(google)) {
+            if (!member.getMemberType().equals(memberType)) {
+                throw new IllegalArgumentException(String.format("%s로 가입한 사용자입니다.", member.getMemberType()));
+            }
+            return true;
+        }
+        throw new CustomException(MEMBER_NOT_FOUND);
     }
 
     private IdToken getKakaoOAuthAccessToken(String code, String redirectUrl) {
