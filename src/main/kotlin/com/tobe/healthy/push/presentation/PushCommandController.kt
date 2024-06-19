@@ -5,18 +5,19 @@ import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.push.application.PushCommandService
 import com.tobe.healthy.push.domain.dto.`in`.CommandRegisterToken
 import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarm
+import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarmToMember
 import com.tobe.healthy.push.domain.dto.out.CommandRegisterTokenResult
 import com.tobe.healthy.push.domain.dto.out.CommandSendPushAlarmResult
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/push")
+@RequestMapping("/push/v1")
 class PushCommandController(
     private val pushCommandService: PushCommandService,
 ) {
 
-    @PostMapping("/register")
+    @PostMapping
     fun registerFcmToken(
         @RequestBody request: CommandRegisterToken,
         @AuthenticationPrincipal member: CustomMemberDetails
@@ -27,7 +28,7 @@ class PushCommandController(
         )
     }
 
-    @PostMapping
+    @PostMapping("/send")
     fun sendPushAlarm(
         @RequestBody request: CommandSendPushAlarm
     ): ApiResultResponse<CommandSendPushAlarmResult> {
@@ -40,7 +41,7 @@ class PushCommandController(
     @PostMapping("/{memberId}")
     fun sendPushAlarm(
         @PathVariable memberId: Long,
-        @RequestBody request: CommandSendPushAlarm
+        @RequestBody request: CommandSendPushAlarmToMember
     ): ApiResultResponse<CommandSendPushAlarmResult> {
         return ApiResultResponse(
             message = "푸시 전송에 성공하였습니다.",

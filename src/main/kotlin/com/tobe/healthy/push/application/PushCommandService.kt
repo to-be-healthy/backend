@@ -10,6 +10,7 @@ import com.tobe.healthy.log
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.push.domain.dto.`in`.CommandRegisterToken
 import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarm
+import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarmToMember
 import com.tobe.healthy.push.domain.dto.out.CommandRegisterTokenResult
 import com.tobe.healthy.push.domain.dto.out.CommandSendPushAlarmResult
 import com.tobe.healthy.push.domain.entity.MemberToken
@@ -30,12 +31,13 @@ class PushCommandService(
         val findMember = memberRepository.findByIdOrNull(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
-        memberTokenRepository.findByMemberId(findMember.id)
-            ?.changeToken(request.token)
+        val findMemberToken = memberTokenRepository.findByMemberId(findMember.id)
             ?: let {
                 val memberToken = MemberToken.register(findMember, request.token)
                 memberTokenRepository.save(memberToken)
             }
+
+        findMemberToken.changeToken(request.token)
 
         return CommandRegisterTokenResult(
             name = findMember.name,
@@ -72,7 +74,7 @@ class PushCommandService(
             .build()
     }
 
-    fun sendPushAlarm(memberId: Long, request: CommandSendPushAlarm): CommandSendPushAlarmResult {
+    fun sendPushAlarm(memberId: Long, request: CommandSendPushAlarmToMember): CommandSendPushAlarmResult {
         val findMemberToken = memberTokenRepository.findByMemberId(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
