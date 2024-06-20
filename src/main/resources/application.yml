@@ -15,11 +15,6 @@ spring:
           timeout: 5000
           starttls:
             enable: true
-  thymeleaf:
-    cache: false
-  devtools:
-    restart:
-      enabled: true
 
   datasource:
     url: ${DB_URL}
