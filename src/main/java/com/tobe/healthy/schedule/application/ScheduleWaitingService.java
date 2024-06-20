@@ -17,12 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
+import static com.tobe.healthy.common.Utils.formatter_hmm;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.schedule.application.TrainerScheduleCommandService.ONE_DAY;
-import static java.time.LocalTime.NOON;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +51,7 @@ public class ScheduleWaitingService {
 		if (lessonDateTime.minusDays(ONE_DAY).isAfter(LocalDateTime.now())) {
 			ScheduleWaiting scheduleWaiting = ScheduleWaiting.register(member, findSchedule);
 			scheduleWaitingRepository.save(scheduleWaiting);
-			return getScheduleTimeText(findSchedule.getLessonStartTime());
+			return findSchedule.getLessonStartTime().format(formatter_hmm);
 		} else {
 			throw new CustomException(NOT_SCHEDULE_WAITING);
 		}
@@ -68,7 +67,7 @@ public class ScheduleWaitingService {
 		ScheduleWaiting scheduleWaiting = scheduleWaitingRepository.findByScheduleIdAndMemberId(scheduleId, memberId)
 				.orElseThrow(() -> new CustomException(SCHEDULE_WAITING_NOT_FOUND));
 		scheduleWaitingRepository.delete(scheduleWaiting);
-		return getScheduleTimeText(scheduleWaiting.getSchedule().getLessonStartTime());
+		return scheduleWaiting.getSchedule().getLessonStartTime().format(formatter_hmm);
 	}
 
 	public FindMyScheduleWaitingResult findAllMyScheduleWaiting(Long memberId) {
@@ -76,7 +75,4 @@ public class ScheduleWaitingService {
 		return FindMyScheduleWaitingResult.create(courseService.getNowUsingCourse(memberId), result);
 	}
 
-	private String getScheduleTimeText(LocalTime lessonStartTime){
-		return NOON.isAfter(lessonStartTime) ? "오전 " + lessonStartTime : "오후 " + lessonStartTime;
-	}
 }

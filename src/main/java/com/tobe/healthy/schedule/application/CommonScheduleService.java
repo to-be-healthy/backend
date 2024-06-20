@@ -14,17 +14,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static com.tobe.healthy.common.Utils.formatter_hmm;
 import static com.tobe.healthy.common.event.EventType.NOTIFICATION;
 import static com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.CANCEL;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.RESERVE;
-import static java.time.LocalTime.NOON;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +63,7 @@ public class CommonScheduleService {
 
         notificationPublisher.publish(notification, NOTIFICATION);
 
-        return ScheduleIdInfo.create(schedule, getScheduleTimeText(schedule.getLessonStartTime()));
+        return ScheduleIdInfo.create(schedule, schedule.getLessonStartTime().format(formatter_hmm));
     }
 
     public ScheduleIdInfo cancelMemberSchedule(Long scheduleId, Long memberId) {
@@ -86,7 +85,7 @@ public class CommonScheduleService {
 
         notificationPublisher.publish(notification, NOTIFICATION);
 
-        ScheduleIdInfo idInfo = ScheduleIdInfo.create(schedule, getScheduleTimeText(schedule.getLessonStartTime()));
+        ScheduleIdInfo idInfo = ScheduleIdInfo.create(schedule, schedule.getLessonStartTime().format(formatter_hmm));
         schedule.cancelMemberSchedule();
 
 
@@ -94,7 +93,4 @@ public class CommonScheduleService {
         return idInfo;
     }
 
-    private String getScheduleTimeText(LocalTime lessonStartTime){
-        return NOON.isAfter(lessonStartTime) ? "오전 " + lessonStartTime : "오후 " + lessonStartTime;
-    }
 }
