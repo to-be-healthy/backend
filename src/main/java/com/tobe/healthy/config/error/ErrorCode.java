@@ -49,6 +49,7 @@ public enum ErrorCode {
     DIET_NOT_VALID(BAD_REQUEST, "C_034", "사진 및 단식을 등록해주세요."),
     MEMBER_LOGIN_FAILED(NOT_FOUND, "C_035", "로그인에 실패했어요."),
     EXERCISE_ALREADY_EXISTS(BAD_REQUEST, "C_036", "이미 등록된 운동이 있습니다."),
+    RESERVATION_ALREADY_EXISTS(BAD_REQUEST, "C_037", "예약된 수업이 있어 수강권을 삭제할 수 없습니다."),
 
     MEMBER_NAME_LENGTH_NOT_VALID(BAD_REQUEST, "C_050", "이름은 최소 2자 이상 입력해 주세요."),
     MEMBER_NAME_NOT_VALID(BAD_REQUEST, "C_051", "이름은 한글 또는 영어만 입력할 수 있습니다."),

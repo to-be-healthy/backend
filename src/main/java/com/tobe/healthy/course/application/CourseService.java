@@ -88,8 +88,8 @@ public class CourseService {
             StudentScheduleCond searchCond = new StudentScheduleCond(null, null, null, courseId);
             List<MyReservation> result = studentScheduleRepository.findNewReservation(memberId, searchCond);
 
-            //수업 취소
-            result.forEach(r -> commonScheduleService.cancelMemberSchedule(r.getScheduleId(), memberId));
+            //예약된 수업이 있으면 수강권 삭제 불가
+            if(!result.isEmpty()) throw new CustomException(RESERVATION_ALREADY_EXISTS);
         }
         deleteCourse(trainerId, courseId);
     }
