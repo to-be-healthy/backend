@@ -58,14 +58,15 @@ public class FileService {
 
                     ObjectMetadata objectMetadata = Utils.createObjectMetadata(file.getSize(), file.getContentType());
                     String fileName = System.currentTimeMillis() + "-" + randomUUID();
-                    String savedFileName =folder + "/" + fileName;
+                    String savedFileName ="origin/" + folder + "/" + fileName + ".jpg";
                     amazonS3.putObject(
                             bucketName,
                             savedFileName,
                             inputStream,
                             objectMetadata
                     );
-                    String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+                    String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString()
+                            .replace("https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/", "https://cdn.to-be-healthy.site/");
                     redisService.setValuesWithTimeout(TEMP_FILE_URI.getDescription() + fileUrl, member.getId().toString(), FILE_TEMP_UPLOAD_TIMEOUT); // 30분
                     uploadFile.add(new RegisterFile(fileUrl, ++fileOrder));
                 } catch (Exception e) {
