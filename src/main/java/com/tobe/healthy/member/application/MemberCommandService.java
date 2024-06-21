@@ -81,7 +81,7 @@ public class MemberCommandService {
         }
 
         ObjectMetadata objectMetadata = createObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
-        String savedFileName = createFileName("profile/");
+        String savedFileName = createFileName("origin/profile/") + uploadFile.getOriginalFilename().substring(uploadFile.getOriginalFilename().lastIndexOf("."));;
 
         try (InputStream inputStream = uploadFile.getInputStream()) {
             amazonS3.putObject(
@@ -90,8 +90,11 @@ public class MemberCommandService {
                 inputStream,
                 objectMetadata
             );
-            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll("https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/", "https://cdn.to-be-healthy.site/");
+
             findMember.registerProfile(savedFileName, fileUrl);
+
             return RegisterMemberProfileResult.from(fileUrl, savedFileName);
         } catch (IOException e) {
             log.error("error => {}", e.getStackTrace()[0]);

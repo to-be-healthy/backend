@@ -26,6 +26,10 @@ public class Utils {
         return path + System.currentTimeMillis() + "-" + UUID.randomUUID();
     }
 
+    public static String createProfileName(String path) {
+        return path + System.currentTimeMillis() + "-" + UUID.randomUUID() + ".jpg";
+    }
+
     public static boolean validatePassword(String password) {
         String regexp = "^[A-Za-z0-9]+$";
         if (password.length() < 8 || !Pattern.matches(regexp, password)) {

@@ -20,7 +20,7 @@ class ComnFileService(
 ) {
 
     fun getPreSignedUrl(request: CommandUploadFile): String {
-        val fileName = createPath(request.prefix, request.fileName)
+        val fileName = createPath(request.fileName)
 
         val generatePresignedUrlRequest = getGeneratePreSignedUrlRequest(bucket, fileName)
 
@@ -47,8 +47,8 @@ class ComnFileService(
         return expiration
     }
 
-    private fun createPath(prefix: String, fileName: String): String {
+    private fun createPath(fileName: String): String {
         val fileUUID = createFileName()
-        return String.format("%s/%s", prefix, fileUUID + fileName.substring(fileName.lastIndexOf(".")))
+        return String.format("%s/%s", "temp", fileUUID + fileName.substring(fileName.lastIndexOf(".")))
     }
 }

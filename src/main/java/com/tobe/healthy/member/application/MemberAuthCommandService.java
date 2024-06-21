@@ -417,7 +417,7 @@ public class MemberAuthCommandService {
 
     private MemberProfile getProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
-        String savedFileName = createFileName("profile/");
+        String savedFileName = createProfileName("origin/profile/");
         ObjectMetadata objectMetadata = createObjectMetadata(image.length, IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(
@@ -426,7 +426,8 @@ public class MemberAuthCommandService {
                     inputStream,
                     objectMetadata
             );
-            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll("https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/", "https://cdn.to-be-healthy.site/");
 
             return MemberProfile.create(savedFileName, fileUrl, member);
 
@@ -438,11 +439,12 @@ public class MemberAuthCommandService {
 
     private MemberProfile getGoogleProfile(String profileImage, Member member) {
         byte[] image = getProfileImage(profileImage);
-        String savedFileName = createFileName("profile/");
+        String savedFileName = createProfileName("origin/profile/");
         ObjectMetadata objectMetadata = createObjectMetadata(image.length, IMAGE_PNG_VALUE);
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
-            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString();
+
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll("https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/", "https://cdn.to-be-healthy.site/");
 
             return MemberProfile.create(savedFileName, fileUrl, member);
 
