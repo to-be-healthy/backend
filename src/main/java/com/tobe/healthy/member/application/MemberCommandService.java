@@ -25,8 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.tobe.healthy.common.Utils.createFileName;
-import static com.tobe.healthy.common.Utils.createObjectMetadata;
+import static com.tobe.healthy.common.Utils.*;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static io.micrometer.common.util.StringUtils.isEmpty;
 
@@ -91,7 +90,7 @@ public class MemberCommandService {
                 objectMetadata
             );
 
-            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll("https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/", "https://cdn.to-be-healthy.site/");
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll(S3_DOMAIN, "https://cdn.to-be-healthy.site/");
 
             findMember.registerProfile(savedFileName, fileUrl);
 

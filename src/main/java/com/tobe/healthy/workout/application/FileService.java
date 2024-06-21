@@ -2,7 +2,7 @@ package com.tobe.healthy.workout.application;
 
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.*;
 import com.tobe.healthy.common.Utils;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.error.CustomException;
@@ -20,11 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +27,6 @@ import java.util.List;
 import static com.tobe.healthy.common.Utils.*;
 import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_REMOVE_ERROR;
-import static com.tobe.healthy.config.error.ErrorCode.FILE_UPLOAD_ERROR;
 import static java.util.UUID.randomUUID;
 
 @Service
@@ -66,7 +60,7 @@ public class FileService {
                             objectMetadata
                     );
                     String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString()
-                            .replace("https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/", "https://cdn.to-be-healthy.site/");
+                            .replace(S3_DOMAIN, "https://cdn.to-be-healthy.site/");
                     redisService.setValuesWithTimeout(TEMP_FILE_URI.getDescription() + fileUrl, member.getId().toString(), FILE_TEMP_UPLOAD_TIMEOUT); // 30분
                     uploadFile.add(new RegisterFile(fileUrl, ++fileOrder));
                 } catch (Exception e) {
@@ -75,6 +69,21 @@ public class FileService {
             }
         }
         return uploadFile;
+    }
+
+    // 1. 파일을 AWS S3 temp -> 대상폴더로 업로드 후 CDN 주소 반환
+    public RegisterFile moveDirTempToOrigin(String dir, String oldSavedFileName) {
+        String newSavedFileName = "origin/" + dir + oldSavedFileName.replaceFirst("temp/", "");
+        CopyObjectRequest copyObjRequest = new CopyObjectRequest(
+                bucketName,
+                oldSavedFileName,
+                bucketName,
+                newSavedFileName
+        );
+        amazonS3.copyObject(copyObjRequest);
+        String fileUrl = amazonS3.getUrl(bucketName, newSavedFileName).toString()
+                .replace(S3_DOMAIN, "https://cdn.to-be-healthy.site/");
+        return new RegisterFile(fileUrl);
     }
 
     public void deleteDietFile(String fileName) {
@@ -88,7 +97,7 @@ public class FileService {
 
     public void deleteHistoryFile(String fileName) {
         try {
-            amazonS3.deleteObject(bucketName, "workout-history/" + fileName);
+            amazonS3.deleteObject(bucketName, "origin/workout-history/" + fileName);
         } catch (Exception e) {
             log.error("error => {}", e.getStackTrace()[0]);
             throw new CustomException(FILE_REMOVE_ERROR);

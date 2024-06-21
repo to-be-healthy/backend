@@ -3,6 +3,7 @@ package com.tobe.healthy.lessonhistory.application
 import com.amazonaws.services.s3.AmazonS3
 import com.tobe.healthy.common.FileUpload.FILE_MAXIMUM_UPLOAD_SIZE
 import com.tobe.healthy.common.FileUpload.FILE_TEMP_UPLOAD_TIMEOUT
+import com.tobe.healthy.common.Utils
 import com.tobe.healthy.common.Utils.createFileName
 import com.tobe.healthy.common.Utils.createObjectMetadata
 import com.tobe.healthy.common.event.CustomEventPublisher
@@ -317,7 +318,7 @@ class LessonHistoryCommandService(
             uploadFile.inputStream,
             objectMetadata,
         )
-        val fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replace("https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/", "https://cdn.to-be-healthy.site/")
+        val fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replace(Utils.S3_DOMAIN, "https://cdn.to-be-healthy.site/")
 
         log.info { "등록된 S3 파일 URL => ${fileUrl}" }
         return fileUrl

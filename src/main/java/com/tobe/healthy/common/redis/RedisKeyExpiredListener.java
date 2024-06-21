@@ -9,6 +9,7 @@ import org.springframework.data.redis.listener.KeyExpirationEventMessageListener
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
+import static com.tobe.healthy.common.Utils.S3_DOMAIN;
 import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.FILE_REMOVE_ERROR;
 
@@ -20,8 +21,6 @@ public class RedisKeyExpiredListener extends KeyExpirationEventMessageListener {
 
 	@Value("${aws.s3.bucket-name}")
 	private String bucketName;
-
-	private final static String S3_DOMAIN = "https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/";
 
 	public RedisKeyExpiredListener(RedisMessageListenerContainer listenerContainer, AmazonS3 amazonS3) {
 		super(listenerContainer);

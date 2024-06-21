@@ -14,6 +14,8 @@ public class Utils {
 
     public static final DateTimeFormatter formatter_hmm = DateTimeFormatter.ofPattern("a h:mm");
 
+    public static final String S3_DOMAIN = "https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/";
+
     public static String getAuthCode(int num) {
         return RandomStringUtils.randomNumeric(num);
     }

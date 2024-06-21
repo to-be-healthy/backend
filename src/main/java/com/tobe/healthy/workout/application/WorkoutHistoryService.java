@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tobe.healthy.common.Utils.S3_DOMAIN;
 import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 
@@ -198,8 +199,9 @@ public class WorkoutHistoryService {
         for (int i = 0; i < files.size(); i++) {
             RegisterFile fileInfo = files.get(i);
             fileInfo.setFileOrder(i+1);
-            workoutFileRepository.save(WorkoutHistoryFiles.create(history, fileInfo.getFileUrl(), fileInfo.getFileOrder()));
-            redisService.deleteValues(TEMP_FILE_URI.getDescription() + fileInfo.getFileUrl());
+            String oldSavedFileName = fileInfo.getFileUrl().replace(S3_DOMAIN, "");
+            RegisterFile result = fileService.moveDirTempToOrigin("workout-history/", oldSavedFileName);
+            workoutFileRepository.save(WorkoutHistoryFiles.create(history, result.getFileUrl(), fileInfo.getFileOrder()));
         }
     }
 
