@@ -26,6 +26,10 @@ public class Utils {
         return path + System.currentTimeMillis() + "-" + UUID.randomUUID();
     }
 
+    public static String createFileName(String path, String extension) {
+        return path + System.currentTimeMillis() + "-" + UUID.randomUUID() + extension;
+    }
+
     public static String createProfileName(String path) {
         return path + System.currentTimeMillis() + "-" + UUID.randomUUID() + ".jpg";
     }

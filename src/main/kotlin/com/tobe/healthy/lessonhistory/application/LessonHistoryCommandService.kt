@@ -310,14 +310,15 @@ class LessonHistoryCommandService(
 
     private fun putFile(uploadFile: MultipartFile): String {
         val objectMetadata = createObjectMetadata(uploadFile.size, uploadFile.contentType)
-        val savedFileName = createFileName("lesson-history/")
+        val savedFileName = createFileName("origin/lesson-history/", uploadFile.originalFilename!!.substring(uploadFile!!.originalFilename!!.lastIndexOf(".")))
         amazonS3.putObject(
             bucketName,
             savedFileName,
             uploadFile.inputStream,
             objectMetadata,
         )
-        val fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString()
+        val fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replace("https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/", "https://cdn.to-be-healthy.site/")
+
         log.info { "등록된 S3 파일 URL => ${fileUrl}" }
         return fileUrl
     }
