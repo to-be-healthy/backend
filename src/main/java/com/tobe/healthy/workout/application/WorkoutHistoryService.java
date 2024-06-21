@@ -119,6 +119,7 @@ public class WorkoutHistoryService {
     }
 
     private void deleteOldFiles(WorkoutHistory history, HistoryAddCommand command) {
+        //TODO: 파일명으로 기존파일 비교하기
         Set<String> oldFileUrlSet = history.getHistoryFiles().stream()
                 .filter(f -> !f.getDelYn())
                 .map(WorkoutHistoryFiles::getFileUrl).collect(Collectors.toSet());

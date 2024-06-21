@@ -20,6 +20,7 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
+import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tobe.healthy.common.Utils.S3_DOMAIN;
 import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.diet.domain.entity.DietType.*;
@@ -206,9 +208,9 @@ public class DietService {
     private void uploadNewFiles(Diet diet, DietUpdateCommand command) {
         //아침 파일
         if (!command.isBreakfastFast() && !ObjectUtils.isEmpty(command.getBreakfastFile())){
-            String originalFileUrl = command.getBreakfastFile();
-            dietFileRepository.save(DietFiles.create(diet, originalFileUrl, BREAKFAST));
-            redisService.deleteValues(TEMP_FILE_URI.getDescription() + originalFileUrl);
+            String oldSavedFileName = command.getBreakfastFile().replace(S3_DOMAIN, "");
+            RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
+            dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), BREAKFAST));
         }else{
             List<DietFiles> files = diet.getDietFiles().stream().filter(f -> BREAKFAST.equals(f.getType())).toList();
             if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(getFileName(files.get(0).getFileUrl()));
@@ -216,9 +218,9 @@ public class DietService {
 
         //점심 파일
         if (!command.isLunchFast() && !ObjectUtils.isEmpty(command.getLunchFile())){
-            String originalFileUrl = command.getLunchFile();
-            dietFileRepository.save(DietFiles.create(diet, originalFileUrl, LUNCH));
-            redisService.deleteValues(TEMP_FILE_URI.getDescription() + originalFileUrl);
+            String oldSavedFileName = command.getLunchFile().replace(S3_DOMAIN, "");
+            RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
+            dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), LUNCH));
         }else{
             List<DietFiles> files = diet.getDietFiles().stream().filter(f -> LUNCH.equals(f.getType())).toList();
             if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(getFileName(files.get(0).getFileUrl()));
@@ -226,9 +228,9 @@ public class DietService {
 
         //저녁 파일
         if (!command.isDinnerFast() && !ObjectUtils.isEmpty(command.getDinnerFile())){
-            String originalFileUrl = command.getDinnerFile();
-            dietFileRepository.save(DietFiles.create(diet, originalFileUrl, DINNER));
-            redisService.deleteValues(TEMP_FILE_URI.getDescription() + originalFileUrl);
+            String oldSavedFileName = command.getDinnerFile().replace(S3_DOMAIN, "");
+            RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
+            dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), DINNER));
         }else{
             List<DietFiles> files = diet.getDietFiles().stream().filter(f -> DINNER.equals(f.getType())).toList();
             if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(getFileName(files.get(0).getFileUrl()));
@@ -236,6 +238,7 @@ public class DietService {
     }
 
     private void deleteOldFiles(Diet diet, DietUpdateCommand command) {
+        //TODO: 파일명으로 기존파일 비교하기
         Set<String> oldFileUrlSet = diet.getDietFiles().stream()
                 .filter(f -> !f.getDelYn())
                 .map(DietFiles::getFileUrl).collect(Collectors.toSet());

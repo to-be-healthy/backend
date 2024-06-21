@@ -88,7 +88,7 @@ public class FileService {
 
     public void deleteDietFile(String fileName) {
         try {
-            amazonS3.deleteObject(bucketName, "diet/" + fileName);
+            amazonS3.deleteObject(bucketName, "origin/diet/" + fileName);
         } catch (Exception e) {
             log.error("error => {}", e.getStackTrace()[0]);
             throw new CustomException(FILE_REMOVE_ERROR);
