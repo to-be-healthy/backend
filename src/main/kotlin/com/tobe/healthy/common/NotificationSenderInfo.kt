@@ -9,7 +9,7 @@ object NotificationSenderInfo {
     }
 
     data class SenderInfo(
-        val profileUrl: String = "https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/profile/default.png",
+        val profileUrl: String = "https://cdn.to-be-healthy.site/origin/profile/default.png",
         val senderType: NotificationSenderType = SYSTEM
     )
 }

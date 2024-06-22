@@ -207,8 +207,7 @@ class TrainerScheduleCommandService(
         // 트레이너가 일정 등록시 학생에게 알림
         val notification = CommandSendNotification(
             title = RESERVE.description,
-            content = String.format(
-                "%s 트레이너가 %s님을 %s 예약에 등록했어요.",
+            content = RESERVE.content.format(
                 schedule.trainer.name,
                 schedule.applicant!!.name,
                 LocalDateTime.of(schedule.lessonDt, schedule.lessonStartTime).format(lessonStartDateTimeFormatter())
@@ -239,8 +238,7 @@ class TrainerScheduleCommandService(
         // 트레이너가 일정 등록시 학생에게 알림
         val notification = CommandSendNotification(
             title = CANCEL.description,
-            content = String.format(
-                "%s 트레이너가 %s님의 %s 예약을 취소했어요.",
+            content = CANCEL.content.format(
                 schedule.trainer.name,
                 applicantName,
                 LocalDateTime.of(schedule.lessonDt, schedule.lessonStartTime).format(lessonStartDateTimeFormatter())

@@ -72,7 +72,7 @@ public class CustomEventListener {
 
                     CommandSendNotification request = new CommandSendNotification(
                             WAITING.getDescription(),
-                            String.format("%s 대기 중이던 예약이 확정되었어요!", LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(lessonStartDateTimeFormatter())),
+                            WAITING.getContent().format(LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(lessonStartDateTimeFormatter())),
                             List.of(schedule.getApplicant().getId()),
                             WAITING,
                             SCHEDULE,
