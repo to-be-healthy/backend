@@ -310,7 +310,7 @@ class LessonHistoryCommandService(
             uploadFile.inputStream,
             objectMetadata,
         )
-        val fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replace(Utils.S3_DOMAIN, "https://cdn.to-be-healthy.site/")
+        val fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replace(Utils.S3_DOMAIN, Utils.CDN_DOMAIN)
 
         log.info { "등록된 S3 파일 URL => ${fileUrl}" }
         return fileUrl

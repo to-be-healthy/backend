@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tobe.healthy.common.Utils.CDN_DOMAIN;
 import static com.tobe.healthy.common.Utils.S3_DOMAIN;
 import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.*;
@@ -238,10 +239,9 @@ public class DietService {
     }
 
     private void deleteOldFiles(Diet diet, DietUpdateCommand command) {
-        //TODO: 파일명으로 기존파일 비교하기
         Set<String> oldFileUrlSet = diet.getDietFiles().stream()
                 .filter(f -> !f.getDelYn())
-                .map(DietFiles::getFileUrl).collect(Collectors.toSet());
+                .map(f -> f.getFileUrl().replace(CDN_DOMAIN, "")).collect(Collectors.toSet());
         oldFileUrlSet.remove(command.getBreakfastFile());
         oldFileUrlSet.remove(command.getLunchFile());
         oldFileUrlSet.remove(command.getDinnerFile());

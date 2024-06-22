@@ -427,7 +427,7 @@ public class MemberAuthCommandService {
                     objectMetadata
             );
 
-            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll(S3_DOMAIN, "https://cdn.to-be-healthy.site/");
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll(S3_DOMAIN, CDN_DOMAIN);
 
             return MemberProfile.create(savedFileName, fileUrl, member);
 
@@ -444,7 +444,7 @@ public class MemberAuthCommandService {
         try (InputStream inputStream = new ByteArrayInputStream(image)) {
             amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
 
-            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll(S3_DOMAIN, "https://cdn.to-be-healthy.site/");
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll(S3_DOMAIN, CDN_DOMAIN);
 
             return MemberProfile.create(savedFileName, fileUrl, member);
 

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tobe.healthy.common.Utils.CDN_DOMAIN;
 import static com.tobe.healthy.common.Utils.S3_DOMAIN;
 import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.*;
@@ -119,20 +120,22 @@ public class WorkoutHistoryService {
     }
 
     private void deleteOldFiles(WorkoutHistory history, HistoryAddCommand command) {
-        //TODO: 파일명으로 기존파일 비교하기
         Set<String> oldFileUrlSet = history.getHistoryFiles().stream()
                 .filter(f -> !f.getDelYn())
-                .map(WorkoutHistoryFiles::getFileUrl).collect(Collectors.toSet());
+                .map(f -> f.getFileUrl().replace(CDN_DOMAIN + "origin/workout-history/", "")).collect(Collectors.toSet());
         Set<String> requestFileUrl = command.getFiles().stream()
-                .map(RegisterFile::getFileUrl).collect(Collectors.toSet());
+                .map(f -> f.getFileUrl().replace(S3_DOMAIN + "temp/", "")).collect(Collectors.toSet());
         oldFileUrlSet.removeAll(requestFileUrl);
-        Set<WorkoutHistoryFiles> deleteFilesSet = history.getHistoryFiles().stream()
-                .filter(f -> oldFileUrlSet.contains(f.getFileUrl())).collect(Collectors.toSet());
+        Set<String> deleteFilesSet = history.getHistoryFiles().stream()
+                .map(f -> f.getFileUrl().replace(CDN_DOMAIN + "origin/workout-history/", ""))
+                .filter(oldFileUrlSet::contains)
+                .collect(Collectors.toSet());
 
         history.deleteFiles();
         history.getHistoryFiles().stream()
+                .map(f -> f.getFileUrl().replace(CDN_DOMAIN + "origin/workout-history/", ""))
                 .filter(deleteFilesSet::contains)
-                .forEach(file -> fileService.deleteHistoryFile(getFileName(file.getFileUrl())));
+                .forEach(fileService::deleteHistoryFile);
     }
 
     private void updateCompletedExercise(HistoryAddCommand command, WorkoutHistory history) {

@@ -94,7 +94,7 @@ public class MemberCommandService {
                 objectMetadata
             );
 
-            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll(S3_DOMAIN, "https://cdn.to-be-healthy.site/");
+            String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll(S3_DOMAIN, CDN_DOMAIN);
 
             findMember.registerProfile(savedFileName, fileUrl);
 

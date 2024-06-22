@@ -60,7 +60,7 @@ public class FileService {
                             objectMetadata
                     );
                     String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString()
-                            .replace(S3_DOMAIN, "https://cdn.to-be-healthy.site/");
+                            .replace(S3_DOMAIN, CDN_DOMAIN);
                     redisService.setValuesWithTimeout(TEMP_FILE_URI.getDescription() + fileUrl, member.getId().toString(), FILE_TEMP_UPLOAD_TIMEOUT); // 30분
                     uploadFile.add(new RegisterFile(fileUrl, ++fileOrder));
                 } catch (Exception e) {
@@ -82,7 +82,7 @@ public class FileService {
         );
         amazonS3.copyObject(copyObjRequest);
         String fileUrl = amazonS3.getUrl(bucketName, newSavedFileName).toString()
-                .replace(S3_DOMAIN, "https://cdn.to-be-healthy.site/");
+                .replace(S3_DOMAIN, CDN_DOMAIN);
         return new RegisterFile(fileUrl);
     }
 
