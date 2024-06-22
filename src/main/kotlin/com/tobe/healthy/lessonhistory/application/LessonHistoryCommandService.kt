@@ -29,6 +29,7 @@ import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
 import com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE
+import com.tobe.healthy.notification.domain.entity.NotificationType
 import com.tobe.healthy.notification.domain.entity.NotificationType.*
 import com.tobe.healthy.schedule.domain.entity.Schedule
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository
@@ -77,18 +78,27 @@ class LessonHistoryCommandService(
         val files = registerFiles(request.uploadFiles, trainer, lessonHistory)
 
         // 학생에게 수업일지 작성 알림
+        sendNotification(WRITE, WRITE.content, lessonHistory.id!!, lessonHistory.student!!.id!!)
+
+        return CommandRegisterLessonHistoryResult.from(lessonHistory, files)
+    }
+
+    private fun sendNotification(
+        notificationType: NotificationType,
+        content: String,
+        lessonHistoryId: Long,
+        memberId: Long
+    ) {
         val notification = CommandSendNotification(
-            title = WRITE.description,
-            content = String.format("트레이너가 새로운 수업일지를 작성하였습니다."),
-            receiverIds = listOf(lessonHistory.student?.id!!),
-            notificationType = WRITE,
+            title = notificationType.description,
+            content = content,
+            receiverIds = listOf(memberId),
+            notificationType = notificationType,
             notificationCategory = SCHEDULE,
-            targetId = lessonHistory.id
+            targetId = lessonHistoryId
         )
 
         notificationPublisher.publish(notification, NOTIFICATION)
-
-        return CommandRegisterLessonHistoryResult.from(lessonHistory, files)
     }
 
     fun registerFilesOfLessonHistory(
@@ -173,16 +183,7 @@ class LessonHistoryCommandService(
         val files = registerFile(request.uploadFiles, findMember, lessonHistory, lessonHistoryComment)
 
         // 게시글 작성자에게 알림
-        val notification = CommandSendNotification(
-                title = COMMENT.description,
-                content = String.format("내 게시글에 새로운 댓글이 달렸어요."),
-                receiverIds = listOf(lessonHistory.trainer!!.id!!),
-                notificationType = COMMENT,
-                notificationCategory = SCHEDULE,
-                targetId = lessonHistory.id
-        )
-
-        notificationPublisher.publish(notification, NOTIFICATION)
+        sendNotification(COMMENT, COMMENT.content, lessonHistory.id!!, lessonHistory.trainer!!.id!!)
 
         return CommandRegisterCommentResult.from(lessonHistoryComment, files)
     }
@@ -212,16 +213,7 @@ class LessonHistoryCommandService(
         )
 
         // 댓글 작성자에게 알림
-        val notification = CommandSendNotification(
-            title = REPLY.description,
-            content = String.format("내 댓글에 새로운 답글이 달렸어요."),
-            receiverIds = listOf(parentComment.writer?.id!!),
-            notificationType = REPLY,
-            notificationCategory = SCHEDULE,
-            targetId = lessonHistory.id
-        )
-
-        notificationPublisher.publish(notification, NOTIFICATION)
+        sendNotification(REPLY, REPLY.content, lessonHistory.id!!, parentComment.writer?.id!!)
 
         lessonHistoryCommentRepository.save(entity)
 

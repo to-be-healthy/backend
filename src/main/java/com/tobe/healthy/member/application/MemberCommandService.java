@@ -64,6 +64,10 @@ public class MemberCommandService {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
+        if (passwordEncoder.matches(request.getChangePassword1(), member.getPassword())) {
+            throw new IllegalArgumentException("이전 비밀번호와 동일합니다.");
+        }
+
         String password = passwordEncoder.encode(request.getChangePassword1());
 
         member.changePassword(password);

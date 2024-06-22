@@ -20,7 +20,7 @@ class ComnFileController(
     fun uploadFile(
         @RequestBody request: CommandUploadFile,
         @AuthenticationPrincipal member: CustomMemberDetails
-    ): ApiResultResponse<String> {
+    ): ApiResultResponse<MutableList<String>> {
         return ApiResultResponse(
             message = "presigned-uri을 생성하였습니다.",
             data = comnFileService.getPreSignedUrl(request)

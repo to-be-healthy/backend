@@ -8,6 +8,7 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest
 import com.tobe.healthy.common.Utils.FILE_TEMP_UPLOAD_TIMEOUT
 import com.tobe.healthy.common.Utils.createFileName
 import com.tobe.healthy.file.domain.dto.`in`.CommandUploadFile
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryFiles
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.*
@@ -19,14 +20,15 @@ class ComnFileService(
     private val amazonS3: AmazonS3
 ) {
 
-    fun getPreSignedUrl(request: CommandUploadFile): String {
-        val fileName = createPath(request.fileName)
-
-        val generatePresignedUrlRequest = getGeneratePreSignedUrlRequest(bucket, fileName)
-
-        val url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest)
-
-        return url.toString()
+    fun getPreSignedUrl(request: CommandUploadFile): MutableList<String> {
+        val list = mutableListOf<String>()
+        for (fileName in request.fileNames) {
+            val fileName = createPath(fileName)
+            val generatePresignedUrlRequest = getGeneratePreSignedUrlRequest(bucket, fileName)
+            val url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest)
+            list.add(url.toString())
+        }
+        return list
     }
 
     private fun getGeneratePreSignedUrlRequest(bucket: String, fileName: String): GeneratePresignedUrlRequest {

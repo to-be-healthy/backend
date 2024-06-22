@@ -108,7 +108,7 @@ class NotificationService(
             sendNotificationFromSystem(
                 CommandSendNotification(
                     title = FEEDBACK.description,
-                    content = String.format("${it.count}명의 회원님에 대한 수업 피드백을 작성해 주세요!"),
+                    content = FEEDBACK.content.format(it.count),
                     receiverIds = listOf(it.trainerId),
                     notificationType = FEEDBACK,
                     notificationCategory = SCHEDULE
