@@ -74,6 +74,11 @@ class TrainerScheduleCommandService(
         request: CommandRegisterDefaultLessonTime,
         trainerScheduleInfo: TrainerScheduleInfo
     ): MutableList<TrainerScheduleClosedDaysInfo> {
+
+        if (request.closedDays?.size == 7) {
+            throw IllegalArgumentException("모든 요일이 휴무일이 될 수 없습니다.")
+        }
+
         return request.closedDays?.map { closedDay ->
             TrainerScheduleClosedDaysInfo.registerClosedDay(closedDay, trainerScheduleInfo)
         }?.toMutableList() ?: mutableListOf()
