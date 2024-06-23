@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.tobe.healthy.config.error.ErrorCode.LESSON_CNT_MAX;
 import static com.tobe.healthy.config.error.ErrorCode.LESSON_CNT_NOT_VALID;
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -51,7 +52,6 @@ public class Course extends BaseTimeEntity<Course, Long> {
     }
 
     public static Course create(Member member, Member trainer, int totalLessonCnt, int remainLessonCnt) {
-        if(totalLessonCnt < 1 || remainLessonCnt < 1) throw new CustomException(LESSON_CNT_NOT_VALID);
         return Course.builder()
                 .member(member)
                 .trainer(trainer)

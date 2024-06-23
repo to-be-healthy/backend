@@ -65,6 +65,8 @@ public class CourseService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
 
         checkCourAlreadyExists(member.getId());
+        if(command.getLessonCnt() < 1) throw new CustomException(LESSON_CNT_NOT_VALID);
+        if(500 < command.getLessonCnt()) throw new CustomException(LESSON_CNT_MAX);
         Course course = courseRepository.save(Course.create(member, trainer, command.getLessonCnt(), command.getLessonCnt()));
         courseHistoryRepository.save(CourseHistory.create(course, course.getTotalLessonCnt(), PLUS, COURSE_CREATE, trainer));
     }
@@ -180,6 +182,7 @@ public class CourseService {
     private void updateCourse(CourseUpdateCommand command, Member trainer, Course course) {
         int result = command.getCalculation().apply(course.getRemainLessonCnt(), command.getUpdateCnt());
         if (result < 0) throw new CustomException(LESSON_CNT_NOT_VALID);
+        if (500 < result) throw new CustomException(LESSON_CNT_MAX);
 
         course.updateRemainLessonCnt(command);
         //수강권 변경 주체가 트레이너인 경우 -> 총 횟수도 함께 업데이트

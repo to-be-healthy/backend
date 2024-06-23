@@ -91,6 +91,7 @@ public class TrainerService {
         validateName(name);
         int lessonCnt = command.getLessonCnt();
         if(lessonCnt < 1) throw new CustomException(LESSON_CNT_NOT_VALID);
+        if(500 < lessonCnt) throw new CustomException(LESSON_CNT_MAX);
 
         String uuid = System.currentTimeMillis() + "-" + UUID.randomUUID();
         String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
