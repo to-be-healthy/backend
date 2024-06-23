@@ -36,9 +36,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.tobe.healthy.common.Utils.CDN_DOMAIN;
 import static com.tobe.healthy.common.Utils.S3_DOMAIN;
-import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.diet.domain.entity.DietType.*;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
@@ -110,16 +108,6 @@ public class DietService {
         if (ObjectUtils.isEmpty(diet)) diet = dietRepository.save(Diet.create(member, trainer));
 
         diet.changeTrainer(trainer);
-
-//        if (!ObjectUtils.isEmpty(diet.getDietFiles())) {
-//            diet.getDietFiles().stream()
-//                    .filter(f -> requestType.equals(f.getType()))
-//                    .forEach(file -> fileService.deleteDietFile(file.getFileName()));
-//        }
-//
-//        if (!command.isFast() && !ObjectUtils.isEmpty(requestFileUrl)){
-//            dietFileRepository.save(DietFiles.create(diet, requestFileUrl, command.getType()));
-//        }
 
         //파일
         if (command.isFast()){ //단식
@@ -286,11 +274,6 @@ public class DietService {
                     fileService.deleteDietFile(f.getFileName());
                     f.deleteDietFile();
                 });
-
-//        diet.deleteFiles();
-//        diet.getDietFiles().stream()
-//                .filter(deleteFileNames::contains)
-//                .forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
     }
 
     public CustomPaging<DietDto> getDietMyTrainer(Long studentId, Pageable pageable, String searchDate) {

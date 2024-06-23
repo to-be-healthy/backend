@@ -20,7 +20,6 @@ import com.tobe.healthy.workout.repository.workoutHistory.WorkoutHistoryLikeRepo
 import com.tobe.healthy.workout.repository.workoutHistory.WorkoutHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,9 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.tobe.healthy.common.Utils.CDN_DOMAIN;
 import static com.tobe.healthy.common.Utils.S3_DOMAIN;
-import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static com.tobe.healthy.config.error.ErrorCode.*;
 
 
