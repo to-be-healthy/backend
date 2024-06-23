@@ -4,6 +4,7 @@ import com.tobe.healthy.ApiResultResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.file.application.ComnFileService
 import com.tobe.healthy.file.domain.dto.`in`.CommandUploadFile
+import com.tobe.healthy.workout.domain.dto.`in`.RegisterFile
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -20,7 +21,7 @@ class ComnFileController(
     fun uploadFile(
         @RequestBody request: CommandUploadFile,
         @AuthenticationPrincipal member: CustomMemberDetails
-    ): ApiResultResponse<MutableList<String>> {
+    ): ApiResultResponse<MutableList<RegisterFile>> {
         return ApiResultResponse(
             message = "presigned-uri을 생성하였습니다.",
             data = comnFileService.getPreSignedUrl(request)
