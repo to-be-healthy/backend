@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface ExerciseRepository extends JpaRepository<Exercise, Long>, ExerciseRepositoryCustom {
     Optional<Exercise> findByExerciseIdAndMemberId(Long exerciseId, Long memberId);
-    Optional<Exercise> findByMemberIdAndCategoryAndNames(Long memberId, ExerciseCategory category, String names);
+    Optional<Exercise> findByMemberIdAndNames(Long memberId, String names);
 
 }

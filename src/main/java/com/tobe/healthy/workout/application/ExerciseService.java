@@ -37,7 +37,7 @@ public class ExerciseService {
     }
 
     public void addExerciseCustom(Member member, CustomExerciseAddCommand command) {
-        exerciseRepository.findByMemberIdAndCategoryAndNames(member.getId(), command.getCategory(), command.getNames())
+        exerciseRepository.findByMemberIdAndNames(member.getId(), command.getNames())
                 .ifPresent(i -> { throw new CustomException(EXERCISE_ALREADY_EXISTS); });
         exerciseRepository.save(Exercise.create(member, command));
     }
