@@ -102,7 +102,7 @@ public class DietService {
         }
         Long memberId = member.getId();
         DietType requestType = command.getType();
-        String originalFileUrl = command.getFile();
+        String requestFileUrl = command.getFile();
 
         Diet diet = dietRepository.getTodayDiet(memberId);
 
@@ -110,16 +110,36 @@ public class DietService {
         if (ObjectUtils.isEmpty(diet)) diet = dietRepository.save(Diet.create(member, trainer));
 
         diet.changeTrainer(trainer);
-        diet.deleteFile(requestType);
-        if (!ObjectUtils.isEmpty(diet.getDietFiles())) {
-            diet.getDietFiles().stream()
-                    .filter(f -> requestType.equals(f.getType()))
-                    .forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
-        }
 
-        if (!command.isFast() && !ObjectUtils.isEmpty(originalFileUrl)){
-            dietFileRepository.save(DietFiles.create(diet, originalFileUrl, command.getType()));
-            redisService.deleteValues(TEMP_FILE_URI.getDescription() + originalFileUrl);
+//        if (!ObjectUtils.isEmpty(diet.getDietFiles())) {
+//            diet.getDietFiles().stream()
+//                    .filter(f -> requestType.equals(f.getType()))
+//                    .forEach(file -> fileService.deleteDietFile(file.getFileName()));
+//        }
+//
+//        if (!command.isFast() && !ObjectUtils.isEmpty(requestFileUrl)){
+//            dietFileRepository.save(DietFiles.create(diet, requestFileUrl, command.getType()));
+//        }
+
+        //파일
+        if (command.isFast()){ //단식
+            List<DietFiles> files = diet.getDietFiles().stream().filter(f -> requestType.equals(f.getType())).toList();
+            if(!ObjectUtils.isEmpty(files)) {
+                fileService.deleteDietFile(files.get(0).getFileName());
+                diet.deleteFile(requestType);
+            }
+        }else{ //사진있음
+            if(!ObjectUtils.isEmpty(requestFileUrl) && requestFileUrl.startsWith(S3_DOMAIN)){
+                String oldSavedFileName = requestFileUrl.replace(S3_DOMAIN, "");
+                RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
+                dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), requestType));
+            }else{
+                List<DietFiles> files = diet.getDietFiles().stream().filter(f -> requestType.equals(f.getType())).toList();
+                if(!ObjectUtils.isEmpty(files)) {
+                    fileService.deleteDietFile(files.get(0).getFileName());
+                    diet.deleteFile(requestType);
+                }
+            }
         }
 
         diet.changeEatDate(command.getEatDate());
@@ -208,50 +228,69 @@ public class DietService {
 
     private void uploadNewFiles(Diet diet, DietUpdateCommand command) {
         //아침 파일
-        if (!command.isBreakfastFast() && !ObjectUtils.isEmpty(command.getBreakfastFile())){
-            String oldSavedFileName = command.getBreakfastFile().replace(S3_DOMAIN, "");
-            RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
-            dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), BREAKFAST));
-        }else{
-            List<DietFiles> files = diet.getDietFiles().stream().filter(f -> BREAKFAST.equals(f.getType())).toList();
-            if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(getFileName(files.get(0).getFileUrl()));
+        if(!ObjectUtils.isEmpty(command.getBreakfastFile()) && command.getBreakfastFile().startsWith(S3_DOMAIN)){
+            if (command.isBreakfastFast()){ //단식
+                List<DietFiles> files = diet.getDietFiles().stream().filter(f -> BREAKFAST.equals(f.getType())).toList();
+                if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(files.get(0).getFileName());
+
+            }else{ //사진있음
+                String oldSavedFileName = command.getBreakfastFile().replace(S3_DOMAIN, "");
+                RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
+                dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), BREAKFAST));
+            }
         }
 
         //점심 파일
-        if (!command.isLunchFast() && !ObjectUtils.isEmpty(command.getLunchFile())){
-            String oldSavedFileName = command.getLunchFile().replace(S3_DOMAIN, "");
-            RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
-            dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), LUNCH));
-        }else{
-            List<DietFiles> files = diet.getDietFiles().stream().filter(f -> LUNCH.equals(f.getType())).toList();
-            if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(getFileName(files.get(0).getFileUrl()));
+        if(!ObjectUtils.isEmpty(command.getLunchFile()) && command.getLunchFile().startsWith(S3_DOMAIN)){
+            if (command.isLunchFast()){ //단식
+                List<DietFiles> files = diet.getDietFiles().stream().filter(f -> LUNCH.equals(f.getType())).toList();
+                if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(files.get(0).getFileName());
+
+            }else{ //사진있음
+                String oldSavedFileName = command.getLunchFile().replace(S3_DOMAIN, "");
+                RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
+                dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), LUNCH));
+            }
         }
 
         //저녁 파일
-        if (!command.isDinnerFast() && !ObjectUtils.isEmpty(command.getDinnerFile())){
-            String oldSavedFileName = command.getDinnerFile().replace(S3_DOMAIN, "");
-            RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
-            dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), DINNER));
-        }else{
-            List<DietFiles> files = diet.getDietFiles().stream().filter(f -> DINNER.equals(f.getType())).toList();
-            if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(getFileName(files.get(0).getFileUrl()));
+        if(!ObjectUtils.isEmpty(command.getDinnerFile()) && command.getDinnerFile().startsWith(S3_DOMAIN)){
+            if (command.isDinnerFast()){ //단식
+                List<DietFiles> files = diet.getDietFiles().stream().filter(f -> DINNER.equals(f.getType())).toList();
+                if(!ObjectUtils.isEmpty(files)) fileService.deleteDietFile(files.get(0).getFileName());
+
+            }else{ //사진있음
+                String oldSavedFileName = command.getDinnerFile().replace(S3_DOMAIN, "");
+                RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
+                dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), DINNER));
+            }
         }
     }
 
     private void deleteOldFiles(Diet diet, DietUpdateCommand command) {
-        Set<String> oldFileUrlSet = diet.getDietFiles().stream()
+        Set<String> oldFileNames = diet.getDietFiles().stream()
                 .filter(f -> !f.getDelYn())
-                .map(f -> f.getFileUrl().replace(CDN_DOMAIN, "")).collect(Collectors.toSet());
-        oldFileUrlSet.remove(command.getBreakfastFile());
-        oldFileUrlSet.remove(command.getLunchFile());
-        oldFileUrlSet.remove(command.getDinnerFile());
-        Set<DietFiles> deleteFilesSet = diet.getDietFiles().stream()
-                .filter(f -> oldFileUrlSet.contains(f.getFileUrl())).collect(Collectors.toSet());
+                .map(DietFiles::getFileName).collect(Collectors.toSet());
+        if(command.getBreakfastFile() != null && !command.isBreakfastFast()) oldFileNames.remove(getFileName(command.getBreakfastFile()));
+        if(command.getLunchFile() != null && !command.isLunchFast()) oldFileNames.remove(getFileName(command.getLunchFile()));
+        if(command.getDinnerFile() != null && !command.isDinnerFast()) oldFileNames.remove(getFileName(command.getDinnerFile()));
+        Set<String> deleteFileNames = diet.getDietFiles().stream()
+                .filter(f -> !f.getDelYn())
+                .map(DietFiles::getFileName)
+                .filter(oldFileNames::contains)
+                .collect(Collectors.toSet());
 
-        diet.deleteFiles();
         diet.getDietFiles().stream()
-                .filter(deleteFilesSet::contains)
-                .forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
+                .filter(f -> deleteFileNames.contains(f.getFileName()))
+                .forEach(f -> {
+                    fileService.deleteDietFile(f.getFileName());
+                    f.deleteDietFile();
+                });
+
+//        diet.deleteFiles();
+//        diet.getDietFiles().stream()
+//                .filter(deleteFileNames::contains)
+//                .forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
     }
 
     public CustomPaging<DietDto> getDietMyTrainer(Long studentId, Pageable pageable, String searchDate) {

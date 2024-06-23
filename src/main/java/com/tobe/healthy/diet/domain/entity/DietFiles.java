@@ -39,12 +39,20 @@ public class DietFiles extends BaseTimeEntity<DietFiles, Long> {
     @ColumnDefault("'BREAKFAST'")
     private DietType type;
 
+    private String fileName;
+
     public static DietFiles create(Diet diet, String fileUrl, DietType type) {
         return DietFiles.builder()
                 .fileUrl(fileUrl)
                 .diet(diet)
                 .type(type)
+                .fileName(getFileName(fileUrl))
                 .build();
+    }
+
+    private static String getFileName(String url) {
+        String[] arr = url.split("/");
+        return arr[arr.length - 1];
     }
 
     public void deleteDietFile() {
