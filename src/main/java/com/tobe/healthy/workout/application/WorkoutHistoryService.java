@@ -120,22 +120,24 @@ public class WorkoutHistoryService {
     }
 
     private void deleteOldFiles(WorkoutHistory history, HistoryAddCommand command) {
-        Set<String> oldFileUrlSet = history.getHistoryFiles().stream()
+        Set<String> oldFileNames = history.getHistoryFiles().stream()
                 .filter(f -> !f.getDelYn())
-                .map(f -> f.getFileUrl().replace(CDN_DOMAIN + "origin/workout-history/", "")).collect(Collectors.toSet());
-        Set<String> requestFileUrl = command.getFiles().stream()
-                .map(f -> f.getFileUrl().replace(S3_DOMAIN + "temp/", "")).collect(Collectors.toSet());
-        oldFileUrlSet.removeAll(requestFileUrl);
-        Set<String> deleteFilesSet = history.getHistoryFiles().stream()
-                .map(f -> f.getFileUrl().replace(CDN_DOMAIN + "origin/workout-history/", ""))
-                .filter(oldFileUrlSet::contains)
+                .map(WorkoutHistoryFiles::getFileName).collect(Collectors.toSet());
+        Set<String> requestFileNames = command.getFiles().stream()
+                .map(f -> getFileName(f.getFileUrl())).collect(Collectors.toSet());
+        oldFileNames.removeAll(requestFileNames);
+        Set<String> deleteFileNames = history.getHistoryFiles().stream()
+                .filter(f -> !f.getDelYn())
+                .map(WorkoutHistoryFiles::getFileName)
+                .filter(oldFileNames::contains)
                 .collect(Collectors.toSet());
 
-        history.deleteFiles();
         history.getHistoryFiles().stream()
-                .map(f -> f.getFileUrl().replace(CDN_DOMAIN + "origin/workout-history/", ""))
-                .filter(deleteFilesSet::contains)
-                .forEach(fileService::deleteHistoryFile);
+            .filter(f -> deleteFileNames.contains(f.getFileName()))
+            .forEach(f -> {
+                fileService.deleteHistoryFile(f.getFileName());
+                f.deleteWorkoutHistoryFile();
+            });
     }
 
     private void updateCompletedExercise(HistoryAddCommand command, WorkoutHistory history) {
@@ -202,10 +204,12 @@ public class WorkoutHistoryService {
     private void uploadNewFiles(WorkoutHistory history, List<RegisterFile> files) {
         for (int i = 0; i < files.size(); i++) {
             RegisterFile fileInfo = files.get(i);
-            fileInfo.setFileOrder(i+1);
-            String oldSavedFileName = fileInfo.getFileUrl().replace(S3_DOMAIN, "");
-            RegisterFile result = fileService.moveDirTempToOrigin("workout-history/", oldSavedFileName);
-            workoutFileRepository.save(WorkoutHistoryFiles.create(history, result.getFileUrl(), fileInfo.getFileOrder()));
+            if(fileInfo.getFileUrl().startsWith(S3_DOMAIN)){
+                fileInfo.setFileOrder(i+1);
+                String oldSavedFileName = fileInfo.getFileUrl().replace(S3_DOMAIN, "");
+                RegisterFile result = fileService.moveDirTempToOrigin("workout-history/", oldSavedFileName);
+                workoutFileRepository.save(WorkoutHistoryFiles.create(history, result.getFileUrl(), fileInfo.getFileOrder()));
+            }
         }
     }
 

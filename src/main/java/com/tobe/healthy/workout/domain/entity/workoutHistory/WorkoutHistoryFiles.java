@@ -35,12 +35,20 @@ public class WorkoutHistoryFiles extends BaseTimeEntity<WorkoutHistoryFiles, Lon
     @JoinColumn(name = "workout_history_id")
     private WorkoutHistory workoutHistory;
 
+    private String fileName;
+
     public static WorkoutHistoryFiles create(WorkoutHistory history, String fileUrl, int fileOrder) {
         return WorkoutHistoryFiles.builder()
                 .workoutHistory(history)
                 .fileUrl(fileUrl)
                 .fileOrder(fileOrder)
+                .fileName(getFileName(fileUrl))
                 .build();
+    }
+
+    private static String getFileName(String url) {
+        String[] arr = url.split("/");
+        return arr[arr.length - 1];
     }
 
     public void deleteWorkoutHistoryFile() {
