@@ -66,6 +66,9 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
     private List<CompletedExercise> completedExercises = new ArrayList<>();
 
+    public List<WorkoutHistoryFiles> getHistoryFiles() {
+        return historyFiles.stream().filter(f -> !f.getDelYn()).toList();
+    }
 
     public static WorkoutHistory create(HistoryAddCommand command, Member member, Gym gym) {
         return WorkoutHistory.builder()

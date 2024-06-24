@@ -109,25 +109,18 @@ public class DietService {
 
         diet.changeTrainer(trainer);
 
-        //파일
-        if (command.isFast()){ //단식
-            List<DietFiles> files = diet.getDietFiles().stream().filter(f -> requestType.equals(f.getType())).toList();
-            if(!ObjectUtils.isEmpty(files)) {
-                fileService.deleteDietFile(files.get(0).getFileName());
-                diet.deleteFile(requestType);
-            }
-        }else{ //사진있음
-            if(!ObjectUtils.isEmpty(requestFileUrl) && requestFileUrl.startsWith(S3_DOMAIN)){
-                String oldSavedFileName = requestFileUrl.replace(S3_DOMAIN, "");
-                RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
-                dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), requestType));
-            }else{
-                List<DietFiles> files = diet.getDietFiles().stream().filter(f -> requestType.equals(f.getType())).toList();
-                if(!ObjectUtils.isEmpty(files)) {
-                    fileService.deleteDietFile(files.get(0).getFileName());
-                    diet.deleteFile(requestType);
-                }
-            }
+        //기존 사진 삭제
+        List<DietFiles> files = diet.getDietFiles().stream().filter(f -> requestType.equals(f.getType())).toList();
+        if(!ObjectUtils.isEmpty(files)) {
+            fileService.deleteDietFile(files.get(0).getFileName());
+            diet.deleteFile(requestType);
+        }
+        //사진 첨부
+        if(!command.isFast() && !ObjectUtils.isEmpty(requestFileUrl) && requestFileUrl.startsWith(S3_DOMAIN)){
+            String oldSavedFileName = requestFileUrl.replace(S3_DOMAIN, "");
+            RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
+            dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), requestType));
+
         }
 
         diet.changeEatDate(command.getEatDate());
@@ -257,13 +250,11 @@ public class DietService {
 
     private void deleteOldFiles(Diet diet, DietUpdateCommand command) {
         Set<String> oldFileNames = diet.getDietFiles().stream()
-                .filter(f -> !f.getDelYn())
                 .map(DietFiles::getFileName).collect(Collectors.toSet());
         if(command.getBreakfastFile() != null && !command.isBreakfastFast()) oldFileNames.remove(getFileName(command.getBreakfastFile()));
         if(command.getLunchFile() != null && !command.isLunchFast()) oldFileNames.remove(getFileName(command.getLunchFile()));
         if(command.getDinnerFile() != null && !command.isDinnerFast()) oldFileNames.remove(getFileName(command.getDinnerFile()));
         Set<String> deleteFileNames = diet.getDietFiles().stream()
-                .filter(f -> !f.getDelYn())
                 .map(DietFiles::getFileName)
                 .filter(oldFileNames::contains)
                 .collect(Collectors.toSet());

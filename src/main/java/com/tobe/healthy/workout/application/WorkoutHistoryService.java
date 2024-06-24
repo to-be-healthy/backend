@@ -118,13 +118,11 @@ public class WorkoutHistoryService {
 
     private void deleteOldFiles(WorkoutHistory history, HistoryAddCommand command) {
         Set<String> oldFileNames = history.getHistoryFiles().stream()
-                .filter(f -> !f.getDelYn())
                 .map(WorkoutHistoryFiles::getFileName).collect(Collectors.toSet());
         Set<String> requestFileNames = command.getFiles().stream()
                 .map(f -> getFileName(f.getFileUrl())).collect(Collectors.toSet());
         oldFileNames.removeAll(requestFileNames);
         Set<String> deleteFileNames = history.getHistoryFiles().stream()
-                .filter(f -> !f.getDelYn())
                 .map(WorkoutHistoryFiles::getFileName)
                 .filter(oldFileNames::contains)
                 .collect(Collectors.toSet());

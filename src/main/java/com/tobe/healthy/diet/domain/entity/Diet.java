@@ -70,6 +70,9 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     @OneToMany(mappedBy = "diet", cascade = CascadeType.ALL)
     private List<DietComment> dietComments = new ArrayList<>();
 
+    public List<DietFiles> getDietFiles() {
+        return dietFiles.stream().filter(f -> !f.getDelYn()).toList();
+    }
 
     public static Diet create(Member member, Member trainer){
         return Diet.builder()
