@@ -203,4 +203,19 @@ public class TrainerController {
                 .message("학생의 예약을 조회하였습니다.")
                 .build();
     }
+
+    @Operation(summary = "트레이너가 내 학생을 환불한다.", responses = {
+            @ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
+            @ApiResponse(responseCode = "200", description = "환불이 완료되었습니다.")
+    })
+    @DeleteMapping("/members/{memberId}/refund")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    public ResponseHandler<TrainerMemberMappingDto> refundStudentOfTrainer(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                           @Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
+        trainerService.refundStudentOfTrainer(customMemberDetails.getMember(), memberId);
+        return ResponseHandler.<TrainerMemberMappingDto>builder()
+                .message("환불이 완료되었습니다.")
+                .build();
+    }
+
 }

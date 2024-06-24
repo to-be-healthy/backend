@@ -96,6 +96,20 @@ public class CourseService {
         deleteCourse(trainerId, courseId);
     }
 
+    public void deleteCourseAndCancelReservation(Long trainerId, Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
+        Long memberId = course.getMember().getId();
+
+        //해당 수강권으로 예약된 수업 조회
+        StudentScheduleCond searchCond = new StudentScheduleCond(null, null, null, courseId);
+        List<MyReservation> result = studentScheduleRepository.findNewReservation(memberId, searchCond);
+
+        //예약된 수업이 있으면 수업 취소
+        if(!result.isEmpty()) result.forEach(r -> commonScheduleService.cancelMemberSchedule(r.getScheduleId(), memberId));
+        deleteCourse(trainerId, courseId);
+    }
+
     public void deleteCourse(Long trainerId, Long courseId) {
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
@@ -200,4 +214,5 @@ public class CourseService {
             case MINUS -> schedule.registerCourse(course); //수업예약
         }
     }
+
 }

@@ -183,4 +183,15 @@ public class TrainerService {
     private boolean isRemainLessonCnt(CourseDto courseDto){
         return courseDto.getCompletedLessonCnt() != courseDto.getTotalLessonCnt();
     }
+
+    public void refundStudentOfTrainer(Member trainer, Long memberId) {
+        Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(memberId, STUDENT)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        CourseDto courseDto = courseService.getNowUsingCourse(memberId);
+        if(courseDto != null){
+            courseService.deleteCourseAndCancelReservation(trainer.getId(), courseDto.getCourseId());
+        }
+        mappingRepository.deleteByTrainerIdAndMemberId(trainer.getId(), member.getId());
+    }
+
 }
