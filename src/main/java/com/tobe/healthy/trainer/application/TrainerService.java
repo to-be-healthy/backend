@@ -21,6 +21,7 @@ import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
 import com.tobe.healthy.point.repository.PointRepository;
+import com.tobe.healthy.schedule.repository.waiting.ScheduleWaitingRepository;
 import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
 import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
 import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
@@ -55,7 +56,7 @@ public class TrainerService {
     private final TrainerMemberMappingRepository mappingRepository;
     private final DietService dietService;
     private final CourseService courseService;
-    private final CourseRepository courseRepository;
+    private final ScheduleWaitingRepository scheduleWaitingRepository;
     private final PointRepository pointRepository;
 
     private static final int ONE_DAY = 24 * 60 * 60 * 1000;
@@ -177,6 +178,8 @@ public class TrainerService {
         if(courseDto != null && isRemainLessonCnt(courseDto)){
             throw new CustomException(COURSE_ALREADY_EXISTS);
         }
+        //대기내역 삭제
+        scheduleWaitingRepository.deleteByMemberId(memberId);
         mappingRepository.deleteByTrainerIdAndMemberId(trainer.getId(), member.getId());
     }
 

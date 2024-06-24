@@ -10,4 +10,6 @@ public interface ScheduleWaitingRepository extends JpaRepository<ScheduleWaiting
 	Optional<ScheduleWaiting> findByScheduleIdAndMemberId(Long scheduleId, Long memberId);
 	@EntityGraph(attributePaths = {"member"})
 	Optional<ScheduleWaiting> findByScheduleId(Long scheduleId);
+    void deleteByMemberId(Long memberId);
+
 }

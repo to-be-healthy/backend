@@ -22,6 +22,7 @@ import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.repository.common.CommonScheduleRepository;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
+import com.tobe.healthy.schedule.repository.waiting.ScheduleWaitingRepository;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,6 @@ import static com.tobe.healthy.course.domain.dto.CourseStatus.*;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.COURSE_CREATE;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
-import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;
 
 
@@ -55,6 +55,7 @@ public class CourseService {
     private final CommonScheduleRepository commonScheduleRepository;
     private final StudentScheduleRepository studentScheduleRepository;
     private final CommonScheduleService commonScheduleService;
+    private final ScheduleWaitingRepository scheduleWaitingRepository;
 
     public void addCourse(Long trainerId, CourseAddCommand command) {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
@@ -64,14 +65,14 @@ public class CourseService {
         mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
 
-        checkCourAlreadyExists(member.getId());
+        checkCourseAlreadyExists(member.getId());
         if(command.getLessonCnt() < 1) throw new CustomException(LESSON_CNT_NOT_VALID);
         if(500 < command.getLessonCnt()) throw new CustomException(LESSON_CNT_MAX);
         Course course = courseRepository.save(Course.create(member, trainer, command.getLessonCnt(), command.getLessonCnt()));
         courseHistoryRepository.save(CourseHistory.create(course, course.getTotalLessonCnt(), PLUS, COURSE_CREATE, trainer));
     }
 
-    private void checkCourAlreadyExists(Long memberId) {
+    private void checkCourseAlreadyExists(Long memberId) {
         Long cnt = courseRepository.countByMemberIdAndRemainLessonCntGreaterThan(memberId, 0);
         if(0 < cnt) throw new CustomException(COURSE_ALREADY_EXISTS);
     }
@@ -93,6 +94,8 @@ public class CourseService {
             //예약된 수업이 있으면 수강권 삭제 불가
             if(!result.isEmpty()) throw new CustomException(RESERVATION_ALREADY_EXISTS);
         }
+        //대기내역 삭제
+        scheduleWaitingRepository.deleteByMemberId(memberId);
         deleteCourse(trainerId, courseId);
     }
 
@@ -107,6 +110,8 @@ public class CourseService {
 
         //예약된 수업이 있으면 수업 취소
         if(!result.isEmpty()) result.forEach(r -> commonScheduleService.cancelMemberSchedule(r.getScheduleId(), memberId));
+        //대기내역 삭제
+        scheduleWaitingRepository.deleteByMemberId(memberId);
         deleteCourse(trainerId, courseId);
     }
 
