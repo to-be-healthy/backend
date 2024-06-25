@@ -1,8 +1,8 @@
 package com.tobe.healthy.gym.application
 
 import com.tobe.healthy.common.Utils
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.*
+import com.tobe.healthy.common.error.CustomException
+import com.tobe.healthy.common.error.ErrorCode.*
 import com.tobe.healthy.gym.domain.dto.`in`.CommandRegisterGym
 import com.tobe.healthy.gym.domain.dto.`in`.CommandSelectMyGym
 import com.tobe.healthy.gym.domain.dto.out.CommandRegisterGymResult

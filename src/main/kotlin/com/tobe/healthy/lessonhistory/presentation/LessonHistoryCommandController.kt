@@ -1,7 +1,7 @@
 package com.tobe.healthy.lessonhistory.presentation
 
 import com.tobe.healthy.ApiResultResponse
-import com.tobe.healthy.config.error.ErrorResponse
+import com.tobe.healthy.common.error.ErrorResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonhistory.application.LessonHistoryCommandService
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommandRegisterComment

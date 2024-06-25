@@ -1,7 +1,7 @@
 package com.tobe.healthy.gym.application
 
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.JOIN_CODE_NOT_VALID
+import com.tobe.healthy.common.error.CustomException
+import com.tobe.healthy.common.error.ErrorCode.JOIN_CODE_NOT_VALID
 import com.tobe.healthy.gym.domain.dto.`in`.CommandRegisterGym
 import com.tobe.healthy.gym.domain.dto.`in`.CommandSelectMyGym
 import com.tobe.healthy.gym.repository.GymRepository

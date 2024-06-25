@@ -1,8 +1,8 @@
 package com.tobe.healthy.workout.application;
 
 import com.tobe.healthy.common.CustomPaging;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.event.CustomEventPublisher;
-import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.notification.domain.dto.in.CommandSendNotification;
 import com.tobe.healthy.workout.domain.dto.WorkoutHistoryCommentDto;
@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.tobe.healthy.common.error.ErrorCode.COMMENT_NOT_FOUND;
+import static com.tobe.healthy.common.error.ErrorCode.WORKOUT_HISTORY_NOT_FOUND;
 import static com.tobe.healthy.common.event.EventType.NOTIFICATION;
-import static com.tobe.healthy.config.error.ErrorCode.COMMENT_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.WORKOUT_HISTORY_NOT_FOUND;
 import static com.tobe.healthy.notification.domain.entity.NotificationCategory.COMMUNITY;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.COMMENT;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.REPLY;

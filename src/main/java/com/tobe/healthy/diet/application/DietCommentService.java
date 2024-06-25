@@ -1,7 +1,7 @@
 package com.tobe.healthy.diet.application;
 
 import com.tobe.healthy.common.CustomPaging;
-import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.diet.domain.dto.DietCommentDto;
 import com.tobe.healthy.diet.domain.dto.in.DietCommentAddCommand;
 import com.tobe.healthy.diet.domain.entity.Diet;
@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.tobe.healthy.config.error.ErrorCode.COMMENT_NOT_FOUND;
-import static com.tobe.healthy.config.error.ErrorCode.DIET_NOT_FOUND;
+import static com.tobe.healthy.common.error.ErrorCode.COMMENT_NOT_FOUND;
+import static com.tobe.healthy.common.error.ErrorCode.DIET_NOT_FOUND;
 
 
 @Service

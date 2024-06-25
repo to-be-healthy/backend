@@ -1,6 +1,6 @@
 package com.tobe.healthy.schedule.application;
 
-import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.member.domain.entity.Member;
@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.tobe.healthy.common.Utils.formatter_hmm;
-import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.common.error.ErrorCode.*;
 import static com.tobe.healthy.schedule.application.TrainerScheduleCommandService.ONE_DAY;
 
 @Service

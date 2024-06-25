@@ -4,17 +4,18 @@ import com.tobe.healthy.common.BaseTimeEntity
 import com.tobe.healthy.lessonhistory.domain.dto.out.CommandUploadFileResult
 import com.tobe.healthy.member.domain.entity.Member
 import jakarta.persistence.*
-import jakarta.persistence.CascadeType.PERSIST
 import jakarta.persistence.FetchType.LAZY
 import jakarta.persistence.GenerationType.IDENTITY
 import lombok.ToString
+import org.hibernate.annotations.DynamicUpdate
 
 @Entity
 @ToString
+@DynamicUpdate
 class LessonHistoryFiles(
-    val fileUrl: String,
+    var fileUrl: String,
 
-    val fileOrder: Int,
+    var fileOrder: Int,
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
@@ -26,7 +27,7 @@ class LessonHistoryFiles(
     @ToString.Exclude
     val lessonHistory: LessonHistory? = null,
 
-    @ManyToOne(fetch = LAZY, cascade = [PERSIST])
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "lesson_history_comment_id")
     @ToString.Exclude
     val lessonHistoryComment: LessonHistoryComment? = null,
@@ -36,6 +37,10 @@ class LessonHistoryFiles(
     @Column(name = "lesson_history_files_id")
     val id: Long = 0
 ) : BaseTimeEntity<LessonHistoryFiles, Long>() {
+
+    fun updateFileOrder(fileOrder: Int) {
+        this.fileOrder = fileOrder
+    }
 
     companion object {
         fun create(member: Member, fileUrl: String, fileOrder: Int): LessonHistoryFiles {

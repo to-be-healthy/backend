@@ -10,6 +10,7 @@ import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistory.lessonHistory
 import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistoryFiles.lessonHistoryFiles
 import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
+import com.tobe.healthy.schedule.domain.entity.QSchedule.schedule
 import io.micrometer.common.util.StringUtils
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -43,12 +44,16 @@ class LessonHistoryRepositoryImpl(
             .from(lessonHistory)
             .innerJoin(lessonHistory.trainer).fetchJoin()
             .innerJoin(lessonHistory.student).fetchJoin()
-            .innerJoin(lessonHistory.schedule).fetchJoin()
+            .innerJoin(lessonHistory.schedule, schedule).fetchJoin()
             .where(
                 convertDateFormat(request.searchDate),
                 validateMemberTypeAndMemberIdEq(memberId, memberType),
             )
-            .orderBy(lessonHistory.id.desc())
+            .orderBy(
+                schedule.lessonDt.desc(),
+                schedule.lessonStartTime.desc(),
+                lessonHistory.id.desc()
+            )
             .limit(50)
             .fetch()
     }
@@ -91,7 +96,11 @@ class LessonHistoryRepositoryImpl(
                 lessonHistory.student.id.eq(studentId),
                 lessonHistory.trainer.id.eq(trainerId)
             )
-            .orderBy(lessonHistory.id.desc())
+            .orderBy(
+                schedule.lessonDt.desc(),
+                schedule.lessonStartTime.desc(),
+                lessonHistory.id.desc()
+            )
             .limit(50)
             .fetch()
     }
@@ -130,7 +139,11 @@ class LessonHistoryRepositoryImpl(
             )
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
-            .orderBy(lessonHistory.id.desc())
+            .orderBy(
+                schedule.lessonDt.desc(),
+                schedule.lessonStartTime.desc(),
+                lessonHistory.id.desc()
+            )
             .fetch()
 
         val totalCount = queryFactory

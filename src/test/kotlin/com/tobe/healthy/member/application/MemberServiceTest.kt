@@ -1,9 +1,9 @@
 package com.tobe.healthy.member.application
 
+import com.tobe.healthy.common.error.CustomException
+import com.tobe.healthy.common.error.ErrorCode.MEMBER_ID_DUPLICATION
+import com.tobe.healthy.common.error.ErrorCode.MEMBER_ID_NOT_VALID
 import com.tobe.healthy.common.redis.RedisService
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_DUPLICATION
-import com.tobe.healthy.config.error.ErrorCode.MEMBER_ID_NOT_VALID
 import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.dto.`in`.*
 import com.tobe.healthy.member.domain.entity.Member

@@ -4,14 +4,13 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.CopyObjectRequest
 import com.tobe.healthy.common.FileUpload.FILE_MAXIMUM_UPLOAD_SIZE
 import com.tobe.healthy.common.FileUpload.FILE_TEMP_UPLOAD_TIMEOUT
-import com.tobe.healthy.common.Utils
 import com.tobe.healthy.common.Utils.*
+import com.tobe.healthy.common.error.CustomException
+import com.tobe.healthy.common.error.ErrorCode.*
 import com.tobe.healthy.common.event.CustomEventPublisher
 import com.tobe.healthy.common.event.EventType.NOTIFICATION
 import com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI
 import com.tobe.healthy.common.redis.RedisService
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommandRegisterComment
 import com.tobe.healthy.lessonhistory.domain.dto.`in`.CommandRegisterLessonHistory
@@ -147,7 +146,7 @@ class LessonHistoryCommandService(
 
         val files = registerFile(
             uploadFiles = request.uploadFiles,
-            findMember = findLessonHistory.trainer!!,
+            member = findLessonHistory.trainer!!,
             lessonHistory = findLessonHistory
         )
 
@@ -239,9 +238,52 @@ class LessonHistoryCommandService(
         val comment = lessonHistoryCommentRepository.findLessonHistoryCommentWithFiles(lessonHistoryCommentId, member.memberId)
             ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
 
-        deleteAllFiles(comment.files)
+        val savedFiles = mutableListOf<LessonHistoryFiles>()
 
-        comment.updateLessonHistoryComment(request.content, request.uploadFiles)
+        // 파일 전체 삭제
+        if (request.uploadFiles.isNotEmpty()) {
+            request.uploadFiles.forEachIndexed { idx, file ->
+                if (comment.files.indexOfFirst { it.fileUrl == file.fileUrl } != - 1) {
+                    val fileIdx = comment.files.indexOfFirst { it.fileUrl == file.fileUrl }
+                    comment.files[fileIdx].updateFileOrder(idx + 1)
+                    savedFiles.add(comment.files[fileIdx])
+                } else {
+                    if (file.fileUrl.startsWith(S3_DOMAIN)) {
+                        val tempUrl = file.fileUrl.replace(S3_DOMAIN, "")
+
+                        val result = moveDirTempToOrigin("origin/lesson-history/", tempUrl, idx + 1)
+
+                        val file = LessonHistoryFiles(
+                            member = comment.writer,
+                            lessonHistory = comment.lessonHistory,
+                            lessonHistoryComment = comment,
+                            fileUrl = result.fileUrl,
+                            fileOrder = idx + 1,
+                        )
+
+                        savedFiles.add(file)
+                    } else if (file.fileUrl.startsWith(CDN_DOMAIN)) {
+                        val file = LessonHistoryFiles(
+                            member = comment.writer,
+                            lessonHistory = comment.lessonHistory,
+                            lessonHistoryComment = comment,
+                            fileUrl = file.fileUrl,
+                            fileOrder = idx + 1,
+                        )
+                        savedFiles.add(file)
+                    }
+                }
+            }
+            lessonHistoryFilesRepository.deleteAll(comment.files)
+            comment.files.clear()
+            comment.files.addAll(savedFiles)
+        } else {
+            lessonHistoryFilesRepository.deleteAll(comment.files)
+            comment.files.clear()
+        }
+
+        // 댓글 내용 업데이트
+        comment.updateLessonHistoryComment(request.content)
 
         return CommandUpdateCommentResult.from(comment)
     }
@@ -250,7 +292,6 @@ class LessonHistoryCommandService(
         lessonHistoryCommentId: Long,
         writerId: Long
     ): Long {
-
         val comment = lessonHistoryCommentRepository.findById(lessonHistoryCommentId, writerId)
             ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
 
@@ -263,26 +304,33 @@ class LessonHistoryCommandService(
 
     private fun registerFile(
         uploadFiles: MutableList<CommandUploadFileResult>,
-        findMember: Member,
+        member: Member,
         lessonHistory: LessonHistory,
         lessonHistoryComment: LessonHistoryComment? = null
     ): MutableList<LessonHistoryFiles> {
 
+        checkMaximumFileCount(uploadFiles.size)
+
         val files = mutableListOf<LessonHistoryFiles>()
 
-        uploadFiles.let {
-            checkMaximumFileCount(it.size)
-            for (uploadFile in it) {
+        uploadFiles.forEachIndexed { idx, uploadFile ->
+            if (uploadFile.fileUrl.startsWith(S3_DOMAIN)) {
+                val tempUrl = uploadFile.fileUrl.replace(S3_DOMAIN, "")
+
+                val result = moveDirTempToOrigin("origin/lesson-history/", tempUrl, idx + 1)
+
                 val file = LessonHistoryFiles(
-                    member = findMember,
+                    member = member,
                     lessonHistory = lessonHistory,
                     lessonHistoryComment = lessonHistoryComment,
-                    fileUrl = uploadFile.fileUrl,
-                    fileOrder = uploadFile.fileOrder,
+                    fileUrl = result.fileUrl,
+                    fileOrder = result.fileOrder,
                 )
+
                 files.add(file)
             }
         }
+
         lessonHistoryFilesRepository.saveAll(files)
 
         return files
@@ -307,14 +355,14 @@ class LessonHistoryCommandService(
 
     private fun putFile(uploadFile: MultipartFile): String {
         val objectMetadata = createObjectMetadata(uploadFile.size, uploadFile.contentType)
-        val savedFileName = createFileName("origin/lesson-history/", uploadFile.originalFilename!!.substring(uploadFile!!.originalFilename!!.lastIndexOf(".")))
+        val savedFileName = createFileName("origin/lesson-history/", uploadFile.originalFilename!!.substring(uploadFile.originalFilename!!.lastIndexOf(".")))
         amazonS3.putObject(
             bucketName,
             savedFileName,
             uploadFile.inputStream,
             objectMetadata,
         )
-        val fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replace(Utils.S3_DOMAIN, Utils.CDN_DOMAIN)
+        val fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replace(S3_DOMAIN, CDN_DOMAIN)
 
         log.info { "등록된 S3 파일 URL => ${fileUrl}" }
         return fileUrl
@@ -327,7 +375,7 @@ class LessonHistoryCommandService(
 
     private fun registerFiles(
         uploadFiles: MutableList<CommandUploadFileResult>,
-        trainer: Member,
+        member: Member,
         lessonHistory: LessonHistory
     ): MutableList<LessonHistoryFiles> {
 
@@ -339,10 +387,10 @@ class LessonHistoryCommandService(
             if (uploadFile.fileUrl.startsWith(S3_DOMAIN)) {
                 val tempUrl = uploadFile.fileUrl.replace(S3_DOMAIN, "")
 
-                val result = moveDirTempToOrigin("origin/lesson-history/", tempUrl, idx)
+                val result = moveDirTempToOrigin("origin/lesson-history/", tempUrl, idx + 1)
 
                 val file = LessonHistoryFiles(
-                    member = trainer,
+                    member = member,
                     lessonHistory = lessonHistory,
                     fileUrl = result.fileUrl,
                     fileOrder = result.fileOrder,
@@ -369,8 +417,9 @@ class LessonHistoryCommandService(
         amazonS3.copyObject(copyObjRequest)
 
         val fileUrl = amazonS3.getUrl(bucketName, createdOriginUrl).toString().replace(S3_DOMAIN, CDN_DOMAIN)
+        log.info { "등록한 fileUrl: ${fileUrl}" }
 
-        return CommandUploadFileResult(fileUrl, idx + 1)
+        return CommandUploadFileResult(fileUrl, idx)
     }
 
     private fun checkMaximumFileCount(uploadFilesSize: Int) {
@@ -385,12 +434,15 @@ class LessonHistoryCommandService(
     }
 
     private fun deleteAllFiles(files: MutableList<LessonHistoryFiles>) {
-        files.forEach {
-            it.fileUrl.let { fileUrl ->
-                amazonS3.deleteObject(bucketName, fileUrl)
-            }
+        files.forEach { file ->
+            val fileName = getFileName(file.fileUrl)
+            amazonS3.deleteObject(bucketName, fileName)
         }
         lessonHistoryFilesRepository.deleteAll(files)
     }
-}
 
+    private fun getFileName(url: String): String {
+        val arr = url.split("/")
+        return "origin/lesson-history/${arr.last()}"
+    }
+}

@@ -1,4 +1,4 @@
-package com.tobe.healthy.config.error;
+package com.tobe.healthy.common.error;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

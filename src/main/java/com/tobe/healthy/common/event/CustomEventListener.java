@@ -1,6 +1,6 @@
 package com.tobe.healthy.common.event;
 
-import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.course.repository.CourseRepository;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.tobe.healthy.common.LessonTimeFormatter.lessonStartDateTimeFormatter;
-import static com.tobe.healthy.config.error.ErrorCode.SCHEDULE_NOT_FOUND;
+import static com.tobe.healthy.common.error.ErrorCode.SCHEDULE_NOT_FOUND;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
 import static com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.WAITING;

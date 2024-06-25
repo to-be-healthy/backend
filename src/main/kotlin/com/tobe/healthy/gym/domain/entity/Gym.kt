@@ -1,8 +1,8 @@
 package com.tobe.healthy.gym.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.JOIN_CODE_NOT_VALID
+import com.tobe.healthy.common.error.CustomException
+import com.tobe.healthy.common.error.ErrorCode.JOIN_CODE_NOT_VALID
 import com.tobe.healthy.member.domain.entity.Member
 import jakarta.persistence.*
 import jakarta.persistence.FetchType.LAZY

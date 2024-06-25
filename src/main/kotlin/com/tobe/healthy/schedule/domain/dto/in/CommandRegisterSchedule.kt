@@ -1,8 +1,8 @@
 package com.tobe.healthy.schedule.domain.dto.`in`
 
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.SCHEDULE_LESS_THAN_31_DAYS
-import com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE
+import com.tobe.healthy.common.error.CustomException
+import com.tobe.healthy.common.error.ErrorCode.SCHEDULE_LESS_THAN_31_DAYS
+import com.tobe.healthy.common.error.ErrorCode.START_DATE_AFTER_END_DATE
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit

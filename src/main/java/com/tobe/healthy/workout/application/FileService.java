@@ -2,19 +2,16 @@ package com.tobe.healthy.workout.application;
 
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.tobe.healthy.common.Utils;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.redis.RedisService;
-import com.tobe.healthy.config.error.CustomException;
-import com.tobe.healthy.diet.domain.entity.Diet;
-import com.tobe.healthy.diet.domain.entity.DietFiles;
-import com.tobe.healthy.diet.domain.entity.DietType;
 import com.tobe.healthy.diet.repository.DietFileRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.tobe.healthy.common.Utils.*;
+import static com.tobe.healthy.common.error.ErrorCode.FILE_REMOVE_ERROR;
 import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
-import static com.tobe.healthy.config.error.ErrorCode.FILE_REMOVE_ERROR;
 import static java.util.UUID.randomUUID;
 
 @Service

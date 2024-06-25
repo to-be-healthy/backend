@@ -3,8 +3,8 @@ package com.tobe.healthy.member.application;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.tobe.healthy.common.Utils;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.redis.RedisService;
-import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.out.*;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.tobe.healthy.common.Utils.*;
-import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.common.error.ErrorCode.*;
 import static io.micrometer.common.util.StringUtils.isEmpty;
 
 @Service

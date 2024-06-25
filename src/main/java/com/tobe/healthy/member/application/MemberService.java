@@ -1,6 +1,6 @@
 package com.tobe.healthy.member.application;
 
-import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.member.domain.dto.in.ValidateCurrentPassword;
 import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.domain.dto.out.RetrieveTrainerInfo;
@@ -15,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

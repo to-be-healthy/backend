@@ -2,9 +2,9 @@ package com.tobe.healthy.member.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.redis.RedisKeyPrefix;
 import com.tobe.healthy.common.redis.RedisService;
-import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
 import com.tobe.healthy.member.domain.dto.in.FindMemberUserId;
 import com.tobe.healthy.member.domain.dto.in.FindMemberUserId.FindMemberUserIdResult;
@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.tobe.healthy.common.Utils.validateUserId;
-import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.common.error.ErrorCode.*;
 import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
 import static io.micrometer.common.util.StringUtils.isEmpty;
 

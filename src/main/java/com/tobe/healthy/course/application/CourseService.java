@@ -1,7 +1,7 @@
 package com.tobe.healthy.course.application;
 
 import com.tobe.healthy.common.CustomPaging;
-import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.CourseHistoryDto;
 import com.tobe.healthy.course.domain.dto.CourseStatus;
@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.common.error.ErrorCode.*;
 import static com.tobe.healthy.course.domain.dto.CourseStatus.*;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.COURSE_CREATE;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;

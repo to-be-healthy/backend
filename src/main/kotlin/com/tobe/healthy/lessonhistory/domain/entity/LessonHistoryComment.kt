@@ -1,7 +1,6 @@
 package com.tobe.healthy.lessonhistory.domain.entity
 
 import com.tobe.healthy.common.BaseTimeEntity
-import com.tobe.healthy.lessonhistory.domain.dto.out.CommandUploadFileResult
 import com.tobe.healthy.member.domain.entity.Member
 import jakarta.persistence.*
 import jakarta.persistence.CascadeType.ALL
@@ -53,9 +52,8 @@ class LessonHistoryComment(
 
     ) : BaseTimeEntity<LessonHistoryComment, Long>() {
 
-    fun updateLessonHistoryComment(content: String, files: MutableList<CommandUploadFileResult>) {
+    fun updateLessonHistoryComment(content: String) {
         this.content = content
-        this.files = files.map { LessonHistoryFiles.from(it, lessonHistory, this, writer) }.toMutableList()
     }
 
     fun deleteComment() {

@@ -1,7 +1,7 @@
 package com.tobe.healthy.schedule.application;
 
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.event.CustomEventPublisher;
-import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.notification.domain.dto.in.CommandSendNotification;
@@ -18,9 +18,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static com.tobe.healthy.common.Utils.formatter_hmm;
+import static com.tobe.healthy.common.error.ErrorCode.*;
 import static com.tobe.healthy.common.event.EventType.NOTIFICATION;
 import static com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL;
-import static com.tobe.healthy.config.error.ErrorCode.*;
 import static com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.CANCEL;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.RESERVE;

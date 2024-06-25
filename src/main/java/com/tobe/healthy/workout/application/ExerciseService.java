@@ -1,7 +1,7 @@
 package com.tobe.healthy.workout.application;
 
 import com.tobe.healthy.common.CustomPaging;
-import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.ExerciseDto;
 import com.tobe.healthy.workout.domain.dto.in.CustomExerciseAddCommand;
@@ -17,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.common.error.ErrorCode.EXERCISE_ALREADY_EXISTS;
+import static com.tobe.healthy.common.error.ErrorCode.EXERCISE_NOT_FOUND;
 
 
 @Service

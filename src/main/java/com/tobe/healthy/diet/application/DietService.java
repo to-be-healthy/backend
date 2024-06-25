@@ -1,8 +1,8 @@
 package com.tobe.healthy.diet.application;
 
 import com.tobe.healthy.common.CustomPaging;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.redis.RedisService;
-import com.tobe.healthy.config.error.CustomException;
 import com.tobe.healthy.diet.domain.dto.DietDetailDto;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.diet.domain.dto.DietFileDto;
@@ -15,15 +15,14 @@ import com.tobe.healthy.diet.repository.DietCommentRepository;
 import com.tobe.healthy.diet.repository.DietFileRepository;
 import com.tobe.healthy.diet.repository.DietLikeRepository;
 import com.tobe.healthy.diet.repository.DietRepository;
-import com.tobe.healthy.workout.application.FileService;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
+import com.tobe.healthy.workout.application.FileService;
 import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +36,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.tobe.healthy.common.Utils.S3_DOMAIN;
-import static com.tobe.healthy.config.error.ErrorCode.*;
+import static com.tobe.healthy.common.error.ErrorCode.*;
 import static com.tobe.healthy.diet.domain.entity.DietType.*;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 

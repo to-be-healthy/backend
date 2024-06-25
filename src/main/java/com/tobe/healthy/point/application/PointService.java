@@ -1,11 +1,10 @@
 package com.tobe.healthy.point.application;
 
 import com.tobe.healthy.common.CustomPaging;
-import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
 import com.tobe.healthy.course.domain.dto.CourseStatus;
-import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -32,12 +31,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.tobe.healthy.config.error.ErrorCode.LESSON_CNT_NOT_VALID;
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.course.domain.dto.CourseStatus.NONE;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NOT_FOUND;
 import static com.tobe.healthy.course.domain.dto.CourseStatus.USING;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.point.domain.entity.Calculation.PLUS;

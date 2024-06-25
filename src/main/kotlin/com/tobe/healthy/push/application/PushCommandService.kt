@@ -4,8 +4,8 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.Message
 import com.google.firebase.messaging.WebpushConfig
 import com.google.firebase.messaging.WebpushNotification
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_FOUND
+import com.tobe.healthy.common.error.CustomException
+import com.tobe.healthy.common.error.ErrorCode.MEMBER_NOT_FOUND
 import com.tobe.healthy.log
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.push.domain.dto.`in`.CommandRegisterToken

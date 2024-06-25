@@ -1,6 +1,6 @@
 package com.tobe.healthy.schedule.application;
 
-import com.tobe.healthy.config.error.CustomException;
+import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
@@ -18,8 +18,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.tobe.healthy.config.error.ErrorCode.MEMBER_NOT_MAPPED;
-import static com.tobe.healthy.config.error.ErrorCode.TRAINER_NOT_MAPPED;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NOT_MAPPED;
+import static com.tobe.healthy.common.error.ErrorCode.TRAINER_NOT_MAPPED;
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
 import static java.time.LocalTime.NOON;
 

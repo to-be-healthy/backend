@@ -1,8 +1,8 @@
 package com.tobe.healthy.schedule.domain.dto.`in`
 
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.LUNCH_TIME_INVALID
-import com.tobe.healthy.config.error.ErrorCode.START_TIME_AFTER_END_TIME
+import com.tobe.healthy.common.error.CustomException
+import com.tobe.healthy.common.error.ErrorCode.LUNCH_TIME_INVALID
+import com.tobe.healthy.common.error.ErrorCode.START_TIME_AFTER_END_TIME
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotNull
 import java.time.DayOfWeek

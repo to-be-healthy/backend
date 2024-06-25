@@ -1,11 +1,11 @@
 package com.tobe.healthy.schedule.application
 
 import com.tobe.healthy.common.LessonTimeFormatter.lessonStartDateTimeFormatter
+import com.tobe.healthy.common.error.CustomException
+import com.tobe.healthy.common.error.ErrorCode.*
 import com.tobe.healthy.common.event.CustomEventPublisher
 import com.tobe.healthy.common.event.EventType.NOTIFICATION
 import com.tobe.healthy.common.event.EventType.SCHEDULE_CANCEL
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.*
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification

@@ -1,4 +1,4 @@
-package com.tobe.healthy.config.error;
+package com.tobe.healthy.common.error;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package com.tobe.healthy.schedule.application
 
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.START_DATE_AFTER_END_DATE
+import com.tobe.healthy.common.error.CustomException
+import com.tobe.healthy.common.error.ErrorCode.START_DATE_AFTER_END_DATE
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec

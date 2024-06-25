@@ -14,7 +14,7 @@ data class CommandUpdateCommentResult(
                 lessonHistoryId = lessonHistoryComment.lessonHistory?.id,
                 lessonHistoryCommentId = lessonHistoryComment.id,
                 content = lessonHistoryComment.content,
-                files = lessonHistoryComment.files.map { CommandUploadFileResult.from(it) }.toMutableList()
+                files = lessonHistoryComment.files.map { CommandUploadFileResult.from(it) }.sortedBy { it.fileOrder }.toMutableList()
             )
         }
     }

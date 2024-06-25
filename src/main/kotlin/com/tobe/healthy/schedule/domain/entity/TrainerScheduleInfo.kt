@@ -1,7 +1,7 @@
 package com.tobe.healthy.schedule.domain.entity
 
-import com.tobe.healthy.config.error.CustomException
-import com.tobe.healthy.config.error.ErrorCode.INVALID_LESSON_TIME_DESCRIPTION
+import com.tobe.healthy.common.error.CustomException
+import com.tobe.healthy.common.error.ErrorCode.INVALID_LESSON_TIME_DESCRIPTION
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterDefaultLessonTime
 import com.tobe.healthy.schedule.domain.entity.LessonTime.ONE_HOUR
