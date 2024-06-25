@@ -57,8 +57,8 @@ public class WorkoutCommentService {
         commentRepository.save(WorkoutHistoryComment.create(history, member, command, depth, orderNum));
 
         // 댓글
-        CommandSendNotification notification;
-        if (command.getParentCommentId() == null) {
+        CommandSendNotification notification = null;
+        if (command.getParentCommentId() == null && !history.getMember().getId().equals(member.getId())) {
             notification = new CommandSendNotification(
                     COMMENT.getDescription(),
                     String.format("내 게시글에 새로운 댓글이 달렸어요."),
@@ -68,7 +68,7 @@ public class WorkoutCommentService {
                     history.getWorkoutHistoryId()
             );
 
-        } else {
+        } else if (command.getParentCommentId() != null && !history.getMember().getId().equals(member.getId())) {
             // 답글
             notification = new CommandSendNotification(
                     COMMENT.getDescription(),
