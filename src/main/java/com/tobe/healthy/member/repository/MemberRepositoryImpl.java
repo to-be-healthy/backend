@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.tobe.healthy.course.domain.entity.QCourse.course;
+import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static com.tobe.healthy.member.domain.entity.QMember.member;
@@ -176,7 +177,10 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .select(member)
                 .from(member)
                 .leftJoin(member.memberToken).fetchJoin()
-                .where(member.id.in(memberId))
+                .where(
+                        member.id.in(memberId),
+                        member.pushAlarmStatus.eq(ENABLED)
+                )
                 .fetch();
     }
 

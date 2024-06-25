@@ -2,6 +2,7 @@ package com.tobe.healthy.notification.application
 
 import com.tobe.healthy.common.KotlinCustomPaging
 import com.tobe.healthy.common.NotificationSenderInfo
+import com.tobe.healthy.member.domain.entity.AlarmStatus.DISABLE
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
 import com.tobe.healthy.notification.domain.dto.out.CommandNotificationStatusResult
@@ -10,6 +11,7 @@ import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedD
 import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedDotResult.RetrieveNotificationResult
 import com.tobe.healthy.notification.domain.entity.Notification
 import com.tobe.healthy.notification.domain.entity.NotificationCategory
+import com.tobe.healthy.notification.domain.entity.NotificationCategory.COMMUNITY
 import com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE
 import com.tobe.healthy.notification.domain.entity.NotificationType.FEEDBACK
 import com.tobe.healthy.notification.repository.NotificationRepository
@@ -42,6 +44,11 @@ class NotificationService(
         val notifications = mutableListOf<Notification>()
 
         receivers.forEach { receiver ->
+
+            if (request.notificationCategory == COMMUNITY && receiver.communityAlarmStatus == DISABLE) {
+                throw IllegalArgumentException("커뮤니티 알림을 거부한 수신자입니다.")
+            }
+
             receiver.memberToken.firstOrNull()?.token?.let { token ->
                 pushCommandService.sendPushAlarm(CommandSendPushAlarm(request.title, request.content, token))
 

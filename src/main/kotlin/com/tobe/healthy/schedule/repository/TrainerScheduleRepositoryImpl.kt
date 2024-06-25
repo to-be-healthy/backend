@@ -10,7 +10,9 @@ import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistory.lessonHistory
 import com.tobe.healthy.lessonhistory.domain.entity.WritingStatus
 import com.tobe.healthy.lessonhistory.domain.entity.WritingStatus.UNWRITTEN
 import com.tobe.healthy.lessonhistory.domain.entity.WritingStatus.WRITTEN
+import com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED
 import com.tobe.healthy.member.domain.entity.QMember
+import com.tobe.healthy.member.domain.entity.QMember.member
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
@@ -365,6 +367,7 @@ class TrainerScheduleRepositoryImpl(
                 )
             )
             .from(schedule)
+            .innerJoin(schedule.trainer, member).on(member.feedbackAlarmStatus.eq(ENABLED))
             .leftJoin(schedule.lessonHistories, lessonHistory)
             .where(
                 lessonHistory.isNull,
