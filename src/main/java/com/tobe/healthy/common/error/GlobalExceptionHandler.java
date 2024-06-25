@@ -3,6 +3,7 @@ package com.tobe.healthy.common.error;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -43,10 +44,16 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException e){
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException e) {
         log.error("MethodArgumentNotValidException: {}", e.getMessage());
-        String errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-        final ErrorResponse response = ErrorResponse.of(errorMessage);
+        final ErrorResponse response = ErrorResponse.of("서버에서 에러가 발생하였습니다.");
+        return new ResponseEntity<>(response, HttpStatusCode.valueOf(BAD_REQUEST.value()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleValidationExceptions(HttpMessageNotReadableException e) {
+        log.error("HttpMessageNotReadableException: {}", e.getMessage());
+        final ErrorResponse response = ErrorResponse.of(e.getMessage());
         return new ResponseEntity<>(response, HttpStatusCode.valueOf(BAD_REQUEST.value()));
     }
 }

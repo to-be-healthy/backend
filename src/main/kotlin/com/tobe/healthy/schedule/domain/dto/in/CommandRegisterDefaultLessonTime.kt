@@ -34,5 +34,21 @@ data class CommandRegisterDefaultLessonTime(
         if (lunchStartTime?.isAfter(lunchEndTime) == true) {
             throw CustomException(LUNCH_TIME_INVALID)
         }
+        require(isWithinRange(lessonStartTime, lessonEndTime)) { "근무 시간은 오전 6시부터 밤 12시까지 설정이 가능해요." }
+    }
+
+    private fun isWithinRange(lessonStartTime: LocalTime, lessonEndTime: LocalTime): Boolean {
+        val maxLessonStartTime = LocalTime.of(6, 0) // 오전 6시
+        val maxLessonEndTime = LocalTime.MIDNIGHT // 밤 12시 (다음날 00:00)
+
+        return isWithinRange(lessonStartTime, maxLessonStartTime, maxLessonEndTime) && isWithinRange(lessonEndTime, maxLessonStartTime, maxLessonEndTime)
+    }
+
+    private fun isWithinRange(time: LocalTime, start: LocalTime, end: LocalTime): Boolean {
+        return if (start.isBefore(end)) {
+            !time.isBefore(start) && !time.isAfter(end)
+        } else {
+            !time.isBefore(start) || !time.isAfter(end)
+        }
     }
 }

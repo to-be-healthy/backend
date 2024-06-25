@@ -1,9 +1,6 @@
 package com.tobe.healthy.push.application
 
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.Message
-import com.google.firebase.messaging.WebpushConfig
-import com.google.firebase.messaging.WebpushNotification
+import com.google.firebase.messaging.*
 import com.tobe.healthy.common.error.CustomException
 import com.tobe.healthy.common.error.ErrorCode.MEMBER_NOT_FOUND
 import com.tobe.healthy.log
@@ -64,13 +61,15 @@ class PushCommandService(
 
     private fun createMessage(token: String, title: String, message: String): Message {
         return Message.builder()
+            .setWebpushConfig(WebpushConfig.builder()
+                .setNotification(WebpushNotification(
+                    title,
+                    message,
+                    "https://cdn.to-be-healthy.site/origin/profile/default.png?w=96&h=96")
+                )
+                .setFcmOptions(WebpushFcmOptions.withLink("https://www.to-be-healthy.site"))
+                .build())
             .setToken(token)
-            .setWebpushConfig(
-                WebpushConfig.builder()
-                    .putHeader("ttl", "300")
-                    .setNotification(WebpushNotification(title, message))
-                    .build()
-            )
             .build()
     }
 
