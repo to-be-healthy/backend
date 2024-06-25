@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ErrorResponse> handleException(final Exception e) {
         log.error("handleException => {}", e.getMessage());
-        final ErrorResponse response = of(e.getMessage());
+        final ErrorResponse response = of("서버에서 에러가 발생하였습니다.");
         return new ResponseEntity<>(response, INTERNAL_SERVER_ERROR);
     }
 

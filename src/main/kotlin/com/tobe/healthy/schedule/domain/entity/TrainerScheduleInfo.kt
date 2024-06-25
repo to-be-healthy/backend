@@ -4,6 +4,7 @@ import com.tobe.healthy.config.error.CustomException
 import com.tobe.healthy.config.error.ErrorCode.INVALID_LESSON_TIME_DESCRIPTION
 import com.tobe.healthy.member.domain.entity.Member
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterDefaultLessonTime
+import com.tobe.healthy.schedule.domain.entity.LessonTime.ONE_HOUR
 import jakarta.persistence.*
 import jakarta.persistence.CascadeType.ALL
 import jakarta.persistence.EnumType.STRING
@@ -59,7 +60,7 @@ class TrainerScheduleInfo(
                 lessonEndTime = request.lessonEndTime,
                 lunchStartTime = request.lunchStartTime,
                 lunchEndTime = request.lunchEndTime,
-                lessonTime = fromDescription(request.lessonTime!!),
+                lessonTime = ONE_HOUR,
                 trainer = trainer,
             )
         }

@@ -54,7 +54,10 @@ public class CommonScheduleService {
         // 일정 신청시 알림
         CommandSendNotification notification = new CommandSendNotification(
                 RESERVE.getDescription(),
-                RESERVE.getContent().format(schedule.getApplicant().getName(), LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)),
+                String.format("%s님이 %s에 예약했어요.",
+                        schedule.getApplicant().getName(),
+                        LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)
+                ),
                 List.of(schedule.getTrainer().getId()),
                 RESERVE,
                 SCHEDULE,
@@ -76,7 +79,10 @@ public class CommonScheduleService {
         // 일정 취소시 알림
         CommandSendNotification notification = new CommandSendNotification(
                 CANCEL.getDescription(),
-                CANCEL.getContent().format(schedule.getApplicant().getName(), LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)),
+                String.format("%s님이 %s 예약을 취소했어요.",
+                        schedule.getApplicant().getName(),
+                        LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)
+                ),
                 List.of(schedule.getTrainer().getId()),
                 CANCEL,
                 SCHEDULE,
