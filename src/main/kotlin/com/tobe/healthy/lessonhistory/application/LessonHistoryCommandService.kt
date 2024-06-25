@@ -1,11 +1,11 @@
 package com.tobe.healthy.lessonhistory.application
 
 import com.amazonaws.services.s3.AmazonS3
+import com.amazonaws.services.s3.model.CopyObjectRequest
 import com.tobe.healthy.common.FileUpload.FILE_MAXIMUM_UPLOAD_SIZE
 import com.tobe.healthy.common.FileUpload.FILE_TEMP_UPLOAD_TIMEOUT
 import com.tobe.healthy.common.Utils
-import com.tobe.healthy.common.Utils.createFileName
-import com.tobe.healthy.common.Utils.createObjectMetadata
+import com.tobe.healthy.common.Utils.*
 import com.tobe.healthy.common.event.CustomEventPublisher
 import com.tobe.healthy.common.event.EventType.NOTIFICATION
 import com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI
@@ -330,25 +330,47 @@ class LessonHistoryCommandService(
         trainer: Member,
         lessonHistory: LessonHistory
     ): MutableList<LessonHistoryFiles> {
+
+        checkMaximumFileCount(uploadFiles.size)
+
         val files = mutableListOf<LessonHistoryFiles>()
 
-        uploadFiles.let {
-            checkMaximumFileCount(it.size)
+        uploadFiles.forEachIndexed { idx, uploadFile ->
+            if (uploadFile.fileUrl.startsWith(S3_DOMAIN)) {
+                val tempUrl = uploadFile.fileUrl.replace(S3_DOMAIN, "")
 
-            for (uploadFile in it) {
+                val result = moveDirTempToOrigin("origin/lesson-history/", tempUrl, idx)
+
                 val file = LessonHistoryFiles(
                     member = trainer,
                     lessonHistory = lessonHistory,
-                    fileUrl = uploadFile.fileUrl,
-                    fileOrder = uploadFile.fileOrder,
+                    fileUrl = result.fileUrl,
+                    fileOrder = result.fileOrder,
                 )
-                files.add(file)
-                redisService.deleteValues(TEMP_FILE_URI.description + uploadFile.fileUrl)
-            }
 
-            lessonHistoryFilesRepository.saveAll(files)
+                files.add(file)
+            }
         }
+
+        lessonHistoryFilesRepository.saveAll(files)
+
         return files
+    }
+
+    fun moveDirTempToOrigin(originDir: String, tempUrl: String, idx: Int): CommandUploadFileResult {
+        val createdOriginUrl = originDir + tempUrl.replaceFirst("temp/".toRegex(), "")
+
+        val copyObjRequest = CopyObjectRequest(
+            bucketName,
+            tempUrl,
+            bucketName,
+            createdOriginUrl
+        )
+        amazonS3.copyObject(copyObjRequest)
+
+        val fileUrl = amazonS3.getUrl(bucketName, createdOriginUrl).toString().replace(S3_DOMAIN, CDN_DOMAIN)
+
+        return CommandUploadFileResult(fileUrl, idx + 1)
     }
 
     private fun checkMaximumFileCount(uploadFilesSize: Int) {

@@ -17,10 +17,10 @@ data class CommandRegisterLessonHistoryResult(
     val trainerName: String?,
     val studentId: Long?,
     val studentName: String?,
-    val files: MutableList<CommandUploadFileResult> = mutableListOf()
+    val files: List<CommandUploadFileResult> = mutableListOf()
 ) {
     companion object {
-        fun from(lessonHistory: LessonHistory, files: MutableList<LessonHistoryFiles>): CommandRegisterLessonHistoryResult {
+        fun from(lessonHistory: LessonHistory, files: List<LessonHistoryFiles>): CommandRegisterLessonHistoryResult {
             return CommandRegisterLessonHistoryResult(
                 lessonHistoryId = lessonHistory.id,
                 title = lessonHistory.title,
