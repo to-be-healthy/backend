@@ -41,7 +41,7 @@ data class RetrieveNotificationWithRedDotResult(
                     content = notification.content,
                     createdAt = notification.createdAt.toString(),
                     isRead = notification.isRead,
-                    targetId = notification.id
+                    targetId = notification.targetId
                 )
             }
         }
