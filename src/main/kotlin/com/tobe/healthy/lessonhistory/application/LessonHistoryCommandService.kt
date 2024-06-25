@@ -182,8 +182,10 @@ class LessonHistoryCommandService(
         val lessonHistoryComment = registerComment(order, request, findMember, lessonHistory)
         val files = registerFile(request.uploadFiles, findMember, lessonHistory, lessonHistoryComment)
 
-        // 게시글 작성자에게 알림
-        sendNotification(COMMENT, COMMENT.content, lessonHistory.id!!, lessonHistory.trainer!!.id!!)
+        // 게시글 작성자에게 알림 (내가 작성한 글은 알림을 받지 않음)
+        if (member.memberId != lessonHistory.trainer!!.id) {
+            sendNotification(COMMENT, COMMENT.content, lessonHistory.id!!, lessonHistory.trainer!!.id!!)
+        }
 
         return CommandRegisterCommentResult.from(lessonHistoryComment, files)
     }
@@ -212,8 +214,10 @@ class LessonHistoryCommandService(
             parent = parentComment
         )
 
-        // 댓글 작성자에게 알림
-        sendNotification(REPLY, REPLY.content, lessonHistory.id!!, parentComment.writer?.id!!)
+        // 댓글 작성자에게 알림 (내가 작성한 글은 알림을 받지 않음)
+        if (lessonHistory.trainer!!.id != member.memberId) {
+            sendNotification(REPLY, REPLY.content, lessonHistory.id!!, parentComment.writer?.id!!)
+        }
 
         lessonHistoryCommentRepository.save(entity)
 
