@@ -21,9 +21,9 @@ public class HistoryAddCommand {
     private String content;
 
     @Schema(description = "완료한 운동 목록")
+    @NotEmpty(message = "운동을 추가해 주세요.")
     private List<CompletedExerciseDto> completedExercises = new ArrayList<>();
 
-    @NotEmpty(message = "사진을 추가해 주세요.")
     private List<RegisterFile> files = new ArrayList<>();
 
     private boolean viewMySelf;
