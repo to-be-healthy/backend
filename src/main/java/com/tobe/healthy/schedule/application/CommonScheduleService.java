@@ -61,6 +61,7 @@ public class CommonScheduleService {
                 List.of(schedule.getTrainer().getId()),
                 RESERVE,
                 SCHEDULE,
+                null,
                 null
         );
 
@@ -86,6 +87,7 @@ public class CommonScheduleService {
                 List.of(schedule.getTrainer().getId()),
                 CANCEL,
                 SCHEDULE,
+                null,
                 null
         );
 

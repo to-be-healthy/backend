@@ -13,6 +13,8 @@ import org.hibernate.annotations.DynamicUpdate
 @DynamicUpdate
 class Notification(
 
+    val clickUrl: String? = null,
+
     val title: String,
 
     val content: String,
@@ -46,7 +48,7 @@ class Notification(
     }
 
     companion object {
-        fun create(title: String, content: String, notificationCategory: NotificationCategory, notificationType: NotificationType, receiver: Member, targetId: Long? = null
+        fun create(title: String, content: String, notificationCategory: NotificationCategory, notificationType: NotificationType, receiver: Member, targetId: Long? = null, clickUrl: String? = null
         ): Notification {
             return Notification(
                 title = title,
@@ -54,7 +56,8 @@ class Notification(
                 notificationCategory = notificationCategory,
                 notificationType = notificationType,
                 receiver = receiver,
-                targetId = targetId
+                targetId = targetId,
+                clickUrl = clickUrl
             )
         }
     }

@@ -58,7 +58,8 @@ class NotificationService(
                     notificationCategory = request.notificationCategory,
                     notificationType = request.notificationType,
                     receiver = receiver,
-                    targetId = request.targetId
+                    targetId = request.targetId,
+                    clickUrl = request.clickUrl
                 )
                 notifications.add(notification)
             }

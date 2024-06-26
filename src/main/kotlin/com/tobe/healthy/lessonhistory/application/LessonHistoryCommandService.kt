@@ -86,7 +86,8 @@ class LessonHistoryCommandService(
         notificationType: NotificationType,
         content: String,
         lessonHistoryId: Long,
-        memberId: Long
+        memberId: Long,
+        clickUrl: String? = null
     ) {
         val notification = CommandSendNotification(
             title = notificationType.description,
@@ -94,7 +95,8 @@ class LessonHistoryCommandService(
             receiverIds = listOf(memberId),
             notificationType = notificationType,
             notificationCategory = SCHEDULE,
-            targetId = lessonHistoryId
+            targetId = lessonHistoryId,
+            clickUrl = clickUrl
         )
 
         notificationPublisher.publish(notification, NOTIFICATION)
@@ -183,7 +185,7 @@ class LessonHistoryCommandService(
 
         // 게시글 작성자에게 알림 (내가 작성한 글은 알림을 받지 않음)
         if (member.memberId != lessonHistory.trainer!!.id) {
-            sendNotification(COMMENT, COMMENT.content, lessonHistory.id!!, lessonHistory.trainer!!.id!!)
+            sendNotification(COMMENT, COMMENT.content, lessonHistory.id!!, lessonHistory.trainer!!.id!!, "https://www.to-be-healthy.site/student/log/${lessonHistory.id}")
         }
 
         return CommandRegisterCommentResult.from(lessonHistoryComment, files)
@@ -215,7 +217,7 @@ class LessonHistoryCommandService(
 
         // 댓글 작성자에게 알림 (내가 작성한 글은 알림을 받지 않음)
         if (lessonHistory.trainer!!.id != member.memberId) {
-            sendNotification(REPLY, REPLY.content, lessonHistory.id!!, parentComment.writer?.id!!)
+            sendNotification(REPLY, REPLY.content, lessonHistory.id!!, parentComment.writer?.id!!, "https://www.to-be-healthy.site/student/log/${lessonHistory.id}")
         }
 
         lessonHistoryCommentRepository.save(entity)

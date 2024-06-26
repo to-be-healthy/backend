@@ -214,7 +214,8 @@ class TrainerScheduleCommandService(
             ),
             receiverIds = listOf(schedule.applicant!!.id),
             notificationType = RESERVE,
-            notificationCategory = SCHEDULE
+            notificationCategory = SCHEDULE,
+            clickUrl = "https://www.to-be-healthy.site/student/schedule?tab=myReservation"
         )
 
         notificationPublisher.publish(notification, NOTIFICATION)
@@ -245,7 +246,8 @@ class TrainerScheduleCommandService(
             ),
             receiverIds = listOf(applicantId!!),
             notificationType = CANCEL,
-            notificationCategory = SCHEDULE
+            notificationCategory = SCHEDULE,
+            clickUrl = "https://www.to-be-healthy.site/student/schedule?tab=myReservation"
         )
 
         notificationPublisher.publish(notification, NOTIFICATION)

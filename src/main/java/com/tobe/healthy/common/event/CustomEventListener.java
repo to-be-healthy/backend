@@ -76,6 +76,7 @@ public class CustomEventListener {
                             List.of(schedule.getApplicant().getId()),
                             WAITING,
                             SCHEDULE,
+                            null,
                             null
                     );
 
