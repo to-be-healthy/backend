@@ -96,7 +96,7 @@ public class CourseService {
         }
         //대기내역 삭제
         scheduleWaitingRepository.deleteByMemberId(memberId);
-        deleteCourse(trainerId, courseId);
+        deleteCourse(trainerId, course);
     }
 
     public void deleteCourseAndCancelReservation(Long trainerId, Long courseId) {
@@ -112,10 +112,12 @@ public class CourseService {
         if(!result.isEmpty()) result.forEach(r -> commonScheduleService.cancelMemberSchedule(r.getScheduleId(), memberId));
         //대기내역 삭제
         scheduleWaitingRepository.deleteByMemberId(memberId);
-        deleteCourse(trainerId, courseId);
+        deleteCourse(trainerId, course);
     }
 
-    public void deleteCourse(Long trainerId, Long courseId) {
+    public void deleteCourse(Long trainerId, Course course) {
+        course.deleteSchedule();
+        Long courseId = course.getCourseId();
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
         courseRepository.deleteByCourseIdAndTrainerId(courseId, trainerId);

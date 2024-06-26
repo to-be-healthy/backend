@@ -3,6 +3,7 @@ package com.tobe.healthy.course.domain.entity;
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.schedule.domain.entity.Schedule;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -37,8 +38,11 @@ public class Course extends BaseTimeEntity<Course, Long> {
     private int totalLessonCnt;
     private int remainLessonCnt;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @OneToMany(fetch = LAZY, mappedBy = "course", cascade = CascadeType.ALL)
     private final List<CourseHistory> courseHistories = new ArrayList<>();
+
+    @OneToMany(fetch = LAZY, mappedBy = "course", cascade = CascadeType.PERSIST)
+    private final List<Schedule> schedules = new ArrayList<>();
 
     @Builder
     public Course(Member member, Member trainer, int totalLessonCnt, int remainLessonCnt) {
@@ -65,4 +69,7 @@ public class Course extends BaseTimeEntity<Course, Long> {
         this.remainLessonCnt = command.getCalculation().apply(remainLessonCnt, command.getUpdateCnt());
     }
 
+    public void deleteSchedule() {
+        this.schedules.forEach(Schedule::deleteCourse);
+    }
 }
