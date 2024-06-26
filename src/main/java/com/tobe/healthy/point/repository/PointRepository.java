@@ -1,5 +1,6 @@
 package com.tobe.healthy.point.repository;
 
+import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.point.domain.entity.Point;
 import com.tobe.healthy.point.domain.entity.PointType;
@@ -39,4 +40,5 @@ public interface PointRepository extends JpaRepository<Point, Long>, PointReposi
             "and date_format(p.created_at, '%Y-%m') <= :searchDate", nativeQuery = true)
     int getTotalPoint(Long memberId, String searchDate);
 
+    void deleteByMember(Member member);
 }

@@ -11,7 +11,9 @@ import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.AlarmType;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.dto.TempRankDto;
+import com.tobe.healthy.point.repository.PointRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
@@ -46,6 +48,7 @@ public class MemberCommandService {
     private final RedisService redisService;
     private final TrainerMemberMappingRepository mappingRepository;
     private final TrainerService trainerService;
+    private final PointRepository pointRepository;
     private final AmazonS3 amazonS3;
 
     @Value("${aws.s3.bucket-name}")
@@ -62,6 +65,7 @@ public class MemberCommandService {
                 if(!mappings.isEmpty()){
                     for(TrainerMemberMapping mapping : mappings){
                         trainerService.refundStudentOfTrainer(mapping.getTrainer(), mapping.getMember().getId());
+                        pointRepository.deleteByMember(mapping.getMember());
                     }
                 }
                 break;
@@ -72,6 +76,7 @@ public class MemberCommandService {
                 if(mappingOpt.isPresent()){
                     TrainerMemberMapping mapping = mappingOpt.get();
                     trainerService.refundStudentOfTrainer(mapping.getTrainer(), mapping.getMember().getId());
+                    pointRepository.deleteByMember(mapping.getMember());
                 }
                 break;
         }
