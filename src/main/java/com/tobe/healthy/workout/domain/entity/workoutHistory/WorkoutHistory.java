@@ -21,6 +21,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Builder
 @Getter
 @DynamicUpdate
+@ToString
 public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     @Id
@@ -32,10 +33,12 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
+    @ToString.Exclude
     private Member member;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "gym_id")
+    @ToString.Exclude
     private Gym gym;
 
     @ColumnDefault("false")
@@ -55,15 +58,18 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
     private Boolean viewMySelf = false;
 
     @Builder.Default
-    @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
+    @OneToMany(fetch = LAZY, mappedBy = "workoutHistory", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<WorkoutHistoryFiles> historyFiles = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
+    @OneToMany(fetch = LAZY, mappedBy = "workoutHistory", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<WorkoutHistoryComment> historyComments = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "workoutHistory", cascade = CascadeType.ALL)
+    @OneToMany(fetch = LAZY, mappedBy = "workoutHistory", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<CompletedExercise> completedExercises = new ArrayList<>();
 
     public List<WorkoutHistoryFiles> getHistoryFiles() {

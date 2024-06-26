@@ -14,6 +14,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 @Entity
 @Table(name = "diet")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,6 +23,7 @@ import java.util.List;
 @Getter
 @Builder
 @DynamicUpdate
+@ToString
 public class Diet extends BaseTimeEntity<Diet, Long> {
 
     @Id
@@ -28,12 +31,14 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
     @Column(name = "diet_id")
     private Long dietId;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
+    @ToString.Exclude
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_id")
+    @ToString.Exclude
     private Member trainer;
 
     @ColumnDefault("false")
@@ -62,12 +67,14 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
 
     private LocalDate eatDate;
 
-    @OneToMany(mappedBy = "diet", cascade = CascadeType.ALL)
+    @OneToMany(fetch = LAZY, mappedBy = "diet", cascade = CascadeType.ALL)
     @Builder.Default
+    @ToString.Exclude
     private List<DietFiles> dietFiles = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "diet", cascade = CascadeType.ALL)
+    @OneToMany(fetch = LAZY, mappedBy = "diet", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private List<DietComment> dietComments = new ArrayList<>();
 
     public List<DietFiles> getDietFiles() {

@@ -15,6 +15,7 @@ import static jakarta.persistence.EnumType.STRING;
 @AllArgsConstructor
 @Builder
 @Getter
+@ToString
 public class Point extends BaseTimeEntity<Point, Long> {
 
     @Id
@@ -24,6 +25,7 @@ public class Point extends BaseTimeEntity<Point, Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
+    @ToString.Exclude
     private Member member;
 
     @ColumnDefault("0")

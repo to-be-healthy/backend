@@ -81,6 +81,7 @@ public class TrainerService {
         TrainerMemberMapping mapping = TrainerMemberMapping.create(trainer, member);
         mappingRepository.save(mapping);
         member.registerGym(trainer.getGym());
+        log.info("[학생 매핑] trainer: {}, member: {}, mapping{}", trainer, member, mapping);
         return TrainerMemberMappingDto.from(mapping);
     }
 
@@ -106,7 +107,9 @@ public class TrainerService {
             put("lessonCnt", String.valueOf(lessonCnt));
         }};
         redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), ONE_DAY); // 1days
-        return new MemberInviteResultCommand(uuid, invitationLink);
+        MemberInviteResultCommand response = new MemberInviteResultCommand(uuid, invitationLink);
+        log.info("[학생 초대] trainer: {}, request: {}, response{}", trainer, command, response);
+        return response;
     }
 
     private void validateName(String name) {
@@ -181,6 +184,7 @@ public class TrainerService {
         //대기내역 삭제
         scheduleWaitingRepository.deleteByMemberId(memberId);
         mappingRepository.deleteByTrainerIdAndMemberId(trainer.getId(), member.getId());
+        log.info("[학생 삭제] trainer: {}, member: {}", trainer, member);
     }
 
     private boolean isRemainLessonCnt(CourseDto courseDto){
@@ -195,6 +199,7 @@ public class TrainerService {
             courseService.deleteCourseAndCancelReservation(trainer.getId(), courseDto.getCourseId());
         }
         mappingRepository.deleteByTrainerIdAndMemberId(trainer.getId(), member.getId());
+        log.info("[학생 환불] trainer: {}, member: {}", trainer, member);
     }
 
 }

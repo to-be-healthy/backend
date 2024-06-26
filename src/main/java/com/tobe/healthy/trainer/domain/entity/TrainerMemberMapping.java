@@ -3,10 +3,7 @@ package com.tobe.healthy.trainer.domain.entity;
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import static jakarta.persistence.FetchType.LAZY;
@@ -15,6 +12,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Table(name = "trainer_member_mapping")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@ToString
 public class TrainerMemberMapping extends BaseTimeEntity<TrainerMemberMapping, Long> {
 
     @Id
@@ -24,10 +22,12 @@ public class TrainerMemberMapping extends BaseTimeEntity<TrainerMemberMapping, L
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_id")
+    @ToString.Exclude
     private Member trainer;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
+    @ToString.Exclude
     private Member member;
 
     @ColumnDefault("999")

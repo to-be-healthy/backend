@@ -7,10 +7,7 @@ import com.tobe.healthy.push.domain.entity.MemberToken;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -36,6 +33,7 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 @Getter
 @DynamicUpdate
+@ToString
 public class Member extends BaseTimeEntity<Member, Long> {
 
 	@Id
@@ -47,6 +45,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	private String email;
 
+	@ToString.Exclude
 	private String password;
 
 	private String name;
@@ -54,6 +53,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@ManyToOne(fetch = LAZY, cascade = ALL)
 	@JoinColumn(name = "member_profile_id")
 	@Nullable
+	@ToString.Exclude
 	private MemberProfile memberProfile;
 
 	@Enumerated(STRING)
@@ -89,22 +89,27 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@ManyToOne(fetch = LAZY, cascade = PERSIST)
 	@JoinColumn(name = "gym_id")
 	@Nullable
+	@ToString.Exclude
 	private Gym gym;
 
 	@OneToMany(fetch = LAZY, mappedBy = "member")
 	@Builder.Default
+	@ToString.Exclude
 	private final List<MemberToken> memberToken = new ArrayList<>();
 
 	@OneToMany(fetch = LAZY, mappedBy = "trainer")
 	@Builder.Default
+	@ToString.Exclude
 	private final List<Schedule> trainerSchedules = new ArrayList<>();
 
 	@OneToMany(fetch = LAZY, mappedBy = "applicant")
 	@Builder.Default
+	@ToString.Exclude
 	private final List<Schedule> applicantSchedules = new ArrayList<>();
 
 	@OneToMany(fetch = LAZY, mappedBy = "member")
 	@Builder.Default
+	@ToString.Exclude
 	private final List<ScheduleWaiting> scheduleWaitings = new ArrayList<>();
 
 	@Enumerated(STRING)

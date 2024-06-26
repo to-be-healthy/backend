@@ -13,6 +13,7 @@ import org.hibernate.annotations.ColumnDefault;
 @AllArgsConstructor
 @Builder
 @Getter
+@ToString
 public class DietComment extends BaseTimeEntity<DietComment, Long> {
 
     @Id
@@ -22,9 +23,11 @@ public class DietComment extends BaseTimeEntity<DietComment, Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "diet_id")
+    @ToString.Exclude
     private Diet diet;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
     @JoinColumn(name = "member_id")
     private Member member;
 

@@ -128,6 +128,7 @@ public class DietService {
         setDietFile(dietDto, List.of(diet.getDietId()));
 
         if(isClean(dietDto) && commentNotExists(diet)) diet.deleteDiet();
+        log.info("[홈에서 식단 등록] member: {}, diet: {}", member, diet);
         return dietDto;
     }
 
@@ -172,6 +173,7 @@ public class DietService {
         diet.deleteDiet();
         dietLikeRepository.deleteLikeByDietId(dietId);
         diet.getDietFiles().forEach(file -> fileService.deleteDietFile(getFileName(file.getFileUrl())));
+        log.info("[식단 삭제] member: {}, diet: {}", member, diet);
     }
 
     public DietDto addDiet(Member member, DietAddCommand command) {
@@ -183,6 +185,7 @@ public class DietService {
         uploadNewFiles(diet, command);
         DietDto dietDto = DietDto.from(diet);
         setDietFile(dietDto, List.of(diet.getDietId()));
+        log.info("[식단 등록] member: {}, diet: {}", member, diet);
         return dietDto;
     }
 
@@ -203,6 +206,7 @@ public class DietService {
         DietDto dietDto = DietDto.from(diet);
         setDietFile(dietDto, List.of(diet.getDietId()));
         if(isClean(dietDto)) throw new CustomException(DIET_NOT_VALID);
+        log.info("[식단 수정] member: {}, diet: {}", member, diet);
         return dietDto;
     }
 

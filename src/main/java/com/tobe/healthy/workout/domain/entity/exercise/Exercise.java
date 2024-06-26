@@ -14,6 +14,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @AllArgsConstructor
 @Builder
 @Getter
+@ToString
 public class Exercise {
 
     @Id
@@ -23,6 +24,7 @@ public class Exercise {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
+    @ToString.Exclude
     private Member member;
 
     private String names;

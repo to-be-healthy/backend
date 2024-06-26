@@ -11,7 +11,9 @@ import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.AlarmType;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.dto.TempRankDto;
+import com.tobe.healthy.point.repository.PointRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
@@ -46,14 +48,13 @@ public class MemberCommandService {
     private final RedisService redisService;
     private final TrainerMemberMappingRepository mappingRepository;
     private final TrainerService trainerService;
+    private final PointRepository pointRepository;
     private final AmazonS3 amazonS3;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
     public String deleteMember(Member loginMember) {
-        Member member = memberRepository.findById(loginMember.getId())
-                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         switch (loginMember.getMemberType()){
             case TRAINER: //트레이너 탈퇴시 학생들 환불처리 & 매핑끊기
@@ -62,8 +63,11 @@ public class MemberCommandService {
                 if(!mappings.isEmpty()){
                     for(TrainerMemberMapping mapping : mappings){
                         trainerService.refundStudentOfTrainer(mapping.getTrainer(), mapping.getMember().getId());
+                        pointRepository.deleteByMember(mapping.getMember());
                     }
                 }
+                log.info("[트레이너 회원 탈퇴] trainer: {}, deleteMappings: {}",
+                        loginMember, mappings.stream().map(TrainerMemberMapping::getMember).toString());
                 break;
 
             case STUDENT: //학생 탈퇴시 환불처리 & 매핑끊기
@@ -72,11 +76,14 @@ public class MemberCommandService {
                 if(mappingOpt.isPresent()){
                     TrainerMemberMapping mapping = mappingOpt.get();
                     trainerService.refundStudentOfTrainer(mapping.getTrainer(), mapping.getMember().getId());
+                    pointRepository.deleteByMember(mapping.getMember());
                 }
+                log.info("[학생 회원 탈퇴] member: {}, deleteMappings: {}",
+                        loginMember, mappingOpt.<Object>map(TrainerMemberMapping::getMember).orElse(null));
                 break;
         }
-        member.deleteMember();
-        return member.getUserId();
+        loginMember.deleteMember();
+        return loginMember.getUserId();
     }
 
     public boolean changePassword(CommandChangeMemberPassword request, Long memberId) {
