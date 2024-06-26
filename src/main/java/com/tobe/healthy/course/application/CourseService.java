@@ -110,7 +110,7 @@ public class CourseService {
         List<MyReservation> result = studentScheduleRepository.findNewReservation(memberId, searchCond);
 
         //예약된 수업이 있으면 수업 취소
-        if(!result.isEmpty()) result.forEach(r -> commonScheduleService.cancelMemberSchedule(r.getScheduleId(), memberId));
+        if(!result.isEmpty()) result.forEach(r -> commonScheduleService.cancelMemberScheduleForce(r.getScheduleId(), memberId));
         //대기내역 삭제
         scheduleWaitingRepository.deleteByMemberId(memberId);
         deleteCourse(trainerId, course);

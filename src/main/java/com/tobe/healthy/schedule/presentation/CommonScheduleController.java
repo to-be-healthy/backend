@@ -2,6 +2,7 @@ package com.tobe.healthy.schedule.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
+import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.schedule.application.CommonScheduleService;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,7 +50,12 @@ public class CommonScheduleController {
     @DeleteMapping("/{scheduleId}")
     public ResponseHandler<ScheduleIdInfo> cancelScheduleForMember(@PathVariable Long scheduleId,
                                                                    @AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-        ScheduleIdInfo result = commonScheduleService.cancelMemberSchedule(scheduleId, customMemberDetails.getMemberId());
+        ScheduleIdInfo result;
+        if(TRAINER.equals(customMemberDetails.getMember().getMemberType())){
+            result = commonScheduleService.cancelMemberScheduleForce(scheduleId, customMemberDetails.getMemberId());
+        }else{
+            result = commonScheduleService.cancelMemberSchedule(scheduleId, customMemberDetails.getMemberId());
+        }
         return ResponseHandler.<ScheduleIdInfo>builder()
                 .data(result)
                 .message(result.getScheduleTime() + " 수업이 취소되었습니다.")

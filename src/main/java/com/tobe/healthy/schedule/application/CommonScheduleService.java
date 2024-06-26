@@ -111,4 +111,37 @@ public class CommonScheduleService {
         return idInfo;
     }
 
+    public ScheduleIdInfo cancelMemberScheduleForce(Long scheduleId, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        Schedule schedule = commonScheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
+                .orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+
+        // 일정 취소시 알림
+        CommandSendNotification notification = new CommandSendNotification(
+                CANCEL.getDescription(),
+                String.format("%s님이 %s 예약을 취소했어요.",
+                        schedule.getApplicant().getName(),
+                        LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)
+                ),
+                List.of(schedule.getTrainer().getId()),
+                CANCEL,
+                SCHEDULE,
+                null,
+                String.format("https://www.to-be-healthy.site/trainer/manage/%d/reservation?name=%s", schedule.getApplicant().getId(), schedule.getApplicant().getName()),
+                schedule.getApplicant().getId(),
+                schedule.getApplicant().getName()
+        );
+
+        notificationPublisher.publish(notification, NOTIFICATION);
+
+        ScheduleIdInfo idInfo = ScheduleIdInfo.create(schedule, schedule.getLessonStartTime().format(formatter_hmm));
+        schedule.cancelMemberSchedule();
+
+        eventPublisher.publish(scheduleId, SCHEDULE_CANCEL);
+        log.info("[수업 취소] member: {}, schedule: {}, trainer: {}", member, schedule, schedule.getTrainer());
+        return idInfo;
+    }
+
 }
