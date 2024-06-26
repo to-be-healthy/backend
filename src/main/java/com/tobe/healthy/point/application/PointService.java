@@ -64,12 +64,13 @@ public class PointService {
                     .stream().map(obj -> new TempRankDto(((Long) obj[0]).intValue(), (Long) obj[1], ((BigDecimal) obj[2]).intValue()))
                     .collect(Collectors.toList());
 
+            log.info("[랭킹 산정] trainerId: {}, ranks: {}", trainerId, ranks);
+
             for(TrainerMemberMapping thisMember : mappings){
                 List<TempRankDto> thisRankDto = ranks.stream().filter(r -> r.getMemberId().equals(thisMember.getMember().getId())).toList();
                 thisMember.changeLastMonthRanking(thisMember.getRanking());
                 thisMember.changeRanking(thisRankDto.isEmpty() ? 999 : thisRankDto.get(0).getRanking());
             }
-            log.info("[랭킹 산정] trainerId: {}, mappings: {}", trainerId, mappings);
         }
     }
 

@@ -71,7 +71,7 @@ public class CommonScheduleService {
         );
 
         notificationPublisher.publish(notification, NOTIFICATION);
-        log.info("[수업 신청] member: {}, schedule: {}", member, schedule);
+        log.info("[수업 신청] member: {}, schedule: {}, trainer: {}", member, schedule, schedule.getTrainer());
         return ScheduleIdInfo.create(schedule, schedule.getLessonStartTime().format(formatter_hmm));
     }
 
@@ -107,7 +107,7 @@ public class CommonScheduleService {
         schedule.cancelMemberSchedule();
 
         eventPublisher.publish(scheduleId, SCHEDULE_CANCEL);
-        log.info("[수업 취소] member: {}, schedule: {}", member, schedule);
+        log.info("[수업 취소] member: {}, schedule: {}, trainer: {}", member, schedule, schedule.getTrainer());
         return idInfo;
     }
 

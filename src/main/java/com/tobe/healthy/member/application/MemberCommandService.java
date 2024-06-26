@@ -64,10 +64,9 @@ public class MemberCommandService {
                     for(TrainerMemberMapping mapping : mappings){
                         trainerService.refundStudentOfTrainer(mapping.getTrainer(), mapping.getMember().getId());
                         pointRepository.deleteByMember(mapping.getMember());
+                        log.info("[트레이너 탈퇴] trainer: {}, deleteMapping: {}, refundMember: {}", loginMember, mapping, mapping.getMember());
                     }
                 }
-                log.info("[트레이너 회원 탈퇴] trainer: {}, deleteMappings: {}",
-                        loginMember, mappings.stream().map(TrainerMemberMapping::getMember).toString());
                 break;
 
             case STUDENT: //학생 탈퇴시 환불처리 & 매핑끊기
@@ -78,8 +77,10 @@ public class MemberCommandService {
                     trainerService.refundStudentOfTrainer(mapping.getTrainer(), mapping.getMember().getId());
                     pointRepository.deleteByMember(mapping.getMember());
                 }
-                log.info("[학생 회원 탈퇴] member: {}, deleteMappings: {}",
-                        loginMember, mappingOpt.<Object>map(TrainerMemberMapping::getMember).orElse(null));
+                log.info("[학생 탈퇴] member: {}, deleteMappings: {}, trainer: {}",
+                        loginMember,
+                        mappingOpt.orElse(null),
+                        mappingOpt.<Object>map(TrainerMemberMapping::getTrainer).orElse(null));
                 break;
         }
         loginMember.deleteMember();

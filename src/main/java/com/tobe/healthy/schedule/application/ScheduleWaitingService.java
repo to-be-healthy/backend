@@ -51,10 +51,12 @@ public class ScheduleWaitingService {
 		if (lessonDateTime.minusDays(ONE_DAY).isAfter(LocalDateTime.now())) {
 			ScheduleWaiting scheduleWaiting = ScheduleWaiting.register(member, schedule);
 			scheduleWaitingRepository.save(scheduleWaiting);
-			log.info("[대기 신청] member: {}, schedule: {}", member, schedule);
+			log.info("[대기 신청] member: {}, schedule: {}, trainer: {}",
+					member, schedule, schedule.getTrainer());
 			return schedule.getLessonStartTime().format(formatter_hmm);
 		} else {
-			log.error("[대기 신청] member: {}, schedule: {}, message:{}", member, schedule, NOT_SCHEDULE_WAITING);
+			log.error("[대기 신청] member: {}, schedule: {}, trainer: {}, message:{}",
+					member, schedule, schedule.getTrainer(), NOT_SCHEDULE_WAITING);
 			throw new CustomException(NOT_SCHEDULE_WAITING);
 		}
 	}
@@ -72,7 +74,7 @@ public class ScheduleWaitingService {
 		ScheduleWaiting scheduleWaiting = scheduleWaitingRepository.findByScheduleIdAndMemberId(scheduleId, memberId)
 				.orElseThrow(() -> new CustomException(SCHEDULE_WAITING_NOT_FOUND));
 		scheduleWaitingRepository.delete(scheduleWaiting);
-		log.info("[대기 취소] member: {}, schedule: {}", member, schedule);
+		log.info("[대기 취소] member: {}, schedule: {}, trainer: {}", member, schedule, schedule.getTrainer());
 		return scheduleWaiting.getSchedule().getLessonStartTime().format(formatter_hmm);
 	}
 
