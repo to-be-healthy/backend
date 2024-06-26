@@ -77,7 +77,7 @@ class LessonHistoryCommandService(
         val files = registerFiles(request.uploadFiles, trainer, lessonHistory)
 
         // 학생에게 수업일지 작성 알림
-        sendNotification(WRITE, WRITE.content, lessonHistory.id!!, lessonHistory.student!!.id!!)
+        sendNotification(WRITE, WRITE.content, lessonHistory.id!!, lessonHistory.student!!.id!!, "https://www.to-be-healthy.site/student/log/${lessonHistory.id}")
 
         return CommandRegisterLessonHistoryResult.from(lessonHistory, files)
     }

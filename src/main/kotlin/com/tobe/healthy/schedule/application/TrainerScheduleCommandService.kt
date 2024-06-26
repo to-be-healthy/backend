@@ -215,7 +215,9 @@ class TrainerScheduleCommandService(
             receiverIds = listOf(schedule.applicant!!.id),
             notificationType = RESERVE,
             notificationCategory = SCHEDULE,
-            clickUrl = "https://www.to-be-healthy.site/student/schedule?tab=myReservation"
+            clickUrl = "https://www.to-be-healthy.site/student/schedule?tab=myReservation",
+            studentId = schedule.applicant!!.id,
+            studentName = schedule.applicant!!.name
         )
 
         notificationPublisher.publish(notification, NOTIFICATION)
