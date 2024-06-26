@@ -1,5 +1,12 @@
 package com.tobe.healthy.common.event;
 
+import static com.tobe.healthy.common.LessonTimeFormatter.lessonStartDateTimeFormatter;
+import static com.tobe.healthy.common.error.ErrorCode.SCHEDULE_NOT_FOUND;
+import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
+import static com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE;
+import static com.tobe.healthy.notification.domain.entity.NotificationType.WAITING;
+import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
+
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
@@ -11,22 +18,14 @@ import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import com.tobe.healthy.schedule.repository.common.CommonScheduleRepository;
 import com.tobe.healthy.schedule.repository.waiting.ScheduleWaitingRepository;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import static com.tobe.healthy.common.LessonTimeFormatter.lessonStartDateTimeFormatter;
-import static com.tobe.healthy.common.error.ErrorCode.SCHEDULE_NOT_FOUND;
-import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
-import static com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE;
-import static com.tobe.healthy.notification.domain.entity.NotificationType.WAITING;
-import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 
 @Slf4j
 @Component
@@ -58,7 +57,7 @@ public class CustomEventListener {
             ScheduleWaiting scheduleWaiting = scheduleWaitingOpt.get();
             scheduleWaitingRepository.delete(scheduleWaiting);
             Schedule schedule = commonScheduleRepository.findById(scheduleId)
-                    .orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
             //수업시간 24시간 이전인 경우만 대기 -> 예약으로 변경 가능
             if(!isBefore24Hour(schedule)) return;
@@ -71,13 +70,15 @@ public class CustomEventListener {
                     schedule.registerSchedule(scheduleWaiting.getMember());
 
                     CommandSendNotification request = new CommandSendNotification(
-                            WAITING.getDescription(),
-                            WAITING.getContent().format(LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(lessonStartDateTimeFormatter())),
-                            List.of(schedule.getApplicant().getId()),
-                            WAITING,
-                            SCHEDULE,
-                            null,
-                            null
+                        WAITING.getDescription(),
+                        String.format(WAITING.getContent(), LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(lessonStartDateTimeFormatter())),
+                        List.of(schedule.getApplicant().getId()),
+                        WAITING,
+                        SCHEDULE,
+                        null,
+                        "https://www.to-be-healthy.site/student/schedule?tab=myReservation",
+                        null,
+                        null
                     );
 
                     sendNotification(request);
