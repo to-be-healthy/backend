@@ -55,22 +55,23 @@ public class MemberCommandService {
     private String bucketName;
 
     public String deleteMember(Member loginMember) {
-
-        switch (loginMember.getMemberType()){
+        Member member = memberRepository.findById(loginMember.getId())
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        switch (member.getMemberType()){
             case TRAINER: //트레이너 탈퇴시 학생들 환불처리 & 매핑끊기
-                Long trainerId = loginMember.getId();
+                Long trainerId = member.getId();
                 List<TrainerMemberMapping> mappings = mappingRepository.findAllByTrainerId(trainerId);
                 if(!mappings.isEmpty()){
                     for(TrainerMemberMapping mapping : mappings){
                         trainerService.refundStudentOfTrainer(mapping.getTrainer(), mapping.getMember().getId());
                         pointRepository.deleteByMember(mapping.getMember());
-                        log.info("[트레이너 탈퇴] trainer: {}, deleteMapping: {}, refundMember: {}", loginMember, mapping, mapping.getMember());
+                        log.info("[트레이너 탈퇴] trainer: {}, deleteMapping: {}, refundMember: {}", member, mapping, mapping.getMember());
                     }
                 }
                 break;
 
             case STUDENT: //학생 탈퇴시 환불처리 & 매핑끊기
-                Long memberId = loginMember.getId();
+                Long memberId = member.getId();
                 Optional<TrainerMemberMapping> mappingOpt = mappingRepository.findByMemberId(memberId);
                 if(mappingOpt.isPresent()){
                     TrainerMemberMapping mapping = mappingOpt.get();
@@ -78,13 +79,13 @@ public class MemberCommandService {
                     pointRepository.deleteByMember(mapping.getMember());
                 }
                 log.info("[학생 탈퇴] member: {}, deleteMappings: {}, trainer: {}",
-                        loginMember,
+                        member,
                         mappingOpt.orElse(null),
                         mappingOpt.<Object>map(TrainerMemberMapping::getTrainer).orElse(null));
                 break;
         }
-        loginMember.deleteMember();
-        return loginMember.getUserId();
+        member.deleteMember();
+        return member.getUserId();
     }
 
     public boolean changePassword(CommandChangeMemberPassword request, Long memberId) {
