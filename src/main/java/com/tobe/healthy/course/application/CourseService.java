@@ -84,7 +84,7 @@ public class CourseService {
         Long memberId = course.getMember().getId();
 
         //수업 진행 횟수가 1회이상이면 삭제 불가
-        Long completedLessonCnt = commonScheduleRepository.getCompletedLessonCnt(memberId, courseId);
+        Long completedLessonCnt = getCompletedLessonCnt(memberId, courseId);
         if(0 < completedLessonCnt){
             throw new CustomException(COURSE_IS_USING);
         }else{
@@ -117,12 +117,13 @@ public class CourseService {
     }
 
     public void deleteCourse(Long trainerId, Course course) {
+        Long completedLessonCnt = getCompletedLessonCnt(course.getMember().getId(), course.getCourseId());
         course.deleteSchedule();
         Long courseId = course.getCourseId();
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
         courseRepository.deleteByCourseIdAndTrainerId(courseId, trainerId);
-        log.info("[수강권 삭제] trainer: {}, course: {}, member: {}", trainer, course, course.getMember());
+        log.info("[수강권 삭제] trainer: {}, course: {}, member: {}, completedLessonCnt: {}", trainer, course, course.getMember(), completedLessonCnt);
     }
 
     public CustomPaging getCourse(Member loginMember, Pageable pageable, Long memberId, String searchDate) {
@@ -145,11 +146,15 @@ public class CourseService {
         Optional<Course> optCourse = courseRepository.findTop1ByMemberIdAndRemainLessonCntGreaterThanOrderByCreatedAtDesc(memberId, -1);
         if(optCourse.isPresent()){
             CourseDto courseDto = CourseDto.from(optCourse.get());
-            Long completedLessonCnt = commonScheduleRepository.getCompletedLessonCnt(memberId, courseDto.getCourseId());
+            Long completedLessonCnt = getCompletedLessonCnt(memberId, courseDto.getCourseId());
             courseDto.setCompletedLessonCnt(completedLessonCnt.intValue());
             return courseDto;
         }
         return null;
+    }
+
+    private Long getCompletedLessonCnt(Long memberId, Long courseDto) {
+        return commonScheduleRepository.getCompletedLessonCnt(memberId, courseDto);
     }
 
     public CourseStatus getCourseStatus(CourseDto courseDto){
@@ -171,7 +176,7 @@ public class CourseService {
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
         Course course = courseRepository.findByCourseIdAndMemberIdAndTrainerId(courseId, member.getId(), trainerId)
                     .orElseThrow(() -> new CustomException(COURSE_NOT_FOUND));
-        updateCourse(command, trainer, course);
+        updateCourse(command, trainer, course, null);
     }
 
     public void updateCourseByMember(Long scheduleId, Long trainerId, CourseUpdateCommand command) {
@@ -198,11 +203,11 @@ public class CourseService {
         Course course = courseRepository.findById(usingCourse.getCourseId())
                     .orElseThrow(() -> new CustomException(LESSON_CNT_NOT_VALID));
 
-        updateCourse(command, trainer, course);
+        updateCourse(command, trainer, course, scheduleId);
         updateScheduleCourse(scheduleId, course, calculation);
     }
 
-    private void updateCourse(CourseUpdateCommand command, Member trainer, Course course) {
+    private void updateCourse(CourseUpdateCommand command, Member trainer, Course course, Long scheduleId) {
         int result = command.getCalculation().apply(course.getRemainLessonCnt(), command.getUpdateCnt());
         if (result < 0) throw new CustomException(LESSON_CNT_NOT_VALID);
         if (500 < result) throw new CustomException(LESSON_CNT_MAX);
@@ -213,7 +218,7 @@ public class CourseService {
             course.updateTotalLessonCnt(command);
         }
         CourseHistory history = courseHistoryRepository.save(CourseHistory.create(course, command.getUpdateCnt(), command.getCalculation(), command.getType(), trainer));
-        log.info("[수강권 증감] trainer: {}, course: {}, history: {}, member: {}", trainer, course, history, course.getMember());
+        log.info("[수강권 증감] trainer: {}, course: {}, history: {}, member: {}, scheduleId: {}", trainer, course, history, course.getMember(), scheduleId);
     }
 
     private void updateScheduleCourse(Long scheduleId, Course course, Calculation calculation) {
