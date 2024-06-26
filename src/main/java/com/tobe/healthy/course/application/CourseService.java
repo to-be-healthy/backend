@@ -70,6 +70,7 @@ public class CourseService {
         if(500 < command.getLessonCnt()) throw new CustomException(LESSON_CNT_MAX);
         Course course = courseRepository.save(Course.create(member, trainer, command.getLessonCnt(), command.getLessonCnt()));
         courseHistoryRepository.save(CourseHistory.create(course, course.getTotalLessonCnt(), PLUS, COURSE_CREATE, trainer));
+        log.info("[수강권 등록] trainer: {}, course: {}, CourseAddCommand:{}", trainer, course, command);
     }
 
     private void checkCourseAlreadyExists(Long memberId) {
@@ -118,9 +119,10 @@ public class CourseService {
     public void deleteCourse(Long trainerId, Course course) {
         course.deleteSchedule();
         Long courseId = course.getCourseId();
-        memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
         courseRepository.deleteByCourseIdAndTrainerId(courseId, trainerId);
+        log.info("[수강권 삭제] trainer: {}, course: {}", trainer, course);
     }
 
     public CustomPaging getCourse(Member loginMember, Pageable pageable, Long memberId, String searchDate) {
@@ -210,7 +212,8 @@ public class CourseService {
         if (CourseHistoryType.getEnumByGroup(TRAINER).contains(command.getType())) {
             course.updateTotalLessonCnt(command);
         }
-        courseHistoryRepository.save(CourseHistory.create(course, command.getUpdateCnt(), command.getCalculation(), command.getType(), trainer));
+        CourseHistory history = courseHistoryRepository.save(CourseHistory.create(course, command.getUpdateCnt(), command.getCalculation(), command.getType(), trainer));
+        log.info("[수강권 증감] trainer: {}, course: {}, history: {}", trainer, course, history);
     }
 
     private void updateScheduleCourse(Long scheduleId, Course course, Calculation calculation) {

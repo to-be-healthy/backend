@@ -56,19 +56,20 @@ public class PointService {
 
     public void updateMemberRank() {
         List<Long> trainerIds = mappingRepository.findAllTrainerIds();
-        List<TrainerMemberMapping> members;
+        List<TrainerMemberMapping> mappings;
         for(Long trainerId : trainerIds){
-            members = mappingRepository.findAllByTrainerId(trainerId);
-            List<Long> memberIds = members.stream().map(m -> m.getMember().getId()).toList();
+            mappings = mappingRepository.findAllByTrainerId(trainerId);
+            List<Long> memberIds = mappings.stream().map(m -> m.getMember().getId()).toList();
             List<TempRankDto> ranks = pointRepository.calculateRank(memberIds).stream().toList()
                     .stream().map(obj -> new TempRankDto(((Long) obj[0]).intValue(), (Long) obj[1], ((BigDecimal) obj[2]).intValue()))
                     .collect(Collectors.toList());
 
-            for(TrainerMemberMapping thisMember : members){
+            for(TrainerMemberMapping thisMember : mappings){
                 List<TempRankDto> thisRankDto = ranks.stream().filter(r -> r.getMemberId().equals(thisMember.getMember().getId())).toList();
                 thisMember.changeLastMonthRanking(thisMember.getRanking());
                 thisMember.changeRanking(thisRankDto.isEmpty() ? 999 : thisRankDto.get(0).getRanking());
             }
+            log.info("[랭킹 산정] trainerId: {}, mappings: {}", trainerId, mappings);
         }
     }
 

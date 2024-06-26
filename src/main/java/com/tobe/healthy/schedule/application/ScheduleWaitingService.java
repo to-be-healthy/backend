@@ -39,25 +39,30 @@ public class ScheduleWaitingService {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		Schedule findSchedule = trainerScheduleRepository.findAvailableWaitingId(scheduleId)
+		Schedule schedule = trainerScheduleRepository.findAvailableWaitingId(scheduleId)
 			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
 		CourseDto usingCourse = courseService.getNowUsingCourse(memberId);
 		if(usingCourse == null) throw new CustomException(COURSE_NOT_FOUND);
 		if(usingCourse.getRemainLessonCnt()==0) throw new CustomException(LESSON_CNT_NOT_VALID);
 
-		LocalDateTime lessonDateTime = LocalDateTime.of(findSchedule.getLessonDt(), findSchedule.getLessonStartTime());
+		LocalDateTime lessonDateTime = LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime());
 
 		if (lessonDateTime.minusDays(ONE_DAY).isAfter(LocalDateTime.now())) {
-			ScheduleWaiting scheduleWaiting = ScheduleWaiting.register(member, findSchedule);
+			ScheduleWaiting scheduleWaiting = ScheduleWaiting.register(member, schedule);
 			scheduleWaitingRepository.save(scheduleWaiting);
-			return findSchedule.getLessonStartTime().format(formatter_hmm);
+			log.info("[대기 신청] member: {}, schedule: {}", member, schedule);
+			return schedule.getLessonStartTime().format(formatter_hmm);
 		} else {
+			log.error("[대기 신청] member: {}, schedule: {}, message:{}", member, schedule, NOT_SCHEDULE_WAITING);
 			throw new CustomException(NOT_SCHEDULE_WAITING);
 		}
 	}
 
 	public String cancelScheduleWaiting(Long scheduleId, Long memberId) {
+		Member member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
 		Schedule schedule = trainerScheduleRepository.findAvailableWaitingId(scheduleId)
 				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
@@ -67,6 +72,7 @@ public class ScheduleWaitingService {
 		ScheduleWaiting scheduleWaiting = scheduleWaitingRepository.findByScheduleIdAndMemberId(scheduleId, memberId)
 				.orElseThrow(() -> new CustomException(SCHEDULE_WAITING_NOT_FOUND));
 		scheduleWaitingRepository.delete(scheduleWaiting);
+		log.info("[대기 취소] member: {}, schedule: {}", member, schedule);
 		return scheduleWaiting.getSchedule().getLessonStartTime().format(formatter_hmm);
 	}
 

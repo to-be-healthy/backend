@@ -4,10 +4,7 @@ import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.point.domain.entity.Calculation;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import static jakarta.persistence.EnumType.STRING;
@@ -18,6 +15,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Table(name = "course_history")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@ToString
 public class CourseHistory extends BaseTimeEntity<CourseHistory, Long> {
 
     @Id
@@ -27,6 +25,7 @@ public class CourseHistory extends BaseTimeEntity<CourseHistory, Long> {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "course_id")
+    @ToString.Exclude
     private Course course;
 
     @ColumnDefault("0")
@@ -42,6 +41,7 @@ public class CourseHistory extends BaseTimeEntity<CourseHistory, Long> {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_id")
+    @ToString.Exclude
     private Member trainer;
 
     @Builder

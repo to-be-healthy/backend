@@ -5,10 +5,7 @@ import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
 import com.tobe.healthy.member.domain.entity.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +29,7 @@ import static lombok.AccessLevel.PROTECTED;
 @DynamicUpdate
 @AllArgsConstructor
 @Builder
+@ToString
 public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@Id
@@ -47,28 +45,34 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 
 	@Enumerated(STRING)
 	@Builder.Default
+	@ToString.Exclude
 	private ReservationStatus reservationStatus = AVAILABLE;
 
 	@ManyToOne(fetch = LAZY, cascade = PERSIST)
 	@JoinColumn(name = "trainer_id")
+	@ToString.Exclude
 	private Member trainer;
 
 	@ManyToOne(fetch = LAZY, cascade = PERSIST)
 	@JoinColumn(name = "applicant_id")
+	@ToString.Exclude
 	@Nullable
 	private Member applicant;
 
 	@OneToMany(fetch = LAZY, mappedBy = "schedule", orphanRemoval = true, cascade = ALL)
 	@Nullable
 	@Builder.Default
+	@ToString.Exclude
 	private List<ScheduleWaiting> scheduleWaiting = new ArrayList<>();
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "course_id")
+	@ToString.Exclude
 	private Course course;
 
 	@OneToMany(fetch = LAZY, mappedBy = "schedule")
 	@Builder.Default
+	@ToString.Exclude
 	private List<LessonHistory> lessonHistories = new ArrayList<>();
 
     public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, ReservationStatus reservationStatus) {

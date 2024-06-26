@@ -66,11 +66,14 @@ public class CommonScheduleService {
         );
 
         notificationPublisher.publish(notification, NOTIFICATION);
-
+        log.info("[수업 신청] member: {}, schedule: {}", member, schedule);
         return ScheduleIdInfo.create(schedule, schedule.getLessonStartTime().format(formatter_hmm));
     }
 
     public ScheduleIdInfo cancelMemberSchedule(Long scheduleId, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
         Schedule schedule = commonScheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
                 .orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
@@ -96,8 +99,8 @@ public class CommonScheduleService {
         ScheduleIdInfo idInfo = ScheduleIdInfo.create(schedule, schedule.getLessonStartTime().format(formatter_hmm));
         schedule.cancelMemberSchedule();
 
-
         eventPublisher.publish(scheduleId, SCHEDULE_CANCEL);
+        log.info("[수업 취소] member: {}, schedule: {}", member, schedule);
         return idInfo;
     }
 

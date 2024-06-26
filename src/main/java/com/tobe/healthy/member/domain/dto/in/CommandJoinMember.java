@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.ToString;
 
 @Data
-@ToString(exclude = "password")
+@ToString(exclude = {"password", "passwordConfirm"})
 @Schema(title = "MemberJoinCommand", description = "회원가입 DTO")
 @Builder
 public class CommandJoinMember {

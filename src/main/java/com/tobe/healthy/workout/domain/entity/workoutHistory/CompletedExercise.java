@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Getter
+@ToString
 public class CompletedExercise {
 
     @Id
@@ -21,6 +22,7 @@ public class CompletedExercise {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workout_history_id")
+    @ToString.Exclude
     private WorkoutHistory workoutHistory;
 
     private String name;

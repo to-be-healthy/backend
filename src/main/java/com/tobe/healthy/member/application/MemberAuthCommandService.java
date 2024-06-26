@@ -115,11 +115,14 @@ public class MemberAuthCommandService {
         Member member = Member.join(request, password);
         memberRepository.save(member);
 
+        CommandJoinMemberResult result;
         if (StringUtils.isEmpty(request.getUuid())) {
-            return CommandJoinMemberResult.from(member);
+            result = CommandJoinMemberResult.from(member);
         } else { //초대가입
-            return joinWithInvitation(request, CommandJoinMemberResult.from(member));
+            result = joinWithInvitation(request, CommandJoinMemberResult.from(member));
         }
+        log.info("[회원가입] member: {}", member);
+        return result;
     }
 
     public Tokens login(CommandLoginMember request) {
@@ -214,7 +217,7 @@ public class MemberAuthCommandService {
         if (StringUtils.isNotEmpty(request.getUuid())) {
             mappingTrainerAndStudent(member, request.getUuid(), authorization.getResponse().getName(), true);
         }
-
+        log.info("[네이버 회원가입 및 로그인] member: {}", member);
         return tokenGenerator.create(member);
     }
 
@@ -238,7 +241,7 @@ public class MemberAuthCommandService {
         if (StringUtils.isNotEmpty(request.getUuid())) {
             mappingTrainerAndStudent(member, request.getUuid(), response.getNickname(), true);
         }
-
+        log.info("[카카오 회원가입 및 로그인] member: {}", member);
         return tokenGenerator.create(member);
     }
 
@@ -275,6 +278,7 @@ public class MemberAuthCommandService {
         if (StringUtils.isNotEmpty(request.getUuid())) {
             mappingTrainerAndStudent(member, request.getUuid(), name, true);
         }
+        log.info("[구글 회원가입 및 로그인] member: {}", member);
         return tokenGenerator.create(member);
     }
 

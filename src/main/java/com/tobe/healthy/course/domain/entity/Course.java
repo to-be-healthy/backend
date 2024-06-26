@@ -5,10 +5,7 @@ import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +17,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Table(name = "course")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@ToString
 public class Course extends BaseTimeEntity<Course, Long> {
 
     @Id
@@ -29,19 +27,23 @@ public class Course extends BaseTimeEntity<Course, Long> {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
+    @ToString.Exclude
     private Member member;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "trainer_id")
+    @ToString.Exclude
     private Member trainer;
 
     private int totalLessonCnt;
     private int remainLessonCnt;
 
     @OneToMany(fetch = LAZY, mappedBy = "course", cascade = CascadeType.ALL)
+    @ToString.Exclude
     private final List<CourseHistory> courseHistories = new ArrayList<>();
 
     @OneToMany(fetch = LAZY, mappedBy = "course", cascade = CascadeType.PERSIST)
+    @ToString.Exclude
     private final List<Schedule> schedules = new ArrayList<>();
 
     @Builder

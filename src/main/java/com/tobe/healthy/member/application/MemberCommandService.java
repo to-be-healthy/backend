@@ -55,8 +55,6 @@ public class MemberCommandService {
     private String bucketName;
 
     public String deleteMember(Member loginMember) {
-        Member member = memberRepository.findById(loginMember.getId())
-                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         switch (loginMember.getMemberType()){
             case TRAINER: //트레이너 탈퇴시 학생들 환불처리 & 매핑끊기
@@ -68,6 +66,8 @@ public class MemberCommandService {
                         pointRepository.deleteByMember(mapping.getMember());
                     }
                 }
+                log.info("[트레이너 회원 탈퇴] trainer: {}, deleteMappings: {}",
+                        loginMember, mappings.stream().map(TrainerMemberMapping::getMember).toString());
                 break;
 
             case STUDENT: //학생 탈퇴시 환불처리 & 매핑끊기
@@ -78,10 +78,12 @@ public class MemberCommandService {
                     trainerService.refundStudentOfTrainer(mapping.getTrainer(), mapping.getMember().getId());
                     pointRepository.deleteByMember(mapping.getMember());
                 }
+                log.info("[학생 회원 탈퇴] member: {}, deleteMappings: {}",
+                        loginMember, mappingOpt.<Object>map(TrainerMemberMapping::getMember).orElse(null));
                 break;
         }
-        member.deleteMember();
-        return member.getUserId();
+        loginMember.deleteMember();
+        return loginMember.getUserId();
     }
 
     public boolean changePassword(CommandChangeMemberPassword request, Long memberId) {

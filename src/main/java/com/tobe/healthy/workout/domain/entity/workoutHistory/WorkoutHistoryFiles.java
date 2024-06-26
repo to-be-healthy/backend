@@ -2,10 +2,7 @@ package com.tobe.healthy.workout.domain.entity.workoutHistory;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -17,6 +14,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Table(name = "workout_history_files")
 @Builder
 @Getter
+@ToString
 public class WorkoutHistoryFiles extends BaseTimeEntity<WorkoutHistoryFiles, Long> {
 
     @Id
@@ -33,6 +31,7 @@ public class WorkoutHistoryFiles extends BaseTimeEntity<WorkoutHistoryFiles, Lon
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workout_history_id")
+    @ToString.Exclude
     private WorkoutHistory workoutHistory;
 
     private String fileName;

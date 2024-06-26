@@ -2,10 +2,7 @@ package com.tobe.healthy.diet.domain.entity;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import static jakarta.persistence.EnumType.STRING;
@@ -18,6 +15,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Table(name = "diet_files")
 @Builder
 @Getter
+@ToString
 public class DietFiles extends BaseTimeEntity<DietFiles, Long> {
 
     @Id
@@ -29,10 +27,12 @@ public class DietFiles extends BaseTimeEntity<DietFiles, Long> {
 
     @ColumnDefault("false")
     @Builder.Default
+    @ToString.Exclude
     private Boolean delYn = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "diet_id")
+    @ToString.Exclude
     private Diet diet;
 
     @Enumerated(STRING)
