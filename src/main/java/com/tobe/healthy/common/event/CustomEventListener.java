@@ -77,8 +77,8 @@ public class CustomEventListener {
                         SCHEDULE,
                         null,
                         "https://www.to-be-healthy.site/student/schedule?tab=myReservation",
-                        null,
-                        null
+                        schedule.getApplicant().getId(),
+                        schedule.getApplicant().getName()
                     );
 
                     sendNotification(request);

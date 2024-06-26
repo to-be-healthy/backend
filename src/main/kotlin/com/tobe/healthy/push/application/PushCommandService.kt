@@ -44,7 +44,7 @@ class PushCommandService(
 
     fun sendPushAlarm(request: CommandSendPushAlarm): CommandSendPushAlarmResult {
 
-        val message = createMessage(request.token, request.title, request.message)
+        val message = createMessage(request.token, request.title, request.message, request.clickUrl)
 
         val response = FirebaseMessaging
             .getInstance()
@@ -59,7 +59,7 @@ class PushCommandService(
         )
     }
 
-    private fun createMessage(token: String, title: String, message: String): Message {
+    private fun createMessage(token: String, title: String, message: String, clickUrl: String? = null): Message {
         return Message.builder()
             .setWebpushConfig(WebpushConfig.builder()
                 .setNotification(WebpushNotification(
@@ -67,7 +67,7 @@ class PushCommandService(
                     message,
                     "https://cdn.to-be-healthy.site/origin/profile/default.png?w=96&h=96")
                 )
-                .setFcmOptions(WebpushFcmOptions.withLink("https://www.to-be-healthy.site"))
+                .setFcmOptions(WebpushFcmOptions.withLink(clickUrl))
                 .build())
             .setToken(token)
             .build()

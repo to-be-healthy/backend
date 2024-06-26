@@ -50,7 +50,7 @@ class NotificationService(
             }
 
             receiver.memberToken.firstOrNull()?.token?.let { token ->
-                pushCommandService.sendPushAlarm(CommandSendPushAlarm(request.title, request.content, token))
+                pushCommandService.sendPushAlarm(CommandSendPushAlarm(request.title, request.content, token, request.clickUrl))
 
                 val notification = Notification.create(
                     title = request.title,
