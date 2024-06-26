@@ -10,5 +10,7 @@ data class CommandSendNotification(
     val notificationType: NotificationType,
     val notificationCategory: NotificationCategory,
     val targetId: Long? = null,
-    val clickUrl: String? = null
+    val clickUrl: String? = null,
+    val studentId: Long? = null,
+    val studentName: String? = null
 )

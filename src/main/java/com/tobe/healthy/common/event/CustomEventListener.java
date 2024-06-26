@@ -76,7 +76,9 @@ public class CustomEventListener {
                         WAITING,
                         SCHEDULE,
                         null,
-                        "https://www.to-be-healthy.site/student/schedule?tab=myReservation"
+                        "https://www.to-be-healthy.site/student/schedule?tab=myReservation",
+                        null,
+                        null
                     );
 
                     sendNotification(request);

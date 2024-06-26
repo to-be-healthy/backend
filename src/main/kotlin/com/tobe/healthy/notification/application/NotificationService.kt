@@ -59,7 +59,9 @@ class NotificationService(
                     notificationType = request.notificationType,
                     receiver = receiver,
                     targetId = request.targetId,
-                    clickUrl = request.clickUrl
+                    clickUrl = request.clickUrl,
+                    studentId = request.studentId,
+                    studentName = request.studentName
                 )
                 notifications.add(notification)
             }

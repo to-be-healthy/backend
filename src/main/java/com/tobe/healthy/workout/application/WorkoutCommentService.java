@@ -66,7 +66,9 @@ public class WorkoutCommentService {
                     COMMENT,
                     COMMUNITY,
                     history.getWorkoutHistoryId(),
-                    String.format("https://www.to-be-healthy.site/student/community/%d", history.getWorkoutHistoryId())
+                    String.format("https://www.to-be-healthy.site/student/community/%d", history.getWorkoutHistoryId()),
+                null,
+                null
             );
 
         } else if (command.getParentCommentId() != null && !history.getMember().getId().equals(member.getId())) {
@@ -78,7 +80,9 @@ public class WorkoutCommentService {
                     REPLY,
                     COMMUNITY,
                     history.getWorkoutHistoryId(),
-                    String.format("https://www.to-be-healthy.site/student/community/%d", history.getWorkoutHistoryId())
+                    String.format("https://www.to-be-healthy.site/student/community/%d", history.getWorkoutHistoryId()),
+                null,
+                null
             );
         }
         notificationPublisher.publish(notification, NOTIFICATION);

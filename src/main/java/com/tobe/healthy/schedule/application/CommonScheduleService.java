@@ -65,7 +65,9 @@ public class CommonScheduleService {
             RESERVE,
             SCHEDULE,
             null,
-            String.format("https://www.to-be-healthy.site/trainer/manage/%d/reservation?name=%s", schedule.getApplicant().getId(), schedule.getApplicant().getName())
+            String.format("https://www.to-be-healthy.site/trainer/manage/%d/reservation?name=%s", schedule.getApplicant().getId(), schedule.getApplicant().getName()),
+            schedule.getApplicant().getId(),
+            schedule.getApplicant().getName()
         );
 
         notificationPublisher.publish(notification, NOTIFICATION);
@@ -91,7 +93,9 @@ public class CommonScheduleService {
             CANCEL,
             SCHEDULE,
             null,
-            String.format("https://www.to-be-healthy.site/trainer/manage/%d/reservation?name=%s", schedule.getApplicant().getId(), schedule.getApplicant().getName())
+            String.format("https://www.to-be-healthy.site/trainer/manage/%d/reservation?name=%s", schedule.getApplicant().getId(), schedule.getApplicant().getName()),
+            schedule.getApplicant().getId(),
+            schedule.getApplicant().getName()
         );
 
         notificationPublisher.publish(notification, NOTIFICATION);
