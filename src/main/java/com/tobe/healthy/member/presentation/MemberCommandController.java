@@ -37,9 +37,9 @@ public class MemberCommandController {
 			@ApiResponse(responseCode = "200", description = "회원 탈퇴 되었습니다.")
 	})
 	@PostMapping("/delete")
-	public ResponseHandler<String> deleteMember(@AuthenticationPrincipal CustomMemberDetails member) {
+	public ResponseHandler<String> deleteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ResponseHandler.<String>builder()
-				.data(memberCommandService.deleteMember(member.getMemberId()))
+				.data(memberCommandService.deleteMember(customMemberDetails.getMember()))
 				.message("회원 탈퇴 되었습니다.")
 				.build();
 	}

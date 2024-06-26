@@ -11,6 +11,8 @@ import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.AlarmType;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.point.domain.dto.TempRankDto;
+import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.tobe.healthy.common.Utils.*;
 import static com.tobe.healthy.common.error.ErrorCode.*;
@@ -39,16 +45,37 @@ public class MemberCommandService {
     private final MemberRepository memberRepository;
     private final RedisService redisService;
     private final TrainerMemberMappingRepository mappingRepository;
+    private final TrainerService trainerService;
     private final AmazonS3 amazonS3;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
-    public String deleteMember(Long memberId) {
-        Member member = memberRepository.findById(memberId)
+    public String deleteMember(Member loginMember) {
+        Member member = memberRepository.findById(loginMember.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        switch (loginMember.getMemberType()){
+            case TRAINER: //트레이너 탈퇴시 학생들 환불처리 & 매핑끊기
+                Long trainerId = loginMember.getId();
+                List<TrainerMemberMapping> mappings = mappingRepository.findAllByTrainerId(trainerId);
+                if(!mappings.isEmpty()){
+                    for(TrainerMemberMapping mapping : mappings){
+                        trainerService.refundStudentOfTrainer(mapping.getTrainer(), mapping.getMember().getId());
+                    }
+                }
+                break;
+
+            case STUDENT: //학생 탈퇴시 환불처리 & 매핑끊기
+                Long memberId = loginMember.getId();
+                Optional<TrainerMemberMapping> mappingOpt = mappingRepository.findByMemberId(memberId);
+                if(mappingOpt.isPresent()){
+                    TrainerMemberMapping mapping = mappingOpt.get();
+                    trainerService.refundStudentOfTrainer(mapping.getTrainer(), mapping.getMember().getId());
+                }
+                break;
+        }
         member.deleteMember();
-        mappingRepository.deleteByMemberId(memberId);
         return member.getUserId();
     }
 
