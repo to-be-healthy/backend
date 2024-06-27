@@ -197,7 +197,9 @@ class LessonHistoryCommandService(
                 content = COMMENT.content,
                 lessonHistoryId = lessonHistory.id!!,
                 memberId = lessonHistory.trainer!!.id!!,
-                clickUrl = "https://www.to-be-healthy.site/trainer/manage/${lessonHistory.student!!.id}/log/${lessonHistory.id}"
+                clickUrl = "https://www.to-be-healthy.site/trainer/manage/${lessonHistory.student!!.id}/log/${lessonHistory.id}",
+                studentId = lessonHistory.student!!.id,
+                studentName = lessonHistory.student!!.name
             )
         }
 
