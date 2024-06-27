@@ -216,7 +216,7 @@ class LessonHistoryCommandService(
         )
 
         // 댓글 작성자에게 알림 (내가 작성한 글은 알림을 받지 않음)
-        if (lessonHistory.trainer!!.id != member.memberId) {
+        if (lessonHistory.trainer!!.id != member.memberId && parentComment.writer?.id!! != member.memberId) {
             sendNotification(REPLY, REPLY.content, lessonHistory.id!!, parentComment.writer?.id!!, "https://www.to-be-healthy.site/student/log/${lessonHistory.id}")
         }
 
