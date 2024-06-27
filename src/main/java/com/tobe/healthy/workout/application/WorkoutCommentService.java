@@ -73,7 +73,7 @@ public class WorkoutCommentService {
                 null
             );
 
-        } else if (command.getParentCommentId() != null && parentWriterId != member.getId()) {
+        } else if (command.getParentCommentId() != null && !parentWriterId.equals(member.getId())) {
             // 답글
             notification = new CommandSendNotification(
                     COMMENT.getDescription(),
