@@ -42,16 +42,18 @@ public class WorkoutCommentService {
     public void addComment(Long workoutHistoryId, HistoryCommentAddCommand command, Member member) {
         WorkoutHistory history = workoutHistoryRepository.findById(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
-        Long depth, orderNum;
+        Long depth, orderNum, parentWriterId;
         Long commentCnt = commentRepository.countByWorkoutHistory(history);
         if(command.getParentCommentId() == null){ //댓글
             depth = 0L;
             orderNum = commentCnt;
+            parentWriterId = 0L;
         }else{ //대댓글
             WorkoutHistoryComment parentComment = commentRepository.findByCommentIdAndDelYnFalse(command.getParentCommentId())
                     .orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
             depth = parentComment.getDepth()+1;
             orderNum = parentComment.getOrderNum();
+            parentWriterId = parentComment.getMember().getId();
         }
 
         commentRepository.save(WorkoutHistoryComment.create(history, member, command, depth, orderNum));
@@ -71,12 +73,12 @@ public class WorkoutCommentService {
                 null
             );
 
-        } else if (command.getParentCommentId() != null && !history.getMember().getId().equals(member.getId())) {
+        } else if (command.getParentCommentId() != null && parentWriterId != member.getId()) {
             // 답글
             notification = new CommandSendNotification(
                     COMMENT.getDescription(),
                     String.format("내 댓글에 새로운 답글이 달렸어요."),
-                    List.of(history.getMember().getId()),
+                    List.of(parentWriterId),
                     REPLY,
                     COMMUNITY,
                     history.getWorkoutHistoryId(),
