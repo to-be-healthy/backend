@@ -2,6 +2,7 @@ package com.tobe.healthy.notification.application
 
 import com.tobe.healthy.common.KotlinCustomPaging
 import com.tobe.healthy.common.NotificationSenderInfo
+import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.entity.AlarmStatus.DISABLE
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
@@ -63,6 +64,7 @@ class NotificationService(
                     studentId = request.studentId,
                     studentName = request.studentName
                 )
+                log.info("notification: ${notification}")
                 notifications.add(notification)
             }
         }

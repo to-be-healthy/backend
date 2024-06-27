@@ -25,6 +25,9 @@ import com.tobe.healthy.lessonhistory.repository.LessonHistoryFilesRepository
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.entity.Member
+import com.tobe.healthy.member.domain.entity.MemberType
+import com.tobe.healthy.member.domain.entity.MemberType.STUDENT
+import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.notification.domain.dto.`in`.CommandSendNotification
 import com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE
@@ -87,7 +90,9 @@ class LessonHistoryCommandService(
         content: String,
         lessonHistoryId: Long,
         memberId: Long,
-        clickUrl: String? = null
+        clickUrl: String? = null,
+        studentId: Long? = null,
+        studentName: String? = null
     ) {
         val notification = CommandSendNotification(
             title = notificationType.description,
@@ -96,7 +101,9 @@ class LessonHistoryCommandService(
             notificationType = notificationType,
             notificationCategory = SCHEDULE,
             targetId = lessonHistoryId,
-            clickUrl = clickUrl
+            clickUrl = clickUrl,
+            studentId = studentId,
+            studentName = studentName
         )
 
         notificationPublisher.publish(notification, NOTIFICATION)
@@ -185,7 +192,13 @@ class LessonHistoryCommandService(
 
         // 게시글 작성자에게 알림 (내가 작성한 글은 알림을 받지 않음)
         if (member.memberId != lessonHistory.trainer!!.id) {
-            sendNotification(COMMENT, COMMENT.content, lessonHistory.id!!, lessonHistory.trainer!!.id!!, "https://www.to-be-healthy.site/trainer/manage/${lessonHistory.student!!.id}/log/${lessonHistory.id}?scheduleId=${lessonHistory.schedule!!.id}")
+            sendNotification(
+                notificationType = COMMENT,
+                content = COMMENT.content,
+                lessonHistoryId = lessonHistory.id!!,
+                memberId = lessonHistory.trainer!!.id!!,
+                clickUrl = "https://www.to-be-healthy.site/trainer/manage/${lessonHistory.student!!.id}/log/${lessonHistory.id}"
+            )
         }
 
         return CommandRegisterCommentResult.from(lessonHistoryComment, files)
@@ -216,8 +229,32 @@ class LessonHistoryCommandService(
         )
 
         // 댓글 작성자에게 알림 (내가 작성한 글은 알림을 받지 않음)
-        if (lessonHistory.trainer!!.id != member.memberId && parentComment.writer?.id!! != member.memberId) {
-            sendNotification(REPLY, REPLY.content, lessonHistory.id!!, parentComment.writer?.id!!, "https://www.to-be-healthy.site/student/log/${lessonHistory.id}")
+        if (parentComment.writer?.id!! != member.memberId) {
+            when (parentComment.writer!!.memberType) {
+                STUDENT -> {
+                    sendNotification(
+                        notificationType = REPLY,
+                        content = REPLY.content,
+                        lessonHistoryId = lessonHistory.id!!,
+                        memberId = parentComment.writer?.id!!,
+                        clickUrl = "https://www.to-be-healthy.site/student/log/${lessonHistory.id}",
+                        studentId = lessonHistory.student!!.id,
+                        studentName = lessonHistory.student!!.name
+                    )
+                }
+
+                TRAINER -> {
+                    sendNotification(
+                        notificationType = REPLY,
+                        content = REPLY.content,
+                        lessonHistoryId = lessonHistory.id!!,
+                        memberId = parentComment.writer?.id!!,
+                        clickUrl = "https://www.to-be-healthy.site/trainer/manage/${lessonHistory.student!!.id}/log/${lessonHistory.id}",
+                        studentId = lessonHistory.student!!.id,
+                        studentName = lessonHistory.student!!.name
+                    )
+                }
+            }
         }
 
         lessonHistoryCommentRepository.save(entity)
