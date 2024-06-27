@@ -185,7 +185,7 @@ class LessonHistoryCommandService(
 
         // 게시글 작성자에게 알림 (내가 작성한 글은 알림을 받지 않음)
         if (member.memberId != lessonHistory.trainer!!.id) {
-            sendNotification(COMMENT, COMMENT.content, lessonHistory.id!!, lessonHistory.trainer!!.id!!, "https://www.to-be-healthy.site/student/log/${lessonHistory.id}")
+            sendNotification(COMMENT, COMMENT.content, lessonHistory.id!!, lessonHistory.trainer!!.id!!, "https://www.to-be-healthy.site/trainer/manage/${lessonHistory.student!!.id}/log/${lessonHistory.id}?scheduleId=${lessonHistory.schedule!!.id}")
         }
 
         return CommandRegisterCommentResult.from(lessonHistoryComment, files)
