@@ -122,10 +122,10 @@ public class CommonScheduleService {
         CommandSendNotification notification = new CommandSendNotification(
                 CANCEL.getDescription(),
                 String.format("%s님이 %s 예약을 취소했어요.",
-                        schedule.getApplicant().getName(),
+                        schedule.getTrainer().getName(),
                         LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)
                 ),
-                List.of(schedule.getTrainer().getId()),
+                List.of(schedule.getApplicant().getId()),
                 CANCEL,
                 SCHEDULE,
                 null,

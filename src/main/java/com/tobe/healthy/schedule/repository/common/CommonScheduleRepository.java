@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface CommonScheduleRepository extends JpaRepository<Schedule, Long>, CommonScheduleRepositoryCustom {
 
-	@EntityGraph(attributePaths = {"applicant"})
+	@EntityGraph(attributePaths = {"applicant", "trainer"})
 	@Query("select s from Schedule s where s.applicant.id = :userId and s.id = :scheduleId")
 	Optional<Schedule> findScheduleByApplicantId(Long userId, Long scheduleId);
 
