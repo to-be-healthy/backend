@@ -40,7 +40,7 @@ public class WorkoutCommentService {
     private final CustomEventPublisher<CommandSendNotification> notificationPublisher;
 
     public void addComment(Long workoutHistoryId, HistoryCommentAddCommand command, Member member) {
-        WorkoutHistory history = workoutHistoryRepository.findById(workoutHistoryId)
+        WorkoutHistory history = workoutHistoryRepository.findByWorkoutHistoryIdAndDelYnFalse(workoutHistoryId)
                 .orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
         Long depth, orderNum, parentWriterId;
         Long commentCnt = commentRepository.countByWorkoutHistory(history);
