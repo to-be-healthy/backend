@@ -118,18 +118,19 @@ public class CommonScheduleService {
         Schedule schedule = commonScheduleRepository.findScheduleByApplicantId(memberId, scheduleId)
                 .orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
-        // 일정 취소시 알림
+        // 트레이너가 일정 취소시 알림
         CommandSendNotification notification = new CommandSendNotification(
                 CANCEL.getDescription(),
-                String.format("%s님이 %s 예약을 취소했어요.",
+                CANCEL.getContent().format(
                         schedule.getTrainer().getName(),
+                        schedule.getApplicant().getName(),
                         LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)
                 ),
                 List.of(schedule.getApplicant().getId()),
                 CANCEL,
                 SCHEDULE,
                 null,
-                String.format("https://www.to-be-healthy.site/trainer/manage/%d/reservation?name=%s", schedule.getApplicant().getId(), schedule.getApplicant().getName()),
+                "https://www.to-be-healthy.site/student/schedule?tab=myReservation",
                 schedule.getApplicant().getId(),
                 schedule.getApplicant().getName()
         );
