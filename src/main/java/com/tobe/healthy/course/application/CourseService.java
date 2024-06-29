@@ -208,6 +208,10 @@ public class CourseService {
     }
 
     private void updateCourse(CourseUpdateCommand command, Member trainer, Course course, Long scheduleId) {
+        if(PLUS.equals(command.getCalculation())) {
+            if(command.getUpdateCnt() < 1) throw new CustomException(COURSE_ONLY_PLUS);
+        }
+
         int result = command.getCalculation().apply(course.getRemainLessonCnt(), command.getUpdateCnt());
         if (result < 0) throw new CustomException(LESSON_CNT_NOT_VALID);
         if (500 < result) throw new CustomException(LESSON_CNT_MAX);
