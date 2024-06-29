@@ -121,7 +121,7 @@ public class CommonScheduleService {
         // 트레이너가 일정 취소시 알림
         CommandSendNotification notification = new CommandSendNotification(
                 CANCEL.getDescription(),
-                CANCEL.getContent().format(
+                String.format(CANCEL.getContent(),
                         schedule.getTrainer().getName(),
                         schedule.getApplicant().getName(),
                         LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(formatter)
