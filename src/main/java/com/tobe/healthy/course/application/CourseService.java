@@ -208,8 +208,13 @@ public class CourseService {
     }
 
     private void updateCourse(CourseUpdateCommand command, Member trainer, Course course, Long scheduleId) {
-        if(PLUS.equals(command.getCalculation())) {
-            if(command.getUpdateCnt() < 1) throw new CustomException(COURSE_ONLY_PLUS);
+        switch (command.getCalculation()){
+            case PLUS:
+                if(command.getUpdateCnt() < 1) throw new CustomException(COURSE_ONLY_PLUS);
+                break;
+            case MINUS:
+                if(command.getUpdateCnt() < 1) throw new CustomException(COURSE_POSITIVE);
+                break;
         }
 
         int result = command.getCalculation().apply(course.getRemainLessonCnt(), command.getUpdateCnt());
