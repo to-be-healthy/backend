@@ -72,7 +72,7 @@ public class WorkoutCommentService {
                 null,
                 null
             );
-
+            notificationPublisher.publish(notification, NOTIFICATION);
         } else if (command.getParentCommentId() != null && !parentWriterId.equals(member.getId())) {
             // 답글
             notification = new CommandSendNotification(
@@ -86,8 +86,8 @@ public class WorkoutCommentService {
                 null,
                 null
             );
+            notificationPublisher.publish(notification, NOTIFICATION);
         }
-        notificationPublisher.publish(notification, NOTIFICATION);
         history.changeCommentCnt(++commentCnt);
     }
 
