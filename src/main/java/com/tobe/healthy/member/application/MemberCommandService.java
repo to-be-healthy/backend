@@ -14,6 +14,7 @@ import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.point.domain.dto.TempRankDto;
 import com.tobe.healthy.point.repository.PointRepository;
+import com.tobe.healthy.push.repository.MemberTokenRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
@@ -50,9 +51,23 @@ public class MemberCommandService {
     private final TrainerService trainerService;
     private final PointRepository pointRepository;
     private final AmazonS3 amazonS3;
+    private final MemberTokenRepository memberTokenRepository;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
+
+    public Boolean logout(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        // 1. refresh token 삭제
+        redisService.deleteValues(member.getUserId());
+
+        // 2. fcm token 삭제
+        memberTokenRepository.deleteAll(member.getMemberToken());
+
+        return true;
+    }
 
     public String deleteMember(Member loginMember) {
         Member member = memberRepository.findById(loginMember.getId())

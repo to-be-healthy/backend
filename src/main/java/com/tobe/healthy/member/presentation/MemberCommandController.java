@@ -30,6 +30,15 @@ public class MemberCommandController {
 
 	private final MemberCommandService memberCommandService;
 
+	@Operation(summary = "로그아웃", description = "로그아웃시 refreshToken, fcmToken을 삭제한다.")
+	@PostMapping("/logout")
+	public ResponseHandler<Boolean> logout(@AuthenticationPrincipal CustomMemberDetails member) {
+		return ResponseHandler.<Boolean>builder()
+			.data(memberCommandService.logout(member.getMemberId()))
+			.message("로그아웃 되었습니다.")
+			.build();
+	}
+
 	@Operation(summary = "회원 탈퇴한다.", description = "로그인한 계정의 현재 비밀번호와 일치하다면 회원탈퇴를 시킨다.",
 		responses = {
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
