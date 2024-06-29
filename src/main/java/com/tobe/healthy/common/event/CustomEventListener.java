@@ -5,6 +5,7 @@ import static com.tobe.healthy.common.error.ErrorCode.SCHEDULE_NOT_FOUND;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.RESERVATION;
 import static com.tobe.healthy.notification.domain.entity.NotificationCategory.SCHEDULE;
 import static com.tobe.healthy.notification.domain.entity.NotificationType.WAITING;
+import static com.tobe.healthy.notification.domain.entity.NotificationType.WAITING_FOR_TRAINER;
 import static com.tobe.healthy.point.domain.entity.Calculation.MINUS;
 
 import com.tobe.healthy.common.error.CustomException;
@@ -69,7 +70,7 @@ public class CustomEventListener {
                     minusCourse(waitingMemberId, scheduleId, schedule.getTrainer().getId());
                     schedule.registerSchedule(scheduleWaiting.getMember());
 
-                    CommandSendNotification request = new CommandSendNotification(
+                    CommandSendNotification studentNotification = new CommandSendNotification(
                         WAITING.getDescription(),
                         String.format(WAITING.getContent(), LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(lessonStartDateTimeFormatter())),
                         List.of(schedule.getApplicant().getId()),
@@ -81,7 +82,20 @@ public class CustomEventListener {
                         schedule.getApplicant().getName()
                     );
 
-                    sendNotification(request);
+                    CommandSendNotification trainerNotification = new CommandSendNotification(
+                        WAITING_FOR_TRAINER.getDescription(),
+                        String.format(WAITING_FOR_TRAINER.getContent(), schedule.getApplicant().getName(), LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime()).format(lessonStartDateTimeFormatter())),
+                        List.of(schedule.getTrainer().getId()),
+                        WAITING_FOR_TRAINER,
+                        SCHEDULE,
+                        null,
+                        null,
+                        schedule.getApplicant().getId(),
+                        schedule.getApplicant().getName()
+                    );
+
+                    sendNotification(studentNotification);
+                    sendNotification(trainerNotification);
 
                     commonScheduleRepository.save(schedule);
                 });

@@ -61,15 +61,19 @@ class PushCommandService(
 
     private fun createMessage(token: String, title: String, message: String, clickUrl: String? = null): Message {
         return Message.builder()
-            .setWebpushConfig(WebpushConfig.builder()
-                .setNotification(WebpushNotification(
-                    title,
-                    message,
-                    "https://cdn.to-be-healthy.site/origin/profile/default.png?w=96&h=96")
-                )
-                .setFcmOptions(WebpushFcmOptions.withLink(clickUrl))
-                .build())
             .setToken(token)
+            .setNotification(Notification.builder()
+                .setTitle(title)
+                .setBody(message)
+                .build())
+            .setWebpushConfig(WebpushConfig.builder()
+                .setNotification(WebpushNotification.builder()
+                    .setTitle(title)
+                    .setBody(message)
+                    .setIcon("https://cdn.to-be-healthy.site/origin/profile/default.png?w=96&h=96") // 웹에서 사용할 아이콘 설정
+                    .build())
+                .build())
+            .putData("click_action", clickUrl ?: "")
             .build()
     }
 
