@@ -1,10 +1,20 @@
 package com.tobe.healthy.member.presentation;
 
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.member.application.MemberCommandService;
-import com.tobe.healthy.member.domain.dto.in.*;
-import com.tobe.healthy.member.domain.dto.out.*;
+import com.tobe.healthy.member.domain.dto.in.CommandAssignNickname;
+import com.tobe.healthy.member.domain.dto.in.CommandChangeEmail;
+import com.tobe.healthy.member.domain.dto.in.CommandChangeMemberPassword;
+import com.tobe.healthy.member.domain.dto.in.CommandChangeName;
+import com.tobe.healthy.member.domain.dto.in.CommandUpdateMemo;
+import com.tobe.healthy.member.domain.dto.out.CommandAssignNicknameResult;
+import com.tobe.healthy.member.domain.dto.out.CommandChangeNameResult;
+import com.tobe.healthy.member.domain.dto.out.DeleteMemberProfileResult;
+import com.tobe.healthy.member.domain.dto.out.MemberChangeAlarmResult;
+import com.tobe.healthy.member.domain.dto.out.RegisterMemberProfileResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.AlarmType;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,10 +25,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,11 +48,8 @@ public class MemberCommandController {
 
 	@Operation(summary = "로그아웃", description = "로그아웃시 refreshToken, fcmToken을 삭제한다.")
 	@PostMapping("/logout")
-	public ResponseHandler<Boolean> logout(@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
-			.data(memberCommandService.logout(member.getMemberId()))
-			.message("로그아웃 되었습니다.")
-			.build();
+	public void logout(@AuthenticationPrincipal CustomMemberDetails member) {
+		memberCommandService.logout(member.getMemberId());
 	}
 
 	@Operation(summary = "회원 탈퇴한다.", description = "로그인한 계정의 현재 비밀번호와 일치하다면 회원탈퇴를 시킨다.",
