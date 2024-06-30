@@ -6,12 +6,16 @@ import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.tobe.healthy.common.Utils;
 import com.tobe.healthy.common.error.CustomException;
+import com.tobe.healthy.common.error.OAuthError;
+import com.tobe.healthy.common.error.OAuthException;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.diet.repository.DietFileRepository;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -98,7 +102,9 @@ public class FileService {
         for (String size : sizes) {
             webClient.get()
                     .uri(fileUrl + size)
-                    .retrieve();
+                    .retrieve()
+                    .bodyToMono(byte[].class)
+                    ;
         }
     }
 
