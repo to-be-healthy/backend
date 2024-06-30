@@ -17,7 +17,7 @@ public class CompletedExerciseDto {
     private Long exerciseId;
 
     @Schema(description = "운동 종류 이름", example = "90/90 Hamstring")
-    private String name;
+    private String names;
 
     @Schema(description = "세트", example = "3")
     @Positive(message = "숫자를 입력해주세요.")
@@ -36,7 +36,7 @@ public class CompletedExerciseDto {
     public static CompletedExerciseDto from(CompletedExercise exercise) {
         return CompletedExerciseDto.builder()
                 .exerciseId(exercise.getExerciseId())
-                .name((exercise.getName()))
+                .names((exercise.getName()))
                 .setNum(exercise.getSetNum())
                 .weight(exercise.getWeight())
                 .numberOfCycles((exercise.getNumberOfCycles()))

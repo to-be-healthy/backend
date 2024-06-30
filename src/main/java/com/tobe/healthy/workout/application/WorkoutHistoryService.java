@@ -47,7 +47,6 @@ public class WorkoutHistoryService {
     private final ExerciseRepository exerciseRepository;
     private final MemberRepository memberRepository;
     private final WorkoutFileRepository workoutFileRepository;
-    private final RedisService redisService;
 
 
     public WorkoutHistoryDto addWorkoutHistory(Member member, HistoryAddCommand command) {
@@ -63,7 +62,7 @@ public class WorkoutHistoryService {
     private void saveCompletedExercises(WorkoutHistory history, HistoryAddCommand command) {
         List<CompletedExercise> completedExercises = command.getCompletedExercises().stream()
                 .map(c -> {
-                    return CompletedExercise.create(c, history, c.getName());
+                    return CompletedExercise.create(c, history, c.getNames());
                 }).collect(Collectors.toList());
         completedExerciseRepository.saveAll(completedExercises);
     }
