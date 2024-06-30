@@ -2,7 +2,6 @@ package com.tobe.healthy.workout.application;
 
 import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.error.CustomException;
-import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.member.domain.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -11,9 +10,7 @@ import com.tobe.healthy.workout.domain.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
 import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
 import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.entity.exercise.Exercise;
 import com.tobe.healthy.workout.domain.entity.workoutHistory.*;
-import com.tobe.healthy.workout.repository.exercise.ExerciseRepository;
 import com.tobe.healthy.workout.repository.workoutHistory.CompletedExerciseRepository;
 import com.tobe.healthy.workout.repository.workoutHistory.WorkoutFileRepository;
 import com.tobe.healthy.workout.repository.workoutHistory.WorkoutHistoryLikeRepository;
@@ -61,7 +58,7 @@ public class WorkoutHistoryService {
     private void saveCompletedExercises(WorkoutHistory history, HistoryAddCommand command) {
         List<CompletedExercise> completedExercises = command.getCompletedExercises().stream()
                 .map(c -> {
-                    return CompletedExercise.create(c, history, c.getNames());
+                    return CompletedExercise.create(c, history, c.getName());
                 }).collect(Collectors.toList());
         completedExerciseRepository.saveAll(completedExercises);
     }
