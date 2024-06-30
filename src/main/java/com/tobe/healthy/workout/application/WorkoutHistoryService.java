@@ -58,7 +58,8 @@ public class WorkoutHistoryService {
     private void saveCompletedExercises(WorkoutHistory history, HistoryAddCommand command) {
         List<CompletedExercise> completedExercises = command.getCompletedExercises().stream()
                 .map(c -> {
-                    return CompletedExercise.create(c, history, c.getName());
+                    String name = c.getNames()!=null ? c.getNames() : c.getName();
+                    return CompletedExercise.create(c, history, name);
                 }).collect(Collectors.toList());
         completedExerciseRepository.saveAll(completedExercises);
     }
