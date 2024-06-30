@@ -13,9 +13,12 @@ import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import java.util.List;
 
 import static com.tobe.healthy.common.Utils.*;
 import static com.tobe.healthy.common.error.ErrorCode.FILE_REMOVE_ERROR;
+import static com.tobe.healthy.common.error.ErrorCode.PROFILE_ACCESS_FAILED;
 import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
 import static java.util.UUID.randomUUID;
 
@@ -31,9 +35,10 @@ import static java.util.UUID.randomUUID;
 @RequiredArgsConstructor
 @Slf4j
 public class FileService {
-    private final DietFileRepository dietFileRepository;
+
     private final AmazonS3 amazonS3;
     private final RedisService redisService;
+    private final WebClient webClient;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -80,7 +85,21 @@ public class FileService {
         amazonS3.copyObject(copyObjRequest);
         String fileUrl = amazonS3.getUrl(bucketName, newSavedFileName).toString()
                 .replace(S3_DOMAIN, CDN_DOMAIN);
+        makeThumb(fileUrl);
         return new RegisterFile(fileUrl);
+    }
+
+    private void makeThumb(String fileUrl){
+        String w_400 = "?w=400&q=90";
+        String w_640 = "?w=640&q=75";
+        String w_1200 = "?w=1200&q=90";
+        List<String> sizes = List.of(w_400, w_640, w_1200);
+
+        for (String size : sizes) {
+            webClient.get()
+                    .uri(fileUrl + size)
+                    .retrieve();
+        }
     }
 
     public void deleteDietFile(String fileName) {

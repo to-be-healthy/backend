@@ -44,7 +44,6 @@ public class WorkoutHistoryService {
     private final WorkoutHistoryLikeRepository workoutHistoryLikeRepository;
     private final WorkoutHistoryRepository workoutHistoryRepository;
     private final CompletedExerciseRepository completedExerciseRepository;
-    private final ExerciseRepository exerciseRepository;
     private final MemberRepository memberRepository;
     private final WorkoutFileRepository workoutFileRepository;
 
