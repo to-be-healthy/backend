@@ -1,22 +1,48 @@
 package com.tobe.healthy.member.application;
 
+import static com.tobe.healthy.common.Utils.CDN_DOMAIN;
+import static com.tobe.healthy.common.Utils.S3_DOMAIN;
+import static com.tobe.healthy.common.Utils.createFileName;
+import static com.tobe.healthy.common.Utils.createObjectMetadata;
+import static com.tobe.healthy.common.error.ErrorCode.FILE_UPLOAD_ERROR;
+import static com.tobe.healthy.common.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NAME_LENGTH_NOT_VALID;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NAME_NOT_VALID;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NOT_MAPPED;
+import static com.tobe.healthy.common.error.ErrorCode.NOT_MATCH_PASSWORD;
+import static com.tobe.healthy.common.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
+import static io.micrometer.common.util.StringUtils.isEmpty;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.tobe.healthy.common.Utils;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.redis.RedisService;
-import com.tobe.healthy.member.domain.dto.in.*;
-import com.tobe.healthy.member.domain.dto.out.*;
+import com.tobe.healthy.member.domain.dto.in.CommandAssignNickname;
+import com.tobe.healthy.member.domain.dto.in.CommandChangeEmail;
+import com.tobe.healthy.member.domain.dto.in.CommandChangeMemberPassword;
+import com.tobe.healthy.member.domain.dto.in.CommandChangeName;
+import com.tobe.healthy.member.domain.dto.in.CommandUpdateMemo;
+import com.tobe.healthy.member.domain.dto.out.CommandAssignNicknameResult;
+import com.tobe.healthy.member.domain.dto.out.CommandChangeNameResult;
+import com.tobe.healthy.member.domain.dto.out.DeleteMemberProfileResult;
+import com.tobe.healthy.member.domain.dto.out.MemberChangeAlarmResult;
+import com.tobe.healthy.member.domain.dto.out.RegisterMemberProfileResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.AlarmType;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.point.application.PointService;
-import com.tobe.healthy.point.domain.dto.TempRankDto;
 import com.tobe.healthy.point.repository.PointRepository;
+import com.tobe.healthy.push.repository.MemberTokenRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,17 +51,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static com.tobe.healthy.common.Utils.*;
-import static com.tobe.healthy.common.error.ErrorCode.*;
-import static io.micrometer.common.util.StringUtils.isEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -50,9 +65,19 @@ public class MemberCommandService {
     private final TrainerService trainerService;
     private final PointRepository pointRepository;
     private final AmazonS3 amazonS3;
+    private final MemberTokenRepository memberTokenRepository;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
+
+    public void logout(Long memberId) {
+        memberRepository.findById(memberId).ifPresent(m -> {
+            // 1. refresh token 삭제
+            redisService.deleteValues(m.getUserId());
+            // 2. fcm token 삭제
+            memberTokenRepository.deleteAll(m.getMemberToken());
+        });
+	}
 
     public String deleteMember(Member loginMember) {
         Member member = memberRepository.findById(loginMember.getId())

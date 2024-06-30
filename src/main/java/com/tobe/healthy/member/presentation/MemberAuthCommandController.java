@@ -1,6 +1,7 @@
 package com.tobe.healthy.member.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.member.application.MemberAuthCommandService;
 import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
