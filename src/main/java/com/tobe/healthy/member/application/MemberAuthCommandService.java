@@ -22,6 +22,7 @@ import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
 import com.tobe.healthy.member.domain.entity.*;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.push.repository.MemberTokenRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import io.jsonwebtoken.impl.Base64UrlCodec;
 import lombok.RequiredArgsConstructor;
