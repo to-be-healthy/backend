@@ -25,7 +25,6 @@ import com.tobe.healthy.lessonhistory.repository.LessonHistoryFilesRepository
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository
 import com.tobe.healthy.log
 import com.tobe.healthy.member.domain.entity.Member
-import com.tobe.healthy.member.domain.entity.MemberType
 import com.tobe.healthy.member.domain.entity.MemberType.STUDENT
 import com.tobe.healthy.member.domain.entity.MemberType.TRAINER
 import com.tobe.healthy.member.repository.MemberRepository
@@ -146,20 +145,56 @@ class LessonHistoryCommandService(
         request: CommandUpdateLessonHistory,
         trainerId: Long
     ): CommandUpdateLessonHistoryResult {
-        val findLessonHistory = lessonHistoryRepository.findOneLessonHistoryWithFiles(lessonHistoryId, trainerId)
+        val lessonHistory = lessonHistoryRepository.findOneLessonHistoryWithFiles(lessonHistoryId, trainerId)
             ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
-        findLessonHistory.updateLessonHistory(request.title, request.content)
+        lessonHistory.updateLessonHistory(request.title, request.content)
 
-        findLessonHistory.files.clear()
+        lessonHistory.files.clear()
 
-        val files = registerFile(
-            uploadFiles = request.uploadFiles,
-            member = findLessonHistory.trainer!!,
-            lessonHistory = findLessonHistory
-        )
+        val savedFiles = mutableListOf<LessonHistoryFiles>()
 
-        return CommandUpdateLessonHistoryResult.from(findLessonHistory, files)
+        // 파일 전체 삭제
+        if (request.uploadFiles.isNotEmpty()) {
+            request.uploadFiles.forEachIndexed { idx, file ->
+                if (lessonHistory.files.indexOfFirst { it.fileUrl == file.fileUrl } != - 1) {
+                    val fileIdx = lessonHistory.files.indexOfFirst { it.fileUrl == file.fileUrl }
+                    lessonHistory.files[fileIdx].updateFileOrder(idx + 1)
+                    savedFiles.add(lessonHistory.files[fileIdx])
+                } else {
+                    if (file.fileUrl.startsWith(S3_DOMAIN)) {
+                        val tempUrl = file.fileUrl.replace(S3_DOMAIN, "")
+
+                        val result = moveDirTempToOrigin("origin/lesson-history/", tempUrl, idx + 1)
+
+                        val file = LessonHistoryFiles(
+                            member = lessonHistory.trainer,
+                            lessonHistory = lessonHistory,
+                            fileUrl = result.fileUrl,
+                            fileOrder = idx + 1,
+                        )
+
+                        savedFiles.add(file)
+                    } else if (file.fileUrl.startsWith(CDN_DOMAIN)) {
+                        val file = LessonHistoryFiles(
+                            member = lessonHistory.trainer,
+                            lessonHistory = lessonHistory,
+                            fileUrl = file.fileUrl,
+                            fileOrder = idx + 1,
+                        )
+                        savedFiles.add(file)
+                    }
+                }
+            }
+            lessonHistoryFilesRepository.deleteAll(lessonHistory.files)
+            lessonHistory.files.clear()
+            lessonHistory.files.addAll(savedFiles)
+        } else {
+            lessonHistoryFilesRepository.deleteAll(lessonHistory.files)
+            lessonHistory.files.clear()
+        }
+
+        return CommandUpdateLessonHistoryResult.from(lessonHistory, savedFiles)
     }
 
     fun deleteLessonHistory(
