@@ -95,9 +95,9 @@ public class FileService {
 
     private void makeThumb(String fileUrl){
         String w_400 = "?w=400&q=90";
-        String w_640 = "?w=640&q=75";
+        String w_800 = "?w=800&q=90";
         String w_1200 = "?w=1200&q=90";
-        List<String> sizes = List.of(w_400, w_640, w_1200);
+        List<String> sizes = List.of(w_400, w_800, w_1200);
 
         for (String size : sizes) {
             webClient.get()
