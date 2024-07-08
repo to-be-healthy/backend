@@ -6,6 +6,7 @@ import com.tobe.healthy.common.error.ErrorCode.MEMBER_NOT_FOUND
 import com.tobe.healthy.log
 import com.tobe.healthy.member.repository.MemberRepository
 import com.tobe.healthy.push.domain.dto.`in`.CommandRegisterToken
+import com.tobe.healthy.push.domain.dto.`in`.CommandRegisterTokenWithWebView
 import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarm
 import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarmToMember
 import com.tobe.healthy.push.domain.dto.out.CommandRegisterTokenResult
@@ -30,7 +31,7 @@ class PushCommandService(
 
         val findMemberToken = memberTokenRepository.findByMemberId(findMember.id)
             ?: let {
-                val memberToken = MemberToken.register(findMember, request.token)
+                val memberToken = MemberToken.register(findMember, request.token, "WEB")
                 memberTokenRepository.save(memberToken)
             }
 
@@ -40,6 +41,19 @@ class PushCommandService(
             name = findMember.name,
             token = request.token
         )
+    }
+
+    fun registerFcmTokenWithWebView(request: CommandRegisterTokenWithWebView) {
+        val findMember = memberRepository.findByIdOrNull(request.memberId)
+            ?: throw CustomException(MEMBER_NOT_FOUND)
+
+        val findMemberToken = memberTokenRepository.findByMemberId(findMember.id)
+            ?: let {
+                val memberToken = MemberToken.register(findMember, request.token, request.deviceType)
+                memberTokenRepository.save(memberToken)
+            }
+
+        findMemberToken.changeToken(request.token)
     }
 
     fun sendPushAlarm(request: CommandSendPushAlarm): CommandSendPushAlarmResult {

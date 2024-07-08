@@ -4,6 +4,7 @@ import com.tobe.healthy.ApiResultResponse
 import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.push.application.PushCommandService
 import com.tobe.healthy.push.domain.dto.`in`.CommandRegisterToken
+import com.tobe.healthy.push.domain.dto.`in`.CommandRegisterTokenWithWebView
 import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarm
 import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarmToMember
 import com.tobe.healthy.push.domain.dto.out.CommandRegisterTokenResult
@@ -26,6 +27,11 @@ class PushCommandController(
             message = "토큰을 저장하였습니다.",
             data = pushCommandService.registerFcmToken(request, member.memberId)
         )
+    }
+
+    @PostMapping("/webview")
+    fun registerFcmTokenWithWebView(@RequestBody request: CommandRegisterTokenWithWebView) {
+        pushCommandService.registerFcmTokenWithWebView(request)
     }
 
     @PostMapping("/send")

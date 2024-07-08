@@ -10,6 +10,8 @@ import lombok.ToString
 @Entity
 class MemberToken(
 
+    var deviceType: String,
+
     var token: String,
 
     @ManyToOne(fetch = LAZY)
@@ -29,10 +31,11 @@ class MemberToken(
     }
 
     companion object {
-        fun register(member: Member, token: String): MemberToken {
+        fun register(member: Member, token: String, deviceType: String): MemberToken {
             return MemberToken(
                 member = member,
-                token = token
+                token = token,
+                deviceType = deviceType
             )
         }
     }
