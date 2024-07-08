@@ -45,7 +45,7 @@ public class SecurityConfig {
             })
             .authorizeHttpRequests(
                 authorize -> authorize
-                        .requestMatchers("/auth/v1/**", "/favicon.ico", "/actuator/**").permitAll()
+                        .requestMatchers("/auth/v1/**", "/favicon.ico", "/actuator/**", "/push/v1/webview").permitAll()
                         .anyRequest().authenticated())
             .addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
             .build();
