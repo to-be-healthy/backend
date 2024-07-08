@@ -10,7 +10,7 @@ import lombok.ToString
 @Entity
 class MemberToken(
 
-    var deviceType: String,
+    var deviceType: DeviceType,
 
     var token: String,
 
@@ -31,7 +31,7 @@ class MemberToken(
     }
 
     companion object {
-        fun register(member: Member, token: String, deviceType: String): MemberToken {
+        fun register(member: Member, token: String, deviceType: DeviceType): MemberToken {
             return MemberToken(
                 member = member,
                 token = token,

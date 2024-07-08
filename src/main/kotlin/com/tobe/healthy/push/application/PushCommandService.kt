@@ -11,6 +11,7 @@ import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarm
 import com.tobe.healthy.push.domain.dto.`in`.CommandSendPushAlarmToMember
 import com.tobe.healthy.push.domain.dto.out.CommandRegisterTokenResult
 import com.tobe.healthy.push.domain.dto.out.CommandSendPushAlarmResult
+import com.tobe.healthy.push.domain.entity.DeviceType.WEB
 import com.tobe.healthy.push.domain.entity.MemberToken
 import com.tobe.healthy.push.repository.MemberTokenRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -31,7 +32,7 @@ class PushCommandService(
 
         val findMemberToken = memberTokenRepository.findByMemberId(findMember.id)
             ?: let {
-                val memberToken = MemberToken.register(findMember, request.token, "WEB")
+                val memberToken = MemberToken.register(findMember, request.token, WEB)
                 memberTokenRepository.save(memberToken)
             }
 
