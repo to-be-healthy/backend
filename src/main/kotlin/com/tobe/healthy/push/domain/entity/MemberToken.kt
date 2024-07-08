@@ -3,12 +3,16 @@ package com.tobe.healthy.push.domain.entity
 import com.tobe.healthy.common.BaseTimeEntity
 import com.tobe.healthy.member.domain.entity.Member
 import jakarta.persistence.*
+import jakarta.persistence.EnumType.STRING
 import jakarta.persistence.FetchType.LAZY
 import jakarta.persistence.GenerationType.IDENTITY
 import lombok.ToString
 
 @Entity
 class MemberToken(
+
+    @Enumerated(STRING)
+    var deviceType: DeviceType,
 
     var token: String,
 
@@ -29,10 +33,11 @@ class MemberToken(
     }
 
     companion object {
-        fun register(member: Member, token: String): MemberToken {
+        fun register(member: Member, token: String, deviceType: DeviceType): MemberToken {
             return MemberToken(
                 member = member,
-                token = token
+                token = token,
+                deviceType = deviceType
             )
         }
     }
