@@ -64,9 +64,9 @@ public class SecurityConfig {
             config.setAllowedOriginPatterns(List.of(
                     "http://localhost:3000",
                     "https://api.to-be-healthy.site",
-                    "https://dev-api.to-be-healthy.site",
+                    "https://dev.api.to-be-healthy.site",
                     "https://www.to-be-healthy.site",
-                    "https://www-dev.to-be-healthy.site"
+                    "https://www.dev.to-be-healthy.site"
             ));
             config.setAllowCredentials(true);
             return config;
