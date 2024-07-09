@@ -28,8 +28,9 @@ class MemberToken(
 
 ) : BaseTimeEntity<MemberToken, Long>() {
 
-    fun changeToken(token: String) {
+    fun changeToken(token: String, deviceType: DeviceType) {
         this.token = token
+        this.deviceType = deviceType
     }
 
     companion object {

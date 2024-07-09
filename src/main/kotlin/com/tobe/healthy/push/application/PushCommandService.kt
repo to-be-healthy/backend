@@ -36,7 +36,7 @@ class PushCommandService(
                 memberTokenRepository.save(memberToken)
             }
 
-        findMemberToken.changeToken(request.token)
+        findMemberToken.changeToken(request.token, WEB)
 
         return CommandRegisterTokenResult(
             name = findMember.name,
@@ -54,7 +54,7 @@ class PushCommandService(
                 memberTokenRepository.save(memberToken)
             }
 
-        findMemberToken.changeToken(request.token)
+        findMemberToken.changeToken(request.token, request.deviceType)
     }
 
     fun sendPushAlarm(request: CommandSendPushAlarm): CommandSendPushAlarmResult {
