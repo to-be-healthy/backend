@@ -26,7 +26,10 @@ class PushCommandService(
     private val memberTokenRepository: MemberTokenRepository
 ) {
 
-    fun registerFcmToken(request: CommandRegisterToken, memberId: Long): CommandRegisterTokenResult {
+    fun registerFcmToken(
+        request: CommandRegisterToken,
+        memberId: Long
+    ): CommandRegisterTokenResult {
         val findMember = memberRepository.findByIdOrNull(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 
@@ -50,7 +53,8 @@ class PushCommandService(
 
         val findMemberToken = memberTokenRepository.findByMemberId(findMember.id)
             ?: let {
-                val memberToken = MemberToken.register(findMember, request.token, request.deviceType)
+                val memberToken =
+                    MemberToken.register(findMember, request.token, request.deviceType)
                 memberTokenRepository.save(memberToken)
             }
 
@@ -74,20 +78,65 @@ class PushCommandService(
         )
     }
 
-    private fun createMessage(token: String, title: String, message: String, clickUrl: String? = null): Message {
+    private fun createMessage(
+        token: String,
+        title: String,
+        message: String,
+        clickUrl: String? = null
+    ): Message {
         return Message.builder()
-            .setWebpushConfig(WebpushConfig.builder()
-                .setNotification(WebpushNotification(
-                    title,
-                    message,
-                    "https://cdn.to-be-healthy.site/origin/profile/default.png?w=96&h=96"))
-                .setFcmOptions(WebpushFcmOptions.withLink(clickUrl ?: ""))
-                .build())
+            .setNotification(
+                Notification.builder()
+                    .setTitle(title)
+                    .setBody(message)
+                    .setImage("https://cdn.to-be-healthy.site/origin/profile/default.png?w=96&h=96")
+                    .build()
+            )
+            .setAndroidConfig(
+                AndroidConfig.builder().setTtl((3600 * 1000).toLong()).setNotification(
+                    AndroidNotification.builder()
+                        .setIcon("https://cdn.to-be-healthy.site/origin/profile/default.png?w=96&h=96")
+                        .setClickAction(clickUrl ?: "")
+                        .build()
+                ).build()
+            )
+            .setApnsConfig(
+                ApnsConfig.builder().setAps(
+                    Aps.builder()
+                        .setAlert(
+                            ApsAlert.builder()
+                                .setTitle(title)
+                                .setBody(message)
+                                .build()
+                        )
+                        .setBadge(42)
+                        .setSound("default")
+                        .build()
+                )
+                    .putHeader("apns-push-type", "alert")
+                    .putHeader("apns-priority", "10")
+                    .putHeader("apns-topic", "site.tobehealthy.webview") // 여기에 실제 번들 ID를 입력
+                    .build()
+            )
+            .setWebpushConfig(
+                WebpushConfig.builder()
+                    .setNotification(
+                        WebpushNotification(
+                            title,
+                            message,
+                        )
+                    )
+                    .setFcmOptions(WebpushFcmOptions.withLink(clickUrl ?: ""))
+                    .build()
+            )
             .setToken(token)
             .build()
     }
 
-    fun sendPushAlarm(memberId: Long, request: CommandSendPushAlarmToMember): CommandSendPushAlarmResult {
+    fun sendPushAlarm(
+        memberId: Long,
+        request: CommandSendPushAlarmToMember
+    ): CommandSendPushAlarmResult {
         val findMemberToken = memberTokenRepository.findByMemberId(memberId)
             ?: throw CustomException(MEMBER_NOT_FOUND)
 

@@ -50,8 +50,8 @@ class NotificationService(
                 throw IllegalArgumentException("커뮤니티 알림을 거부한 수신자입니다.")
             }
 
-            receiver.memberToken.firstOrNull()?.token?.let { token ->
-                pushCommandService.sendPushAlarm(CommandSendPushAlarm(request.title, request.content, token, request.clickUrl))
+            receiver.memberToken.firstOrNull()?.let { memberToken ->
+                pushCommandService.sendPushAlarm(CommandSendPushAlarm(request.title, request.content, memberToken.token, request.clickUrl, memberToken.deviceType))
 
                 val notification = Notification.create(
                     title = request.title,
