@@ -95,7 +95,6 @@ class PushCommandService(
             .setAndroidConfig(
                 AndroidConfig.builder().setTtl((3600 * 1000).toLong()).setNotification(
                     AndroidNotification.builder()
-                        .setIcon("https://cdn.to-be-healthy.site/origin/profile/default.png?w=96&h=96")
                         .setClickAction(clickUrl ?: "")
                         .build()
                 ).build()
@@ -109,7 +108,6 @@ class PushCommandService(
                                 .setBody(message)
                                 .build()
                         )
-                        .setBadge(42)
                         .setSound("default")
                         .build()
                 )
