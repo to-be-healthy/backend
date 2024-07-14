@@ -11,6 +11,7 @@ import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.domain.dto.DietDto;
 import com.tobe.healthy.gym.domain.dto.out.GymDto;
 import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
 import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.Member;
@@ -85,6 +86,22 @@ public class TrainerService {
         return TrainerMemberMappingDto.from(mapping);
     }
 
+    public void addStudentOfTrainerByNonmember(Long trainerId, Member nonmember, MemberLessonCommand command) {
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+
+        //트레이너 매핑
+        Long memberId = nonmember.getId();
+        mappingRepository.deleteByMemberId(memberId);
+        mappingRepository.flush();
+        TrainerMemberMapping mapping = TrainerMemberMapping.create(trainer, nonmember);
+        mappingRepository.save(mapping);
+        nonmember.registerGym(trainer.getGym());
+
+        //수강권 등록
+        courseService.addCourseByNonmember(trainerId, CourseAddCommand.create(memberId, command.getLessonCnt()), nonmember);
+    }
+
     public MemberInviteResultCommand inviteMember(MemberInviteCommand command, Member trainer) {
         memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), TRAINER)
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
@@ -109,6 +126,37 @@ public class TrainerService {
         redisService.setValuesWithTimeout(invitationKey, JSONObject.toJSONString(invitedMapping), ONE_DAY); // 1days
         MemberInviteResultCommand response = new MemberInviteResultCommand(uuid, invitationLink);
         log.info("[학생 초대] trainer: {}, request: {}, response{}", trainer, command, response);
+        return response;
+    }
+
+    public MemberInviteResultCommand inviteNonmember(MemberInviteCommand command, Member trainer) {
+        memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), TRAINER)
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
+        String name = command.getName();
+        validateName(name);
+        int lessonCnt = command.getLessonCnt();
+        if(lessonCnt < 1) throw new CustomException(LESSON_CNT_NOT_VALID);
+        if(500 < lessonCnt) throw new CustomException(LESSON_CNT_MAX);
+
+        String uuid = System.currentTimeMillis() + "-" + UUID.randomUUID();
+        String invitationLink = "https://www.to-be-healthy.site/invite?type={type}&uuid={uuid}"
+                .replace("{type}", STUDENT.getCode().toLowerCase())
+                .replace("{uuid}", uuid);
+
+        //미가입 회원 DB 저장
+        CommandJoinMember request = CommandJoinMember.builder()
+                .name(name)
+                .memberType(STUDENT)
+                .build();
+        Member member = Member.join(request, null);
+        member.registerInvitationLink(invitationLink);
+        memberRepository.save(member);
+
+        //트레이너 매핑 & 수강권 등록
+        addStudentOfTrainerByNonmember(trainer.getId(), member, new MemberLessonCommand(command.getLessonCnt()));
+        MemberInviteResultCommand response = new MemberInviteResultCommand(uuid, invitationLink);
+        log.info("[미가입 학생 직접 등록] trainer: {}, request: {}, response{}", trainer, command, response);
         return response;
     }
 

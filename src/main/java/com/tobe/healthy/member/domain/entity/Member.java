@@ -123,6 +123,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@Builder.Default
 	private boolean delYn = false;
 
+	private String invitationLink;
+
 	public static Member join(CommandJoinMember request, String password) {
 		return Member.builder()
 				.userId(request.getUserId())
@@ -197,6 +199,10 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	public void changeEmail(String email) {
 		this.email = email;
+	}
+
+	public void registerInvitationLink(String invitationLink) {
+		this.invitationLink = invitationLink;
 	}
 
 	public void registerProfile(String fileName, String fileUrl) {

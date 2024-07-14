@@ -61,7 +61,7 @@ public class CourseService {
         Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
                 .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
         Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(command.getMemberId(), STUDENT)
-                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+                    .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
         mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
 
@@ -69,6 +69,20 @@ public class CourseService {
         if(command.getLessonCnt() < 1) throw new CustomException(LESSON_CNT_NOT_VALID);
         if(500 < command.getLessonCnt()) throw new CustomException(LESSON_CNT_MAX);
         Course course = courseRepository.save(Course.create(member, trainer, command.getLessonCnt(), command.getLessonCnt()));
+        courseHistoryRepository.save(CourseHistory.create(course, course.getTotalLessonCnt(), PLUS, COURSE_CREATE, trainer));
+        log.info("[수강권 등록] trainer: {}, course: {}, member:{}", trainer, course, course.getMember());
+    }
+
+    public void addCourseByNonmember(Long trainerId, CourseAddCommand command, Member nonmember) {
+        Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
+                .orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
+        mappingRepository.findByTrainerIdAndMemberId(trainerId, nonmember.getId())
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
+
+        checkCourseAlreadyExists(nonmember.getId());
+        if(command.getLessonCnt() < 1) throw new CustomException(LESSON_CNT_NOT_VALID);
+        if(500 < command.getLessonCnt()) throw new CustomException(LESSON_CNT_MAX);
+        Course course = courseRepository.save(Course.create(nonmember, trainer, command.getLessonCnt(), command.getLessonCnt()));
         courseHistoryRepository.save(CourseHistory.create(course, course.getTotalLessonCnt(), PLUS, COURSE_CREATE, trainer));
         log.info("[수강권 등록] trainer: {}, course: {}, member:{}", trainer, course, course.getMember());
     }

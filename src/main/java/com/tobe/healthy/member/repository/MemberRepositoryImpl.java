@@ -45,7 +45,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return queryFactory
                 .select(new QMemberInTeamResult(member.id, member.name, member.userId, member.email,
                         trainerMemberMapping.ranking, course.totalLessonCnt, course.remainLessonCnt,
-                        member.nickname, memberProfile.fileUrl))
+                        member.nickname, memberProfile.fileUrl, member.invitationLink))
                 .from(trainerMemberMapping)
                 .innerJoin(trainerMemberMapping.member, member).on(trainerMemberMapping.member.id.eq(member.id))
                 .leftJoin(member.memberProfile, memberProfile)
@@ -71,7 +71,8 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                         course.totalLessonCnt,
                         course.remainLessonCnt,
                         member.nickname,
-                        memberProfile.fileUrl)
+                        memberProfile.fileUrl,
+                        member.invitationLink)
                 )
                 .from(trainerMemberMapping)
                 .innerJoin(trainerMemberMapping.member, member).on(trainerMemberMapping.member.id.eq(member.id))
@@ -133,7 +134,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return queryFactory
                 .select(new QMemberDetailResult(member.id, member.name, member.nickname, memberProfile.fileUrl
                         , trainerMemberMapping.memo, trainerMemberMapping.ranking
-                        , schedule.lessonDt, schedule.lessonStartTime))
+                        , schedule.lessonDt, schedule.lessonStartTime, member.invitationLink))
                 .from(member)
                 .leftJoin(memberProfile)
                 .on(member.memberProfile.id.eq(memberProfile.id))

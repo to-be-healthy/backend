@@ -61,6 +61,21 @@ public class TrainerController {
                 .build();
     }
 
+    @Operation(summary = "트레이너가 미가입 학생 직접 등록하기", responses = {
+            @ApiResponse(responseCode = "400", description = "시작날짜와 종료날짜가 유효하지않습니다."),
+            @ApiResponse(responseCode = "400", description = "회원을 찾을 수 없습니다."),
+            @ApiResponse(responseCode = "200", description = "회원초대가 완료 되었습니다.")
+    })
+    @PostMapping("/nonmember")
+    @PreAuthorize("hasAuthority('ROLE_TRAINER')")
+    public ResponseHandler<MemberInviteResultCommand> inviteNonmember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+                                                                   @RequestBody MemberInviteCommand command) {
+        return ResponseHandler.<MemberInviteResultCommand>builder()
+                .data(trainerService.inviteNonmember(command, customMemberDetails.getMember()))
+                .message("미가입 학생 등록이 완료 되었습니다.")
+                .build();
+    }
+
     @Operation(summary = "트레이너가 내 학생으로 등록하기", responses = {
             @ApiResponse(responseCode = "400", description = "이미 등록된 회원입니다."),
             @ApiResponse(responseCode = "404", description = "트레이너가 존재하지 않습니다."),

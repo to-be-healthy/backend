@@ -28,9 +28,10 @@ public class MemberDetailResult {
 	private PointDto point;
 	private RankDto rank;
 	private GymDto gym;
+	private boolean isNonmember;
 
 	@QueryProjection
-	public MemberDetailResult(Long memberId, String name, String nickName, String fileUrl, String memo, int ranking, LocalDate lessonDt, LocalTime lessonStartTime) {
+	public MemberDetailResult(Long memberId, String name, String nickName, String fileUrl, String memo, int ranking, LocalDate lessonDt, LocalTime lessonStartTime, String invitationLink) {
 		this.memberId = memberId;
 		this.name = name;
 		this.nickName = nickName;
@@ -39,6 +40,7 @@ public class MemberDetailResult {
 		this.ranking = ranking;
 		this.lessonDt = lessonDt;
 		this.lessonStartTime = lessonStartTime;
+		this.isNonmember = invitationLink != null;
 	}
 
 }
