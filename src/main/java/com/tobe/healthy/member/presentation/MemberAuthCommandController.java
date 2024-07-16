@@ -1,9 +1,14 @@
 package com.tobe.healthy.member.presentation;
 
 import com.tobe.healthy.common.ResponseHandler;
-import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.member.application.MemberAuthCommandService;
-import com.tobe.healthy.member.domain.dto.in.*;
+import com.tobe.healthy.member.domain.dto.in.CommandFindMemberPassword;
+import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
+import com.tobe.healthy.member.domain.dto.in.CommandLoginMember;
+import com.tobe.healthy.member.domain.dto.in.CommandRefreshToken;
+import com.tobe.healthy.member.domain.dto.in.CommandSocialLogin;
+import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
+import com.tobe.healthy.member.domain.dto.in.CommandVerification;
 import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
@@ -15,7 +20,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -162,6 +166,19 @@ public class MemberAuthCommandController {
 	public ResponseHandler<Tokens> getGoogleOAuth(@RequestBody CommandSocialLogin command) {
 		return ResponseHandler.<Tokens>builder()
 			.data(memberAuthCommandService.getGoogleOAuth(command))
+			.message("요청이 처리되었습니다.")
+			.build();
+	}
+
+	@Operation(summary = "애플 소셜 로그인", description = "인가코드로 애플에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.",
+		responses = {
+			@ApiResponse(responseCode = "500", description = "애플 소셜서버와 연동중 에러가 발생하였습니다."),
+			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
+		})
+	@PostMapping("/access-token/apple")
+	public ResponseHandler<Tokens> getAppleOAuth(@RequestBody CommandSocialLogin request) {
+		return ResponseHandler.<Tokens>builder()
+			.data(memberAuthCommandService.getAppleOAuth(request))
 			.message("요청이 처리되었습니다.")
 			.build();
 	}

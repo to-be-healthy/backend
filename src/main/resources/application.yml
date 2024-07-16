@@ -78,6 +78,12 @@ oauth:
     token-uri: ${OAUTH_GOOGLE_TOKEN_URI}
     user-info-uri: ${OAUTH_GOOGLE_USER_INFO_URI}
     redirect-uri: ${OAUTH_GOOGLE_REDIRECT_URI}
+  apple:
+    team-id: ${OAUTH_APPLE_TEAM_ID}
+    login-key: ${OAUTH_APPLE_LOGIN_KEY}
+    client-id: ${OAUTH_APPLE_CLIENT_ID}
+    redirect-uri: ${OAUTH_APPLE_REDIRECT_URI}
+    key-path: ${OAUTH_APPLE_KEY_PATH}
 
 aws:
   s3:

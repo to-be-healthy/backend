@@ -56,6 +56,7 @@ dependencies {
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
     implementation("com.google.firebase:firebase-admin:9.3.0")
     implementation("org.imgscalr:imgscalr-lib:4.2")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
 
     runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")

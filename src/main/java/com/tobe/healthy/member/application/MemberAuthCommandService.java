@@ -1,9 +1,48 @@
 package com.tobe.healthy.member.application;
 
+import static com.tobe.healthy.common.Utils.CDN_DOMAIN;
+import static com.tobe.healthy.common.Utils.EMAIL_AUTH_TIMEOUT;
+import static com.tobe.healthy.common.Utils.S3_DOMAIN;
+import static com.tobe.healthy.common.Utils.createObjectMetadata;
+import static com.tobe.healthy.common.Utils.createProfileName;
+import static com.tobe.healthy.common.error.ErrorCode.CONFIRM_PASSWORD_NOT_MATCHED;
+import static com.tobe.healthy.common.error.ErrorCode.FILE_UPLOAD_ERROR;
+import static com.tobe.healthy.common.error.ErrorCode.INVITE_LINK_NOT_FOUND;
+import static com.tobe.healthy.common.error.ErrorCode.INVITE_NAME_NOT_VALID;
+import static com.tobe.healthy.common.error.ErrorCode.JSON_PARSING_ERROR;
+import static com.tobe.healthy.common.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_ID_DUPLICATION;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_LOGIN_FAILED;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NAME_LENGTH_NOT_VALID;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NAME_NOT_VALID;
+import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NOT_FOUND;
+import static com.tobe.healthy.common.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
+import static com.tobe.healthy.common.error.ErrorCode.PROFILE_ACCESS_FAILED;
+import static com.tobe.healthy.common.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
+import static com.tobe.healthy.common.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
+import static com.tobe.healthy.common.error.ErrorCode.USERID_POLICY_VIOLATION;
+import static com.tobe.healthy.member.domain.entity.SocialType.APPLE;
+import static com.tobe.healthy.member.domain.entity.SocialType.GOOGLE;
+import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
+import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
+import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
+import static io.micrometer.common.util.StringUtils.isEmpty;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
+
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.crypto.ECDSASigner;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import com.tobe.healthy.common.Utils;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.error.OAuthError.GoogleError;
@@ -12,23 +51,53 @@ import com.tobe.healthy.common.error.OAuthError.NaverError;
 import com.tobe.healthy.common.error.OAuthException;
 import com.tobe.healthy.common.redis.RedisKeyPrefix;
 import com.tobe.healthy.common.redis.RedisService;
+import com.tobe.healthy.config.KeyUtil;
 import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.config.jwt.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
-import com.tobe.healthy.member.domain.dto.in.*;
+import com.tobe.healthy.member.domain.dto.in.CommandFindMemberPassword;
+import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
+import com.tobe.healthy.member.domain.dto.in.CommandLoginMember;
+import com.tobe.healthy.member.domain.dto.in.CommandRefreshToken;
+import com.tobe.healthy.member.domain.dto.in.CommandSocialLogin;
+import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
+import com.tobe.healthy.member.domain.dto.in.CommandVerification;
+import com.tobe.healthy.member.domain.dto.in.IdToken;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
-import com.tobe.healthy.member.domain.entity.*;
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberProfile;
+import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.member.domain.entity.SocialType;
+import com.tobe.healthy.member.domain.entity.Tokens;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.push.repository.MemberTokenRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import io.jsonwebtoken.impl.Base64UrlCodec;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.interfaces.ECPrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -39,24 +108,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.regex.Pattern;
-
-import static com.tobe.healthy.common.Utils.*;
-import static com.tobe.healthy.common.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.SocialType.*;
-import static io.micrometer.common.util.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 @Service
 @RequiredArgsConstructor
@@ -78,6 +129,21 @@ public class MemberAuthCommandService {
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
+
+    @Value("${oauth.apple.team-id}")
+    private String appleTeamId;
+
+    @Value("${oauth.apple.client-id}")
+    private String appleClientId;
+
+    @Value("${oauth.apple.key-path}")
+    private String appleKeyPath;
+
+    @Value("${oauth.apple.login-key}")
+    private String appleLoginKey;
+
+    @Value("${oauth.apple.redirect-uri}")
+    private String appleRedirectUri;
 
     public String sendEmailVerification(CommandValidateEmail request) {
         memberRepository.findByEmail(request.getEmail()).ifPresent(e -> {
@@ -283,6 +349,90 @@ public class MemberAuthCommandService {
         return tokenGenerator.create(member);
     }
 
+    public Tokens getAppleOAuth(CommandSocialLogin request) {
+        String token = decordToken(request.getIdToken());
+        try {
+            IdToken userInfo = new ObjectMapper().readValue(token, IdToken.class);
+            Optional<Member> findMember = memberRepository.findByUserId(userInfo.getSub());
+
+            if (findMember.isPresent()) {
+                if (isJoinMember(findMember.get(), APPLE, request.getMemberType())) {
+                    return tokenGenerator.create(findMember.get());
+                }
+            }
+
+            // TODO: 24. 7. 16. 애플로 로그인한 계정 삭제시 애플쪽에도 추가적으로 삭제처리 작업 필요
+            String nickname = request.getUser().getName().getLastName() + request.getUser().getName().getFirstName();
+
+            Member member = Member.builder()
+                    .userId(userInfo.getSub())
+                    .email(userInfo.getEmail())
+                    .name(nickname)
+                    .memberType(request.getMemberType())
+                    .socialType(APPLE)
+                    .build();
+
+            memberRepository.save(member);
+
+            //초대가입인 경우
+            if (StringUtils.isNotEmpty(request.getUuid())) {
+                mappingTrainerAndStudent(member, request.getUuid(), nickname, true);
+            }
+
+            log.info("[애플 회원가입 및 로그인] member: {}", member);
+
+            return tokenGenerator.create(member);
+
+        } catch (JsonMappingException e) {
+			throw new RuntimeException(e);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+    }
+
+    public String createClientSecret() {
+        Date now = new Date();
+
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+            .issuer(appleTeamId)
+            .issueTime(now)
+            .expirationTime(new Date(now.getTime() + 3600000))
+            .audience("https://appleid.apple.com")
+            .subject(appleClientId)
+            .build();
+
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES256).keyID(appleLoginKey).build();
+
+        SignedJWT signedJWT = new SignedJWT(header, claimsSet);
+
+        try {
+            ECPrivateKey ecPrivateKey = loadPrivateKey(appleKeyPath);
+            JWSSigner signer = new ECDSASigner(ecPrivateKey);
+            signedJWT.sign(signer);
+        } catch (InvalidKeySpecException | IOException e) {
+			throw new RuntimeException(e);
+		} catch (JOSEException e) {
+			throw new RuntimeException(e);
+		}
+
+		return signedJWT.serialize();
+    }
+
+    private ECPrivateKey loadPrivateKey(String keyPath) throws IOException, InvalidKeySpecException {
+        File file = new File(keyPath);
+
+        if (!file.exists()) {
+            throw new FileNotFoundException("File not found: " + keyPath);
+        }
+
+        try (PemReader pemReader = new PemReader(new FileReader(file))) {
+            PemObject pemObject = pemReader.readPemObject();
+            byte[] content = pemObject.getContent();
+            return KeyUtil.getPrivateKeyFromBytes(content);
+        }
+    }
+
+
     private boolean isJoinMember(Member member, SocialType google, MemberType memberType) {
         if (member.getSocialType().equals(google)) {
             if (!member.getMemberType().equals(memberType)) {
@@ -313,7 +463,7 @@ public class MemberAuthCommandService {
                 .bodyToMono(OAuthInfo.class)
                 .share().block();
         try {
-            String token = decordToken(result);
+            String token = decordToken(result.getIdToken());
             return new ObjectMapper().readValue(token, IdToken.class);
         } catch (JsonProcessingException e) {
             log.error("error => {}", e.getStackTrace()[0]);
@@ -415,8 +565,8 @@ public class MemberAuthCommandService {
                 .block();
     }
 
-    private static String decordToken(OAuthInfo result) {
-        byte[] decode = new Base64UrlCodec().decode(result.getIdToken().split("\\.")[1]);
+    private static String decordToken(String idToken) {
+        byte[] decode = new Base64UrlCodec().decode(idToken.split("\\.")[1]);
         return new String(decode, StandardCharsets.UTF_8);
     }
 

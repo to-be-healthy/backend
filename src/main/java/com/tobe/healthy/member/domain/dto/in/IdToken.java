@@ -28,4 +28,13 @@ public class IdToken {
 	private String email;
 
 	private String name;
+
+	@JsonProperty("c_hash")
+	private String cHash;
+
+	@JsonProperty("email_verified")
+	private boolean emailVerified;
+
+	@JsonProperty("nonce_supported")
+	private boolean nonceSupported;
 }

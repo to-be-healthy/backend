@@ -10,7 +10,8 @@ public enum SocialType implements EnumMapperType {
 	NONE("없음"),
 	KAKAO("카카오"),
 	NAVER("네이버"),
-	GOOGLE("구글");
+	GOOGLE("구글"),
+	APPLE("애플");
 
 	private final String description;
 

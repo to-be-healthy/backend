@@ -27,4 +27,9 @@ public class CommandSocialLogin {
 
 	@Schema(description = "초대링크로 가입하는 경우 uuid")
 	private String uuid;
+
+	@Schema(description = "애플 토큰 데이터")
+	private String idToken;
+
+	private CommandAppleUserInfo user;
 }
