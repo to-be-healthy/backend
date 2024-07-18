@@ -66,7 +66,8 @@ public class SecurityConfig {
                     "https://api.to-be-healthy.site",
                     "https://dev.api.to-be-healthy.site",
                     "https://www.to-be-healthy.site",
-                    "https://www.dev.to-be-healthy.site"
+                    "https://www.dev.to-be-healthy.site",
+                    "https://main.to-be-healthy.site"
             ));
             config.setAllowCredentials(true);
             return config;
