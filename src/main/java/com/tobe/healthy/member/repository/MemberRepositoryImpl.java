@@ -139,7 +139,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return queryFactory
                 .select(new QMemberDetailResult(member.id, member.name, member.nickname, memberProfile.fileUrl
                         , trainerMemberMapping.memo, trainerMemberMapping.ranking
-                        , schedule.lessonDt, schedule.lessonStartTime, member.invitationLink))
+                        , schedule.lessonDt, schedule.lessonStartTime, nonMember.id))
                 .from(member)
                 .leftJoin(memberProfile)
                 .on(member.memberProfile.id.eq(memberProfile.id))
@@ -149,6 +149,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                 .on(member.id.eq(schedule.applicant.id)
                         , scheduleReservationStatusEq(COMPLETED)
                         , lessonDateTimeAfterNow())
+                .leftJoin(nonMember).on(nonMember.member.id.eq(member.id))
                 .where(memberIdEq(memberId), memberDelYnEq(false))
                 .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
                 .limit(1)
