@@ -114,7 +114,7 @@ public class TrainerService {
 
         String uuid = System.currentTimeMillis() + "-" + UUID.randomUUID();
         String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
-        String invitationLink = "https://www.to-be-healthy.site/invite?type={type}&uuid={uuid}"
+        String invitationLink = "https://main.to-be-healthy.site/invite?type={type}&uuid={uuid}"
                 .replace("{type}", STUDENT.getCode().toLowerCase())
                 .replace("{uuid}", uuid);
 
@@ -140,7 +140,7 @@ public class TrainerService {
         if(500 < lessonCnt) throw new CustomException(LESSON_CNT_MAX);
 
         String uuid = System.currentTimeMillis() + "-" + UUID.randomUUID();
-        String invitationLink = "https://www.to-be-healthy.site/invite?type={type}&uuid={uuid}"
+        String invitationLink = "https://main.to-be-healthy.site/invite?type={type}&uuid={uuid}"
                 .replace("{type}", STUDENT.getCode().toLowerCase())
                 .replace("{uuid}", uuid);
 

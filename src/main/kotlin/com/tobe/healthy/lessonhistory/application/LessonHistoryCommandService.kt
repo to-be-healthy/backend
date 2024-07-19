@@ -79,7 +79,7 @@ class LessonHistoryCommandService(
         val files = registerFiles(request.uploadFiles, trainer, lessonHistory)
 
         // 학생에게 수업일지 작성 알림
-        sendNotification(WRITE, WRITE.content, lessonHistory.id!!, lessonHistory.student!!.id!!, "https://www.to-be-healthy.site/student/log/${lessonHistory.id}")
+        sendNotification(WRITE, WRITE.content, lessonHistory.id!!, lessonHistory.student!!.id!!, "https://main.to-be-healthy.site/student/log/${lessonHistory.id}")
 
         return CommandRegisterLessonHistoryResult.from(lessonHistory, files)
     }
@@ -232,7 +232,7 @@ class LessonHistoryCommandService(
                 content = COMMENT.content,
                 lessonHistoryId = lessonHistory.id!!,
                 memberId = lessonHistory.trainer!!.id!!,
-                clickUrl = "https://www.to-be-healthy.site/trainer/manage/${lessonHistory.student!!.id}/log/${lessonHistory.id}",
+                clickUrl = "https://main.to-be-healthy.site/trainer/manage/${lessonHistory.student!!.id}/log/${lessonHistory.id}",
                 studentId = lessonHistory.student!!.id,
                 studentName = lessonHistory.student!!.name
             )
@@ -274,7 +274,7 @@ class LessonHistoryCommandService(
                         content = REPLY.content,
                         lessonHistoryId = lessonHistory.id!!,
                         memberId = parentComment.writer?.id!!,
-                        clickUrl = "https://www.to-be-healthy.site/student/log/${lessonHistory.id}",
+                        clickUrl = "https://main.to-be-healthy.site/student/log/${lessonHistory.id}",
                         studentId = lessonHistory.student!!.id,
                         studentName = lessonHistory.student!!.name
                     )
@@ -286,7 +286,7 @@ class LessonHistoryCommandService(
                         content = REPLY.content,
                         lessonHistoryId = lessonHistory.id!!,
                         memberId = parentComment.writer?.id!!,
-                        clickUrl = "https://www.to-be-healthy.site/trainer/manage/${lessonHistory.student!!.id}/log/${lessonHistory.id}",
+                        clickUrl = "https://main.to-be-healthy.site/trainer/manage/${lessonHistory.student!!.id}/log/${lessonHistory.id}",
                         studentId = lessonHistory.student!!.id,
                         studentName = lessonHistory.student!!.name
                     )
