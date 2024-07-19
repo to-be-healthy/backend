@@ -118,9 +118,7 @@ class TrainerScheduleCommandService(
                 continue
             }
 
-            generateDisabledSchedules(schedules, lessonDt, trainer, dayLessonStartTime, defaultLessonStartTime, lessonTime)
             generateAvailableSchedules(schedules, lessonDt, trainer, defaultLessonStartTime, defaultLessonEndTime, trainerScheduleInfo, lessonTime)
-            generateDisabledSchedules(schedules, lessonDt, trainer, defaultLessonEndTime, dayLessonEndTime, lessonTime)
 
             lessonDt = lessonDt.plusDays(ONE_DAY)
         }
