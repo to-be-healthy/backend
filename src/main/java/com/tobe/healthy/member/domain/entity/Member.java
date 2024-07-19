@@ -133,8 +133,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@Builder.Default
 	private boolean delYn = false;
 
-	private String invitationLink;
-
 	public static Member join(CommandJoinMember request, String password) {
 		return Member.builder()
 				.userId(request.getUserId())
