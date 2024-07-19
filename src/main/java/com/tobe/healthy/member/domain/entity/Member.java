@@ -215,6 +215,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 		this.invitationLink = invitationLink;
 	}
 
+
 	public void registerProfile(String fileName, String fileUrl) {
 		this.memberProfile = MemberProfile.create(fileName, fileUrl, this);
 	}

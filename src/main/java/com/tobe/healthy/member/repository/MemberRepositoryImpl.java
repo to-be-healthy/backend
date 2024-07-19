@@ -11,6 +11,8 @@ import com.tobe.healthy.member.domain.dto.out.QMemberDetailResult;
 import com.tobe.healthy.member.domain.dto.out.QMemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.member.domain.entity.NonMember;
+import com.tobe.healthy.member.domain.entity.QNonMember;
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,7 @@ import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
 import static com.tobe.healthy.member.domain.entity.QMember.member;
 import static com.tobe.healthy.member.domain.entity.QMemberProfile.memberProfile;
+import static com.tobe.healthy.member.domain.entity.QNonMember.nonMember;
 import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
 import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
 import static com.tobe.healthy.trainer.domain.entity.QTrainerMemberMapping.trainerMemberMapping;
@@ -45,11 +48,12 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return queryFactory
                 .select(new QMemberInTeamResult(member.id, member.name, member.userId, member.email,
                         trainerMemberMapping.ranking, course.totalLessonCnt, course.remainLessonCnt,
-                        member.nickname, memberProfile.fileUrl, member.invitationLink))
+                        member.nickname, memberProfile.fileUrl, nonMember.id))
                 .from(trainerMemberMapping)
                 .innerJoin(trainerMemberMapping.member, member).on(trainerMemberMapping.member.id.eq(member.id))
                 .leftJoin(member.memberProfile, memberProfile)
                 .leftJoin(course).on(course.member.id.eq(member.id), course.remainLessonCnt.gt(0))
+                .leftJoin(nonMember).on(nonMember.member.id.eq(member.id))
                 .where(
                         mappingTrainerIdEq(trainerId),
                         memberTypeEq(STUDENT),
@@ -72,11 +76,12 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                         course.remainLessonCnt,
                         member.nickname,
                         memberProfile.fileUrl,
-                        member.invitationLink)
+                        nonMember.id)
                 )
                 .from(trainerMemberMapping)
                 .innerJoin(trainerMemberMapping.member, member).on(trainerMemberMapping.member.id.eq(member.id))
                 .leftJoin(member.memberProfile, memberProfile).leftJoin(course).on(course.member.id.eq(member.id), course.remainLessonCnt.gt(0))
+                .leftJoin(nonMember).on(nonMember.member.id.eq(member.id))
                 .where(
                         mappingTrainerIdEq(trainerId),
                         memberTypeEq(STUDENT),

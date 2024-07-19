@@ -21,7 +21,7 @@ public class MemberInTeamResult {
 	private boolean isNonmember;
 
 	@QueryProjection
-	public MemberInTeamResult(Long memberId, String name, String userId, String email, int ranking, int lessonCnt, int remainLessonCnt, String nickName, String fileUrl, String invitationLink) {
+	public MemberInTeamResult(Long memberId, String name, String userId, String email, int ranking, int lessonCnt, int remainLessonCnt, String nickName, String fileUrl, Long nonMemberId) {
 		this.memberId = memberId;
 		this.name = name;
 		this.userId = userId;
@@ -31,6 +31,6 @@ public class MemberInTeamResult {
 		this.remainLessonCnt = remainLessonCnt;
 		this.nickName = nickName;
 		this.fileUrl = fileUrl;
-		this.isNonmember = invitationLink != null;
+		this.isNonmember = nonMemberId != null;
 	}
 }

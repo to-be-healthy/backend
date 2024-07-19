@@ -15,7 +15,9 @@ import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
 import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.NonMember;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.member.repository.NonMemberRepository;
 import com.tobe.healthy.point.domain.dto.out.PointDto;
 import com.tobe.healthy.point.domain.dto.out.RankDto;
 import com.tobe.healthy.point.repository.PointRepository;
@@ -41,6 +43,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.tobe.healthy.common.Utils.ONE_DAY;
 import static com.tobe.healthy.common.error.ErrorCode.*;
 import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
 import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
@@ -59,8 +62,7 @@ public class TrainerService {
     private final CourseService courseService;
     private final ScheduleWaitingRepository scheduleWaitingRepository;
     private final PointRepository pointRepository;
-
-    private static final int ONE_DAY = 24 * 60 * 60 * 1000;
+    private final NonMemberRepository nonMemberRepository;
 
 
     public TrainerMemberMappingDto addStudentOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
@@ -150,8 +152,10 @@ public class TrainerService {
                 .memberType(STUDENT)
                 .build();
         Member member = Member.join(request, null);
-        member.registerInvitationLink(invitationLink);
         memberRepository.save(member);
+
+        NonMember nonMember = NonMember.create(member, invitationLink, name, trainer.getId(), lessonCnt);
+        nonMemberRepository.save(nonMember);
 
         //트레이너 매핑 & 수강권 등록
         addStudentOfTrainerByNonmember(trainer.getId(), member, new MemberLessonCommand(command.getLessonCnt()));
