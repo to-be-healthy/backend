@@ -211,11 +211,6 @@ public class Member extends BaseTimeEntity<Member, Long> {
 		this.email = email;
 	}
 
-	public void registerInvitationLink(String invitationLink) {
-		this.invitationLink = invitationLink;
-	}
-
-
 	public void registerProfile(String fileName, String fileUrl) {
 		this.memberProfile = MemberProfile.create(fileName, fileUrl, this);
 	}
@@ -229,5 +224,15 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	public void deleteProfile() {
 		this.memberProfile = null;
+	}
+
+	public void updateNonMemberInfo(CommandJoinMember request, String password) {
+		this.userId = request.getUserId();
+		this.email = request.getEmail();
+		this.password = password;
+		this.name = request.getName();
+		this.pushAlarmStatus = ENABLED;
+		this.memberType = request.getMemberType();
+		this.socialType = NONE;
 	}
 }

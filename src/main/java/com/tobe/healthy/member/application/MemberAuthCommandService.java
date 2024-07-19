@@ -22,6 +22,7 @@ import static com.tobe.healthy.common.error.ErrorCode.PROFILE_ACCESS_FAILED;
 import static com.tobe.healthy.common.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
 import static com.tobe.healthy.common.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
 import static com.tobe.healthy.common.error.ErrorCode.USERID_POLICY_VIOLATION;
+import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
 import static com.tobe.healthy.member.domain.entity.SocialType.APPLE;
 import static com.tobe.healthy.member.domain.entity.SocialType.GOOGLE;
 import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
@@ -68,12 +69,9 @@ import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberProfile;
-import com.tobe.healthy.member.domain.entity.MemberType;
-import com.tobe.healthy.member.domain.entity.SocialType;
-import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.member.domain.entity.*;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.member.repository.NonMemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import io.jsonwebtoken.impl.Base64UrlCodec;
 import java.io.ByteArrayInputStream;
@@ -126,6 +124,7 @@ public class MemberAuthCommandService {
     private final AmazonS3 amazonS3;
     private final MailService mailService;
     private final CourseService courseService;
+    private final NonMemberRepository nonMemberRepository;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -180,16 +179,15 @@ public class MemberAuthCommandService {
 
         String password = passwordEncoder.encode(request.getPassword());
         Member member = Member.join(request, password);
-        memberRepository.save(member);
 
-        CommandJoinMemberResult result;
-        if (StringUtils.isEmpty(request.getUuid())) {
-            result = CommandJoinMemberResult.from(member);
-        } else { //초대가입
-            result = joinWithInvitation(request, CommandJoinMemberResult.from(member));
-        }
         log.info("[회원가입] member: {}", member);
-        return result;
+        if (StringUtils.isEmpty(request.getUuid())) { //회원가입
+            memberRepository.save(member);
+            return CommandJoinMemberResult.from(member);
+
+        } else { //미가입 회원이 초대받아서 가입하는 경우 (회원 정보 update)
+            return updateNonMemberInfo(request, password);
+        }
     }
 
     public Tokens login(CommandLoginMember request) {
@@ -248,12 +246,18 @@ public class MemberAuthCommandService {
         );
     }
 
-    public CommandJoinMemberResult joinWithInvitation(CommandJoinMember request, CommandJoinMemberResult result) {
-        Member member = memberRepository.findById(result.getId())
-                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+    public CommandJoinMemberResult updateNonMemberInfo(CommandJoinMember request, String password) {
+        String invitationLink = "https://main.to-be-healthy.site/invite?type=student&uuid=" + request.getUuid();
+        NonMember nonMember = nonMemberRepository.findByInvitationLink(invitationLink)
+                .orElseThrow(() -> new CustomException(INVITE_LINK_NOT_FOUND));
 
-        mappingTrainerAndStudent(member, request.getUuid(), request.getName(), false);
-        return result;
+        Member member = memberRepository.findById(nonMember.getMember().getId())
+                .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        if(!member.getName().equals(request.getName())) throw new CustomException(INVITE_NAME_NOT_VALID);
+
+        member.updateNonMemberInfo(request, password);
+        nonMemberRepository.delete(nonMember);
+        return CommandJoinMemberResult.from(member);
     }
 
     public Tokens getNaverAccessToken(CommandSocialLogin request) {
