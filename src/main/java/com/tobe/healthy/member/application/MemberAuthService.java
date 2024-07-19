@@ -1,28 +1,26 @@
 package com.tobe.healthy.member.application;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tobe.healthy.common.error.CustomException;
-import com.tobe.healthy.common.redis.RedisKeyPrefix;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
 import com.tobe.healthy.member.domain.dto.in.FindMemberUserId;
 import com.tobe.healthy.member.domain.dto.in.FindMemberUserId.FindMemberUserIdResult;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.NonMember;
 import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.member.repository.NonMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.tobe.healthy.common.Utils.validateUserId;
 import static com.tobe.healthy.common.error.ErrorCode.*;
 import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
-import static io.micrometer.common.util.StringUtils.isEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +31,7 @@ public class MemberAuthService {
     private final MemberRepository memberRepository;
     private final RedisService redisService;
     private final ObjectMapper objectMapper;
+    private final NonMemberRepository nonMemberRepository;
 
     public boolean validateUserIdDuplication(String userId) {
         if (validateUserId(userId)) {
@@ -69,27 +68,16 @@ public class MemberAuthService {
     }
 
     public InvitationMappingResult getInvitationMapping(String uuid) {
-        Map<String, String> map = getInviteMappingData(uuid);
-        Long trainerId = Long.valueOf(map.get("trainerId"));
-        String name = map.get("name");
-        int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
-        Member member = memberRepository.findByIdAndDelYnFalse(trainerId)
+        NonMember nonMember = getNonmemberData(uuid);
+        Member member = memberRepository.findByIdAndDelYnFalse(nonMember.getTrainerId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-        return InvitationMappingResult.create(member, name, lessonCnt);
+        return InvitationMappingResult.create(member, nonMember.getName(), nonMember.getLessonCnt());
     }
 
-    private Map<String, String> getInviteMappingData(String uuid) {
-        String invitationKey = RedisKeyPrefix.INVITATION.getDescription() + uuid;
-        String mappedData = redisService.getValues(invitationKey);
-        if (isEmpty(mappedData)) {
-            throw new CustomException(INVITE_LINK_NOT_FOUND);
-        }
-        HashMap<String, String> map = new HashMap<>();
-        try {
-            map = objectMapper.readValue(mappedData, HashMap.class);
-        } catch (JsonProcessingException e) {
-            log.error("error => {}", e.getStackTrace()[0]);
-        }
-        return map;
+    private NonMember getNonmemberData(String uuid) {
+        String invitationLink = "https://main.to-be-healthy.site/invite?type=student&uuid=" + uuid;
+        NonMember nonMember = nonMemberRepository.findByInvitationLink(invitationLink)
+                .orElseThrow(() -> new CustomException(INVITE_LINK_NOT_FOUND));
+        return nonMember;
     }
 }
