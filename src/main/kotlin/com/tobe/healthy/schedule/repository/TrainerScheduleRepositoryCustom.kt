@@ -4,6 +4,7 @@ import com.tobe.healthy.lessonhistory.domain.dto.`in`.UnwrittenLessonHistorySear
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
+import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByTrainerId
 import com.tobe.healthy.schedule.domain.dto.out.FeedbackNotificationToTrainer
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
 import com.tobe.healthy.schedule.domain.entity.ReservationStatus
@@ -20,6 +21,7 @@ interface TrainerScheduleRepositoryCustom {
     fun validateDuplicateSchedule(trainerScheduleInfo: TrainerScheduleInfo, request: CommandRegisterSchedule, trainerId: Long): Boolean
     fun findAvailableWaitingId(scheduleId: Long): Optional<Schedule>
     fun findAllSchedule(request: RetrieveTrainerScheduleByLessonInfo, trainerId: Long): List<Schedule>
+    fun findAllSchedule(request: RetrieveTrainerScheduleByTrainerId, trainerId: Long): List<Schedule>
     fun findAllSchedule(scheduleIds: List<Long>, reservationStatus: ReservationStatus, trainerId: Long): List<Schedule>
     fun findAllSchedule(scheduleIds: List<Long>, reservationStatus: List<ReservationStatus>, trainerId: Long): List<Schedule>
     fun findAllSchedule(scheduleId: Long, reservationStatus: ReservationStatus, trainerId: Long): Schedule?

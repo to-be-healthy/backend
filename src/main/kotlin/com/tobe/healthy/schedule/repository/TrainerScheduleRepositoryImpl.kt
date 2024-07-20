@@ -16,6 +16,7 @@ import com.tobe.healthy.member.domain.entity.QMember.member
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
+import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByTrainerId
 import com.tobe.healthy.schedule.domain.dto.out.FeedbackNotificationToTrainer
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonInfoResult
@@ -53,6 +54,27 @@ class TrainerScheduleRepositoryImpl(
             .leftJoin(schedule.scheduleWaiting, scheduleWaiting).fetchJoin()
             .where(
                 lessonDtMonthEq(request.lessonDt),
+                lessonDtBetween(
+                    request.lessonStartDt,
+                    request.lessonEndDt
+                ),
+                trainerIdEq(trainerId)
+            )
+            .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+            .fetch()
+    }
+
+    override fun findAllSchedule(
+        request: RetrieveTrainerScheduleByTrainerId,
+        trainerId: Long
+    ): List<Schedule> {
+        return queryFactory
+            .select(schedule)
+            .from(schedule)
+            .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
+            .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
+            .leftJoin(schedule.scheduleWaiting, scheduleWaiting).fetchJoin()
+            .where(
                 lessonDtBetween(
                     request.lessonStartDt,
                     request.lessonEndDt

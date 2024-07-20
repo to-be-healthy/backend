@@ -3,6 +3,7 @@ package com.tobe.healthy.schedule.application
 import com.tobe.healthy.common.KotlinCustomPaging
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
+import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByTrainerId
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveApplicantSchedule
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerDefaultLessonTimeResult
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
@@ -29,6 +30,14 @@ class TrainerScheduleService(
     fun findAllSchedule(
         request: RetrieveTrainerScheduleByLessonInfo,
         trainerId: Long
+    ): RetrieveTrainerScheduleByLessonInfoResult? {
+        val schedules = trainerScheduleRepository.findAllSchedule(request, trainerId)
+        return RetrieveTrainerScheduleByLessonInfoResult.from(schedules)
+    }
+
+    fun findAllSchedule(
+        trainerId: Long,
+        request: RetrieveTrainerScheduleByTrainerId,
     ): RetrieveTrainerScheduleByLessonInfoResult? {
         val schedules = trainerScheduleRepository.findAllSchedule(request, trainerId)
         return RetrieveTrainerScheduleByLessonInfoResult.from(schedules)

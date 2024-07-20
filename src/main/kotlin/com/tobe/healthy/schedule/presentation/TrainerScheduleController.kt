@@ -6,6 +6,7 @@ import com.tobe.healthy.config.security.CustomMemberDetails
 import com.tobe.healthy.schedule.application.TrainerScheduleService
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
 import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
+import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByTrainerId
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveApplicantSchedule
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerDefaultLessonTimeResult
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
@@ -63,6 +64,23 @@ class TrainerScheduleController(
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
             data = trainerScheduleService.findAllSchedule(retrieveTrainerScheduleByLessonInfo, customMemberDetails.memberId)
+        )
+    }
+
+    @Operation(
+        summary = "트레이너의 일정을 조회한다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "트레이너의 일정 조회 완료")
+        ]
+    )
+    @GetMapping("/all/{trainerId}")
+    fun findAllScheduleByTrainerId(
+        @PathVariable trainerId: Long,
+        @ParameterObject request: RetrieveTrainerScheduleByTrainerId
+    ): ApiResultResponse<RetrieveTrainerScheduleByLessonInfoResult?> {
+        return ApiResultResponse(
+            message = "트레이너의 일정을 조회했습니다.",
+            data = trainerScheduleService.findAllSchedule(trainerId, request)
         )
     }
 
