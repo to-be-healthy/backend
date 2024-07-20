@@ -120,7 +120,7 @@ public class HomeService {
             }
         }
 
-        RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(trainerId);
+        RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(null, trainerId);
 
         // 알림 레드닷 여부
         boolean redDotStatus = notificationService.findRedDotStatus(trainerId);

@@ -1,37 +1,5 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.common.Utils.CDN_DOMAIN;
-import static com.tobe.healthy.common.Utils.EMAIL_AUTH_TIMEOUT;
-import static com.tobe.healthy.common.Utils.S3_DOMAIN;
-import static com.tobe.healthy.common.Utils.createObjectMetadata;
-import static com.tobe.healthy.common.Utils.createProfileName;
-import static com.tobe.healthy.common.error.ErrorCode.CONFIRM_PASSWORD_NOT_MATCHED;
-import static com.tobe.healthy.common.error.ErrorCode.FILE_UPLOAD_ERROR;
-import static com.tobe.healthy.common.error.ErrorCode.INVITE_LINK_NOT_FOUND;
-import static com.tobe.healthy.common.error.ErrorCode.INVITE_NAME_NOT_VALID;
-import static com.tobe.healthy.common.error.ErrorCode.JSON_PARSING_ERROR;
-import static com.tobe.healthy.common.error.ErrorCode.MAIL_AUTH_CODE_NOT_VALID;
-import static com.tobe.healthy.common.error.ErrorCode.MEMBER_EMAIL_DUPLICATION;
-import static com.tobe.healthy.common.error.ErrorCode.MEMBER_ID_DUPLICATION;
-import static com.tobe.healthy.common.error.ErrorCode.MEMBER_LOGIN_FAILED;
-import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NAME_LENGTH_NOT_VALID;
-import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NAME_NOT_VALID;
-import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NOT_FOUND;
-import static com.tobe.healthy.common.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
-import static com.tobe.healthy.common.error.ErrorCode.PROFILE_ACCESS_FAILED;
-import static com.tobe.healthy.common.error.ErrorCode.REFRESH_TOKEN_NOT_FOUND;
-import static com.tobe.healthy.common.error.ErrorCode.REFRESH_TOKEN_NOT_VALID;
-import static com.tobe.healthy.common.error.ErrorCode.USERID_POLICY_VIOLATION;
-import static com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED;
-import static com.tobe.healthy.member.domain.entity.SocialType.APPLE;
-import static com.tobe.healthy.member.domain.entity.SocialType.GOOGLE;
-import static com.tobe.healthy.member.domain.entity.SocialType.KAKAO;
-import static com.tobe.healthy.member.domain.entity.SocialType.NAVER;
-import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
-import static io.micrometer.common.util.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
-
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -57,15 +25,7 @@ import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.config.jwt.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
-import com.tobe.healthy.member.domain.dto.in.CommandFindMemberPassword;
-import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
-import com.tobe.healthy.member.domain.dto.in.CommandLoginMember;
-import com.tobe.healthy.member.domain.dto.in.CommandRefreshToken;
-import com.tobe.healthy.member.domain.dto.in.CommandSocialLogin;
-import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
-import com.tobe.healthy.member.domain.dto.in.CommandVerification;
-import com.tobe.healthy.member.domain.dto.in.IdToken;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
+import com.tobe.healthy.member.domain.dto.in.*;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
@@ -74,22 +34,6 @@ import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.member.repository.NonMemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 import io.jsonwebtoken.impl.Base64UrlCodec;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.security.interfaces.ECPrivateKey;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -106,6 +50,21 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.io.*;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.interfaces.ECPrivateKey;
+import java.security.spec.InvalidKeySpecException;
+import java.util.*;
+import java.util.regex.Pattern;
+
+import static com.tobe.healthy.common.Utils.*;
+import static com.tobe.healthy.common.error.ErrorCode.*;
+import static com.tobe.healthy.member.domain.entity.SocialType.*;
+import static io.micrometer.common.util.StringUtils.isEmpty;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 @Service
 @RequiredArgsConstructor
@@ -228,7 +187,7 @@ public class MemberAuthCommandService {
     }
 
     public CommandFindMemberPasswordResult findMemberPW(CommandFindMemberPassword request) {
-        Member member = memberRepository.findPasswordByEmailAndName(request.getEmail(), request.getName())
+        Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         if (member.getSocialType() != NONE) {

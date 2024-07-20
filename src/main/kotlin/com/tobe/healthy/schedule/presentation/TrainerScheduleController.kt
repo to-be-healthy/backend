@@ -110,14 +110,14 @@ class TrainerScheduleController(
     )
     @GetMapping("/{studentId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    fun findAllScheduleByStduentId(
+    fun findAllScheduleByStudentId(
         @PathVariable studentId: Long,
         @ParameterObject @PageableDefault(size = 10) pageable: Pageable,
         @AuthenticationPrincipal customMemberDetails: CustomMemberDetails
     ): ApiResultResponse<KotlinCustomPaging<RetrieveApplicantSchedule>> {
         return ApiResultResponse(
             message = "학생의 일정을 조회했습니다.",
-            data = trainerScheduleService.findAllScheduleByStduentId(studentId, pageable, customMemberDetails.memberId)
+            data = trainerScheduleService.findAllScheduleByStudentId(studentId, pageable, customMemberDetails.memberId)
         )
     }
 }

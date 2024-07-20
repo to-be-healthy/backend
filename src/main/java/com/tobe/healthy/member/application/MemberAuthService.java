@@ -16,8 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-
 import static com.tobe.healthy.common.Utils.validateUserId;
 import static com.tobe.healthy.common.error.ErrorCode.*;
 import static com.tobe.healthy.member.domain.entity.SocialType.NONE;
@@ -54,7 +52,7 @@ public class MemberAuthService {
 
     public FindMemberUserIdResult findUserId(FindMemberUserId request) {
 
-        Member member = memberRepository.findIdByEmailAndName(request.getEmail(), request.getName())
+        Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
         if (member.getSocialType() != NONE) {

@@ -221,7 +221,7 @@ class LessonHistoryCommandService(
         val lessonHistory = lessonHistoryRepository.findById(lessonHistoryId, member.memberId, member.memberType)
             ?: throw CustomException(LESSON_HISTORY_NOT_FOUND)
 
-        val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id)
+        val order = lessonHistoryCommentRepository.findTopComment(lessonHistory.id, null)
         val lessonHistoryComment = registerComment(order, request, findMember, lessonHistory)
         val files = registerFile(request.uploadFiles, findMember, lessonHistory, lessonHistoryComment)
 

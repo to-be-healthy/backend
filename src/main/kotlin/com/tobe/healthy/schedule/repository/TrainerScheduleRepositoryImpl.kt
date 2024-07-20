@@ -14,9 +14,6 @@ import com.tobe.healthy.member.domain.entity.AlarmStatus.ENABLED
 import com.tobe.healthy.member.domain.entity.QMember
 import com.tobe.healthy.member.domain.entity.QMember.member
 import com.tobe.healthy.schedule.domain.dto.`in`.CommandRegisterSchedule
-import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonDt
-import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByLessonInfo
-import com.tobe.healthy.schedule.domain.dto.`in`.RetrieveTrainerScheduleByTrainerId
 import com.tobe.healthy.schedule.domain.dto.out.FeedbackNotificationToTrainer
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonDtResult
 import com.tobe.healthy.schedule.domain.dto.out.RetrieveTrainerScheduleByLessonInfoResult
@@ -32,6 +29,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.support.PageableExecutionUtils
 import org.springframework.stereotype.Repository
 import org.springframework.util.ObjectUtils
+import org.springframework.util.StringUtils
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
@@ -43,7 +41,9 @@ class TrainerScheduleRepositoryImpl(
 ) : TrainerScheduleRepositoryCustom {
 
     override fun findAllSchedule(
-        request: RetrieveTrainerScheduleByLessonInfo,
+        lessonDt: String?,
+        lessonStartDt: LocalDate?,
+        lessonEndDt: LocalDate?,
         trainerId: Long
     ): List<Schedule> {
         return queryFactory
@@ -53,31 +53,10 @@ class TrainerScheduleRepositoryImpl(
             .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
             .leftJoin(schedule.scheduleWaiting, scheduleWaiting).fetchJoin()
             .where(
-                lessonDtMonthEq(request.lessonDt),
+                lessonDtMonthEq(lessonDt),
                 lessonDtBetween(
-                    request.lessonStartDt,
-                    request.lessonEndDt
-                ),
-                trainerIdEq(trainerId)
-            )
-            .orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
-            .fetch()
-    }
-
-    override fun findAllSchedule(
-        request: RetrieveTrainerScheduleByTrainerId,
-        trainerId: Long
-    ): List<Schedule> {
-        return queryFactory
-            .select(schedule)
-            .from(schedule)
-            .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
-            .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
-            .leftJoin(schedule.scheduleWaiting, scheduleWaiting).fetchJoin()
-            .where(
-                lessonDtBetween(
-                    request.lessonStartDt,
-                    request.lessonEndDt
+                    lessonStartDt,
+                    lessonEndDt
                 ),
                 trainerIdEq(trainerId)
             )
@@ -86,7 +65,7 @@ class TrainerScheduleRepositoryImpl(
     }
 
     override fun findOneTrainerTodaySchedule(
-        request: RetrieveTrainerScheduleByLessonDt,
+        lessonDt: String?,
         trainerId: Long
     ): RetrieveTrainerScheduleByLessonDtResult? {
         val results = queryFactory
@@ -95,7 +74,7 @@ class TrainerScheduleRepositoryImpl(
             .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
             .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
             .where(
-                lessonDtEq(request.lessonDt),
+                lessonDtEq(lessonDt),
                 trainerIdEq(trainerId),
                 reservationStatusEq(COMPLETED)
             )
@@ -106,7 +85,7 @@ class TrainerScheduleRepositoryImpl(
             .select(schedule.count())
             .from(schedule)
             .where(
-                lessonDtEq(request.lessonDt),
+                lessonDtEq(lessonDt),
                 trainerIdEq(trainerId),
                 reservationStatusEq(COMPLETED)
             )
@@ -128,53 +107,6 @@ class TrainerScheduleRepositoryImpl(
                 }
             }
             
-            return trainerTodaySchedule
-        }
-    }
-
-    override fun findOneTrainerTodaySchedule(trainerId: Long): RetrieveTrainerScheduleByLessonDtResult? {
-        val results = queryFactory
-            .select(schedule)
-            .from(schedule)
-            .leftJoin(schedule.trainer, QMember("trainer")).fetchJoin()
-            .leftJoin(schedule.applicant, QMember("applicant")).fetchJoin()
-            .where(
-                schedule.lessonDt.eq(LocalDate.now()),
-                trainerIdEq(trainerId),
-                reservationStatusEq(COMPLETED)
-            )
-            .orderBy(
-                schedule.lessonDt.asc(),
-                schedule.lessonStartTime.asc()
-            )
-            .fetch()
-
-        val scheduleCount = queryFactory
-            .select(schedule.count())
-            .from(schedule)
-            .where(
-                schedule.lessonDt.eq(LocalDate.now()),
-                trainerIdEq(trainerId),
-                reservationStatusEq(COMPLETED)
-            )
-            .fetchOne()
-
-
-        val response = RetrieveTrainerScheduleByLessonInfoResult.from(results)
-
-        response.let {
-            val trainerTodaySchedule = RetrieveTrainerScheduleByLessonDtResult(
-                trainerName = response.trainerName,
-                scheduleTotalCount = scheduleCount!!,
-            )
-
-            response.schedule?.forEach { (key, value) ->
-                value.filter {
-                    it.lessonStartTime?.isAfter(LocalTime.now()) == true
-                }.forEach {
-                    trainerTodaySchedule.schedule.add(it)
-                }
-            }
             return trainerTodaySchedule
         }
     }
@@ -221,22 +153,6 @@ class TrainerScheduleRepositoryImpl(
 
     override fun findAllSchedule(
         scheduleIds: List<Long>,
-        reservationStatus: ReservationStatus,
-        trainerId: Long
-    ): List<Schedule> {
-        return queryFactory
-            .select(schedule)
-            .from(schedule)
-            .where(
-                scheduleIdIn(scheduleIds),
-                trainerIdEq(trainerId),
-                reservationStatusEq(reservationStatus)
-            )
-            .fetch()
-    }
-
-    override fun findAllSchedule(
-        scheduleIds: List<Long>,
         reservationStatus: List<ReservationStatus>,
         trainerId: Long
     ): List<Schedule> {
@@ -259,19 +175,6 @@ class TrainerScheduleRepositoryImpl(
                 scheduleIdEq(scheduleId),
                 trainerIdEq(trainerId),
                 reservationStatusEq(reservationStatus)
-            )
-            .fetchOne()
-    }
-
-    override fun findAllSchedule(scheduleId: Long, trainerId: Long): Schedule? {
-        return queryFactory
-            .select(schedule)
-            .from(schedule)
-            .leftJoin(schedule.scheduleWaiting).fetchJoin()
-            .where(
-                scheduleIdEq(scheduleId),
-                trainerIdEq(trainerId),
-                reservationStatusEq(COMPLETED)
             )
             .fetchOne()
     }
@@ -346,7 +249,7 @@ class TrainerScheduleRepositoryImpl(
             .fetch()
     }
 
-    override fun findAllScheduleByStduentId(
+    override fun findAllScheduleByStudentId(
         studentId: Long,
         pageable: Pageable,
         trainerId: Long
@@ -433,7 +336,10 @@ class TrainerScheduleRepositoryImpl(
         return null
     }
 
-    private fun lessonDtEq(lessonDt: String): BooleanExpression? {
+    private fun lessonDtEq(lessonDt: String?): BooleanExpression? {
+        if (!StringUtils.hasText(lessonDt)) {
+            return null
+        }
         val formattedDate = stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d')", schedule.lessonDt)
         return formattedDate.eq(lessonDt)
     }

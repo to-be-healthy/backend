@@ -31,7 +31,7 @@ class TrainerScheduleService(
         request: RetrieveTrainerScheduleByLessonInfo,
         trainerId: Long
     ): RetrieveTrainerScheduleByLessonInfoResult? {
-        val schedules = trainerScheduleRepository.findAllSchedule(request, trainerId)
+        val schedules = trainerScheduleRepository.findAllSchedule(request.lessonDt, request.lessonStartDt, request.lessonEndDt, trainerId)
         return RetrieveTrainerScheduleByLessonInfoResult.from(schedules)
     }
 
@@ -39,7 +39,7 @@ class TrainerScheduleService(
         trainerId: Long,
         request: RetrieveTrainerScheduleByTrainerId,
     ): RetrieveTrainerScheduleByLessonInfoResult? {
-        val schedules = trainerScheduleRepository.findAllSchedule(request, trainerId)
+        val schedules = trainerScheduleRepository.findAllSchedule(null, request.lessonStartDt, request.lessonEndDt, trainerId)
         return RetrieveTrainerScheduleByLessonInfoResult.from(schedules)
     }
 
@@ -47,16 +47,16 @@ class TrainerScheduleService(
         request: RetrieveTrainerScheduleByLessonDt,
         trainerId: Long
     ): RetrieveTrainerScheduleByLessonDtResult? {
-        return trainerScheduleRepository.findOneTrainerTodaySchedule(request, trainerId)
+        return trainerScheduleRepository.findOneTrainerTodaySchedule(request.lessonDt, trainerId)
     }
 
-    fun findAllScheduleByStduentId(
+    fun findAllScheduleByStudentId(
         studentId: Long,
         pageable: Pageable,
         trainerId: Long
     ): KotlinCustomPaging<RetrieveApplicantSchedule> {
 
-        val schedules = trainerScheduleRepository.findAllScheduleByStduentId(studentId, pageable, trainerId)
+        val schedules = trainerScheduleRepository.findAllScheduleByStudentId(studentId, pageable, trainerId)
 
         val contents = schedules.map { RetrieveApplicantSchedule.from(it) }
 

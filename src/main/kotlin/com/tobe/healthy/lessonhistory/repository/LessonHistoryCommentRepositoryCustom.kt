@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface LessonHistoryCommentRepositoryCustom {
-    fun findTopComment(lessonHistoryId: Long?): Int
     fun findTopComment(lessonHistoryId: Long?, lessonHistoryCommentId: Long?): Int
     fun findLessonHistoryCommentWithFiles(lessonHistoryCommentId: Long, writerId: Long): LessonHistoryComment?
     fun findCommentById(lessonHistoryCommentId: Long): LessonHistoryComment?

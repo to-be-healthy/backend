@@ -5,23 +5,12 @@ import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryComment
 import com.tobe.healthy.lessonhistory.domain.entity.QLessonHistoryComment.lessonHistoryComment
 import org.springframework.stereotype.Repository
+import org.springframework.util.ObjectUtils
 
 @Repository
 class LessonHistoryCommentRepositoryImpl(
     private val queryFactory: JPAQueryFactory
 ) : LessonHistoryCommentRepositoryCustom {
-
-    override fun findTopComment(lessonHistoryId: Long?): Int {
-        val result = queryFactory
-            .select(lessonHistoryComment.order.max().add(1))
-            .from(lessonHistoryComment)
-            .where(
-                lessonHistoryIdEq(lessonHistoryId),
-                parentCommentIdIsNull()
-            )
-            .fetchOne() ?: 1
-        return result
-    }
 
     override fun findTopComment(lessonHistoryId: Long?, lessonHistoryCommentId: Long?): Int {
         return queryFactory
@@ -73,8 +62,12 @@ class LessonHistoryCommentRepositoryImpl(
             .fetchOne()
     }
 
-    private fun parentCommentIdEq(lessonHistoryCommentParentId: Long?): BooleanExpression? =
-        lessonHistoryComment.parent.id.eq(lessonHistoryCommentParentId)
+    private fun parentCommentIdEq(lessonHistoryCommentParentId: Long?): BooleanExpression? {
+        if (ObjectUtils.isEmpty(lessonHistoryCommentParentId)) {
+            return null
+        }
+        return lessonHistoryComment.parent.id.eq(lessonHistoryCommentParentId)
+    }
 
     private fun parentCommentIdIsNull(): BooleanExpression =
         lessonHistoryComment.parent.isNull

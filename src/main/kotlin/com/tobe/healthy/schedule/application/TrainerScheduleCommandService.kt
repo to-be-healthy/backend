@@ -106,10 +106,10 @@ class TrainerScheduleCommandService(
         // 일정 등록 시작
         while (!lessonDt.isAfter(lessonEndDt)) {
 
-            var defaultLessonStartTime = LocalDateTime.of(lessonDt, trainerScheduleInfo.lessonStartTime)
-            var defaultLessonEndTime = LocalDateTime.of(lessonDt, trainerScheduleInfo.lessonEndTime)
-            var dayLessonStartTime = LocalDateTime.of(lessonDt, LocalTime.of(6, 0))
-            var dayLessonEndTime = LocalDateTime.of(lessonDt.plusDays(1), LocalTime.of(0, 0))
+            val defaultLessonStartTime = LocalDateTime.of(lessonDt, trainerScheduleInfo.lessonStartTime)
+            val defaultLessonEndTime = LocalDateTime.of(lessonDt, trainerScheduleInfo.lessonEndTime)
+            val dayLessonStartTime = LocalDateTime.of(lessonDt, LocalTime.of(6, 0))
+            val dayLessonEndTime = LocalDateTime.of(lessonDt.plusDays(1), LocalTime.of(0, 0))
 
             // 휴무일일 경우
             if (isClosedDay(trainerScheduleInfo, lessonDt)) {
@@ -152,7 +152,7 @@ class TrainerScheduleCommandService(
         when (status) {
 
             AVAILABLE -> {
-                schedules = trainerScheduleRepository.findAllSchedule(request.scheduleIds!!, DISABLED, memberId)
+                schedules = trainerScheduleRepository.findAllSchedule(request.scheduleIds!!, listOf(DISABLED), memberId)
 
                 if (schedules.isEmpty()) {
                     throw CustomException(SCHEDULE_NOT_FOUND)
@@ -228,7 +228,7 @@ class TrainerScheduleCommandService(
         trainerId: Long
     ): CommandCancelStudentReservationResult {
 
-        val schedule = trainerScheduleRepository.findAllSchedule(scheduleId, trainerId)
+        val schedule = trainerScheduleRepository.findAllSchedule(scheduleId, COMPLETED, trainerId)
             ?: throw CustomException(SCHEDULE_NOT_FOUND)
 
         val applicantId = schedule.applicant?.id
