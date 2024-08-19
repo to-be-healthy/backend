@@ -358,7 +358,7 @@ public class MemberAuthCommandService {
     }
 
     public Tokens getAppleOAuth(CommandSocialLogin request) {
-        String token = decordToken(request.getIdToken());
+        String token = decordToken(request.getId_token());
         try {
             IdToken userInfo = new ObjectMapper().readValue(token, IdToken.class);
             Optional<Member> findMember = memberRepository.findByUserId(userInfo.getSub());
