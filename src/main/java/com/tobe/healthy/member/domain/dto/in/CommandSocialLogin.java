@@ -1,5 +1,6 @@
 package com.tobe.healthy.member.domain.dto.in;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -29,6 +30,7 @@ public class CommandSocialLogin {
 	private String uuid;
 
 	@Schema(description = "애플 토큰 데이터")
+	@JsonProperty("id_token")
 	private String idToken;
 
 	private CommandAppleUserInfo user;
