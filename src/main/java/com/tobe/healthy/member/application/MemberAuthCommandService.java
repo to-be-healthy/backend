@@ -145,9 +145,6 @@ public class MemberAuthCommandService {
     @Value("${oauth.apple.login-key}")
     private String appleLoginKey;
 
-    @Value("${oauth.apple.redirect-uri}")
-    private String appleRedirectUri;
-
     public String sendEmailVerification(CommandValidateEmail request) {
         memberRepository.findByEmail(request.getEmail()).ifPresent(e -> {
             throw new CustomException(MEMBER_EMAIL_DUPLICATION);
