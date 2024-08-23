@@ -37,4 +37,7 @@ public class IdToken {
 
 	@JsonProperty("nonce_supported")
 	private boolean nonceSupported;
+
+	@JsonProperty("is_private_email")
+	private boolean isPrivateEmail;
 }
