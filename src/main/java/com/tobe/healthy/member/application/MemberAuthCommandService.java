@@ -297,7 +297,7 @@ public class MemberAuthCommandService {
 
     public Tokens getKakaoAccessToken(CommandSocialLogin request) {
         IdToken response = getKakaoOAuthAccessToken(request.getCode(), request.getRedirectUrl());
-
+        log.info("response => {}", response);
         Optional<Member> findMember = memberRepository.findByEmail(response.getEmail());
 
         if (findMember.isPresent()) {
@@ -457,6 +457,7 @@ public class MemberAuthCommandService {
         request.add("redirect_uri", redirectUrl);
         request.add("code", code);
         request.add("client_secret", oAuthProperties.getKakao().getClientSecret());
+
         OAuthInfo result = webClient.post()
                 .uri(oAuthProperties.getKakao().getTokenUri())
                 .bodyValue(request)
@@ -468,12 +469,17 @@ public class MemberAuthCommandService {
                             return Mono.error(new OAuthException(e.getErrorDescription()));
                         }))
                 .bodyToMono(OAuthInfo.class)
-                .share().block();
+                .share()
+                .block();
+        log.info("result => {}", result);
+
         KakaoUserInfo response = webClient.post()
             .uri(oAuthProperties.getKakao().getUserInfoUri())
             .header("Bearer " + result.getAccessToken())
             .contentType(APPLICATION_FORM_URLENCODED)
             .retrieve().bodyToMono(OAuthInfo.KakaoUserInfo.class).share().block();
+        log.info("response => {}", response);
+
         try {
             String token = decordToken(result.getIdToken());
             IdToken idToken = new ObjectMapper().readValue(token, IdToken.class);
