@@ -42,7 +42,6 @@ import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +51,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
@@ -89,8 +89,8 @@ public class MemberCommandService {
             case KAKAO -> {
                 webClient.post()
                     .uri("https://kapi.kakao.com/v1/user/unlink")
-                    .header("KakaoAK 4619cf37473b70ea6a53c33c1c14ec23")
-                    .bodyValue(Map.of("target_id_type", "user_id", "target_id", member.getSocialId()))
+                    .header("Authorization", "KakaoAK 4619cf37473b70ea6a53c33c1c14ec23")
+                    .body(BodyInserters.fromFormData("target_id_type", "user_id").with("target_id", String.valueOf(member.getSocialId())))
                     .retrieve().bodyToMono(String.class).share().block();
             }
             case NAVER -> {
