@@ -248,7 +248,7 @@ public class MemberAuthCommandService {
     }
 
     public CommandJoinMemberResult updateNonMemberInfo(CommandJoinMember request, String password) {
-        String invitationLink = "https://main.to-be-healthy.site/invite?type=student&uuid=" + request.getUuid();
+        String invitationLink = "https://main.to-be-healthy.shop/invite?type=student&uuid=" + request.getUuid();
         NonMember nonMember = nonMemberRepository.findByInvitationLink(invitationLink)
                 .orElseThrow(() -> new CustomException(INVITE_LINK_NOT_FOUND));
 
