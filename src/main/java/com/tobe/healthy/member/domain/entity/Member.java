@@ -129,6 +129,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	private String nickname;
 
+	private Long socialId;
+
 	@ColumnDefault("false")
 	@Builder.Default
 	private boolean delYn = false;
@@ -145,7 +147,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 				.build();
 	}
 
-	public static Member join(String email, String name, MemberType memberType, SocialType socialType) {
+	public static Member join(String email, String name, MemberType memberType, SocialType socialType, Long id) {
 		return Member.builder()
 				.userId(UUID.randomUUID().toString())
 				.email(email)
@@ -153,6 +155,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 				.pushAlarmStatus(ENABLED)
 				.memberType(memberType)
 				.socialType(socialType)
+				.socialId(id)
 				.build();
 	}
 

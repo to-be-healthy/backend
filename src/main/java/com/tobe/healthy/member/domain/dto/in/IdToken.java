@@ -8,6 +8,8 @@ import lombok.ToString;
 @ToString
 public class IdToken {
 
+	private Long id;
+
 	private String aud;
 
 	private String sub;
