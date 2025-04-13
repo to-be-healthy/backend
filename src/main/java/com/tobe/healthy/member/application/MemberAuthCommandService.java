@@ -473,11 +473,12 @@ public class MemberAuthCommandService {
                 .block();
         log.info("result => {}", result);
 
-        KakaoUserInfo response = webClient.post()
+        KakaoUserInfo response = webClient.get()
             .uri(oAuthProperties.getKakao().getUserInfoUri())
-            .header("Bearer " + result.getAccessToken())
-            .contentType(APPLICATION_FORM_URLENCODED)
-            .retrieve().bodyToMono(OAuthInfo.KakaoUserInfo.class).share().block();
+            .header("Authorization", "Bearer " + result.getAccessToken())
+            .retrieve()
+            .bodyToMono(OAuthInfo.KakaoUserInfo.class)
+            .share().block();
         log.info("response => {}", response);
 
         try {
