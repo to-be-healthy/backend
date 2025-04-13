@@ -68,7 +68,7 @@ public class WorkoutCommentService {
                     COMMENT,
                     COMMUNITY,
                     history.getWorkoutHistoryId(),
-                    String.format("https://main.to-be-healthy.site/student/community/%d", history.getWorkoutHistoryId()),
+                    String.format("https://main.to-be-healthy.shop/student/community/%d", history.getWorkoutHistoryId()),
                 null,
                 null
             );
@@ -82,7 +82,7 @@ public class WorkoutCommentService {
                     REPLY,
                     COMMUNITY,
                     history.getWorkoutHistoryId(),
-                    String.format("https://main.to-be-healthy.site/student/community/%d", history.getWorkoutHistoryId()),
+                    String.format("https://main.to-be-healthy.shop/student/community/%d", history.getWorkoutHistoryId()),
                 null,
                 null
             );

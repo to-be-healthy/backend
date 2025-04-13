@@ -124,7 +124,7 @@ class NotificationService(
                     receiverIds = listOf(it.trainerId),
                     notificationType = FEEDBACK,
                     notificationCategory = SCHEDULE,
-                    clickUrl = "https://main.to-be-healthy.site/trainer/manage/feedback"
+                    clickUrl = "https://main.to-be-healthy.shop/trainer/manage/feedback"
                 )
             )
         }

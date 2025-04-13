@@ -89,7 +89,7 @@ class PushCommandService(
                 Notification.builder()
                     .setTitle(title)
                     .setBody(message)
-                    .setImage("https://cdn.to-be-healthy.site/origin/profile/default.png?w=96&h=96")
+                    .setImage("https://cdn.to-be-healthy.shop/origin/profile/default.png?w=96&h=96")
                     .build()
             )
             .setAndroidConfig(
