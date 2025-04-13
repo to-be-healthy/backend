@@ -85,6 +85,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.interfaces.ECPrivateKey;
@@ -574,16 +576,21 @@ public class MemberAuthCommandService {
     }
 
     private byte[] getProfileImage(String imageName) {
-        return webClient.get().uri(imageName)
+        try {
+            return webClient.get()
+                .uri(new URI(imageName))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
-                        response.bodyToMono(String.class).flatMap(error -> {
-                            log.error("error => {}", error);
-                            return Mono.error(new CustomException(PROFILE_ACCESS_FAILED));
-                        }))
+                    response.bodyToMono(String.class).flatMap(error -> {
+                        log.error("error => {}", error);
+                        return Mono.error(new CustomException(PROFILE_ACCESS_FAILED));
+                    }))
                 .bodyToMono(byte[].class)
                 .share()
                 .block();
+        } catch (URISyntaxException e) {
+            log.error("Invalid URL syntax: {}", imageName);
+            throw new CustomException(PROFILE_ACCESS_FAILED);        }
     }
 
     private static String decordToken(String idToken) {
