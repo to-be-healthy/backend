@@ -42,6 +42,7 @@ import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +68,7 @@ public class MemberCommandService {
     private final PointRepository pointRepository;
     private final AmazonS3 amazonS3;
     private final MemberTokenRepository memberTokenRepository;
+    private final WebClient webClient;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -82,6 +85,24 @@ public class MemberCommandService {
     public String deleteMember(Member loginMember) {
         Member member = memberRepository.findById(loginMember.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+        switch (member.getSocialType()) {
+            case KAKAO -> {
+                webClient.post()
+                    .uri("https://kapi.kakao.com/v1/user/unlink")
+                    .header("KakaoAK 4619cf37473b70ea6a53c33c1c14ec23")
+                    .bodyValue(Map.of("target_id_type", "user_id", "target_id", member.getSocialId()))
+                    .retrieve().bodyToMono(String.class).share().block();
+            }
+            case NAVER -> {
+
+            }
+            case GOOGLE -> {
+
+            }
+            case APPLE -> {
+
+            }
+        }
         switch (member.getMemberType()){
             case TRAINER: //트레이너 탈퇴시 학생들 환불처리 & 매핑끊기
                 Long trainerId = member.getId();
