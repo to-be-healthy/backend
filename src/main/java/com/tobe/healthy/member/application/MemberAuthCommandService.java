@@ -65,6 +65,7 @@ import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
 import com.tobe.healthy.member.domain.dto.in.CommandVerification;
 import com.tobe.healthy.member.domain.dto.in.IdToken;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
@@ -278,7 +279,8 @@ public class MemberAuthCommandService {
                 authorization.getResponse().getEmail(),
                 authorization.getResponse().getName(),
                 request.getMemberType(),
-                NAVER
+                NAVER,
+                0L
         );
 
         MemberProfile profile = getProfile(authorization.getResponse().getProfileImage(), member);
@@ -304,7 +306,7 @@ public class MemberAuthCommandService {
             }
         }
 
-        Member member = Member.join(response.getEmail(), response.getNickname(), request.getMemberType(), KAKAO);
+        Member member = Member.join(response.getEmail(), response.getNickname(), request.getMemberType(), KAKAO, response.getId());
         MemberProfile profile = getProfile(response.getPicture(), member);
         member.setMemberProfile(profile);
         memberRepository.save(member);
@@ -341,7 +343,7 @@ public class MemberAuthCommandService {
             }
         }
 
-        Member member = Member.join(email, name, request.getMemberType(), GOOGLE);
+        Member member = Member.join(email, name, request.getMemberType(), GOOGLE, 0L);
         MemberProfile profile = getGoogleProfile(picture, member);
         member.setMemberProfile(profile);
         memberRepository.save(member);
@@ -467,9 +469,16 @@ public class MemberAuthCommandService {
                         }))
                 .bodyToMono(OAuthInfo.class)
                 .share().block();
+        KakaoUserInfo response = webClient.post()
+            .uri(oAuthProperties.getKakao().getUserInfoUri())
+            .header("Bearer " + result.getAccessToken())
+            .contentType(APPLICATION_FORM_URLENCODED)
+            .retrieve().bodyToMono(OAuthInfo.KakaoUserInfo.class).share().block();
         try {
             String token = decordToken(result.getIdToken());
-            return new ObjectMapper().readValue(token, IdToken.class);
+            IdToken idToken = new ObjectMapper().readValue(token, IdToken.class);
+            idToken.setId(response.getId());
+            return idToken;
         } catch (JsonProcessingException e) {
             log.error("error => {}", e.getStackTrace()[0]);
             throw new CustomException(JSON_PARSING_ERROR);
