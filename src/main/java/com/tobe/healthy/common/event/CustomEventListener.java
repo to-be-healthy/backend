@@ -77,7 +77,7 @@ public class CustomEventListener {
                         WAITING,
                         SCHEDULE,
                         null,
-                        "https://main.to-be-healthy.site/student/schedule?tab=myReservation",
+                        "https://main.to-be-healthy.shop/student/schedule?tab=myReservation",
                         schedule.getApplicant().getId(),
                         schedule.getApplicant().getName()
                     );

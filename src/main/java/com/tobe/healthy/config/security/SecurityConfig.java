@@ -63,11 +63,11 @@ public class SecurityConfig {
             config.setAllowedMethods(Collections.singletonList("*"));
             config.setAllowedOriginPatterns(List.of(
                     "http://localhost:3000",
-                    "https://api.to-be-healthy.site",
-                    "https://dev.api.to-be-healthy.site",
-                    "https://www.to-be-healthy.site",
-                    "https://www.dev.to-be-healthy.site",
-                    "https://main.to-be-healthy.site"
+                    "https://api.to-be-healthy.shop",
+                    "https://dev.api.to-be-healthy.shop",
+                    "https://www.to-be-healthy.shop",
+                    "https://www.dev.to-be-healthy.shop",
+                    "https://main.to-be-healthy.shop"
             ));
             config.setAllowCredentials(true);
             return config;

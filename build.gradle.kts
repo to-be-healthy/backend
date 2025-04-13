@@ -43,7 +43,7 @@ dependencies {
     implementation("org.modelmapper:modelmapper:3.2.0")
     implementation("org.springframework.boot:spring-boot-starter-webflux:3.2.6")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
-    implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.1")
+    implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.10.0")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
