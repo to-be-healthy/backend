@@ -452,47 +452,55 @@ public class MemberAuthCommandService {
         throw new CustomException(MEMBER_NOT_FOUND);
     }
 
-    private IdToken getKakaoOAuthAccessToken(String code, String redirectUrl) {
-        MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
-        request.add("grant_type", oAuthProperties.getKakao().getGrantType());
-        request.add("client_id", oAuthProperties.getKakao().getClientId());
-        request.add("redirect_uri", redirectUrl);
-        request.add("code", code);
-        request.add("client_secret", oAuthProperties.getKakao().getClientSecret());
+    public IdToken getKakaoOAuthAccessToken(String code, String redirectUrl) {
+        OAuthInfo tokenInfo = requestAccessToken(code, redirectUrl);
+        KakaoUserInfo kakaoUser = requestKakaoUserInfo(tokenInfo.getAccessToken());
+        return parseIdToken(tokenInfo.getIdToken(), kakaoUser.getId());
+    }
 
-        OAuthInfo result = webClient.post()
-                .uri(oAuthProperties.getKakao().getTokenUri())
-                .bodyValue(request)
-                .headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, response ->
-                        response.bodyToMono(KakaoError.class).flatMap(e -> {
-                            log.error("error => {}", e);
-                            return Mono.error(new OAuthException(e.getErrorDescription()));
-                        }))
-                .bodyToMono(OAuthInfo.class)
-                .share()
-                .block();
-        log.info("result => {}", result);
+    private OAuthInfo requestAccessToken(String code, String redirectUrl) {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("grant_type", oAuthProperties.getKakao().getGrantType());
+        form.add("client_id", oAuthProperties.getKakao().getClientId());
+        form.add("redirect_uri", redirectUrl);
+        form.add("code", code);
+        form.add("client_secret", oAuthProperties.getKakao().getClientSecret());
 
-        KakaoUserInfo response = webClient.get()
+        return webClient.post()
+            .uri(oAuthProperties.getKakao().getTokenUri())
+            .contentType(APPLICATION_FORM_URLENCODED)
+            .bodyValue(form)
+            .retrieve()
+            .onStatus(HttpStatusCode::isError, response ->
+                response.bodyToMono(KakaoError.class).flatMap(error -> {
+                    log.warn("Kakao token error: {}", error);
+                    return Mono.error(new OAuthException(error.getErrorDescription()));
+                }))
+            .bodyToMono(OAuthInfo.class)
+            .block();
+    }
+
+    private KakaoUserInfo requestKakaoUserInfo(String accessToken) {
+        return webClient.get()
             .uri(oAuthProperties.getKakao().getUserInfoUri())
-            .header("Authorization", "Bearer " + result.getAccessToken())
+            .header("Authorization", "Bearer " + accessToken)
             .retrieve()
             .bodyToMono(OAuthInfo.KakaoUserInfo.class)
-            .share().block();
-        log.info("response => {}", response);
+            .block();
+    }
 
+    private IdToken parseIdToken(String encodedIdToken, Long kakaoUserId) {
         try {
-            String token = decordToken(result.getIdToken());
-            IdToken idToken = new ObjectMapper().readValue(token, IdToken.class);
-            idToken.setId(response.getId());
+            String tokenPayload = decordToken(encodedIdToken);
+            IdToken idToken = objectMapper.readValue(tokenPayload, IdToken.class);
+            idToken.setId(kakaoUserId);
             return idToken;
         } catch (JsonProcessingException e) {
-            log.error("error => {}", e.getStackTrace()[0]);
+            log.error("ID token JSON parsing failed", e);
             throw new CustomException(JSON_PARSING_ERROR);
         }
     }
+
 
     private OAuthInfo getGoogleAccessToken(String code, String redirectUri) {
         String decode = URLDecoder.decode(code, StandardCharsets.UTF_8);
