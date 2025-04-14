@@ -266,9 +266,9 @@ public class MemberAuthCommandService {
 
     public Tokens getNaverAccessToken(CommandSocialLogin request) {
         OAuthInfo response = getNaverOAuthAccessToken(request.getCode(), request.getState());
-
+        log.info("response: {}", response);
         NaverUserInfo authorization = getNaverUserInfo(response);
-
+        log.info("authorization: {}", authorization);
         Optional<Member> findMember = memberRepository.findByEmail(authorization.getResponse().getEmail());
 
         if (findMember.isPresent()) {
@@ -287,6 +287,7 @@ public class MemberAuthCommandService {
                 response.getRefreshToken()
         );
 
+        log.info("getProfile before");
         MemberProfile profile = getProfile(authorization.getResponse().getProfileImage(), member);
         member.setMemberProfile(profile);
         memberRepository.save(member);
@@ -651,12 +652,7 @@ public class MemberAuthCommandService {
     private NaverUserInfo getNaverUserInfo(OAuthInfo oAuthInfo) {
         return webClient.get()
                 .uri(oAuthProperties.getNaver().getUserInfoUri())
-                .headers(
-                        header -> {
-                            header.setContentType(APPLICATION_FORM_URLENCODED);
-                            header.set("Authorization", "Bearer " + oAuthInfo.getAccessToken());
-                        }
-                )
+                .header("Authorization", "Bearer " + oAuthInfo.getAccessToken())
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                         response.bodyToMono(NaverError.class).flatMap(e -> {
