@@ -131,6 +131,8 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	private Long socialId;
 
+	private String socialRefreshToken;
+
 	@ColumnDefault("false")
 	@Builder.Default
 	private boolean delYn = false;
@@ -157,6 +159,23 @@ public class Member extends BaseTimeEntity<Member, Long> {
 				.socialType(socialType)
 				.socialId(id)
 				.build();
+	}
+
+	public static Member join(String email, String name, MemberType memberType, SocialType socialType, Long id, String socialRefreshToken) {
+		return Member.builder()
+			.userId(UUID.randomUUID().toString())
+			.email(email)
+			.name(name)
+			.pushAlarmStatus(ENABLED)
+			.memberType(memberType)
+			.socialType(socialType)
+			.socialId(id)
+			.socialRefreshToken(socialRefreshToken)
+			.build();
+	}
+
+	public void updateSocialRefreshToken(String refreshToken) {
+		this.socialRefreshToken = refreshToken;
 	}
 
 	public void resetPassword(String password) {

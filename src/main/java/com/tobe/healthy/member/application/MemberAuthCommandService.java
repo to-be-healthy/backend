@@ -273,6 +273,7 @@ public class MemberAuthCommandService {
 
         if (findMember.isPresent()) {
             if (isJoinMember(findMember.get(), NAVER, request.getMemberType())) {
+                findMember.get().updateSocialRefreshToken(response.getRefreshToken());
                 return tokenGenerator.create(findMember.get());
             }
         }
@@ -282,7 +283,8 @@ public class MemberAuthCommandService {
                 authorization.getResponse().getName(),
                 request.getMemberType(),
                 NAVER,
-                0L
+                Long.valueOf(authorization.getResponse().getId()),
+                response.getRefreshToken()
         );
 
         MemberProfile profile = getProfile(authorization.getResponse().getProfileImage(), member);
@@ -293,6 +295,7 @@ public class MemberAuthCommandService {
         if (StringUtils.isNotEmpty(request.getUuid())) {
             mappingTrainerAndStudent(member, request.getUuid(), authorization.getResponse().getName(), true);
         }
+
         log.info("[네이버 회원가입 및 로그인] member: {}", member);
         return tokenGenerator.create(member);
     }
