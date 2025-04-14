@@ -129,7 +129,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	private String nickname;
 
-	private Long socialId;
+	private String socialId;
 
 	private String socialRefreshToken;
 
@@ -149,7 +149,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 				.build();
 	}
 
-	public static Member join(String email, String name, MemberType memberType, SocialType socialType, Long id) {
+	public static Member join(String email, String name, MemberType memberType, SocialType socialType, String id) {
 		return Member.builder()
 				.userId(UUID.randomUUID().toString())
 				.email(email)
@@ -161,7 +161,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 				.build();
 	}
 
-	public static Member join(String email, String name, MemberType memberType, SocialType socialType, Long id, String socialRefreshToken) {
+	public static Member join(String email, String name, MemberType memberType, SocialType socialType, String id, String socialRefreshToken) {
 		return Member.builder()
 			.userId(UUID.randomUUID().toString())
 			.email(email)

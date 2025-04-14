@@ -283,7 +283,7 @@ public class MemberAuthCommandService {
                 authorization.getResponse().getName(),
                 request.getMemberType(),
                 NAVER,
-                Long.valueOf(authorization.getResponse().getId()),
+                authorization.getResponse().getId(),
                 response.getRefreshToken()
         );
 
@@ -312,7 +312,7 @@ public class MemberAuthCommandService {
             }
         }
 
-        Member member = Member.join(response.getEmail(), response.getNickname(), request.getMemberType(), KAKAO, response.getId());
+        Member member = Member.join(response.getEmail(), response.getNickname(), request.getMemberType(), KAKAO, String.valueOf(response.getId()));
         MemberProfile profile = getProfile(response.getPicture(), member);
         member.setMemberProfile(profile);
         memberRepository.save(member);
@@ -349,7 +349,7 @@ public class MemberAuthCommandService {
             }
         }
 
-        Member member = Member.join(email, name, request.getMemberType(), GOOGLE, 0L);
+        Member member = Member.join(email, name, request.getMemberType(), GOOGLE, null);
         MemberProfile profile = getGoogleProfile(picture, member);
         member.setMemberProfile(profile);
         memberRepository.save(member);
