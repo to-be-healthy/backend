@@ -131,6 +131,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	private String socialId;
 
+	@Column(length = 512)
 	private String socialRefreshToken;
 
 	@ColumnDefault("false")
