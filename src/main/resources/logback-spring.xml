@@ -58,11 +58,6 @@
 
     <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/logs/error/current.log</file>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>error</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
