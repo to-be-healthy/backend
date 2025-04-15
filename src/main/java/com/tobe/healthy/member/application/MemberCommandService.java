@@ -14,17 +14,20 @@ import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NOT_MAPPED;
 import static com.tobe.healthy.common.error.ErrorCode.NOT_MATCH_PASSWORD;
 import static com.tobe.healthy.common.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
 import static io.micrometer.common.util.StringUtils.isEmpty;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.tobe.healthy.common.Utils;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.redis.RedisService;
+import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.member.domain.dto.in.CommandAssignNickname;
 import com.tobe.healthy.member.domain.dto.in.CommandChangeEmail;
 import com.tobe.healthy.member.domain.dto.in.CommandChangeMemberPassword;
 import com.tobe.healthy.member.domain.dto.in.CommandChangeName;
 import com.tobe.healthy.member.domain.dto.in.CommandUpdateMemo;
+import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
 import com.tobe.healthy.member.domain.dto.out.CommandAssignNicknameResult;
 import com.tobe.healthy.member.domain.dto.out.CommandChangeNameResult;
 import com.tobe.healthy.member.domain.dto.out.DeleteMemberProfileResult;
@@ -42,7 +45,6 @@ import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,8 +52,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
@@ -69,6 +74,7 @@ public class MemberCommandService {
     private final AmazonS3 amazonS3;
     private final MemberTokenRepository memberTokenRepository;
     private final WebClient webClient;
+    private final OAuthProperties oAuthProperties;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -89,12 +95,41 @@ public class MemberCommandService {
             case KAKAO -> {
                 webClient.post()
                     .uri("https://kapi.kakao.com/v1/user/unlink")
-                    .header("KakaoAK 4619cf37473b70ea6a53c33c1c14ec23")
-                    .bodyValue(Map.of("target_id_type", "user_id", "target_id", member.getSocialId()))
+                    .header("Authorization", "KakaoAK 4619cf37473b70ea6a53c33c1c14ec23")
+                    .body(BodyInserters.fromFormData("target_id_type", "user_id").with("target_id", String.valueOf(member.getSocialId())))
                     .retrieve().bodyToMono(String.class).share().block();
             }
             case NAVER -> {
+                MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
+                request.add("client_id", oAuthProperties.getNaver().getClientId());
+                request.add("client_secret", oAuthProperties.getNaver().getClientSecret());
+                request.add("refresh_token", member.getSocialRefreshToken());
+                request.add("grant_type", oAuthProperties.getNaver().getGrantType());
 
+                OAuthInfo token = webClient.post()
+                    .uri(oAuthProperties.getNaver().getTokenUri())
+                    .bodyValue(request)
+                    .headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+                    .retrieve()
+                    .bodyToMono(OAuthInfo.class)
+                    .share()
+                    .block();
+
+                MultiValueMap<String, String> deleteToken = new LinkedMultiValueMap<>();
+                deleteToken.add("client_id", oAuthProperties.getNaver().getClientId());
+                deleteToken.add("client_secret", oAuthProperties.getNaver().getClientSecret());
+                deleteToken.add("access_token", token.getAccessToken());
+                deleteToken.add("grant_type", "delete");
+
+                String block = webClient.post().
+                    uri(oAuthProperties.getNaver().getTokenUri())
+                    .bodyValue(deleteToken)
+                    .headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .share().block();
+
+                log.info("block: {}", block);
             }
             case GOOGLE -> {
 

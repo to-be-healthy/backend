@@ -85,6 +85,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.interfaces.ECPrivateKey;
@@ -264,13 +266,14 @@ public class MemberAuthCommandService {
 
     public Tokens getNaverAccessToken(CommandSocialLogin request) {
         OAuthInfo response = getNaverOAuthAccessToken(request.getCode(), request.getState());
-
+        log.info("response: {}", response);
         NaverUserInfo authorization = getNaverUserInfo(response);
-
+        log.info("authorization: {}", authorization);
         Optional<Member> findMember = memberRepository.findByEmail(authorization.getResponse().getEmail());
 
         if (findMember.isPresent()) {
             if (isJoinMember(findMember.get(), NAVER, request.getMemberType())) {
+                findMember.get().updateSocialRefreshToken(response.getRefreshToken());
                 return tokenGenerator.create(findMember.get());
             }
         }
@@ -280,9 +283,11 @@ public class MemberAuthCommandService {
                 authorization.getResponse().getName(),
                 request.getMemberType(),
                 NAVER,
-                0L
+                authorization.getResponse().getId(),
+                response.getRefreshToken()
         );
 
+        log.info("getProfile before");
         MemberProfile profile = getProfile(authorization.getResponse().getProfileImage(), member);
         member.setMemberProfile(profile);
         memberRepository.save(member);
@@ -291,13 +296,14 @@ public class MemberAuthCommandService {
         if (StringUtils.isNotEmpty(request.getUuid())) {
             mappingTrainerAndStudent(member, request.getUuid(), authorization.getResponse().getName(), true);
         }
+
         log.info("[네이버 회원가입 및 로그인] member: {}", member);
         return tokenGenerator.create(member);
     }
 
     public Tokens getKakaoAccessToken(CommandSocialLogin request) {
         IdToken response = getKakaoOAuthAccessToken(request.getCode(), request.getRedirectUrl());
-
+        log.info("response => {}", response);
         Optional<Member> findMember = memberRepository.findByEmail(response.getEmail());
 
         if (findMember.isPresent()) {
@@ -306,7 +312,7 @@ public class MemberAuthCommandService {
             }
         }
 
-        Member member = Member.join(response.getEmail(), response.getNickname(), request.getMemberType(), KAKAO, response.getId());
+        Member member = Member.join(response.getEmail(), response.getNickname(), request.getMemberType(), KAKAO, String.valueOf(response.getId()));
         MemberProfile profile = getProfile(response.getPicture(), member);
         member.setMemberProfile(profile);
         memberRepository.save(member);
@@ -343,7 +349,7 @@ public class MemberAuthCommandService {
             }
         }
 
-        Member member = Member.join(email, name, request.getMemberType(), GOOGLE, 0L);
+        Member member = Member.join(email, name, request.getMemberType(), GOOGLE, null);
         MemberProfile profile = getGoogleProfile(picture, member);
         member.setMemberProfile(profile);
         memberRepository.save(member);
@@ -450,40 +456,55 @@ public class MemberAuthCommandService {
         throw new CustomException(MEMBER_NOT_FOUND);
     }
 
-    private IdToken getKakaoOAuthAccessToken(String code, String redirectUrl) {
-        MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
-        request.add("grant_type", oAuthProperties.getKakao().getGrantType());
-        request.add("client_id", oAuthProperties.getKakao().getClientId());
-        request.add("redirect_uri", redirectUrl);
-        request.add("code", code);
-        request.add("client_secret", oAuthProperties.getKakao().getClientSecret());
-        OAuthInfo result = webClient.post()
-                .uri(oAuthProperties.getKakao().getTokenUri())
-                .bodyValue(request)
-                .headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, response ->
-                        response.bodyToMono(KakaoError.class).flatMap(e -> {
-                            log.error("error => {}", e);
-                            return Mono.error(new OAuthException(e.getErrorDescription()));
-                        }))
-                .bodyToMono(OAuthInfo.class)
-                .share().block();
-        KakaoUserInfo response = webClient.post()
-            .uri(oAuthProperties.getKakao().getUserInfoUri())
-            .header("Bearer " + result.getAccessToken())
+    public IdToken getKakaoOAuthAccessToken(String code, String redirectUrl) {
+        OAuthInfo tokenInfo = requestAccessToken(code, redirectUrl);
+        KakaoUserInfo kakaoUser = requestKakaoUserInfo(tokenInfo.getAccessToken());
+        return parseIdToken(tokenInfo.getIdToken(), kakaoUser.getId());
+    }
+
+    private OAuthInfo requestAccessToken(String code, String redirectUrl) {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("grant_type", oAuthProperties.getKakao().getGrantType());
+        form.add("client_id", oAuthProperties.getKakao().getClientId());
+        form.add("redirect_uri", redirectUrl);
+        form.add("code", code);
+        form.add("client_secret", oAuthProperties.getKakao().getClientSecret());
+
+        return webClient.post()
+            .uri(oAuthProperties.getKakao().getTokenUri())
             .contentType(APPLICATION_FORM_URLENCODED)
-            .retrieve().bodyToMono(OAuthInfo.KakaoUserInfo.class).share().block();
+            .bodyValue(form)
+            .retrieve()
+            .onStatus(HttpStatusCode::isError, response ->
+                response.bodyToMono(KakaoError.class).flatMap(error -> {
+                    log.warn("Kakao token error: {}", error);
+                    return Mono.error(new OAuthException(error.getErrorDescription()));
+                }))
+            .bodyToMono(OAuthInfo.class)
+            .block();
+    }
+
+    private KakaoUserInfo requestKakaoUserInfo(String accessToken) {
+        return webClient.get()
+            .uri(oAuthProperties.getKakao().getUserInfoUri())
+            .header("Authorization", "Bearer " + accessToken)
+            .retrieve()
+            .bodyToMono(OAuthInfo.KakaoUserInfo.class)
+            .block();
+    }
+
+    private IdToken parseIdToken(String encodedIdToken, Long kakaoUserId) {
         try {
-            String token = decordToken(result.getIdToken());
-            IdToken idToken = new ObjectMapper().readValue(token, IdToken.class);
-            idToken.setId(response.getId());
+            String tokenPayload = decordToken(encodedIdToken);
+            IdToken idToken = objectMapper.readValue(tokenPayload, IdToken.class);
+            idToken.setId(kakaoUserId);
             return idToken;
         } catch (JsonProcessingException e) {
-            log.error("error => {}", e.getStackTrace()[0]);
+            log.error("ID token JSON parsing failed", e);
             throw new CustomException(JSON_PARSING_ERROR);
         }
     }
+
 
     private OAuthInfo getGoogleAccessToken(String code, String redirectUri) {
         String decode = URLDecoder.decode(code, StandardCharsets.UTF_8);
@@ -567,16 +588,21 @@ public class MemberAuthCommandService {
     }
 
     private byte[] getProfileImage(String imageName) {
-        return webClient.get().uri(imageName)
+        try {
+            return webClient.get()
+                .uri(new URI(imageName))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
-                        response.bodyToMono(String.class).flatMap(error -> {
-                            log.error("error => {}", error);
-                            return Mono.error(new CustomException(PROFILE_ACCESS_FAILED));
-                        }))
+                    response.bodyToMono(String.class).flatMap(error -> {
+                        log.error("error => {}", error);
+                        return Mono.error(new CustomException(PROFILE_ACCESS_FAILED));
+                    }))
                 .bodyToMono(byte[].class)
                 .share()
                 .block();
+        } catch (URISyntaxException e) {
+            log.error("Invalid URL syntax: {}", imageName);
+            throw new CustomException(PROFILE_ACCESS_FAILED);        }
     }
 
     private static String decordToken(String idToken) {
@@ -626,12 +652,7 @@ public class MemberAuthCommandService {
     private NaverUserInfo getNaverUserInfo(OAuthInfo oAuthInfo) {
         return webClient.get()
                 .uri(oAuthProperties.getNaver().getUserInfoUri())
-                .headers(
-                        header -> {
-                            header.setContentType(APPLICATION_FORM_URLENCODED);
-                            header.set("Authorization", "Bearer " + oAuthInfo.getAccessToken());
-                        }
-                )
+                .header("Authorization", "Bearer " + oAuthInfo.getAccessToken())
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                         response.bodyToMono(NaverError.class).flatMap(e -> {
