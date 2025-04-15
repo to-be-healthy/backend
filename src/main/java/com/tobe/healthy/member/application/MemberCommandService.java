@@ -134,8 +134,8 @@ public class MemberCommandService {
             case APPLE -> {
                 MultiValueMap<String, String> revokeForm = new LinkedMultiValueMap<>();
                 revokeForm.add("client_id", "tobehealthy.apple.login");
-                revokeForm.add("client_secret", member.getSocialRefreshToken());
-                revokeForm.add("token", member.getSocialId());
+                revokeForm.add("client_secret", member.getSocialId());
+                revokeForm.add("token", member.getSocialRefreshToken());
                 revokeForm.add("token_type_hint", "refresh_token");
 
                 String block = webClient.post().

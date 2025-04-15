@@ -129,6 +129,7 @@ public class Member extends BaseTimeEntity<Member, Long> {
 
 	private String nickname;
 
+	@Column(length = 512)
 	private String socialId;
 
 	@Column(length = 512)
