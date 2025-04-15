@@ -121,15 +121,13 @@ public class MemberCommandService {
                 deleteToken.add("access_token", token.getAccessToken());
                 deleteToken.add("grant_type", "delete");
 
-                String block = webClient.post().
+                webClient.post().
                     uri(oAuthProperties.getNaver().getTokenUri())
                     .bodyValue(deleteToken)
                     .headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
                     .retrieve()
                     .bodyToMono(String.class)
                     .share().block();
-
-                log.info("block: {}", block);
             }
             case APPLE -> {
                 MultiValueMap<String, String> revokeForm = new LinkedMultiValueMap<>();
@@ -138,15 +136,13 @@ public class MemberCommandService {
                 revokeForm.add("token", member.getSocialRefreshToken());
                 revokeForm.add("token_type_hint", "refresh_token");
 
-                String block = webClient.post().
+                webClient.post().
                     uri("https://appleid.apple.com/auth/revoke")
                     .bodyValue(revokeForm)
                     .headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
                     .retrieve()
                     .bodyToMono(String.class)
                     .share().block();
-
-                log.info("block: {}", block);
             }
         }
         switch (member.getMemberType()){

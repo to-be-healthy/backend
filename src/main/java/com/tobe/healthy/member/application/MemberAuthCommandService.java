@@ -266,9 +266,7 @@ public class MemberAuthCommandService {
 
     public Tokens getNaverAccessToken(CommandSocialLogin request) {
         OAuthInfo response = getNaverOAuthAccessToken(request.getCode(), request.getState());
-        log.info("response: {}", response);
         NaverUserInfo authorization = getNaverUserInfo(response);
-        log.info("authorization: {}", authorization);
         Optional<Member> findMember = memberRepository.findByEmail(authorization.getResponse().getEmail());
 
         if (findMember.isPresent()) {
@@ -287,7 +285,6 @@ public class MemberAuthCommandService {
                 response.getRefreshToken()
         );
 
-        log.info("getProfile before");
         MemberProfile profile = getProfile(authorization.getResponse().getProfileImage(), member);
         member.setMemberProfile(profile);
         memberRepository.save(member);
@@ -303,7 +300,6 @@ public class MemberAuthCommandService {
 
     public Tokens getKakaoAccessToken(CommandSocialLogin request) {
         IdToken response = getKakaoOAuthAccessToken(request.getCode(), request.getRedirectUrl());
-        log.info("response => {}", response);
         Optional<Member> findMember = memberRepository.findByEmail(response.getEmail());
 
         if (findMember.isPresent()) {
@@ -367,7 +363,6 @@ public class MemberAuthCommandService {
         try {
             IdToken userInfo = new ObjectMapper().readValue(token, IdToken.class);
             Optional<Member> findMember = memberRepository.findByUserId(userInfo.getSub());
-            log.info("userInfo => {}", userInfo);
             if (findMember.isPresent()) {
                 if (isJoinMember(findMember.get(), APPLE, request.getMemberType())) {
                     return tokenGenerator.create(findMember.get());
@@ -392,8 +387,6 @@ public class MemberAuthCommandService {
                 .retrieve()
                 .bodyToMono(Data.class)
                 .block();
-
-            System.out.println("block = " + block);
 
             Member member = Member.join(userInfo.getEmail(), name, request.getMemberType(), APPLE, clientSecret, block.refresh_token);
 
