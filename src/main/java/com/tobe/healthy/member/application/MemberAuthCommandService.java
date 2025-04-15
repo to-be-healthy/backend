@@ -385,17 +385,17 @@ public class MemberAuthCommandService {
             form.add("grant_type", "authorization_code");
             form.add("redirect_uri", "https://main.to-be-healthy.shop/api/callback/apple");
 
-            String block = webClient.post()
+            Data block = webClient.post()
                 .uri("https://appleid.apple.com/auth/token")
                 .contentType(APPLICATION_FORM_URLENCODED)
                 .bodyValue(form)
                 .retrieve()
-                .bodyToMono(String.class)
+                .bodyToMono(Data.class)
                 .block();
 
             System.out.println("block = " + block);
 
-            Member member = Member.join(userInfo.getEmail(), name, request.getMemberType(), APPLE, null);
+            Member member = Member.join(userInfo.getEmail(), name, request.getMemberType(), APPLE, clientSecret, block.refresh_token);
 
             memberRepository.save(member);
 
@@ -413,6 +413,14 @@ public class MemberAuthCommandService {
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
+    }
+
+    @lombok.Data
+    private static class Data {
+        private String access_token;
+        private String token_type;
+        private int expires_in;
+        private String refresh_token;
     }
 
     public String createClientSecret() {

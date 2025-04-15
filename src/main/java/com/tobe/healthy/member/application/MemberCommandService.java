@@ -131,11 +131,22 @@ public class MemberCommandService {
 
                 log.info("block: {}", block);
             }
-            case GOOGLE -> {
-
-            }
             case APPLE -> {
+                MultiValueMap<String, String> revokeForm = new LinkedMultiValueMap<>();
+                revokeForm.add("client_id", "tobehealthy.apple.login");
+                revokeForm.add("client_secret", member.getSocialRefreshToken());
+                revokeForm.add("token", member.getSocialId());
+                revokeForm.add("token_type_hint", "refresh_token");
 
+                String block = webClient.post().
+                    uri("https://appleid.apple.com/auth/revoke")
+                    .bodyValue(revokeForm)
+                    .headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .share().block();
+
+                log.info("block: {}", block);
             }
         }
         switch (member.getMemberType()){
