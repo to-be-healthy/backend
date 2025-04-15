@@ -377,6 +377,24 @@ public class MemberAuthCommandService {
             // TODO: 24. 7. 16. 애플로 로그인한 계정 삭제시 애플쪽에도 추가적으로 삭제처리 작업 필요
             String name = request.getUser().getName().getLastName() + request.getUser().getName().getFirstName();
 
+            MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+            String clientSecret = createClientSecret();
+            form.add("client_id", "tobehealthy.apple.login");
+            form.add("client_secret", clientSecret);
+            form.add("code", request.getCode().split("&")[0]);
+            form.add("grant_type", "authorization_code");
+            form.add("redirect_uri", "https://main.to-be-healthy.shop/api/callback/apple");
+
+            String block = webClient.post()
+                .uri("https://appleid.apple.com/auth/token")
+                .contentType(APPLICATION_FORM_URLENCODED)
+                .bodyValue(form)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+            System.out.println("block = " + block);
+
             Member member = Member.join(userInfo.getEmail(), name, request.getMemberType(), APPLE, null);
 
             memberRepository.save(member);
