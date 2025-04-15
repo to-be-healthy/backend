@@ -377,13 +377,7 @@ public class MemberAuthCommandService {
             // TODO: 24. 7. 16. 애플로 로그인한 계정 삭제시 애플쪽에도 추가적으로 삭제처리 작업 필요
             String name = request.getUser().getName().getLastName() + request.getUser().getName().getFirstName();
 
-            Member member = Member.builder()
-                    .userId(userInfo.getSub())
-                    .email(userInfo.getEmail())
-                    .name(name)
-                    .memberType(request.getMemberType())
-                    .socialType(APPLE)
-                    .build();
+            Member member = Member.join(userInfo.getEmail(), name, request.getMemberType(), APPLE, null);
 
             memberRepository.save(member);
 
