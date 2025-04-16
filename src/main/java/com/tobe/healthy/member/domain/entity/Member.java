@@ -257,4 +257,5 @@ public class Member extends BaseTimeEntity<Member, Long> {
 		this.memberType = request.getMemberType();
 		this.socialType = NONE;
 	}
+
 }
