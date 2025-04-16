@@ -14,7 +14,7 @@ import static com.tobe.healthy.common.error.ErrorCode.MEMBER_NOT_MAPPED;
 import static com.tobe.healthy.common.error.ErrorCode.NOT_MATCH_PASSWORD;
 import static com.tobe.healthy.common.error.ErrorCode.PASSWORD_POLICY_VIOLATION;
 import static io.micrometer.common.util.StringUtils.isEmpty;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -91,14 +91,14 @@ public class MemberCommandService {
     public String deleteMember(Member loginMember) {
         Member member = memberRepository.findById(loginMember.getId())
                 .orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+
         switch (member.getSocialType()) {
-            case KAKAO -> {
-                webClient.post()
-                    .uri("https://kapi.kakao.com/v1/user/unlink")
-                    .header("Authorization", "KakaoAK 4619cf37473b70ea6a53c33c1c14ec23")
-                    .body(BodyInserters.fromFormData("target_id_type", "user_id").with("target_id", String.valueOf(member.getSocialId())))
-                    .retrieve().bodyToMono(String.class).share().block();
-            }
+            case KAKAO -> webClient.post()
+                .uri("https://kapi.kakao.com/v1/user/unlink")
+				.header("Authorization", "KakaoAK 4619cf37473b70ea6a53c33c1c14ec23")
+				.body(BodyInserters.fromFormData("target_id_type", "user_id").with("target_id", String.valueOf(member.getSocialId())))
+				.retrieve().bodyToMono(String.class).block();
+
             case NAVER -> {
                 MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
                 request.add("client_id", oAuthProperties.getNaver().getClientId());
@@ -109,10 +109,9 @@ public class MemberCommandService {
                 OAuthInfo token = webClient.post()
                     .uri(oAuthProperties.getNaver().getTokenUri())
                     .bodyValue(request)
-                    .headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+                    .header("content-type", APPLICATION_FORM_URLENCODED_VALUE)
                     .retrieve()
                     .bodyToMono(OAuthInfo.class)
-                    .share()
                     .block();
 
                 MultiValueMap<String, String> deleteToken = new LinkedMultiValueMap<>();
@@ -121,13 +120,13 @@ public class MemberCommandService {
                 deleteToken.add("access_token", token.getAccessToken());
                 deleteToken.add("grant_type", "delete");
 
-                webClient.post().
-                    uri(oAuthProperties.getNaver().getTokenUri())
+                webClient.post()
+                    .uri(oAuthProperties.getNaver().getTokenUri())
                     .bodyValue(deleteToken)
-                    .headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+                    .header("content-type", APPLICATION_FORM_URLENCODED_VALUE)
                     .retrieve()
                     .bodyToMono(String.class)
-                    .share().block();
+                    .block();
             }
             case APPLE -> {
                 MultiValueMap<String, String> revokeForm = new LinkedMultiValueMap<>();
@@ -136,13 +135,13 @@ public class MemberCommandService {
                 revokeForm.add("token", member.getSocialRefreshToken());
                 revokeForm.add("token_type_hint", "refresh_token");
 
-                webClient.post().
-                    uri("https://appleid.apple.com/auth/revoke")
+                webClient.post()
+                    .uri("https://appleid.apple.com/auth/revoke")
                     .bodyValue(revokeForm)
-                    .headers(header -> header.setContentType(APPLICATION_FORM_URLENCODED))
+                    .header("content-type", APPLICATION_FORM_URLENCODED_VALUE)
                     .retrieve()
                     .bodyToMono(String.class)
-                    .share().block();
+                    .block();
             }
         }
         switch (member.getMemberType()){

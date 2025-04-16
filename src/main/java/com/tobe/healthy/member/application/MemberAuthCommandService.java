@@ -34,7 +34,6 @@ import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -56,6 +55,7 @@ import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.config.jwt.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
+import com.tobe.healthy.member.domain.dto.in.AppleToken;
 import com.tobe.healthy.member.domain.dto.in.CommandFindMemberPassword;
 import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
 import com.tobe.healthy.member.domain.dto.in.CommandLoginMember;
@@ -359,9 +359,8 @@ public class MemberAuthCommandService {
     }
 
     public Tokens getAppleOAuth(CommandSocialLogin request) {
-        String token = decordToken(request.getId_token());
-        try {
-            IdToken userInfo = new ObjectMapper().readValue(token, IdToken.class);
+		try {
+            IdToken userInfo = new ObjectMapper().readValue(decordToken(request.getId_token()), IdToken.class);
             Optional<Member> findMember = memberRepository.findByUserId(userInfo.getSub());
             if (findMember.isPresent()) {
                 if (isJoinMember(findMember.get(), APPLE, request.getMemberType())) {
@@ -372,23 +371,24 @@ public class MemberAuthCommandService {
             // TODO: 24. 7. 16. 애플로 로그인한 계정 삭제시 애플쪽에도 추가적으로 삭제처리 작업 필요
             String name = request.getUser().getName().getLastName() + request.getUser().getName().getFirstName();
 
-            MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
             String clientSecret = createClientSecret();
+
+            MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
             form.add("client_id", "tobehealthy.apple.login");
             form.add("client_secret", clientSecret);
             form.add("code", request.getCode().split("&")[0]);
             form.add("grant_type", "authorization_code");
             form.add("redirect_uri", "https://main.to-be-healthy.shop/api/callback/apple");
 
-            Data block = webClient.post()
+            AppleToken token = webClient.post()
                 .uri("https://appleid.apple.com/auth/token")
                 .contentType(APPLICATION_FORM_URLENCODED)
                 .bodyValue(form)
                 .retrieve()
-                .bodyToMono(Data.class)
+                .bodyToMono(AppleToken.class)
                 .block();
 
-            Member member = Member.join(userInfo.getEmail(), name, request.getMemberType(), APPLE, clientSecret, block.refresh_token);
+            Member member = Member.join(userInfo.getEmail(), name, request.getMemberType(), APPLE, clientSecret, token.getRefresh_token());
 
             memberRepository.save(member);
 
@@ -401,20 +401,11 @@ public class MemberAuthCommandService {
 
             return tokenGenerator.create(member);
 
-        } catch (JsonMappingException e) {
-			throw new RuntimeException(e);
-		} catch (JsonProcessingException e) {
+        } catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
     }
 
-    @lombok.Data
-    private static class Data {
-        private String access_token;
-        private String token_type;
-        private int expires_in;
-        private String refresh_token;
-    }
 
     public String createClientSecret() {
         Date now = new Date();
@@ -435,9 +426,7 @@ public class MemberAuthCommandService {
             ECPrivateKey ecPrivateKey = loadPrivateKey(appleKeyPath);
             JWSSigner signer = new ECDSASigner(ecPrivateKey);
             signedJWT.sign(signer);
-        } catch (InvalidKeySpecException | IOException e) {
-			throw new RuntimeException(e);
-		} catch (JOSEException e) {
+        } catch (InvalidKeySpecException | IOException | JOSEException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -458,9 +447,11 @@ public class MemberAuthCommandService {
         }
     }
 
-
-    private boolean isJoinMember(Member member, SocialType google, MemberType memberType) {
-        if (member.getSocialType().equals(google)) {
+    private boolean isJoinMember(Member member, SocialType socialType, MemberType memberType) {
+        if (member.getSocialType().equals(NONE)) {
+            throw new IllegalArgumentException("이미 같은 이메일로 가입된 계정이 있습니다. 기존 방식으로 로그인해 주세요.");
+        }
+        if (member.getSocialType().equals(socialType)) {
             if (!member.getMemberType().equals(memberType)) {
                 throw new IllegalArgumentException(String.format("%s로 가입한 사용자입니다.", member.getTransformedMemberType()));
             }
