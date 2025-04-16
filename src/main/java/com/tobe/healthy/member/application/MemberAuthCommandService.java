@@ -388,7 +388,7 @@ public class MemberAuthCommandService {
                 .bodyToMono(AppleToken.class)
                 .block();
 
-            Member member = Member.join(userInfo.getEmail(), name, request.getMemberType(), APPLE, clientSecret, token.getRefresh_token());
+            Member member = Member.join(userInfo.getSub(), userInfo.getEmail(), name, request.getMemberType(), APPLE, clientSecret, token.getRefresh_token());
 
             memberRepository.save(member);
 

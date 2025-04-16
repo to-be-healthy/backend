@@ -176,6 +176,19 @@ public class Member extends BaseTimeEntity<Member, Long> {
 			.build();
 	}
 
+	public static Member join(String userId, String email, String name, MemberType memberType, SocialType socialType, String id, String socialRefreshToken) {
+		return Member.builder()
+			.userId(userId)
+			.email(email)
+			.name(name)
+			.pushAlarmStatus(ENABLED)
+			.memberType(memberType)
+			.socialType(socialType)
+			.socialId(id)
+			.socialRefreshToken(socialRefreshToken)
+			.build();
+	}
+
 	public void updateSocialRefreshToken(String refreshToken) {
 		this.socialRefreshToken = refreshToken;
 	}
