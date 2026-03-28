@@ -25,5 +25,9 @@ public class OAuthProperties {
 		private String tokenUri;
 		private String userInfoUri;
 		private String adminKey;
+
+		public String getAdminKey() {
+			return adminKey;
+		}
 	}
 }
