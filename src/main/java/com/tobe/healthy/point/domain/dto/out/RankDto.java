@@ -1,6 +1,10 @@
 package com.tobe.healthy.point.domain.dto.out;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @ToString
@@ -9,15 +13,15 @@ import lombok.*;
 @AllArgsConstructor
 public class RankDto {
 
-    private int ranking;
-    private int lastMonthRanking;
-    private int totalMemberCnt;
+	private int ranking;
+	private int lastMonthRanking;
+	private int totalMemberCnt;
 
-    public static RankDto create(int ranking, int lastMonthRanking, int totalMemberCnt) {
-        return RankDto.builder()
-                .ranking(ranking)
-                .lastMonthRanking(lastMonthRanking)
-                .totalMemberCnt(totalMemberCnt)
-                .build();
-    }
+	public static RankDto create(int ranking, int lastMonthRanking, int totalMemberCnt) {
+		return RankDto.builder()
+			.ranking(ranking)
+			.lastMonthRanking(lastMonthRanking)
+			.totalMemberCnt(totalMemberCnt)
+			.build();
+	}
 }

@@ -1,7 +1,10 @@
 package com.tobe.healthy.diet.domain.dto;
 
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @ToString
@@ -10,12 +13,12 @@ import lombok.*;
 @AllArgsConstructor
 public class DietDetailDto {
 
-    @Builder.Default
-    private Boolean fast = false;
-    private DietFileDto dietFile;
+	@Builder.Default
+	private Boolean fast = false;
+	private DietFileDto dietFile;
 
-    public DietDetailDto(Boolean fast) {
-        this.fast = fast;
-    }
+	public DietDetailDto(Boolean fast) {
+		this.fast = fast;
+	}
 
 }

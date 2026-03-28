@@ -106,7 +106,7 @@ class TrainerScheduleRepositoryImpl(
                     trainerTodaySchedule.schedule.add(it)
                 }
             }
-            
+
             return trainerTodaySchedule
         }
     }

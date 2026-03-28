@@ -4,7 +4,7 @@ import com.tobe.healthy.notification.domain.entity.NotificationSenderType
 import com.tobe.healthy.notification.domain.entity.NotificationSenderType.SYSTEM
 
 object NotificationSenderInfo {
-    fun getSenderInfo() : SenderInfo {
+    fun getSenderInfo(): SenderInfo {
         return SenderInfo()
     }
 

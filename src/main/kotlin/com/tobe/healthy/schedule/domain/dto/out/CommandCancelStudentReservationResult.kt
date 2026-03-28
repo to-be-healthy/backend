@@ -14,7 +14,11 @@ data class CommandCancelStudentReservationResult(
     val waitingStudentId: Long? = null
 ) {
     companion object {
-        fun from(schedule: Schedule, applicantId: Long?, applicantName: String?) : CommandCancelStudentReservationResult {
+        fun from(
+            schedule: Schedule,
+            applicantId: Long?,
+            applicantName: String?
+        ): CommandCancelStudentReservationResult {
             return CommandCancelStudentReservationResult(
                 scheduleId = schedule.id,
                 lessonStartTime = schedule.lessonStartTime,

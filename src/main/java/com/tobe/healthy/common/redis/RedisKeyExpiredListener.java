@@ -1,17 +1,19 @@
 package com.tobe.healthy.common.redis;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.tobe.healthy.common.error.CustomException;
-import lombok.extern.slf4j.Slf4j;
+import static com.tobe.healthy.common.Utils.*;
+import static com.tobe.healthy.common.error.ErrorCode.*;
+import static com.tobe.healthy.common.redis.RedisKeyPrefix.*;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.listener.KeyExpirationEventMessageListener;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
-import static com.tobe.healthy.common.Utils.S3_DOMAIN;
-import static com.tobe.healthy.common.error.ErrorCode.FILE_REMOVE_ERROR;
-import static com.tobe.healthy.common.redis.RedisKeyPrefix.TEMP_FILE_URI;
+import com.amazonaws.services.s3.AmazonS3;
+import com.tobe.healthy.common.error.CustomException;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -24,8 +26,8 @@ public class RedisKeyExpiredListener extends KeyExpirationEventMessageListener {
 
 	public RedisKeyExpiredListener(RedisMessageListenerContainer listenerContainer, AmazonS3 amazonS3) {
 		super(listenerContainer);
-        this.amazonS3 = amazonS3;
-    }
+		this.amazonS3 = amazonS3;
+	}
 
 	@Override
 	public void onMessage(Message message, byte[] pattern) {

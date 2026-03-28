@@ -7,7 +7,7 @@ data class CommandNotificationStatusResult(
     val isRead: Boolean
 ) {
     companion object {
-        fun from(notification: Notification) : CommandNotificationStatusResult {
+        fun from(notification: Notification): CommandNotificationStatusResult {
             return CommandNotificationStatusResult(
                 notificationId = notification.id,
                 isRead = notification.isRead

@@ -51,7 +51,12 @@ class LessonHistoryFiles(
             )
         }
 
-        fun from(files: CommandUploadFileResult, lessonHistory: LessonHistory?, lessonHistoryComment: LessonHistoryComment?, writer: Member?): LessonHistoryFiles {
+        fun from(
+            files: CommandUploadFileResult,
+            lessonHistory: LessonHistory?,
+            lessonHistoryComment: LessonHistoryComment?,
+            writer: Member?
+        ): LessonHistoryFiles {
             return LessonHistoryFiles(
                 fileUrl = files.fileUrl,
                 fileOrder = files.fileOrder,

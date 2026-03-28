@@ -1,5 +1,18 @@
 package com.tobe.healthy.schedule.repository.student;
 
+import static com.querydsl.core.types.dsl.Expressions.*;
+import static com.tobe.healthy.schedule.domain.entity.QSchedule.*;
+import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.*;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
+import static java.util.stream.Collectors.*;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+import org.springframework.util.ObjectUtils;
+
 import com.querydsl.core.types.ConstantImpl;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -13,21 +26,9 @@ import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
 import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Repository;
-import org.springframework.util.ObjectUtils;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
-import static com.tobe.healthy.diet.domain.entity.QDiet.diet;
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.schedule;
-import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.scheduleWaiting;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
-import static java.util.stream.Collectors.toList;
 
 @Repository
 @RequiredArgsConstructor
@@ -39,19 +40,19 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	@Override
 	public List<ScheduleCommandResult> findAllSchedule(StudentScheduleCond searchCond, Long trainerId, Member member) {
 		List<Schedule> results = queryFactory
-				.select(schedule)
-				.from(schedule)
-				.leftJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.leftJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
-				.leftJoin(schedule.scheduleWaiting, scheduleWaiting)
-				.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), scheduleTrainerIdEq(trainerId)
+			.select(schedule)
+			.from(schedule)
+			.leftJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
+			.leftJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
+			.leftJoin(schedule.scheduleWaiting, scheduleWaiting)
+			.where(lessonDtEq(searchCond), lessonDtBetween(searchCond), scheduleTrainerIdEq(trainerId)
 				, scheduleReservationStatusForStudent())
-				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
-				.fetch();
+			.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+			.fetch();
 
 		return results.stream()
-				.map(result -> ScheduleCommandResult.from(result, member))
-				.collect(toList());
+			.map(result -> ScheduleCommandResult.from(result, member))
+			.collect(toList());
 	}
 
 	@Override
@@ -73,64 +74,65 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	@Override
 	public List<MyReservation> findNewReservation(Long memberId, StudentScheduleCond searchCond) {
 		List<Schedule> schedules = queryFactory.select(schedule)
-				.from(schedule)
-				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
-				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.where(scheduleApplicantIdEq(memberId), lessonDateTimeAfterNow(), lessonDtEq(searchCond), courseIdEq(searchCond))
-				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
-				.fetch();
+			.from(schedule)
+			.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
+			.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
+			.where(scheduleApplicantIdEq(memberId), lessonDateTimeAfterNow(), lessonDtEq(searchCond),
+				courseIdEq(searchCond))
+			.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+			.fetch();
 		return schedules.stream().map(MyReservation::from).collect(toList());
 	}
 
 	@Override
 	public List<MyReservation> findOldReservation(Long memberId, String searchDate) {
 		List<Schedule> schedules = queryFactory.select(schedule)
-				.from(schedule)
-				.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
-				.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
-				.where(scheduleApplicantIdEq(memberId), lessonDateTimeBeforeNow(), convertDateFormat(searchDate))
-				.orderBy(schedule.lessonDt.desc(), schedule.lessonStartTime.desc())
-				.fetch();
+			.from(schedule)
+			.innerJoin(schedule.applicant, new QMember("applicant")).fetchJoin()
+			.innerJoin(schedule.trainer, new QMember("trainer")).fetchJoin()
+			.where(scheduleApplicantIdEq(memberId), lessonDateTimeBeforeNow(), convertDateFormat(searchDate))
+			.orderBy(schedule.lessonDt.desc(), schedule.lessonStartTime.desc())
+			.fetch();
 		return schedules.stream().map(MyReservation::from).collect(toList());
 	}
 
 	@Override
 	public MyReservation findMyNextReservation(Long memberId) {
 		Schedule result = queryFactory.select(schedule)
-				.from(schedule)
-				.where(scheduleApplicantIdEq(memberId), lessonDateTimeAfterNow())
-				.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
-				.limit(1)
-				.fetchOne();
-		return result==null ? null : MyReservation.from(result);
+			.from(schedule)
+			.where(scheduleApplicantIdEq(memberId), lessonDateTimeAfterNow())
+			.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
+			.limit(1)
+			.fetchOne();
+		return result == null ? null : MyReservation.from(result);
 	}
 
 	@Override
 	public List<String> findMyReservationBlueDot(Long memberId, StudentScheduleCond searchCond) {
 		return queryFactory
-				.select(Expressions.stringTemplate(
-						"DATE_FORMAT({0}, {1})"
-						, schedule.lessonDt
-						, ConstantImpl.create("%Y-%m-%d"))).distinct()
-				.from(schedule)
-				.where(scheduleApplicantIdEq(memberId), lessonDtBetween(searchCond))
-				.fetch();
+			.select(Expressions.stringTemplate(
+				"DATE_FORMAT({0}, {1})"
+				, schedule.lessonDt
+				, ConstantImpl.create("%Y-%m-%d"))).distinct()
+			.from(schedule)
+			.where(scheduleApplicantIdEq(memberId), lessonDtBetween(searchCond))
+			.fetch();
 	}
 
 	private BooleanExpression scheduleReservationStatusForStudent() {
 		return schedule.reservationStatus.eq(COMPLETED)
-				.or(schedule.reservationStatus.eq(AVAILABLE))
-				.or(schedule.reservationStatus.eq(SOLD_OUT));
+			.or(schedule.reservationStatus.eq(AVAILABLE))
+			.or(schedule.reservationStatus.eq(SOLD_OUT));
 	}
 
 	private Predicate lessonDateTimeAfterNow() {
 		return schedule.lessonDt.after(LocalDate.now())
-				.or(schedule.lessonDt.goe(LocalDate.now()).and(schedule.lessonStartTime.after(LocalTime.now())));
+			.or(schedule.lessonDt.goe(LocalDate.now()).and(schedule.lessonStartTime.after(LocalTime.now())));
 	}
 
 	private Predicate lessonDateTimeBeforeNow() {
 		return schedule.lessonDt.before(LocalDate.now())
-				.or(schedule.lessonDt.loe(LocalDate.now()).and(schedule.lessonStartTime.before(LocalTime.now())));
+			.or(schedule.lessonDt.loe(LocalDate.now()).and(schedule.lessonStartTime.before(LocalTime.now())));
 	}
 
 	private BooleanExpression lessonDtBetween(StudentScheduleCond searchCond) {
@@ -149,14 +151,14 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	}
 
 	private BooleanExpression scheduleTrainerIdEq(Long trainerId) {
-		if(!ObjectUtils.isEmpty(trainerId)){
+		if (!ObjectUtils.isEmpty(trainerId)) {
 			return schedule.trainer.id.eq(trainerId);
 		}
 		return null;
 	}
 
 	private BooleanExpression scheduleApplicantIdEq(Long memberId) {
-		if(!ObjectUtils.isEmpty(memberId)){
+		if (!ObjectUtils.isEmpty(memberId)) {
 			return schedule.applicant.id.eq(memberId);
 		}
 		return null;
@@ -170,11 +172,11 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	}
 
 	private BooleanExpression convertDateFormat(String searchDate) {
-		if (!ObjectUtils.isEmpty(searchDate)){
+		if (!ObjectUtils.isEmpty(searchDate)) {
 			StringTemplate stringTemplate = Expressions.stringTemplate(
-					"DATE_FORMAT({0}, {1})"
-					, schedule.lessonDt
-					, ConstantImpl.create("%Y-%m"));
+				"DATE_FORMAT({0}, {1})"
+				, schedule.lessonDt
+				, ConstantImpl.create("%Y-%m"));
 			return stringTemplate.eq(searchDate);
 		}
 		return null;

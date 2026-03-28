@@ -60,7 +60,8 @@ class NotificationRepositoryImpl(
                     NotificationRedDotStatusResult::class.java,
                     notification.notificationCategory,
                     CaseBuilder()
-                        .`when`(CaseBuilder()
+                        .`when`(
+                            CaseBuilder()
                                 .`when`(notification.receiver.id.eq(receiverId).and(notification.isRead.eq(false)))
                                 .then(1)
                                 .otherwise(0)

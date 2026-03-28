@@ -37,7 +37,8 @@ class GymServiceTest(
     "내 헬스장으로 등록한다" {
         val findGym = gymRepository.findByName("건강해짐 원흥점") ?: throw IllegalArgumentException("헬스장을 찾을 수 없습니다.")
         val trainer = memberRepository.findByUserId("healthy-trainer0").get()
-        val response = gymCommandService.selectMyGym(findGym.id!!, CommandSelectMyGym(joinCode = findGym.joinCode), trainer.id)
+        val response =
+            gymCommandService.selectMyGym(findGym.id!!, CommandSelectMyGym(joinCode = findGym.joinCode), trainer.id)
         response.id shouldBe findGym.id
         response.name shouldBe "건강해짐 원흥점"
     }

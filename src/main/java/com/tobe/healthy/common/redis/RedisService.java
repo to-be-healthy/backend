@@ -1,11 +1,12 @@
 package com.tobe.healthy.common.redis;
 
-import lombok.RequiredArgsConstructor;
+import static java.util.concurrent.TimeUnit.*;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional

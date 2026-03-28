@@ -40,7 +40,10 @@ class TrainerScheduleInfo(
     val id: Long? = null
 ) {
 
-    fun changeDefaultLessonTime(request: CommandRegisterDefaultLessonTime, closedDays: MutableList<TrainerScheduleClosedDaysInfo>) {
+    fun changeDefaultLessonTime(
+        request: CommandRegisterDefaultLessonTime,
+        closedDays: MutableList<TrainerScheduleClosedDaysInfo>
+    ) {
         this.lessonStartTime = request.lessonStartTime
         this.lessonEndTime = request.lessonEndTime
         this.lunchStartTime = request.lunchStartTime
@@ -64,6 +67,7 @@ class TrainerScheduleInfo(
                 trainer = trainer,
             )
         }
+
         fun fromDescription(description: Int): LessonTime {
             for (lessonTime in LessonTime.entries) {
                 if (lessonTime.description == description) {

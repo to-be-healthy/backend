@@ -11,9 +11,9 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommandRefreshToken {
-    @NotEmpty
-    private String userId;
+	@NotEmpty
+	private String userId;
 
-    @NotEmpty
-    private String refreshToken;
+	@NotEmpty
+	private String refreshToken;
 }

@@ -8,13 +8,13 @@ import lombok.ToString;
 @ToString
 @Builder
 public class RegisterMemberProfileResult {
-    private String fileUrl;
-    private String fileName;
+	private String fileUrl;
+	private String fileName;
 
-    public static RegisterMemberProfileResult from(String fileUrl, String fileName) {
-        return RegisterMemberProfileResult.builder()
-                .fileUrl(fileUrl)
-                .fileName(fileName)
-                .build();
-    }
+	public static RegisterMemberProfileResult from(String fileUrl, String fileName) {
+		return RegisterMemberProfileResult.builder()
+			.fileUrl(fileUrl)
+			.fileName(fileName)
+			.build();
+	}
 }

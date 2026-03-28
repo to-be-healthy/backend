@@ -9,16 +9,16 @@ import lombok.ToString;
 @Builder
 public class PointDto {
 
-    private String searchDate;
-    private int monthPoint;
-    private int totalPoint;
+	private String searchDate;
+	private int monthPoint;
+	private int totalPoint;
 
-    public static PointDto create(String searchDate, int monthPoint, int totalPoint) {
-        return PointDto.builder()
-                .searchDate(searchDate)
-                .monthPoint(monthPoint)
-                .totalPoint(totalPoint)
-                .build();
-    }
+	public static PointDto create(String searchDate, int monthPoint, int totalPoint) {
+		return PointDto.builder()
+			.searchDate(searchDate)
+			.monthPoint(monthPoint)
+			.totalPoint(totalPoint)
+			.build();
+	}
 
 }

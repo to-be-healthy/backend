@@ -1,19 +1,25 @@
 package com.tobe.healthy.member.domain.entity;
 
+import static jakarta.persistence.FetchType.*;
+import static jakarta.persistence.GenerationType.*;
+import static lombok.AccessLevel.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import com.tobe.healthy.common.BaseTimeEntity;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-
-import static jakarta.persistence.FetchType.LAZY;
-import static jakarta.persistence.GenerationType.IDENTITY;
-import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
@@ -22,14 +28,12 @@ import static lombok.AccessLevel.PROTECTED;
 @Getter
 public class MemberProfile extends BaseTimeEntity<MemberProfile, Long> {
 
+	@OneToMany(mappedBy = "memberProfile", fetch = LAZY)
+	private final List<Member> member = new ArrayList<>();
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
 	@Column(name = "member_profile_id")
 	private Long id;
-
-	@OneToMany(mappedBy = "memberProfile", fetch = LAZY)
-	private final List<Member> member = new ArrayList<>();
-
 	@Nullable
 	private String fileUrl;
 
@@ -37,9 +41,9 @@ public class MemberProfile extends BaseTimeEntity<MemberProfile, Long> {
 
 	public static MemberProfile create(String fileName, String fileUrl, Member member) {
 		MemberProfile memberProfile = MemberProfile.builder()
-				.fileName(fileName)
-				.fileUrl(fileUrl)
-				.build();
+			.fileName(fileName)
+			.fileUrl(fileUrl)
+			.build();
 
 		memberProfile.getMember().add(member);
 

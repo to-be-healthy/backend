@@ -1,6 +1,7 @@
 package com.tobe.healthy.member.domain.dto.in;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 import lombok.ToString;
 

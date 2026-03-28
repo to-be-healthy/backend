@@ -7,7 +7,16 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 
 interface NotificationRepositoryCustom {
-    fun findAllByNotificationType(notificationCategory: NotificationCategory, receiverId: Long, pageable: Pageable): Page<Notification>
-    fun findAllRedDotStatus(notificationCategory: NotificationCategory, receiverId: Long): List<NotificationRedDotStatusResult>
-    fun findRedDotStatus(receiverId: Long) : Boolean
+    fun findAllByNotificationType(
+        notificationCategory: NotificationCategory,
+        receiverId: Long,
+        pageable: Pageable
+    ): Page<Notification>
+
+    fun findAllRedDotStatus(
+        notificationCategory: NotificationCategory,
+        receiverId: Long
+    ): List<NotificationRedDotStatusResult>
+
+    fun findRedDotStatus(receiverId: Long): Boolean
 }

@@ -1,5 +1,10 @@
 package com.tobe.healthy.member.presentation;
 
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.member.application.MemberAuthCommandService;
 import com.tobe.healthy.member.domain.dto.in.CommandFindMemberPassword;
@@ -12,6 +17,7 @@ import com.tobe.healthy.member.domain.dto.in.CommandVerification;
 import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,10 +26,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,7 +41,7 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "500", description = "메일 전송중 에러가 발생하였습니다."),
 			@ApiResponse(responseCode = "400", description = "이미 등록된 이메일입니다."),
 			@ApiResponse(responseCode = "200", description = "이메일로 인증번호를 전송하였습니다.")
-	})
+		})
 	@PostMapping("/validation/send-email")
 	public ResponseHandler<String> sendEmailVerification(@RequestBody @Valid CommandValidateEmail request) {
 		return ResponseHandler.<String>builder()
@@ -52,7 +54,7 @@ public class MemberAuthCommandController {
 		responses = {
 			@ApiResponse(responseCode = "400", description = "이메일 인증번호가 일치하지 않습니다."),
 			@ApiResponse(responseCode = "200", description = "이메일 인증번호가 일치합니다.")
-	})
+		})
 	@PostMapping("/validation/confirm-email")
 	public ResponseHandler<Boolean> verifyAuthMail(@RequestBody @Valid CommandVerification reuqest) {
 		return ResponseHandler.<Boolean>builder()
@@ -71,7 +73,7 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "400(6)", description = "이미 등록된 아이디입니다."),
 			@ApiResponse(responseCode = "400(7)", description = "이미 등록된 이메일입니다."),
 			@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
-	})
+		})
 	@PostMapping("/join")
 	public ResponseHandler<CommandJoinMemberResult> join(@RequestBody @Valid CommandJoinMember request) {
 		return ResponseHandler.<CommandJoinMemberResult>builder()
@@ -85,7 +87,7 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "400", description = "아이디 또는 비밀번호가 잘못되었습니다.",
 				content = {@Content(schema = @Schema(implementation = Tokens.class))}),
 			@ApiResponse(responseCode = "200", description = "로그인에 성공하고, Access Token, Refresh Token, userId, Role을 반환한다.")
-	})
+		})
 	@PostMapping("/login")
 	public ResponseHandler<Tokens> login(@RequestBody @Valid CommandLoginMember request) {
 		return ResponseHandler.<Tokens>builder()
@@ -100,7 +102,7 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "404(2)", description = "회원을 찾을 수 없습니다."),
 			@ApiResponse(responseCode = "400", description = "Refresh Token이 유효하지 않습니다."),
 			@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token, userId, Role을 반환한다.")
-	})
+		})
 	@PostMapping("/refresh-token")
 	public ResponseHandler<Tokens> refreshToken(@RequestBody @Valid CommandRefreshToken request) {
 		return ResponseHandler.<Tokens>builder()
@@ -114,9 +116,10 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "500", description = "메일 전송중 에러가 발생했습니다."),
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 			@ApiResponse(responseCode = "200", description = "등록된 이메일로 초기화 비밀번호를 전송한다.")
-	})
+		})
 	@PostMapping("/find/password")
-	public ResponseHandler<CommandFindMemberPasswordResult> findMemberPW(@RequestBody @Valid CommandFindMemberPassword request) {
+	public ResponseHandler<CommandFindMemberPasswordResult> findMemberPW(
+		@RequestBody @Valid CommandFindMemberPassword request) {
 
 		CommandFindMemberPasswordResult findMemberPasswordResult = memberAuthCommandService.findMemberPW(request);
 
@@ -132,7 +135,7 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "500(2)", description = "파일 업로드중 에러가 발생하였습니다."),
 			@ApiResponse(responseCode = "500(3)", description = "소셜 프로필을 가져오던 중 에러가 발생하였습니다."),
 			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
-	})
+		})
 	@PostMapping("/access-token/naver")
 	public ResponseHandler<Tokens> getNaverAccessToken(@RequestBody CommandSocialLogin request) {
 		return ResponseHandler.<Tokens>builder()
@@ -148,7 +151,7 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "500(3)", description = "파일 업로드중 에러가 발생하였습니다."),
 			@ApiResponse(responseCode = "500(4)", description = "소셜 프로필을 가져오던 중 에러가 발생하였습니다."),
 			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
-	})
+		})
 	@PostMapping("/access-token/kakao")
 	public ResponseHandler<Tokens> getKakaoAccessToken(@RequestBody CommandSocialLogin request) {
 		return ResponseHandler.<Tokens>builder()
@@ -158,10 +161,10 @@ public class MemberAuthCommandController {
 	}
 
 	@Operation(summary = "구글 소셜 로그인", description = "인가코드로 구글에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.",
-			responses = {
-					@ApiResponse(responseCode = "500", description = "구글 소셜서버와 연동중 에러가 발생하였습니다."),
-					@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
-	})
+		responses = {
+			@ApiResponse(responseCode = "500", description = "구글 소셜서버와 연동중 에러가 발생하였습니다."),
+			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
+		})
 	@PostMapping("/access-token/google")
 	public ResponseHandler<Tokens> getGoogleOAuth(@RequestBody CommandSocialLogin command) {
 		return ResponseHandler.<Tokens>builder()

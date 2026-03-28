@@ -1,18 +1,25 @@
 package com.tobe.healthy.member.presentation;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.tobe.healthy.common.ResponseHandler;
 import com.tobe.healthy.member.application.MemberAuthService;
 import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
 import com.tobe.healthy.member.domain.dto.in.FindMemberUserId;
 import com.tobe.healthy.member.domain.dto.in.FindMemberUserId.FindMemberUserIdResult;
 import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,7 +35,7 @@ public class MemberAuthController {
 		responses = {
 			@ApiResponse(responseCode = "400", description = "이미 등록된 아이디입니다."),
 			@ApiResponse(responseCode = "200", description = "사용 가능한 아이디입니다.")
-	})
+		})
 	@GetMapping("/validation/user-id")
 	public ResponseHandler<Boolean> validateUsernameDuplication(@RequestParam String userId) {
 		return ResponseHandler.<Boolean>builder()
@@ -41,7 +48,7 @@ public class MemberAuthController {
 		responses = {
 			@ApiResponse(responseCode = "400", description = "이미 등록된 이메일입니다."),
 			@ApiResponse(responseCode = "200", description = "사용 가능한 이메일입니다.")
-	})
+		})
 	@GetMapping("/validation/email")
 	public ResponseHandler<Boolean> validateEmailDuplication(@RequestParam @Valid CommandValidateEmail request) {
 		return ResponseHandler.<Boolean>builder()
@@ -54,7 +61,7 @@ public class MemberAuthController {
 		responses = {
 			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
 			@ApiResponse(responseCode = "200", description = "이메일 이름이 일치한 사용자 아이디를 반환한다.")
-	})
+		})
 	@PostMapping("/find/user-id")
 	public ResponseHandler<FindMemberUserIdResult> findUserId(@RequestBody @Valid FindMemberUserId request) {
 		FindMemberUserIdResult userIdResult = memberAuthService.findUserId(request);

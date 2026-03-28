@@ -14,10 +14,26 @@ import java.util.*
 
 interface TrainerScheduleRepositoryCustom {
     fun findOneTrainerTodaySchedule(lessonDt: String?, trainerId: Long): RetrieveTrainerScheduleByLessonDtResult?
-    fun validateDuplicateSchedule(trainerScheduleInfo: TrainerScheduleInfo, request: CommandRegisterSchedule, trainerId: Long): Boolean
+    fun validateDuplicateSchedule(
+        trainerScheduleInfo: TrainerScheduleInfo,
+        request: CommandRegisterSchedule,
+        trainerId: Long
+    ): Boolean
+
     fun findAvailableWaitingId(scheduleId: Long): Optional<Schedule>
-    fun findAllSchedule(lessonDt: String?, lessonStartDt: LocalDate?, lessonEndDt: LocalDate?, trainerId: Long): List<Schedule>
-    fun findAllSchedule(scheduleIds: List<Long>, reservationStatus: List<ReservationStatus>, trainerId: Long): List<Schedule>
+    fun findAllSchedule(
+        lessonDt: String?,
+        lessonStartDt: LocalDate?,
+        lessonEndDt: LocalDate?,
+        trainerId: Long
+    ): List<Schedule>
+
+    fun findAllSchedule(
+        scheduleIds: List<Long>,
+        reservationStatus: List<ReservationStatus>,
+        trainerId: Long
+    ): List<Schedule>
+
     fun findAllSchedule(scheduleId: Long, reservationStatus: ReservationStatus, trainerId: Long): Schedule?
     fun findAllDisabledSchedule(lessonStartDt: LocalDate, lessonEndDt: LocalDate): List<Schedule?>
     fun findAllUnwrittenLessonHistory(request: UnwrittenLessonHistorySearchCond, memberId: Long): List<Schedule>

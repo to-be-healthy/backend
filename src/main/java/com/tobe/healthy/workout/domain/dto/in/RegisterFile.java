@@ -11,10 +11,10 @@ import lombok.ToString;
 @NoArgsConstructor
 public class RegisterFile {
 
-    private String fileUrl;
-    private int fileOrder;
+	private String fileUrl;
+	private int fileOrder;
 
-    public RegisterFile(String fileUrl) {
-        this.fileUrl = fileUrl;
-    }
+	public RegisterFile(String fileUrl) {
+		this.fileUrl = fileUrl;
+	}
 }

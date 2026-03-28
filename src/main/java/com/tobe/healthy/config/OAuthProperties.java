@@ -1,9 +1,10 @@
 package com.tobe.healthy.config;
 
-import lombok.Data;
-import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+
+import lombok.Data;
+import lombok.ToString;
 
 @Component
 @ConfigurationProperties("oauth")

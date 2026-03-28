@@ -1,17 +1,19 @@
 package com.tobe.healthy.member.application;
 
-import com.tobe.healthy.common.error.CustomException;
-import com.tobe.healthy.member.domain.entity.Member;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static com.tobe.healthy.common.error.ErrorCode.*;
+
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import static com.tobe.healthy.common.error.ErrorCode.MAIL_SEND_ERROR;
+import com.tobe.healthy.common.error.CustomException;
+import com.tobe.healthy.member.domain.entity.Member;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -55,10 +57,11 @@ public class MailService {
 		try {
 			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
 			mimeMessageHelper.setTo(email);
-			mimeMessageHelper.setSubject("[건강해짐] 안녕하세요. {trainerName}님이 고객님을 초대했습니다.".replace("{trainerName}", trainer.getName())); // 메일 제목
+			mimeMessageHelper.setSubject(
+				"[건강해짐] 안녕하세요. {trainerName}님이 고객님을 초대했습니다.".replace("{trainerName}", trainer.getName())); // 메일 제목
 			String text = "안녕하세요. {trainerName}님이 고객님을 초대했습니다.\n하단 링크를 통해 회원가입을 해주세요.\n{inviteLink}"
-					.replace("{trainerName}", trainer.getName())
-					.replace("{inviteLink}", invitationLink);
+				.replace("{trainerName}", trainer.getName())
+				.replace("{inviteLink}", invitationLink);
 			mimeMessageHelper.setText(text, false); // 메일 본문 내용, HTML 여부
 			mailSender.send(mimeMessage);
 		} catch (Exception e) {

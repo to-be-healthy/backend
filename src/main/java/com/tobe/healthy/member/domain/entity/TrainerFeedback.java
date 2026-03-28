@@ -1,6 +1,7 @@
 package com.tobe.healthy.member.domain.entity;
 
 import com.tobe.healthy.common.enums.EnumMapperType;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -11,8 +11,8 @@ import lombok.ToString;
 @AllArgsConstructor
 public class TempRankDto {
 
-    private int ranking;
-    private Long memberId;
-    private int pointSum;
+	private int ranking;
+	private Long memberId;
+	private int pointSum;
 
 }

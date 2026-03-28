@@ -19,7 +19,7 @@ data class RetrieveUnwrittenLessonHistory(
     val reviewStatus: String
 ) {
     companion object {
-        fun from(schedule: Schedule) : RetrieveUnwrittenLessonHistory {
+        fun from(schedule: Schedule): RetrieveUnwrittenLessonHistory {
             return RetrieveUnwrittenLessonHistory(
                 scheduleId = schedule.id,
                 studentId = schedule.applicant?.id,

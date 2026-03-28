@@ -25,7 +25,8 @@ class GymCommandController(
         responses = [ApiResponse(responseCode = "200", description = "헬스장을 등록하였습니다.")],
     )
     @PostMapping
-    fun registerGym(@RequestBody request: CommandRegisterGym
+    fun registerGym(
+        @RequestBody request: CommandRegisterGym
     ): ApiResultResponse<CommandRegisterGymResult> {
         return ApiResultResponse(
             data = gymCommandService.registerGym(request),

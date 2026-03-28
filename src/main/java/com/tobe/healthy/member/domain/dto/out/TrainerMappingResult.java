@@ -8,5 +8,5 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 public class TrainerMappingResult {
-    private Boolean mapped;
+	private Boolean mapped;
 }

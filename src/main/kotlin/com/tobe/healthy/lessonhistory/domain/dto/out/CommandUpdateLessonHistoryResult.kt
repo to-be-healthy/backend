@@ -10,7 +10,10 @@ data class CommandUpdateLessonHistoryResult(
     val files: MutableList<CommandUploadFileResult> = mutableListOf()
 ) {
     companion object {
-        fun from(lessonHistory: LessonHistory, files: MutableList<LessonHistoryFiles>): CommandUpdateLessonHistoryResult {
+        fun from(
+            lessonHistory: LessonHistory,
+            files: MutableList<LessonHistoryFiles>
+        ): CommandUpdateLessonHistoryResult {
             return CommandUpdateLessonHistoryResult(
                 lessonHistoryId = lessonHistory.id,
                 title = lessonHistory.title,

@@ -1,16 +1,17 @@
 package com.tobe.healthy.member.repository;
 
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.Optional;
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberType;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 	@Query("select m from Member m where m.email = :email and m.delYn = false")
-    Optional<Member> findByEmail(String email);
+	Optional<Member> findByEmail(String email);
 
 	@Query("select m from Member m where m.userId = :userId and m.delYn = false")
 	Optional<Member> findByUserId(String userId);

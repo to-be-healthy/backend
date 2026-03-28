@@ -11,6 +11,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommandChangeName {
-    @NotEmpty
-    private String name;
+	@NotEmpty
+	private String name;
 }

@@ -24,7 +24,7 @@ class NotificationController(
         @PathVariable notificationCategory: NotificationCategory,
         @AuthenticationPrincipal member: CustomMemberDetails,
         @ParameterObject @PageableDefault(size = 10) pageable: Pageable
-    ) : ApiResultResponse<KotlinCustomPaging<RetrieveNotificationResult>> {
+    ): ApiResultResponse<KotlinCustomPaging<RetrieveNotificationResult>> {
         return ApiResultResponse(
             message = "전체 알림을 조회하였습니다.",
             data = notificationService.findAllNotification(notificationCategory, member.memberId, pageable)
@@ -35,7 +35,7 @@ class NotificationController(
     fun updateNotificationStatus(
         @PathVariable notificationId: Long,
         @AuthenticationPrincipal member: CustomMemberDetails,
-    ) : ApiResultResponse<CommandNotificationStatusResult> {
+    ): ApiResultResponse<CommandNotificationStatusResult> {
         return ApiResultResponse(
             message = "해당 알림을 읽음 처리 하였습니다.",
             data = notificationService.updateNotificationStatus(notificationId, member.memberId)
@@ -45,7 +45,7 @@ class NotificationController(
     @GetMapping("/red-dot")
     fun findNotificationWithRedDot(
         @AuthenticationPrincipal member: CustomMemberDetails
-    ) : ApiResultResponse<Boolean> {
+    ): ApiResultResponse<Boolean> {
         return ApiResultResponse(
             message = "red-dot 상태를 조회하였습니다.",
             data = notificationService.findRedDotStatus(member.memberId)

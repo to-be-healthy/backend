@@ -7,6 +7,6 @@ import lombok.ToString;
 @Data
 @ToString
 public class CommandAssignNickname {
-    @NotEmpty
-    private String nickname;
+	@NotEmpty
+	private String nickname;
 }

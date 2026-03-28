@@ -38,7 +38,13 @@ class LessonHistoryServiceTest(
         schedule = trainerScheduleRepository.findByIdOrNull(1L)!!
     }
 
-    fun createLessonHistory(studentId: Long, trainerId: Long, scheduleId: Long, title: String, content: String): CommandRegisterLessonHistoryResult {
+    fun createLessonHistory(
+        studentId: Long,
+        trainerId: Long,
+        scheduleId: Long,
+        title: String,
+        content: String
+    ): CommandRegisterLessonHistoryResult {
         return CommandRegisterLessonHistory(
             title = title,
             content = content,
@@ -82,7 +88,11 @@ class LessonHistoryServiceTest(
 
         val commentRequest = CommandRegisterComment(content = "수업일지 테스트 댓글")
         val response =
-            lessonHistoryCommandService.registerLessonHistoryComment(result.lessonHistoryId!!, commentRequest, CustomMemberDetails(student))
+            lessonHistoryCommandService.registerLessonHistoryComment(
+                result.lessonHistoryId!!,
+                commentRequest,
+                CustomMemberDetails(student)
+            )
 
         response.content shouldBe commentRequest.content
         response.writerId shouldBe student.id
@@ -94,7 +104,11 @@ class LessonHistoryServiceTest(
         memberId: Long
     ): CommandRegisterCommentResult {
         return CommandRegisterComment(content = comment).let {
-            lessonHistoryCommandService.registerLessonHistoryComment(lessonHistoryId!!, it, CustomMemberDetails(student))
+            lessonHistoryCommandService.registerLessonHistoryComment(
+                lessonHistoryId!!,
+                it,
+                CustomMemberDetails(student)
+            )
         }
     }
 

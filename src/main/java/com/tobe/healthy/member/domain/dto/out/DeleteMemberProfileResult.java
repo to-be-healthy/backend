@@ -8,13 +8,13 @@ import lombok.ToString;
 @ToString
 @Builder
 public class DeleteMemberProfileResult {
-    private String fileUrl;
-    private String fileName;
+	private String fileUrl;
+	private String fileName;
 
-    public static DeleteMemberProfileResult from(String fileUrl, String fileName) {
-        return DeleteMemberProfileResult.builder()
-                .fileUrl(fileUrl)
-                .fileName(fileName)
-                .build();
-    }
+	public static DeleteMemberProfileResult from(String fileUrl, String fileName) {
+		return DeleteMemberProfileResult.builder()
+			.fileUrl(fileUrl)
+			.fileName(fileName)
+			.build();
+	}
 }

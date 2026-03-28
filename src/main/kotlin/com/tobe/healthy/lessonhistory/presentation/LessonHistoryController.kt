@@ -26,10 +26,12 @@ class LessonHistoryController(
     private val lessonHistoryService: LessonHistoryService
 ) {
 
-    @Operation(summary = "전체 수업 일지를 조회한다.",
+    @Operation(
+        summary = "전체 수업 일지를 조회한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "전체 수업 일지를 조회하였습니다.")
-        ])
+        ]
+    )
     @GetMapping
     fun findAllLessonHistory(
         @ParameterObject request: RetrieveLessonHistoryByDateCond,
@@ -41,11 +43,13 @@ class LessonHistoryController(
         )
     }
 
-    @Operation(summary = "수업일지 단건을 조회한다.",
+    @Operation(
+        summary = "수업일지 단건을 조회한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "학생의 전체 수업 일지를 조회하였습니다."),
             ApiResponse(responseCode = "404", description = "수업 일지를 찾을 수 없습니다."),
-        ])
+        ]
+    )
     @GetMapping("/{lessonHistoryId}")
     fun findOneLessonHistory(
         @PathVariable lessonHistoryId: Long,
@@ -57,10 +61,12 @@ class LessonHistoryController(
         )
     }
 
-    @Operation(summary = "학생의 수업일지 전체를 조회한다.",
+    @Operation(
+        summary = "학생의 수업일지 전체를 조회한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "학생의 전체 수업 일지를 조회하였습니다.")
-        ])
+        ]
+    )
     @GetMapping("/student/{studentId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun findAllLessonHistoryByMemberId(
@@ -74,10 +80,12 @@ class LessonHistoryController(
         )
     }
 
-    @Operation(summary = "수업일지를 작성하지 않은 수업들을 조회하였습니다.",
+    @Operation(
+        summary = "수업일지를 작성하지 않은 수업들을 조회하였습니다.",
         responses = [
             ApiResponse(responseCode = "200", description = "수업일지를 작성하지 않은 수업들을 조회하였습니다."),
-        ])
+        ]
+    )
     @GetMapping("/unwritten")
     fun findAllUnwrittenLessonHistory(
         request: UnwrittenLessonHistorySearchCond,

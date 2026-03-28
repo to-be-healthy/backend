@@ -1,15 +1,19 @@
 package com.tobe.healthy.schedule.repository.waiting;
 
-import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
+import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 
-public interface ScheduleWaitingRepository extends JpaRepository<ScheduleWaiting, Long>, ScheduleWaitingRepositoryCustom {
+public interface ScheduleWaitingRepository
+	extends JpaRepository<ScheduleWaiting, Long>, ScheduleWaitingRepositoryCustom {
 	Optional<ScheduleWaiting> findByScheduleIdAndMemberId(Long scheduleId, Long memberId);
+
 	@EntityGraph(attributePaths = {"member"})
 	Optional<ScheduleWaiting> findByScheduleId(Long scheduleId);
-    void deleteByMemberId(Long memberId);
+
+	void deleteByMemberId(Long memberId);
 
 }

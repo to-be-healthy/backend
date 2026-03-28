@@ -1,16 +1,21 @@
 package com.tobe.healthy.schedule.domain.dto.out;
 
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
-import lombok.*;
-import org.springframework.util.ObjectUtils;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.COMPLETED;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.SOLD_OUT;
+import org.springframework.util.ObjectUtils;
+
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
+import com.tobe.healthy.schedule.domain.entity.Schedule;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @ToString
@@ -44,7 +49,8 @@ public class ScheduleCommandResult {
 		}
 
 		if (!ObjectUtils.isEmpty(entity.getApplicant())) {
-			if (entity.getApplicant().getId().equals(member.getId()) && entity.getReservationStatus().equals(COMPLETED)) {
+			if (entity.getApplicant().getId().equals(member.getId()) && entity.getReservationStatus()
+				.equals(COMPLETED)) {
 				builder.reservationStatus(SOLD_OUT);
 			} else {
 				builder.reservationStatus(entity.getReservationStatus());
@@ -61,11 +67,11 @@ public class ScheduleCommandResult {
 
 	public static ScheduleCommandResult from(Schedule entity) {
 		ScheduleCommandResultBuilder builder = ScheduleCommandResult.builder()
-				.scheduleId(entity.getId())
-				.lessonDt(entity.getLessonDt())
-				.lessonStartTime(entity.getLessonStartTime())
-				.lessonEndTime(entity.getLessonEndTime())
-				.reservationStatus(entity.getReservationStatus());
+			.scheduleId(entity.getId())
+			.lessonDt(entity.getLessonDt())
+			.lessonStartTime(entity.getLessonStartTime())
+			.lessonEndTime(entity.getLessonEndTime())
+			.reservationStatus(entity.getReservationStatus());
 
 		if (!ObjectUtils.isEmpty(entity.getReservationStatus())) {
 			builder.reservationStatus(entity.getReservationStatus());

@@ -31,7 +31,12 @@ class TrainerScheduleService(
         request: RetrieveTrainerScheduleByLessonInfo,
         trainerId: Long
     ): RetrieveTrainerScheduleByLessonInfoResult? {
-        val schedules = trainerScheduleRepository.findAllSchedule(request.lessonDt, request.lessonStartDt, request.lessonEndDt, trainerId)
+        val schedules = trainerScheduleRepository.findAllSchedule(
+            request.lessonDt,
+            request.lessonStartDt,
+            request.lessonEndDt,
+            trainerId
+        )
         return RetrieveTrainerScheduleByLessonInfoResult.from(schedules)
     }
 
@@ -39,7 +44,8 @@ class TrainerScheduleService(
         trainerId: Long,
         request: RetrieveTrainerScheduleByTrainerId,
     ): RetrieveTrainerScheduleByLessonInfoResult? {
-        val schedules = trainerScheduleRepository.findAllSchedule(null, request.lessonStartDt, request.lessonEndDt, trainerId)
+        val schedules =
+            trainerScheduleRepository.findAllSchedule(null, request.lessonStartDt, request.lessonEndDt, trainerId)
         return RetrieveTrainerScheduleByLessonInfoResult.from(schedules)
     }
 

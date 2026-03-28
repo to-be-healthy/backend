@@ -1,13 +1,11 @@
 package com.tobe.healthy.schedule.domain.entity;
 
-import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.course.domain.entity.Course;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
-import com.tobe.healthy.member.domain.entity.Member;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.DynamicUpdate;
-import org.jetbrains.annotations.Nullable;
+import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
+import static jakarta.persistence.CascadeType.*;
+import static jakarta.persistence.EnumType.*;
+import static jakarta.persistence.FetchType.*;
+import static jakarta.persistence.GenerationType.*;
+import static lombok.AccessLevel.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,13 +13,27 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
-import static jakarta.persistence.CascadeType.ALL;
-import static jakarta.persistence.CascadeType.PERSIST;
-import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.FetchType.LAZY;
-import static jakarta.persistence.GenerationType.IDENTITY;
-import static lombok.AccessLevel.PROTECTED;
+import org.hibernate.annotations.DynamicUpdate;
+import org.jetbrains.annotations.Nullable;
+
+import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.course.domain.entity.Course;
+import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
+import com.tobe.healthy.member.domain.entity.Member;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @NoArgsConstructor(access = PROTECTED)
@@ -75,13 +87,14 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 	@ToString.Exclude
 	private List<LessonHistory> lessonHistories = new ArrayList<>();
 
-    public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime, ReservationStatus reservationStatus) {
+	public static Schedule registerSchedule(LocalDate date, Member trainer, LocalTime startTime, LocalTime endTime,
+		ReservationStatus reservationStatus) {
 		ScheduleBuilder reserve = Schedule.builder()
-				.lessonDt(date)
-				.lessonStartTime(startTime)
-				.lessonEndTime(endTime)
-				.trainer(trainer)
-				.reservationStatus(reservationStatus);
+			.lessonDt(date)
+			.lessonStartTime(startTime)
+			.lessonEndTime(endTime)
+			.trainer(trainer)
+			.reservationStatus(reservationStatus);
 
 		return reserve.build();
 	}
@@ -113,11 +126,11 @@ public class Schedule extends BaseTimeEntity<Schedule, Long> {
 		this.applicant = null;
 	}
 
-	public void registerCourse(Course course){
+	public void registerCourse(Course course) {
 		this.course = course;
 	}
 
-	public void deleteCourse(){
+	public void deleteCourse() {
 		this.course = null;
 	}
 

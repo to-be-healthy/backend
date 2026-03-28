@@ -1,6 +1,7 @@
 package com.tobe.healthy.common.error;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 import lombok.ToString;
 
@@ -9,7 +10,7 @@ import lombok.ToString;
 public class OAuthError {
 
 	@Data
-    @ToString
+	@ToString
 	public static class KakaoError {
 		@JsonProperty("error")
 		private String error;
@@ -22,14 +23,14 @@ public class OAuthError {
 	}
 
 	@Data
-    @ToString
+	@ToString
 	public static class NaverError {
 		private String resultcode;
 		private String message;
 	}
 
 	@Data
-    @ToString
+	@ToString
 	public static class GoogleError {
 		@JsonProperty("error")
 		private String error;

@@ -64,7 +64,13 @@ class LessonHistory(
     }
 
     companion object {
-        fun register(title: String, content: String, student: Member, trainer: Member, schedule: Schedule): LessonHistory {
+        fun register(
+            title: String,
+            content: String,
+            student: Member,
+            trainer: Member,
+            schedule: Schedule
+        ): LessonHistory {
             return LessonHistory(
                 title = title,
                 content = content,

@@ -78,7 +78,8 @@ class MemberServiceTest(
             )
         )
 
-        val refreshToken = memberAuthCommandService.refreshToken(CommandRefreshToken(student.userId, token.refreshToken))
+        val refreshToken =
+            memberAuthCommandService.refreshToken(CommandRefreshToken(student.userId, token.refreshToken))
 
         token.userId shouldBe refreshToken.userId
         token.accessToken shouldNotBe refreshToken.accessToken
@@ -86,13 +87,27 @@ class MemberServiceTest(
     }
 
     "프로필 사진을 등록한다" {
-        val response = memberCommandService.registerProfile(MockMultipartFile("file", "file1.txt", "text/plain", "some content".toByteArray()), student.id)
+        val response = memberCommandService.registerProfile(
+            MockMultipartFile(
+                "file",
+                "file1.txt",
+                "text/plain",
+                "some content".toByteArray()
+            ), student.id
+        )
         response.fileName shouldStartWith "profile/"
         response.fileUrl shouldStartWith "https://"
     }
 
     "프로필 사진을 삭제한다" {
-        memberCommandService.registerProfile(MockMultipartFile("file", "file1.txt", "text/plain", "some content".toByteArray()), student.id)
+        memberCommandService.registerProfile(
+            MockMultipartFile(
+                "file",
+                "file1.txt",
+                "text/plain",
+                "some content".toByteArray()
+            ), student.id
+        )
         val response = memberCommandService.deleteProfile(student.id)
         response.fileName shouldStartWith "profile/"
         response.fileUrl shouldStartWith "https://"
@@ -108,7 +123,7 @@ class MemberServiceTest(
 
     "회원이 닉네임을 변경한다" {
         val changeName = memberCommandService.changeName(CommandChangeName("미미미누"), student.id)
-        log.info { "변경된 닉네임: ${changeName.name}"}
+        log.info { "변경된 닉네임: ${changeName.name}" }
         changeName.name shouldBe "미미미누"
     }
 

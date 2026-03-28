@@ -75,7 +75,7 @@ class LessonHistoryRepositoryImpl(
                 lessonHistoryIdEq(lessonHistoryId)
             )
             .fetchOne()
-        }
+    }
 
     private fun lessonHistoryIdEq(lessonHistoryId: Long): BooleanExpression? =
         lessonHistory.id.eq(lessonHistoryId)
@@ -195,6 +195,7 @@ class LessonHistoryRepositoryImpl(
             TRAINER -> {
                 lessonHistory.trainer.id.eq(memberId)
             }
+
             else -> {
                 lessonHistory.student.id.eq(memberId)
             }

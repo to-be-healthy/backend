@@ -1,5 +1,15 @@
 package com.tobe.healthy.schedule.application;
 
+import static com.tobe.healthy.common.Utils.*;
+import static com.tobe.healthy.common.error.ErrorCode.*;
+import static com.tobe.healthy.schedule.application.TrainerScheduleCommandService.ONE_DAY;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.domain.dto.CourseDto;
@@ -11,17 +21,9 @@ import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository;
 import com.tobe.healthy.schedule.repository.waiting.ScheduleWaitingRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static com.tobe.healthy.common.Utils.formatter_hmm;
-import static com.tobe.healthy.common.error.ErrorCode.*;
-import static com.tobe.healthy.schedule.application.TrainerScheduleCommandService.ONE_DAY;
 
 @Service
 @RequiredArgsConstructor
@@ -43,8 +45,10 @@ public class ScheduleWaitingService {
 			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
 		CourseDto usingCourse = courseService.getNowUsingCourse(memberId);
-		if(usingCourse == null) throw new CustomException(COURSE_NOT_FOUND);
-		if(usingCourse.getRemainLessonCnt()==0) throw new CustomException(LESSON_CNT_NOT_VALID);
+		if (usingCourse == null)
+			throw new CustomException(COURSE_NOT_FOUND);
+		if (usingCourse.getRemainLessonCnt() == 0)
+			throw new CustomException(LESSON_CNT_NOT_VALID);
 
 		LocalDateTime lessonDateTime = LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime());
 
@@ -52,27 +56,29 @@ public class ScheduleWaitingService {
 			ScheduleWaiting scheduleWaiting = ScheduleWaiting.register(member, schedule);
 			scheduleWaitingRepository.save(scheduleWaiting);
 			log.info("[대기 신청] member: {}, schedule: {}, trainer: {}",
-					member, schedule, schedule.getTrainer());
+				member, schedule, schedule.getTrainer());
 			return schedule.getLessonStartTime().format(formatter_hmm);
 		} else {
 			log.error("[대기 신청] member: {}, schedule: {}, trainer: {}, message:{}",
-					member, schedule, schedule.getTrainer(), NOT_SCHEDULE_WAITING);
+				member, schedule, schedule.getTrainer(), NOT_SCHEDULE_WAITING);
 			throw new CustomException(NOT_SCHEDULE_WAITING);
 		}
 	}
 
 	public String cancelScheduleWaiting(Long scheduleId, Long memberId) {
 		Member member = memberRepository.findById(memberId)
-				.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 		Schedule schedule = trainerScheduleRepository.findAvailableWaitingId(scheduleId)
-				.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(SCHEDULE_NOT_FOUND));
 
-		LocalDateTime before24Hour = LocalDateTime.of(schedule.getLessonDt().minusDays(1), schedule.getLessonStartTime());
-		if (LocalDateTime.now().isAfter(before24Hour)) throw new CustomException(RESERVATION_CANCEL_NOT_VALID);
+		LocalDateTime before24Hour = LocalDateTime.of(schedule.getLessonDt().minusDays(1),
+			schedule.getLessonStartTime());
+		if (LocalDateTime.now().isAfter(before24Hour))
+			throw new CustomException(RESERVATION_CANCEL_NOT_VALID);
 
 		ScheduleWaiting scheduleWaiting = scheduleWaitingRepository.findByScheduleIdAndMemberId(scheduleId, memberId)
-				.orElseThrow(() -> new CustomException(SCHEDULE_WAITING_NOT_FOUND));
+			.orElseThrow(() -> new CustomException(SCHEDULE_WAITING_NOT_FOUND));
 		scheduleWaitingRepository.delete(scheduleWaiting);
 		log.info("[대기 취소] member: {}, schedule: {}, trainer: {}", member, schedule, schedule.getTrainer());
 		return scheduleWaiting.getSchedule().getLessonStartTime().format(formatter_hmm);

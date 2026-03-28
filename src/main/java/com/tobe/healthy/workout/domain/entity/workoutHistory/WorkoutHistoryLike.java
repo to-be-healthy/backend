@@ -3,8 +3,11 @@ package com.tobe.healthy.workout.domain.entity.workoutHistory;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.*;
-
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "workout_history_like")
@@ -14,13 +17,13 @@ import lombok.*;
 @Getter
 public class WorkoutHistoryLike {
 
-    @EmbeddedId
-    private WorkoutHistoryLikePK workoutHistoryLikePK;
+	@EmbeddedId
+	private WorkoutHistoryLikePK workoutHistoryLikePK;
 
-    public static WorkoutHistoryLike from(WorkoutHistoryLikePK workoutHistoryLikePK) {
-        return WorkoutHistoryLike.builder()
-                .workoutHistoryLikePK(workoutHistoryLikePK)
-                .build();
-    }
+	public static WorkoutHistoryLike from(WorkoutHistoryLikePK workoutHistoryLikePK) {
+		return WorkoutHistoryLike.builder()
+			.workoutHistoryLikePK(workoutHistoryLikePK)
+			.build();
+	}
 
 }

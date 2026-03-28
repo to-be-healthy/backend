@@ -8,6 +8,6 @@ import lombok.ToString;
 @ToString
 public class CommandUpdateMemo {
 
-    @Schema(description = "메모내용", example = "메모메모")
-    private String memo;
+	@Schema(description = "메모내용", example = "메모메모")
+	private String memo;
 }

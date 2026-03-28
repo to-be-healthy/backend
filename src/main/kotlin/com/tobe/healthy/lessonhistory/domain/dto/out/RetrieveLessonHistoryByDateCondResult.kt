@@ -31,7 +31,7 @@ data class RetrieveLessonHistoryByDateCondResult(
 
     companion object {
 
-        fun top1From(entity: LessonHistory?) : RetrieveLessonHistoryByDateCondResult? {
+        fun top1From(entity: LessonHistory?): RetrieveLessonHistoryByDateCondResult? {
             return entity?.let {
                 return RetrieveLessonHistoryByDateCondResult(
                     id = entity.id,
@@ -46,9 +46,13 @@ data class RetrieveLessonHistoryByDateCondResult(
                     scheduleId = entity.schedule?.id,
                     lessonDt = formatLessonDt(entity.schedule?.lessonDt),
                     lessonTime = formatLessonTime(entity.schedule?.lessonStartTime, entity.schedule?.lessonEndTime),
-                    attendanceStatus = validateAttendanceStatus(entity.schedule?.lessonDt, entity.schedule?.lessonEndTime),
+                    attendanceStatus = validateAttendanceStatus(
+                        entity.schedule?.lessonDt,
+                        entity.schedule?.lessonEndTime
+                    ),
                     feedbackChecked = entity.feedbackChecked,
-                    files = entity.files.map { file -> LessonHistoryFileResults.from(file) }.sortedBy { file -> file.createdAt }.toMutableList()
+                    files = entity.files.map { file -> LessonHistoryFileResults.from(file) }
+                        .sortedBy { file -> file.createdAt }.toMutableList()
                 )
             }
         }
@@ -68,9 +72,14 @@ data class RetrieveLessonHistoryByDateCondResult(
                     scheduleId = entity.schedule?.id,
                     lessonDt = formatLessonDt(entity.schedule?.lessonDt),
                     lessonTime = formatLessonTime(entity.schedule?.lessonStartTime, entity.schedule?.lessonEndTime),
-                    attendanceStatus = validateAttendanceStatus(entity.schedule?.lessonDt, entity.schedule?.lessonEndTime),
+                    attendanceStatus = validateAttendanceStatus(
+                        entity.schedule?.lessonDt,
+                        entity.schedule?.lessonEndTime
+                    ),
                     feedbackChecked = entity.feedbackChecked,
-                    files = entity.files.filter { it.lessonHistoryComment == null }.map { file -> LessonHistoryFileResults.from(file) }.sortedBy { file -> file.createdAt }.toMutableList()
+                    files = entity.files.filter { it.lessonHistoryComment == null }
+                        .map { file -> LessonHistoryFileResults.from(file) }.sortedBy { file -> file.createdAt }
+                        .toMutableList()
                 )
             }
         }

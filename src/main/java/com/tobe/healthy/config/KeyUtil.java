@@ -12,7 +12,7 @@ public class KeyUtil {
 			PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
 			KeyFactory keyFactory = KeyFactory.getInstance("EC");
 			PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
-			return (ECPrivateKey) privateKey;
+			return (ECPrivateKey)privateKey;
 		} catch (Exception e) {
 			throw new InvalidKeySpecException("Failed to create ECPrivateKey from bytes", e);
 		}

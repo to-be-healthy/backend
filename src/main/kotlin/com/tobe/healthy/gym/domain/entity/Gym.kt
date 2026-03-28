@@ -28,7 +28,7 @@ class Gym(
     @Column(name = "gym_id")
     val id: Long? = null,
 
-) : BaseTimeEntity<Gym, Long>() {
+    ) : BaseTimeEntity<Gym, Long>() {
 
     fun validateJoinCode(joinCode: String?) {
         if (this.joinCode != joinCode) {

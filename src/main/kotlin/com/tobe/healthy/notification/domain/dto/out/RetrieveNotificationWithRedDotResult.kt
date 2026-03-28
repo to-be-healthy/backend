@@ -11,7 +11,7 @@ data class RetrieveNotificationWithRedDotResult(
         fun from(
             notifications: Page<Notification>,
             redDotStatus: List<NotificationRedDotStatusResult>
-        ) : RetrieveNotificationWithRedDotResult {
+        ): RetrieveNotificationWithRedDotResult {
             return RetrieveNotificationWithRedDotResult(
                 content = notifications.content.map { RetrieveNotificationResult.from(it) },
                 redDotStatus = redDotStatus
@@ -33,7 +33,7 @@ data class RetrieveNotificationWithRedDotResult(
         val studentName: String? = null
     ) {
         companion object {
-            fun from(notification: Notification) : RetrieveNotificationResult {
+            fun from(notification: Notification): RetrieveNotificationResult {
                 return RetrieveNotificationResult(
                     notificationId = notification.id,
                     notificationCategoryAndType = "${notification.notificationCategory.name + "-" + notification.notificationType.name}",

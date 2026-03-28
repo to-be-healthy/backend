@@ -113,12 +113,27 @@ class TrainerScheduleCommandService(
 
             // 휴무일일 경우
             if (isClosedDay(trainerScheduleInfo, lessonDt)) {
-                generateDisabledSchedules(schedules, lessonDt, trainer, dayLessonStartTime, dayLessonEndTime, lessonTime)
+                generateDisabledSchedules(
+                    schedules,
+                    lessonDt,
+                    trainer,
+                    dayLessonStartTime,
+                    dayLessonEndTime,
+                    lessonTime
+                )
                 lessonDt = lessonDt.plusDays(ONE_DAY)
                 continue
             }
 
-            generateAvailableSchedules(schedules, lessonDt, trainer, defaultLessonStartTime, defaultLessonEndTime, trainerScheduleInfo, lessonTime)
+            generateAvailableSchedules(
+                schedules,
+                lessonDt,
+                trainer,
+                defaultLessonStartTime,
+                defaultLessonEndTime,
+                trainerScheduleInfo,
+                lessonTime
+            )
 
             lessonDt = lessonDt.plusDays(ONE_DAY)
         }
@@ -311,7 +326,13 @@ class TrainerScheduleCommandService(
     ) {
         var currentTime = startTime
         while (currentTime.isBefore(endTime)) {
-            val schedule = Schedule.registerSchedule(lessonDt, trainer, currentTime.toLocalTime(), currentTime.plusMinutes(lessonTime).toLocalTime(), DISABLED)
+            val schedule = Schedule.registerSchedule(
+                lessonDt,
+                trainer,
+                currentTime.toLocalTime(),
+                currentTime.plusMinutes(lessonTime).toLocalTime(),
+                DISABLED
+            )
             schedules.add(schedule)
             currentTime = currentTime.plusMinutes(lessonTime)
         }
@@ -330,16 +351,26 @@ class TrainerScheduleCommandService(
         while (currentTime.isBefore(endTime)) {
             if (isStartTimeEqualsLunchStartTime(trainerScheduleInfo.lunchStartTime, currentTime.toLocalTime())) {
                 val duration = between(trainerScheduleInfo.lunchStartTime, trainerScheduleInfo.lunchEndTime)
-                schedules.add(Schedule.registerSchedule(lessonDt, trainer, trainerScheduleInfo.lunchStartTime, trainerScheduleInfo.lunchEndTime, DISABLED))
+                schedules.add(
+                    Schedule.registerSchedule(
+                        lessonDt,
+                        trainer,
+                        trainerScheduleInfo.lunchStartTime,
+                        trainerScheduleInfo.lunchEndTime,
+                        DISABLED
+                    )
+                )
                 currentTime = currentTime.plusMinutes(duration.toMinutes())
             } else {
-                schedules.add(Schedule.registerSchedule(
-                    lessonDt,
-                    trainer,
-                    currentTime.toLocalTime(),
-                    currentTime.plusMinutes(lessonTime).toLocalTime(),
-                    AVAILABLE
-                ))
+                schedules.add(
+                    Schedule.registerSchedule(
+                        lessonDt,
+                        trainer,
+                        currentTime.toLocalTime(),
+                        currentTime.plusMinutes(lessonTime).toLocalTime(),
+                        AVAILABLE
+                    )
+                )
                 currentTime = currentTime.plusMinutes(lessonTime)
             }
         }

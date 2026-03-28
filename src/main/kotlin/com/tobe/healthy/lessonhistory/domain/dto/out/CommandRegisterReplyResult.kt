@@ -13,7 +13,10 @@ data class CommandRegisterReplyResult(
     val parentId: Long?
 ) {
     companion object {
-        fun from(lessonHistoryComment: LessonHistoryComment, files: MutableList<LessonHistoryFiles>) : CommandRegisterReplyResult {
+        fun from(
+            lessonHistoryComment: LessonHistoryComment,
+            files: MutableList<LessonHistoryFiles>
+        ): CommandRegisterReplyResult {
             return CommandRegisterReplyResult(
                 lessonHistoryId = lessonHistoryComment.lessonHistory?.id,
                 commentId = lessonHistoryComment.id,

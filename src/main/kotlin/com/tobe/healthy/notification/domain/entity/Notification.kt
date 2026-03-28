@@ -52,7 +52,16 @@ class Notification(
     }
 
     companion object {
-        fun create(title: String, content: String, notificationCategory: NotificationCategory, notificationType: NotificationType, receiver: Member, targetId: Long? = null, clickUrl: String? = null, studentId: Long? = null, studentName: String? = null
+        fun create(
+            title: String,
+            content: String,
+            notificationCategory: NotificationCategory,
+            notificationType: NotificationType,
+            receiver: Member,
+            targetId: Long? = null,
+            clickUrl: String? = null,
+            studentId: Long? = null,
+            studentName: String? = null
         ): Notification {
             return Notification(
                 title = title,

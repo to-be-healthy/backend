@@ -25,7 +25,7 @@ data class CommandSendNotificationResult(
         val receiverName: String?
     ) {
         companion object {
-            fun from(receiver: Member?) : NotificationReciverInfo {
+            fun from(receiver: Member?): NotificationReciverInfo {
                 return NotificationReciverInfo(
                     receiverId = receiver?.id,
                     receiverName = receiver?.name

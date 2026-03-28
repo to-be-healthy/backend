@@ -15,7 +15,7 @@ data class CommandScheduleStatusResult(
     val reservationStatus: ReservationStatus
 ) {
     companion object {
-        fun from(schedule: Schedule) : CommandScheduleStatusResult {
+        fun from(schedule: Schedule): CommandScheduleStatusResult {
             return CommandScheduleStatusResult(
                 scheduleId = schedule.id!!,
                 studentId = schedule.applicant?.id,

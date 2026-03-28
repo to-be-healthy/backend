@@ -12,7 +12,10 @@ data class CommandRegisterCommentResult(
     val files: MutableList<CommandUploadFileResult> = mutableListOf()
 ) {
     companion object {
-        fun from(lessonHistoryComment: LessonHistoryComment, files: MutableList<LessonHistoryFiles>) : CommandRegisterCommentResult {
+        fun from(
+            lessonHistoryComment: LessonHistoryComment,
+            files: MutableList<LessonHistoryFiles>
+        ): CommandRegisterCommentResult {
             return CommandRegisterCommentResult(
                 lessonHistoryId = lessonHistoryComment.lessonHistory?.id,
                 lessonHistoryCommentId = lessonHistoryComment.id,

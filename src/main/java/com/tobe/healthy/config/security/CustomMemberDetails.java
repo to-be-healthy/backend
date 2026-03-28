@@ -1,19 +1,20 @@
 package com.tobe.healthy.config.security;
 
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
-import lombok.Data;
-import lombok.ToString;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import static com.tobe.healthy.member.domain.entity.MemberType.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.tobe.healthy.member.domain.entity.MemberType.STUDENT;
-import static com.tobe.healthy.member.domain.entity.MemberType.TRAINER;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.MemberType;
+
+import lombok.Data;
+import lombok.ToString;
 
 @Data
 @ToString

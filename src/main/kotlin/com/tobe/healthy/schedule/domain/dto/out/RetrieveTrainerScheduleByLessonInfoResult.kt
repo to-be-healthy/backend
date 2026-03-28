@@ -19,8 +19,10 @@ data class RetrieveTrainerScheduleByLessonInfoResult(
     companion object {
         private const val DEFAULT_DURATION = 60.0
         fun from(schedule: List<Schedule>): RetrieveTrainerScheduleByLessonInfoResult {
-            val firstLessonStartTime = schedule.filter { it.reservationStatus != DISABLED }.minOfOrNull { it.lessonStartTime }
-            val lastLessonEndTime = schedule.filter { it.reservationStatus != DISABLED }.maxOfOrNull { it.lessonEndTime }
+            val firstLessonStartTime =
+                schedule.filter { it.reservationStatus != DISABLED }.minOfOrNull { it.lessonStartTime }
+            val lastLessonEndTime =
+                schedule.filter { it.reservationStatus != DISABLED }.maxOfOrNull { it.lessonEndTime }
 
             val groupingSchedules = schedule.groupBy { it.lessonDt }
                 .mapValues { entry ->

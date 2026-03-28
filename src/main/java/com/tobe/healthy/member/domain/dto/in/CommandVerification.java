@@ -7,9 +7,9 @@ import lombok.ToString;
 @Data
 @ToString
 public class CommandVerification {
-    @NotEmpty
-    private String email;
+	@NotEmpty
+	private String email;
 
-    @NotEmpty
-    private String emailKey;
+	@NotEmpty
+	private String emailKey;
 }

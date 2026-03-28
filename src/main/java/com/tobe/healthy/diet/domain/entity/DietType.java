@@ -1,6 +1,7 @@
 package com.tobe.healthy.diet.domain.entity;
 
 import com.tobe.healthy.common.enums.EnumMapperType;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,14 +9,14 @@ import lombok.Getter;
 @Getter
 public enum DietType implements EnumMapperType {
 
-    BREAKFAST("breakfast"),
-    LUNCH("lunch"),
-    DINNER("dinner");
+	BREAKFAST("breakfast"),
+	LUNCH("lunch"),
+	DINNER("dinner");
 
-    private final String description;
+	private final String description;
 
-    @Override
-    public String getCode() {
-        return name();
-    }
+	@Override
+	public String getCode() {
+		return name();
+	}
 }

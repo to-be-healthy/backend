@@ -1,7 +1,12 @@
 package com.tobe.healthy.schedule.domain.dto.out;
 
 import com.tobe.healthy.schedule.domain.entity.Schedule;
-import lombok.*;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @ToString
@@ -24,18 +29,18 @@ public class ScheduleIdInfo {
 
 	public static ScheduleIdInfo create(Schedule schedule, String scheduleTime) {
 		return ScheduleIdInfo.builder()
-				.studentId(schedule.getApplicant().getId())
-				.trainerId(schedule.getTrainer().getId())
-				.scheduleId(schedule.getId())
-				.scheduleTime(scheduleTime)
-				.build();
+			.studentId(schedule.getApplicant().getId())
+			.trainerId(schedule.getTrainer().getId())
+			.scheduleId(schedule.getId())
+			.scheduleTime(scheduleTime)
+			.build();
 	}
 
 	public static ScheduleIdInfo create(Schedule schedule, Long waitingStudentId) {
 		return ScheduleIdInfo.builder()
-				.studentId(waitingStudentId)
-				.trainerId(schedule.getTrainer().getId())
-				.scheduleId(schedule.getId())
-				.build();
+			.studentId(waitingStudentId)
+			.trainerId(schedule.getTrainer().getId())
+			.scheduleId(schedule.getId())
+			.build();
 	}
 }

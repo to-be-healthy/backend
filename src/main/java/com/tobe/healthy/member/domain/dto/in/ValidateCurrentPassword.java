@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class ValidateCurrentPassword {
-    @NotEmpty(message = "현재 비밀번호를 입력해 주세요.")
-    private String password;
+	@NotEmpty(message = "현재 비밀번호를 입력해 주세요.")
+	private String password;
 }

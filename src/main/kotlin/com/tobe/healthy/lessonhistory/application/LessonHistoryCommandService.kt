@@ -79,7 +79,13 @@ class LessonHistoryCommandService(
         val files = registerFiles(request.uploadFiles, trainer, lessonHistory)
 
         // 학생에게 수업일지 작성 알림
-        sendNotification(WRITE, WRITE.content, lessonHistory.id!!, lessonHistory.student!!.id!!, "https://main.to-be-healthy.shop/student/log/${lessonHistory.id}")
+        sendNotification(
+            WRITE,
+            WRITE.content,
+            lessonHistory.id!!,
+            lessonHistory.student!!.id!!,
+            "https://main.to-be-healthy.shop/student/log/${lessonHistory.id}"
+        )
 
         return CommandRegisterLessonHistoryResult.from(lessonHistory, files)
     }
@@ -157,7 +163,7 @@ class LessonHistoryCommandService(
         // 파일 전체 삭제
         if (request.uploadFiles.isNotEmpty()) {
             request.uploadFiles.forEachIndexed { idx, file ->
-                if (lessonHistory.files.indexOfFirst { it.fileUrl == file.fileUrl } != - 1) {
+                if (lessonHistory.files.indexOfFirst { it.fileUrl == file.fileUrl } != -1) {
                     val fileIdx = lessonHistory.files.indexOfFirst { it.fileUrl == file.fileUrl }
                     lessonHistory.files[fileIdx].updateFileOrder(idx + 1)
                     savedFiles.add(lessonHistory.files[fileIdx])
@@ -311,15 +317,16 @@ class LessonHistoryCommandService(
         request: CommandUpdateComment,
         member: CustomMemberDetails
     ): CommandUpdateCommentResult {
-        val comment = lessonHistoryCommentRepository.findLessonHistoryCommentWithFiles(lessonHistoryCommentId, member.memberId)
-            ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
+        val comment =
+            lessonHistoryCommentRepository.findLessonHistoryCommentWithFiles(lessonHistoryCommentId, member.memberId)
+                ?: throw CustomException(LESSON_HISTORY_COMMENT_NOT_FOUND)
 
         val savedFiles = mutableListOf<LessonHistoryFiles>()
 
         // 파일 전체 삭제
         if (request.uploadFiles.isNotEmpty()) {
             request.uploadFiles.forEachIndexed { idx, file ->
-                if (comment.files.indexOfFirst { it.fileUrl == file.fileUrl } != - 1) {
+                if (comment.files.indexOfFirst { it.fileUrl == file.fileUrl } != -1) {
                     val fileIdx = comment.files.indexOfFirst { it.fileUrl == file.fileUrl }
                     comment.files[fileIdx].updateFileOrder(idx + 1)
                     savedFiles.add(comment.files[fileIdx])
@@ -431,7 +438,10 @@ class LessonHistoryCommandService(
 
     private fun putFile(uploadFile: MultipartFile): String {
         val objectMetadata = createObjectMetadata(uploadFile.size, uploadFile.contentType)
-        val savedFileName = createFileName("origin/lesson-history/", uploadFile.originalFilename!!.substring(uploadFile.originalFilename!!.lastIndexOf(".")))
+        val savedFileName = createFileName(
+            "origin/lesson-history/",
+            uploadFile.originalFilename!!.substring(uploadFile.originalFilename!!.lastIndexOf("."))
+        )
         amazonS3.putObject(
             bucketName,
             savedFileName,

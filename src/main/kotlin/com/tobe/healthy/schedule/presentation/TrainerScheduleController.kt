@@ -63,7 +63,10 @@ class TrainerScheduleController(
     ): ApiResultResponse<RetrieveTrainerScheduleByLessonInfoResult?> {
         return ApiResultResponse(
             message = "전체 일정을 조회했습니다.",
-            data = trainerScheduleService.findAllSchedule(retrieveTrainerScheduleByLessonInfo, customMemberDetails.memberId)
+            data = trainerScheduleService.findAllSchedule(
+                retrieveTrainerScheduleByLessonInfo,
+                customMemberDetails.memberId
+            )
         )
     }
 

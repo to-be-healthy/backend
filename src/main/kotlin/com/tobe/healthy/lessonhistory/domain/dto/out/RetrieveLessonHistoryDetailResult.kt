@@ -46,7 +46,9 @@ data class RetrieveLessonHistoryDetailResult(
                     lessonDt = formatLessonDt(it.schedule?.lessonDt),
                     lessonTime = formatLessonTime(it.schedule?.lessonStartTime, it.schedule?.lessonEndTime),
                     attendanceStatus = validateAttendanceStatus(it.schedule?.lessonDt, it.schedule?.lessonEndTime),
-                    files = it.files.filter { comment -> comment.lessonHistoryComment == null }.map { files -> LessonHistoryFileResults.from(files) }.sortedBy { file -> file.createdAt }.toMutableList()
+                    files = it.files.filter { comment -> comment.lessonHistoryComment == null }
+                        .map { files -> LessonHistoryFileResults.from(files) }.sortedBy { file -> file.createdAt }
+                        .toMutableList()
                 )
             }
         }
@@ -94,7 +96,8 @@ data class RetrieveLessonHistoryDetailResult(
                     orderNum = entity?.order,
                     replies = entity?.replies?.map { replies -> from(replies) }?.toMutableList() ?: mutableListOf(),
                     parentId = entity?.parent?.id,
-                    files = entity?.files?.map { files -> LessonHistoryFileResults.from(files) }?.toMutableList() ?: mutableListOf(),
+                    files = entity?.files?.map { files -> LessonHistoryFileResults.from(files) }?.toMutableList()
+                        ?: mutableListOf(),
                     delYn = entity?.delYn,
                     createdAt = entity?.createdAt,
                     updatedAt = entity?.updatedAt

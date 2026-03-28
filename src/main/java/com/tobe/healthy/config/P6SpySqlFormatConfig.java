@@ -1,15 +1,16 @@
 package com.tobe.healthy.config;
 
-import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
-import jakarta.annotation.PostConstruct;
+import static com.p6spy.engine.logging.Category.*;
+import static com.p6spy.engine.spy.P6SpyOptions.*;
+import static java.util.Locale.*;
+import static org.hibernate.engine.jdbc.internal.FormatStyle.*;
+import static org.springframework.util.StringUtils.*;
+
 import org.springframework.context.annotation.Configuration;
 
-import static com.p6spy.engine.logging.Category.STATEMENT;
-import static com.p6spy.engine.spy.P6SpyOptions.getActiveInstance;
-import static java.util.Locale.ROOT;
-import static org.hibernate.engine.jdbc.internal.FormatStyle.BASIC;
-import static org.hibernate.engine.jdbc.internal.FormatStyle.DDL;
-import static org.springframework.util.StringUtils.hasText;
+import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
+
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 public class P6SpySqlFormatConfig implements MessageFormattingStrategy {
@@ -24,7 +25,8 @@ public class P6SpySqlFormatConfig implements MessageFormattingStrategy {
 	}
 
 	@Override
-	public String formatMessage(int connectionId, String now, long elapsed, String category, String prepared, String sql, String url) {
+	public String formatMessage(int connectionId, String now, long elapsed, String category, String prepared,
+		String sql, String url) {
 		sql = applySqlFormat(category, sql);
 
 		return hasText(sql) ? buildFormattedMessage(sql, connectionId, elapsed) : "";
@@ -49,11 +51,11 @@ public class P6SpySqlFormatConfig implements MessageFormattingStrategy {
 
 	private String formatConnectionInfo(int connectionId, long elapsed) {
 		return String.format("""
-
-
-                \tConnection ID: %d | Execution Time: %d ms
-
-                ===========================================================================
-                """, connectionId, elapsed);
+			
+			
+			\tConnection ID: %d | Execution Time: %d ms
+			
+			===========================================================================
+			""", connectionId, elapsed);
 	}
 }

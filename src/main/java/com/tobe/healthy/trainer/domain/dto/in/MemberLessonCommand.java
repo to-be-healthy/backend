@@ -7,13 +7,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-
 @Data
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberLessonCommand {
-    @Schema(description = "수업할 PT 횟수" , example = "10")
-    @Positive(message = "양수를 입력해주세요.")
-    private int lessonCnt;
+	@Schema(description = "수업할 PT 횟수", example = "10")
+	@Positive(message = "양수를 입력해주세요.")
+	private int lessonCnt;
 }

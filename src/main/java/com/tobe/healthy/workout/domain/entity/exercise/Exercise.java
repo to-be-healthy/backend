@@ -1,12 +1,26 @@
 package com.tobe.healthy.workout.domain.entity.exercise;
 
+import static jakarta.persistence.EnumType.*;
+import static jakarta.persistence.FetchType.*;
+
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.workout.domain.dto.in.CustomExerciseAddCommand;
-import jakarta.persistence.*;
-import lombok.*;
 
-import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.FetchType.LAZY;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "exercise")
@@ -17,30 +31,30 @@ import static jakarta.persistence.FetchType.LAZY;
 @ToString
 public class Exercise {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "exercise_id")
-    private Long exerciseId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "exercise_id")
+	private Long exerciseId;
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "member_id")
-    @ToString.Exclude
-    private Member member;
+	@ManyToOne(fetch = LAZY)
+	@JoinColumn(name = "member_id")
+	@ToString.Exclude
+	private Member member;
 
-    private String names;
+	private String names;
 
-    @Enumerated(STRING)
-    private ExerciseCategory category;
+	@Enumerated(STRING)
+	private ExerciseCategory category;
 
-    private String primaryMuscle;
-    private String secondaryMuscle;
+	private String primaryMuscle;
+	private String secondaryMuscle;
 
-    public static Exercise create(Member member, CustomExerciseAddCommand command) {
-        return Exercise.builder()
-                .member(member)
-                .names(command.getNames())
-                .category(command.getCategory())
-                .secondaryMuscle(command.getMuscles())
-                .build();
-    }
+	public static Exercise create(Member member, CustomExerciseAddCommand command) {
+		return Exercise.builder()
+			.member(member)
+			.names(command.getNames())
+			.category(command.getCategory())
+			.secondaryMuscle(command.getMuscles())
+			.build();
+	}
 }

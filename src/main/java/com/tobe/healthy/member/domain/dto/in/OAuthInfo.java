@@ -1,6 +1,7 @@
 package com.tobe.healthy.member.domain.dto.in;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 import lombok.ToString;
 
@@ -29,7 +30,7 @@ public class OAuthInfo {
 	private int refreshTokenExpiresIn;
 
 	@Data
-    @ToString
+	@ToString
 	public static class NaverUserInfo {
 
 		@JsonProperty("resultcode")
@@ -40,7 +41,7 @@ public class OAuthInfo {
 		private NaverUserInfoDetail response;
 
 		@Data
-        @ToString
+		@ToString
 		public static class NaverUserInfoDetail {
 
 			private String id;
@@ -69,7 +70,7 @@ public class OAuthInfo {
 		private KakaoAccount kakaoAccount;
 
 		@Data
-        @ToString
+		@ToString
 		public static class Properties {
 
 			private String nickname;
@@ -82,7 +83,7 @@ public class OAuthInfo {
 		}
 
 		@Data
-        @ToString
+		@ToString
 		public static class KakaoAccount {
 
 			@JsonProperty("profile_nickname_needs_agreement")
@@ -109,7 +110,7 @@ public class OAuthInfo {
 		}
 
 		@Data
-        @ToString
+		@ToString
 		public static class Profile {
 
 			private String nickname;
@@ -130,7 +131,7 @@ public class OAuthInfo {
 	// 카카오 끝
 
 	@Data
-    @ToString
+	@ToString
 	public static class GoogleUserInfo {
 
 		private String id;

@@ -29,13 +29,36 @@ class LessonHistoryCommandController(
 
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
-    @Operation(summary = "수업 일지를 등록한다.",
+    @Operation(
+        summary = "수업 일지를 등록한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "수업 일지를 등록하였습니다."),
-            ApiResponse(responseCode = "404(1)", description = "학생을 찾을 수 없습니다.", content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]),
-            ApiResponse(responseCode = "404(2)", description = "트레이너를 찾을 수 없습니다.", content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]),
-            ApiResponse(responseCode = "404(3)", description = "일정을 찾을 수 없습니다.", content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]),
-        ])
+            ApiResponse(
+                responseCode = "404(1)",
+                description = "학생을 찾을 수 없습니다.",
+                content = [Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponse::class)
+                )]
+            ),
+            ApiResponse(
+                responseCode = "404(2)",
+                description = "트레이너를 찾을 수 없습니다.",
+                content = [Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponse::class)
+                )]
+            ),
+            ApiResponse(
+                responseCode = "404(3)",
+                description = "일정을 찾을 수 없습니다.",
+                content = [Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponse::class)
+                )]
+            ),
+        ]
+    )
     fun registerLessonHistory(
         @RequestBody @Valid request: CommandRegisterLessonHistory,
         @AuthenticationPrincipal member: CustomMemberDetails
@@ -46,10 +69,12 @@ class LessonHistoryCommandController(
         )
     }
 
-    @Operation(summary = "게시글/댓글 작성 전에 파일을 첨부한다.",
+    @Operation(
+        summary = "게시글/댓글 작성 전에 파일을 첨부한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "게시글/댓글 작성 전에 파일을 첨부한다.")
-        ])
+        ]
+    )
     @PostMapping("/file")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun registerFilesOfLessonHistory(
@@ -62,11 +87,13 @@ class LessonHistoryCommandController(
         )
     }
 
-    @Operation(summary = "수업일지를 수정한다.",
+    @Operation(
+        summary = "수업일지를 수정한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "수업 일지를 수정하였습니다."),
             ApiResponse(responseCode = "404", description = "수업 일지를 찾을 수 없습니다."),
-        ])
+        ]
+    )
     @PatchMapping("/{lessonHistoryId}")
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     fun updateLessonHistory(
@@ -80,11 +107,13 @@ class LessonHistoryCommandController(
         )
     }
 
-    @Operation(summary = "수업일지를 삭제한다.",
+    @Operation(
+        summary = "수업일지를 삭제한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "수업 일지를 삭제하였습니다."),
             ApiResponse(responseCode = "404", description = "수업 일지를 찾을 수 없습니다."),
-        ])
+        ]
+    )
     @PreAuthorize("hasAuthority('ROLE_TRAINER')")
     @DeleteMapping("/{lessonHistoryId}")
     fun deleteLessonHistory(
@@ -97,12 +126,14 @@ class LessonHistoryCommandController(
         )
     }
 
-    @Operation(summary = "수업일지에 댓글을 등록한다.",
+    @Operation(
+        summary = "수업일지에 댓글을 등록한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "수업 일지에 댓글이 등록되었습니다."),
             ApiResponse(responseCode = "404(1)", description = "회원을 찾을 수 없습니다."),
             ApiResponse(responseCode = "404(2)", description = "수업 일지를 찾을 수 없습니다."),
-        ])
+        ]
+    )
     @PostMapping("/{lessonHistoryId}/comment")
     fun registerLessonHistoryComment(
         @PathVariable lessonHistoryId: Long,
@@ -115,12 +146,14 @@ class LessonHistoryCommandController(
         )
     }
 
-    @Operation(summary = "수업일지 댓글에 대댓글을 등록한다.",
+    @Operation(
+        summary = "수업일지 댓글에 대댓글을 등록한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "수업 일지에 대댓글이 등록되었습니다."),
             ApiResponse(responseCode = "404(1)", description = "회원을 찾을 수 없습니다."),
             ApiResponse(responseCode = "404(2)", description = "수업 일지를 찾을 수 없습니다."),
-        ])
+        ]
+    )
     @PostMapping("/{lessonHistoryId}/comment/{lessonHistoryCommentId}")
     fun registerLessonHistoryComment(
         @PathVariable lessonHistoryId: Long,
@@ -130,15 +163,22 @@ class LessonHistoryCommandController(
     ): ApiResultResponse<CommandRegisterReplyResult> {
         return ApiResultResponse(
             message = "대댓글이 등록되었습니다.",
-            data = lessonHistoryCommandService.registerLessonHistoryReply(lessonHistoryId, lessonHistoryCommentId, request, member)
+            data = lessonHistoryCommandService.registerLessonHistoryReply(
+                lessonHistoryId,
+                lessonHistoryCommentId,
+                request,
+                member
+            )
         )
     }
 
-    @Operation(summary = "수업일지에 댓글/답글을 수정한다.",
+    @Operation(
+        summary = "수업일지에 댓글/답글을 수정한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "수업 일지에 댓글이 수정되었습니다."),
             ApiResponse(responseCode = "404", description = "수업 일지에 댓글을 찾을 수 없습니다.")
-        ])
+        ]
+    )
     @PatchMapping("/comment/{lessonHistoryCommentId}")
     fun updateLessonHistoryComment(
         @PathVariable lessonHistoryCommentId: Long,
@@ -151,11 +191,13 @@ class LessonHistoryCommandController(
         )
     }
 
-    @Operation(summary = "수업일지에 댓글/답글을 삭제한다.",
+    @Operation(
+        summary = "수업일지에 댓글/답글을 삭제한다.",
         responses = [
             ApiResponse(responseCode = "200", description = "수업 일지에 댓글이 삭제되었습니다."),
             ApiResponse(responseCode = "404", description = "수업 일지에 댓글을 찾을 수 없습니다.")
-        ])
+        ]
+    )
     @DeleteMapping("/comment/{lessonHistoryCommentId}")
     fun deleteLessonHistoryComment(
         @PathVariable lessonHistoryCommentId: Long,

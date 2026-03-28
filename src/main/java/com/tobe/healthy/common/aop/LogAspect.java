@@ -1,8 +1,7 @@
 package com.tobe.healthy.common.aop;
 
-import com.google.common.base.Joiner;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
+import java.util.stream.Collectors;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -11,37 +10,41 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.stream.Collectors;
+import com.google.common.base.Joiner;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Aspect
 @Component
 public class LogAspect {
 
-    @Pointcut("bean(*Controller)")
-    private void allController() {}
+	private static String getParameters(HttpServletRequest request) {
+		return request.getParameterMap().entrySet().stream()
+			.map(entry -> String.format("%s: (%s)", entry.getKey(), Joiner.on(",").join(entry.getValue())))
+			.collect(Collectors.joining(", "));
+	}
 
-    @Around("allController()")
-    public Object doLogging(final ProceedingJoinPoint joinPoint) throws Throwable{
-        log.info("===========================================================================");
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+	@Pointcut("bean(*Controller)")
+	private void allController() {
+	}
 
-        long start = System.currentTimeMillis();
-        try {
-            log.info("Request: [{}] {}", request.getMethod(), request.getRequestURL());
-            log.info("[Parameters] {}", getParameters(request));
-            log.info("[Args] {}", joinPoint.getArgs());
-            return joinPoint.proceed();
-        }finally {
-            long end = System.currentTimeMillis();
-            log.info("RunningTime: {} ({}ms)", request.getRequestURI(), end-start);
-        }
-    }
+	@Around("allController()")
+	public Object doLogging(final ProceedingJoinPoint joinPoint) throws Throwable {
+		log.info("===========================================================================");
+		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
 
-    private static String getParameters(HttpServletRequest request) {
-        return request.getParameterMap().entrySet().stream()
-                .map(entry -> String.format("%s: (%s)", entry.getKey(), Joiner.on(",").join(entry.getValue())))
-                .collect(Collectors.joining(", "));
-    }
+		long start = System.currentTimeMillis();
+		try {
+			log.info("Request: [{}] {}", request.getMethod(), request.getRequestURL());
+			log.info("[Parameters] {}", getParameters(request));
+			log.info("[Args] {}", joinPoint.getArgs());
+			return joinPoint.proceed();
+		} finally {
+			long end = System.currentTimeMillis();
+			log.info("RunningTime: {} ({}ms)", request.getRequestURI(), end - start);
+		}
+	}
 
 }

@@ -41,7 +41,11 @@ data class CommandRegisterDefaultLessonTime(
         val maxLessonStartTime = LocalTime.of(6, 0) // 오전 6시
         val maxLessonEndTime = LocalTime.MIDNIGHT // 밤 12시 (다음날 00:00)
 
-        return isWithinRange(lessonStartTime, maxLessonStartTime, maxLessonEndTime) && isWithinRange(lessonEndTime, maxLessonStartTime, maxLessonEndTime)
+        return isWithinRange(lessonStartTime, maxLessonStartTime, maxLessonEndTime) && isWithinRange(
+            lessonEndTime,
+            maxLessonStartTime,
+            maxLessonEndTime
+        )
     }
 
     private fun isWithinRange(time: LocalTime, start: LocalTime, end: LocalTime): Boolean {

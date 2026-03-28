@@ -12,18 +12,18 @@ import lombok.ToString;
 @Builder
 public class CourseAddCommand {
 
-    @Schema(description = "학생 ID" , example = "1")
-    @NotNull
-    private Long memberId;
+	@Schema(description = "학생 ID", example = "1")
+	@NotNull
+	private Long memberId;
 
-    @Schema(description = "수업할 PT 횟수" , example = "10")
-    @Positive(message = "양수를 입력해주세요.")
-    private int lessonCnt;
+	@Schema(description = "수업할 PT 횟수", example = "10")
+	@Positive(message = "양수를 입력해주세요.")
+	private int lessonCnt;
 
-    public static CourseAddCommand create(Long memberId, int lessonCnt) {
-        return CourseAddCommand.builder()
-                .memberId(memberId)
-                .lessonCnt(lessonCnt)
-                .build();
-    }
+	public static CourseAddCommand create(Long memberId, int lessonCnt) {
+		return CourseAddCommand.builder()
+			.memberId(memberId)
+			.lessonCnt(lessonCnt)
+			.build();
+	}
 }
