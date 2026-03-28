@@ -51,7 +51,7 @@ jobs:
           ssh-keyscan -p "$PORT" -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
       - run: |
           PORT="${{ secrets.DEPLOY_PORT || 22 }}"
-          rsync -az --delete --exclude '.git/' --exclude '.github/' --exclude '.gradle/' --exclude '.idea/' --exclude 'build/' --exclude 'logs/' --exclude 'config/' --exclude '.env' --exclude '.DS_Store' \
+          rsync -az --delete --exclude '.git/' --exclude '.github/' --exclude '.gradle/' --exclude '.idea/' --exclude 'build/' --exclude 'logs/' --exclude '.env' --exclude '.DS_Store' \
             -e "ssh -p $PORT" ./ \
             "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${DEPLOY_PATH}/"
       - run: |
