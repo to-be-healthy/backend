@@ -39,6 +39,6 @@ out/
 .vscode/
 
 ## 추가
-config/
+/config/
 /logs
 .env
