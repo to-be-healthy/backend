@@ -11,8 +11,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
  && rm -rf /var/lib/apt/lists/* \
  && useradd --system --uid 1001 --create-home --shell /usr/sbin/nologin appuser \
- && mkdir -p /logs/info /logs/warn /logs/error \
- && chown -R appuser:appuser /logs
+ && mkdir -p /app/logs/info /app/logs/warn /app/logs/error \
+ && chown -R appuser:appuser /app/logs
 COPY --chown=appuser:appuser --from=builder /build/build/libs/*.jar /app/app.jar
 USER appuser
 EXPOSE 8080 7070
