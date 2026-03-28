@@ -225,7 +225,7 @@ public class TrainerService {
 		result.setRank(rank);
 
 		//헬스장 정보
-		GymDto gym = member.getGym() == null ? null : GymDto.Companion.from(member.getGym());
+		GymDto gym = member.getGym() == null ? null : GymDto.from(member.getGym());
 		result.setGym(gym);
 		return result;
 	}

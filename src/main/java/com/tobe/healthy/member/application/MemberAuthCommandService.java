@@ -316,7 +316,7 @@ public class MemberAuthCommandService {
 		try {
 			idToken = objectMapper.readValue(payload, Map.class);
 		} catch (Exception e) {
-			log.error("error => {}", e.getStackTrace()[0]);
+			log.error("error", e);
 		}
 		String email = idToken.get("email");
 		String name = idToken.get("name");
@@ -517,7 +517,7 @@ public class MemberAuthCommandService {
 					}))
 				.bodyToMono(OAuthInfo.class);
 		} catch (Exception e) {
-			log.error("error => {}", e.getStackTrace()[0]);
+			log.error("error", e);
 		}
 		return responseMono.share().block();
 	}
@@ -551,7 +551,7 @@ public class MemberAuthCommandService {
 		try {
 			map = objectMapper.readValue(mappedData, HashMap.class);
 		} catch (JsonProcessingException e) {
-			log.error("error => {}", e.getStackTrace()[0]);
+			log.error("error", e);
 		}
 		return map;
 	}
@@ -611,7 +611,7 @@ public class MemberAuthCommandService {
 			return MemberProfile.create(savedFileName, fileUrl, member);
 
 		} catch (IOException e) {
-			log.error("error => {}", e.getStackTrace()[0]);
+			log.error("error", e);
 			throw new CustomException(FILE_UPLOAD_ERROR);
 		}
 	}
@@ -628,7 +628,7 @@ public class MemberAuthCommandService {
 			return MemberProfile.create(savedFileName, fileUrl, member);
 
 		} catch (IOException e) {
-			log.error("error => {}", e.getStackTrace()[0]);
+			log.error("error", e);
 			throw new CustomException(FILE_UPLOAD_ERROR);
 		}
 	}

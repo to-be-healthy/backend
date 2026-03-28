@@ -87,7 +87,7 @@ public class MemberCommandService {
 		switch (member.getSocialType()) {
 			case KAKAO -> webClient.post()
 				.uri("https://kapi.kakao.com/v1/user/unlink")
-				.header("Authorization", "KakaoAK 4619cf37473b70ea6a53c33c1c14ec23")
+				.header("Authorization", "KakaoAK " + oAuthProperties.getKakao().getAdminKey())
 				.body(BodyInserters.fromFormData("target_id_type", "user_id")
 					.with("target_id", String.valueOf(member.getSocialId())))
 				.retrieve().bodyToMono(String.class).block();
@@ -219,7 +219,7 @@ public class MemberCommandService {
 
 			return RegisterMemberProfileResult.from(fileUrl, savedFileName);
 		} catch (IOException e) {
-			log.error("error => {}", e.getStackTrace()[0]);
+			log.error("error", e);
 			throw new CustomException(FILE_UPLOAD_ERROR);
 		}
 	}

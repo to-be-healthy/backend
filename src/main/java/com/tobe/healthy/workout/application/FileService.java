@@ -63,7 +63,7 @@ public class FileService {
 						member.getId().toString(), FILE_TEMP_UPLOAD_TIMEOUT); // 30분
 					uploadFile.add(new RegisterFile(fileUrl, ++fileOrder));
 				} catch (Exception e) {
-					log.error("error => {}", e.getStackTrace()[0]);
+					log.error("error", e);
 				}
 			}
 		}
@@ -97,7 +97,7 @@ public class FileService {
 				.uri(fileUrl + size)
 				.retrieve()
 				.bodyToMono(byte[].class)
-			;
+				.block();
 		}
 	}
 
@@ -105,7 +105,7 @@ public class FileService {
 		try {
 			amazonS3.deleteObject(bucketName, "origin/diet/" + fileName);
 		} catch (Exception e) {
-			log.error("error => {}", e.getStackTrace()[0]);
+			log.error("error", e);
 			throw new CustomException(FILE_REMOVE_ERROR);
 		}
 	}
@@ -114,7 +114,7 @@ public class FileService {
 		try {
 			amazonS3.deleteObject(bucketName, "origin/workout-history/" + fileName);
 		} catch (Exception e) {
-			log.error("error => {}", e.getStackTrace()[0]);
+			log.error("error", e);
 			throw new CustomException(FILE_REMOVE_ERROR);
 		}
 	}

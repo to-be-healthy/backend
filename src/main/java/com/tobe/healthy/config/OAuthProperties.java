@@ -24,5 +24,6 @@ public class OAuthProperties {
 		private String redirectUri; // Google과 Kakao에만 존재
 		private String tokenUri;
 		private String userInfoUri;
+		private String adminKey;
 	}
 }

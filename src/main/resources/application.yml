@@ -1,7 +1,4 @@
 spring:
-  profiles:
-    active: DEV
-
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
@@ -24,7 +21,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
 
     properties:
       hibernate:
@@ -34,8 +31,9 @@ spring:
     open-in-view: false
   data:
     redis:
-      host: ${DATA_REDIS_HOST} #redis-compose, local 실행시 localhost
-      port: 6379
+      host: ${DATA_REDIS_HOST}
+      port: ${DATA_REDIS_PORT:6379}
+      password: ${DATA_REDIS_PASSWORD:}
   servlet:
     multipart:
       max-file-size: 50MB
@@ -48,6 +46,7 @@ jwt:
 
 server:
   port: 8080
+  forward-headers-strategy: framework
   servlet:
     encoding:
       charset: UTF-8
@@ -65,6 +64,7 @@ oauth:
     redirect-uri: ${OAUTH_KAKAO_REDIRECT_URI}
     token-uri: ${OAUTH_KAKAO_TOKEN_URI}
     user-info-uri: ${OAUTH_KAKAO_USER_INFO_URI}
+    admin-key: ${OAUTH_KAKAO_ADMIN_KEY}
   naver:
     grant-type: ${OAUTH_NAVER_GRANT_TYPE}
     client-id: ${OAUTH_NAVER_CLIENT_ID}
@@ -110,7 +110,7 @@ springdoc:
 decorator:
   datasource:
     p6spy:
-      enable-logging: true
+      enable-logging: false
 
 management:
   info:
@@ -127,7 +127,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "prometheus"
+        include: "health,prometheus"
   server:
     port: 7070
 
@@ -135,3 +135,17 @@ info:
   app:
     name: to-be-healthy-actuator
     company: to-be-healthy
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true

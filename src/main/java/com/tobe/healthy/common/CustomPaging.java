@@ -1,5 +1,6 @@
 package com.tobe.healthy.common;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 import lombok.Data;
@@ -14,6 +15,7 @@ public class CustomPaging<T> {
 	private int pageSize;
 	private int totalPages;
 	private Long totalElements;
+	@JsonProperty("isLast")
 	private Boolean isLast;
 	private T mainData;
 

@@ -1,0 +1,57 @@
+package com.tobe.healthy.gym.domain.entity;
+
+import com.tobe.healthy.common.BaseTimeEntity;
+import com.tobe.healthy.common.error.CustomException;
+import com.tobe.healthy.common.error.ErrorCode;
+import com.tobe.healthy.member.domain.entity.Member;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicUpdate
+@ToString(exclude = "member")
+public class Gym extends BaseTimeEntity<Gym, Long> {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "gym_id")
+    private Long id;
+
+    private String name;
+
+    @Column(length = 6)
+    private String joinCode;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "gym")
+    private List<Member> member = new ArrayList<>();
+
+    private Gym(String name, String joinCode) {
+        this.name = name;
+        this.joinCode = joinCode;
+    }
+
+    public void validateJoinCode(String joinCode) {
+        if (!this.joinCode.equals(joinCode)) {
+            throw new CustomException(ErrorCode.JOIN_CODE_NOT_VALID);
+        }
+    }
+
+    public static Gym registerGym(String name, String accessKey) {
+        return new Gym(name, accessKey);
+    }
+}
