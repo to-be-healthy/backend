@@ -27,4 +27,7 @@ public class CommandLoginMember {
 	@Schema(description = "회원 구분", example = "TRAINER")
 	@NotNull(message = "회원 구분이 필요합니다.")
 	private MemberType memberType;
+
+	@Schema(description = "체험하기 로그인 여부", example = "true", defaultValue = "false")
+	private boolean complimentaryLogin;
 }

@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -77,11 +78,13 @@ import com.tobe.healthy.member.presentation.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.presentation.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.presentation.dto.out.CommandJoinMemberResult;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.entity.ComplimentaryLoginHistory;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.member.domain.entity.MemberType;
 import com.tobe.healthy.member.domain.entity.NonMember;
 import com.tobe.healthy.member.domain.entity.SocialType;
 import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.member.repository.ComplimentaryLoginHistoryRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.member.repository.NonMemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
@@ -109,6 +112,7 @@ public class MemberAuthCommandService {
 	private final MailService mailService;
 	private final CourseService courseService;
 	private final NonMemberRepository nonMemberRepository;
+	private final ComplimentaryLoginHistoryRepository complimentaryLoginHistoryRepository;
 
 	@Value("${oauth.apple.team-id}")
 	private String appleTeamId;
@@ -121,6 +125,11 @@ public class MemberAuthCommandService {
 
 	@Value("${oauth.apple.login-key}")
 	private String appleLoginKey;
+
+	private static final Set<String> COMPLIMENTARY_ACCOUNT_USER_IDS = Set.of(
+		"healthytrainer0",
+		"healthystudent0"
+	);
 
 	private static String decordToken(String idToken) {
 		byte[] decode = new Base64UrlCodec().decode(idToken.split("\\.")[1]);
@@ -185,7 +194,17 @@ public class MemberAuthCommandService {
 			throw new IllegalArgumentException(String.format("%s로 가입한 사용자입니다.", member.getTransformedMemberType()));
 		}
 
+		saveComplimentaryLoginHistory(request, member);
+
 		return tokenGenerator.create(member);
+	}
+
+	private void saveComplimentaryLoginHistory(CommandLoginMember request, Member member) {
+		if (!request.isComplimentaryLogin() || !COMPLIMENTARY_ACCOUNT_USER_IDS.contains(member.getUserId())) {
+			return;
+		}
+
+		complimentaryLoginHistoryRepository.save(ComplimentaryLoginHistory.create(member));
 	}
 
 	public Tokens refreshToken(CommandRefreshToken request) {
