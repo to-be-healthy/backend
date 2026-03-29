@@ -11,8 +11,8 @@ import org.springframework.util.ObjectUtils;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.tobe.healthy.common.error.CustomException;
-import com.tobe.healthy.member.domain.dto.in.CommandRegisterMemberProfile;
-import com.tobe.healthy.member.domain.dto.out.RegisterMemberProfileResult;
+import com.tobe.healthy.member.presentation.dto.in.CommandRegisterMemberProfile;
+import com.tobe.healthy.member.presentation.dto.out.RegisterMemberProfileResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 

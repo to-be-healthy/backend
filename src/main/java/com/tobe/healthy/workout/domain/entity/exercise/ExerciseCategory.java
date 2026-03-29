@@ -1,10 +1,6 @@
 package com.tobe.healthy.workout.domain.entity.exercise;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.tobe.healthy.common.enums.EnumMapperType;
-import com.tobe.healthy.workout.domain.dto.out.ExerciseCategoryDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,10 +19,6 @@ public enum ExerciseCategory implements EnumMapperType {
 	STRETCHING("스트레칭");
 
 	private final String description;
-
-	public static List<ExerciseCategoryDto> getCategoryList() {
-		return Arrays.stream(ExerciseCategory.values()).map(ExerciseCategoryDto::from).toList();
-	}
 
 	@Override
 	public String getCode() {

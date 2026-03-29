@@ -1,7 +1,5 @@
 package com.tobe.healthy.workout.domain.entity.workoutHistory;
 
-import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -44,13 +42,14 @@ public class CompletedExercise {
 	private int weight;
 	private int numberOfCycles;
 
-	public static CompletedExercise create(CompletedExerciseDto completed, WorkoutHistory history, String name) {
+	public static CompletedExercise create(Long exerciseId, WorkoutHistory history, String name, int setNum, int weight,
+		int numberOfCycles) {
 		return CompletedExercise.builder()
-			.exerciseId(completed.getExerciseId())
+			.exerciseId(exerciseId)
 			.name(name)
-			.setNum(completed.getSetNum())
-			.weight(completed.getWeight())
-			.numberOfCycles(completed.getNumberOfCycles())
+			.setNum(setNum)
+			.weight(weight)
+			.numberOfCycles(numberOfCycles)
 			.workoutHistory(history)
 			.build();
 	}

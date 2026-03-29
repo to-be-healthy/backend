@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 
 import jakarta.persistence.CascadeType;
@@ -71,12 +71,12 @@ public class Course extends BaseTimeEntity<Course, Long> {
 			.build();
 	}
 
-	public void updateTotalLessonCnt(CourseUpdateCommand command) {
-		this.totalLessonCnt = command.getCalculation().apply(totalLessonCnt, command.getUpdateCnt());
+	public void updateTotalLessonCnt(Calculation calculation, int updateCnt) {
+		this.totalLessonCnt = calculation.apply(totalLessonCnt, updateCnt);
 	}
 
-	public void updateRemainLessonCnt(CourseUpdateCommand command) {
-		this.remainLessonCnt = command.getCalculation().apply(remainLessonCnt, command.getUpdateCnt());
+	public void updateRemainLessonCnt(Calculation calculation, int updateCnt) {
+		this.remainLessonCnt = calculation.apply(remainLessonCnt, updateCnt);
 	}
 
 	public void deleteSchedule() {

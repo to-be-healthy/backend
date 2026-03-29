@@ -18,9 +18,9 @@ import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.event.CustomEventPublisher;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.notification.domain.dto.in.CommandSendNotification;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryCommentDto;
-import com.tobe.healthy.workout.domain.dto.in.HistoryCommentAddCommand;
+import com.tobe.healthy.notification.presentation.dto.in.CommandSendNotification;
+import com.tobe.healthy.workout.presentation.dto.WorkoutHistoryCommentDto;
+import com.tobe.healthy.workout.presentation.dto.in.HistoryCommentAddCommand;
 import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistory;
 import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryComment;
 import com.tobe.healthy.workout.repository.workoutHistory.WorkoutHistoryCommentRepository;
@@ -57,7 +57,9 @@ public class WorkoutCommentService {
 			parentWriterId = parentComment.getMember().getId();
 		}
 
-		commentRepository.save(WorkoutHistoryComment.create(history, member, command, depth, orderNum));
+		commentRepository.save(
+			WorkoutHistoryComment.create(history, member, command.getContent(), command.getParentCommentId(), depth,
+				orderNum));
 
 		// 댓글
 		CommandSendNotification notification = null;

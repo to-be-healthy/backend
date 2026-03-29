@@ -7,12 +7,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.member.application.MemberAuthService;
-import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
-import com.tobe.healthy.member.domain.dto.in.FindMemberUserId;
-import com.tobe.healthy.member.domain.dto.in.FindMemberUserId.FindMemberUserIdResult;
-import com.tobe.healthy.member.domain.dto.out.InvitationMappingResult;
+import com.tobe.healthy.member.presentation.dto.in.CommandValidateEmail;
+import com.tobe.healthy.member.presentation.dto.in.FindMemberUserId;
+import com.tobe.healthy.member.presentation.dto.in.FindMemberUserId.FindMemberUserIdResult;
+import com.tobe.healthy.member.presentation.dto.out.InvitationMappingResult;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth/v1")
+@RequestMapping("/api/v1/auth")
 @Slf4j
 @Valid
 @Tag(name = "01. 회원 인증 API", description = "인증/권한 없이 접근할 수 있는 회원 API")
@@ -37,8 +37,8 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "사용 가능한 아이디입니다.")
 		})
 	@GetMapping("/validation/user-id")
-	public ResponseHandler<Boolean> validateUsernameDuplication(@RequestParam String userId) {
-		return ResponseHandler.<Boolean>builder()
+	public ApiResult<Boolean> validateUsernameDuplication(@RequestParam String userId) {
+		return ApiResult.<Boolean>builder()
 			.data(memberAuthService.validateUserIdDuplication(userId))
 			.message("사용할 수 있는 아이디입니다.")
 			.build();
@@ -50,8 +50,8 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "사용 가능한 이메일입니다.")
 		})
 	@GetMapping("/validation/email")
-	public ResponseHandler<Boolean> validateEmailDuplication(@RequestParam @Valid CommandValidateEmail request) {
-		return ResponseHandler.<Boolean>builder()
+	public ApiResult<Boolean> validateEmailDuplication(@RequestParam @Valid CommandValidateEmail request) {
+		return ApiResult.<Boolean>builder()
 			.data(memberAuthService.validateEmailDuplication(request))
 			.message("사용 가능한 이메일입니다.")
 			.build();
@@ -63,9 +63,9 @@ public class MemberAuthController {
 			@ApiResponse(responseCode = "200", description = "이메일 이름이 일치한 사용자 아이디를 반환한다.")
 		})
 	@PostMapping("/find/user-id")
-	public ResponseHandler<FindMemberUserIdResult> findUserId(@RequestBody @Valid FindMemberUserId request) {
+	public ApiResult<FindMemberUserIdResult> findUserId(@RequestBody @Valid FindMemberUserId request) {
 		FindMemberUserIdResult userIdResult = memberAuthService.findUserId(request);
-		return ResponseHandler.<FindMemberUserIdResult>builder()
+		return ApiResult.<FindMemberUserIdResult>builder()
 			.data(userIdResult)
 			.message(userIdResult.getMessage())
 			.build();
@@ -76,8 +76,8 @@ public class MemberAuthController {
 		@ApiResponse(responseCode = "200", description = "성공")
 	})
 	@GetMapping("/invitation/uuid")
-	public ResponseHandler<InvitationMappingResult> getInvitationMapping(@RequestParam String uuid) {
-		return ResponseHandler.<InvitationMappingResult>builder()
+	public ApiResult<InvitationMappingResult> getInvitationMapping(@RequestParam String uuid) {
+		return ApiResult.<InvitationMappingResult>builder()
 			.data(memberAuthService.getInvitationMapping(uuid))
 			.message("조회가 완료되었습니다.")
 			.build();

@@ -7,8 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum NotificationSenderType {
 
-    SYSTEM("시스템"),
-    USER("사용자");
+	SYSTEM("시스템"),
+	USER("사용자");
 
-    private final String description;
+	private final String description;
 }

@@ -1,11 +1,12 @@
 package com.tobe.healthy.push.repository;
 
-import com.tobe.healthy.push.domain.entity.MemberToken;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
+import com.tobe.healthy.push.domain.entity.MemberToken;
 
 public interface MemberTokenRepository extends JpaRepository<MemberToken, Long> {
 
-    Optional<MemberToken> findByMemberId(Long memberId);
+	Optional<MemberToken> findByMemberId(Long memberId);
 }

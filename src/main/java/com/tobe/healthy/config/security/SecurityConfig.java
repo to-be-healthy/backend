@@ -49,9 +49,17 @@ public class SecurityConfig {
 			})
 			.authorizeHttpRequests(
 				authorize -> authorize
-					.requestMatchers("/auth/v1/**", "/favicon.ico", "/actuator/**", "/push/v1/webview",
-						"/schedule/v1/all/{trainerId}",
-						"/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
+					.requestMatchers(
+						"/api/v1/auth/**",
+						"/favicon.ico",
+						"/actuator/**",
+						"/api/v1/push/webview",
+						"/api/v1/schedule/all/{trainerId}",
+						"/swagger-ui/**",
+						"/swagger-ui.html",
+						"/v3/api-docs/**",
+						"/swagger-resources/**"
+					).permitAll()
 					.anyRequest().authenticated())
 			.addFilterBefore(new JwtFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
 			.build();
@@ -79,5 +87,4 @@ public class SecurityConfig {
 			return config;
 		};
 	}
-
 }

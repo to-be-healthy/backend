@@ -15,16 +15,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.diet.application.DietService;
-import com.tobe.healthy.diet.domain.dto.DietDto;
-import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
-import com.tobe.healthy.diet.domain.dto.in.DietAddCommandAtHome;
-import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
-import com.tobe.healthy.diet.domain.dto.out.DietUploadDaysResult;
+import com.tobe.healthy.diet.presentation.dto.DietDto;
+import com.tobe.healthy.diet.presentation.dto.in.DietAddCommand;
+import com.tobe.healthy.diet.presentation.dto.in.DietAddCommandAtHome;
+import com.tobe.healthy.diet.presentation.dto.in.DietUpdateCommand;
+import com.tobe.healthy.diet.presentation.dto.out.DietUploadDaysResult;
 import com.tobe.healthy.workout.application.FileService;
-import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
+import com.tobe.healthy.workout.presentation.dto.in.RegisterFile;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/diets/v1")
+@RequestMapping("/api/v1/diets")
 @Tag(name = "09. 식단 API", description = "식단 API")
 @Slf4j
 public class DietController {
@@ -49,10 +49,10 @@ public class DietController {
 		@ApiResponse(responseCode = "200", description = "파일 url을 반환한다.")
 	})
 	@PostMapping("/file")
-	public ResponseHandler<List<RegisterFile>> addDietFile(
+	public ApiResult<List<RegisterFile>> addDietFile(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Valid List<MultipartFile> uploadFiles) {
-		return ResponseHandler.<List<RegisterFile>>builder()
+		return ApiResult.<List<RegisterFile>>builder()
 			.data(fileService.uploadFiles("diet", uploadFiles, customMemberDetails.getMember()))
 			.message("첨부파일이 등록되었습니다.")
 			.build();
@@ -63,9 +63,9 @@ public class DietController {
 		@ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
 	})
 	@PostMapping("/home")
-	public ResponseHandler<DietDto> addDietAtHome(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<DietDto> addDietAtHome(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Valid @RequestBody DietAddCommandAtHome command) {
-		return ResponseHandler.<DietDto>builder()
+		return ApiResult.<DietDto>builder()
 			.data(dietService.addDietAtHome(customMemberDetails.getMember(), command))
 			.message("식단기록이 등록되었습니다.")
 			.build();
@@ -76,9 +76,9 @@ public class DietController {
 		@ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
 	})
 	@PostMapping
-	public ResponseHandler<DietDto> addDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<DietDto> addDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@RequestBody @Valid DietAddCommand command) {
-		return ResponseHandler.<DietDto>builder()
+		return ApiResult.<DietDto>builder()
 			.data(dietService.addDiet(customMemberDetails.getMember(), command))
 			.message("식단기록이 등록되었습니다.")
 			.build();
@@ -89,8 +89,8 @@ public class DietController {
 		@ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
 	})
 	@GetMapping("/today")
-	public ResponseHandler<DietDto> getTodayDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<DietDto>builder()
+	public ApiResult<DietDto> getTodayDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ApiResult.<DietDto>builder()
 			.data(dietService.getTodayDiet(customMemberDetails.getMember().getId()))
 			.message("식단기록이 조회되었습니다.")
 			.build();
@@ -101,9 +101,9 @@ public class DietController {
 		@ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
 	})
 	@GetMapping("/{dietId}")
-	public ResponseHandler<DietDto> getDietDetail(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<DietDto> getDietDetail(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
-		return ResponseHandler.<DietDto>builder()
+		return ApiResult.<DietDto>builder()
 			.data(dietService.getDietDetail(customMemberDetails.getMemberId(), dietId))
 			.message("식단기록이 조회되었습니다.")
 			.build();
@@ -114,10 +114,10 @@ public class DietController {
 		@ApiResponse(responseCode = "200", description = "좋아요 완료.")
 	})
 	@PostMapping("/{dietId}/like")
-	public ResponseHandler<Void> likeDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<Void> likeDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
 		dietService.likeDiet(customMemberDetails.getMember(), dietId);
-		return ResponseHandler.<Void>builder()
+		return ApiResult.<Void>builder()
 			.message("식단기록 좋아요에 성공하였습니다.")
 			.build();
 	}
@@ -127,10 +127,10 @@ public class DietController {
 		@ApiResponse(responseCode = "200", description = "좋아요 취소 완료.")
 	})
 	@DeleteMapping("/{dietId}/like")
-	public ResponseHandler<Void> deleteLikeDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<Void> deleteLikeDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
 		dietService.deleteLikeDiet(customMemberDetails.getMember(), dietId);
-		return ResponseHandler.<Void>builder()
+		return ApiResult.<Void>builder()
 			.message("식단기록 좋아요가 취소되었습니다.")
 			.build();
 	}
@@ -139,10 +139,10 @@ public class DietController {
 		@ApiResponse(responseCode = "200", description = "식단기록 삭제 완료.")
 	})
 	@DeleteMapping("/{dietId}")
-	public ResponseHandler<Void> deleteDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<Void> deleteDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
 		dietService.deleteDiet(customMemberDetails.getMember(), dietId);
-		return ResponseHandler.<Void>builder()
+		return ApiResult.<Void>builder()
 			.message("식단기록이 삭제되었습니다.")
 			.build();
 	}
@@ -152,10 +152,10 @@ public class DietController {
 		@ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
 	})
 	@PatchMapping("/{dietId}")
-	public ResponseHandler<DietDto> updateDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<DietDto> updateDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
 		@RequestBody @Valid DietUpdateCommand command) {
-		return ResponseHandler.<DietDto>builder()
+		return ApiResult.<DietDto>builder()
 			.data(dietService.updateDiet(customMemberDetails.getMember(), dietId, command))
 			.message("식단기록이 수정되었습니다.")
 			.build();
@@ -166,11 +166,11 @@ public class DietController {
 		@ApiResponse(responseCode = "200", description = "업로드 날짜를 반환한다.")
 	})
 	@GetMapping("/upload-date")
-	public ResponseHandler<DietUploadDaysResult> getDietUploadDays(
+	public ApiResult<DietUploadDaysResult> getDietUploadDays(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "시작 날짜", example = "2024-03-01") @Param("startDate") LocalDate startDate,
 		@Parameter(description = "종료 날짜", example = "2024-05-31") @Param("endDate") LocalDate endDate) {
-		return ResponseHandler.<DietUploadDaysResult>builder()
+		return ApiResult.<DietUploadDaysResult>builder()
 			.data(dietService.getDietUploadDays(customMemberDetails.getMember().getId(), startDate, endDate))
 			.message("업로드 날짜가 조회되었습니다.")
 			.build();

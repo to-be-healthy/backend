@@ -7,8 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum NotificationCategory {
 
-    SCHEDULE("스케줄"),
-    COMMUNITY("커뮤니티");
+	SCHEDULE("스케줄"),
+	COMMUNITY("커뮤니티");
 
-    private final String description;
+	private final String description;
 }

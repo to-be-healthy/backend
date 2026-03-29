@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.workout.domain.dto.ExerciseDto;
-import com.tobe.healthy.workout.domain.dto.in.CustomExerciseAddCommand;
+import com.tobe.healthy.workout.presentation.dto.ExerciseDto;
+import com.tobe.healthy.workout.presentation.dto.in.CustomExerciseAddCommand;
 import com.tobe.healthy.workout.domain.entity.exercise.Exercise;
 import com.tobe.healthy.workout.domain.entity.exercise.ExerciseCategory;
 import com.tobe.healthy.workout.repository.exercise.ExerciseRepository;
@@ -45,7 +45,7 @@ public class ExerciseService {
 			.ifPresent(i -> {
 				throw new CustomException(EXERCISE_ALREADY_EXISTS);
 			});
-		exerciseRepository.save(Exercise.create(member, command));
+		exerciseRepository.save(Exercise.create(member, command.getNames(), command.getCategory(), command.getMuscles()));
 	}
 
 	public void deleteExerciseCustom(Member member, Long exerciseId) {

@@ -1,0 +1,28 @@
+package com.tobe.healthy.schedule.presentation.dto.in;
+
+import java.time.LocalDate;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@Data
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+public class StudentScheduleCond {
+
+	@Schema(description = "조회할 수업 일자", example = "2024-04")
+	private String lessonDt;
+
+	@Schema(description = "조회할 수업 시작 일자", example = "2024-04-01")
+	private LocalDate lessonStartDt;
+
+	@Schema(description = "조회할 수업 종료 일자", example = "2024-04-30")
+	private LocalDate lessonEndDt;
+
+	private Long courseId;
+
+}

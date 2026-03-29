@@ -1,7 +1,7 @@
 package com.tobe.healthy.course.application;
 
 import static com.tobe.healthy.common.error.ErrorCode.*;
-import static com.tobe.healthy.course.domain.dto.CourseStatus.*;
+import static com.tobe.healthy.course.presentation.dto.CourseStatus.*;
 import static com.tobe.healthy.course.domain.entity.CourseHistoryType.*;
 import static com.tobe.healthy.member.domain.entity.MemberType.*;
 import static com.tobe.healthy.point.domain.entity.Calculation.*;
@@ -16,12 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.error.CustomException;
-import com.tobe.healthy.course.domain.dto.CourseDto;
-import com.tobe.healthy.course.domain.dto.CourseHistoryDto;
-import com.tobe.healthy.course.domain.dto.CourseStatus;
-import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
-import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
-import com.tobe.healthy.course.domain.dto.out.CourseGetResult;
+import com.tobe.healthy.course.presentation.dto.CourseDto;
+import com.tobe.healthy.course.presentation.dto.CourseHistoryDto;
+import com.tobe.healthy.course.presentation.dto.CourseStatus;
+import com.tobe.healthy.course.presentation.dto.in.CourseAddCommand;
+import com.tobe.healthy.course.presentation.dto.in.CourseUpdateCommand;
+import com.tobe.healthy.course.presentation.dto.out.CourseGetResult;
 import com.tobe.healthy.course.domain.entity.Course;
 import com.tobe.healthy.course.domain.entity.CourseHistory;
 import com.tobe.healthy.course.domain.entity.CourseHistoryType;
@@ -31,8 +31,8 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.point.domain.entity.Calculation;
 import com.tobe.healthy.schedule.application.CommonScheduleService;
-import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
-import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
+import com.tobe.healthy.schedule.presentation.dto.in.StudentScheduleCond;
+import com.tobe.healthy.schedule.presentation.dto.out.MyReservation;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.repository.common.CommonScheduleRepository;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
@@ -257,10 +257,10 @@ public class CourseService {
 		if (500 < result)
 			throw new CustomException(LESSON_CNT_MAX);
 
-		course.updateRemainLessonCnt(command);
+		course.updateRemainLessonCnt(command.getCalculation(), command.getUpdateCnt());
 		//수강권 변경 주체가 트레이너인 경우 -> 총 횟수도 함께 업데이트
 		if (CourseHistoryType.getEnumByGroup(TRAINER).contains(command.getType())) {
-			course.updateTotalLessonCnt(command);
+			course.updateTotalLessonCnt(command.getCalculation(), command.getUpdateCnt());
 		}
 		CourseHistory history = courseHistoryRepository.save(
 			CourseHistory.create(course, command.getUpdateCnt(), command.getCalculation(), command.getType(), trainer));

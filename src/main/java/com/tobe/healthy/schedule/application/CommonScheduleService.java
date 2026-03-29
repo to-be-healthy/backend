@@ -17,8 +17,8 @@ import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.event.CustomEventPublisher;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.notification.domain.dto.in.CommandSendNotification;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
+import com.tobe.healthy.notification.presentation.dto.in.CommandSendNotification;
+import com.tobe.healthy.schedule.presentation.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.repository.common.CommonScheduleRepository;
 

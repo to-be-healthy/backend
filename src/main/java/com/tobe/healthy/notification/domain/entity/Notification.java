@@ -1,7 +1,12 @@
 package com.tobe.healthy.notification.domain.entity;
 
+import static jakarta.persistence.EnumType.*;
+
+import org.hibernate.annotations.DynamicUpdate;
+
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.member.domain.entity.Member;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -14,9 +19,6 @@ import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.DynamicUpdate;
-
-import static jakarta.persistence.EnumType.STRING;
 
 @Entity
 @Getter
@@ -24,64 +26,64 @@ import static jakarta.persistence.EnumType.STRING;
 @DynamicUpdate
 public class Notification extends BaseTimeEntity<Notification, Long> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "notification_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "notification_id")
+	private Long id;
 
-    private Long studentId;
+	private Long studentId;
 
-    private String studentName;
+	private String studentName;
 
-    private String clickUrl;
+	private String clickUrl;
 
-    private String title;
+	private String title;
 
-    private String content;
+	private String content;
 
-    @Enumerated(STRING)
-    private NotificationCategory notificationCategory;
+	@Enumerated(STRING)
+	private NotificationCategory notificationCategory;
 
-    @Enumerated(STRING)
-    private NotificationType notificationType;
+	@Enumerated(STRING)
+	private NotificationType notificationType;
 
-    @Enumerated(STRING)
-    private NotificationSenderType senderType;
+	@Enumerated(STRING)
+	private NotificationSenderType senderType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_id")
-    private Member receiver;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "receiver_id")
+	private Member receiver;
 
-    private Long targetId;
+	private Long targetId;
 
-    private boolean isRead;
+	private boolean isRead;
 
-    private Notification(String title, String content, NotificationCategory notificationCategory,
-                         NotificationType notificationType, Member receiver, Long targetId,
-                         String clickUrl, Long studentId, String studentName) {
-        this.title = title;
-        this.content = content;
-        this.notificationCategory = notificationCategory;
-        this.notificationType = notificationType;
-        this.senderType = NotificationSenderType.SYSTEM;
-        this.receiver = receiver;
-        this.targetId = targetId;
-        this.clickUrl = clickUrl;
-        this.studentId = studentId;
-        this.studentName = studentName;
-        this.isRead = false;
-    }
+	private Notification(String title, String content, NotificationCategory notificationCategory,
+		NotificationType notificationType, Member receiver, Long targetId,
+		String clickUrl, Long studentId, String studentName) {
+		this.title = title;
+		this.content = content;
+		this.notificationCategory = notificationCategory;
+		this.notificationType = notificationType;
+		this.senderType = NotificationSenderType.SYSTEM;
+		this.receiver = receiver;
+		this.targetId = targetId;
+		this.clickUrl = clickUrl;
+		this.studentId = studentId;
+		this.studentName = studentName;
+		this.isRead = false;
+	}
 
-    public void updateNotificationStatus() {
-        this.isRead = true;
-    }
+	public static Notification create(String title, String content,
+		NotificationCategory notificationCategory,
+		NotificationType notificationType,
+		Member receiver, Long targetId,
+		String clickUrl, Long studentId, String studentName) {
+		return new Notification(title, content, notificationCategory, notificationType,
+			receiver, targetId, clickUrl, studentId, studentName);
+	}
 
-    public static Notification create(String title, String content,
-                                      NotificationCategory notificationCategory,
-                                      NotificationType notificationType,
-                                      Member receiver, Long targetId,
-                                      String clickUrl, Long studentId, String studentName) {
-        return new Notification(title, content, notificationCategory, notificationType,
-                receiver, targetId, clickUrl, studentId, studentName);
-    }
+	public void updateNotificationStatus() {
+		this.isRead = true;
+	}
 }

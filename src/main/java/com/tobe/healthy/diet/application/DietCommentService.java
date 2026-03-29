@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.error.CustomException;
-import com.tobe.healthy.diet.domain.dto.DietCommentDto;
-import com.tobe.healthy.diet.domain.dto.in.DietCommentAddCommand;
+import com.tobe.healthy.diet.presentation.dto.DietCommentDto;
+import com.tobe.healthy.diet.presentation.dto.in.DietCommentAddCommand;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietComment;
 import com.tobe.healthy.diet.repository.DietCommentRepository;
@@ -70,7 +70,8 @@ public class DietCommentService {
 			depth = 0L;
 			orderNum = commentCnt;
 		}
-		commentRepository.save(DietComment.create(diet, member, command, depth, orderNum));
+		commentRepository.save(
+			DietComment.create(diet, member, command.getContent(), command.getParentCommentId(), depth, orderNum));
 		diet.updateCommentCnt(++commentCnt);
 	}
 

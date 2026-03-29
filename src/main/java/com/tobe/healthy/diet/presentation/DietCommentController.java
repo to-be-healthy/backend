@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tobe.healthy.common.CustomPaging;
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.diet.application.DietCommentService;
-import com.tobe.healthy.diet.domain.dto.DietCommentDto;
-import com.tobe.healthy.diet.domain.dto.in.DietCommentAddCommand;
+import com.tobe.healthy.diet.presentation.dto.DietCommentDto;
+import com.tobe.healthy.diet.presentation.dto.in.DietCommentAddCommand;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/diets/v1")
+@RequestMapping("/api/v1/diets")
 @Tag(name = "09-00. 식단기록 댓글 API", description = "식단기록 댓글 API")
 @Slf4j
 public class DietCommentController {
@@ -40,10 +40,10 @@ public class DietCommentController {
 		@ApiResponse(responseCode = "200", description = "식단기록의 댓글, 페이징을 반환한다.")
 	})
 	@GetMapping("/{dietId}/comments")
-	public ResponseHandler<CustomPaging<DietCommentDto>> getCommentsByDietId(
+	public ApiResult<CustomPaging<DietCommentDto>> getCommentsByDietId(
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
 		Pageable pageable) {
-		return ResponseHandler.<CustomPaging<DietCommentDto>>builder()
+		return ApiResult.<CustomPaging<DietCommentDto>>builder()
 			.data(commentService.getCommentsByDietId(dietId, pageable))
 			.message("댓글이 조회되었습니다.")
 			.build();
@@ -54,11 +54,11 @@ public class DietCommentController {
 		@ApiResponse(responseCode = "200", description = "식단기록 댓글을 반환한다.")
 	})
 	@PostMapping("/{dietId}/comments")
-	public ResponseHandler<Void> addComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<Void> addComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
 		@Valid @RequestBody DietCommentAddCommand command) {
 		commentService.addComment(dietId, command, customMemberDetails.getMember());
-		return ResponseHandler.<Void>builder()
+		return ApiResult.<Void>builder()
 			.message("댓글이 등록되었습니다.")
 			.build();
 	}
@@ -68,12 +68,12 @@ public class DietCommentController {
 		@ApiResponse(responseCode = "200", description = "식단기록 댓글을 반환한다.")
 	})
 	@PatchMapping("/{dietId}/comments/{commentId}")
-	public ResponseHandler<DietCommentDto> updateComment(
+	public ApiResult<DietCommentDto> updateComment(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
 		@Parameter(description = "식단기록의 댓글 ID") @PathVariable("commentId") Long commentId,
 		@Valid @RequestBody DietCommentAddCommand command) {
-		return ResponseHandler.<DietCommentDto>builder()
+		return ApiResult.<DietCommentDto>builder()
 			.data(commentService.updateComment(customMemberDetails.getMember(), dietId, commentId, command))
 			.message("댓글이 수정되었습니다.")
 			.build();
@@ -83,11 +83,11 @@ public class DietCommentController {
 		@ApiResponse(responseCode = "200", description = "식단기록 댓글 삭제 완료.")
 	})
 	@DeleteMapping("/{dietId}/comments/{commentId}")
-	public ResponseHandler<Void> deleteComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<Void> deleteComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
 		@Parameter(description = "식단기록의 댓글 ID") @PathVariable("commentId") Long commentId) {
 		commentService.deleteComment(customMemberDetails.getMember(), dietId, commentId);
-		return ResponseHandler.<Void>builder()
+		return ApiResult.<Void>builder()
 			.message("댓글이 삭제되었습니다.")
 			.build();
 	}

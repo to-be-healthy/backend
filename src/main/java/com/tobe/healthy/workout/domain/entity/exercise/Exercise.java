@@ -4,7 +4,6 @@ import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.FetchType.*;
 
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.workout.domain.dto.in.CustomExerciseAddCommand;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,12 +48,12 @@ public class Exercise {
 	private String primaryMuscle;
 	private String secondaryMuscle;
 
-	public static Exercise create(Member member, CustomExerciseAddCommand command) {
+	public static Exercise create(Member member, String names, ExerciseCategory category, String muscles) {
 		return Exercise.builder()
 			.member(member)
-			.names(command.getNames())
-			.category(command.getCategory())
-			.secondaryMuscle(command.getMuscles())
+			.names(names)
+			.category(category)
+			.secondaryMuscle(muscles)
 			.build();
 	}
 }

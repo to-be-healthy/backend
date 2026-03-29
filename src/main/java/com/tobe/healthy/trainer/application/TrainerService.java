@@ -22,27 +22,26 @@ import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.redis.RedisKeyPrefix;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.course.application.CourseService;
-import com.tobe.healthy.course.domain.dto.CourseDto;
-import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
+import com.tobe.healthy.course.presentation.dto.CourseDto;
+import com.tobe.healthy.course.presentation.dto.in.CourseAddCommand;
 import com.tobe.healthy.diet.application.DietService;
-import com.tobe.healthy.diet.domain.dto.DietDto;
-import com.tobe.healthy.gym.domain.dto.out.GymDto;
-import com.tobe.healthy.member.domain.dto.MemberDto;
-import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
-import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
-import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
+import com.tobe.healthy.diet.presentation.dto.DietDto;
+import com.tobe.healthy.gym.presentation.dto.out.GymDto;
+import com.tobe.healthy.member.presentation.dto.MemberDto;
+import com.tobe.healthy.member.presentation.dto.out.MemberDetailResult;
+import com.tobe.healthy.member.presentation.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.NonMember;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.member.repository.NonMemberRepository;
-import com.tobe.healthy.point.domain.dto.out.PointDto;
-import com.tobe.healthy.point.domain.dto.out.RankDto;
+import com.tobe.healthy.point.presentation.dto.out.PointDto;
+import com.tobe.healthy.point.presentation.dto.out.RankDto;
 import com.tobe.healthy.point.repository.PointRepository;
 import com.tobe.healthy.schedule.repository.waiting.ScheduleWaitingRepository;
-import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
-import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
-import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
-import com.tobe.healthy.trainer.domain.dto.out.MemberInviteResultCommand;
+import com.tobe.healthy.trainer.presentation.dto.TrainerMemberMappingDto;
+import com.tobe.healthy.trainer.presentation.dto.in.MemberInviteCommand;
+import com.tobe.healthy.trainer.presentation.dto.in.MemberLessonCommand;
+import com.tobe.healthy.trainer.presentation.dto.out.MemberInviteResultCommand;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 
@@ -153,11 +152,7 @@ public class TrainerService {
 			.replace("{uuid}", uuid);
 
 		//미가입 회원 DB 저장
-		CommandJoinMember request = CommandJoinMember.builder()
-			.name(name)
-			.memberType(STUDENT)
-			.build();
-		Member member = Member.join(request, null);
+		Member member = Member.join(null, null, name, STUDENT, null);
 		memberRepository.save(member);
 
 		NonMember nonMember = NonMember.create(member, invitationLink, name, trainer.getId(), lessonCnt);

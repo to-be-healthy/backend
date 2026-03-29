@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.ScheduleWaitingService;
-import com.tobe.healthy.schedule.domain.dto.out.FindMyScheduleWaitingResult;
+import com.tobe.healthy.schedule.presentation.dto.out.FindMyScheduleWaitingResult;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/schedule/waiting/v1")
+@RequestMapping("/api/v1/schedule/waiting")
 @Slf4j
 @Valid
 @Tag(name = "03-02. 수업 대기 API", description = "수업 대기 API")
@@ -37,11 +37,11 @@ public class ScheduleWaitingController {
 		})
 	@PostMapping("/{scheduleId}")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<Boolean> registerScheduleWaiting(@PathVariable Long scheduleId,
+	public ApiResult<Boolean> registerScheduleWaiting(@PathVariable Long scheduleId,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		String scheduleTime = scheduleWaitingService.registerScheduleWaiting(scheduleId,
 			customMemberDetails.getMemberId());
-		return ResponseHandler.<Boolean>builder()
+		return ApiResult.<Boolean>builder()
 			.data(true)
 			.message(scheduleTime + " 수업 대기가 예약되었습니다.")
 			.build();
@@ -53,11 +53,11 @@ public class ScheduleWaitingController {
 		})
 	@DeleteMapping("/{scheduleId}")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<Boolean> cancelScheduleWaiting(@PathVariable Long scheduleId,
+	public ApiResult<Boolean> cancelScheduleWaiting(@PathVariable Long scheduleId,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		String scheduleTime = scheduleWaitingService.cancelScheduleWaiting(scheduleId,
 			customMemberDetails.getMemberId());
-		return ResponseHandler.<Boolean>builder()
+		return ApiResult.<Boolean>builder()
 			.data(true)
 			.message(scheduleTime + " 수업 대기가 취소되었습니다.")
 			.build();
@@ -69,9 +69,9 @@ public class ScheduleWaitingController {
 		})
 	@GetMapping("/my-waiting")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<FindMyScheduleWaitingResult> findAllMyScheduleWaiting(
+	public ApiResult<FindMyScheduleWaitingResult> findAllMyScheduleWaiting(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<FindMyScheduleWaitingResult>builder()
+		return ApiResult.<FindMyScheduleWaitingResult>builder()
 			.data(scheduleWaitingService.findAllMyScheduleWaiting(customMemberDetails.getMemberId()))
 			.message("학생이 대기중인 예약을 조회하였습니다.")
 			.build();

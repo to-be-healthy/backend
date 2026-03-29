@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.home.application.HomeService;
-import com.tobe.healthy.member.domain.dto.out.StudentHomeResult;
-import com.tobe.healthy.member.domain.dto.out.TrainerHomeResult;
+import com.tobe.healthy.member.presentation.dto.out.StudentHomeResult;
+import com.tobe.healthy.member.presentation.dto.out.TrainerHomeResult;
 import com.tobe.healthy.point.application.PointService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/home/v1")
+@RequestMapping("/api/v1/home")
 @Tag(name = "10. 홈 API", description = "홈 API")
 @Slf4j
 public class HomeController {
@@ -35,9 +35,9 @@ public class HomeController {
 	})
 	@GetMapping("/student")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<StudentHomeResult> getStudentHome(
+	public ApiResult<StudentHomeResult> getStudentHome(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<StudentHomeResult>builder()
+		return ApiResult.<StudentHomeResult>builder()
 			.data(homeService.getStudentHome(customMemberDetails.getMemberId()))
 			.message("학생 홈이 조회되었습니다.")
 			.build();
@@ -49,9 +49,9 @@ public class HomeController {
 	})
 	@GetMapping("/trainer")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<TrainerHomeResult> getTrainerHome(
+	public ApiResult<TrainerHomeResult> getTrainerHome(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<TrainerHomeResult>builder()
+		return ApiResult.<TrainerHomeResult>builder()
 			.data(homeService.getTrainerHome(customMemberDetails.getMemberId()))
 			.message("트레이너 홈이 조회되었습니다.")
 			.build();

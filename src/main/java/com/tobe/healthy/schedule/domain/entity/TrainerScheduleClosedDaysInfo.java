@@ -1,5 +1,9 @@
 package com.tobe.healthy.schedule.domain.entity;
 
+import java.time.DayOfWeek;
+
+import org.hibernate.annotations.DynamicUpdate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,9 +17,6 @@ import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.DynamicUpdate;
-
-import java.time.DayOfWeek;
 
 @Entity
 @Getter
@@ -23,27 +24,27 @@ import java.time.DayOfWeek;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TrainerScheduleClosedDaysInfo {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "trainer_schedule_closed_days_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "trainer_schedule_closed_days_id")
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trainer_schedule_info_id")
-    private TrainerScheduleInfo trainerScheduleInfo;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "trainer_schedule_info_id")
+	private TrainerScheduleInfo trainerScheduleInfo;
 
-    @Enumerated(EnumType.STRING)
-    private DayOfWeek closedDays;
+	@Enumerated(EnumType.STRING)
+	private DayOfWeek closedDays;
 
-    private TrainerScheduleClosedDaysInfo(TrainerScheduleInfo trainerScheduleInfo, DayOfWeek closedDays) {
-        this.trainerScheduleInfo = trainerScheduleInfo;
-        this.closedDays = closedDays;
-    }
+	private TrainerScheduleClosedDaysInfo(TrainerScheduleInfo trainerScheduleInfo, DayOfWeek closedDays) {
+		this.trainerScheduleInfo = trainerScheduleInfo;
+		this.closedDays = closedDays;
+	}
 
-    public static TrainerScheduleClosedDaysInfo registerClosedDay(
-            DayOfWeek dayOfWeek,
-            TrainerScheduleInfo trainerScheduleInfo
-    ) {
-        return new TrainerScheduleClosedDaysInfo(trainerScheduleInfo, dayOfWeek);
-    }
+	public static TrainerScheduleClosedDaysInfo registerClosedDay(
+		DayOfWeek dayOfWeek,
+		TrainerScheduleInfo trainerScheduleInfo
+	) {
+		return new TrainerScheduleClosedDaysInfo(trainerScheduleInfo, dayOfWeek);
+	}
 }

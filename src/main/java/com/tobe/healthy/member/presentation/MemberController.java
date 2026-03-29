@@ -11,16 +11,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tobe.healthy.common.CustomPaging;
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.diet.application.DietService;
-import com.tobe.healthy.diet.domain.dto.DietDto;
+import com.tobe.healthy.diet.presentation.dto.DietDto;
 import com.tobe.healthy.member.application.MemberService;
-import com.tobe.healthy.member.domain.dto.in.ValidateCurrentPassword;
-import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
-import com.tobe.healthy.member.domain.dto.out.RetrieveTrainerInfo;
-import com.tobe.healthy.member.domain.dto.out.TrainerMappingResult;
+import com.tobe.healthy.member.presentation.dto.in.ValidateCurrentPassword;
+import com.tobe.healthy.member.presentation.dto.out.MemberInfoResult;
+import com.tobe.healthy.member.presentation.dto.out.RetrieveTrainerInfo;
+import com.tobe.healthy.member.presentation.dto.out.TrainerMappingResult;
 import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 
@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/members/v1")
+@RequestMapping("/api/v1/members")
 @Slf4j
 @Valid
 @Tag(name = "02. 회원 API", description = "인증이 있어야만 접근 가능한 회원 API")
@@ -50,8 +50,8 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "회원 정보가 조회되었습니다.")
 	})
 	@GetMapping("/me")
-	public ResponseHandler<MemberInfoResult> getMemberInfo(@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<MemberInfoResult>builder()
+	public ApiResult<MemberInfoResult> getMemberInfo(@AuthenticationPrincipal CustomMemberDetails member) {
+		return ApiResult.<MemberInfoResult>builder()
 			.data(memberService.getMemberInfo(member.getMemberId()))
 			.message("회원정보가 조회 되었습니다.")
 			.build();
@@ -62,8 +62,8 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "회원 정보가 조회되었습니다.")
 	})
 	@GetMapping("/{memberId}")
-	public ResponseHandler<MemberInfoResult> getMemberInfo(@PathVariable Long memberId) {
-		return ResponseHandler.<MemberInfoResult>builder()
+	public ApiResult<MemberInfoResult> getMemberInfo(@PathVariable Long memberId) {
+		return ApiResult.<MemberInfoResult>builder()
 			.data(memberService.getMemberInfo(memberId))
 			.message("회원정보가 조회 되었습니다.")
 			.build();
@@ -77,10 +77,10 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/me/workout-histories")
-	public ResponseHandler<CustomPaging> getWorkoutHistory(String searchDate,
+	public ApiResult<CustomPaging> getWorkoutHistory(String searchDate,
 		Pageable pageable,
 		@AuthenticationPrincipal CustomMemberDetails loginMember) {
-		return ResponseHandler.<CustomPaging>builder()
+		return ApiResult.<CustomPaging>builder()
 			.data(workoutService.getWorkoutHistory(loginMember.getMember(), loginMember.getMemberId(), pageable,
 				searchDate))
 			.message("운동기록이 조회되었습니다.")
@@ -92,10 +92,10 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/{memberId}/workout-histories")
-	public ResponseHandler<CustomPaging> getWorkoutHistory(@PathVariable Long memberId, String searchDate,
+	public ApiResult<CustomPaging> getWorkoutHistory(@PathVariable Long memberId, String searchDate,
 		@AuthenticationPrincipal CustomMemberDetails loginMember,
 		Pageable pageable) {
-		return ResponseHandler.<CustomPaging>builder()
+		return ApiResult.<CustomPaging>builder()
 			.data(workoutService.getWorkoutHistory(loginMember.getMember(), memberId, pageable, searchDate))
 			.message("운동기록이 조회되었습니다.")
 			.build();
@@ -113,10 +113,10 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/me/diets")
-	public ResponseHandler<CustomPaging<DietDto>> getDiet(String searchDate,
+	public ApiResult<CustomPaging<DietDto>> getDiet(String searchDate,
 		Pageable pageable,
 		@AuthenticationPrincipal CustomMemberDetails loginMember) {
-		return ResponseHandler.<CustomPaging<DietDto>>builder()
+		return ApiResult.<CustomPaging<DietDto>>builder()
 			.data(dietService.getDiet(loginMember.getMemberId(), loginMember.getMemberId(), pageable, searchDate))
 			.message("식단기록 조회되었습니다.")
 			.build();
@@ -127,11 +127,11 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/{memberId}/diets")
-	public ResponseHandler<CustomPaging<DietDto>> getDiet(@AuthenticationPrincipal CustomMemberDetails loginMember,
+	public ApiResult<CustomPaging<DietDto>> getDiet(@AuthenticationPrincipal CustomMemberDetails loginMember,
 		@PathVariable Long memberId,
 		String searchDate,
 		Pageable pageable) {
-		return ResponseHandler.<CustomPaging<DietDto>>builder()
+		return ApiResult.<CustomPaging<DietDto>>builder()
 			.data(dietService.getDiet(loginMember.getMemberId(), memberId, pageable, searchDate))
 			.message("식단기록 조회되었습니다.")
 			.build();
@@ -142,10 +142,10 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
 	})
 	@GetMapping("/my-trainer/diets")
-	public ResponseHandler<CustomPaging<DietDto>> getDietMyTrainer(String searchDate,
+	public ApiResult<CustomPaging<DietDto>> getDietMyTrainer(String searchDate,
 		Pageable pageable,
 		@AuthenticationPrincipal CustomMemberDetails loginMember) {
-		return ResponseHandler.<CustomPaging<DietDto>>builder()
+		return ApiResult.<CustomPaging<DietDto>>builder()
 			.data(dietService.getDietMyTrainer(loginMember.getMemberId(), pageable, searchDate))
 			.message("식단기록 조회되었습니다.")
 			.build();
@@ -160,10 +160,10 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "수강권 정보를 반환한다.")
 	})
 	@GetMapping("/course")
-	public ResponseHandler<CustomPaging> getMyCourse(String searchDate,
+	public ApiResult<CustomPaging> getMyCourse(String searchDate,
 		Pageable pageable,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<CustomPaging>builder()
+		return ApiResult.<CustomPaging>builder()
 			.data(courseService.getCourse(customMemberDetails.getMember(), pageable, customMemberDetails.getMemberId(),
 				searchDate))
 			.message("수강권이 조회되었습니다.")
@@ -176,11 +176,11 @@ public class MemberController {
 	})
 	@GetMapping("/{memberId}/course")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<CustomPaging> getCourse(@PathVariable Long memberId,
+	public ApiResult<CustomPaging> getCourse(@PathVariable Long memberId,
 		String searchDate,
 		Pageable pageable,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<CustomPaging>builder()
+		return ApiResult.<CustomPaging>builder()
 			.data(courseService.getCourse(customMemberDetails.getMember(), pageable, memberId, searchDate))
 			.message("수강권이 조회되었습니다.")
 			.build();
@@ -191,9 +191,9 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "포인트 및 히스토리를 반환한다.")
 	})
 	@GetMapping("/point")
-	public ResponseHandler<CustomPaging> getMyPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<CustomPaging> getMyPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		String searchDate, Pageable pageable) {
-		return ResponseHandler.<CustomPaging>builder()
+		return ApiResult.<CustomPaging>builder()
 			.data(pointService.getPoint(customMemberDetails.getMember().getId(), searchDate, pageable))
 			.message("포인트가 조회되었습니다.")
 			.build();
@@ -205,8 +205,8 @@ public class MemberController {
 	})
 	@GetMapping("/{memberId}/point")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<CustomPaging> getPoint(@PathVariable Long memberId, String searchDate, Pageable pageable) {
-		return ResponseHandler.<CustomPaging>builder()
+	public ApiResult<CustomPaging> getPoint(@PathVariable Long memberId, String searchDate, Pageable pageable) {
+		return ApiResult.<CustomPaging>builder()
 			.data(pointService.getPoint(memberId, searchDate, pageable))
 			.message("포인트가 조회되었습니다.")
 			.build();
@@ -217,9 +217,9 @@ public class MemberController {
 		@ApiResponse(responseCode = "200", description = "학생이 트레이너와 매핑 여부를 반환한다.")
 	})
 	@GetMapping("/trainer-mapping")
-	public ResponseHandler<TrainerMappingResult> getTrainerMapping(
+	public ApiResult<TrainerMappingResult> getTrainerMapping(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<TrainerMappingResult>builder()
+		return ApiResult.<TrainerMappingResult>builder()
 			.data(memberService.getTrainerMapping(customMemberDetails.getMember()))
 			.message("매핑 여부가 조회되었습니다.")
 			.build();
@@ -231,8 +231,8 @@ public class MemberController {
 	})
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	@GetMapping("/trainer-mapping/info")
-	public ResponseHandler<RetrieveTrainerInfo> findMyTrainerInfo(@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<RetrieveTrainerInfo>builder()
+	public ApiResult<RetrieveTrainerInfo> findMyTrainerInfo(@AuthenticationPrincipal CustomMemberDetails member) {
+		return ApiResult.<RetrieveTrainerInfo>builder()
 			.data(memberService.findMyTrainerInfo(member.getMemberId()))
 			.message("내 트레이너 정보를 조회하였습니다.")
 			.build();
@@ -244,9 +244,9 @@ public class MemberController {
 			@ApiResponse(responseCode = "200", description = "현재 비밀번호가 확인되었습니다.")
 		})
 	@PostMapping("/password")
-	public ResponseHandler<Boolean> validateCurrentPassword(@RequestBody @Valid ValidateCurrentPassword request,
+	public ApiResult<Boolean> validateCurrentPassword(@RequestBody @Valid ValidateCurrentPassword request,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
+		return ApiResult.<Boolean>builder()
 			.data(memberService.validateCurrentPassword(request, member.getMemberId()))
 			.message("비밀번호가 확인되었습니다.")
 			.build();

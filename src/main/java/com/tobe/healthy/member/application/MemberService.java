@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tobe.healthy.common.error.CustomException;
-import com.tobe.healthy.member.domain.dto.in.ValidateCurrentPassword;
-import com.tobe.healthy.member.domain.dto.out.MemberInfoResult;
-import com.tobe.healthy.member.domain.dto.out.RetrieveTrainerInfo;
-import com.tobe.healthy.member.domain.dto.out.TrainerMappingResult;
+import com.tobe.healthy.member.presentation.dto.in.ValidateCurrentPassword;
+import com.tobe.healthy.member.presentation.dto.out.MemberInfoResult;
+import com.tobe.healthy.member.presentation.dto.out.RetrieveTrainerInfo;
+import com.tobe.healthy.member.presentation.dto.out.TrainerMappingResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;

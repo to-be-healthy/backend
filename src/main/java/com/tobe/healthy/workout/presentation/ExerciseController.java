@@ -1,5 +1,6 @@
 package com.tobe.healthy.workout.presentation;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -14,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tobe.healthy.common.CustomPaging;
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.workout.application.ExerciseService;
-import com.tobe.healthy.workout.domain.dto.ExerciseDto;
-import com.tobe.healthy.workout.domain.dto.in.CustomExerciseAddCommand;
-import com.tobe.healthy.workout.domain.dto.out.ExerciseCategoryDto;
+import com.tobe.healthy.workout.presentation.dto.ExerciseDto;
+import com.tobe.healthy.workout.presentation.dto.in.CustomExerciseAddCommand;
+import com.tobe.healthy.workout.presentation.dto.out.ExerciseCategoryDto;
 import com.tobe.healthy.workout.domain.entity.exercise.ExerciseCategory;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/exercise/v1")
+@RequestMapping("/api/v1/exercise")
 @Tag(name = "06-00. 운동종류 API", description = "운동종류 API")
 @Slf4j
 public class ExerciseController {
@@ -44,9 +45,9 @@ public class ExerciseController {
 		@ApiResponse(responseCode = "200", description = "운동 종류를 반환한다.")
 	})
 	@GetMapping("/category")
-	public ResponseHandler<List<ExerciseCategoryDto>> getExerciseCategory() {
-		return ResponseHandler.<List<ExerciseCategoryDto>>builder()
-			.data(ExerciseCategory.getCategoryList())
+	public ApiResult<List<ExerciseCategoryDto>> getExerciseCategory() {
+		return ApiResult.<List<ExerciseCategoryDto>>builder()
+			.data(Arrays.stream(ExerciseCategory.values()).map(ExerciseCategoryDto::from).toList())
 			.message("운동 카테고리가 조회되었습니다.")
 			.build();
 	}
@@ -56,12 +57,12 @@ public class ExerciseController {
 		@ApiResponse(responseCode = "200", description = "운동 종류를 반환한다.")
 	})
 	@GetMapping
-	public ResponseHandler<CustomPaging<ExerciseDto>> getExercise(
+	public ApiResult<CustomPaging<ExerciseDto>> getExercise(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "카테고리") @RequestParam(required = false) ExerciseCategory exerciseCategory,
 		@Parameter(description = "검색할 이름", example = "임채린") @RequestParam(required = false) String searchValue,
 		Pageable pageable) {
-		return ResponseHandler.<CustomPaging<ExerciseDto>>builder()
+		return ApiResult.<CustomPaging<ExerciseDto>>builder()
 			.data(exerciseService.getExercise(customMemberDetails.getMember(), exerciseCategory, pageable, searchValue))
 			.message("운동 종류가 조회되었습니다.")
 			.build();
@@ -72,10 +73,10 @@ public class ExerciseController {
 		@ApiResponse(responseCode = "200", description = "운동 종류를 등록한다.")
 	})
 	@PostMapping
-	public ResponseHandler<Void> addExerciseCustom(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<Void> addExerciseCustom(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Valid @RequestBody CustomExerciseAddCommand command) {
 		exerciseService.addExerciseCustom(customMemberDetails.getMember(), command);
-		return ResponseHandler.<Void>builder()
+		return ApiResult.<Void>builder()
 			.message("운동 종류가 등록되었습니다.")
 			.build();
 	}
@@ -85,10 +86,10 @@ public class ExerciseController {
 		@ApiResponse(responseCode = "200", description = "운동 종류를 삭제한다.")
 	})
 	@DeleteMapping("/{exerciseId}")
-	public ResponseHandler<Void> deleteExerciseCustom(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<Void> deleteExerciseCustom(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "운동종류 ID") @PathVariable("exerciseId") Long exerciseId) {
 		exerciseService.deleteExerciseCustom(customMemberDetails.getMember(), exerciseId);
-		return ResponseHandler.<Void>builder()
+		return ApiResult.<Void>builder()
 			.message("운동 종류가 삭제되었습니다.")
 			.build();
 	}

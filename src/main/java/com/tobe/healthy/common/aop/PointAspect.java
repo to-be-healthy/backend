@@ -12,10 +12,10 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
-import com.tobe.healthy.diet.domain.dto.DietDto;
+import com.tobe.healthy.diet.presentation.dto.DietDto;
 import com.tobe.healthy.point.application.PointService;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
+import com.tobe.healthy.schedule.presentation.dto.out.ScheduleIdInfo;
+import com.tobe.healthy.workout.presentation.dto.out.WorkoutHistoryDto;
 
 import lombok.extern.slf4j.Slf4j;
 

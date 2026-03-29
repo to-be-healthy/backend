@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.course.application.CourseService;
-import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
-import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
+import com.tobe.healthy.course.presentation.dto.in.CourseAddCommand;
+import com.tobe.healthy.course.presentation.dto.in.CourseUpdateCommand;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/course/v1")
+@RequestMapping("/api/v1/course")
 @Tag(name = "08. 수강권 API", description = "수강권 API")
 @Slf4j
 public class CourseController {
@@ -42,10 +42,10 @@ public class CourseController {
 	})
 	@PostMapping
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<Void> addCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<Void> addCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@RequestBody @Valid CourseAddCommand command) {
 		courseService.addCourse(customMemberDetails.getMember().getId(), command);
-		return ResponseHandler.<Void>builder()
+		return ApiResult.<Void>builder()
 			.message("수강권이 등록되었습니다.")
 			.build();
 	}
@@ -56,10 +56,10 @@ public class CourseController {
 	})
 	@DeleteMapping("/{courseId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<Void> deleteCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<Void> deleteCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "수강권 ID") @PathVariable("courseId") Long courseId) {
 		courseService.deleteCourseByTrainer(customMemberDetails.getMember().getId(), courseId);
-		return ResponseHandler.<Void>builder()
+		return ApiResult.<Void>builder()
 			.message("수강권이 삭제되었습니다.")
 			.build();
 	}
@@ -71,11 +71,11 @@ public class CourseController {
 	})
 	@PatchMapping("/{courseId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<Void> updateCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
+	public ApiResult<Void> updateCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "수강권 ID") @PathVariable("courseId") Long courseId,
 		@RequestBody @Valid CourseUpdateCommand command) {
 		courseService.updateCourseByTrainer(customMemberDetails.getMember().getId(), courseId, command);
-		return ResponseHandler.<Void>builder()
+		return ApiResult.<Void>builder()
 			.message("수강권 횟수가 증가 및 차감 되었습니다.")
 			.build();
 	}

@@ -11,7 +11,6 @@ import org.hibernate.annotations.DynamicUpdate;
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.gym.domain.entity.Gym;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -88,10 +87,10 @@ public class WorkoutHistory extends BaseTimeEntity<WorkoutHistory, Long> {
 	@ToString.Exclude
 	private List<CompletedExercise> completedExercises = new ArrayList<>();
 
-	public static WorkoutHistory create(HistoryAddCommand command, Member member, Gym gym) {
+	public static WorkoutHistory create(String content, boolean viewMySelf, Member member, Gym gym) {
 		return WorkoutHistory.builder()
-			.content(command.getContent())
-			.viewMySelf(command.isViewMySelf())
+			.content(content)
+			.viewMySelf(viewMySelf)
 			.member(member)
 			.gym(gym)
 			.build();

@@ -5,17 +5,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.member.application.MemberAuthCommandService;
-import com.tobe.healthy.member.domain.dto.in.CommandFindMemberPassword;
-import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
-import com.tobe.healthy.member.domain.dto.in.CommandLoginMember;
-import com.tobe.healthy.member.domain.dto.in.CommandRefreshToken;
-import com.tobe.healthy.member.domain.dto.in.CommandSocialLogin;
-import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
-import com.tobe.healthy.member.domain.dto.in.CommandVerification;
-import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
-import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
+import com.tobe.healthy.member.presentation.dto.in.CommandFindMemberPassword;
+import com.tobe.healthy.member.presentation.dto.in.CommandJoinMember;
+import com.tobe.healthy.member.presentation.dto.in.CommandLoginMember;
+import com.tobe.healthy.member.presentation.dto.in.CommandRefreshToken;
+import com.tobe.healthy.member.presentation.dto.in.CommandSocialLogin;
+import com.tobe.healthy.member.presentation.dto.in.CommandValidateEmail;
+import com.tobe.healthy.member.presentation.dto.in.CommandVerification;
+import com.tobe.healthy.member.presentation.dto.out.CommandFindMemberPasswordResult;
+import com.tobe.healthy.member.presentation.dto.out.CommandJoinMemberResult;
 import com.tobe.healthy.member.domain.entity.Tokens;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth/v1")
+@RequestMapping("/api/v1/auth")
 @Slf4j
 @Tag(name = "01. 회원 인증 API", description = "인증/권한 없이 접근할 수 있는 회원 API")
 public class MemberAuthCommandController {
@@ -43,8 +43,8 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "이메일로 인증번호를 전송하였습니다.")
 		})
 	@PostMapping("/validation/send-email")
-	public ResponseHandler<String> sendEmailVerification(@RequestBody @Valid CommandValidateEmail request) {
-		return ResponseHandler.<String>builder()
+	public ApiResult<String> sendEmailVerification(@RequestBody @Valid CommandValidateEmail request) {
+		return ApiResult.<String>builder()
 			.data(memberAuthCommandService.sendEmailVerification(request))
 			.message("이메일로 인증번호를 발송중이에요!")
 			.build();
@@ -56,8 +56,8 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "이메일 인증번호가 일치합니다.")
 		})
 	@PostMapping("/validation/confirm-email")
-	public ResponseHandler<Boolean> verifyAuthMail(@RequestBody @Valid CommandVerification reuqest) {
-		return ResponseHandler.<Boolean>builder()
+	public ApiResult<Boolean> verifyAuthMail(@RequestBody @Valid CommandVerification reuqest) {
+		return ApiResult.<Boolean>builder()
 			.data(memberAuthCommandService.verifyEmailAuthNumber(reuqest))
 			.message("인증번호가 확인되었습니다.")
 			.build();
@@ -75,8 +75,8 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
 		})
 	@PostMapping("/join")
-	public ResponseHandler<CommandJoinMemberResult> join(@RequestBody @Valid CommandJoinMember request) {
-		return ResponseHandler.<CommandJoinMemberResult>builder()
+	public ApiResult<CommandJoinMemberResult> join(@RequestBody @Valid CommandJoinMember request) {
+		return ApiResult.<CommandJoinMemberResult>builder()
 			.data(memberAuthCommandService.joinMember(request))
 			.message("회원가입이 완료되었습니다.")
 			.build();
@@ -89,8 +89,8 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "로그인에 성공하고, Access Token, Refresh Token, userId, Role을 반환한다.")
 		})
 	@PostMapping("/login")
-	public ResponseHandler<Tokens> login(@RequestBody @Valid CommandLoginMember request) {
-		return ResponseHandler.<Tokens>builder()
+	public ApiResult<Tokens> login(@RequestBody @Valid CommandLoginMember request) {
+		return ApiResult.<Tokens>builder()
 			.data(memberAuthCommandService.login(request))
 			.message("로그인 되었습니다.")
 			.build();
@@ -104,8 +104,8 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token, userId, Role을 반환한다.")
 		})
 	@PostMapping("/refresh-token")
-	public ResponseHandler<Tokens> refreshToken(@RequestBody @Valid CommandRefreshToken request) {
-		return ResponseHandler.<Tokens>builder()
+	public ApiResult<Tokens> refreshToken(@RequestBody @Valid CommandRefreshToken request) {
+		return ApiResult.<Tokens>builder()
 			.data(memberAuthCommandService.refreshToken(request))
 			.message("토큰이 갱신되었습니다.")
 			.build();
@@ -118,12 +118,12 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "등록된 이메일로 초기화 비밀번호를 전송한다.")
 		})
 	@PostMapping("/find/password")
-	public ResponseHandler<CommandFindMemberPasswordResult> findMemberPW(
+	public ApiResult<CommandFindMemberPasswordResult> findMemberPW(
 		@RequestBody @Valid CommandFindMemberPassword request) {
 
 		CommandFindMemberPasswordResult findMemberPasswordResult = memberAuthCommandService.findMemberPW(request);
 
-		return ResponseHandler.<CommandFindMemberPasswordResult>builder()
+		return ApiResult.<CommandFindMemberPasswordResult>builder()
 			.data(findMemberPasswordResult)
 			.message(findMemberPasswordResult.getMessage())
 			.build();
@@ -137,8 +137,8 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
 		})
 	@PostMapping("/access-token/naver")
-	public ResponseHandler<Tokens> getNaverAccessToken(@RequestBody CommandSocialLogin request) {
-		return ResponseHandler.<Tokens>builder()
+	public ApiResult<Tokens> getNaverAccessToken(@RequestBody CommandSocialLogin request) {
+		return ApiResult.<Tokens>builder()
 			.data(memberAuthCommandService.getNaverAccessToken(request))
 			.message("요청이 처리되었습니다.")
 			.build();
@@ -153,8 +153,8 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
 		})
 	@PostMapping("/access-token/kakao")
-	public ResponseHandler<Tokens> getKakaoAccessToken(@RequestBody CommandSocialLogin request) {
-		return ResponseHandler.<Tokens>builder()
+	public ApiResult<Tokens> getKakaoAccessToken(@RequestBody CommandSocialLogin request) {
+		return ApiResult.<Tokens>builder()
 			.data(memberAuthCommandService.getKakaoAccessToken(request))
 			.message("요청이 처리되었습니다.")
 			.build();
@@ -166,8 +166,8 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
 		})
 	@PostMapping("/access-token/google")
-	public ResponseHandler<Tokens> getGoogleOAuth(@RequestBody CommandSocialLogin command) {
-		return ResponseHandler.<Tokens>builder()
+	public ApiResult<Tokens> getGoogleOAuth(@RequestBody CommandSocialLogin command) {
+		return ApiResult.<Tokens>builder()
 			.data(memberAuthCommandService.getGoogleOAuth(command))
 			.message("요청이 처리되었습니다.")
 			.build();
@@ -179,8 +179,8 @@ public class MemberAuthCommandController {
 			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
 		})
 	@PostMapping("/access-token/apple")
-	public ResponseHandler<Tokens> getAppleOAuth(@RequestBody CommandSocialLogin request) {
-		return ResponseHandler.<Tokens>builder()
+	public ApiResult<Tokens> getAppleOAuth(@RequestBody CommandSocialLogin request) {
+		return ApiResult.<Tokens>builder()
 			.data(memberAuthCommandService.getAppleOAuth(request))
 			.message("요청이 처리되었습니다.")
 			.build();

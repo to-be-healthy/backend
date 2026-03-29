@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
+import com.tobe.healthy.workout.presentation.dto.out.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryFiles;
 
 public interface WorkoutHistoryRepositoryCustom {

@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
-import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
+import com.tobe.healthy.member.presentation.dto.out.MemberDetailResult;
+import com.tobe.healthy.member.presentation.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.Member;
 
 public interface MemberRepositoryCustom {

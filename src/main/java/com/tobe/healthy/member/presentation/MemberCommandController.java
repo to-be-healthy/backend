@@ -15,19 +15,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.member.application.MemberCommandService;
-import com.tobe.healthy.member.domain.dto.in.CommandAssignNickname;
-import com.tobe.healthy.member.domain.dto.in.CommandChangeEmail;
-import com.tobe.healthy.member.domain.dto.in.CommandChangeMemberPassword;
-import com.tobe.healthy.member.domain.dto.in.CommandChangeName;
-import com.tobe.healthy.member.domain.dto.in.CommandUpdateMemo;
-import com.tobe.healthy.member.domain.dto.out.CommandAssignNicknameResult;
-import com.tobe.healthy.member.domain.dto.out.CommandChangeNameResult;
-import com.tobe.healthy.member.domain.dto.out.DeleteMemberProfileResult;
-import com.tobe.healthy.member.domain.dto.out.MemberChangeAlarmResult;
-import com.tobe.healthy.member.domain.dto.out.RegisterMemberProfileResult;
+import com.tobe.healthy.member.presentation.dto.in.CommandAssignNickname;
+import com.tobe.healthy.member.presentation.dto.in.CommandChangeEmail;
+import com.tobe.healthy.member.presentation.dto.in.CommandChangeMemberPassword;
+import com.tobe.healthy.member.presentation.dto.in.CommandChangeName;
+import com.tobe.healthy.member.presentation.dto.in.CommandUpdateMemo;
+import com.tobe.healthy.member.presentation.dto.out.CommandAssignNicknameResult;
+import com.tobe.healthy.member.presentation.dto.out.CommandChangeNameResult;
+import com.tobe.healthy.member.presentation.dto.out.DeleteMemberProfileResult;
+import com.tobe.healthy.member.presentation.dto.out.MemberChangeAlarmResult;
+import com.tobe.healthy.member.presentation.dto.out.RegisterMemberProfileResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.member.domain.entity.AlarmType;
 
@@ -40,7 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/members/v1")
+@RequestMapping("/api/v1/members")
 @Slf4j
 @Valid
 @Tag(name = "02. 회원 API", description = "인증이 있어야만 접근 가능한 회원 API")
@@ -61,8 +61,8 @@ public class MemberCommandController {
 			@ApiResponse(responseCode = "200", description = "회원 탈퇴 되었습니다.")
 		})
 	@PostMapping("/delete")
-	public ResponseHandler<String> deleteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<String>builder()
+	public ApiResult<String> deleteMember(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
+		return ApiResult.<String>builder()
 			.data(memberCommandService.deleteMember(customMemberDetails.getMember()))
 			.message("회원 탈퇴 되었습니다.")
 			.build();
@@ -75,9 +75,9 @@ public class MemberCommandController {
 			@ApiResponse(responseCode = "200", description = "비밀번호 변경이 완료 되었습니다.")
 		})
 	@PatchMapping("/password")
-	public ResponseHandler<Boolean> changePassword(@RequestBody @Valid CommandChangeMemberPassword request,
+	public ApiResult<Boolean> changePassword(@RequestBody @Valid CommandChangeMemberPassword request,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
+		return ApiResult.<Boolean>builder()
 			.data(memberCommandService.changePassword(request, member.getMemberId()))
 			.message("비밀번호 변경이 완료되었습니다.")
 			.build();
@@ -89,9 +89,9 @@ public class MemberCommandController {
 		@ApiResponse(responseCode = "200", description = "프로필 사진이 등록되었습니다.")
 	})
 	@PutMapping(value = "/profile", consumes = MULTIPART_FORM_DATA_VALUE)
-	public ResponseHandler<RegisterMemberProfileResult> changeProfile(@RequestParam MultipartFile file,
+	public ApiResult<RegisterMemberProfileResult> changeProfile(@RequestParam MultipartFile file,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<RegisterMemberProfileResult>builder()
+		return ApiResult.<RegisterMemberProfileResult>builder()
 			.data(memberCommandService.registerProfile(file, member.getMemberId()))
 			.message("프로필 사진이 등록되었습니다.")
 			.build();
@@ -102,9 +102,9 @@ public class MemberCommandController {
 		@ApiResponse(responseCode = "200", description = "프로필 사진이 삭제되었습니다.")
 	})
 	@DeleteMapping("/profile")
-	public ResponseHandler<DeleteMemberProfileResult> changeProfile(
+	public ApiResult<DeleteMemberProfileResult> changeProfile(
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<DeleteMemberProfileResult>builder()
+		return ApiResult.<DeleteMemberProfileResult>builder()
 			.data(memberCommandService.deleteProfile(member.getMemberId()))
 			.message("프로필 사진이 삭제되었습니다.")
 			.build();
@@ -115,12 +115,12 @@ public class MemberCommandController {
 		@ApiResponse(responseCode = "200", description = "이름이 변경되었습니다.")
 	})
 	@PatchMapping("/name")
-	public ResponseHandler<CommandChangeNameResult> changeName(
+	public ApiResult<CommandChangeNameResult> changeName(
 		@RequestBody @Valid CommandChangeName request,
 		@AuthenticationPrincipal CustomMemberDetails member
 	) {
 
-		return ResponseHandler.<CommandChangeNameResult>builder()
+		return ApiResult.<CommandChangeNameResult>builder()
 			.data(memberCommandService.changeName(request, member.getMemberId()))
 			.message("이름이 변경되었습니다.")
 			.build();
@@ -131,10 +131,10 @@ public class MemberCommandController {
 		@ApiResponse(responseCode = "200", description = "알림 상태가 변경되었습니다.")
 	})
 	@PatchMapping("/alarm/{type}/{status}")
-	public ResponseHandler<MemberChangeAlarmResult> changeAlarm(@PathVariable AlarmType type,
+	public ApiResult<MemberChangeAlarmResult> changeAlarm(@PathVariable AlarmType type,
 		@PathVariable AlarmStatus status,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<MemberChangeAlarmResult>builder()
+		return ApiResult.<MemberChangeAlarmResult>builder()
 			.data(memberCommandService.changeAlarm(type, status, member.getMemberId()))
 			.message("알림 상태가 변경되었습니다.")
 			.build();
@@ -146,11 +146,11 @@ public class MemberCommandController {
 	})
 	@PutMapping("/{memberId}/memo")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<Void> updateMemo(@AuthenticationPrincipal CustomMemberDetails trainer,
+	public ApiResult<Void> updateMemo(@AuthenticationPrincipal CustomMemberDetails trainer,
 		@PathVariable Long memberId,
 		@RequestBody CommandUpdateMemo command) {
 		memberCommandService.updateMemo(trainer.getMemberId(), memberId, command);
-		return ResponseHandler.<Void>builder()
+		return ApiResult.<Void>builder()
 			.message("메모가 수정되었습니다.")
 			.build();
 	}
@@ -161,9 +161,9 @@ public class MemberCommandController {
 	})
 	@PostMapping("/nickname/{studentId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<CommandAssignNicknameResult> assignNickname(@PathVariable Long studentId,
+	public ApiResult<CommandAssignNicknameResult> assignNickname(@PathVariable Long studentId,
 		@RequestBody @Valid CommandAssignNickname request) {
-		return ResponseHandler.<CommandAssignNicknameResult>builder()
+		return ApiResult.<CommandAssignNicknameResult>builder()
 			.data(memberCommandService.assignNickname(request, studentId))
 			.message("닉네임을 지정하였습니다.")
 			.build();
@@ -174,9 +174,9 @@ public class MemberCommandController {
 		@ApiResponse(responseCode = "200", description = "이메일이 변경되었습니다.")
 	})
 	@PatchMapping("/email")
-	public ResponseHandler<Boolean> changeEmail(@RequestBody @Valid CommandChangeEmail request,
+	public ApiResult<Boolean> changeEmail(@RequestBody @Valid CommandChangeEmail request,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
+		return ApiResult.<Boolean>builder()
 			.data(memberCommandService.changeEmail(request, member.getMemberId()))
 			.message("이메일이 변경되었습니다.")
 			.build();
@@ -188,9 +188,9 @@ public class MemberCommandController {
 			@ApiResponse(responseCode = "200", description = "스케줄 공지 보기 여부가 변경되었습니다.")
 		})
 	@PatchMapping("/schedule-notice")
-	public ResponseHandler<Boolean> changeScheduleNotice(@RequestParam AlarmStatus alarmStatus,
+	public ApiResult<Boolean> changeScheduleNotice(@RequestParam AlarmStatus alarmStatus,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
+		return ApiResult.<Boolean>builder()
 			.data(memberCommandService.changeScheduleNotice(alarmStatus, member.getMemberId()))
 			.message("스케줄 공지 보기 여부가 변경되었습니다.")
 			.build();
@@ -202,9 +202,9 @@ public class MemberCommandController {
 			@ApiResponse(responseCode = "200", description = "식단 공지 보기 여부가 변경되었습니다.")
 		})
 	@PatchMapping("/diet-notice")
-	public ResponseHandler<Boolean> changeDietNotice(@RequestParam AlarmStatus alarmStatus,
+	public ApiResult<Boolean> changeDietNotice(@RequestParam AlarmStatus alarmStatus,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
+		return ApiResult.<Boolean>builder()
 			.data(memberCommandService.changeDietNotice(alarmStatus, member.getMemberId()))
 			.message("식단 공지 보기 여부가 변경되었습니다.")
 			.build();

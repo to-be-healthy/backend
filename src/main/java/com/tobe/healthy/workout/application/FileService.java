@@ -22,7 +22,7 @@ import com.tobe.healthy.common.Utils;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
+import com.tobe.healthy.workout.presentation.dto.in.RegisterFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

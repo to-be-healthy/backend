@@ -1,8 +1,9 @@
 package com.tobe.healthy.gym.repository;
 
-import com.tobe.healthy.gym.domain.entity.Gym;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.tobe.healthy.gym.domain.entity.Gym;
+
 public interface GymRepository extends JpaRepository<Gym, Long> {
-    Gym findByName(String name);
+	Gym findByName(String name);
 }

@@ -11,7 +11,6 @@ import static lombok.AccessLevel.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -20,7 +19,6 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.tobe.healthy.common.BaseTimeEntity;
 import com.tobe.healthy.gym.domain.entity.Gym;
-import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
 import com.tobe.healthy.push.domain.entity.MemberToken;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
@@ -124,14 +122,14 @@ public class Member extends BaseTimeEntity<Member, Long> {
 	@Builder.Default
 	private boolean delYn = false;
 
-	public static Member join(CommandJoinMember request, String password) {
+	public static Member join(String userId, String email, String name, MemberType memberType, String password) {
 		return Member.builder()
-			.userId(request.getUserId())
-			.email(request.getEmail())
+			.userId(userId)
+			.email(email)
 			.password(password)
-			.name(request.getName())
+			.name(name)
 			.pushAlarmStatus(ENABLED)
-			.memberType(request.getMemberType())
+			.memberType(memberType)
 			.socialType(NONE)
 			.build();
 	}
@@ -248,13 +246,13 @@ public class Member extends BaseTimeEntity<Member, Long> {
 		this.memberProfile = null;
 	}
 
-	public void updateNonMemberInfo(CommandJoinMember request, String password) {
-		this.userId = request.getUserId();
-		this.email = request.getEmail();
+	public void updateNonMemberInfo(String userId, String email, String name, MemberType memberType, String password) {
+		this.userId = userId;
+		this.email = email;
 		this.password = password;
-		this.name = request.getName();
+		this.name = name;
 		this.pushAlarmStatus = ENABLED;
-		this.memberType = request.getMemberType();
+		this.memberType = memberType;
 		this.socialType = NONE;
 	}
 

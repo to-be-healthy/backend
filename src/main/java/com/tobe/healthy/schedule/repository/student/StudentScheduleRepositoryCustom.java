@@ -3,9 +3,9 @@ package com.tobe.healthy.schedule.repository.student;
 import java.util.List;
 
 import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
-import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.presentation.dto.in.StudentScheduleCond;
+import com.tobe.healthy.schedule.presentation.dto.out.MyReservation;
+import com.tobe.healthy.schedule.presentation.dto.out.ScheduleCommandResult;
 
 public interface StudentScheduleRepositoryCustom {
 	List<ScheduleCommandResult> findAllSchedule(StudentScheduleCond searchCond, Long trainerId, Member member);

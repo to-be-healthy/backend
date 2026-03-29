@@ -1,32 +1,32 @@
 package com.tobe.healthy.file.presentation;
 
-import com.tobe.healthy.ApiResult;
-import com.tobe.healthy.config.security.CustomMemberDetails;
-import com.tobe.healthy.file.application.ComnFileService;
-import com.tobe.healthy.file.domain.dto.in.CommandUploadFile;
-import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import org.springframework.http.HttpStatus;
+import com.tobe.healthy.ApiResult;
+import com.tobe.healthy.config.security.CustomMemberDetails;
+import com.tobe.healthy.file.application.ComnFileService;
+import com.tobe.healthy.file.presentation.dto.in.CommandUploadFile;
+import com.tobe.healthy.workout.presentation.dto.in.RegisterFile;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/file/v1")
+@RequestMapping("/api/v1/file")
 @RequiredArgsConstructor
 public class ComnFileController {
 
-    private final ComnFileService comnFileService;
+	private final ComnFileService comnFileService;
 
-    @PostMapping
-    public ApiResult<List<RegisterFile>> uploadFile(
-            @RequestBody CommandUploadFile request,
-            @AuthenticationPrincipal CustomMemberDetails member) {
-        return new ApiResult<>(HttpStatus.OK, "presigned-uri을 생성하였습니다.", comnFileService.getPreSignedUrl(request));
-    }
+	@PostMapping
+	public ApiResult<List<RegisterFile>> uploadFile(
+		@RequestBody CommandUploadFile request,
+		@AuthenticationPrincipal CustomMemberDetails member) {
+		return ApiResult.success("presigned-uri을 생성하였습니다.", comnFileService.getPreSignedUrl(request));
+	}
 }

@@ -20,13 +20,13 @@ import org.springframework.util.ObjectUtils;
 import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.redis.RedisService;
-import com.tobe.healthy.diet.domain.dto.DietDetailDto;
-import com.tobe.healthy.diet.domain.dto.DietDto;
-import com.tobe.healthy.diet.domain.dto.DietFileDto;
-import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
-import com.tobe.healthy.diet.domain.dto.in.DietAddCommandAtHome;
-import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
-import com.tobe.healthy.diet.domain.dto.out.DietUploadDaysResult;
+import com.tobe.healthy.diet.presentation.dto.DietDetailDto;
+import com.tobe.healthy.diet.presentation.dto.DietDto;
+import com.tobe.healthy.diet.presentation.dto.DietFileDto;
+import com.tobe.healthy.diet.presentation.dto.in.DietAddCommand;
+import com.tobe.healthy.diet.presentation.dto.in.DietAddCommandAtHome;
+import com.tobe.healthy.diet.presentation.dto.in.DietUpdateCommand;
+import com.tobe.healthy.diet.presentation.dto.out.DietUploadDaysResult;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietFiles;
 import com.tobe.healthy.diet.domain.entity.DietLike;
@@ -41,7 +41,7 @@ import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import com.tobe.healthy.workout.application.FileService;
-import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
+import com.tobe.healthy.workout.presentation.dto.in.RegisterFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -132,7 +132,7 @@ public class DietService {
 
 		}
 
-		diet.changeEatDate(command.getEatDate());
+		diet.changeEatDate(LocalDate.parse(command.getEatDate()));
 		diet.changeFast(command.getType(), command.isFast());
 		DietDto dietDto = DietDto.from(diet);
 		setDietFile(dietDto, List.of(diet.getDietId()));
@@ -194,7 +194,11 @@ public class DietService {
 			throw new CustomException(DIET_ALREADY_EXISTS);
 
 		Member trainer = getMappedTrainer(member.getId());
-		Diet diet = dietRepository.save(Diet.create(member, trainer, command));
+		Diet diet = dietRepository.save(Diet.create(member, trainer,
+			command.isBreakfastFast(),
+			command.isLunchFast(),
+			command.isDinnerFast(),
+			LocalDate.parse(command.getEatDate())));
 		uploadNewFiles(diet, command);
 		DietDto dietDto = DietDto.from(diet);
 		setDietFile(dietDto, List.of(diet.getDietId()));
@@ -212,7 +216,7 @@ public class DietService {
 			.orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
 
 		diet.changeTrainer(getMappedTrainer(member.getId()));
-		diet.changeFast(command);
+		diet.changeFast(command.isBreakfastFast(), command.isLunchFast(), command.isDinnerFast());
 		deleteOldFiles(diet, command);
 		uploadNewFiles(diet, command);
 

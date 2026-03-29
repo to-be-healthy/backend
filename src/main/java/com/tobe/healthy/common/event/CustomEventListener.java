@@ -17,10 +17,10 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
-import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
+import com.tobe.healthy.course.presentation.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.notification.application.NotificationService;
-import com.tobe.healthy.notification.domain.dto.in.CommandSendNotification;
+import com.tobe.healthy.notification.presentation.dto.in.CommandSendNotification;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 import com.tobe.healthy.schedule.repository.common.CommonScheduleRepository;

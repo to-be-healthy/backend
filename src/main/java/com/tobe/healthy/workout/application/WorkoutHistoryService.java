@@ -15,14 +15,14 @@ import org.springframework.util.ObjectUtils;
 
 import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.error.CustomException;
-import com.tobe.healthy.member.domain.dto.MemberDto;
+import com.tobe.healthy.member.presentation.dto.MemberDto;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.workout.domain.dto.CompletedExerciseDto;
-import com.tobe.healthy.workout.domain.dto.WorkoutHistoryFileDto;
-import com.tobe.healthy.workout.domain.dto.in.HistoryAddCommand;
-import com.tobe.healthy.workout.domain.dto.in.RegisterFile;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
+import com.tobe.healthy.workout.presentation.dto.CompletedExerciseDto;
+import com.tobe.healthy.workout.presentation.dto.WorkoutHistoryFileDto;
+import com.tobe.healthy.workout.presentation.dto.in.HistoryAddCommand;
+import com.tobe.healthy.workout.presentation.dto.in.RegisterFile;
+import com.tobe.healthy.workout.presentation.dto.out.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.workoutHistory.CompletedExercise;
 import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistory;
 import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryFiles;
@@ -52,7 +52,8 @@ public class WorkoutHistoryService {
 	public WorkoutHistoryDto addWorkoutHistory(Member member, HistoryAddCommand command) {
 		Member result = memberRepository.findByIdAndDelYnFalse(member.getId())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		WorkoutHistory history = WorkoutHistory.create(command, member, result.getGym());
+		WorkoutHistory history = WorkoutHistory.create(command.getContent(), command.isViewMySelf(), member,
+			result.getGym());
 		workoutHistoryRepository.save(history);
 		saveCompletedExercises(history, command);
 		uploadNewFiles(history, command.getFiles());
@@ -63,8 +64,9 @@ public class WorkoutHistoryService {
 		List<CompletedExercise> completedExercises = command.getCompletedExercises().stream()
 			.map(c -> {
 				String name = c.getNames() != null ? c.getNames() : c.getName();
-				return CompletedExercise.create(c, history, name);
-			}).collect(Collectors.toList());
+				return CompletedExercise.create(c.getExerciseId(), history, name, c.getSetNum(), c.getWeight(),
+					c.getNumberOfCycles());
+				}).collect(Collectors.toList());
 		completedExerciseRepository.saveAll(completedExercises);
 	}
 

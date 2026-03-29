@@ -1,32 +1,34 @@
 package com.tobe.healthy.notification.application;
 
-import com.tobe.healthy.common.KotlinCustomPaging;
-import com.tobe.healthy.common.NotificationSenderInfo;
-import com.tobe.healthy.member.domain.entity.AlarmStatus;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.notification.domain.dto.in.CommandSendNotification;
-import com.tobe.healthy.notification.domain.dto.out.CommandNotificationStatusResult;
-import com.tobe.healthy.notification.domain.dto.out.CommandSendNotificationResult;
-import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedDotResult;
-import com.tobe.healthy.notification.domain.dto.out.RetrieveNotificationWithRedDotResult.RetrieveNotificationResult;
-import com.tobe.healthy.notification.domain.entity.Notification;
-import com.tobe.healthy.notification.domain.entity.NotificationCategory;
-import com.tobe.healthy.notification.domain.entity.NotificationType;
-import com.tobe.healthy.notification.repository.NotificationRepository;
-import com.tobe.healthy.push.application.PushCommandService;
-import com.tobe.healthy.push.domain.dto.in.CommandSendPushAlarm;
-import com.tobe.healthy.push.domain.entity.MemberToken;
-import com.tobe.healthy.schedule.repository.TrainerScheduleRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.tobe.healthy.common.KotlinCustomPaging;
+import com.tobe.healthy.common.NotificationSenderInfo;
+import com.tobe.healthy.member.domain.entity.AlarmStatus;
+import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.repository.MemberRepository;
+import com.tobe.healthy.notification.presentation.dto.in.CommandSendNotification;
+import com.tobe.healthy.notification.presentation.dto.out.CommandNotificationStatusResult;
+import com.tobe.healthy.notification.presentation.dto.out.CommandSendNotificationResult;
+import com.tobe.healthy.notification.presentation.dto.out.RetrieveNotificationWithRedDotResult;
+import com.tobe.healthy.notification.presentation.dto.out.RetrieveNotificationWithRedDotResult.RetrieveNotificationResult;
+import com.tobe.healthy.notification.domain.entity.Notification;
+import com.tobe.healthy.notification.domain.entity.NotificationCategory;
+import com.tobe.healthy.notification.domain.entity.NotificationType;
+import com.tobe.healthy.notification.repository.NotificationRepository;
+import com.tobe.healthy.push.application.PushCommandService;
+import com.tobe.healthy.push.presentation.dto.in.CommandSendPushAlarm;
+import com.tobe.healthy.push.domain.entity.MemberToken;
+import com.tobe.healthy.schedule.repository.TrainerScheduleRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Transactional
@@ -34,116 +36,118 @@ import java.util.List;
 @Slf4j
 public class NotificationService {
 
-    private final NotificationRepository notificationRepository;
-    private final MemberRepository memberRepository;
-    private final PushCommandService pushCommandService;
-    private final TrainerScheduleRepository trainerScheduleRepository;
+	private final NotificationRepository notificationRepository;
+	private final MemberRepository memberRepository;
+	private final PushCommandService pushCommandService;
+	private final TrainerScheduleRepository trainerScheduleRepository;
 
-    public CommandSendNotificationResult sendNotificationFromSystem(CommandSendNotification request) {
+	public CommandSendNotificationResult sendNotificationFromSystem(CommandSendNotification request) {
 
-        List<Member> receivers = memberRepository.findMemberTokenById(request.getReceiverIds());
+		List<Member> receivers = memberRepository.findMemberTokenById(request.getReceiverIds());
 
-        if (receivers.isEmpty()) {
-            throw new IllegalArgumentException("수신자의 ID가 존재하지 않습니다.");
-        }
+		if (receivers.isEmpty()) {
+			throw new IllegalArgumentException("수신자의 ID가 존재하지 않습니다.");
+		}
 
-        List<Notification> notifications = new ArrayList<>();
+		List<Notification> notifications = new ArrayList<>();
 
-        for (Member receiver : receivers) {
+		for (Member receiver : receivers) {
 
-            if (request.getNotificationCategory() == NotificationCategory.COMMUNITY
-                    && receiver.getCommunityAlarmStatus() == AlarmStatus.DISABLE) {
-                throw new IllegalArgumentException("커뮤니티 알림을 거부한 수신자입니다.");
-            }
+			if (request.getNotificationCategory() == NotificationCategory.COMMUNITY
+				&& receiver.getCommunityAlarmStatus() == AlarmStatus.DISABLE) {
+				throw new IllegalArgumentException("커뮤니티 알림을 거부한 수신자입니다.");
+			}
 
-            List<MemberToken> memberTokens = receiver.getMemberToken();
-            if (memberTokens != null && !memberTokens.isEmpty()) {
-                MemberToken memberToken = memberTokens.get(0);
-                pushCommandService.sendPushAlarm(
-                        new CommandSendPushAlarm(
-                                request.getTitle(),
-                                request.getContent(),
-                                memberToken.getToken(),
-                                request.getClickUrl(),
-                                memberToken.getDeviceType()
-                        )
-                );
+			List<MemberToken> memberTokens = receiver.getMemberToken();
+			if (memberTokens != null && !memberTokens.isEmpty()) {
+				MemberToken memberToken = memberTokens.get(0);
+				pushCommandService.sendPushAlarm(
+					new CommandSendPushAlarm(
+						request.getTitle(),
+						request.getContent(),
+						memberToken.getToken(),
+						request.getClickUrl(),
+						memberToken.getDeviceType()
+					)
+				);
 
-                Notification notification = Notification.create(
-                        request.getTitle(),
-                        request.getContent(),
-                        request.getNotificationCategory(),
-                        request.getNotificationType(),
-                        receiver,
-                        request.getTargetId(),
-                        request.getClickUrl(),
-                        request.getStudentId(),
-                        request.getStudentName()
-                );
-                log.info("notification: {}", notification);
-                notifications.add(notification);
-            }
-        }
+				Notification notification = Notification.create(
+					request.getTitle(),
+					request.getContent(),
+					request.getNotificationCategory(),
+					request.getNotificationType(),
+					receiver,
+					request.getTargetId(),
+					request.getClickUrl(),
+					request.getStudentId(),
+					request.getStudentName()
+				);
+				log.info("notification: {}", notification);
+				notifications.add(notification);
+			}
+		}
 
-        notificationRepository.saveAll(notifications);
+		notificationRepository.saveAll(notifications);
 
-        return CommandSendNotificationResult.from(notifications);
-    }
+		return CommandSendNotificationResult.from(notifications);
+	}
 
-    public KotlinCustomPaging<RetrieveNotificationResult> findAllNotification(
-            NotificationCategory notificationCategory,
-            Long receiverId,
-            Pageable pageable) {
+	public KotlinCustomPaging<RetrieveNotificationResult> findAllNotification(
+		NotificationCategory notificationCategory,
+		Long receiverId,
+		Pageable pageable) {
 
-        Page<Notification> notification = notificationRepository.findAllByNotificationType(notificationCategory, receiverId, pageable);
+		Page<Notification> notification = notificationRepository.findAllByNotificationType(notificationCategory,
+			receiverId, pageable);
 
-        var redDotStatus = notificationRepository.findAllRedDotStatus(notificationCategory, receiverId);
+		var redDotStatus = notificationRepository.findAllRedDotStatus(notificationCategory, receiverId);
 
-        RetrieveNotificationWithRedDotResult results = RetrieveNotificationWithRedDotResult.from(notification, redDotStatus);
+		RetrieveNotificationWithRedDotResult results = RetrieveNotificationWithRedDotResult.from(notification,
+			redDotStatus);
 
-        List<RetrieveNotificationResult> content = results.getContent();
+		List<RetrieveNotificationResult> content = results.getContent();
 
-        return KotlinCustomPaging.<RetrieveNotificationResult>builder()
-                .content(content.isEmpty() ? null : content)
-                .pageNumber(notification.getPageable().getPageNumber())
-                .pageSize(notification.getPageable().getPageSize())
-                .totalPages(notification.getTotalPages())
-                .totalElements(notification.getTotalElements())
-                .isLast(notification.isLast())
-                .redDotStatus(results.getRedDotStatus())
-                .sender(NotificationSenderInfo.getSenderInfo())
-                .build();
-    }
+		return KotlinCustomPaging.<RetrieveNotificationResult>builder()
+			.content(content.isEmpty() ? null : content)
+			.pageNumber(notification.getPageable().getPageNumber())
+			.pageSize(notification.getPageable().getPageSize())
+			.totalPages(notification.getTotalPages())
+			.totalElements(notification.getTotalElements())
+			.isLast(notification.isLast())
+			.redDotStatus(results.getRedDotStatus())
+			.sender(NotificationSenderInfo.getSenderInfo())
+			.build();
+	}
 
-    public boolean findRedDotStatus(Long memberId) {
-        return notificationRepository.findRedDotStatus(memberId);
-    }
+	public boolean findRedDotStatus(Long memberId) {
+		return notificationRepository.findRedDotStatus(memberId);
+	}
 
-    public CommandNotificationStatusResult updateNotificationStatus(Long notificationId, Long receiverId) {
+	public CommandNotificationStatusResult updateNotificationStatus(Long notificationId, Long receiverId) {
 
-        Notification notification = notificationRepository.findByIdAndReceiverId(notificationId, receiverId);
+		Notification notification = notificationRepository.findByIdAndReceiverId(notificationId, receiverId);
 
-        if (notification == null) {
-            throw new IllegalArgumentException("해당 알림이 존재하지 않습니다.");
-        }
+		if (notification == null) {
+			throw new IllegalArgumentException("해당 알림이 존재하지 않습니다.");
+		}
 
-        notification.updateNotificationStatus();
+		notification.updateNotificationStatus();
 
-        return CommandNotificationStatusResult.from(notification);
-    }
+		return CommandNotificationStatusResult.from(notification);
+	}
 
-    public void sendFeedbackNotificationToTrainer() {
-        trainerScheduleRepository.findAllFeedbackNotificationToTrainer().forEach(it ->
-                sendNotificationFromSystem(
-                        CommandSendNotification.builder()
-                                .title(NotificationType.FEEDBACK.getDescription())
-                                .content(String.format(NotificationType.FEEDBACK.getContent(), it.getCount()))
-                                .receiverIds(List.of(it.getTrainerId()))
-                                .notificationType(NotificationType.FEEDBACK)
-                                .notificationCategory(NotificationCategory.SCHEDULE)
-                                .clickUrl("https://main.to-be-healthy.shop/trainer/manage/feedback")
-                                .build()
-                )
-        );
-    }
+	public void sendFeedbackNotificationToTrainer() {
+		trainerScheduleRepository.findAllFeedbackNotificationToTrainer().forEach(it ->
+			sendNotificationFromSystem(
+				CommandSendNotification.builder()
+					.title(NotificationType.FEEDBACK.getDescription())
+					.content(String.format(NotificationType.FEEDBACK.getContent(), it.getCount()))
+					.receiverIds(List.of(it.getTrainerId()))
+					.notificationType(NotificationType.FEEDBACK)
+					.notificationCategory(NotificationCategory.SCHEDULE)
+					.clickUrl("https://main.to-be-healthy.shop/trainer/manage/feedback")
+					.build()
+			)
+		);
+	}
 }

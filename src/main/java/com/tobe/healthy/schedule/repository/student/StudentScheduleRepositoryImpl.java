@@ -22,9 +22,9 @@ import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.QMember;
-import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
-import com.tobe.healthy.schedule.domain.dto.out.MyReservation;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.presentation.dto.in.StudentScheduleCond;
+import com.tobe.healthy.schedule.presentation.dto.out.MyReservation;
+import com.tobe.healthy.schedule.presentation.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.domain.entity.Schedule;
 
 import lombok.RequiredArgsConstructor;

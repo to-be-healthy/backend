@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.member.application.MemberCommandServiceV2;
-import com.tobe.healthy.member.domain.dto.in.CommandRegisterMemberProfile;
-import com.tobe.healthy.member.domain.dto.out.RegisterMemberProfileResult;
+import com.tobe.healthy.member.presentation.dto.in.CommandRegisterMemberProfile;
+import com.tobe.healthy.member.presentation.dto.out.RegisterMemberProfileResult;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/members/v2")
+@RequestMapping("/api/v2/members")
 @Slf4j
 @Valid
 @Tag(name = "02. 회원 API", description = "인증이 있어야만 접근 가능한 회원 API")
@@ -35,9 +35,9 @@ public class MemberCommandControllerV2 {
 		@ApiResponse(responseCode = "200", description = "프로필 사진이 등록되었습니다.")
 	})
 	@PostMapping("/profile")
-	public ResponseHandler<RegisterMemberProfileResult> changeProfile(@RequestBody CommandRegisterMemberProfile request,
+	public ApiResult<RegisterMemberProfileResult> changeProfile(@RequestBody CommandRegisterMemberProfile request,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<RegisterMemberProfileResult>builder()
+		return ApiResult.<RegisterMemberProfileResult>builder()
 			.data(memberCommandServiceV2.registerProfile(request, member.getMemberId()))
 			.message("프로필 사진이 등록되었습니다.")
 			.build();

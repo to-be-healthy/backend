@@ -11,10 +11,10 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import com.tobe.healthy.course.application.CourseService;
-import com.tobe.healthy.course.domain.dto.in.CourseUpdateCommand;
-import com.tobe.healthy.schedule.domain.dto.out.CommandCancelStudentReservationResult;
-import com.tobe.healthy.schedule.domain.dto.out.CommandRegisterScheduleByStudentResult;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleIdInfo;
+import com.tobe.healthy.course.presentation.dto.in.CourseUpdateCommand;
+import com.tobe.healthy.schedule.presentation.dto.out.CommandCancelStudentReservationResult;
+import com.tobe.healthy.schedule.presentation.dto.out.CommandRegisterScheduleByStudentResult;
+import com.tobe.healthy.schedule.presentation.dto.out.ScheduleIdInfo;
 
 import lombok.extern.slf4j.Slf4j;
 

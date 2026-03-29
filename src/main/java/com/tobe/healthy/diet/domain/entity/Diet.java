@@ -3,7 +3,6 @@ package com.tobe.healthy.diet.domain.entity;
 import static jakarta.persistence.FetchType.*;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,8 +10,6 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.diet.domain.dto.in.DietAddCommand;
-import com.tobe.healthy.diet.domain.dto.in.DietUpdateCommand;
 import com.tobe.healthy.member.domain.entity.Member;
 
 import jakarta.persistence.CascadeType;
@@ -100,14 +97,15 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
 			.build();
 	}
 
-	public static Diet create(Member member, Member trainer, DietAddCommand command) {
+	public static Diet create(Member member, Member trainer, boolean breakfastFast, boolean lunchFast,
+		boolean dinnerFast, LocalDate eatDate) {
 		return Diet.builder()
 			.member(member)
 			.trainer(trainer)
-			.fastBreakfast(command.isBreakfastFast())
-			.fastLunch(command.isLunchFast())
-			.fastDinner(command.isDinnerFast())
-			.eatDate(LocalDate.parse(command.getEatDate(), DateTimeFormatter.ISO_DATE))
+			.fastBreakfast(breakfastFast)
+			.fastLunch(lunchFast)
+			.fastDinner(dinnerFast)
+			.eatDate(eatDate)
 			.build();
 	}
 
@@ -127,10 +125,10 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
 		}
 	}
 
-	public void changeFast(DietUpdateCommand command) {
-		this.changeFastBreakfast(command.isBreakfastFast());
-		this.changeFastLunch(command.isLunchFast());
-		this.changeFastDinner(command.isDinnerFast());
+	public void changeFast(boolean breakfastFast, boolean lunchFast, boolean dinnerFast) {
+		this.changeFastBreakfast(breakfastFast);
+		this.changeFastLunch(lunchFast);
+		this.changeFastDinner(dinnerFast);
 	}
 
 	public void changeFastBreakfast(boolean isFast) {
@@ -170,8 +168,8 @@ public class Diet extends BaseTimeEntity<Diet, Long> {
 		this.commentCnt = commentCnt;
 	}
 
-	public void changeEatDate(String eatDate) {
-		this.eatDate = LocalDate.parse(eatDate, DateTimeFormatter.ISO_DATE);
+	public void changeEatDate(LocalDate eatDate) {
+		this.eatDate = eatDate;
 	}
 
 	public void changeTrainer(Member trainer) {

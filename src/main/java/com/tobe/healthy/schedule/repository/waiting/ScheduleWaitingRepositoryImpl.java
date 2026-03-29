@@ -15,7 +15,7 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.QMember;
-import com.tobe.healthy.schedule.domain.dto.out.MyScheduleWaiting;
+import com.tobe.healthy.schedule.presentation.dto.out.MyScheduleWaiting;
 import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
 
 import lombok.RequiredArgsConstructor;

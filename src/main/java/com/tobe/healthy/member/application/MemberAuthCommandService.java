@@ -62,21 +62,21 @@ import com.tobe.healthy.config.KeyUtil;
 import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.config.jwt.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
-import com.tobe.healthy.course.domain.dto.in.CourseAddCommand;
-import com.tobe.healthy.member.domain.dto.in.AppleToken;
-import com.tobe.healthy.member.domain.dto.in.CommandFindMemberPassword;
-import com.tobe.healthy.member.domain.dto.in.CommandJoinMember;
-import com.tobe.healthy.member.domain.dto.in.CommandLoginMember;
-import com.tobe.healthy.member.domain.dto.in.CommandRefreshToken;
-import com.tobe.healthy.member.domain.dto.in.CommandSocialLogin;
-import com.tobe.healthy.member.domain.dto.in.CommandValidateEmail;
-import com.tobe.healthy.member.domain.dto.in.CommandVerification;
-import com.tobe.healthy.member.domain.dto.in.IdToken;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo.KakaoUserInfo;
-import com.tobe.healthy.member.domain.dto.in.OAuthInfo.NaverUserInfo;
-import com.tobe.healthy.member.domain.dto.out.CommandFindMemberPasswordResult;
-import com.tobe.healthy.member.domain.dto.out.CommandJoinMemberResult;
+import com.tobe.healthy.course.presentation.dto.in.CourseAddCommand;
+import com.tobe.healthy.member.presentation.dto.in.AppleToken;
+import com.tobe.healthy.member.presentation.dto.in.CommandFindMemberPassword;
+import com.tobe.healthy.member.presentation.dto.in.CommandJoinMember;
+import com.tobe.healthy.member.presentation.dto.in.CommandLoginMember;
+import com.tobe.healthy.member.presentation.dto.in.CommandRefreshToken;
+import com.tobe.healthy.member.presentation.dto.in.CommandSocialLogin;
+import com.tobe.healthy.member.presentation.dto.in.CommandValidateEmail;
+import com.tobe.healthy.member.presentation.dto.in.CommandVerification;
+import com.tobe.healthy.member.presentation.dto.in.IdToken;
+import com.tobe.healthy.member.presentation.dto.in.OAuthInfo;
+import com.tobe.healthy.member.presentation.dto.in.OAuthInfo.KakaoUserInfo;
+import com.tobe.healthy.member.presentation.dto.in.OAuthInfo.NaverUserInfo;
+import com.tobe.healthy.member.presentation.dto.out.CommandFindMemberPasswordResult;
+import com.tobe.healthy.member.presentation.dto.out.CommandJoinMemberResult;
 import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.domain.entity.MemberProfile;
 import com.tobe.healthy.member.domain.entity.MemberType;
@@ -165,7 +165,8 @@ public class MemberAuthCommandService {
 		validateDuplicationEmail(request.getEmail());
 
 		String password = passwordEncoder.encode(request.getPassword());
-		Member member = Member.join(request, password);
+		Member member = Member.join(request.getUserId(), request.getEmail(), request.getName(), request.getMemberType(),
+			password);
 
 		log.info("[회원가입] member: {}", member);
 		if (StringUtils.isEmpty(request.getUuid())) { //회원가입
@@ -243,7 +244,8 @@ public class MemberAuthCommandService {
 		if (!member.getName().equals(request.getName()))
 			throw new CustomException(INVITE_NAME_NOT_VALID);
 
-		member.updateNonMemberInfo(request, password);
+		member.updateNonMemberInfo(request.getUserId(), request.getEmail(), request.getName(), request.getMemberType(),
+			password);
 		nonMemberRepository.delete(nonMember);
 		return CommandJoinMemberResult.from(member);
 	}

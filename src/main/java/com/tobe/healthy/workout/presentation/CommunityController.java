@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tobe.healthy.common.CustomPaging;
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
+import com.tobe.healthy.workout.presentation.dto.out.WorkoutHistoryDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/community/v1")
+@RequestMapping("/api/v1/community")
 @Tag(name = "06-04. 커뮤니티 API", description = "커뮤니티 API")
 @Slf4j
 public class CommunityController {
@@ -34,12 +34,12 @@ public class CommunityController {
 		@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
 	})
 	@GetMapping
-	public ResponseHandler<CustomPaging<WorkoutHistoryDto>> getWorkoutHistoryOnCommunity(
+	public ApiResult<CustomPaging<WorkoutHistoryDto>> getWorkoutHistoryOnCommunity(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 		@Parameter(description = "학생 ID") Long memberId,
 		Pageable pageable) {
-		return ResponseHandler.<CustomPaging<WorkoutHistoryDto>>builder()
+		return ApiResult.<CustomPaging<WorkoutHistoryDto>>builder()
 			.data(workoutService.getWorkoutHistoryOnCommunity(memberId, customMemberDetails.getMember(), pageable,
 				searchDate))
 			.message("운동기록이 조회되었습니다.")

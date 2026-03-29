@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.schedule.application.StudentScheduleService;
-import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
-import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ReservationDaysResult;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResponse;
-import com.tobe.healthy.schedule.domain.dto.out.ScheduleCommandResult;
+import com.tobe.healthy.schedule.presentation.dto.in.StudentScheduleCond;
+import com.tobe.healthy.schedule.presentation.dto.out.MyReservationResponse;
+import com.tobe.healthy.schedule.presentation.dto.out.ReservationDaysResult;
+import com.tobe.healthy.schedule.presentation.dto.out.ScheduleCommandResponse;
+import com.tobe.healthy.schedule.presentation.dto.out.ScheduleCommandResult;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/schedule/v1/student")
+@RequestMapping("/api/v1/schedule/student")
 @Slf4j
 @Valid
 @Tag(name = "03-02.수업 API", description = "수업 일정 API")
@@ -42,10 +42,10 @@ public class StudentScheduleController {
 			@ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
 		})
 	@GetMapping("/all")
-	public ResponseHandler<ScheduleCommandResponse> findAllScheduleOfTrainer(
+	public ApiResult<ScheduleCommandResponse> findAllScheduleOfTrainer(
 		@ParameterObject StudentScheduleCond searchCond,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<ScheduleCommandResponse>builder()
+		return ApiResult.<ScheduleCommandResponse>builder()
 			.data(studentScheduleService.findAllScheduleOfTrainer(searchCond, customMemberDetails.getMember()))
 			.message("전체 일정을 조회했습니다.")
 			.build();
@@ -57,9 +57,9 @@ public class StudentScheduleController {
 		})
 	@GetMapping
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<List<ScheduleCommandResult>> findMySchedule(
+	public ApiResult<List<ScheduleCommandResult>> findMySchedule(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ResponseHandler.<List<ScheduleCommandResult>>builder()
+		return ApiResult.<List<ScheduleCommandResult>>builder()
 			.data(studentScheduleService.findAllByApplicantId(customMemberDetails.getMemberId()))
 			.message("내 수업을 조회하였습니다.")
 			.build();
@@ -71,10 +71,10 @@ public class StudentScheduleController {
 		})
 	@GetMapping("/my-reservation/new")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<MyReservationResponse> findNewReservation(
+	public ApiResult<MyReservationResponse> findNewReservation(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@ParameterObject StudentScheduleCond searchCond) {
-		return ResponseHandler.<MyReservationResponse>builder()
+		return ApiResult.<MyReservationResponse>builder()
 			.data(studentScheduleService.findNewReservation(customMemberDetails.getMemberId(), searchCond))
 			.message("학생이 내 예약을 조회하였습니다.")
 			.build();
@@ -86,10 +86,10 @@ public class StudentScheduleController {
 		})
 	@GetMapping("/my-reservation/old")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<MyReservationResponse> findOldReservation(
+	public ApiResult<MyReservationResponse> findOldReservation(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate) {
-		return ResponseHandler.<MyReservationResponse>builder()
+		return ApiResult.<MyReservationResponse>builder()
 			.data(studentScheduleService.findOldReservation(customMemberDetails.getMemberId(), searchDate))
 			.message("학생이 내 예약을 조회하였습니다.")
 			.build();
@@ -101,10 +101,10 @@ public class StudentScheduleController {
 		})
 	@GetMapping("/my-reservation")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
-	public ResponseHandler<ReservationDaysResult> findMyReservationBlueDot(
+	public ApiResult<ReservationDaysResult> findMyReservationBlueDot(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@ParameterObject StudentScheduleCond searchCond) {
-		return ResponseHandler.<ReservationDaysResult>builder()
+		return ApiResult.<ReservationDaysResult>builder()
 			.data(studentScheduleService.findMyReservationBlueDot(customMemberDetails.getMemberId(), searchCond))
 			.message("학생이 내 예약을 조회하였습니다.")
 			.build();

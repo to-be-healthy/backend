@@ -6,8 +6,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum WritingStatus {
-    WRITTEN("작성완료"),
-    UNWRITTEN("미작성");
+	WRITTEN("작성완료"),
+	UNWRITTEN("미작성");
 
-    private final String description;
+	private final String description;
 }

@@ -20,8 +20,8 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.member.domain.entity.QMemberProfile;
-import com.tobe.healthy.workout.domain.dto.out.QWorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.dto.out.WorkoutHistoryDto;
+import com.tobe.healthy.workout.presentation.dto.out.QWorkoutHistoryDto;
+import com.tobe.healthy.workout.presentation.dto.out.WorkoutHistoryDto;
 import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryFiles;
 
 import lombok.RequiredArgsConstructor;

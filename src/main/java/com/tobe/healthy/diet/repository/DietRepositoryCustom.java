@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.tobe.healthy.diet.domain.dto.DietDto;
+import com.tobe.healthy.diet.presentation.dto.DietDto;
 import com.tobe.healthy.diet.domain.entity.Diet;
 import com.tobe.healthy.diet.domain.entity.DietFiles;
 import com.tobe.healthy.member.domain.entity.Member;

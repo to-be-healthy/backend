@@ -19,23 +19,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tobe.healthy.common.CustomPaging;
-import com.tobe.healthy.common.ResponseHandler;
+import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.diet.application.DietService;
-import com.tobe.healthy.diet.domain.dto.DietDto;
+import com.tobe.healthy.diet.presentation.dto.DietDto;
 import com.tobe.healthy.member.application.MemberCommandService;
-import com.tobe.healthy.member.domain.dto.MemberDto;
-import com.tobe.healthy.member.domain.dto.out.MemberDetailResult;
-import com.tobe.healthy.member.domain.dto.out.MemberInTeamResult;
+import com.tobe.healthy.member.presentation.dto.MemberDto;
+import com.tobe.healthy.member.presentation.dto.out.MemberDetailResult;
+import com.tobe.healthy.member.presentation.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.domain.entity.AlarmStatus;
 import com.tobe.healthy.schedule.application.StudentScheduleService;
-import com.tobe.healthy.schedule.domain.dto.in.StudentScheduleCond;
-import com.tobe.healthy.schedule.domain.dto.out.MyReservationResponse;
+import com.tobe.healthy.schedule.presentation.dto.in.StudentScheduleCond;
+import com.tobe.healthy.schedule.presentation.dto.out.MyReservationResponse;
 import com.tobe.healthy.trainer.application.TrainerService;
-import com.tobe.healthy.trainer.domain.dto.TrainerMemberMappingDto;
-import com.tobe.healthy.trainer.domain.dto.in.MemberInviteCommand;
-import com.tobe.healthy.trainer.domain.dto.in.MemberLessonCommand;
-import com.tobe.healthy.trainer.domain.dto.out.MemberInviteResultCommand;
+import com.tobe.healthy.trainer.presentation.dto.TrainerMemberMappingDto;
+import com.tobe.healthy.trainer.presentation.dto.in.MemberInviteCommand;
+import com.tobe.healthy.trainer.presentation.dto.in.MemberLessonCommand;
+import com.tobe.healthy.trainer.presentation.dto.out.MemberInviteResultCommand;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,7 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/trainers/v1")
+@RequestMapping("/api/v1/trainers")
 @Tag(name = "05. 트레이너 API", description = "트레이너 API")
 @Slf4j
 public class TrainerController {
@@ -63,10 +63,10 @@ public class TrainerController {
 	})
 	@PostMapping("/invitation")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<MemberInviteResultCommand> inviteMember(
+	public ApiResult<MemberInviteResultCommand> inviteMember(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@RequestBody MemberInviteCommand command) {
-		return ResponseHandler.<MemberInviteResultCommand>builder()
+		return ApiResult.<MemberInviteResultCommand>builder()
 			.data(trainerService.inviteMember(command, customMemberDetails.getMember()))
 			.message("회원초대가 완료 되었습니다.")
 			.build();
@@ -79,10 +79,10 @@ public class TrainerController {
 	})
 	@PostMapping("/nonmember")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<MemberInviteResultCommand> inviteNonmember(
+	public ApiResult<MemberInviteResultCommand> inviteNonmember(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@RequestBody MemberInviteCommand command) {
-		return ResponseHandler.<MemberInviteResultCommand>builder()
+		return ApiResult.<MemberInviteResultCommand>builder()
 			.data(trainerService.inviteNonmember(command, customMemberDetails.getMember()))
 			.message("미가입 학생 등록이 완료 되었습니다.")
 			.build();
@@ -96,11 +96,11 @@ public class TrainerController {
 	})
 	@PostMapping("/members/{memberId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<TrainerMemberMappingDto> addStudentOfTrainer(
+	public ApiResult<TrainerMemberMappingDto> addStudentOfTrainer(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId,
 		@RequestBody MemberLessonCommand command) {
-		return ResponseHandler.<TrainerMemberMappingDto>builder()
+		return ApiResult.<TrainerMemberMappingDto>builder()
 			.data(trainerService.addStudentOfTrainer(customMemberDetails.getMember().getId(), memberId, command))
 			.message("내 학생으로 등록되었습니다.")
 			.build();
@@ -112,11 +112,11 @@ public class TrainerController {
 	})
 	@DeleteMapping("/members/{memberId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<TrainerMemberMappingDto> deleteStudentOfTrainer(
+	public ApiResult<TrainerMemberMappingDto> deleteStudentOfTrainer(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
 		trainerService.deleteStudentOfTrainer(customMemberDetails.getMember(), memberId);
-		return ResponseHandler.<TrainerMemberMappingDto>builder()
+		return ApiResult.<TrainerMemberMappingDto>builder()
 			.message("내 학생에서 삭제되었습니다.")
 			.build();
 	}
@@ -128,10 +128,10 @@ public class TrainerController {
 	})
 	@GetMapping("/members/{memberId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<MemberDetailResult> getMemberOfTrainer(
+	public ApiResult<MemberDetailResult> getMemberOfTrainer(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
-		return ResponseHandler.<MemberDetailResult>builder()
+		return ApiResult.<MemberDetailResult>builder()
 			.data(trainerService.getMemberOfTrainer(customMemberDetails.getMember(), memberId))
 			.message("학생 상세가 조회되었습니다.")
 			.build();
@@ -143,14 +143,14 @@ public class TrainerController {
 		})
 	@GetMapping("/members")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<List<MemberInTeamResult>> findAllMyMemberInTrainer(
+	public ApiResult<List<MemberInTeamResult>> findAllMyMemberInTrainer(
 		@AuthenticationPrincipal CustomMemberDetails member,
 		@Parameter(description = "검색할 이름", example = "임채린")
 		@RequestParam(required = false) String searchValue,
 		@Parameter(description = "정렬 조건", example = "ranking, memberId")
 		@RequestParam(required = false, defaultValue = "memberId") String sortValue,
 		@PageableDefault(size = 100) Pageable pageable) {
-		return ResponseHandler.<List<MemberInTeamResult>>builder()
+		return ApiResult.<List<MemberInTeamResult>>builder()
 			.data(trainerService.findAllMyMemberInTeam(member.getMemberId(), searchValue, sortValue, pageable))
 			.message("트레이너가 관리하는 학생을 조회하였습니다.")
 			.build();
@@ -162,14 +162,14 @@ public class TrainerController {
 		})
 	@GetMapping("unattached-members")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<List<MemberDto>> findAllUnattachedMembers(
+	public ApiResult<List<MemberDto>> findAllUnattachedMembers(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "검색할 이름", example = "임채린")
 		@RequestParam(required = false) String searchValue,
 		@Parameter(description = "정렬 조건", example = "memberId")
 		@RequestParam(required = false, defaultValue = "memberId") String sortValue,
 		Pageable pageable) {
-		return ResponseHandler.<List<MemberDto>>builder()
+		return ApiResult.<List<MemberDto>>builder()
 			.data(trainerService.findAllUnattachedMembers(customMemberDetails.getMember(), searchValue, sortValue,
 				pageable))
 			.message("트레이너가 가입된 학생을 조회하였습니다.")
@@ -183,10 +183,10 @@ public class TrainerController {
 		})
 	@PatchMapping("/trainer-feedback")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태", example = "ENABLED")
+	public ApiResult<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태", example = "ENABLED")
 		@RequestParam AlarmStatus alarmStatus,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ResponseHandler.<Boolean>builder()
+		return ApiResult.<Boolean>builder()
 			.data(memberCommandService.changeTrainerFeedback(alarmStatus, member.getMemberId()))
 			.message("수업 기록 여부가 변경되었습니다.")
 			.build();
@@ -198,11 +198,11 @@ public class TrainerController {
 	})
 	@GetMapping("/diets")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<CustomPaging<DietDto>> getDietByTrainer(
+	public ApiResult<CustomPaging<DietDto>> getDietByTrainer(
 		@AuthenticationPrincipal CustomMemberDetails loginMember,
 		@Parameter(description = "조회할 날짜", example = "2024-12-01") @Param("searchDate") String searchDate,
 		Pageable pageable) {
-		return ResponseHandler.<CustomPaging<DietDto>>builder()
+		return ApiResult.<CustomPaging<DietDto>>builder()
 			.data(dietService.getDietByTrainer(loginMember.getMemberId(), pageable, searchDate))
 			.message("식단기록이 조회되었습니다.")
 			.build();
@@ -214,11 +214,11 @@ public class TrainerController {
 		})
 	@GetMapping("/reservation/new")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<MyReservationResponse> findNewReservationByTrainer(
+	public ApiResult<MyReservationResponse> findNewReservationByTrainer(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@ParameterObject StudentScheduleCond searchCond,
 		@Param("memberId") Long memberId) {
-		return ResponseHandler.<MyReservationResponse>builder()
+		return ApiResult.<MyReservationResponse>builder()
 			.data(studentScheduleService.findNewReservationByTrainer(customMemberDetails.getMemberId(), memberId,
 				searchCond))
 			.message("학생이 내 예약을 조회하였습니다.")
@@ -231,11 +231,11 @@ public class TrainerController {
 		})
 	@GetMapping("/reservation/old")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<MyReservationResponse> findOldReservationByTrainer(
+	public ApiResult<MyReservationResponse> findOldReservationByTrainer(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 		@Param("memberId") Long memberId) {
-		return ResponseHandler.<MyReservationResponse>builder()
+		return ApiResult.<MyReservationResponse>builder()
 			.data(studentScheduleService.findOldReservationByTrainer(customMemberDetails.getMemberId(), memberId,
 				searchDate))
 			.message("학생의 예약을 조회하였습니다.")
@@ -248,11 +248,11 @@ public class TrainerController {
 	})
 	@DeleteMapping("/members/{memberId}/refund")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ResponseHandler<TrainerMemberMappingDto> refundStudentOfTrainer(
+	public ApiResult<TrainerMemberMappingDto> refundStudentOfTrainer(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
 		trainerService.refundStudentOfTrainer(customMemberDetails.getMember(), memberId);
-		return ResponseHandler.<TrainerMemberMappingDto>builder()
+		return ApiResult.<TrainerMemberMappingDto>builder()
 			.message("환불이 완료되었습니다.")
 			.build();
 	}

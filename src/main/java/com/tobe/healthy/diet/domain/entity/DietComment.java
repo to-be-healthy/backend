@@ -3,7 +3,6 @@ package com.tobe.healthy.diet.domain.entity;
 import org.hibernate.annotations.ColumnDefault;
 
 import com.tobe.healthy.common.BaseTimeEntity;
-import com.tobe.healthy.diet.domain.dto.in.DietCommentAddCommand;
 import com.tobe.healthy.member.domain.entity.Member;
 
 import jakarta.persistence.Column;
@@ -58,14 +57,15 @@ public class DietComment extends BaseTimeEntity<DietComment, Long> {
 
 	public static DietComment create(Diet diet,
 		Member member,
-		DietCommentAddCommand command,
+		String content,
+		Long parentCommentId,
 		Long depth,
 		Long orderNum) {
 		return DietComment.builder()
 			.diet(diet)
 			.member(member)
-			.content(command.getContent())
-			.parentCommentId(command.getParentCommentId())
+			.content(content)
+			.parentCommentId(parentCommentId)
 			.depth(depth)
 			.orderNum(orderNum)
 			.build();
