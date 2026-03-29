@@ -127,8 +127,8 @@ public class MemberAuthCommandService {
 	private String appleLoginKey;
 
 	private static final Set<String> COMPLIMENTARY_ACCOUNT_USER_IDS = Set.of(
-		"healthytrainer0",
-		"healthystudent0"
+		"healthy-trainer0",
+		"healthy-student0"
 	);
 
 	private static String decordToken(String idToken) {
