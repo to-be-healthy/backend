@@ -46,7 +46,7 @@ dependencies {
     implementation 'org.modelmapper:modelmapper:3.2.0'
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.5'
-    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.744'
+
     implementation 'com.google.firebase:firebase-admin:9.3.0'
     implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
     implementation 'org.bouncycastle:bcprov-jdk18on:1.78.1'

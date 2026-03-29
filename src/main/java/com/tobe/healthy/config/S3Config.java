@@ -1,39 +1,6 @@
 package com.tobe.healthy.config;
 
-import static com.amazonaws.regions.Regions.*;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-
-@Configuration
-public class S3Config {
-
-	@Value("${aws.s3.access-key}")
-	private String accessKey;
-
-	@Value("${aws.s3.secret-key}")
-	private String secretKey;
-
-	@Bean
-	@Primary
-	public BasicAWSCredentials awsCredentialsProvider() {
-		return new BasicAWSCredentials(accessKey, secretKey);
-	}
-
-	@Bean
-	public AmazonS3 amazonS3Client() {
-		return AmazonS3ClientBuilder.standard()
-			.withCredentials(
-				new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey))
-			)
-			.withRegion(AP_NORTHEAST_2)
-			.build();
-	}
-}
+/**
+ * S3Config는 더 이상 사용되지 않습니다.
+ * LocalFileStorageConfig와 LocalFileStorageService로 대체되었습니다.
+ */

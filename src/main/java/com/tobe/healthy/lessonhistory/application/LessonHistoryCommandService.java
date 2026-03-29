@@ -8,13 +8,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.error.ErrorCode;
 import com.tobe.healthy.common.event.CustomEventPublisher;
@@ -22,6 +19,7 @@ import com.tobe.healthy.common.event.EventType;
 import com.tobe.healthy.common.redis.RedisKeyPrefix;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.security.CustomMemberDetails;
+import com.tobe.healthy.file.application.LocalFileStorageService;
 import com.tobe.healthy.lessonhistory.presentation.dto.in.CommandRegisterComment;
 import com.tobe.healthy.lessonhistory.presentation.dto.in.CommandRegisterLessonHistory;
 import com.tobe.healthy.lessonhistory.presentation.dto.in.CommandUpdateComment;
@@ -61,12 +59,9 @@ public class LessonHistoryCommandService {
 	private final MemberRepository memberRepository;
 	private final TrainerScheduleRepository trainerScheduleRepository;
 	private final LessonHistoryCommentRepository lessonHistoryCommentRepository;
-	private final AmazonS3 amazonS3;
+	private final LocalFileStorageService fileStorageService;
 	private final RedisService redisService;
 	private final CustomEventPublisher<CommandSendNotification> notificationPublisher;
-
-	@Value("${aws.s3.bucket-name}")
-	private String bucketName;
 
 	public CommandRegisterLessonHistoryResult registerLessonHistory(CommandRegisterLessonHistory request,
 		Long trainerId) {
@@ -88,7 +83,6 @@ public class LessonHistoryCommandService {
 
 		List<LessonHistoryFiles> files = registerFiles(request.getUploadFiles(), trainer, lessonHistory);
 
-		// 학생에게 수업일지 작성 알림
 		sendNotification(
 			NotificationType.WRITE,
 			NotificationType.WRITE.getContent(),
@@ -134,7 +128,7 @@ public class LessonHistoryCommandService {
 					RedisKeyPrefix.TEMP_FILE_URI.getDescription() + fileUrl,
 					String.valueOf(memberId),
 					(long)FILE_TEMP_UPLOAD_TIMEOUT.getDescription()
-				); // 30분
+				);
 			}
 		}
 
@@ -154,7 +148,6 @@ public class LessonHistoryCommandService {
 
 		List<LessonHistoryFiles> savedFiles = new ArrayList<>();
 
-		// 파일 전체 삭제
 		if (!request.getUploadFiles().isEmpty()) {
 			List<CommandUploadFileResult> requestFiles = request.getUploadFiles();
 			for (int idx = 0; idx < requestFiles.size(); idx++) {
@@ -164,14 +157,14 @@ public class LessonHistoryCommandService {
 					lessonHistory.getFiles().get(existingIdx).updateFileOrder(idx + 1);
 					savedFiles.add(lessonHistory.getFiles().get(existingIdx));
 				} else {
-					if (file.getFileUrl().startsWith(S3_DOMAIN)) {
-						String tempUrl = file.getFileUrl().replace(S3_DOMAIN, "");
-						CommandUploadFileResult result = moveDirTempToOrigin("origin/lesson-history/", tempUrl,
+					if (isTempFile(file.getFileUrl())) {
+						String tempPath = fileStorageService.extractFilePath(file.getFileUrl());
+						CommandUploadFileResult result = moveDirTempToOrigin("origin/lesson-history/", tempPath,
 							idx + 1);
 						LessonHistoryFiles newFile = new LessonHistoryFiles(result.getFileUrl(), idx + 1,
 							lessonHistory.getTrainer(), lessonHistory);
 						savedFiles.add(newFile);
-					} else if (file.getFileUrl().startsWith(CDN_DOMAIN)) {
+					} else {
 						LessonHistoryFiles newFile = new LessonHistoryFiles(file.getFileUrl(), idx + 1,
 							lessonHistory.getTrainer(), lessonHistory);
 						savedFiles.add(newFile);
@@ -217,7 +210,6 @@ public class LessonHistoryCommandService {
 		List<LessonHistoryFiles> files = registerFile(request.getUploadFiles(), findMember, lessonHistory,
 			lessonHistoryComment);
 
-		// 게시글 작성자에게 알림 (내가 작성한 글은 알림을 받지 않음)
 		if (!member.getMemberId().equals(lessonHistory.getTrainer().getId())) {
 			sendNotification(
 				NotificationType.COMMENT,
@@ -252,7 +244,6 @@ public class LessonHistoryCommandService {
 		LessonHistoryComment entity = new LessonHistoryComment(order, request.getContent(), findMember, lessonHistory,
 			parentComment);
 
-		// 댓글 작성자에게 알림 (내가 작성한 글은 알림을 받지 않음)
 		if (!parentComment.getWriter().getId().equals(member.getMemberId())) {
 			if (parentComment.getWriter().getMemberType() == MemberType.STUDENT) {
 				sendNotification(
@@ -295,7 +286,6 @@ public class LessonHistoryCommandService {
 
 		List<LessonHistoryFiles> savedFiles = new ArrayList<>();
 
-		// 파일 전체 삭제
 		if (!request.getUploadFiles().isEmpty()) {
 			List<CommandUploadFileResult> requestFiles = request.getUploadFiles();
 			for (int idx = 0; idx < requestFiles.size(); idx++) {
@@ -305,14 +295,14 @@ public class LessonHistoryCommandService {
 					comment.getFiles().get(existingIdx).updateFileOrder(idx + 1);
 					savedFiles.add(comment.getFiles().get(existingIdx));
 				} else {
-					if (file.getFileUrl().startsWith(S3_DOMAIN)) {
-						String tempUrl = file.getFileUrl().replace(S3_DOMAIN, "");
-						CommandUploadFileResult result = moveDirTempToOrigin("origin/lesson-history/", tempUrl,
+					if (isTempFile(file.getFileUrl())) {
+						String tempPath = fileStorageService.extractFilePath(file.getFileUrl());
+						CommandUploadFileResult result = moveDirTempToOrigin("origin/lesson-history/", tempPath,
 							idx + 1);
 						LessonHistoryFiles newFile = new LessonHistoryFiles(result.getFileUrl(), idx + 1,
 							comment.getWriter(), comment.getLessonHistory(), comment);
 						savedFiles.add(newFile);
-					} else if (file.getFileUrl().startsWith(CDN_DOMAIN)) {
+					} else {
 						LessonHistoryFiles newFile = new LessonHistoryFiles(file.getFileUrl(), idx + 1,
 							comment.getWriter(), comment.getLessonHistory(), comment);
 						savedFiles.add(newFile);
@@ -327,7 +317,6 @@ public class LessonHistoryCommandService {
 			comment.getFiles().clear();
 		}
 
-		// 댓글 내용 업데이트
 		comment.updateLessonHistoryComment(request.getContent());
 
 		return CommandUpdateCommentResult.from(comment);
@@ -346,6 +335,11 @@ public class LessonHistoryCommandService {
 		return lessonHistoryCommentId;
 	}
 
+	private boolean isTempFile(String fileUrl) {
+		String filePath = fileStorageService.extractFilePath(fileUrl);
+		return filePath.startsWith("temp/");
+	}
+
 	private List<LessonHistoryFiles> registerFile(List<CommandUploadFileResult> uploadFiles, Member member,
 		LessonHistory lessonHistory, LessonHistoryComment lessonHistoryComment) {
 		checkMaximumFileCount(uploadFiles.size());
@@ -354,9 +348,9 @@ public class LessonHistoryCommandService {
 
 		for (int idx = 0; idx < uploadFiles.size(); idx++) {
 			CommandUploadFileResult uploadFile = uploadFiles.get(idx);
-			if (uploadFile.getFileUrl().startsWith(S3_DOMAIN)) {
-				String tempUrl = uploadFile.getFileUrl().replace(S3_DOMAIN, "");
-				CommandUploadFileResult result = moveDirTempToOrigin("origin/lesson-history/", tempUrl, idx + 1);
+			if (isTempFile(uploadFile.getFileUrl())) {
+				String tempPath = fileStorageService.extractFilePath(uploadFile.getFileUrl());
+				CommandUploadFileResult result = moveDirTempToOrigin("origin/lesson-history/", tempPath, idx + 1);
 				LessonHistoryFiles file = new LessonHistoryFiles(result.getFileUrl(), result.getFileOrder(), member,
 					lessonHistory, lessonHistoryComment);
 				files.add(file);
@@ -376,21 +370,18 @@ public class LessonHistoryCommandService {
 	}
 
 	private String putFile(MultipartFile uploadFile) {
-		var objectMetadata = createObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
 		String originalFilename = uploadFile.getOriginalFilename();
 		String savedFileName = createFileName(
 			"origin/lesson-history/",
 			originalFilename.substring(originalFilename.lastIndexOf("."))
 		);
 		try {
-			amazonS3.putObject(bucketName, savedFileName, uploadFile.getInputStream(), objectMetadata);
+			String fileUrl = fileStorageService.store(savedFileName, uploadFile.getInputStream());
+			log.info("등록된 파일 URL => {}", fileUrl);
+			return fileUrl;
 		} catch (Exception e) {
 			throw new RuntimeException("파일 업로드에 실패했습니다.", e);
 		}
-		String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replace(S3_DOMAIN, CDN_DOMAIN);
-
-		log.info("등록된 S3 파일 URL => {}", fileUrl);
-		return fileUrl;
 	}
 
 	private Schedule findSchedule(Long scheduleId) {
@@ -406,9 +397,9 @@ public class LessonHistoryCommandService {
 
 		for (int idx = 0; idx < uploadFiles.size(); idx++) {
 			CommandUploadFileResult uploadFile = uploadFiles.get(idx);
-			if (uploadFile.getFileUrl().startsWith(S3_DOMAIN)) {
-				String tempUrl = uploadFile.getFileUrl().replace(S3_DOMAIN, "");
-				CommandUploadFileResult result = moveDirTempToOrigin("origin/lesson-history/", tempUrl, idx + 1);
+			if (isTempFile(uploadFile.getFileUrl())) {
+				String tempPath = fileStorageService.extractFilePath(uploadFile.getFileUrl());
+				CommandUploadFileResult result = moveDirTempToOrigin("origin/lesson-history/", tempPath, idx + 1);
 				LessonHistoryFiles file = new LessonHistoryFiles(result.getFileUrl(), result.getFileOrder(), member,
 					lessonHistory);
 				files.add(file);
@@ -420,15 +411,11 @@ public class LessonHistoryCommandService {
 		return files;
 	}
 
-	public CommandUploadFileResult moveDirTempToOrigin(String originDir, String tempUrl, int idx) {
-		String createdOriginUrl = originDir + tempUrl.replaceFirst("temp/", "");
-
-		CopyObjectRequest copyObjRequest = new CopyObjectRequest(bucketName, tempUrl, bucketName, createdOriginUrl);
-		amazonS3.copyObject(copyObjRequest);
-
-		String fileUrl = amazonS3.getUrl(bucketName, createdOriginUrl).toString().replace(S3_DOMAIN, CDN_DOMAIN);
+	public CommandUploadFileResult moveDirTempToOrigin(String originDir, String tempPath, int idx) {
+		String originPath = originDir + tempPath.replaceFirst("temp/", "");
+		fileStorageService.copy(tempPath, originPath);
+		String fileUrl = fileStorageService.getFileUrl(originPath);
 		log.info("등록한 fileUrl: {}", fileUrl);
-
 		return new CommandUploadFileResult(fileUrl, idx);
 	}
 
@@ -445,15 +432,10 @@ public class LessonHistoryCommandService {
 
 	private void deleteAllFiles(List<LessonHistoryFiles> files) {
 		for (LessonHistoryFiles file : files) {
-			String fileName = getFileName(file.getFileUrl());
-			amazonS3.deleteObject(bucketName, fileName);
+			String filePath = fileStorageService.extractFilePath(file.getFileUrl());
+			fileStorageService.delete(filePath);
 		}
 		lessonHistoryFilesRepository.deleteAll(files);
-	}
-
-	private String getFileName(String url) {
-		String[] arr = url.split("/");
-		return "origin/lesson-history/" + arr[arr.length - 1];
 	}
 
 	private int findFileIndex(List<LessonHistoryFiles> files, String fileUrl) {

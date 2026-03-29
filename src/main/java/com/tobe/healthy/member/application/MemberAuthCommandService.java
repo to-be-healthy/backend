@@ -39,8 +39,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
@@ -63,6 +61,7 @@ import com.tobe.healthy.config.OAuthProperties;
 import com.tobe.healthy.config.jwt.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.presentation.dto.in.CourseAddCommand;
+import com.tobe.healthy.file.application.LocalFileStorageService;
 import com.tobe.healthy.member.presentation.dto.in.AppleToken;
 import com.tobe.healthy.member.presentation.dto.in.CommandFindMemberPassword;
 import com.tobe.healthy.member.presentation.dto.in.CommandJoinMember;
@@ -106,13 +105,10 @@ public class MemberAuthCommandService {
 	private final TrainerService trainerService;
 	private final ObjectMapper objectMapper;
 	private final OAuthProperties oAuthProperties;
-	private final AmazonS3 amazonS3;
+	private final LocalFileStorageService fileStorageService;
 	private final MailService mailService;
 	private final CourseService courseService;
 	private final NonMemberRepository nonMemberRepository;
-
-	@Value("${aws.s3.bucket-name}")
-	private String bucketName;
 
 	@Value("${oauth.apple.team-id}")
 	private String appleTeamId;
@@ -140,7 +136,6 @@ public class MemberAuthCommandService {
 
 		redisService.setValuesWithTimeout(request.getEmail(), authKey, EMAIL_AUTH_TIMEOUT); // 3분
 
-		// 3. 이메일에 인증번호 전송한다.
 		mailService.sendAuthMail(request.getEmail(), authKey);
 
 		return request.getEmail();
@@ -169,11 +164,11 @@ public class MemberAuthCommandService {
 			password);
 
 		log.info("[회원가입] member: {}", member);
-		if (StringUtils.isEmpty(request.getUuid())) { //회원가입
+		if (StringUtils.isEmpty(request.getUuid())) {
 			memberRepository.save(member);
 			return CommandJoinMemberResult.from(member);
 
-		} else { //미가입 회원이 초대받아서 가입하는 경우 (회원 정보 update)
+		} else {
 			return updateNonMemberInfo(request, password);
 		}
 	}
@@ -275,7 +270,6 @@ public class MemberAuthCommandService {
 		member.setMemberProfile(profile);
 		memberRepository.save(member);
 
-		//초대가입인 경우
 		if (StringUtils.isNotEmpty(request.getUuid())) {
 			mappingTrainerAndStudent(member, request.getUuid(), authorization.getResponse().getName(), true);
 		}
@@ -300,7 +294,6 @@ public class MemberAuthCommandService {
 		member.setMemberProfile(profile);
 		memberRepository.save(member);
 
-		//초대가입인 경우
 		if (StringUtils.isNotEmpty(request.getUuid())) {
 			mappingTrainerAndStudent(member, request.getUuid(), response.getNickname(), true);
 		}
@@ -333,11 +326,10 @@ public class MemberAuthCommandService {
 		}
 
 		Member member = Member.join(email, name, request.getMemberType(), GOOGLE, null);
-		MemberProfile profile = getGoogleProfile(picture, member);
+		MemberProfile profile = getProfile(picture, member);
 		member.setMemberProfile(profile);
 		memberRepository.save(member);
 
-		//초대가입인 경우
 		if (StringUtils.isNotEmpty(request.getUuid())) {
 			mappingTrainerAndStudent(member, request.getUuid(), name, true);
 		}
@@ -355,7 +347,6 @@ public class MemberAuthCommandService {
 				}
 			}
 
-			// TODO: 24. 7. 16. 애플로 로그인한 계정 삭제시 애플쪽에도 추가적으로 삭제처리 작업 필요
 			String name = request.getUser().getName().getLastName() + request.getUser().getName().getFirstName();
 
 			String clientSecret = createClientSecret();
@@ -380,7 +371,6 @@ public class MemberAuthCommandService {
 
 			memberRepository.save(member);
 
-			//초대가입인 경우
 			if (StringUtils.isNotEmpty(request.getUuid())) {
 				mappingTrainerAndStudent(member, request.getUuid(), name, true);
 			}
@@ -531,11 +521,9 @@ public class MemberAuthCommandService {
 			throw new CustomException(INVITE_NAME_NOT_VALID);
 		member.changeName(name);
 
-		//트레이너 학생 매핑
 		Long trainerId = Long.valueOf(map.get("trainerId"));
 		trainerService.mappingMemberAndTrainer(trainerId, member.getId());
 
-		//수강권 등록
 		int lessonCnt = Integer.parseInt(map.get("lessonCnt"));
 		courseService.addCourse(trainerId, CourseAddCommand.create(member.getId(), lessonCnt));
 
@@ -599,36 +587,9 @@ public class MemberAuthCommandService {
 	private MemberProfile getProfile(String profileImage, Member member) {
 		byte[] image = getProfileImage(profileImage);
 		String savedFileName = createProfileName("origin/profile/");
-		ObjectMetadata objectMetadata = createObjectMetadata(image.length, IMAGE_PNG_VALUE);
 		try (InputStream inputStream = new ByteArrayInputStream(image)) {
-			amazonS3.putObject(
-				bucketName,
-				savedFileName,
-				inputStream,
-				objectMetadata
-			);
-
-			String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll(S3_DOMAIN, CDN_DOMAIN);
-
+			String fileUrl = fileStorageService.store(savedFileName, inputStream);
 			return MemberProfile.create(savedFileName, fileUrl, member);
-
-		} catch (IOException e) {
-			log.error("error", e);
-			throw new CustomException(FILE_UPLOAD_ERROR);
-		}
-	}
-
-	private MemberProfile getGoogleProfile(String profileImage, Member member) {
-		byte[] image = getProfileImage(profileImage);
-		String savedFileName = createProfileName("origin/profile/");
-		ObjectMetadata objectMetadata = createObjectMetadata(image.length, IMAGE_PNG_VALUE);
-		try (InputStream inputStream = new ByteArrayInputStream(image)) {
-			amazonS3.putObject(bucketName, savedFileName, inputStream, objectMetadata);
-
-			String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll(S3_DOMAIN, CDN_DOMAIN);
-
-			return MemberProfile.create(savedFileName, fileUrl, member);
-
 		} catch (IOException e) {
 			log.error("error", e);
 			throw new CustomException(FILE_UPLOAD_ERROR);

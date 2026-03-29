@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.tobe.healthy.common.Utils;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.OAuthProperties;
+import com.tobe.healthy.file.application.LocalFileStorageService;
 import com.tobe.healthy.member.presentation.dto.in.CommandAssignNickname;
 import com.tobe.healthy.member.presentation.dto.in.CommandChangeEmail;
 import com.tobe.healthy.member.presentation.dto.in.CommandChangeMemberPassword;
@@ -63,19 +61,14 @@ public class MemberCommandService {
 	private final TrainerMemberMappingRepository mappingRepository;
 	private final TrainerService trainerService;
 	private final PointRepository pointRepository;
-	private final AmazonS3 amazonS3;
+	private final LocalFileStorageService fileStorageService;
 	private final MemberTokenRepository memberTokenRepository;
 	private final WebClient webClient;
 	private final OAuthProperties oAuthProperties;
 
-	@Value("${aws.s3.bucket-name}")
-	private String bucketName;
-
 	public void logout(Long memberId) {
 		memberRepository.findById(memberId).ifPresent(m -> {
-			// 1. refresh token 삭제
 			redisService.deleteValues(m.getUserId());
-			// 2. fcm token 삭제
 			memberTokenRepository.deleteAll(m.getMemberToken());
 		});
 	}
@@ -138,7 +131,7 @@ public class MemberCommandService {
 			}
 		}
 		switch (member.getMemberType()) {
-			case TRAINER: //트레이너 탈퇴시 학생들 환불처리 & 매핑끊기
+			case TRAINER:
 				Long trainerId = member.getId();
 				List<TrainerMemberMapping> mappings = mappingRepository.findAllByTrainerId(trainerId);
 				if (!mappings.isEmpty()) {
@@ -151,7 +144,7 @@ public class MemberCommandService {
 				}
 				break;
 
-			case STUDENT: //학생 탈퇴시 환불처리 & 매핑끊기
+			case STUDENT:
 				Long memberId = member.getId();
 				Optional<TrainerMemberMapping> mappingOpt = mappingRepository.findByMemberId(memberId);
 				if (mappingOpt.isPresent()) {
@@ -200,23 +193,13 @@ public class MemberCommandService {
 			throw new IllegalArgumentException("프로필 사진을 등록해 주세요.");
 		}
 
-		ObjectMetadata objectMetadata = createObjectMetadata(uploadFile.getSize(), uploadFile.getContentType());
-		String savedFileName = createFileName("origin/profile/") + uploadFile.getOriginalFilename()
+		String extension = uploadFile.getOriginalFilename()
 			.substring(uploadFile.getOriginalFilename().lastIndexOf("."));
-		;
+		String savedFileName = createFileName("origin/profile/") + extension;
 
 		try (InputStream inputStream = uploadFile.getInputStream()) {
-			amazonS3.putObject(
-				bucketName,
-				savedFileName,
-				inputStream,
-				objectMetadata
-			);
-
-			String fileUrl = amazonS3.getUrl(bucketName, savedFileName).toString().replaceAll(S3_DOMAIN, CDN_DOMAIN);
-
+			String fileUrl = fileStorageService.store(savedFileName, inputStream);
 			findMember.registerProfile(savedFileName, fileUrl);
-
 			return RegisterMemberProfileResult.from(fileUrl, savedFileName);
 		} catch (IOException e) {
 			log.error("error", e);
@@ -235,7 +218,7 @@ public class MemberCommandService {
 		String fileUrl = findMember.getMemberProfile().getFileUrl();
 		String fileName = findMember.getMemberProfile().getFileName();
 
-		amazonS3.deleteObject(bucketName, fileName);
+		fileStorageService.delete(fileName);
 
 		findMember.deleteProfile();
 

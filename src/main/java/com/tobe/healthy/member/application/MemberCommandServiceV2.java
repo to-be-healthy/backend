@@ -1,16 +1,13 @@
 package com.tobe.healthy.member.application;
 
-import static com.tobe.healthy.common.Utils.*;
 import static com.tobe.healthy.common.error.ErrorCode.*;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.tobe.healthy.common.error.CustomException;
+import com.tobe.healthy.file.application.LocalFileStorageService;
 import com.tobe.healthy.member.presentation.dto.in.CommandRegisterMemberProfile;
 import com.tobe.healthy.member.presentation.dto.out.RegisterMemberProfileResult;
 import com.tobe.healthy.member.domain.entity.Member;
@@ -26,10 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberCommandServiceV2 {
 
 	private final MemberRepository memberRepository;
-	private final AmazonS3 amazonS3;
-
-	@Value("${aws.s3.bucket-name}")
-	private String bucketName;
+	private final LocalFileStorageService fileStorageService;
 
 	public RegisterMemberProfileResult registerProfile(CommandRegisterMemberProfile request, Long memberId) {
 		Member findMember = memberRepository.findMemberById(memberId)
@@ -39,21 +33,13 @@ public class MemberCommandServiceV2 {
 			throw new IllegalArgumentException("프로필 사진을 등록해 주세요.");
 		}
 
-		String tempUrl = request.getUploadFile().getFileUrl().replace(S3_DOMAIN, "");
-		String fileName = tempUrl.replaceFirst("temp/", "");
+		String tempFilePath = fileStorageService.extractFilePath(request.getUploadFile().getFileUrl());
+		String fileName = tempFilePath.replaceFirst("temp/", "");
+		String originPath = "origin/profile/" + fileName;
 
-		String createdOriginUrl = "origin/profile/" + fileName;
+		fileStorageService.copy(tempFilePath, originPath);
 
-		CopyObjectRequest copyObjectRequest = new CopyObjectRequest(
-			bucketName,
-			tempUrl,
-			bucketName,
-			createdOriginUrl
-		);
-
-		amazonS3.copyObject(copyObjectRequest);
-
-		String fileUrl = amazonS3.getUrl(bucketName, createdOriginUrl).toString().replace(S3_DOMAIN, CDN_DOMAIN);
+		String fileUrl = fileStorageService.getFileUrl(originPath);
 
 		log.info("등록한 fileUrl: {}", fileUrl);
 

@@ -4,14 +4,14 @@ import java.util.List;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.tobe.healthy.ApiResult;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.file.application.ComnFileService;
-import com.tobe.healthy.file.presentation.dto.in.CommandUploadFile;
 import com.tobe.healthy.workout.presentation.dto.in.RegisterFile;
 
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,8 @@ public class ComnFileController {
 
 	@PostMapping
 	public ApiResult<List<RegisterFile>> uploadFile(
-		@RequestBody CommandUploadFile request,
+		@RequestPart("files") List<MultipartFile> files,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ApiResult.success("presigned-uri을 생성하였습니다.", comnFileService.getPreSignedUrl(request));
+		return ApiResult.success("파일을 업로드하였습니다.", comnFileService.uploadFiles(files));
 	}
 }

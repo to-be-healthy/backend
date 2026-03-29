@@ -7,17 +7,12 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.util.StringUtils;
 
-import com.amazonaws.services.s3.model.ObjectMetadata;
-
 public class Utils {
 	public static final Integer EMAIL_AUTH_TIMEOUT = 3 * 60 * 1000; // 3분
 	public static final Long FILE_TEMP_UPLOAD_TIMEOUT = 30 * 60 * 1000L; // 30분
 	public static final Integer ONE_DAY = 24 * 60 * 60 * 1000; //1일
 
 	public static final DateTimeFormatter formatter_hmm = DateTimeFormatter.ofPattern("a h:mm");
-
-	public static final String S3_DOMAIN = "https://to-be-healthy-bucket.s3.ap-northeast-2.amazonaws.com/";
-	public static final String CDN_DOMAIN = "https://cdn.to-be-healthy.shop/";
 
 	public static String getAuthCode(int num) {
 		return RandomStringUtils.randomNumeric(num);
@@ -64,12 +59,5 @@ public class Utils {
 
 	public static boolean validateUserId(String userId) {
 		return userId.length() < 4 || !StringUtils.hasText(userId);
-	}
-
-	public static <T extends Number> ObjectMetadata createObjectMetadata(T fileSize, String contentType) {
-		ObjectMetadata objectMetadata = new ObjectMetadata();
-		objectMetadata.setContentLength(fileSize.longValue());
-		objectMetadata.setContentType(contentType);
-		return objectMetadata;
 	}
 }

@@ -1,6 +1,5 @@
 package com.tobe.healthy.workout.application;
 
-import static com.tobe.healthy.common.Utils.*;
 import static com.tobe.healthy.common.error.ErrorCode.*;
 
 import java.util.List;
@@ -32,6 +31,7 @@ import com.tobe.healthy.workout.repository.workoutHistory.CompletedExerciseRepos
 import com.tobe.healthy.workout.repository.workoutHistory.WorkoutFileRepository;
 import com.tobe.healthy.workout.repository.workoutHistory.WorkoutHistoryLikeRepository;
 import com.tobe.healthy.workout.repository.workoutHistory.WorkoutHistoryRepository;
+import com.tobe.healthy.file.application.LocalFileStorageService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkoutHistoryService {
 
 	private final FileService fileService;
+	private final LocalFileStorageService fileStorageService;
 	private final WorkoutHistoryLikeRepository workoutHistoryLikeRepository;
 	private final WorkoutHistoryRepository workoutHistoryRepository;
 	private final CompletedExerciseRepository completedExerciseRepository;
@@ -209,10 +210,10 @@ public class WorkoutHistoryService {
 	private void uploadNewFiles(WorkoutHistory history, List<RegisterFile> files) {
 		for (int i = 0; i < files.size(); i++) {
 			RegisterFile fileInfo = files.get(i);
-			if (fileInfo.getFileUrl().startsWith(S3_DOMAIN)) {
+			String filePath = fileStorageService.extractFilePath(fileInfo.getFileUrl());
+			if (filePath.startsWith("temp/")) {
 				fileInfo.setFileOrder(i + 1);
-				String oldSavedFileName = fileInfo.getFileUrl().replace(S3_DOMAIN, "");
-				RegisterFile result = fileService.moveDirTempToOrigin("workout-history/", oldSavedFileName);
+				RegisterFile result = fileService.moveDirTempToOrigin("workout-history/", fileInfo.getFileUrl());
 				workoutFileRepository.save(
 					WorkoutHistoryFiles.create(history, result.getFileUrl(), fileInfo.getFileOrder()));
 			}

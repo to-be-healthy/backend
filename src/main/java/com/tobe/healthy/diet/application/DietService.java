@@ -1,6 +1,5 @@
 package com.tobe.healthy.diet.application;
 
-import static com.tobe.healthy.common.Utils.*;
 import static com.tobe.healthy.common.error.ErrorCode.*;
 import static com.tobe.healthy.diet.domain.entity.DietType.*;
 import static com.tobe.healthy.member.domain.entity.MemberType.*;
@@ -40,6 +39,7 @@ import com.tobe.healthy.member.domain.entity.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
+import com.tobe.healthy.file.application.LocalFileStorageService;
 import com.tobe.healthy.workout.application.FileService;
 import com.tobe.healthy.workout.presentation.dto.in.RegisterFile;
 
@@ -57,6 +57,7 @@ public class DietService {
 	private final DietFileRepository dietFileRepository;
 	private final TrainerMemberMappingRepository mappingRepository;
 	private final FileService fileService;
+	private final LocalFileStorageService fileStorageService;
 	private final MemberRepository memberRepository;
 	private final RedisService redisService;
 	private final DietCommentRepository commentRepository;
@@ -125,9 +126,8 @@ public class DietService {
 			diet.deleteFile(requestType);
 		}
 		//사진 첨부
-		if (!command.isFast() && !ObjectUtils.isEmpty(requestFileUrl) && requestFileUrl.startsWith(S3_DOMAIN)) {
-			String oldSavedFileName = requestFileUrl.replace(S3_DOMAIN, "");
-			RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
+		if (!command.isFast() && !ObjectUtils.isEmpty(requestFileUrl) && isTempFile(requestFileUrl)) {
+			RegisterFile result = fileService.moveDirTempToOrigin("diet/", requestFileUrl);
 			dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), requestType));
 
 		}
@@ -230,7 +230,7 @@ public class DietService {
 
 	private void uploadNewFiles(Diet diet, DietUpdateCommand command) {
 		//아침 파일
-		if (!ObjectUtils.isEmpty(command.getBreakfastFile()) && command.getBreakfastFile().startsWith(S3_DOMAIN)) {
+		if (!ObjectUtils.isEmpty(command.getBreakfastFile()) && isTempFile(command.getBreakfastFile())) {
 			if (command.isBreakfastFast()) { //단식
 				List<DietFiles> files = diet.getDietFiles()
 					.stream()
@@ -240,39 +240,41 @@ public class DietService {
 					fileService.deleteDietFile(files.get(0).getFileName());
 
 			} else { //사진있음
-				String oldSavedFileName = command.getBreakfastFile().replace(S3_DOMAIN, "");
-				RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
+				RegisterFile result = fileService.moveDirTempToOrigin("diet/", command.getBreakfastFile());
 				dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), BREAKFAST));
 			}
 		}
 
 		//점심 파일
-		if (!ObjectUtils.isEmpty(command.getLunchFile()) && command.getLunchFile().startsWith(S3_DOMAIN)) {
+		if (!ObjectUtils.isEmpty(command.getLunchFile()) && isTempFile(command.getLunchFile())) {
 			if (command.isLunchFast()) { //단식
 				List<DietFiles> files = diet.getDietFiles().stream().filter(f -> LUNCH.equals(f.getType())).toList();
 				if (!ObjectUtils.isEmpty(files))
 					fileService.deleteDietFile(files.get(0).getFileName());
 
 			} else { //사진있음
-				String oldSavedFileName = command.getLunchFile().replace(S3_DOMAIN, "");
-				RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
+				RegisterFile result = fileService.moveDirTempToOrigin("diet/", command.getLunchFile());
 				dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), LUNCH));
 			}
 		}
 
 		//저녁 파일
-		if (!ObjectUtils.isEmpty(command.getDinnerFile()) && command.getDinnerFile().startsWith(S3_DOMAIN)) {
+		if (!ObjectUtils.isEmpty(command.getDinnerFile()) && isTempFile(command.getDinnerFile())) {
 			if (command.isDinnerFast()) { //단식
 				List<DietFiles> files = diet.getDietFiles().stream().filter(f -> DINNER.equals(f.getType())).toList();
 				if (!ObjectUtils.isEmpty(files))
 					fileService.deleteDietFile(files.get(0).getFileName());
 
 			} else { //사진있음
-				String oldSavedFileName = command.getDinnerFile().replace(S3_DOMAIN, "");
-				RegisterFile result = fileService.moveDirTempToOrigin("diet/", oldSavedFileName);
+				RegisterFile result = fileService.moveDirTempToOrigin("diet/", command.getDinnerFile());
 				dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), DINNER));
 			}
 		}
+	}
+
+	private boolean isTempFile(String fileUrl) {
+		String filePath = fileStorageService.extractFilePath(fileUrl);
+		return filePath.startsWith("temp/");
 	}
 
 	private void deleteOldFiles(Diet diet, DietUpdateCommand command) {
