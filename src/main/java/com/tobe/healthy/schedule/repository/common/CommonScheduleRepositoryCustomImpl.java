@@ -1,6 +1,7 @@
 package com.tobe.healthy.schedule.repository.common;
 
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.*;
+
+import static com.tobe.healthy.schedule.domain.QSchedule.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

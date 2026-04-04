@@ -1,9 +1,9 @@
 package com.tobe.healthy.lessonhistory.repository;
 
-import static com.tobe.healthy.lessonhistory.domain.entity.QLessonHistory.*;
-import static com.tobe.healthy.lessonhistory.domain.entity.QLessonHistoryFiles.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.*;
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.*;
+import static com.tobe.healthy.lessonhistory.domain.QLessonHistory.*;
+import static com.tobe.healthy.lessonhistory.domain.QLessonHistoryFiles.*;
+import static com.tobe.healthy.member.domain.MemberType.*;
+import static com.tobe.healthy.schedule.domain.QSchedule.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,8 +18,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.lessonhistory.presentation.dto.in.RetrieveLessonHistoryByDateCond;
 import com.tobe.healthy.lessonhistory.presentation.dto.out.RetrieveLessonHistoryByDateCondResult;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
-import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.lessonhistory.domain.LessonHistory;
+import com.tobe.healthy.member.domain.MemberType;
 
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;

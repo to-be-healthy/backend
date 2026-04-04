@@ -1,7 +1,7 @@
 package com.tobe.healthy.member.presentation.dto.out;
 
-import com.tobe.healthy.member.domain.entity.AlarmStatus;
-import com.tobe.healthy.member.domain.entity.AlarmType;
+import com.tobe.healthy.member.domain.AlarmStatus;
+import com.tobe.healthy.member.domain.AlarmType;
 
 import lombok.Builder;
 import lombok.Data;

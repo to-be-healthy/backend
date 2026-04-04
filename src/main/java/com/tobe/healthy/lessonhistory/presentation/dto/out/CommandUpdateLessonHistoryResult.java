@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryFiles;
+import com.tobe.healthy.lessonhistory.domain.LessonHistory;
+import com.tobe.healthy.lessonhistory.domain.LessonHistoryFiles;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

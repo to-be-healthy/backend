@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
  && useradd --system --uid 1001 --create-home --shell /usr/sbin/nologin appuser \
  && mkdir -p /app/logs/info /app/logs/warn /app/logs/error /data/files \
  && chown -R appuser:appuser /app/logs /data
+ENV FILE_UPLOAD_DIR=/data/files
 COPY --chown=appuser:appuser --from=builder /build/build/libs/*.jar /app/app.jar
 USER appuser
 EXPOSE 8080 7070

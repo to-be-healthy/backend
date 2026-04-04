@@ -1,6 +1,6 @@
 package com.tobe.healthy.schedule.presentation;
 
-import static com.tobe.healthy.member.domain.entity.MemberType.*;
+import static com.tobe.healthy.member.domain.MemberType.*;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;

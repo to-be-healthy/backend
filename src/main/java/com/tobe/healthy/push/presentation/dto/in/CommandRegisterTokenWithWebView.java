@@ -1,6 +1,6 @@
 package com.tobe.healthy.push.presentation.dto.in;
 
-import com.tobe.healthy.push.domain.entity.DeviceType;
+import com.tobe.healthy.push.domain.DeviceType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,8 +1,9 @@
 package com.tobe.healthy.diet.repository;
 
-import static com.tobe.healthy.diet.domain.entity.QDiet.*;
-import static com.tobe.healthy.diet.domain.entity.QDietFiles.*;
-import static com.tobe.healthy.diet.domain.entity.QDietLike.*;
+
+import static com.tobe.healthy.diet.domain.QDiet.*;
+import static com.tobe.healthy.diet.domain.QDietFiles.*;
+import static com.tobe.healthy.diet.domain.QDietLike.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,9 +22,9 @@ import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.diet.presentation.dto.DietDto;
 import com.tobe.healthy.diet.presentation.dto.QDietDto;
-import com.tobe.healthy.diet.domain.entity.Diet;
-import com.tobe.healthy.diet.domain.entity.DietFiles;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.diet.domain.Diet;
+import com.tobe.healthy.diet.domain.DietFiles;
+import com.tobe.healthy.member.domain.Member;
 
 import lombok.RequiredArgsConstructor;
 

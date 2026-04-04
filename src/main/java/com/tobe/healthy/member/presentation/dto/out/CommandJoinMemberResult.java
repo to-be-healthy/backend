@@ -1,7 +1,7 @@
 package com.tobe.healthy.member.presentation.dto.out;
 
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.MemberType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

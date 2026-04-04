@@ -1,14 +1,14 @@
 package com.tobe.healthy.member.repository;
 
-import static com.tobe.healthy.course.domain.entity.QCourse.*;
-import static com.tobe.healthy.member.domain.entity.AlarmStatus.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.*;
-import static com.tobe.healthy.member.domain.entity.QMember.*;
-import static com.tobe.healthy.member.domain.entity.QMemberProfile.*;
-import static com.tobe.healthy.member.domain.entity.QNonMember.*;
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.*;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
-import static com.tobe.healthy.trainer.domain.entity.QTrainerMemberMapping.*;
+import static com.tobe.healthy.course.domain.QCourse.*;
+import static com.tobe.healthy.member.domain.AlarmStatus.*;
+import static com.tobe.healthy.member.domain.MemberType.*;
+import static com.tobe.healthy.member.domain.QMember.*;
+import static com.tobe.healthy.member.domain.QMemberProfile.*;
+import static com.tobe.healthy.member.domain.QNonMember.*;
+import static com.tobe.healthy.schedule.domain.QSchedule.*;
+import static com.tobe.healthy.schedule.domain.ReservationStatus.*;
+import static com.tobe.healthy.trainer.domain.QTrainerMemberMapping.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -30,9 +30,9 @@ import com.tobe.healthy.member.presentation.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.presentation.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.presentation.dto.out.QMemberDetailResult;
 import com.tobe.healthy.member.presentation.dto.out.QMemberInTeamResult;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.MemberType;
+import com.tobe.healthy.schedule.domain.ReservationStatus;
 
 import lombok.RequiredArgsConstructor;
 

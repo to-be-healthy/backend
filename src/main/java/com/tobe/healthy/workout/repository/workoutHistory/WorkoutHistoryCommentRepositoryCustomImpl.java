@@ -1,7 +1,8 @@
 package com.tobe.healthy.workout.repository.workoutHistory;
 
-import static com.tobe.healthy.member.domain.entity.QMember.*;
-import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryComment.*;
+
+import static com.tobe.healthy.member.domain.QMember.*;
+import static com.tobe.healthy.workout.domain.QWorkoutHistoryComment.*;
 
 import java.util.List;
 
@@ -13,8 +14,8 @@ import org.springframework.util.ObjectUtils;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.member.domain.entity.QMemberProfile;
-import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryComment;
+import com.tobe.healthy.member.domain.QMemberProfile;
+import com.tobe.healthy.workout.domain.WorkoutHistoryComment;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,6 +1,6 @@
 package com.tobe.healthy.schedule.presentation.dto.out;
 
-import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.domain.Schedule;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

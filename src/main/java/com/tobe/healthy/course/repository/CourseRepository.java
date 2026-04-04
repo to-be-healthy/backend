@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.tobe.healthy.course.domain.entity.Course;
+import com.tobe.healthy.course.domain.Course;
 
 public interface CourseRepository extends JpaRepository<Course, Long> {
 

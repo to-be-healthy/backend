@@ -26,10 +26,13 @@ public class LocalFileStorageService {
 	@Value("${file.base-url}")
 	private String baseUrl;
 
+	private Path rootPath;
+
 	@PostConstruct
 	public void init() {
 		try {
-			Files.createDirectories(Paths.get(uploadDir));
+			rootPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+			Files.createDirectories(rootPath);
 		} catch (IOException e) {
 			throw new RuntimeException("파일 저장 디렉토리를 생성할 수 없습니다.", e);
 		}
@@ -37,7 +40,7 @@ public class LocalFileStorageService {
 
 	public String store(String filePath, InputStream inputStream) {
 		try {
-			Path targetPath = Paths.get(uploadDir, filePath);
+			Path targetPath = rootPath.resolve(filePath).normalize();
 			Files.createDirectories(targetPath.getParent());
 			Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
 			return getFileUrl(filePath);
@@ -49,8 +52,8 @@ public class LocalFileStorageService {
 
 	public void copy(String sourcePath, String targetPath) {
 		try {
-			Path source = Paths.get(uploadDir, sourcePath);
-			Path target = Paths.get(uploadDir, targetPath);
+			Path source = rootPath.resolve(sourcePath).normalize();
+			Path target = rootPath.resolve(targetPath).normalize();
 			Files.createDirectories(target.getParent());
 			Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
@@ -61,7 +64,7 @@ public class LocalFileStorageService {
 
 	public void delete(String filePath) {
 		try {
-			Path target = Paths.get(uploadDir, filePath);
+			Path target = rootPath.resolve(filePath).normalize();
 			Files.deleteIfExists(target);
 		} catch (IOException e) {
 			log.error("파일 삭제 실패: {}", filePath, e);

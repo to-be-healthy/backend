@@ -6,8 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.tobe.healthy.notification.presentation.dto.out.NotificationRedDotStatusResult;
-import com.tobe.healthy.notification.domain.entity.Notification;
-import com.tobe.healthy.notification.domain.entity.NotificationCategory;
+import com.tobe.healthy.notification.domain.Notification;
+import com.tobe.healthy.notification.domain.NotificationCategory;
 
 public interface NotificationRepositoryCustom {
 

@@ -27,7 +27,7 @@ import com.tobe.healthy.member.application.MemberCommandService;
 import com.tobe.healthy.member.presentation.dto.MemberDto;
 import com.tobe.healthy.member.presentation.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.presentation.dto.out.MemberInTeamResult;
-import com.tobe.healthy.member.domain.entity.AlarmStatus;
+import com.tobe.healthy.member.domain.AlarmStatus;
 import com.tobe.healthy.schedule.application.StudentScheduleService;
 import com.tobe.healthy.schedule.presentation.dto.in.StudentScheduleCond;
 import com.tobe.healthy.schedule.presentation.dto.out.MyReservationResponse;

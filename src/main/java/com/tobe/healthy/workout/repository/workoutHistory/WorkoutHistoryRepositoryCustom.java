@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 
 import com.tobe.healthy.workout.presentation.dto.out.WorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryFiles;
+import com.tobe.healthy.workout.domain.WorkoutHistoryFiles;
 
 public interface WorkoutHistoryRepositoryCustom {
 	Page<WorkoutHistoryDto> getWorkoutHistoryOfMonth(Long loginMemberId, Long memberId, Pageable pageable,

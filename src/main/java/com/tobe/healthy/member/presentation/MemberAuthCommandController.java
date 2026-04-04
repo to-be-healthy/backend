@@ -16,7 +16,7 @@ import com.tobe.healthy.member.presentation.dto.in.CommandValidateEmail;
 import com.tobe.healthy.member.presentation.dto.in.CommandVerification;
 import com.tobe.healthy.member.presentation.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.presentation.dto.out.CommandJoinMemberResult;
-import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.member.domain.Tokens;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

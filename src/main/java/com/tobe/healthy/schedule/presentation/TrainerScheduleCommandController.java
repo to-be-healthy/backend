@@ -24,7 +24,7 @@ import com.tobe.healthy.schedule.presentation.dto.out.CommandRegisterScheduleByS
 import com.tobe.healthy.schedule.presentation.dto.out.CommandRegisterScheduleResult;
 import com.tobe.healthy.schedule.presentation.dto.out.CommandScheduleStatusResult;
 import com.tobe.healthy.schedule.presentation.dto.out.ScheduleIdInfo;
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
+import com.tobe.healthy.schedule.domain.ReservationStatus;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

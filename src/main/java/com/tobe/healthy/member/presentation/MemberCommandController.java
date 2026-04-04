@@ -28,8 +28,8 @@ import com.tobe.healthy.member.presentation.dto.out.CommandChangeNameResult;
 import com.tobe.healthy.member.presentation.dto.out.DeleteMemberProfileResult;
 import com.tobe.healthy.member.presentation.dto.out.MemberChangeAlarmResult;
 import com.tobe.healthy.member.presentation.dto.out.RegisterMemberProfileResult;
-import com.tobe.healthy.member.domain.entity.AlarmStatus;
-import com.tobe.healthy.member.domain.entity.AlarmType;
+import com.tobe.healthy.member.domain.AlarmStatus;
+import com.tobe.healthy.member.domain.AlarmType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

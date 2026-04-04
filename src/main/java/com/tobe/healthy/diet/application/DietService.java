@@ -1,8 +1,8 @@
 package com.tobe.healthy.diet.application;
 
 import static com.tobe.healthy.common.error.ErrorCode.*;
-import static com.tobe.healthy.diet.domain.entity.DietType.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.*;
+import static com.tobe.healthy.diet.domain.DietType.*;
+import static com.tobe.healthy.member.domain.MemberType.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,18 +26,18 @@ import com.tobe.healthy.diet.presentation.dto.in.DietAddCommand;
 import com.tobe.healthy.diet.presentation.dto.in.DietAddCommandAtHome;
 import com.tobe.healthy.diet.presentation.dto.in.DietUpdateCommand;
 import com.tobe.healthy.diet.presentation.dto.out.DietUploadDaysResult;
-import com.tobe.healthy.diet.domain.entity.Diet;
-import com.tobe.healthy.diet.domain.entity.DietFiles;
-import com.tobe.healthy.diet.domain.entity.DietLike;
-import com.tobe.healthy.diet.domain.entity.DietLikePK;
-import com.tobe.healthy.diet.domain.entity.DietType;
+import com.tobe.healthy.diet.domain.Diet;
+import com.tobe.healthy.diet.domain.DietFiles;
+import com.tobe.healthy.diet.domain.DietLike;
+import com.tobe.healthy.diet.domain.DietLikePK;
+import com.tobe.healthy.diet.domain.DietType;
 import com.tobe.healthy.diet.repository.DietCommentRepository;
 import com.tobe.healthy.diet.repository.DietFileRepository;
 import com.tobe.healthy.diet.repository.DietLikeRepository;
 import com.tobe.healthy.diet.repository.DietRepository;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.domain.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 import com.tobe.healthy.file.application.LocalFileStorageService;
 import com.tobe.healthy.workout.application.FileService;

@@ -1,9 +1,10 @@
 package com.tobe.healthy.workout.repository.workoutHistory;
 
-import static com.tobe.healthy.member.domain.entity.QMember.*;
-import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistory.*;
-import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryFiles.*;
-import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryLike.*;
+
+import static com.tobe.healthy.member.domain.QMember.*;
+import static com.tobe.healthy.workout.domain.QWorkoutHistory.*;
+import static com.tobe.healthy.workout.domain.QWorkoutHistoryFiles.*;
+import static com.tobe.healthy.workout.domain.QWorkoutHistoryLike.*;
 
 import java.util.List;
 
@@ -19,10 +20,10 @@ import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.member.domain.entity.QMemberProfile;
+import com.tobe.healthy.member.domain.QMemberProfile;
 import com.tobe.healthy.workout.presentation.dto.out.QWorkoutHistoryDto;
 import com.tobe.healthy.workout.presentation.dto.out.WorkoutHistoryDto;
-import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryFiles;
+import com.tobe.healthy.workout.domain.WorkoutHistoryFiles;
 
 import lombok.RequiredArgsConstructor;
 

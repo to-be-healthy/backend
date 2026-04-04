@@ -3,8 +3,8 @@ package com.tobe.healthy.notification.presentation.dto.out;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.notification.domain.entity.Notification;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.notification.domain.Notification;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

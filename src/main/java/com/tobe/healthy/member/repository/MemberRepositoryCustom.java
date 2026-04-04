@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.tobe.healthy.member.presentation.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.presentation.dto.out.MemberInTeamResult;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 
 public interface MemberRepositoryCustom {
 	List<MemberInTeamResult> findAllMyMemberInTeam(Long trainerId, String searchValue, String sortValue,

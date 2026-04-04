@@ -30,19 +30,19 @@ import com.tobe.healthy.lessonhistory.presentation.dto.out.CommandRegisterReplyR
 import com.tobe.healthy.lessonhistory.presentation.dto.out.CommandUpdateCommentResult;
 import com.tobe.healthy.lessonhistory.presentation.dto.out.CommandUpdateLessonHistoryResult;
 import com.tobe.healthy.lessonhistory.presentation.dto.out.CommandUploadFileResult;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryComment;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryFiles;
+import com.tobe.healthy.lessonhistory.domain.LessonHistory;
+import com.tobe.healthy.lessonhistory.domain.LessonHistoryComment;
+import com.tobe.healthy.lessonhistory.domain.LessonHistoryFiles;
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryCommentRepository;
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryFilesRepository;
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.notification.presentation.dto.in.CommandSendNotification;
-import com.tobe.healthy.notification.domain.entity.NotificationCategory;
-import com.tobe.healthy.notification.domain.entity.NotificationType;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.notification.domain.NotificationCategory;
+import com.tobe.healthy.notification.domain.NotificationType;
+import com.tobe.healthy.schedule.domain.Schedule;
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository;
 
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.tobe.healthy.common.aop;
 
-import static com.tobe.healthy.course.domain.entity.CourseHistoryType.*;
-import static com.tobe.healthy.point.domain.entity.Calculation.*;
+import static com.tobe.healthy.course.domain.CourseHistoryType.*;
+import static com.tobe.healthy.point.domain.Calculation.*;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;

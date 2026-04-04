@@ -1,9 +1,9 @@
 package com.tobe.healthy.schedule.repository.student;
 
 import static com.querydsl.core.types.dsl.Expressions.*;
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.*;
-import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.*;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
+import static com.tobe.healthy.schedule.domain.QSchedule.*;
+import static com.tobe.healthy.schedule.domain.QScheduleWaiting.*;
+import static com.tobe.healthy.schedule.domain.ReservationStatus.*;
 import static java.util.stream.Collectors.*;
 
 import java.time.LocalDate;
@@ -20,12 +20,12 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.QMember;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.QMember;
 import com.tobe.healthy.schedule.presentation.dto.in.StudentScheduleCond;
 import com.tobe.healthy.schedule.presentation.dto.out.MyReservation;
 import com.tobe.healthy.schedule.presentation.dto.out.ScheduleCommandResult;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.domain.Schedule;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

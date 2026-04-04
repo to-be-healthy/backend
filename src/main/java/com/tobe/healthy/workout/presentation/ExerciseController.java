@@ -21,7 +21,7 @@ import com.tobe.healthy.workout.application.ExerciseService;
 import com.tobe.healthy.workout.presentation.dto.ExerciseDto;
 import com.tobe.healthy.workout.presentation.dto.in.CustomExerciseAddCommand;
 import com.tobe.healthy.workout.presentation.dto.out.ExerciseCategoryDto;
-import com.tobe.healthy.workout.domain.entity.exercise.ExerciseCategory;
+import com.tobe.healthy.workout.domain.ExerciseCategory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

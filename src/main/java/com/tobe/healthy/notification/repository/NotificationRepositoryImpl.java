@@ -1,6 +1,6 @@
 package com.tobe.healthy.notification.repository;
 
-import static com.tobe.healthy.notification.domain.entity.QNotification.*;
+import static com.tobe.healthy.notification.domain.QNotification.*;
 
 import java.util.List;
 
@@ -15,8 +15,8 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.notification.presentation.dto.out.NotificationRedDotStatusResult;
-import com.tobe.healthy.notification.domain.entity.Notification;
-import com.tobe.healthy.notification.domain.entity.NotificationCategory;
+import com.tobe.healthy.notification.domain.Notification;
+import com.tobe.healthy.notification.domain.NotificationCategory;
 
 import lombok.RequiredArgsConstructor;
 

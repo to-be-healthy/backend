@@ -1,6 +1,6 @@
 package com.tobe.healthy.lessonhistory.presentation.dto.in;
 
-import com.tobe.healthy.lessonhistory.domain.entity.WritingStatus;
+import com.tobe.healthy.lessonhistory.domain.WritingStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

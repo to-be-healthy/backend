@@ -1,7 +1,7 @@
 package com.tobe.healthy.member.presentation.dto.out;
 
 import com.tobe.healthy.member.presentation.dto.MemberDto;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

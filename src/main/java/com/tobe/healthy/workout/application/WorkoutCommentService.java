@@ -2,8 +2,8 @@ package com.tobe.healthy.workout.application;
 
 import static com.tobe.healthy.common.error.ErrorCode.*;
 import static com.tobe.healthy.common.event.EventType.*;
-import static com.tobe.healthy.notification.domain.entity.NotificationCategory.*;
-import static com.tobe.healthy.notification.domain.entity.NotificationType.*;
+import static com.tobe.healthy.notification.domain.NotificationCategory.*;
+import static com.tobe.healthy.notification.domain.NotificationType.*;
 
 import java.util.List;
 import java.util.Map;
@@ -17,12 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.event.CustomEventPublisher;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.notification.presentation.dto.in.CommandSendNotification;
 import com.tobe.healthy.workout.presentation.dto.WorkoutHistoryCommentDto;
 import com.tobe.healthy.workout.presentation.dto.in.HistoryCommentAddCommand;
-import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistory;
-import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryComment;
+import com.tobe.healthy.workout.domain.WorkoutHistory;
+import com.tobe.healthy.workout.domain.WorkoutHistoryComment;
 import com.tobe.healthy.workout.repository.workoutHistory.WorkoutHistoryCommentRepository;
 import com.tobe.healthy.workout.repository.workoutHistory.WorkoutHistoryRepository;
 

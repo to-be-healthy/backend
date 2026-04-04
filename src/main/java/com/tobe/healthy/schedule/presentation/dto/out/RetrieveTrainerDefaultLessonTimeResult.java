@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.tobe.healthy.common.LessonTimeFormatter;
-import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo;
+import com.tobe.healthy.schedule.domain.TrainerScheduleInfo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

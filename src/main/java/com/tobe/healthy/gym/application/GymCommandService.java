@@ -10,10 +10,10 @@ import com.tobe.healthy.gym.presentation.dto.in.CommandRegisterGym;
 import com.tobe.healthy.gym.presentation.dto.in.CommandSelectMyGym;
 import com.tobe.healthy.gym.presentation.dto.out.CommandRegisterGymResult;
 import com.tobe.healthy.gym.presentation.dto.out.CommandSelectMyGymResult;
-import com.tobe.healthy.gym.domain.entity.Gym;
+import com.tobe.healthy.gym.domain.Gym;
 import com.tobe.healthy.gym.repository.GymRepository;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;

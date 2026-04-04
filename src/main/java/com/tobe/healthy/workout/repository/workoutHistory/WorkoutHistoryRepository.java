@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistory;
+import com.tobe.healthy.workout.domain.WorkoutHistory;
 
 public interface WorkoutHistoryRepository extends JpaRepository<WorkoutHistory, Long>, WorkoutHistoryRepositoryCustom {
 

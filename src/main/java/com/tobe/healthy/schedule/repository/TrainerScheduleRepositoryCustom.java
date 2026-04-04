@@ -11,9 +11,9 @@ import com.tobe.healthy.lessonhistory.presentation.dto.in.UnwrittenLessonHistory
 import com.tobe.healthy.schedule.presentation.dto.in.CommandRegisterSchedule;
 import com.tobe.healthy.schedule.presentation.dto.out.FeedbackNotificationToTrainer;
 import com.tobe.healthy.schedule.presentation.dto.out.RetrieveTrainerScheduleByLessonDtResult;
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo;
+import com.tobe.healthy.schedule.domain.ReservationStatus;
+import com.tobe.healthy.schedule.domain.Schedule;
+import com.tobe.healthy.schedule.domain.TrainerScheduleInfo;
 
 public interface TrainerScheduleRepositoryCustom {
 

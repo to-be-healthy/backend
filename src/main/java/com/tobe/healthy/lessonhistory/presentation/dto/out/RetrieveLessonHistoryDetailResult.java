@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.tobe.healthy.common.LessonTimeFormatter;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryComment;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryFiles;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.lessonhistory.domain.LessonAttendanceStatus;
+import com.tobe.healthy.lessonhistory.domain.LessonHistory;
+import com.tobe.healthy.lessonhistory.domain.LessonHistoryComment;
+import com.tobe.healthy.lessonhistory.domain.LessonHistoryFiles;
+import com.tobe.healthy.member.domain.Member;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

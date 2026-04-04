@@ -3,7 +3,7 @@ package com.tobe.healthy.point.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.tobe.healthy.point.domain.entity.Point;
+import com.tobe.healthy.point.domain.Point;
 
 public interface PointRepositoryCustom {
 

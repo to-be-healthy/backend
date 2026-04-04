@@ -1,6 +1,6 @@
 package com.tobe.healthy.common;
 
-import com.tobe.healthy.notification.domain.entity.NotificationSenderType;
+import com.tobe.healthy.notification.domain.NotificationSenderType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

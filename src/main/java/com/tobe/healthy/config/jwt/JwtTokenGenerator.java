@@ -13,10 +13,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.tobe.healthy.common.redis.RedisService;
-import com.tobe.healthy.gym.domain.entity.Gym;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
-import com.tobe.healthy.member.domain.entity.Tokens;
+import com.tobe.healthy.gym.domain.Gym;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.MemberType;
+import com.tobe.healthy.member.domain.Tokens;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

@@ -16,7 +16,7 @@ import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.notification.application.NotificationService;
 import com.tobe.healthy.notification.presentation.dto.out.CommandNotificationStatusResult;
 import com.tobe.healthy.notification.presentation.dto.out.RetrieveNotificationWithRedDotResult.RetrieveNotificationResult;
-import com.tobe.healthy.notification.domain.entity.NotificationCategory;
+import com.tobe.healthy.notification.domain.NotificationCategory;
 
 import lombok.RequiredArgsConstructor;
 

@@ -2,8 +2,8 @@ package com.tobe.healthy.notification.presentation.dto.in;
 
 import java.util.List;
 
-import com.tobe.healthy.notification.domain.entity.NotificationCategory;
-import com.tobe.healthy.notification.domain.entity.NotificationType;
+import com.tobe.healthy.notification.domain.NotificationCategory;
+import com.tobe.healthy.notification.domain.NotificationType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

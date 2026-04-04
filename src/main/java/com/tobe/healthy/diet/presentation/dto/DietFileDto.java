@@ -1,7 +1,7 @@
 package com.tobe.healthy.diet.presentation.dto;
 
-import com.tobe.healthy.diet.domain.entity.DietFiles;
-import com.tobe.healthy.diet.domain.entity.DietType;
+import com.tobe.healthy.diet.domain.DietFiles;
+import com.tobe.healthy.diet.domain.DietType;
 
 import lombok.Builder;
 import lombok.Data;

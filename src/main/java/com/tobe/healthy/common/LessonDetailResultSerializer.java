@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.tobe.healthy.schedule.presentation.dto.out.RetrieveTrainerScheduleByLessonInfoResult.LessonDetailResult;
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
+import com.tobe.healthy.schedule.domain.ReservationStatus;
 
 public class LessonDetailResultSerializer extends JsonSerializer<LessonDetailResult> {
 

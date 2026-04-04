@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.util.ObjectUtils;
 
-import com.tobe.healthy.member.domain.entity.AlarmStatus;
+import com.tobe.healthy.member.domain.AlarmStatus;
 
 import lombok.Builder;
 import lombok.Data;

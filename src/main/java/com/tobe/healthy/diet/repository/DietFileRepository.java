@@ -2,7 +2,7 @@ package com.tobe.healthy.diet.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.tobe.healthy.diet.domain.entity.DietFiles;
+import com.tobe.healthy.diet.domain.DietFiles;
 
 public interface DietFileRepository extends JpaRepository<DietFiles, Long> {
 

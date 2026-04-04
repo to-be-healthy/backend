@@ -1,7 +1,7 @@
 package com.tobe.healthy.common.aop;
 
-import static com.tobe.healthy.point.domain.entity.Calculation.*;
-import static com.tobe.healthy.point.domain.entity.PointType.*;
+import static com.tobe.healthy.point.domain.Calculation.*;
+import static com.tobe.healthy.point.domain.PointType.*;
 
 import java.time.LocalDate;
 

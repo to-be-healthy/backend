@@ -11,9 +11,9 @@ import com.tobe.healthy.member.presentation.dto.in.ValidateCurrentPassword;
 import com.tobe.healthy.member.presentation.dto.out.MemberInfoResult;
 import com.tobe.healthy.member.presentation.dto.out.RetrieveTrainerInfo;
 import com.tobe.healthy.member.presentation.dto.out.TrainerMappingResult;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.domain.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 
 import lombok.RequiredArgsConstructor;

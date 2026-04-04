@@ -1,7 +1,7 @@
 package com.tobe.healthy.course.presentation.dto.in;
 
-import com.tobe.healthy.course.domain.entity.CourseHistoryType;
-import com.tobe.healthy.point.domain.entity.Calculation;
+import com.tobe.healthy.course.domain.CourseHistoryType;
+import com.tobe.healthy.point.domain.Calculation;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;

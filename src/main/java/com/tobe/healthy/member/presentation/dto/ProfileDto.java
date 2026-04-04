@@ -2,7 +2,7 @@ package com.tobe.healthy.member.presentation.dto;
 
 import org.springframework.util.ObjectUtils;
 
-import com.tobe.healthy.member.domain.entity.MemberProfile;
+import com.tobe.healthy.member.domain.MemberProfile;
 
 import lombok.Builder;
 import lombok.Data;

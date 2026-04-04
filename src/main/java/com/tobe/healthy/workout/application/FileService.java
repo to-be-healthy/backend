@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.file.application.LocalFileStorageService;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.workout.presentation.dto.in.RegisterFile;
 
 import lombok.RequiredArgsConstructor;

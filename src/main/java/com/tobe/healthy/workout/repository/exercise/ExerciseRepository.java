@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.tobe.healthy.workout.domain.entity.exercise.Exercise;
+import com.tobe.healthy.workout.domain.Exercise;
 
 public interface ExerciseRepository extends JpaRepository<Exercise, Long>, ExerciseRepositoryCustom {
 	Optional<Exercise> findByExerciseIdAndMemberId(Long exerciseId, Long memberId);

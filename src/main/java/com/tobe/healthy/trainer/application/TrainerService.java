@@ -2,7 +2,7 @@ package com.tobe.healthy.trainer.application;
 
 import static com.tobe.healthy.common.Utils.*;
 import static com.tobe.healthy.common.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.*;
+import static com.tobe.healthy.member.domain.MemberType.*;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -30,8 +30,8 @@ import com.tobe.healthy.gym.presentation.dto.out.GymDto;
 import com.tobe.healthy.member.presentation.dto.MemberDto;
 import com.tobe.healthy.member.presentation.dto.out.MemberDetailResult;
 import com.tobe.healthy.member.presentation.dto.out.MemberInTeamResult;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.NonMember;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.NonMember;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.member.repository.NonMemberRepository;
 import com.tobe.healthy.point.presentation.dto.out.PointDto;
@@ -42,7 +42,7 @@ import com.tobe.healthy.trainer.presentation.dto.TrainerMemberMappingDto;
 import com.tobe.healthy.trainer.presentation.dto.in.MemberInviteCommand;
 import com.tobe.healthy.trainer.presentation.dto.in.MemberLessonCommand;
 import com.tobe.healthy.trainer.presentation.dto.out.MemberInviteResultCommand;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.domain.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 
 import lombok.RequiredArgsConstructor;

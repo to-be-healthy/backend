@@ -1,7 +1,7 @@
 package com.tobe.healthy.notification.presentation.dto.out;
 
 import com.querydsl.core.annotations.QueryProjection;
-import com.tobe.healthy.notification.domain.entity.NotificationCategory;
+import com.tobe.healthy.notification.domain.NotificationCategory;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

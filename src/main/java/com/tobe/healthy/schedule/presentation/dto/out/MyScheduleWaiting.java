@@ -3,7 +3,7 @@ package com.tobe.healthy.schedule.presentation.dto.out;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
+import com.tobe.healthy.schedule.domain.ScheduleWaiting;
 
 import lombok.Builder;
 import lombok.Data;

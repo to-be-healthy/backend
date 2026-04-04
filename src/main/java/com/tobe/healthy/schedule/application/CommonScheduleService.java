@@ -3,8 +3,8 @@ package com.tobe.healthy.schedule.application;
 import static com.tobe.healthy.common.Utils.*;
 import static com.tobe.healthy.common.error.ErrorCode.*;
 import static com.tobe.healthy.common.event.EventType.*;
-import static com.tobe.healthy.notification.domain.entity.NotificationCategory.*;
-import static com.tobe.healthy.notification.domain.entity.NotificationType.*;
+import static com.tobe.healthy.notification.domain.NotificationCategory.*;
+import static com.tobe.healthy.notification.domain.NotificationType.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,11 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.common.event.CustomEventPublisher;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.notification.presentation.dto.in.CommandSendNotification;
 import com.tobe.healthy.schedule.presentation.dto.out.ScheduleIdInfo;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.domain.Schedule;
 import com.tobe.healthy.schedule.repository.common.CommonScheduleRepository;
 
 import lombok.RequiredArgsConstructor;

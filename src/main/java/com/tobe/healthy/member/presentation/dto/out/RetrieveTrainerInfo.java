@@ -2,8 +2,8 @@ package com.tobe.healthy.member.presentation.dto.out;
 
 import com.tobe.healthy.gym.presentation.dto.out.GymDto;
 import com.tobe.healthy.member.presentation.dto.ProfileDto;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.trainer.domain.TrainerMemberMapping;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

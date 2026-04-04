@@ -1,8 +1,8 @@
 package com.tobe.healthy.course.repository;
 
-import static com.tobe.healthy.course.domain.entity.CourseHistoryType.*;
-import static com.tobe.healthy.course.domain.entity.QCourse.*;
-import static com.tobe.healthy.course.domain.entity.QCourseHistory.*;
+import static com.tobe.healthy.course.domain.CourseHistoryType.*;
+import static com.tobe.healthy.course.domain.QCourse.*;
+import static com.tobe.healthy.course.domain.QCourseHistory.*;
 
 import java.util.List;
 
@@ -17,8 +17,8 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.course.domain.entity.CourseHistory;
-import com.tobe.healthy.course.domain.entity.CourseHistoryType;
+import com.tobe.healthy.course.domain.CourseHistory;
+import com.tobe.healthy.course.domain.CourseHistoryType;
 
 import lombok.RequiredArgsConstructor;
 

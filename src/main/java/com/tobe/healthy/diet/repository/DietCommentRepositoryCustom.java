@@ -3,7 +3,7 @@ package com.tobe.healthy.diet.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.tobe.healthy.diet.domain.entity.DietComment;
+import com.tobe.healthy.diet.domain.DietComment;
 
 public interface DietCommentRepositoryCustom {
 

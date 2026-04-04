@@ -1,6 +1,6 @@
 package com.tobe.healthy.member.presentation.dto.in;
 
-import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.member.domain.MemberType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;

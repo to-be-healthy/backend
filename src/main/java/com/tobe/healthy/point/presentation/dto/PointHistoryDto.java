@@ -2,9 +2,9 @@ package com.tobe.healthy.point.presentation.dto;
 
 import java.time.LocalDateTime;
 
-import com.tobe.healthy.point.domain.entity.Calculation;
-import com.tobe.healthy.point.domain.entity.Point;
-import com.tobe.healthy.point.domain.entity.PointType;
+import com.tobe.healthy.point.domain.Calculation;
+import com.tobe.healthy.point.domain.Point;
+import com.tobe.healthy.point.domain.PointType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

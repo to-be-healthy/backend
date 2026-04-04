@@ -1,6 +1,6 @@
 package com.tobe.healthy.config.security;
 
-import static com.tobe.healthy.member.domain.entity.MemberType.*;
+import static com.tobe.healthy.member.domain.MemberType.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,8 +10,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.MemberType;
 
 import lombok.Data;
 import lombok.ToString;

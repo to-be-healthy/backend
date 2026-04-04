@@ -3,8 +3,8 @@ package com.tobe.healthy.member.presentation.dto.in;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.SocialType;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.SocialType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;

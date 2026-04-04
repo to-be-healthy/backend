@@ -3,9 +3,9 @@ package com.tobe.healthy.lessonhistory.presentation.dto.out;
 import java.util.List;
 
 import com.tobe.healthy.common.LessonTimeFormatter;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.lessonhistory.domain.LessonHistory;
+import com.tobe.healthy.schedule.domain.ReservationStatus;
+import com.tobe.healthy.schedule.domain.Schedule;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

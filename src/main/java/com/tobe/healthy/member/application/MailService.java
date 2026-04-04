@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.tobe.healthy.common.error.CustomException;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

@@ -8,8 +8,8 @@ import org.springframework.data.domain.Pageable;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.lessonhistory.presentation.dto.in.RetrieveLessonHistoryByDateCond;
 import com.tobe.healthy.lessonhistory.presentation.dto.out.RetrieveLessonHistoryByDateCondResult;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
-import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.lessonhistory.domain.LessonHistory;
+import com.tobe.healthy.member.domain.MemberType;
 
 public interface LessonHistoryRepositoryCustom {
 	LessonHistory findById(Long lessonHistoryId, Long memberId, MemberType memberType);

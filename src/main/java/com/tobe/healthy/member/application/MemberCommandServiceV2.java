@@ -10,7 +10,7 @@ import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.file.application.LocalFileStorageService;
 import com.tobe.healthy.member.presentation.dto.in.CommandRegisterMemberProfile;
 import com.tobe.healthy.member.presentation.dto.out.RegisterMemberProfileResult;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.tobe.healthy.workout.presentation.dto;
 
-import com.tobe.healthy.workout.domain.entity.workoutHistory.CompletedExercise;
+import com.tobe.healthy.workout.domain.CompletedExercise;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Positive;

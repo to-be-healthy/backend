@@ -3,7 +3,7 @@ package com.tobe.healthy.trainer.respository;
 import java.util.List;
 import java.util.Optional;
 
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.domain.TrainerMemberMapping;
 
 public interface TrainerMemberMappingRepositoryCustom {
 	List<Long> findAllTrainerIds();

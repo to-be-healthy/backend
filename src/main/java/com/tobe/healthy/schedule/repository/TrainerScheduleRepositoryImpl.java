@@ -1,9 +1,10 @@
 package com.tobe.healthy.schedule.repository;
 
-import static com.tobe.healthy.lessonhistory.domain.entity.QLessonHistory.*;
-import static com.tobe.healthy.member.domain.entity.QMember.*;
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.*;
-import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.*;
+
+import static com.tobe.healthy.lessonhistory.domain.QLessonHistory.*;
+import static com.tobe.healthy.member.domain.QMember.*;
+import static com.tobe.healthy.schedule.domain.QSchedule.*;
+import static com.tobe.healthy.schedule.domain.QScheduleWaiting.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -24,16 +25,16 @@ import com.querydsl.core.types.dsl.DatePath;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tobe.healthy.lessonhistory.presentation.dto.in.UnwrittenLessonHistorySearchCond;
-import com.tobe.healthy.lessonhistory.domain.entity.WritingStatus;
-import com.tobe.healthy.member.domain.entity.AlarmStatus;
-import com.tobe.healthy.member.domain.entity.QMember;
+import com.tobe.healthy.lessonhistory.domain.WritingStatus;
+import com.tobe.healthy.member.domain.AlarmStatus;
+import com.tobe.healthy.member.domain.QMember;
 import com.tobe.healthy.schedule.presentation.dto.in.CommandRegisterSchedule;
 import com.tobe.healthy.schedule.presentation.dto.out.FeedbackNotificationToTrainer;
 import com.tobe.healthy.schedule.presentation.dto.out.RetrieveTrainerScheduleByLessonDtResult;
 import com.tobe.healthy.schedule.presentation.dto.out.RetrieveTrainerScheduleByLessonInfoResult;
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo;
+import com.tobe.healthy.schedule.domain.ReservationStatus;
+import com.tobe.healthy.schedule.domain.Schedule;
+import com.tobe.healthy.schedule.domain.TrainerScheduleInfo;
 
 import lombok.RequiredArgsConstructor;
 

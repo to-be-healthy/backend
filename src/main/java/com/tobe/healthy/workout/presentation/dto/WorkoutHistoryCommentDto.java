@@ -3,8 +3,8 @@ package com.tobe.healthy.workout.presentation.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.tobe.healthy.member.domain.entity.MemberProfile;
-import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryComment;
+import com.tobe.healthy.member.domain.MemberProfile;
+import com.tobe.healthy.workout.domain.WorkoutHistoryComment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

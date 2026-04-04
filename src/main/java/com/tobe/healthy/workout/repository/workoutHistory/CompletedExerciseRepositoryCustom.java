@@ -2,7 +2,7 @@ package com.tobe.healthy.workout.repository.workoutHistory;
 
 import java.util.List;
 
-import com.tobe.healthy.workout.domain.entity.workoutHistory.CompletedExercise;
+import com.tobe.healthy.workout.domain.CompletedExercise;
 
 public interface CompletedExerciseRepositoryCustom {
 

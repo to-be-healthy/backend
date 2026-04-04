@@ -3,8 +3,8 @@ package com.tobe.healthy.schedule.presentation.dto.out;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.schedule.domain.Schedule;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

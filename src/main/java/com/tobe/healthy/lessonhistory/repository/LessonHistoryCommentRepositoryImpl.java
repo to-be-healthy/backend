@@ -1,13 +1,13 @@
 package com.tobe.healthy.lessonhistory.repository;
 
-import static com.tobe.healthy.lessonhistory.domain.entity.QLessonHistoryComment.*;
+import static com.tobe.healthy.lessonhistory.domain.QLessonHistoryComment.*;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryComment;
+import com.tobe.healthy.lessonhistory.domain.LessonHistoryComment;
 
 import lombok.RequiredArgsConstructor;
 

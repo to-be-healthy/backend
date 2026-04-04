@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryComment;
+import com.tobe.healthy.lessonhistory.domain.LessonHistoryComment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

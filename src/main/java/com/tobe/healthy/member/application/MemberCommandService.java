@@ -36,14 +36,14 @@ import com.tobe.healthy.member.presentation.dto.out.CommandChangeNameResult;
 import com.tobe.healthy.member.presentation.dto.out.DeleteMemberProfileResult;
 import com.tobe.healthy.member.presentation.dto.out.MemberChangeAlarmResult;
 import com.tobe.healthy.member.presentation.dto.out.RegisterMemberProfileResult;
-import com.tobe.healthy.member.domain.entity.AlarmStatus;
-import com.tobe.healthy.member.domain.entity.AlarmType;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.AlarmStatus;
+import com.tobe.healthy.member.domain.AlarmType;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.point.repository.PointRepository;
 import com.tobe.healthy.push.repository.MemberTokenRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.domain.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 
 import lombok.RequiredArgsConstructor;

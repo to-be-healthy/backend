@@ -2,7 +2,7 @@ package com.tobe.healthy.member.application;
 
 import static com.tobe.healthy.common.Utils.*;
 import static com.tobe.healthy.common.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.SocialType.*;
+import static com.tobe.healthy.member.domain.SocialType.*;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +14,8 @@ import com.tobe.healthy.member.presentation.dto.in.CommandValidateEmail;
 import com.tobe.healthy.member.presentation.dto.in.FindMemberUserId;
 import com.tobe.healthy.member.presentation.dto.in.FindMemberUserId.FindMemberUserIdResult;
 import com.tobe.healthy.member.presentation.dto.out.InvitationMappingResult;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.NonMember;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.NonMember;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.member.repository.NonMemberRepository;
 

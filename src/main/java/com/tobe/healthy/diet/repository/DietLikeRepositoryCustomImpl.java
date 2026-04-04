@@ -1,6 +1,6 @@
 package com.tobe.healthy.diet.repository;
 
-import static com.tobe.healthy.diet.domain.entity.QDietLike.*;
+import static com.tobe.healthy.diet.domain.QDietLike.*;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;

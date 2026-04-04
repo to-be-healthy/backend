@@ -11,11 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.error.CustomException;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.workout.presentation.dto.ExerciseDto;
 import com.tobe.healthy.workout.presentation.dto.in.CustomExerciseAddCommand;
-import com.tobe.healthy.workout.domain.entity.exercise.Exercise;
-import com.tobe.healthy.workout.domain.entity.exercise.ExerciseCategory;
+import com.tobe.healthy.workout.domain.Exercise;
+import com.tobe.healthy.workout.domain.ExerciseCategory;
 import com.tobe.healthy.workout.repository.exercise.ExerciseRepository;
 
 import lombok.RequiredArgsConstructor;

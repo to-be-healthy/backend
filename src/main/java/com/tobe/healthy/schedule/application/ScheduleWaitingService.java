@@ -13,12 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.presentation.dto.CourseDto;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.schedule.presentation.dto.out.FindMyScheduleWaitingResult;
 import com.tobe.healthy.schedule.presentation.dto.out.MyScheduleWaiting;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
+import com.tobe.healthy.schedule.domain.Schedule;
+import com.tobe.healthy.schedule.domain.ScheduleWaiting;
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository;
 import com.tobe.healthy.schedule.repository.waiting.ScheduleWaitingRepository;
 

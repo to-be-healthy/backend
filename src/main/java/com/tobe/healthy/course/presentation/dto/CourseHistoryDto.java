@@ -2,9 +2,9 @@ package com.tobe.healthy.course.presentation.dto;
 
 import java.time.LocalDateTime;
 
-import com.tobe.healthy.course.domain.entity.CourseHistory;
-import com.tobe.healthy.course.domain.entity.CourseHistoryType;
-import com.tobe.healthy.point.domain.entity.Calculation;
+import com.tobe.healthy.course.domain.CourseHistory;
+import com.tobe.healthy.course.domain.CourseHistoryType;
+import com.tobe.healthy.point.domain.Calculation;
 
 import lombok.Builder;
 import lombok.Data;

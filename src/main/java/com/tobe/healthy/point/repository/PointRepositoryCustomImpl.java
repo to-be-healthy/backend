@@ -1,6 +1,6 @@
 package com.tobe.healthy.point.repository;
 
-import static com.tobe.healthy.point.domain.entity.QPoint.*;
+import static com.tobe.healthy.point.domain.QPoint.*;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.point.domain.entity.Point;
+import com.tobe.healthy.point.domain.Point;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,7 +32,7 @@ public class PointRepositoryCustomImpl implements PointRepositoryCustom {
 			.from(point1)
 			.where(pointMemberIdEq(memberId), convertDateFormat(searchDate))
 			.fetchOne();
-		List<com.tobe.healthy.point.domain.entity.Point> points = queryFactory
+		List<Point> points = queryFactory
 			.select(point1)
 			.from(point1)
 			.where(pointMemberIdEq(memberId), convertDateFormat(searchDate))

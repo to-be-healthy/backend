@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.querydsl.core.annotations.QueryProjection;
-import com.tobe.healthy.diet.domain.entity.Diet;
+import com.tobe.healthy.diet.domain.Diet;
 import com.tobe.healthy.member.presentation.dto.MemberDto;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

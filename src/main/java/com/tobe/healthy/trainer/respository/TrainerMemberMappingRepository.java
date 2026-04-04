@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.domain.TrainerMemberMapping;
 
 public interface TrainerMemberMappingRepository
 	extends JpaRepository<TrainerMemberMapping, Long>, TrainerMemberMappingRepositoryCustom {

@@ -2,10 +2,10 @@ package com.tobe.healthy.common.event;
 
 import static com.tobe.healthy.common.LessonTimeFormatter.*;
 import static com.tobe.healthy.common.error.ErrorCode.*;
-import static com.tobe.healthy.course.domain.entity.CourseHistoryType.*;
-import static com.tobe.healthy.notification.domain.entity.NotificationCategory.*;
-import static com.tobe.healthy.notification.domain.entity.NotificationType.*;
-import static com.tobe.healthy.point.domain.entity.Calculation.*;
+import static com.tobe.healthy.course.domain.CourseHistoryType.*;
+import static com.tobe.healthy.notification.domain.NotificationCategory.*;
+import static com.tobe.healthy.notification.domain.NotificationType.*;
+import static com.tobe.healthy.point.domain.Calculation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,8 +21,8 @@ import com.tobe.healthy.course.presentation.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.notification.application.NotificationService;
 import com.tobe.healthy.notification.presentation.dto.in.CommandSendNotification;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
+import com.tobe.healthy.schedule.domain.Schedule;
+import com.tobe.healthy.schedule.domain.ScheduleWaiting;
 import com.tobe.healthy.schedule.repository.common.CommonScheduleRepository;
 import com.tobe.healthy.schedule.repository.waiting.ScheduleWaitingRepository;
 

@@ -1,7 +1,7 @@
 package com.tobe.healthy.diet.repository;
 
-import static com.tobe.healthy.diet.domain.entity.QDietComment.*;
-import static com.tobe.healthy.member.domain.entity.QMember.*;
+import static com.tobe.healthy.diet.domain.QDietComment.*;
+import static com.tobe.healthy.member.domain.QMember.*;
 
 import java.util.List;
 
@@ -13,8 +13,8 @@ import org.springframework.util.ObjectUtils;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.diet.domain.entity.DietComment;
-import com.tobe.healthy.member.domain.entity.QMemberProfile;
+import com.tobe.healthy.diet.domain.DietComment;
+import com.tobe.healthy.member.domain.QMemberProfile;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,6 +1,6 @@
 package com.tobe.healthy.workout.presentation.dto;
 
-import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistoryFiles;
+import com.tobe.healthy.workout.domain.WorkoutHistoryFiles;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

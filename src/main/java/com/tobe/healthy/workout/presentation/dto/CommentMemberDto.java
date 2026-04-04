@@ -1,7 +1,7 @@
 package com.tobe.healthy.workout.presentation.dto;
 
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberProfile;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.MemberProfile;
 
 import lombok.Builder;
 import lombok.Data;

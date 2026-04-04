@@ -1,6 +1,6 @@
 package com.tobe.healthy.workout.presentation.dto.in;
 
-import com.tobe.healthy.workout.domain.entity.exercise.ExerciseCategory;
+import com.tobe.healthy.workout.domain.ExerciseCategory;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

@@ -5,8 +5,8 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.tobe.healthy.diet.domain.entity.Diet;
-import com.tobe.healthy.diet.domain.entity.DietComment;
+import com.tobe.healthy.diet.domain.Diet;
+import com.tobe.healthy.diet.domain.DietComment;
 
 public interface DietCommentRepository extends JpaRepository<DietComment, Long>, DietCommentRepositoryCustom {
 

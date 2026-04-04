@@ -2,7 +2,7 @@ package com.tobe.healthy.schedule.presentation.dto.out;
 
 import java.util.List;
 
-import com.tobe.healthy.member.domain.entity.AlarmStatus;
+import com.tobe.healthy.member.domain.AlarmStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

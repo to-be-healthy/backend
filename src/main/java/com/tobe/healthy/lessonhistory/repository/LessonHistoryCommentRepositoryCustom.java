@@ -2,7 +2,7 @@ package com.tobe.healthy.lessonhistory.repository;
 
 import org.springframework.stereotype.Repository;
 
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryComment;
+import com.tobe.healthy.lessonhistory.domain.LessonHistoryComment;
 
 @Repository
 public interface LessonHistoryCommentRepositoryCustom {

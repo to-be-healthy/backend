@@ -1,7 +1,7 @@
 package com.tobe.healthy.schedule.repository.waiting;
 
-import static com.tobe.healthy.schedule.domain.entity.QSchedule.*;
-import static com.tobe.healthy.schedule.domain.entity.QScheduleWaiting.*;
+import static com.tobe.healthy.schedule.domain.QSchedule.*;
+import static com.tobe.healthy.schedule.domain.QScheduleWaiting.*;
 import static java.util.stream.Collectors.*;
 
 import java.time.LocalDate;
@@ -14,9 +14,9 @@ import org.springframework.util.ObjectUtils;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.member.domain.entity.QMember;
+import com.tobe.healthy.member.domain.QMember;
 import com.tobe.healthy.schedule.presentation.dto.out.MyScheduleWaiting;
-import com.tobe.healthy.schedule.domain.entity.ScheduleWaiting;
+import com.tobe.healthy.schedule.domain.ScheduleWaiting;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,7 +1,7 @@
 package com.tobe.healthy.trainer.respository;
 
-import static com.tobe.healthy.member.domain.entity.QMember.*;
-import static com.tobe.healthy.trainer.domain.entity.QTrainerMemberMapping.*;
+import static com.tobe.healthy.member.domain.QMember.*;
+import static com.tobe.healthy.trainer.domain.QTrainerMemberMapping.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.domain.TrainerMemberMapping;
 
 import lombok.RequiredArgsConstructor;
 

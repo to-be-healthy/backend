@@ -1,8 +1,8 @@
 package com.tobe.healthy.member.presentation.dto.out;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.SocialType;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.SocialType;
 
 import lombok.Builder;
 import lombok.Data;

@@ -6,10 +6,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.point.domain.entity.Calculation;
-import com.tobe.healthy.point.domain.entity.Point;
-import com.tobe.healthy.point.domain.entity.PointType;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.point.domain.Calculation;
+import com.tobe.healthy.point.domain.Point;
+import com.tobe.healthy.point.domain.PointType;
 
 public interface PointRepository extends JpaRepository<Point, Long>, PointRepositoryCustom {
 

@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.tobe.healthy.push.domain.entity.MemberToken;
+import com.tobe.healthy.push.domain.MemberToken;
 
 public interface MemberTokenRepository extends JpaRepository<MemberToken, Long> {
 

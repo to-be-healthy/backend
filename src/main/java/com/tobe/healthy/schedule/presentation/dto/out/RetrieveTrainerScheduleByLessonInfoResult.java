@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.tobe.healthy.common.LessonDetailResultSerializer;
 import com.tobe.healthy.common.LessonTimeFormatter;
-import com.tobe.healthy.schedule.domain.entity.ReservationStatus;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
+import com.tobe.healthy.schedule.domain.ReservationStatus;
+import com.tobe.healthy.schedule.domain.Schedule;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

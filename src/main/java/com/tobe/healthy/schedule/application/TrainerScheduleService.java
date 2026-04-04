@@ -15,8 +15,8 @@ import com.tobe.healthy.schedule.presentation.dto.out.RetrieveApplicantSchedule;
 import com.tobe.healthy.schedule.presentation.dto.out.RetrieveTrainerDefaultLessonTimeResult;
 import com.tobe.healthy.schedule.presentation.dto.out.RetrieveTrainerScheduleByLessonDtResult;
 import com.tobe.healthy.schedule.presentation.dto.out.RetrieveTrainerScheduleByLessonInfoResult;
-import com.tobe.healthy.schedule.domain.entity.Schedule;
-import com.tobe.healthy.schedule.domain.entity.TrainerScheduleInfo;
+import com.tobe.healthy.schedule.domain.Schedule;
+import com.tobe.healthy.schedule.domain.TrainerScheduleInfo;
 import com.tobe.healthy.schedule.repository.TrainerScheduleInfoRepository;
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository;
 

@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.tobe.healthy.notification.domain.entity.Notification;
+import com.tobe.healthy.notification.domain.Notification;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -10,21 +10,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tobe.healthy.common.KotlinCustomPaging;
 import com.tobe.healthy.common.NotificationSenderInfo;
-import com.tobe.healthy.member.domain.entity.AlarmStatus;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.AlarmStatus;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.notification.presentation.dto.in.CommandSendNotification;
 import com.tobe.healthy.notification.presentation.dto.out.CommandNotificationStatusResult;
 import com.tobe.healthy.notification.presentation.dto.out.CommandSendNotificationResult;
 import com.tobe.healthy.notification.presentation.dto.out.RetrieveNotificationWithRedDotResult;
 import com.tobe.healthy.notification.presentation.dto.out.RetrieveNotificationWithRedDotResult.RetrieveNotificationResult;
-import com.tobe.healthy.notification.domain.entity.Notification;
-import com.tobe.healthy.notification.domain.entity.NotificationCategory;
-import com.tobe.healthy.notification.domain.entity.NotificationType;
+import com.tobe.healthy.notification.domain.Notification;
+import com.tobe.healthy.notification.domain.NotificationCategory;
+import com.tobe.healthy.notification.domain.NotificationType;
 import com.tobe.healthy.notification.repository.NotificationRepository;
 import com.tobe.healthy.push.application.PushCommandService;
 import com.tobe.healthy.push.presentation.dto.in.CommandSendPushAlarm;
-import com.tobe.healthy.push.domain.entity.MemberToken;
+import com.tobe.healthy.push.domain.MemberToken;
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository;
 
 import lombok.RequiredArgsConstructor;

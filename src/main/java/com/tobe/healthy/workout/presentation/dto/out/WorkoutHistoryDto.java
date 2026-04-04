@@ -9,12 +9,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.querydsl.core.annotations.QueryProjection;
 import com.tobe.healthy.member.presentation.dto.MemberDto;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberProfile;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.MemberProfile;
 import com.tobe.healthy.workout.presentation.dto.CompletedExerciseDto;
 import com.tobe.healthy.workout.presentation.dto.WorkoutHistoryFileDto;
 import com.tobe.healthy.workout.presentation.dto.in.HistoryAddCommand;
-import com.tobe.healthy.workout.domain.entity.workoutHistory.WorkoutHistory;
+import com.tobe.healthy.workout.domain.WorkoutHistory;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

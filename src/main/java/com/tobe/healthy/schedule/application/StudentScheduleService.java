@@ -1,7 +1,7 @@
 package com.tobe.healthy.schedule.application;
 
 import static com.tobe.healthy.common.error.ErrorCode.*;
-import static com.tobe.healthy.schedule.domain.entity.ReservationStatus.*;
+import static com.tobe.healthy.schedule.domain.ReservationStatus.*;
 import static java.time.LocalTime.*;
 
 import java.time.LocalDate;
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.schedule.presentation.dto.in.StudentScheduleCond;
 import com.tobe.healthy.schedule.presentation.dto.out.MyReservation;
 import com.tobe.healthy.schedule.presentation.dto.out.MyReservationResponse;
@@ -22,7 +22,7 @@ import com.tobe.healthy.schedule.presentation.dto.out.ReservationDaysResult;
 import com.tobe.healthy.schedule.presentation.dto.out.ScheduleCommandResponse;
 import com.tobe.healthy.schedule.presentation.dto.out.ScheduleCommandResult;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.domain.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 
 import lombok.RequiredArgsConstructor;

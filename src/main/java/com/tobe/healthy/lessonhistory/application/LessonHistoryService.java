@@ -17,8 +17,8 @@ import com.tobe.healthy.lessonhistory.presentation.dto.out.RetrieveLessonHistory
 import com.tobe.healthy.lessonhistory.presentation.dto.out.RetrieveLessonHistoryDetailResult;
 import com.tobe.healthy.lessonhistory.presentation.dto.out.RetrieveUnwrittenLessonHistory;
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository;
-import com.tobe.healthy.member.domain.entity.Member;
-import com.tobe.healthy.member.domain.entity.MemberType;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.MemberType;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository;
 

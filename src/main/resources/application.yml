@@ -85,7 +85,7 @@ oauth:
     key-path: ${OAUTH_APPLE_KEY_PATH}
 
 file:
-  upload-dir: ${FILE_UPLOAD_DIR:/data/files}
+  upload-dir: ${FILE_UPLOAD_DIR:./build/local-files}
   base-url: ${FILE_BASE_URL:http://localhost:8080}
 
 firebase:
@@ -142,6 +142,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
+file:
+  upload-dir: ${FILE_UPLOAD_DIR:./build/local-files}
 
 decorator:
   datasource:

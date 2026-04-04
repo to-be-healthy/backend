@@ -1,6 +1,6 @@
 package com.tobe.healthy.diet.presentation.dto.in;
 
-import com.tobe.healthy.diet.domain.entity.DietType;
+import com.tobe.healthy.diet.domain.DietType;
 
 import lombok.Data;
 import lombok.ToString;

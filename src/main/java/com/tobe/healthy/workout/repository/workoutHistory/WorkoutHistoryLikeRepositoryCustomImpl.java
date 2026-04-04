@@ -1,6 +1,6 @@
 package com.tobe.healthy.workout.repository.workoutHistory;
 
-import static com.tobe.healthy.workout.domain.entity.workoutHistory.QWorkoutHistoryLike.*;
+import static com.tobe.healthy.workout.domain.QWorkoutHistoryLike.*;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;

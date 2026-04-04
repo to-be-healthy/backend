@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.tobe.healthy.common.LessonTimeFormatter;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonAttendanceStatus;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistory;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryFiles;
-import com.tobe.healthy.lessonhistory.domain.entity.LessonHistoryReadStatus;
+import com.tobe.healthy.lessonhistory.domain.LessonAttendanceStatus;
+import com.tobe.healthy.lessonhistory.domain.LessonHistory;
+import com.tobe.healthy.lessonhistory.domain.LessonHistoryFiles;
+import com.tobe.healthy.lessonhistory.domain.LessonHistoryReadStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

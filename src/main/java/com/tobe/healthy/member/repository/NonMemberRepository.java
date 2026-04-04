@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.tobe.healthy.member.domain.entity.NonMember;
+import com.tobe.healthy.member.domain.NonMember;
 
 public interface NonMemberRepository extends JpaRepository<NonMember, Long> {
 

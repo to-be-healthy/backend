@@ -15,11 +15,11 @@ import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.diet.presentation.dto.DietCommentDto;
 import com.tobe.healthy.diet.presentation.dto.in.DietCommentAddCommand;
-import com.tobe.healthy.diet.domain.entity.Diet;
-import com.tobe.healthy.diet.domain.entity.DietComment;
+import com.tobe.healthy.diet.domain.Diet;
+import com.tobe.healthy.diet.domain.DietComment;
 import com.tobe.healthy.diet.repository.DietCommentRepository;
 import com.tobe.healthy.diet.repository.DietRepository;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

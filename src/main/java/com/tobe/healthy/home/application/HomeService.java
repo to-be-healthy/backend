@@ -1,7 +1,7 @@
 package com.tobe.healthy.home.application;
 
 import static com.tobe.healthy.common.error.ErrorCode.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.*;
+import static com.tobe.healthy.member.domain.MemberType.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,7 +21,7 @@ import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository;
 import com.tobe.healthy.member.presentation.dto.out.MemberInTeamResult;
 import com.tobe.healthy.member.presentation.dto.out.StudentHomeResult;
 import com.tobe.healthy.member.presentation.dto.out.TrainerHomeResult;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.notification.application.NotificationService;
 import com.tobe.healthy.point.presentation.dto.out.PointDto;
@@ -31,7 +31,7 @@ import com.tobe.healthy.schedule.presentation.dto.out.MyReservation;
 import com.tobe.healthy.schedule.presentation.dto.out.RetrieveTrainerScheduleByLessonDtResult;
 import com.tobe.healthy.schedule.repository.TrainerScheduleRepository;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.domain.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 
 import lombok.RequiredArgsConstructor;

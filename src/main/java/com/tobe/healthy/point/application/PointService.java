@@ -2,9 +2,9 @@ package com.tobe.healthy.point.application;
 
 import static com.tobe.healthy.common.error.ErrorCode.*;
 import static com.tobe.healthy.course.presentation.dto.CourseStatus.*;
-import static com.tobe.healthy.member.domain.entity.MemberType.*;
-import static com.tobe.healthy.point.domain.entity.Calculation.*;
-import static com.tobe.healthy.point.domain.entity.PointType.*;
+import static com.tobe.healthy.member.domain.MemberType.*;
+import static com.tobe.healthy.point.domain.Calculation.*;
+import static com.tobe.healthy.point.domain.PointType.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,18 +24,18 @@ import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.presentation.dto.CourseDto;
 import com.tobe.healthy.course.presentation.dto.CourseStatus;
 import com.tobe.healthy.course.repository.CourseRepository;
-import com.tobe.healthy.member.domain.entity.Member;
+import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.point.presentation.dto.PointHistoryDto;
 import com.tobe.healthy.point.presentation.dto.TempRankDto;
 import com.tobe.healthy.point.presentation.dto.out.PointDto;
-import com.tobe.healthy.point.domain.entity.Calculation;
-import com.tobe.healthy.point.domain.entity.Point;
-import com.tobe.healthy.point.domain.entity.PointType;
+import com.tobe.healthy.point.domain.Calculation;
+import com.tobe.healthy.point.domain.Point;
+import com.tobe.healthy.point.domain.PointType;
 import com.tobe.healthy.point.repository.PointRepository;
 import com.tobe.healthy.schedule.presentation.dto.out.MyReservation;
 import com.tobe.healthy.schedule.repository.student.StudentScheduleRepository;
-import com.tobe.healthy.trainer.domain.entity.TrainerMemberMapping;
+import com.tobe.healthy.trainer.domain.TrainerMemberMapping;
 import com.tobe.healthy.trainer.respository.TrainerMemberMappingRepository;
 
 import lombok.RequiredArgsConstructor;
