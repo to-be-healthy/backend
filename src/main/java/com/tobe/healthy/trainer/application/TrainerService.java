@@ -241,7 +241,7 @@ public class TrainerService {
 	}
 
 	private boolean isRemainLessonCnt(CourseDto courseDto) {
-		return courseDto.getCompletedLessonCnt() != courseDto.getTotalLessonCnt();
+		return courseDto.completedLessonCnt() != courseDto.totalLessonCnt();
 	}
 
 	public void refundStudentOfTrainer(Member trainer, Long memberId) {
@@ -249,7 +249,7 @@ public class TrainerService {
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		CourseDto courseDto = courseService.getNowUsingCourse(memberId);
 		if (courseDto != null) {
-			courseService.deleteCourseAndCancelReservation(trainer.getId(), courseDto.getCourseId());
+			courseService.deleteCourseAndCancelReservation(trainer.getId(), courseDto.courseId());
 		}
 		mappingRepository.deleteByTrainerIdAndMemberId(trainer.getId(), member.getId());
 		log.info("[학생 환불] trainer: {}, member: {}", trainer, member);

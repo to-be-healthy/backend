@@ -54,7 +54,7 @@ public class PointAspect {
 	 */
 	@AfterReturning(value = "addWorkoutHistory()", returning = "returnValue")
 	public void plusPointWhenPostWorkout(JoinPoint joinPoint, Object returnValue) {
-		Long memberId = ((WorkoutHistoryDto)returnValue).getMember().getId();
+		Long memberId = ((WorkoutHistoryDto)returnValue).member().id();
 		//메서드가 호출되는 시점에 스프링 컨테이너에 등록된 Bean을 조회 (지연조회)
 		PointService pointService = pointServiceProvider.getObject();
 		pointService.updatePoint(memberId, WORKOUT, PLUS, ONE_POINT);
@@ -66,7 +66,7 @@ public class PointAspect {
 	@AfterReturning(value = "addDiet()", returning = "returnValue")
 	public void plusPointWhenPostDiet(JoinPoint joinPoint, Object returnValue) {
 		DietDto dietDto = (DietDto)returnValue;
-		Long memberId = dietDto.member().getId();
+		Long memberId = dietDto.member().id();
 		if (!dietDto.eatDate().isEqual(LocalDate.now()))
 			return;
 

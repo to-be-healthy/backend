@@ -127,7 +127,7 @@ public class DietService {
 		//사진 첨부
 		if (!command.fast() && !ObjectUtils.isEmpty(requestFileUrl) && isTempFile(requestFileUrl)) {
 			RegisterFile result = fileService.moveDirTempToOrigin("diet/", requestFileUrl);
-			dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), requestType));
+			dietFileRepository.save(DietFiles.create(diet, result.fileUrl(), requestType));
 
 		}
 
@@ -240,7 +240,7 @@ public class DietService {
 
 			} else { //사진있음
 				RegisterFile result = fileService.moveDirTempToOrigin("diet/", command.breakfastFile());
-				dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), BREAKFAST));
+				dietFileRepository.save(DietFiles.create(diet, result.fileUrl(), BREAKFAST));
 			}
 		}
 
@@ -253,7 +253,7 @@ public class DietService {
 
 			} else { //사진있음
 				RegisterFile result = fileService.moveDirTempToOrigin("diet/", command.lunchFile());
-				dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), LUNCH));
+				dietFileRepository.save(DietFiles.create(diet, result.fileUrl(), LUNCH));
 			}
 		}
 
@@ -266,7 +266,7 @@ public class DietService {
 
 			} else { //사진있음
 				RegisterFile result = fileService.moveDirTempToOrigin("diet/", command.dinnerFile());
-				dietFileRepository.save(DietFiles.create(diet, result.getFileUrl(), DINNER));
+				dietFileRepository.save(DietFiles.create(diet, result.fileUrl(), DINNER));
 			}
 		}
 	}

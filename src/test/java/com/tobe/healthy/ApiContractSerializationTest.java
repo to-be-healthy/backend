@@ -42,20 +42,12 @@ class ApiContractSerializationTest {
 
 	@Test
 	void notificationDtosKeepIsReadPropertyName() throws Exception {
-		CommandNotificationStatusResult statusResult = CommandNotificationStatusResult.builder()
-			.notificationId(1L)
-			.isRead(true)
-			.build();
+		CommandNotificationStatusResult statusResult = new CommandNotificationStatusResult(1L, true);
 
 		RetrieveNotificationWithRedDotResult.RetrieveNotificationResult notificationResult =
-			RetrieveNotificationWithRedDotResult.RetrieveNotificationResult.builder()
-				.notificationId(2L)
-				.notificationCategoryAndType("SCHEDULE-FEEDBACK")
-				.title("title")
-				.content("content")
-				.createdAt("2026-03-28T00:00:00")
-				.isRead(true)
-				.build();
+			new RetrieveNotificationWithRedDotResult.RetrieveNotificationResult(
+				2L, "SCHEDULE-FEEDBACK", null, null, "title", "content", "2026-03-28T00:00:00", true, null, null, null
+			);
 
 		JsonNode statusJson = objectMapper.readTree(objectMapper.writeValueAsString(statusResult));
 		JsonNode notificationJson = objectMapper.readTree(objectMapper.writeValueAsString(notificationResult));

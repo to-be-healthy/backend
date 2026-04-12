@@ -73,12 +73,12 @@ public class HomeService {
 		PointDto point = PointDto.create(yyyyMM, monthPoint, totalPoint);
 
 		//랭킹
-		RankDto rank = new RankDto();
+		RankDto rank;
 		if (isMapped) {
 			long totalMemberCnt = mappingRepository.countByTrainerId(mapping.getTrainer().getId());
-			rank.setRanking(mapping.getRanking());
-			rank.setLastMonthRanking(mapping.getLastMonthRanking());
-			rank.setTotalMemberCnt((int)totalMemberCnt);
+			rank = RankDto.create(mapping.getRanking(), mapping.getLastMonthRanking(), (int)totalMemberCnt);
+		} else {
+			rank = RankDto.create(0, 0, 0);
 		}
 
 		//다음 PT 예정일
@@ -119,7 +119,7 @@ public class HomeService {
 			bestStudents = bestStudents.stream()
 				.map(bestStudent -> {
 					CourseDto usingCourse = courseService.getNowUsingCourse(bestStudent.memberId());
-					return bestStudent.withCourseId(usingCourse == null ? null : usingCourse.getCourseId());
+					return bestStudent.withCourseId(usingCourse == null ? null : usingCourse.courseId());
 				})
 				.toList();
 		}

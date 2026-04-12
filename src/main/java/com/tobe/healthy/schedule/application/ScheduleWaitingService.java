@@ -47,7 +47,7 @@ public class ScheduleWaitingService {
 		CourseDto usingCourse = courseService.getNowUsingCourse(memberId);
 		if (usingCourse == null)
 			throw new CustomException(COURSE_NOT_FOUND);
-		if (usingCourse.getRemainLessonCnt() == 0)
+		if (usingCourse.remainLessonCnt() == 0)
 			throw new CustomException(LESSON_CNT_NOT_VALID);
 
 		LocalDateTime lessonDateTime = LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime());
