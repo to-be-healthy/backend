@@ -45,7 +45,7 @@ public enum ErrorCode {
 	DATE_NOT_VALID(BAD_REQUEST, "C_032", "날짜가 유효하지 않습니다."),
 	DIET_ALREADY_EXISTS(BAD_REQUEST, "C_033", "해당 날짜에 식단기록이 존재합니다."),
 	DIET_NOT_VALID(BAD_REQUEST, "C_034", "사진 및 단식을 등록해주세요."),
-	MEMBER_LOGIN_FAILED(NOT_FOUND, "C_035", "로그인에 실패했어요."),
+	MEMBER_LOGIN_FAILED(BAD_REQUEST, "C_035", "로그인에 실패했어요."),
 	EXERCISE_ALREADY_EXISTS(BAD_REQUEST, "C_036", "이미 등록된 운동이 있습니다."),
 	RESERVATION_ALREADY_EXISTS(BAD_REQUEST, "C_037", "예약된 수업이 있어 수강권을 삭제할 수 없습니다."),
 	LESSON_CNT_MAX(BAD_REQUEST, "C_038", "수강권 횟수는 500회를 초과할 수 없습니다."),

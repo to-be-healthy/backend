@@ -1,6 +1,7 @@
 package com.tobe.healthy.member.presentation;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +39,7 @@ public class MemberAuthController {
 
 	@Operation(summary = "이메일 중복을 확인한다.")
 	@GetMapping("/validation/email")
-	public ApiResult<Boolean> validateEmailDuplication(@RequestParam @Valid CommandValidateEmail request) {
+	public ApiResult<Boolean> validateEmailDuplication(@ModelAttribute @Valid CommandValidateEmail request) {
 		return ApiResult.success("사용 가능한 이메일입니다.", memberAuthService.validateEmailDuplication(request));
 	}
 

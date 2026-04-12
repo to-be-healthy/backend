@@ -8,6 +8,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,5 +57,19 @@ public class GlobalExceptionHandler {
 		log.error("HttpMessageNotReadableException: {}", e.getMessage());
 		final ErrorResponse response = ErrorResponse.of(e.getMessage());
 		return new ResponseEntity<>(response, HttpStatusCode.valueOf(BAD_REQUEST.value()));
+	}
+
+	@ExceptionHandler(NoResourceFoundException.class)
+	protected ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException e) {
+		log.error("NoResourceFoundException => {}", e.getMessage());
+		final ErrorResponse response = ErrorResponse.of("요청한 리소스를 찾을 수 없습니다.");
+		return new ResponseEntity<>(response, NOT_FOUND);
+	}
+
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	protected ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
+		log.error("MethodArgumentTypeMismatchException => {}", e.getMessage());
+		final ErrorResponse response = ErrorResponse.of("잘못된 파라미터 값입니다: " + e.getValue());
+		return new ResponseEntity<>(response, BAD_REQUEST);
 	}
 }
