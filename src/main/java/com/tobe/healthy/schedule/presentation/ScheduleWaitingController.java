@@ -15,7 +15,6 @@ import com.tobe.healthy.schedule.application.ScheduleWaitingService;
 import com.tobe.healthy.schedule.presentation.dto.out.FindMyScheduleWaitingResult;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +30,7 @@ public class ScheduleWaitingController {
 
 	private final ScheduleWaitingService scheduleWaitingService;
 
-	@Operation(summary = "학생이 수업 대기 신청을 한다.", description = "학생이 신청완료된 수업에 대기 신청을 한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업 대기 신청 완료")
-		})
+	@Operation(summary = "학생이 수업 대기 신청을 한다.", description = "학생이 신청완료된 수업에 대기 신청을 한다.")
 	@PostMapping("/{scheduleId}")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<Boolean> registerScheduleWaiting(@PathVariable Long scheduleId,
@@ -47,10 +43,7 @@ public class ScheduleWaitingController {
 			.build();
 	}
 
-	@Operation(summary = "학생이 대기 신청을 취소한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업 대기 취소 완료")
-		})
+	@Operation(summary = "학생이 대기 신청을 취소한다.")
 	@DeleteMapping("/{scheduleId}")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<Boolean> cancelScheduleWaiting(@PathVariable Long scheduleId,
@@ -63,10 +56,7 @@ public class ScheduleWaitingController {
 			.build();
 	}
 
-	@Operation(summary = "학생이 대기중인 예약을 조회한다.", description = "학생이 대기중인 예약을 조회한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "학생이 대기중인 예약을 조회하였습니다.")
-		})
+	@Operation(summary = "학생이 대기중인 예약을 조회한다.", description = "학생이 대기중인 예약을 조회한다.")
 	@GetMapping("/my-waiting")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<FindMyScheduleWaitingResult> findAllMyScheduleWaiting(

@@ -25,7 +25,6 @@ import com.tobe.healthy.workout.domain.ExerciseCategory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,10 +39,7 @@ public class ExerciseController {
 
 	private final ExerciseService exerciseService;
 
-	@Operation(summary = "운동 카레고리 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동 종류를 반환한다.")
-	})
+	@Operation(summary = "운동 카레고리 조회")
 	@GetMapping("/category")
 	public ApiResult<List<ExerciseCategoryDto>> getExerciseCategory() {
 		return ApiResult.<List<ExerciseCategoryDto>>builder()
@@ -52,10 +48,7 @@ public class ExerciseController {
 			.build();
 	}
 
-	@Operation(summary = "운동 종류 목록 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동 종류를 반환한다.")
-	})
+	@Operation(summary = "운동 종류 목록 조회")
 	@GetMapping
 	public ApiResult<CustomPaging<ExerciseDto>> getExercise(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
@@ -68,10 +61,7 @@ public class ExerciseController {
 			.build();
 	}
 
-	@Operation(summary = "운동 종류 추가", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동 종류를 등록한다.")
-	})
+	@Operation(summary = "운동 종류 추가")
 	@PostMapping
 	public ApiResult<Void> addExerciseCustom(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Valid @RequestBody CustomExerciseAddCommand command) {
@@ -81,10 +71,7 @@ public class ExerciseController {
 			.build();
 	}
 
-	@Operation(summary = "운동 종류 삭제", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동 종류를 삭제한다.")
-	})
+	@Operation(summary = "운동 종류 삭제")
 	@DeleteMapping("/{exerciseId}")
 	public ApiResult<Void> deleteExerciseCustom(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "운동종류 ID") @PathVariable("exerciseId") Long exerciseId) {

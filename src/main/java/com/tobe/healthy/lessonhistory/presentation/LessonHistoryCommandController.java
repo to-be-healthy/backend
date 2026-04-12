@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tobe.healthy.ApiResult;
-import com.tobe.healthy.common.error.ErrorResponse;
 import com.tobe.healthy.config.security.CustomMemberDetails;
 import com.tobe.healthy.lessonhistory.application.LessonHistoryCommandService;
 import com.tobe.healthy.lessonhistory.presentation.dto.in.CommandRegisterComment;
@@ -29,9 +28,6 @@ import com.tobe.healthy.lessonhistory.presentation.dto.out.CommandUpdateLessonHi
 import com.tobe.healthy.lessonhistory.presentation.dto.out.CommandUploadFileResult;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,36 +42,7 @@ public class LessonHistoryCommandController {
 
 	@PostMapping
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	@Operation(
-		summary = "수업 일지를 등록한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업 일지를 등록하였습니다."),
-			@ApiResponse(
-				responseCode = "404(1)",
-				description = "학생을 찾을 수 없습니다.",
-				content = @Content(
-					mediaType = "application/json",
-					schema = @Schema(implementation = ErrorResponse.class)
-				)
-			),
-			@ApiResponse(
-				responseCode = "404(2)",
-				description = "트레이너를 찾을 수 없습니다.",
-				content = @Content(
-					mediaType = "application/json",
-					schema = @Schema(implementation = ErrorResponse.class)
-				)
-			),
-			@ApiResponse(
-				responseCode = "404(3)",
-				description = "일정을 찾을 수 없습니다.",
-				content = @Content(
-					mediaType = "application/json",
-					schema = @Schema(implementation = ErrorResponse.class)
-				)
-			)
-		}
-	)
+	@Operation(summary = "수업 일지를 등록한다.")
 	public ApiResult<CommandRegisterLessonHistoryResult> registerLessonHistory(
 		@RequestBody @Valid CommandRegisterLessonHistory request,
 		@AuthenticationPrincipal CustomMemberDetails member) {
@@ -85,12 +52,7 @@ public class LessonHistoryCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "게시글/댓글 작성 전에 파일을 첨부한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "게시글/댓글 작성 전에 파일을 첨부한다.")
-		}
-	)
+	@Operation(summary = "게시글/댓글 작성 전에 파일을 첨부한다.")
 	@PostMapping("/file")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<List<CommandUploadFileResult>> registerFilesOfLessonHistory(
@@ -102,13 +64,7 @@ public class LessonHistoryCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "수업일지를 수정한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업 일지를 수정하였습니다."),
-			@ApiResponse(responseCode = "404", description = "수업 일지를 찾을 수 없습니다.")
-		}
-	)
+	@Operation(summary = "수업일지를 수정한다.")
 	@PatchMapping("/{lessonHistoryId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<CommandUpdateLessonHistoryResult> updateLessonHistory(
@@ -121,13 +77,7 @@ public class LessonHistoryCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "수업일지를 삭제한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업 일지를 삭제하였습니다."),
-			@ApiResponse(responseCode = "404", description = "수업 일지를 찾을 수 없습니다.")
-		}
-	)
+	@Operation(summary = "수업일지를 삭제한다.")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	@DeleteMapping("/{lessonHistoryId}")
 	public ApiResult<Long> deleteLessonHistory(
@@ -139,14 +89,7 @@ public class LessonHistoryCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "수업일지에 댓글을 등록한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업 일지에 댓글이 등록되었습니다."),
-			@ApiResponse(responseCode = "404(1)", description = "회원을 찾을 수 없습니다."),
-			@ApiResponse(responseCode = "404(2)", description = "수업 일지를 찾을 수 없습니다.")
-		}
-	)
+	@Operation(summary = "수업일지에 댓글을 등록한다.")
 	@PostMapping("/{lessonHistoryId}/comment")
 	public ApiResult<CommandRegisterCommentResult> registerLessonHistoryComment(
 		@PathVariable Long lessonHistoryId,
@@ -158,14 +101,7 @@ public class LessonHistoryCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "수업일지 댓글에 대댓글을 등록한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업 일지에 대댓글이 등록되었습니다."),
-			@ApiResponse(responseCode = "404(1)", description = "회원을 찾을 수 없습니다."),
-			@ApiResponse(responseCode = "404(2)", description = "수업 일지를 찾을 수 없습니다.")
-		}
-	)
+	@Operation(summary = "수업일지 댓글에 대댓글을 등록한다.")
 	@PostMapping("/{lessonHistoryId}/comment/{lessonHistoryCommentId}")
 	public ApiResult<CommandRegisterReplyResult> registerLessonHistoryReply(
 		@PathVariable Long lessonHistoryId,
@@ -179,13 +115,7 @@ public class LessonHistoryCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "수업일지에 댓글/답글을 수정한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업 일지에 댓글이 수정되었습니다."),
-			@ApiResponse(responseCode = "404", description = "수업 일지에 댓글을 찾을 수 없습니다.")
-		}
-	)
+	@Operation(summary = "수업일지에 댓글/답글을 수정한다.")
 	@PatchMapping("/comment/{lessonHistoryCommentId}")
 	public ApiResult<CommandUpdateCommentResult> updateLessonHistoryComment(
 		@PathVariable Long lessonHistoryCommentId,
@@ -197,13 +127,7 @@ public class LessonHistoryCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "수업일지에 댓글/답글을 삭제한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업 일지에 댓글이 삭제되었습니다."),
-			@ApiResponse(responseCode = "404", description = "수업 일지에 댓글을 찾을 수 없습니다.")
-		}
-	)
+	@Operation(summary = "수업일지에 댓글/답글을 삭제한다.")
 	@DeleteMapping("/comment/{lessonHistoryCommentId}")
 	public ApiResult<Long> deleteLessonHistoryComment(
 		@PathVariable Long lessonHistoryCommentId,

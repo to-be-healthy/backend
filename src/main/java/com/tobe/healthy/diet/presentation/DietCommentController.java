@@ -20,7 +20,6 @@ import com.tobe.healthy.diet.presentation.dto.in.DietCommentAddCommand;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +34,7 @@ public class DietCommentController {
 
 	private final DietCommentService commentService;
 
-	@Operation(summary = "식단기록의 댓글을 조회한다.", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "식단기록의 댓글, 페이징을 반환한다.")
-	})
+	@Operation(summary = "식단기록의 댓글을 조회한다.")
 	@GetMapping("/{dietId}/comments")
 	public ApiResult<CustomPaging<DietCommentDto>> getCommentsByDietId(
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
@@ -49,10 +45,7 @@ public class DietCommentController {
 			.build();
 	}
 
-	@Operation(summary = "식단기록에 댓글(답글)을 등록한다", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "식단기록 댓글을 반환한다.")
-	})
+	@Operation(summary = "식단기록에 댓글(답글)을 등록한다")
 	@PostMapping("/{dietId}/comments")
 	public ApiResult<Void> addComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
@@ -63,10 +56,7 @@ public class DietCommentController {
 			.build();
 	}
 
-	@Operation(summary = "식단기록의 댓글을 수정한다.", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "식단기록 댓글을 반환한다.")
-	})
+	@Operation(summary = "식단기록의 댓글을 수정한다.")
 	@PatchMapping("/{dietId}/comments/{commentId}")
 	public ApiResult<DietCommentDto> updateComment(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
@@ -79,9 +69,7 @@ public class DietCommentController {
 			.build();
 	}
 
-	@Operation(summary = "식단기록의 댓글을 삭제한다.", responses = {
-		@ApiResponse(responseCode = "200", description = "식단기록 댓글 삭제 완료.")
-	})
+	@Operation(summary = "식단기록의 댓글을 삭제한다.")
 	@DeleteMapping("/{dietId}/comments/{commentId}")
 	public ApiResult<Void> deleteComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,

@@ -18,7 +18,6 @@ import com.tobe.healthy.course.presentation.dto.in.CourseUpdateCommand;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,13 +32,7 @@ public class CourseController {
 
 	private final CourseService courseService;
 
-	@Operation(summary = "수강권 등록", responses = {
-		@ApiResponse(responseCode = "404", description = "존재하지 않는 트레이너"),
-		@ApiResponse(responseCode = "404", description = "존재하지 않는 회원"),
-		@ApiResponse(responseCode = "400", description = "이미 등록된 수강권이 존재"),
-		@ApiResponse(responseCode = "400", description = "내 학생이 아닙니다."),
-		@ApiResponse(responseCode = "200", description = "수강권을 등록한다.")
-	})
+	@Operation(summary = "수강권 등록")
 	@PostMapping
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<Void> addCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
@@ -50,10 +43,7 @@ public class CourseController {
 			.build();
 	}
 
-	@Operation(summary = "수강권 삭제", responses = {
-		@ApiResponse(responseCode = "404", description = "존재하지 않는 트레이너"),
-		@ApiResponse(responseCode = "200", description = "수강권을 삭제한다.")
-	})
+	@Operation(summary = "수강권 삭제")
 	@DeleteMapping("/{courseId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<Void> deleteCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
@@ -64,11 +54,7 @@ public class CourseController {
 			.build();
 	}
 
-	@Operation(summary = "수강권 횟수 증가/차감", responses = {
-		@ApiResponse(responseCode = "404", description = "존재하지 않는 트레이너"),
-		@ApiResponse(responseCode = "404", description = "존재하지 않는 수강권"),
-		@ApiResponse(responseCode = "200", description = "수강권 횟수를 증가 및 차감한다.")
-	})
+	@Operation(summary = "수강권 횟수 증가/차감")
 	@PatchMapping("/{courseId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<Void> updateCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,

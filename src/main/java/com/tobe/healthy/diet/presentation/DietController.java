@@ -28,7 +28,6 @@ import com.tobe.healthy.workout.presentation.dto.in.RegisterFile;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,10 +43,7 @@ public class DietController {
 	private final DietService dietService;
 	private final FileService fileService;
 
-	@Operation(summary = "식단기록 첨부파일 등록", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "파일 url을 반환한다.")
-	})
+	@Operation(summary = "식단기록 첨부파일 등록")
 	@PostMapping("/file")
 	public ApiResult<List<RegisterFile>> addDietFile(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
@@ -58,10 +54,7 @@ public class DietController {
 			.build();
 	}
 
-	@Operation(summary = "홈에서 식단기록 등록", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
-	})
+	@Operation(summary = "홈에서 식단기록 등록")
 	@PostMapping("/home")
 	public ApiResult<DietDto> addDietAtHome(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Valid @RequestBody DietAddCommandAtHome command) {
@@ -71,10 +64,7 @@ public class DietController {
 			.build();
 	}
 
-	@Operation(summary = "식단기록 등록", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
-	})
+	@Operation(summary = "식단기록 등록")
 	@PostMapping
 	public ApiResult<DietDto> addDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@RequestBody @Valid DietAddCommand command) {
@@ -84,10 +74,7 @@ public class DietController {
 			.build();
 	}
 
-	@Operation(summary = "오늘 식단 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
-	})
+	@Operation(summary = "오늘 식단 조회")
 	@GetMapping("/today")
 	public ApiResult<DietDto> getTodayDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		return ApiResult.<DietDto>builder()
@@ -96,10 +83,7 @@ public class DietController {
 			.build();
 	}
 
-	@Operation(summary = "식단기록 상세 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
-	})
+	@Operation(summary = "식단기록 상세 조회")
 	@GetMapping("/{dietId}")
 	public ApiResult<DietDto> getDietDetail(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
@@ -109,10 +93,7 @@ public class DietController {
 			.build();
 	}
 
-	@Operation(summary = "식단기록 좋아요", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "좋아요 완료.")
-	})
+	@Operation(summary = "식단기록 좋아요")
 	@PostMapping("/{dietId}/like")
 	public ApiResult<Void> likeDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
@@ -122,10 +103,7 @@ public class DietController {
 			.build();
 	}
 
-	@Operation(summary = "식단기록 좋아요 취소", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "좋아요 취소 완료.")
-	})
+	@Operation(summary = "식단기록 좋아요 취소")
 	@DeleteMapping("/{dietId}/like")
 	public ApiResult<Void> deleteLikeDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
@@ -135,9 +113,7 @@ public class DietController {
 			.build();
 	}
 
-	@Operation(summary = "식단기록 삭제", responses = {
-		@ApiResponse(responseCode = "200", description = "식단기록 삭제 완료.")
-	})
+	@Operation(summary = "식단기록 삭제")
 	@DeleteMapping("/{dietId}")
 	public ApiResult<Void> deleteDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
@@ -147,10 +123,7 @@ public class DietController {
 			.build();
 	}
 
-	@Operation(summary = "식단기록 수정", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "식단기록 내용을 반환한다.")
-	})
+	@Operation(summary = "식단기록 수정")
 	@PatchMapping("/{dietId}")
 	public ApiResult<DietDto> updateDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
@@ -161,10 +134,7 @@ public class DietController {
 			.build();
 	}
 
-	@Operation(summary = "식단 등록한 날짜 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "업로드 날짜를 반환한다.")
-	})
+	@Operation(summary = "식단 등록한 날짜 조회")
 	@GetMapping("/upload-date")
 	public ApiResult<DietUploadDaysResult> getDietUploadDays(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,

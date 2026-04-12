@@ -21,7 +21,6 @@ import com.tobe.healthy.schedule.presentation.dto.out.ScheduleCommandResult;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,10 +36,7 @@ public class StudentScheduleController {
 
 	private final StudentScheduleService studentScheduleService;
 
-	@Operation(summary = "학생이 트레이너의 전체 일정을 조회한다.", description = "전체 일정을 조회한다. 특정 일자나 기간으로 조회하고 싶으면 DTO를 활용한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "전체 일정 조회 완료")
-		})
+	@Operation(summary = "학생이 트레이너의 전체 일정을 조회한다.", description = "전체 일정을 조회한다. 특정 일자나 기간으로 조회하고 싶으면 DTO를 활용한다.")
 	@GetMapping("/all")
 	public ApiResult<ScheduleCommandResponse> findAllScheduleOfTrainer(
 		@ParameterObject StudentScheduleCond searchCond,
@@ -51,10 +47,7 @@ public class StudentScheduleController {
 			.build();
 	}
 
-	@Operation(summary = "학생이 내 수업을 조회한다.", description = "회원이 등록된 수업 전체를 조회한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "내 수업 조회 완료")
-		})
+	@Operation(summary = "학생이 내 수업을 조회한다.", description = "회원이 등록된 수업 전체를 조회한다.")
 	@GetMapping
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<List<ScheduleCommandResult>> findMySchedule(
@@ -65,10 +58,7 @@ public class StudentScheduleController {
 			.build();
 	}
 
-	@Operation(summary = "학생이 다가오는 예약을 조회한다.", description = "학생이 다가오는 예약을 조회한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "학생이 내 예약을 조회하였습니다.")
-		})
+	@Operation(summary = "학생이 다가오는 예약을 조회한다.", description = "학생이 다가오는 예약을 조회한다.")
 	@GetMapping("/my-reservation/new")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<MyReservationResponse> findNewReservation(
@@ -80,10 +70,7 @@ public class StudentScheduleController {
 			.build();
 	}
 
-	@Operation(summary = "학생이 지난 예약을 조회한다.", description = "학생이 지난 예약을 조회한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "학생이 내 예약을 조회하였습니다.")
-		})
+	@Operation(summary = "학생이 지난 예약을 조회한다.", description = "학생이 지난 예약을 조회한다.")
 	@GetMapping("/my-reservation/old")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<MyReservationResponse> findOldReservation(
@@ -95,10 +82,7 @@ public class StudentScheduleController {
 			.build();
 	}
 
-	@Operation(summary = "학생 예약한 날짜 블루닷 표시", description = "학생 예약한 날짜 블루닷 표시를 조회한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "학생 예약한 날짜 블루닷 표시를 조회한다.")
-		})
+	@Operation(summary = "학생 예약한 날짜 블루닷 표시", description = "학생 예약한 날짜 블루닷 표시를 조회한다.")
 	@GetMapping("/my-reservation")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<ReservationDaysResult> findMyReservationBlueDot(

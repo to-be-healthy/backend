@@ -20,7 +20,6 @@ import com.tobe.healthy.lessonhistory.presentation.dto.out.RetrieveLessonHistory
 import com.tobe.healthy.lessonhistory.presentation.dto.out.RetrieveUnwrittenLessonHistory;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -32,12 +31,7 @@ public class LessonHistoryController {
 
 	private final LessonHistoryService lessonHistoryService;
 
-	@Operation(
-		summary = "전체 수업 일지를 조회한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "전체 수업 일지를 조회하였습니다.")
-		}
-	)
+	@Operation(summary = "전체 수업 일지를 조회한다.")
 	@GetMapping
 	public ApiResult<CustomRetrieveLessonHistoryByDateCondResult> findAllLessonHistory(
 		@ParameterObject RetrieveLessonHistoryByDateCond request,
@@ -48,13 +42,7 @@ public class LessonHistoryController {
 		);
 	}
 
-	@Operation(
-		summary = "수업일지 단건을 조회한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "학생의 전체 수업 일지를 조회하였습니다."),
-			@ApiResponse(responseCode = "404", description = "수업 일지를 찾을 수 없습니다.")
-		}
-	)
+	@Operation(summary = "수업일지 단건을 조회한다.")
 	@GetMapping("/{lessonHistoryId}")
 	public ApiResult<RetrieveLessonHistoryDetailResult> findOneLessonHistory(
 		@PathVariable Long lessonHistoryId,
@@ -65,12 +53,7 @@ public class LessonHistoryController {
 		);
 	}
 
-	@Operation(
-		summary = "학생의 수업일지 전체를 조회한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "학생의 전체 수업 일지를 조회하였습니다.")
-		}
-	)
+	@Operation(summary = "학생의 수업일지 전체를 조회한다.")
 	@GetMapping("/student/{studentId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<CustomRetrieveLessonHistoryByDateCondResult> findAllLessonHistoryByMemberId(
@@ -83,12 +66,7 @@ public class LessonHistoryController {
 		);
 	}
 
-	@Operation(
-		summary = "수업일지를 작성하지 않은 수업들을 조회하였습니다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업일지를 작성하지 않은 수업들을 조회하였습니다.")
-		}
-	)
+	@Operation(summary = "수업일지를 작성하지 않은 수업들을 조회하였습니다.")
 	@GetMapping("/unwritten")
 	public ApiResult<List<RetrieveUnwrittenLessonHistory>> findAllUnwrittenLessonHistory(
 		UnwrittenLessonHistorySearchCond request,

@@ -23,7 +23,6 @@ import com.tobe.healthy.workout.presentation.dto.out.WorkoutHistoryDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,10 +38,7 @@ public class WorkoutHistoryController {
 	private final WorkoutHistoryService workoutService;
 	private final FileService fileService;
 
-	@Operation(summary = "운동기록 첨부파일 등록", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "파일 url을 반환한다.")
-	})
+	@Operation(summary = "운동기록 첨부파일 등록")
 	@PostMapping("/file")
 	public ApiResult<List<RegisterFile>> addWorkoutHistoryFile(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
@@ -53,10 +49,7 @@ public class WorkoutHistoryController {
 			.build();
 	}
 
-	@Operation(summary = "운동기록 등록", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동기록ID, 회원ID, 운동기록 내용을 반환한다.")
-	})
+	@Operation(summary = "운동기록 등록")
 	@PostMapping
 	public ApiResult<WorkoutHistoryDto> addWorkoutHistory(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
@@ -67,10 +60,7 @@ public class WorkoutHistoryController {
 			.build();
 	}
 
-	@Operation(summary = "운동기록 상세 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동기록 상세정보를 반환한다.")
-	})
+	@Operation(summary = "운동기록 상세 조회")
 	@GetMapping("/{workoutHistoryId}")
 	public ApiResult<WorkoutHistoryDto> getWorkoutHistoryDetail(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
@@ -81,9 +71,7 @@ public class WorkoutHistoryController {
 			.build();
 	}
 
-	@Operation(summary = "운동기록 삭제", responses = {
-		@ApiResponse(responseCode = "200", description = "운동기록 삭제 완료.")
-	})
+	@Operation(summary = "운동기록 삭제")
 	@DeleteMapping("/{workoutHistoryId}")
 	public ApiResult<Void> deleteWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId) {
@@ -93,10 +81,7 @@ public class WorkoutHistoryController {
 			.build();
 	}
 
-	@Operation(summary = "운동기록 수정", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동기록ID, 회원ID, 운동기록 내용을 반환한다.")
-	})
+	@Operation(summary = "운동기록 수정")
 	@PatchMapping("/{workoutHistoryId}")
 	public ApiResult<WorkoutHistoryDto> updateWorkoutHistory(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
@@ -108,10 +93,7 @@ public class WorkoutHistoryController {
 			.build();
 	}
 
-	@Operation(summary = "운동기록 좋아요", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "좋아요 완료.")
-	})
+	@Operation(summary = "운동기록 좋아요")
 	@PostMapping("/{workoutHistoryId}/like")
 	public ApiResult<Void> likeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId) {
@@ -121,10 +103,7 @@ public class WorkoutHistoryController {
 			.build();
 	}
 
-	@Operation(summary = "운동기록 좋아요 취소", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "좋아요 취소 완료.")
-	})
+	@Operation(summary = "운동기록 좋아요 취소")
 	@DeleteMapping("/{workoutHistoryId}/like")
 	public ApiResult<Void> deleteLikeWorkoutHistory(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,

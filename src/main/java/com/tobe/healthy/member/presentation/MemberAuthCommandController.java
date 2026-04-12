@@ -19,9 +19,6 @@ import com.tobe.healthy.member.presentation.dto.out.CommandJoinMemberResult;
 import com.tobe.healthy.member.domain.Tokens;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,12 +33,7 @@ public class MemberAuthCommandController {
 
 	private final MemberAuthCommandService memberAuthCommandService;
 
-	@Operation(summary = "이메일로 인증번호를 전송한다.", description = "이메일로 6자리의 난수를 만들어 3분간 유효한 인증번호를 전송한다.",
-		responses = {
-			@ApiResponse(responseCode = "500", description = "메일 전송중 에러가 발생하였습니다."),
-			@ApiResponse(responseCode = "400", description = "이미 등록된 이메일입니다."),
-			@ApiResponse(responseCode = "200", description = "이메일로 인증번호를 전송하였습니다.")
-		})
+	@Operation(summary = "이메일로 인증번호를 전송한다.", description = "이메일로 6자리의 난수를 만들어 3분간 유효한 인증번호를 전송한다.")
 	@PostMapping("/validation/send-email")
 	public ApiResult<String> sendEmailVerification(@RequestBody @Valid CommandValidateEmail request) {
 		return ApiResult.<String>builder()
@@ -50,11 +42,7 @@ public class MemberAuthCommandController {
 			.build();
 	}
 
-	@Operation(summary = "이메일 인증번호를 검증한다.", description = "이메일로 전송된 인증번호를 3분안에 입력해야 검증에 성공한다.",
-		responses = {
-			@ApiResponse(responseCode = "400", description = "이메일 인증번호가 일치하지 않습니다."),
-			@ApiResponse(responseCode = "200", description = "이메일 인증번호가 일치합니다.")
-		})
+	@Operation(summary = "이메일 인증번호를 검증한다.", description = "이메일로 전송된 인증번호를 3분안에 입력해야 검증에 성공한다.")
 	@PostMapping("/validation/confirm-email")
 	public ApiResult<Boolean> verifyAuthMail(@RequestBody @Valid CommandVerification reuqest) {
 		return ApiResult.<Boolean>builder()
@@ -63,17 +51,7 @@ public class MemberAuthCommandController {
 			.build();
 	}
 
-	@Operation(summary = "회원가입", description = "이름, 비밀번호 규칙, 아이디, 이메일 중복을 검증하고 비밀번호는 암호화해서 가입시킨다.",
-		responses = {
-			@ApiResponse(responseCode = "400(1)", description = "이름의 길이는 2자 이상이여야 합니다."),
-			@ApiResponse(responseCode = "400(2)", description = "이름은 한글 또는 영어만 입력할 수 있습니다."),
-			@ApiResponse(responseCode = "400(3)", description = "확인 비밀번호가 일치하지 않습니다."),
-			@ApiResponse(responseCode = "400(4)", description = "비밀번호는 영어 대/소문자와 숫자로 구성된 8자리 이상 문자여야 합니다."),
-			@ApiResponse(responseCode = "400(5)", description = "아이디에 한글을 포함할 수 없습니다."),
-			@ApiResponse(responseCode = "400(6)", description = "이미 등록된 아이디입니다."),
-			@ApiResponse(responseCode = "400(7)", description = "이미 등록된 이메일입니다."),
-			@ApiResponse(responseCode = "200", description = "회원가입에 성공하였습니다.")
-		})
+	@Operation(summary = "회원가입", description = "이름, 비밀번호 규칙, 아이디, 이메일 중복을 검증하고 비밀번호는 암호화해서 가입시킨다.")
 	@PostMapping("/join")
 	public ApiResult<CommandJoinMemberResult> join(@RequestBody @Valid CommandJoinMember request) {
 		return ApiResult.<CommandJoinMemberResult>builder()
@@ -82,12 +60,7 @@ public class MemberAuthCommandController {
 			.build();
 	}
 
-	@Operation(summary = "로그인", description = "로그인에 성공하면, Access/Refresh token, userId, memberType, gymId를 반환한다.",
-		responses = {
-			@ApiResponse(responseCode = "400", description = "아이디 또는 비밀번호가 잘못되었습니다.",
-				content = {@Content(schema = @Schema(implementation = Tokens.class))}),
-			@ApiResponse(responseCode = "200", description = "로그인에 성공하고, Access Token, Refresh Token, userId, Role을 반환한다.")
-		})
+	@Operation(summary = "로그인", description = "로그인에 성공하면, Access/Refresh token, userId, memberType, gymId를 반환한다.")
 	@PostMapping("/login")
 	public ApiResult<Tokens> login(@RequestBody @Valid CommandLoginMember request) {
 		return ApiResult.<Tokens>builder()
@@ -96,13 +69,7 @@ public class MemberAuthCommandController {
 			.build();
 	}
 
-	@Operation(summary = "토큰을 갱신한다.", description = "refresh token이 유효하면 AccessToken을 생성하여 반환한다.",
-		responses = {
-			@ApiResponse(responseCode = "404(1)", description = "Refresh Token을 찾을 수 없습니다."),
-			@ApiResponse(responseCode = "404(2)", description = "회원을 찾을 수 없습니다."),
-			@ApiResponse(responseCode = "400", description = "Refresh Token이 유효하지 않습니다."),
-			@ApiResponse(responseCode = "200", description = "Access Token, Refresh Token, userId, Role을 반환한다.")
-		})
+	@Operation(summary = "토큰을 갱신한다.", description = "refresh token이 유효하면 AccessToken을 생성하여 반환한다.")
 	@PostMapping("/refresh-token")
 	public ApiResult<Tokens> refreshToken(@RequestBody @Valid CommandRefreshToken request) {
 		return ApiResult.<Tokens>builder()
@@ -111,12 +78,7 @@ public class MemberAuthCommandController {
 			.build();
 	}
 
-	@Operation(summary = "비밀번호 찾기", description = "등록된 이메일로 초기화 비밀번호를 전송한다.",
-		responses = {
-			@ApiResponse(responseCode = "500", description = "메일 전송중 에러가 발생했습니다."),
-			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
-			@ApiResponse(responseCode = "200", description = "등록된 이메일로 초기화 비밀번호를 전송한다.")
-		})
+	@Operation(summary = "비밀번호 찾기", description = "등록된 이메일로 초기화 비밀번호를 전송한다.")
 	@PostMapping("/find/password")
 	public ApiResult<CommandFindMemberPasswordResult> findMemberPW(
 		@RequestBody @Valid CommandFindMemberPassword request) {
@@ -129,13 +91,7 @@ public class MemberAuthCommandController {
 			.build();
 	}
 
-	@Operation(summary = "네이버 소셜 로그인", description = "인가코드로 네이버에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.",
-		responses = {
-			@ApiResponse(responseCode = "500(1)", description = "네이버 소셜서버와 연동중 에러가 발생하였습니다."),
-			@ApiResponse(responseCode = "500(2)", description = "파일 업로드중 에러가 발생하였습니다."),
-			@ApiResponse(responseCode = "500(3)", description = "소셜 프로필을 가져오던 중 에러가 발생하였습니다."),
-			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
-		})
+	@Operation(summary = "네이버 소셜 로그인", description = "인가코드로 네이버에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.")
 	@PostMapping("/access-token/naver")
 	public ApiResult<Tokens> getNaverAccessToken(@RequestBody CommandSocialLogin request) {
 		return ApiResult.<Tokens>builder()
@@ -144,14 +100,7 @@ public class MemberAuthCommandController {
 			.build();
 	}
 
-	@Operation(summary = "카카오 소셜 로그인", description = "인가코드로 카카오에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.",
-		responses = {
-			@ApiResponse(responseCode = "500(1)", description = "카카오 소셜서버와 연동중 에러가 발생하였습니다."),
-			@ApiResponse(responseCode = "500(2)", description = "JSON 토큰을 파싱중 에러가 발생하였습니다."),
-			@ApiResponse(responseCode = "500(3)", description = "파일 업로드중 에러가 발생하였습니다."),
-			@ApiResponse(responseCode = "500(4)", description = "소셜 프로필을 가져오던 중 에러가 발생하였습니다."),
-			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
-		})
+	@Operation(summary = "카카오 소셜 로그인", description = "인가코드로 카카오에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.")
 	@PostMapping("/access-token/kakao")
 	public ApiResult<Tokens> getKakaoAccessToken(@RequestBody CommandSocialLogin request) {
 		return ApiResult.<Tokens>builder()
@@ -160,11 +109,7 @@ public class MemberAuthCommandController {
 			.build();
 	}
 
-	@Operation(summary = "구글 소셜 로그인", description = "인가코드로 구글에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.",
-		responses = {
-			@ApiResponse(responseCode = "500", description = "구글 소셜서버와 연동중 에러가 발생하였습니다."),
-			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
-		})
+	@Operation(summary = "구글 소셜 로그인", description = "인가코드로 구글에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.")
 	@PostMapping("/access-token/google")
 	public ApiResult<Tokens> getGoogleOAuth(@RequestBody CommandSocialLogin command) {
 		return ApiResult.<Tokens>builder()
@@ -173,11 +118,7 @@ public class MemberAuthCommandController {
 			.build();
 	}
 
-	@Operation(summary = "애플 소셜 로그인", description = "인가코드로 애플에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.",
-		responses = {
-			@ApiResponse(responseCode = "500", description = "애플 소셜서버와 연동중 에러가 발생하였습니다."),
-			@ApiResponse(responseCode = "200", description = "요청 처리에 성공하였습니다.")
-		})
+	@Operation(summary = "애플 소셜 로그인", description = "인가코드로 애플에서 정보를 받아온 뒤에, 로그인 프로세스를 거친다. 비회원인 경우 회원가입 프로세스를 추가로 거친다.")
 	@PostMapping("/access-token/apple")
 	public ApiResult<Tokens> getAppleOAuth(@RequestBody CommandSocialLogin request) {
 		return ApiResult.<Tokens>builder()

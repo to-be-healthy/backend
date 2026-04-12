@@ -14,7 +14,6 @@ import com.tobe.healthy.member.presentation.dto.out.TrainerHomeResult;
 import com.tobe.healthy.point.application.PointService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,10 +28,7 @@ public class HomeController {
 	private final HomeService homeService;
 	private final PointService pointService;
 
-	@Operation(summary = "학생 홈 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "학생 홈을 반환한다.")
-	})
+	@Operation(summary = "학생 홈 조회")
 	@GetMapping("/student")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<StudentHomeResult> getStudentHome(
@@ -43,10 +39,7 @@ public class HomeController {
 			.build();
 	}
 
-	@Operation(summary = "트레이너 홈 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "트레이너 홈을 반환한다.")
-	})
+	@Operation(summary = "트레이너 홈 조회")
 	@GetMapping("/trainer")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<TrainerHomeResult> getTrainerHome(

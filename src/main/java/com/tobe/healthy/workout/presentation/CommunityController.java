@@ -15,7 +15,6 @@ import com.tobe.healthy.workout.presentation.dto.out.WorkoutHistoryDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,10 +28,7 @@ public class CommunityController {
 
 	private final WorkoutHistoryService workoutService;
 
-	@Operation(summary = "커뮤니티 운동기록 목록 조회하기", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
-	})
+	@Operation(summary = "커뮤니티 운동기록 목록 조회하기")
 	@GetMapping
 	public ApiResult<CustomPaging<WorkoutHistoryDto>> getWorkoutHistoryOnCommunity(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,

@@ -27,7 +27,6 @@ import com.tobe.healthy.schedule.presentation.dto.out.ScheduleIdInfo;
 import com.tobe.healthy.schedule.domain.ReservationStatus;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,14 +39,7 @@ public class TrainerScheduleCommandController {
 
 	private final TrainerScheduleCommandService trainerScheduleCommandService;
 
-	@Operation(
-		summary = "트레이너가 기본 수업 시간을 설정한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "기본 수업 시간 등록 성공"),
-			@ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
-			@ApiResponse(responseCode = "400", description = "이미 등록된 일정이 존재합니다.")
-		}
-	)
+	@Operation(summary = "트레이너가 기본 수업 시간을 설정한다.")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	@PostMapping("/default-lesson-time")
 	public ApiResult<CommandRegisterDefaultLessonTimeResult> registerDefaultSchedule(
@@ -60,14 +52,7 @@ public class TrainerScheduleCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "트레이너가 일정을 등록한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "일정 등록 성공"),
-			@ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
-			@ApiResponse(responseCode = "400", description = "이미 등록된 일정이 존재합니다.")
-		}
-	)
+	@Operation(summary = "트레이너가 일정을 등록한다.")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	@PostMapping
 	public ApiResult<CommandRegisterScheduleResult> registerSchedule(
@@ -80,13 +65,7 @@ public class TrainerScheduleCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "트레이너가 특정 스케줄을 DISABLED/AVAILABLE로 변경한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "해당 스케줄을 변경하였습니다."),
-			@ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
-		}
-	)
+	@Operation(summary = "트레이너가 특정 스케줄을 DISABLED/AVAILABLE로 변경한다.")
 	@PostMapping("/trainer/{status}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<List<CommandScheduleStatusResult>> changeScheduleForTrainer(
@@ -100,14 +79,7 @@ public class TrainerScheduleCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "트레이너가 학생을 수업에 등록한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업 등록 성공"),
-			@ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다."),
-			@ApiResponse(responseCode = "400", description = "이미 등록된 일정이 존재합니다.")
-		}
-	)
+	@Operation(summary = "트레이너가 학생을 수업에 등록한다.")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	@PostMapping("/{scheduleId}/{studentId}")
 	public ApiResult<CommandRegisterScheduleByStudentResult> registerStudentInTrainerSchedule(
@@ -123,13 +95,7 @@ public class TrainerScheduleCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "트레이너가 학생이 신청한 수업을 취소한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "수업이 취소되었습니다."),
-			@ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
-		}
-	)
+	@Operation(summary = "트레이너가 학생이 신청한 수업을 취소한다.")
 	@DeleteMapping("/trainer/{scheduleId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<CommandCancelStudentReservationResult> cancelScheduleForTrainer(
@@ -144,13 +110,7 @@ public class TrainerScheduleCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "트레이너가 학생 노쇼 처리를 한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "노쇼 처리가 되었습니다."),
-			@ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
-		}
-	)
+	@Operation(summary = "트레이너가 학생 노쇼 처리를 한다.")
 	@DeleteMapping("/no-show/{scheduleId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<ScheduleIdInfo> updateReservationStatusToNoShow(
@@ -165,13 +125,7 @@ public class TrainerScheduleCommandController {
 		);
 	}
 
-	@Operation(
-		summary = "트레이너가 학생 노쇼 처리를 취소한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "노쇼 처리가 취소되었습니다."),
-			@ApiResponse(responseCode = "404", description = "해당 일정이 존재하지 않습니다.")
-		}
-	)
+	@Operation(summary = "트레이너가 학생 노쇼 처리를 취소한다.")
 	@PostMapping("/no-show/{scheduleId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<ScheduleIdInfo> revertReservationStatusToNoShow(

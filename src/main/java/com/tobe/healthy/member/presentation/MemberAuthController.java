@@ -15,7 +15,6 @@ import com.tobe.healthy.member.presentation.dto.in.FindMemberUserId.FindMemberUs
 import com.tobe.healthy.member.presentation.dto.out.InvitationMappingResult;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +30,7 @@ public class MemberAuthController {
 
 	private final MemberAuthService memberAuthService;
 
-	@Operation(summary = "아이디 중복 확인하기",
-		responses = {
-			@ApiResponse(responseCode = "400", description = "이미 등록된 아이디입니다."),
-			@ApiResponse(responseCode = "200", description = "사용 가능한 아이디입니다.")
-		})
+	@Operation(summary = "아이디 중복 확인하기")
 	@GetMapping("/validation/user-id")
 	public ApiResult<Boolean> validateUsernameDuplication(@RequestParam String userId) {
 		return ApiResult.<Boolean>builder()
@@ -44,11 +39,7 @@ public class MemberAuthController {
 			.build();
 	}
 
-	@Operation(summary = "이메일 중복을 확인한다.",
-		responses = {
-			@ApiResponse(responseCode = "400", description = "이미 등록된 이메일입니다."),
-			@ApiResponse(responseCode = "200", description = "사용 가능한 이메일입니다.")
-		})
+	@Operation(summary = "이메일 중복을 확인한다.")
 	@GetMapping("/validation/email")
 	public ApiResult<Boolean> validateEmailDuplication(@RequestParam @Valid CommandValidateEmail request) {
 		return ApiResult.<Boolean>builder()
@@ -57,11 +48,7 @@ public class MemberAuthController {
 			.build();
 	}
 
-	@Operation(summary = "아이디를 찾는다.", description = "이메일과 이름을 기준으로 일치하는 아이디를 찾는다.(소셜은 찾을 수 없음)",
-		responses = {
-			@ApiResponse(responseCode = "404", description = "등록된 회원이 아닙니다."),
-			@ApiResponse(responseCode = "200", description = "이메일 이름이 일치한 사용자 아이디를 반환한다.")
-		})
+	@Operation(summary = "아이디를 찾는다.", description = "이메일과 이름을 기준으로 일치하는 아이디를 찾는다.(소셜은 찾을 수 없음)")
 	@PostMapping("/find/user-id")
 	public ApiResult<FindMemberUserIdResult> findUserId(@RequestBody @Valid FindMemberUserId request) {
 		FindMemberUserIdResult userIdResult = memberAuthService.findUserId(request);
@@ -71,10 +58,7 @@ public class MemberAuthController {
 			.build();
 	}
 
-	@Operation(summary = "초대링크 uuid 데이터 조회", responses = {
-		@ApiResponse(responseCode = "404", description = "초대링크를 찾을 수 없습니다."),
-		@ApiResponse(responseCode = "200", description = "성공")
-	})
+	@Operation(summary = "초대링크 uuid 데이터 조회")
 	@GetMapping("/invitation/uuid")
 	public ApiResult<InvitationMappingResult> getInvitationMapping(@RequestParam String uuid) {
 		return ApiResult.<InvitationMappingResult>builder()

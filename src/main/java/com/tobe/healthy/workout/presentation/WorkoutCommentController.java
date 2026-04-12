@@ -20,7 +20,6 @@ import com.tobe.healthy.workout.presentation.dto.in.HistoryCommentAddCommand;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +34,7 @@ public class WorkoutCommentController {
 
 	private final WorkoutCommentService commentService;
 
-	@Operation(summary = "운동기록의 댓글을 조회한다.", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동기록의 댓글, 페이징을 반환한다.")
-	})
+	@Operation(summary = "운동기록의 댓글을 조회한다.")
 	@GetMapping("/{workoutHistoryId}/comments")
 	public ApiResult<CustomPaging<WorkoutHistoryCommentDto>> getCommentsByHistoryId(
 		@PathVariable @Parameter(description = "운동기록 ID") Long workoutHistoryId,
@@ -49,10 +45,7 @@ public class WorkoutCommentController {
 			.build();
 	}
 
-	@Operation(summary = "운동기록에 댓글(답글)을 등록한다", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동기록 댓글을 반환한다.")
-	})
+	@Operation(summary = "운동기록에 댓글(답글)을 등록한다")
 	@PostMapping("/{workoutHistoryId}/comments")
 	public ApiResult<Void> addComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId,
@@ -63,10 +56,7 @@ public class WorkoutCommentController {
 			.build();
 	}
 
-	@Operation(summary = "운동기록의 댓글을 수정한다.", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동기록 댓글을 반환한다.")
-	})
+	@Operation(summary = "운동기록의 댓글을 수정한다.")
 	@PatchMapping("/{workoutHistoryId}/comments/{commentId}")
 	public ApiResult<WorkoutHistoryCommentDto> updateComment(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
@@ -79,9 +69,7 @@ public class WorkoutCommentController {
 			.build();
 	}
 
-	@Operation(summary = "운동기록의 댓글을 삭제한다.", responses = {
-		@ApiResponse(responseCode = "200", description = "운동기록 댓글 삭제 완료.")
-	})
+	@Operation(summary = "운동기록의 댓글을 삭제한다.")
 	@DeleteMapping("/{workoutHistoryId}/comments/{commentId}")
 	public ApiResult<Void> deleteComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId,

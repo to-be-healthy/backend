@@ -23,7 +23,6 @@ import com.tobe.healthy.schedule.presentation.dto.out.RetrieveTrainerScheduleByL
 import com.tobe.healthy.schedule.presentation.dto.out.RetrieveTrainerScheduleByLessonInfoResult;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -35,13 +34,7 @@ public class TrainerScheduleController {
 
 	private final TrainerScheduleService trainerScheduleService;
 
-	@Operation(
-		summary = "트레이너가 기본 수업 시간을 조회한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "일정 조회 성공"),
-			@ApiResponse(responseCode = "404", description = "회원이 존재하지 않습니다.")
-		}
-	)
+	@Operation(summary = "트레이너가 기본 수업 시간을 조회한다.")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	@GetMapping("/default-lesson-time")
 	public ApiResult<RetrieveTrainerDefaultLessonTimeResult> findOneDefaultLessonTime(
@@ -53,13 +46,7 @@ public class TrainerScheduleController {
 		);
 	}
 
-	@Operation(
-		summary = "트레이너가 전체 일정을 조회한다.",
-		description = "트레이너가 전체 일정을 조회한다. 특정 일자나 기간으로 조회하고 싶으면 DTO를 활용한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "트레이너가 전체 일정 조회 완료")
-		}
-	)
+	@Operation(summary = "트레이너가 전체 일정을 조회한다.", description = "트레이너가 전체 일정을 조회한다. 특정 일자나 기간으로 조회하고 싶으면 DTO를 활용한다.")
 	@GetMapping("/all")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<RetrieveTrainerScheduleByLessonInfoResult> findAllSchedule(
@@ -75,12 +62,7 @@ public class TrainerScheduleController {
 		);
 	}
 
-	@Operation(
-		summary = "트레이너의 일정을 조회한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "트레이너의 일정 조회 완료")
-		}
-	)
+	@Operation(summary = "트레이너의 일정을 조회한다.")
 	@GetMapping("/all/{trainerId}")
 	public ApiResult<RetrieveTrainerScheduleByLessonInfoResult> findAllScheduleByTrainerId(
 		@PathVariable Long trainerId,
@@ -92,12 +74,7 @@ public class TrainerScheduleController {
 		);
 	}
 
-	@Operation(
-		summary = "트레이너가 특정 날짜의 일정을 조회한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "트레이너가 특정 날짜의 일정 조회 완료")
-		}
-	)
+	@Operation(summary = "트레이너가 특정 날짜의 일정을 조회한다.")
 	@GetMapping
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<RetrieveTrainerScheduleByLessonDtResult> findOneSchedule(
@@ -110,12 +87,7 @@ public class TrainerScheduleController {
 		);
 	}
 
-	@Operation(
-		summary = "트레이너가 학생의 일정을 조회한다.",
-		responses = {
-			@ApiResponse(responseCode = "200", description = "트레이너가 학생의 일정 조회 완료")
-		}
-	)
+	@Operation(summary = "트레이너가 학생의 일정을 조회한다.")
 	@GetMapping("/{studentId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<KotlinCustomPaging<RetrieveApplicantSchedule>> findAllScheduleByStudentId(

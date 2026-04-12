@@ -25,7 +25,6 @@ import com.tobe.healthy.point.application.PointService;
 import com.tobe.healthy.workout.application.WorkoutHistoryService;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,10 +44,7 @@ public class MemberController {
 	private final PointService pointService;
 	private final DietService dietService;
 
-	@Operation(summary = "내 정보 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청."),
-		@ApiResponse(responseCode = "200", description = "회원 정보가 조회되었습니다.")
-	})
+	@Operation(summary = "내 정보 조회")
 	@GetMapping("/me")
 	public ApiResult<MemberInfoResult> getMemberInfo(@AuthenticationPrincipal CustomMemberDetails member) {
 		return ApiResult.<MemberInfoResult>builder()
@@ -57,10 +53,7 @@ public class MemberController {
 			.build();
 	}
 
-	@Operation(summary = "회원 정보조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청."),
-		@ApiResponse(responseCode = "200", description = "회원 정보가 조회되었습니다.")
-	})
+	@Operation(summary = "회원 정보조회")
 	@GetMapping("/{memberId}")
 	public ApiResult<MemberInfoResult> getMemberInfo(@PathVariable Long memberId) {
 		return ApiResult.<MemberInfoResult>builder()
@@ -72,10 +65,7 @@ public class MemberController {
 	/**
 	 * ============================== 운동기록 시작 ==============================
 	 */
-	@Operation(summary = "내 운동기록 목록 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
-	})
+	@Operation(summary = "내 운동기록 목록 조회")
 	@GetMapping("/me/workout-histories")
 	public ApiResult<CustomPaging> getWorkoutHistory(String searchDate,
 		Pageable pageable,
@@ -87,10 +77,7 @@ public class MemberController {
 			.build();
 	}
 
-	@Operation(summary = "학생의 운동기록 목록 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "운동기록, 페이징을 반환한다.")
-	})
+	@Operation(summary = "학생의 운동기록 목록 조회")
 	@GetMapping("/{memberId}/workout-histories")
 	public ApiResult<CustomPaging> getWorkoutHistory(@PathVariable Long memberId, String searchDate,
 		@AuthenticationPrincipal CustomMemberDetails loginMember,
@@ -108,10 +95,7 @@ public class MemberController {
 	/**
 	 * ============================== 식단기록 시작 ==============================
 	 */
-	@Operation(summary = "내 식단기록 목록 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
-	})
+	@Operation(summary = "내 식단기록 목록 조회")
 	@GetMapping("/me/diets")
 	public ApiResult<CustomPaging<DietDto>> getDiet(String searchDate,
 		Pageable pageable,
@@ -122,10 +106,7 @@ public class MemberController {
 			.build();
 	}
 
-	@Operation(summary = "다른 학생의 식단기록 목록 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
-	})
+	@Operation(summary = "다른 학생의 식단기록 목록 조회")
 	@GetMapping("/{memberId}/diets")
 	public ApiResult<CustomPaging<DietDto>> getDiet(@AuthenticationPrincipal CustomMemberDetails loginMember,
 		@PathVariable Long memberId,
@@ -137,10 +118,7 @@ public class MemberController {
 			.build();
 	}
 
-	@Operation(summary = "내 트레이너가 관리하는 학생들의 식단기록 목록 조회하기", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "식단기록, 페이징을 반환한다.")
-	})
+	@Operation(summary = "내 트레이너가 관리하는 학생들의 식단기록 목록 조회하기")
 	@GetMapping("/my-trainer/diets")
 	public ApiResult<CustomPaging<DietDto>> getDietMyTrainer(String searchDate,
 		Pageable pageable,
@@ -155,10 +133,7 @@ public class MemberController {
 	 * ============================== 식단기록 종료 ==============================
 	 */
 
-	@Operation(summary = "학생이 본인의 수강권 조회", responses = {
-		@ApiResponse(responseCode = "404", description = "존재하지 않는 학생"),
-		@ApiResponse(responseCode = "200", description = "수강권 정보를 반환한다.")
-	})
+	@Operation(summary = "학생이 본인의 수강권 조회")
 	@GetMapping("/course")
 	public ApiResult<CustomPaging> getMyCourse(String searchDate,
 		Pageable pageable,
@@ -170,10 +145,7 @@ public class MemberController {
 			.build();
 	}
 
-	@Operation(summary = "트레이너가 학생의 수강권 조회", responses = {
-		@ApiResponse(responseCode = "404", description = "존재하지 않는 학생"),
-		@ApiResponse(responseCode = "200", description = "수강권 정보를 반환한다.")
-	})
+	@Operation(summary = "트레이너가 학생의 수강권 조회")
 	@GetMapping("/{memberId}/course")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<CustomPaging> getCourse(@PathVariable Long memberId,
@@ -186,10 +158,7 @@ public class MemberController {
 			.build();
 	}
 
-	@Operation(summary = "학생이 본인의 포인트 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "포인트 및 히스토리를 반환한다.")
-	})
+	@Operation(summary = "학생이 본인의 포인트 조회")
 	@GetMapping("/point")
 	public ApiResult<CustomPaging> getMyPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		String searchDate, Pageable pageable) {
@@ -199,10 +168,7 @@ public class MemberController {
 			.build();
 	}
 
-	@Operation(summary = "트레이너가 학생의 포인트 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "포인트 및 히스토리를 반환한다.")
-	})
+	@Operation(summary = "트레이너가 학생의 포인트 조회")
 	@GetMapping("/{memberId}/point")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<CustomPaging> getPoint(@PathVariable Long memberId, String searchDate, Pageable pageable) {
@@ -212,10 +178,7 @@ public class MemberController {
 			.build();
 	}
 
-	@Operation(summary = "학생이 트레이너와 매핑 여부 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "학생이 트레이너와 매핑 여부를 반환한다.")
-	})
+	@Operation(summary = "학생이 트레이너와 매핑 여부 조회")
 	@GetMapping("/trainer-mapping")
 	public ApiResult<TrainerMappingResult> getTrainerMapping(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
@@ -225,10 +188,7 @@ public class MemberController {
 			.build();
 	}
 
-	@Operation(summary = "학생이 내 트레이너 정보 조회", responses = {
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 입력"),
-		@ApiResponse(responseCode = "200", description = "내 트레이너 정보를 반환한다.")
-	})
+	@Operation(summary = "학생이 내 트레이너 정보 조회")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	@GetMapping("/trainer-mapping/info")
 	public ApiResult<RetrieveTrainerInfo> findMyTrainerInfo(@AuthenticationPrincipal CustomMemberDetails member) {
@@ -238,11 +198,7 @@ public class MemberController {
 			.build();
 	}
 
-	@Operation(summary = "회원이 현재 비밀번호를 검증한다.",
-		responses = {
-			@ApiResponse(responseCode = "404", description = "현재 비밀번호가 일치하지 않습니다."),
-			@ApiResponse(responseCode = "200", description = "현재 비밀번호가 확인되었습니다.")
-		})
+	@Operation(summary = "회원이 현재 비밀번호를 검증한다.")
 	@PostMapping("/password")
 	public ApiResult<Boolean> validateCurrentPassword(@RequestBody @Valid ValidateCurrentPassword request,
 		@AuthenticationPrincipal CustomMemberDetails member) {

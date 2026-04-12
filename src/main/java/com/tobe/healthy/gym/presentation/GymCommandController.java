@@ -16,7 +16,6 @@ import com.tobe.healthy.gym.presentation.dto.out.CommandRegisterGymResult;
 import com.tobe.healthy.gym.presentation.dto.out.CommandSelectMyGymResult;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -28,10 +27,7 @@ public class GymCommandController {
 
 	private final GymCommandService gymCommandService;
 
-	@Operation(
-		summary = "관리자 또는 트레이너가 헬스장을 등록한다.",
-		responses = @ApiResponse(responseCode = "200", description = "헬스장을 등록하였습니다.")
-	)
+	@Operation(summary = "관리자 또는 트레이너가 헬스장을 등록한다.")
 	@PostMapping
 	public ApiResult<CommandRegisterGymResult> registerGym(
 		@RequestBody CommandRegisterGym request) {
@@ -41,14 +37,7 @@ public class GymCommandController {
 			.build();
 	}
 
-	@Operation(
-		summary = "학생 또는 트레이너가 내가 다니는 헬스장으로 등록한다.",
-		responses = {
-			@ApiResponse(responseCode = "404", description = "회원을 찾을 수 없습니다."),
-			@ApiResponse(responseCode = "404", description = "헬스장을 찾을 수 없습니다."),
-			@ApiResponse(responseCode = "200", description = "내 헬스장으로 등록하였습니다.")
-		}
-	)
+	@Operation(summary = "학생 또는 트레이너가 내가 다니는 헬스장으로 등록한다.")
 	@PostMapping("/{gymId}")
 	public ApiResult<CommandSelectMyGymResult> selectMyGym(
 		@PathVariable Long gymId,
