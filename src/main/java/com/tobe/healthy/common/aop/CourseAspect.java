@@ -53,9 +53,9 @@ public class CourseAspect {
 	@AfterReturning(value = "cancelMemberSchedule()", returning = "returnValue")
 	public void plusCourseByStudent(JoinPoint joinPoint, Object returnValue) {
 		ScheduleIdInfo scheduleIdInfo = ((ScheduleIdInfo)returnValue);
-		Long scheduleId = scheduleIdInfo.getScheduleId();
-		Long studentId = scheduleIdInfo.getStudentId();
-		Long trainerId = scheduleIdInfo.getTrainerId();
+		Long scheduleId = scheduleIdInfo.scheduleId();
+		Long studentId = scheduleIdInfo.studentId();
+		Long trainerId = scheduleIdInfo.trainerId();
 
 		plusCourse(studentId, scheduleId, trainerId);
 	}
@@ -66,9 +66,9 @@ public class CourseAspect {
 	@AfterReturning(value = "cancelStudentReservation()", returning = "returnValue")
 	public void plusCourseByTrainer(JoinPoint joinPoint, Object returnValue) {
 		CommandCancelStudentReservationResult result = ((CommandCancelStudentReservationResult)returnValue);
-		Long scheduleId = result.getScheduleId();
-		Long studentId = result.getStudentId();
-		Long trainerId = result.getTrainerId();
+		Long scheduleId = result.scheduleId();
+		Long studentId = result.studentId();
+		Long trainerId = result.trainerId();
 
 		plusCourse(studentId, scheduleId, trainerId);
 	}
@@ -79,9 +79,9 @@ public class CourseAspect {
 	@AfterReturning(value = "reserveSchedule()", returning = "returnValue")
 	public void minusCourseByStudent(JoinPoint joinPoint, Object returnValue) {
 		ScheduleIdInfo scheduleIdInfo = ((ScheduleIdInfo)returnValue);
-		Long scheduleId = scheduleIdInfo.getScheduleId();
-		Long studentId = scheduleIdInfo.getStudentId();
-		Long trainerId = scheduleIdInfo.getTrainerId();
+		Long scheduleId = scheduleIdInfo.scheduleId();
+		Long studentId = scheduleIdInfo.studentId();
+		Long trainerId = scheduleIdInfo.trainerId();
 
 		minusCourse(studentId, scheduleId, trainerId);
 	}
@@ -92,9 +92,9 @@ public class CourseAspect {
 	@AfterReturning(value = "registerStudentInTrainerSchedule()", returning = "returnValue")
 	public void minusCourseByTrainer(JoinPoint joinPoint, Object returnValue) {
 		CommandRegisterScheduleByStudentResult result = ((CommandRegisterScheduleByStudentResult)returnValue);
-		Long scheduleId = result.getScheduleId();
-		Long studentId = result.getStudentId();
-		Long trainerId = result.getTrainerId();
+		Long scheduleId = result.scheduleId();
+		Long studentId = result.studentId();
+		Long trainerId = result.trainerId();
 
 		minusCourse(studentId, scheduleId, trainerId);
 	}

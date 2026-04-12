@@ -1,24 +1,17 @@
 package com.tobe.healthy.diet.presentation.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+public record DietDetailDto(Boolean fast, DietFileDto dietFile) {
 
-@Data
-@ToString
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class DietDetailDto {
-
-	@Builder.Default
-	private Boolean fast = false;
-	private DietFileDto dietFile;
+	public DietDetailDto() {
+		this(false, null);
+	}
 
 	public DietDetailDto(Boolean fast) {
-		this.fast = fast;
+		this(fast, null);
+	}
+
+	public DietDetailDto withDietFile(DietFileDto dietFile) {
+		return new DietDetailDto(this.fast, dietFile);
 	}
 
 }

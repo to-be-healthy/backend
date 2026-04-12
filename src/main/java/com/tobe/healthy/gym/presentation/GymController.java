@@ -27,19 +27,13 @@ public class GymController {
 	@Operation(summary = "모든 헬스장을 조회한다.", description = "등록된 모든 헬스장을 조회한다.")
 	@GetMapping
 	public ApiResult<List<GymResult>> findAllGym() {
-		return ApiResult.<List<GymResult>>builder()
-			.data(gymService.findAllGym())
-			.message("모든 헬스장을 조회하였습니다.")
-			.build();
+		return ApiResult.success("모든 헬스장을 조회하였습니다.", gymService.findAllGym());
 	}
 
 	@Operation(summary = "학생이 헬스장의 모든 트레이너들을 조회한다.", description = "학생이 헬스장의 모든 트레이너들을 조회한다.(새로운 트레이너가 상단에 있도록)")
 	@GetMapping("/{gymId}/trainers")
 	public ApiResult<List<TrainersByGymResult>> findAllTrainersByGym(
 		@PathVariable Long gymId) {
-		return ApiResult.<List<TrainersByGymResult>>builder()
-			.data(gymService.findAllTrainersByGym(gymId))
-			.message("헬스장의 모든 트레이너들을 조회하였습니다.")
-			.build();
+		return ApiResult.success("헬스장의 모든 트레이너들을 조회하였습니다.", gymService.findAllTrainersByGym(gymId));
 	}
 }

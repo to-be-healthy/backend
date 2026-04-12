@@ -42,9 +42,9 @@ public class TrainerScheduleService {
 		Long trainerId
 	) {
 		List<Schedule> schedules = trainerScheduleRepository.findAllSchedule(
-			request.getLessonDt(),
-			request.getLessonStartDt(),
-			request.getLessonEndDt(),
+			request.lessonDt(),
+			request.lessonStartDt(),
+			request.lessonEndDt(),
 			trainerId
 		);
 		return RetrieveTrainerScheduleByLessonInfoResult.from(schedules);
@@ -56,8 +56,8 @@ public class TrainerScheduleService {
 	) {
 		List<Schedule> schedules = trainerScheduleRepository.findAllSchedule(
 			null,
-			request.getLessonStartDt(),
-			request.getLessonEndDt(),
+			request.lessonStartDt(),
+			request.lessonEndDt(),
 			trainerId
 		);
 		return RetrieveTrainerScheduleByLessonInfoResult.from(schedules);
@@ -67,7 +67,7 @@ public class TrainerScheduleService {
 		RetrieveTrainerScheduleByLessonDt request,
 		Long trainerId
 	) {
-		return trainerScheduleRepository.findOneTrainerTodaySchedule(request.getLessonDt(), trainerId);
+		return trainerScheduleRepository.findOneTrainerTodaySchedule(request.lessonDt(), trainerId);
 	}
 
 	public KotlinCustomPaging<RetrieveApplicantSchedule> findAllScheduleByStudentId(

@@ -1,14 +1,6 @@
 package com.tobe.healthy.gym.presentation.dto.in;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CommandSelectMyGym {
-	private String joinCode;
+public record CommandSelectMyGym(
+	String joinCode
+) {
 }

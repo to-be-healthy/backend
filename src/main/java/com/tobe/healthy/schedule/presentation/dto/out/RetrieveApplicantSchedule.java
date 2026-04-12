@@ -4,34 +4,23 @@ import com.tobe.healthy.common.LessonTimeFormatter;
 import com.tobe.healthy.schedule.domain.ReservationStatus;
 import com.tobe.healthy.schedule.domain.Schedule;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class RetrieveApplicantSchedule {
-
-	private Long studentId;
-	private String studentName;
-	private Long scheduleId;
-	private String lessonDt;
-	private String lessonTime;
-	private String attendanceStatus;
-
+public record RetrieveApplicantSchedule(
+	Long studentId,
+	String studentName,
+	Long scheduleId,
+	String lessonDt,
+	String lessonTime,
+	String attendanceStatus
+) {
 	public static RetrieveApplicantSchedule from(Schedule schedule) {
-		return RetrieveApplicantSchedule.builder()
-			.studentId(schedule.getApplicant() != null ? schedule.getApplicant().getId() : null)
-			.studentName(schedule.getApplicant() != null ? schedule.getApplicant().getName() : null)
-			.scheduleId(schedule.getId())
-			.lessonDt(LessonTimeFormatter.formatLessonDt(schedule.getLessonDt()))
-			.lessonTime(
-				LessonTimeFormatter.formatLessonTime(schedule.getLessonStartTime(), schedule.getLessonEndTime()))
-			.attendanceStatus(formatReservationStatus(schedule.getReservationStatus()))
-			.build();
+		return new RetrieveApplicantSchedule(
+			schedule.getApplicant() != null ? schedule.getApplicant().getId() : null,
+			schedule.getApplicant() != null ? schedule.getApplicant().getName() : null,
+			schedule.getId(),
+			LessonTimeFormatter.formatLessonDt(schedule.getLessonDt()),
+			LessonTimeFormatter.formatLessonTime(schedule.getLessonStartTime(), schedule.getLessonEndTime()),
+			formatReservationStatus(schedule.getReservationStatus())
+		);
 	}
 
 	private static String formatReservationStatus(ReservationStatus reservationStatus) {

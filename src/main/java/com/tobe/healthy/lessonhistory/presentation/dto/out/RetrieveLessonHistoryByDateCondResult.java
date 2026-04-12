@@ -14,94 +14,83 @@ import com.tobe.healthy.lessonhistory.domain.LessonHistory;
 import com.tobe.healthy.lessonhistory.domain.LessonHistoryFiles;
 import com.tobe.healthy.lessonhistory.domain.LessonHistoryReadStatus;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class RetrieveLessonHistoryByDateCondResult {
-
-	private Long id;
-	private String title;
-	private String content;
-	private Integer commentTotalCount;
-	private LocalDateTime createdAt;
-	private Long studentId;
-	private String student;
-	private String trainer;
-	private String trainerProfile;
-	private Long scheduleId;
-	private String lessonDt;
-	private String lessonTime;
-	private String attendanceStatus;
-	private LessonHistoryReadStatus feedbackChecked;
-	@Builder.Default
-	private List<LessonHistoryFileResults> files = new ArrayList<>();
-
+public record RetrieveLessonHistoryByDateCondResult(
+	Long id,
+	String title,
+	String content,
+	Integer commentTotalCount,
+	LocalDateTime createdAt,
+	Long studentId,
+	String student,
+	String trainer,
+	String trainerProfile,
+	Long scheduleId,
+	String lessonDt,
+	String lessonTime,
+	String attendanceStatus,
+	LessonHistoryReadStatus feedbackChecked,
+	List<LessonHistoryFileResults> files
+) {
 	public static RetrieveLessonHistoryByDateCondResult top1From(LessonHistory entity) {
 		if (entity == null) {
 			return null;
 		}
-		return RetrieveLessonHistoryByDateCondResult.builder()
-			.id(entity.getId())
-			.title(entity.getTitle())
-			.content(entity.getContent())
-			.commentTotalCount((int)entity.getLessonHistoryComment().stream().filter(c -> !c.isDelYn()).count())
-			.createdAt(entity.getCreatedAt())
-			.studentId(entity.getStudent() != null ? entity.getStudent().getId() : null)
-			.student(entity.getStudent() != null ? entity.getStudent().getName() : null)
-			.trainer(entity.getTrainer() != null ? entity.getTrainer().getName() + " 트레이너" : null)
-			.trainerProfile(entity.getTrainer() != null && entity.getTrainer().getMemberProfile() != null ?
-				entity.getTrainer().getMemberProfile().getFileUrl() : null)
-			.scheduleId(entity.getSchedule() != null ? entity.getSchedule().getId() : null)
-			.lessonDt(LessonTimeFormatter.formatLessonDt(
-				entity.getSchedule() != null ? entity.getSchedule().getLessonDt() : null))
-			.lessonTime(LessonTimeFormatter.formatLessonTime(
+		return new RetrieveLessonHistoryByDateCondResult(
+			entity.getId(),
+			entity.getTitle(),
+			entity.getContent(),
+			(int) entity.getLessonHistoryComment().stream().filter(c -> !c.isDelYn()).count(),
+			entity.getCreatedAt(),
+			entity.getStudent() != null ? entity.getStudent().getId() : null,
+			entity.getStudent() != null ? entity.getStudent().getName() : null,
+			entity.getTrainer() != null ? entity.getTrainer().getName() + " 트레이너" : null,
+			entity.getTrainer() != null && entity.getTrainer().getMemberProfile() != null
+				? entity.getTrainer().getMemberProfile().getFileUrl() : null,
+			entity.getSchedule() != null ? entity.getSchedule().getId() : null,
+			LessonTimeFormatter.formatLessonDt(
+				entity.getSchedule() != null ? entity.getSchedule().getLessonDt() : null),
+			LessonTimeFormatter.formatLessonTime(
 				entity.getSchedule() != null ? entity.getSchedule().getLessonStartTime() : null,
-				entity.getSchedule() != null ? entity.getSchedule().getLessonEndTime() : null))
-			.attendanceStatus(validateAttendanceStatus(
+				entity.getSchedule() != null ? entity.getSchedule().getLessonEndTime() : null),
+			validateAttendanceStatus(
 				entity.getSchedule() != null ? entity.getSchedule().getLessonDt() : null,
-				entity.getSchedule() != null ? entity.getSchedule().getLessonEndTime() : null))
-			.feedbackChecked(entity.getFeedbackChecked())
-			.files(entity.getFiles().stream()
+				entity.getSchedule() != null ? entity.getSchedule().getLessonEndTime() : null),
+			entity.getFeedbackChecked(),
+			entity.getFiles().stream()
 				.map(LessonHistoryFileResults::from)
-				.sorted(Comparator.comparing(LessonHistoryFileResults::getCreatedAt))
-				.collect(Collectors.toList()))
-			.build();
+				.sorted(Comparator.comparing(LessonHistoryFileResults::createdAt))
+				.collect(Collectors.toList())
+		);
 	}
 
 	public static RetrieveLessonHistoryByDateCondResult from(LessonHistory entity) {
-		return RetrieveLessonHistoryByDateCondResult.builder()
-			.id(entity.getId())
-			.title(entity.getTitle())
-			.content(entity.getContent())
-			.commentTotalCount((int)entity.getLessonHistoryComment().stream().filter(c -> !c.isDelYn()).count())
-			.createdAt(entity.getCreatedAt())
-			.studentId(entity.getStudent() != null ? entity.getStudent().getId() : null)
-			.student(entity.getStudent() != null ? entity.getStudent().getName() : null)
-			.trainer(entity.getTrainer() != null ? entity.getTrainer().getName() + " 트레이너" : null)
-			.trainerProfile(entity.getTrainer() != null && entity.getTrainer().getMemberProfile() != null ?
-				entity.getTrainer().getMemberProfile().getFileUrl() : null)
-			.scheduleId(entity.getSchedule() != null ? entity.getSchedule().getId() : null)
-			.lessonDt(LessonTimeFormatter.formatLessonDt(
-				entity.getSchedule() != null ? entity.getSchedule().getLessonDt() : null))
-			.lessonTime(LessonTimeFormatter.formatLessonTime(
+		return new RetrieveLessonHistoryByDateCondResult(
+			entity.getId(),
+			entity.getTitle(),
+			entity.getContent(),
+			(int) entity.getLessonHistoryComment().stream().filter(c -> !c.isDelYn()).count(),
+			entity.getCreatedAt(),
+			entity.getStudent() != null ? entity.getStudent().getId() : null,
+			entity.getStudent() != null ? entity.getStudent().getName() : null,
+			entity.getTrainer() != null ? entity.getTrainer().getName() + " 트레이너" : null,
+			entity.getTrainer() != null && entity.getTrainer().getMemberProfile() != null
+				? entity.getTrainer().getMemberProfile().getFileUrl() : null,
+			entity.getSchedule() != null ? entity.getSchedule().getId() : null,
+			LessonTimeFormatter.formatLessonDt(
+				entity.getSchedule() != null ? entity.getSchedule().getLessonDt() : null),
+			LessonTimeFormatter.formatLessonTime(
 				entity.getSchedule() != null ? entity.getSchedule().getLessonStartTime() : null,
-				entity.getSchedule() != null ? entity.getSchedule().getLessonEndTime() : null))
-			.attendanceStatus(validateAttendanceStatus(
+				entity.getSchedule() != null ? entity.getSchedule().getLessonEndTime() : null),
+			validateAttendanceStatus(
 				entity.getSchedule() != null ? entity.getSchedule().getLessonDt() : null,
-				entity.getSchedule() != null ? entity.getSchedule().getLessonEndTime() : null))
-			.feedbackChecked(entity.getFeedbackChecked())
-			.files(entity.getFiles().stream()
+				entity.getSchedule() != null ? entity.getSchedule().getLessonEndTime() : null),
+			entity.getFeedbackChecked(),
+			entity.getFiles().stream()
 				.filter(f -> f.getLessonHistoryComment() == null)
 				.map(LessonHistoryFileResults::from)
-				.sorted(Comparator.comparing(LessonHistoryFileResults::getCreatedAt))
-				.collect(Collectors.toList()))
-			.build();
+				.sorted(Comparator.comparing(LessonHistoryFileResults::createdAt))
+				.collect(Collectors.toList())
+		);
 	}
 
 	private static String validateAttendanceStatus(LocalDate lessonDt, LocalTime lessonEndTime) {
@@ -112,21 +101,17 @@ public class RetrieveLessonHistoryByDateCondResult {
 		return LessonAttendanceStatus.ABSENT.getDescription();
 	}
 
-	@Data
-	@Builder
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class LessonHistoryFileResults {
-		private String fileUrl;
-		private int fileOrder;
-		private LocalDateTime createdAt;
-
+	public record LessonHistoryFileResults(
+		String fileUrl,
+		int fileOrder,
+		LocalDateTime createdAt
+	) {
 		public static LessonHistoryFileResults from(LessonHistoryFiles entity) {
-			return LessonHistoryFileResults.builder()
-				.fileUrl(entity.getFileUrl())
-				.fileOrder(entity.getFileOrder())
-				.createdAt(entity.getCreatedAt())
-				.build();
+			return new LessonHistoryFileResults(
+				entity.getFileUrl(),
+				entity.getFileOrder(),
+				entity.getCreatedAt()
+			);
 		}
 	}
 }

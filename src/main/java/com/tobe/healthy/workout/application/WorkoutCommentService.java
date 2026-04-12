@@ -44,13 +44,13 @@ public class WorkoutCommentService {
 			.orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
 		Long depth, orderNum, parentWriterId;
 		Long commentCnt = commentRepository.countByWorkoutHistory(history);
-		if (command.getParentCommentId() == null) { //댓글
+		if (command.parentCommentId() == null) { //댓글
 			depth = 0L;
 			orderNum = commentCnt;
 			parentWriterId = 0L;
 		} else { //대댓글
 			WorkoutHistoryComment parentComment = commentRepository.findByCommentIdAndDelYnFalse(
-					command.getParentCommentId())
+					command.parentCommentId())
 				.orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
 			depth = parentComment.getDepth() + 1;
 			orderNum = parentComment.getOrderNum();
@@ -58,12 +58,12 @@ public class WorkoutCommentService {
 		}
 
 		commentRepository.save(
-			WorkoutHistoryComment.create(history, member, command.getContent(), command.getParentCommentId(), depth,
+			WorkoutHistoryComment.create(history, member, command.content(), command.parentCommentId(), depth,
 				orderNum));
 
 		// 댓글
 		CommandSendNotification notification = null;
-		if (command.getParentCommentId() == null && !history.getMember().getId().equals(member.getId())) {
+		if (command.parentCommentId() == null && !history.getMember().getId().equals(member.getId())) {
 			notification = new CommandSendNotification(
 				COMMENT.getDescription(),
 				String.format("내 게시글에 새로운 댓글이 달렸어요."),
@@ -76,7 +76,7 @@ public class WorkoutCommentService {
 				null
 			);
 			notificationPublisher.publish(notification, NOTIFICATION);
-		} else if (command.getParentCommentId() != null && !parentWriterId.equals(member.getId())) {
+		} else if (command.parentCommentId() != null && !parentWriterId.equals(member.getId())) {
 			// 답글
 			notification = new CommandSendNotification(
 				COMMENT.getDescription(),
@@ -99,7 +99,7 @@ public class WorkoutCommentService {
 		WorkoutHistoryComment comment = commentRepository.findByCommentIdAndMemberIdAndDelYnFalse(commentId,
 				member.getId())
 			.orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
-		comment.updateContent(command.getContent());
+		comment.updateContent(command.content());
 		return WorkoutHistoryCommentDto.from(comment);
 	}
 
@@ -117,13 +117,13 @@ public class WorkoutCommentService {
 		List<WorkoutHistoryCommentDto> dtos = comments.stream()
 			.map(c -> WorkoutHistoryCommentDto.create(c, c.getMember().getMemberProfile())).toList();
 		Map<Boolean, List<WorkoutHistoryCommentDto>> dtos2 = dtos.stream()
-			.collect(Collectors.partitioningBy(c -> c.getParentId() == null));
+			.collect(Collectors.partitioningBy(c -> c.parentId() == null));
 		List<WorkoutHistoryCommentDto> parent = dtos2.get(true);
 		List<WorkoutHistoryCommentDto> child = dtos2.get(false);
 
 		Map<Long, List<WorkoutHistoryCommentDto>> childByGroupList = child.stream()
-			.collect(Collectors.groupingBy(WorkoutHistoryCommentDto::getParentId, Collectors.toList()));
-		return parent.stream().peek(p -> p.setReplies(childByGroupList.get(p.getId()))).toList();
+			.collect(Collectors.groupingBy(WorkoutHistoryCommentDto::parentId, Collectors.toList()));
+		return parent.stream().map(p -> p.withReplies(childByGroupList.get(p.id()))).toList();
 	}
 
 	public void deleteComment(Member member, Long workoutHistoryId, Long commentId) {

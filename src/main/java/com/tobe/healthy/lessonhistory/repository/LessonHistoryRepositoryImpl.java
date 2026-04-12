@@ -52,7 +52,7 @@ public class LessonHistoryRepositoryImpl implements LessonHistoryRepositoryCusto
 			.innerJoin(lessonHistory.student).fetchJoin()
 			.innerJoin(lessonHistory.schedule, schedule).fetchJoin()
 			.where(
-				convertDateFormat(request.getSearchDate()),
+				convertDateFormat(request.searchDate()),
 				validateMemberTypeAndMemberIdEq(memberId, memberType)
 			)
 			.orderBy(
@@ -94,7 +94,7 @@ public class LessonHistoryRepositoryImpl implements LessonHistoryRepositoryCusto
 			.leftJoin(lessonHistory.student).fetchJoin()
 			.leftJoin(lessonHistory.schedule).fetchJoin()
 			.where(
-				convertDateFormat(request.getSearchDate()),
+				convertDateFormat(request.searchDate()),
 				lessonHistory.student.id.eq(studentId),
 				lessonHistory.trainer.id.eq(trainerId)
 			)
@@ -134,7 +134,7 @@ public class LessonHistoryRepositoryImpl implements LessonHistoryRepositoryCusto
 			.innerJoin(lessonHistory.schedule).fetchJoin()
 			.leftJoin(lessonHistory.files, lessonHistoryFiles).fetchJoin()
 			.where(
-				convertDateFormat(request.getSearchDate()),
+				convertDateFormat(request.searchDate()),
 				validateMemberTypeAndMemberIdEq(member.getMemberId(), member.getMemberType()),
 				lessonHistoryFiles.lessonHistoryComment.id.isNull()
 			)
@@ -155,7 +155,7 @@ public class LessonHistoryRepositoryImpl implements LessonHistoryRepositoryCusto
 			.innerJoin(lessonHistory.schedule)
 			.leftJoin(lessonHistory.files, lessonHistoryFiles)
 			.where(
-				convertDateFormat(request.getSearchDate()),
+				convertDateFormat(request.searchDate()),
 				validateMemberTypeAndMemberIdEq(member.getMemberId(), member.getMemberType()),
 				lessonHistoryFiles.lessonHistoryComment.id.isNull()
 			);

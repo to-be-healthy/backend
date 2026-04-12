@@ -4,44 +4,32 @@ import java.time.LocalTime;
 
 import com.tobe.healthy.schedule.domain.Schedule;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CommandCancelStudentReservationResult {
-
-	private Long scheduleId;
-	private LocalTime lessonStartTime;
-	private LocalTime lessonEndTime;
-	private Long trainerId;
-	private String trainerName;
-	private Long studentId;
-	private String studentName;
-	private Long waitingStudentId;
-
+public record CommandCancelStudentReservationResult(
+	Long scheduleId,
+	LocalTime lessonStartTime,
+	LocalTime lessonEndTime,
+	Long trainerId,
+	String trainerName,
+	Long studentId,
+	String studentName,
+	Long waitingStudentId
+) {
 	public static CommandCancelStudentReservationResult from(
 		Schedule schedule,
 		Long applicantId,
 		String applicantName
 	) {
-		return CommandCancelStudentReservationResult.builder()
-			.scheduleId(schedule.getId())
-			.lessonStartTime(schedule.getLessonStartTime())
-			.lessonEndTime(schedule.getLessonEndTime())
-			.trainerId(schedule.getTrainer().getId())
-			.trainerName(schedule.getTrainer().getName() + " 트레이너")
-			.studentId(applicantId)
-			.studentName(applicantName)
-			.waitingStudentId(
-				schedule.getScheduleWaiting() != null && !schedule.getScheduleWaiting().isEmpty()
-					? schedule.getScheduleWaiting().get(0).getId()
-					: null
-			)
-			.build();
+		return new CommandCancelStudentReservationResult(
+			schedule.getId(),
+			schedule.getLessonStartTime(),
+			schedule.getLessonEndTime(),
+			schedule.getTrainer().getId(),
+			schedule.getTrainer().getName() + " 트레이너",
+			applicantId,
+			applicantName,
+			schedule.getScheduleWaiting() != null && !schedule.getScheduleWaiting().isEmpty()
+				? schedule.getScheduleWaiting().get(0).getId()
+				: null
+		);
 	}
 }

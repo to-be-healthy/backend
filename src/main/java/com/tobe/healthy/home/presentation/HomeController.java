@@ -33,10 +33,7 @@ public class HomeController {
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<StudentHomeResult> getStudentHome(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ApiResult.<StudentHomeResult>builder()
-			.data(homeService.getStudentHome(customMemberDetails.getMemberId()))
-			.message("학생 홈이 조회되었습니다.")
-			.build();
+		return ApiResult.success("학생 홈이 조회되었습니다.", homeService.getStudentHome(customMemberDetails.getMemberId()));
 	}
 
 	@Operation(summary = "트레이너 홈 조회")
@@ -44,9 +41,6 @@ public class HomeController {
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<TrainerHomeResult> getTrainerHome(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ApiResult.<TrainerHomeResult>builder()
-			.data(homeService.getTrainerHome(customMemberDetails.getMemberId()))
-			.message("트레이너 홈이 조회되었습니다.")
-			.build();
+		return ApiResult.success("트레이너 홈이 조회되었습니다.", homeService.getTrainerHome(customMemberDetails.getMemberId()));
 	}
 }

@@ -35,12 +35,8 @@ public class ScheduleWaitingController {
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<Boolean> registerScheduleWaiting(@PathVariable Long scheduleId,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		String scheduleTime = scheduleWaitingService.registerScheduleWaiting(scheduleId,
-			customMemberDetails.getMemberId());
-		return ApiResult.<Boolean>builder()
-			.data(true)
-			.message(scheduleTime + " 수업 대기가 예약되었습니다.")
-			.build();
+		String scheduleTime = scheduleWaitingService.registerScheduleWaiting(scheduleId, customMemberDetails.getMemberId());
+		return ApiResult.success(scheduleTime + " 수업 대기가 예약되었습니다.", true);
 	}
 
 	@Operation(summary = "학생이 대기 신청을 취소한다.")
@@ -48,12 +44,8 @@ public class ScheduleWaitingController {
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<Boolean> cancelScheduleWaiting(@PathVariable Long scheduleId,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		String scheduleTime = scheduleWaitingService.cancelScheduleWaiting(scheduleId,
-			customMemberDetails.getMemberId());
-		return ApiResult.<Boolean>builder()
-			.data(true)
-			.message(scheduleTime + " 수업 대기가 취소되었습니다.")
-			.build();
+		String scheduleTime = scheduleWaitingService.cancelScheduleWaiting(scheduleId, customMemberDetails.getMemberId());
+		return ApiResult.success(scheduleTime + " 수업 대기가 취소되었습니다.", true);
 	}
 
 	@Operation(summary = "학생이 대기중인 예약을 조회한다.", description = "학생이 대기중인 예약을 조회한다.")
@@ -61,9 +53,6 @@ public class ScheduleWaitingController {
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<FindMyScheduleWaitingResult> findAllMyScheduleWaiting(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ApiResult.<FindMyScheduleWaitingResult>builder()
-			.data(scheduleWaitingService.findAllMyScheduleWaiting(customMemberDetails.getMemberId()))
-			.message("학생이 대기중인 예약을 조회하였습니다.")
-			.build();
+		return ApiResult.success("학생이 대기중인 예약을 조회하였습니다.", scheduleWaitingService.findAllMyScheduleWaiting(customMemberDetails.getMemberId()));
 	}
 }

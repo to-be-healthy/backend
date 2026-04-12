@@ -54,19 +54,13 @@ public class StudentScheduleService {
 
 	private ScheduleCommandResponse settingMorningAndAfternoon(List<ScheduleCommandResult> schedule, Member member) {
 		List<ScheduleCommandResult> morning = schedule.stream()
-			.filter(s -> NOON.isAfter(s.getLessonStartTime()))
-			.peek(s -> {
-				if (isSoldOut(s))
-					s.setReservationStatus(SOLD_OUT);
-			})
+			.filter(s -> NOON.isAfter(s.lessonStartTime()))
+			.map(s -> isSoldOut(s) ? s.withReservationStatus(SOLD_OUT) : s)
 			.collect(Collectors.toList());
 
 		List<ScheduleCommandResult> afternoon = schedule.stream()
-			.filter(s -> NOON.isBefore(s.getLessonStartTime()))
-			.peek(s -> {
-				if (isSoldOut(s))
-					s.setReservationStatus(SOLD_OUT);
-			})
+			.filter(s -> NOON.isBefore(s.lessonStartTime()))
+			.map(s -> isSoldOut(s) ? s.withReservationStatus(SOLD_OUT) : s)
 			.collect(Collectors.toList());
 
 		return ScheduleCommandResponse.create(member.getScheduleNoticeStatus(), morning, afternoon);
@@ -79,37 +73,37 @@ public class StudentScheduleService {
 
 	//수업시간 24시간 전부터는 대기 불가
 	private boolean validateWaitingBefore24Hour(ScheduleCommandResult schedule) {
-		LocalDateTime before24hour = LocalDateTime.of(schedule.getLessonDt().minusDays(1),
-			schedule.getLessonStartTime());
+		LocalDateTime before24hour = LocalDateTime.of(schedule.lessonDt().minusDays(1),
+			schedule.lessonStartTime());
 		return LocalDateTime.now().isAfter(before24hour)
-			&& schedule.getApplicantName() != null
-			&& schedule.getWaitingByName() == null;
+			&& schedule.applicantName() != null
+			&& schedule.waitingByName() == null;
 	}
 
 	//수업시간 30분 전부터는 예약 불가
 	private boolean validateReservationBefore30Minutes(ScheduleCommandResult schedule) {
-		LocalDateTime before30Minutes = LocalDateTime.of(schedule.getLessonDt(),
-			schedule.getLessonStartTime().minusMinutes(30));
-		return LocalDateTime.now().isAfter(before30Minutes) && schedule.getApplicantName() == null;
+		LocalDateTime before30Minutes = LocalDateTime.of(schedule.lessonDt(),
+			schedule.lessonStartTime().minusMinutes(30));
+		return LocalDateTime.now().isAfter(before30Minutes) && schedule.applicantName() == null;
 	}
 
 	//현재시간 이전 일정
 	private boolean beforeLessonDateTimeThenNow(ScheduleCommandResult schedule) {
-		LocalDateTime lessonDateTime = LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime());
+		LocalDateTime lessonDateTime = LocalDateTime.of(schedule.lessonDt(), schedule.lessonStartTime());
 		return lessonDateTime.isBefore(LocalDateTime.now());
 	}
 
 	//금일 대기 불가
 	private boolean validateWaitingToday(ScheduleCommandResult schedule) {
-		return schedule.getLessonDt().equals(LocalDate.now())
-			&& schedule.getApplicantName() != null
-			&& schedule.getWaitingByName() == null;
+		return schedule.lessonDt().equals(LocalDate.now())
+			&& schedule.applicantName() != null
+			&& schedule.waitingByName() == null;
 	}
 
 	//대기자 있음
 	private boolean existsWaiting(ScheduleCommandResult schedule) {
-		return schedule.getApplicantName() != null
-			&& schedule.getWaitingByName() != null;
+		return schedule.applicantName() != null
+			&& schedule.waitingByName() != null;
 	}
 
 	public MyReservationResponse findNewReservationByTrainer(Long trainerId, Long memberId,

@@ -2,18 +2,9 @@ package com.tobe.healthy.lessonhistory.presentation.dto.in;
 
 import com.tobe.healthy.lessonhistory.domain.WritingStatus;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class UnwrittenLessonHistorySearchCond {
-
-	private String lessonDate;
-	private Long studentId;
-	private WritingStatus writingStatus;
+public record UnwrittenLessonHistorySearchCond(
+	String lessonDate,
+	Long studentId,
+	WritingStatus writingStatus
+) {
 }

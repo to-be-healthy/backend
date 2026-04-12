@@ -30,10 +30,7 @@ public class PushCommandController {
 	public ApiResult<CommandRegisterTokenResult> registerFcmToken(
 		@RequestBody CommandRegisterToken request,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ApiResult.<CommandRegisterTokenResult>builder()
-			.message("토큰을 저장하였습니다.")
-			.data(pushCommandService.registerFcmToken(request, member.getMemberId()))
-			.build();
+		return ApiResult.success("토큰을 저장하였습니다.", pushCommandService.registerFcmToken(request, member.getMemberId()));
 	}
 
 	@PostMapping("/webview")
@@ -44,19 +41,13 @@ public class PushCommandController {
 	@PostMapping("/send")
 	public ApiResult<CommandSendPushAlarmResult> sendPushAlarm(
 		@RequestBody CommandSendPushAlarm request) {
-		return ApiResult.<CommandSendPushAlarmResult>builder()
-			.message("푸시 전송에 성공하였습니다.")
-			.data(pushCommandService.sendPushAlarm(request))
-			.build();
+		return ApiResult.success("푸시 전송에 성공하였습니다.", pushCommandService.sendPushAlarm(request));
 	}
 
 	@PostMapping("/{memberId}")
 	public ApiResult<CommandSendPushAlarmResult> sendPushAlarm(
 		@PathVariable Long memberId,
 		@RequestBody CommandSendPushAlarmToMember request) {
-		return ApiResult.<CommandSendPushAlarmResult>builder()
-			.message("푸시 전송에 성공하였습니다.")
-			.data(pushCommandService.sendPushAlarm(memberId, request))
-			.build();
+		return ApiResult.success("푸시 전송에 성공하였습니다.", pushCommandService.sendPushAlarm(memberId, request));
 	}
 }

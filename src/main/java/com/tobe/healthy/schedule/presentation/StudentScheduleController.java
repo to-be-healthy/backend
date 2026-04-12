@@ -41,10 +41,7 @@ public class StudentScheduleController {
 	public ApiResult<ScheduleCommandResponse> findAllScheduleOfTrainer(
 		@ParameterObject StudentScheduleCond searchCond,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ApiResult.<ScheduleCommandResponse>builder()
-			.data(studentScheduleService.findAllScheduleOfTrainer(searchCond, customMemberDetails.getMember()))
-			.message("전체 일정을 조회했습니다.")
-			.build();
+		return ApiResult.success("전체 일정을 조회했습니다.", studentScheduleService.findAllScheduleOfTrainer(searchCond, customMemberDetails.getMember()));
 	}
 
 	@Operation(summary = "학생이 내 수업을 조회한다.", description = "회원이 등록된 수업 전체를 조회한다.")
@@ -52,10 +49,7 @@ public class StudentScheduleController {
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	public ApiResult<List<ScheduleCommandResult>> findMySchedule(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ApiResult.<List<ScheduleCommandResult>>builder()
-			.data(studentScheduleService.findAllByApplicantId(customMemberDetails.getMemberId()))
-			.message("내 수업을 조회하였습니다.")
-			.build();
+		return ApiResult.success("내 수업을 조회하였습니다.", studentScheduleService.findAllByApplicantId(customMemberDetails.getMemberId()));
 	}
 
 	@Operation(summary = "학생이 다가오는 예약을 조회한다.", description = "학생이 다가오는 예약을 조회한다.")
@@ -64,10 +58,7 @@ public class StudentScheduleController {
 	public ApiResult<MyReservationResponse> findNewReservation(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@ParameterObject StudentScheduleCond searchCond) {
-		return ApiResult.<MyReservationResponse>builder()
-			.data(studentScheduleService.findNewReservation(customMemberDetails.getMemberId(), searchCond))
-			.message("학생이 내 예약을 조회하였습니다.")
-			.build();
+		return ApiResult.success("학생이 내 예약을 조회하였습니다.", studentScheduleService.findNewReservation(customMemberDetails.getMemberId(), searchCond));
 	}
 
 	@Operation(summary = "학생이 지난 예약을 조회한다.", description = "학생이 지난 예약을 조회한다.")
@@ -76,10 +67,7 @@ public class StudentScheduleController {
 	public ApiResult<MyReservationResponse> findOldReservation(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate) {
-		return ApiResult.<MyReservationResponse>builder()
-			.data(studentScheduleService.findOldReservation(customMemberDetails.getMemberId(), searchDate))
-			.message("학생이 내 예약을 조회하였습니다.")
-			.build();
+		return ApiResult.success("학생이 내 예약을 조회하였습니다.", studentScheduleService.findOldReservation(customMemberDetails.getMemberId(), searchDate));
 	}
 
 	@Operation(summary = "학생 예약한 날짜 블루닷 표시", description = "학생 예약한 날짜 블루닷 표시를 조회한다.")
@@ -88,10 +76,7 @@ public class StudentScheduleController {
 	public ApiResult<ReservationDaysResult> findMyReservationBlueDot(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@ParameterObject StudentScheduleCond searchCond) {
-		return ApiResult.<ReservationDaysResult>builder()
-			.data(studentScheduleService.findMyReservationBlueDot(customMemberDetails.getMemberId(), searchCond))
-			.message("학생이 내 예약을 조회하였습니다.")
-			.build();
+		return ApiResult.success("학생이 내 예약을 조회하였습니다.", studentScheduleService.findMyReservationBlueDot(customMemberDetails.getMemberId(), searchCond));
 	}
 
 }

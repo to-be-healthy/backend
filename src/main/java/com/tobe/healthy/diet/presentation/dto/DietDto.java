@@ -9,74 +9,85 @@ import com.tobe.healthy.diet.domain.Diet;
 import com.tobe.healthy.member.presentation.dto.MemberDto;
 import com.tobe.healthy.member.domain.Member;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+public record DietDto(
+	Long dietId,
+	MemberDto member,
+	Long likeCnt,
+	Long commentCnt,
+	LocalDateTime createdAt,
+	LocalDateTime updatedAt,
+	LocalDate eatDate,
+	boolean liked,
+	boolean feedbackChecked,
+	DietDetailDto breakfast,
+	DietDetailDto lunch,
+	DietDetailDto dinner
+) {
 
-@Data
-@ToString
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class DietDto {
-
-	private Long dietId;
-	private MemberDto member;
-	private Long likeCnt;
-	private Long commentCnt;
-	private LocalDateTime createdAt;
-	private LocalDateTime updatedAt;
-	private LocalDate eatDate;
-	private boolean liked;
-	private boolean feedbackChecked;
-
-	@Builder.Default
-	private DietDetailDto breakfast = new DietDetailDto();
-	@Builder.Default
-	private DietDetailDto lunch = new DietDetailDto();
-	@Builder.Default
-	private DietDetailDto dinner = new DietDetailDto();
+	public DietDto() {
+		this(null, null, null, null, null, null, null, false, false,
+			new DietDetailDto(), new DietDetailDto(), new DietDetailDto());
+	}
 
 	@QueryProjection
 	public DietDto(Long dietId, Member member, boolean liked, Long likeCnt, Long commentCnt, LocalDate eatDate,
 		boolean fastBreakfast, boolean fastLunch, boolean fastDinner) {
-		this.dietId = dietId;
-		this.member = MemberDto.from(member);
-		this.liked = liked;
-		this.likeCnt = likeCnt;
-		this.commentCnt = commentCnt;
-		this.eatDate = eatDate;
-		this.breakfast = new DietDetailDto(fastBreakfast);
-		this.lunch = new DietDetailDto(fastLunch);
-		this.dinner = new DietDetailDto(fastDinner);
+		this(
+			dietId,
+			MemberDto.from(member),
+			likeCnt,
+			commentCnt,
+			null,
+			null,
+			eatDate,
+			liked,
+			false,
+			new DietDetailDto(fastBreakfast),
+			new DietDetailDto(fastLunch),
+			new DietDetailDto(fastDinner)
+		);
 	}
 
 	public static DietDto from(Diet diet) {
-		DietDto dto = DietDto.builder()
-			.dietId(diet.getDietId())
-			.member(MemberDto.from(diet.getMember()))
-			.likeCnt(diet.getLikeCnt())
-			.commentCnt(diet.getCommentCnt())
-			.createdAt(diet.getCreatedAt())
-			.updatedAt(diet.getUpdatedAt())
-			.eatDate(diet.getEatDate())
-			.build();
-		dto.breakfast.setFast(diet.getFastBreakfast());
-		dto.lunch.setFast(diet.getFastLunch());
-		dto.dinner.setFast(diet.getFastDinner());
-		return dto;
+		return new DietDto(
+			diet.getDietId(),
+			MemberDto.from(diet.getMember()),
+			diet.getLikeCnt(),
+			diet.getCommentCnt(),
+			diet.getCreatedAt(),
+			diet.getUpdatedAt(),
+			diet.getEatDate(),
+			false,
+			false,
+			new DietDetailDto(diet.getFastBreakfast()),
+			new DietDetailDto(diet.getFastLunch()),
+			new DietDetailDto(diet.getFastDinner())
+		);
 	}
 
-	public void setDietFiles(List<DietFileDto> filesDto) {
+	public DietDto withLiked(boolean liked) {
+		return new DietDto(dietId, member, likeCnt, commentCnt, createdAt, updatedAt, eatDate,
+			liked, feedbackChecked, breakfast, lunch, dinner);
+	}
+
+	public DietDto withFeedbackChecked(boolean feedbackChecked) {
+		return new DietDto(dietId, member, likeCnt, commentCnt, createdAt, updatedAt, eatDate,
+			liked, feedbackChecked, breakfast, lunch, dinner);
+	}
+
+	public DietDto withDietFiles(List<DietFileDto> filesDto) {
+		DietDetailDto newBreakfast = breakfast;
+		DietDetailDto newLunch = lunch;
+		DietDetailDto newDinner = dinner;
 		for (DietFileDto file : filesDto) {
-			switch (file.getType()) {
-				case BREAKFAST -> this.breakfast.setDietFile(file);
-				case LUNCH -> this.lunch.setDietFile(file);
-				case DINNER -> this.dinner.setDietFile(file);
+			switch (file.type()) {
+				case BREAKFAST -> newBreakfast = newBreakfast.withDietFile(file);
+				case LUNCH -> newLunch = newLunch.withDietFile(file);
+				case DINNER -> newDinner = newDinner.withDietFile(file);
 			}
 		}
+		return new DietDto(dietId, member, likeCnt, commentCnt, createdAt, updatedAt, eatDate,
+			liked, feedbackChecked, newBreakfast, newLunch, newDinner);
 	}
 
 }

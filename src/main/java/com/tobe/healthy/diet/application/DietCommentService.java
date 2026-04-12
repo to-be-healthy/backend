@@ -45,24 +45,24 @@ public class DietCommentService {
 		List<DietCommentDto> dtos = comments.stream()
 			.map(c -> DietCommentDto.create(c, c.getMember().getMemberProfile())).toList();
 		Map<Boolean, List<DietCommentDto>> dtos2 = dtos.stream()
-			.collect(Collectors.partitioningBy(c -> c.getParentId() == null));
+			.collect(Collectors.partitioningBy(c -> c.parentId() == null));
 		List<DietCommentDto> parent = dtos2.get(true);
 		List<DietCommentDto> child = dtos2.get(false);
 
 		Map<Long, List<DietCommentDto>> childByGroupList = child.stream()
-			.collect(Collectors.groupingBy(DietCommentDto::getParentId, Collectors.toList()));
-		return parent.stream().peek(p -> p.setReplies(childByGroupList.get(p.getId()))).toList();
+			.collect(Collectors.groupingBy(DietCommentDto::parentId, Collectors.toList()));
+		return parent.stream().map(p -> p.withReplies(childByGroupList.get(p.id()))).toList();
 	}
 
 	public void addComment(Long dietId, DietCommentAddCommand command, Member member) {
 		Diet diet = dietRepository.findById(dietId)
 			.orElseThrow(() -> new CustomException(DIET_NOT_FOUND));
 
-		boolean isReply = command.getParentCommentId() != null;
+		boolean isReply = command.parentCommentId() != null;
 		Long depth, orderNum;
 		Long commentCnt = commentRepository.countByDiet(diet);
 		if (isReply) {
-			DietComment parentComment = commentRepository.findByCommentIdAndDelYnFalse(command.getParentCommentId())
+			DietComment parentComment = commentRepository.findByCommentIdAndDelYnFalse(command.parentCommentId())
 				.orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
 			depth = parentComment.getDepth() + 1;
 			orderNum = parentComment.getOrderNum();
@@ -71,14 +71,14 @@ public class DietCommentService {
 			orderNum = commentCnt;
 		}
 		commentRepository.save(
-			DietComment.create(diet, member, command.getContent(), command.getParentCommentId(), depth, orderNum));
+			DietComment.create(diet, member, command.content(), command.parentCommentId(), depth, orderNum));
 		diet.updateCommentCnt(++commentCnt);
 	}
 
 	public DietCommentDto updateComment(Member member, Long dietId, Long commentId, DietCommentAddCommand command) {
 		DietComment comment = commentRepository.findByCommentIdAndMemberIdAndDelYnFalse(commentId, member.getId())
 			.orElseThrow(() -> new CustomException(COMMENT_NOT_FOUND));
-		comment.updateContent(command.getContent());
+		comment.updateContent(command.content());
 		return DietCommentDto.from(comment);
 	}
 

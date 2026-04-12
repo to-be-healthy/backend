@@ -5,27 +5,22 @@ import java.time.LocalTime;
 
 import com.tobe.healthy.schedule.domain.Schedule;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
-
-@Data
-@ToString
-@Builder
-public class MyReservation {
-	private Long scheduleId;
-	private LocalDate lessonDt;
-	private LocalTime lessonStartTime;
-	private LocalTime lessonEndTime;
-	private String trainerName;
-	private String reservationStatus;
-
+public record MyReservation(
+	Long scheduleId,
+	LocalDate lessonDt,
+	LocalTime lessonStartTime,
+	LocalTime lessonEndTime,
+	String trainerName,
+	String reservationStatus
+) {
 	public static MyReservation from(Schedule schedule) {
-		return MyReservation.builder().scheduleId(schedule.getId())
-			.lessonDt(schedule.getLessonDt())
-			.lessonStartTime(schedule.getLessonStartTime())
-			.lessonEndTime(schedule.getLessonEndTime())
-			.trainerName(schedule.getTrainer().getName() + " 트레이너")
-			.reservationStatus(schedule.getReservationStatus().name()).build();
+		return new MyReservation(
+			schedule.getId(),
+			schedule.getLessonDt(),
+			schedule.getLessonStartTime(),
+			schedule.getLessonEndTime(),
+			schedule.getTrainer().getName() + " 트레이너",
+			schedule.getReservationStatus().name()
+		);
 	}
 }

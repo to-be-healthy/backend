@@ -11,84 +11,84 @@ import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.schedule.domain.ReservationStatus;
 import com.tobe.healthy.schedule.domain.Schedule;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
-@Data
-@ToString
-@NoArgsConstructor
-@Builder
-@AllArgsConstructor
-public class ScheduleCommandResult {
-
-	private Long scheduleId;
-	private LocalDate lessonDt;
-	private LocalTime lessonStartTime;
-	private LocalTime lessonEndTime;
-	private ReservationStatus reservationStatus;
-	private String trainerName;
-	private String applicantName;
-	private String waitingByName;
-
+public record ScheduleCommandResult(
+	Long scheduleId,
+	LocalDate lessonDt,
+	LocalTime lessonStartTime,
+	LocalTime lessonEndTime,
+	ReservationStatus reservationStatus,
+	String trainerName,
+	String applicantName,
+	String waitingByName
+) {
 	public static ScheduleCommandResult from(Schedule entity, Member member) {
-		ScheduleCommandResultBuilder builder = ScheduleCommandResult.builder()
-			.scheduleId(entity.getId())
-			.lessonDt(entity.getLessonDt())
-			.lessonStartTime(entity.getLessonStartTime())
-			.lessonEndTime(entity.getLessonEndTime());
+		Long scheduleId = entity.getId();
+		LocalDate lessonDt = entity.getLessonDt();
+		LocalTime lessonStartTime = entity.getLessonStartTime();
+		LocalTime lessonEndTime = entity.getLessonEndTime();
+		ReservationStatus reservationStatus = null;
+		String trainerName = null;
+		String applicantName = null;
+		String waitingByName = null;
 
 		if (!ObjectUtils.isEmpty(entity.getReservationStatus())) {
-			builder.reservationStatus(entity.getReservationStatus());
+			reservationStatus = entity.getReservationStatus();
 		}
 
 		if (!ObjectUtils.isEmpty(entity.getTrainer())) {
-			builder.trainerName(entity.getTrainer().getName() + " 트레이너");
+			trainerName = entity.getTrainer().getName() + " 트레이너";
 		}
 
 		if (!ObjectUtils.isEmpty(entity.getApplicant())) {
 			if (entity.getApplicant().getId().equals(member.getId()) && entity.getReservationStatus()
 				.equals(COMPLETED)) {
-				builder.reservationStatus(SOLD_OUT);
+				reservationStatus = SOLD_OUT;
 			} else {
-				builder.reservationStatus(entity.getReservationStatus());
+				reservationStatus = entity.getReservationStatus();
 			}
-			builder.applicantName(entity.getApplicant().getName());
+			applicantName = entity.getApplicant().getName();
 		}
 
 		if (!ObjectUtils.isEmpty(entity.getScheduleWaiting())) {
-			builder.waitingByName(entity.getScheduleWaiting().get(0).getMember().getName());
+			waitingByName = entity.getScheduleWaiting().get(0).getMember().getName();
 		}
 
-		return builder.build();
+		return new ScheduleCommandResult(scheduleId, lessonDt, lessonStartTime, lessonEndTime,
+			reservationStatus, trainerName, applicantName, waitingByName);
 	}
 
 	public static ScheduleCommandResult from(Schedule entity) {
-		ScheduleCommandResultBuilder builder = ScheduleCommandResult.builder()
-			.scheduleId(entity.getId())
-			.lessonDt(entity.getLessonDt())
-			.lessonStartTime(entity.getLessonStartTime())
-			.lessonEndTime(entity.getLessonEndTime())
-			.reservationStatus(entity.getReservationStatus());
+		Long scheduleId = entity.getId();
+		LocalDate lessonDt = entity.getLessonDt();
+		LocalTime lessonStartTime = entity.getLessonStartTime();
+		LocalTime lessonEndTime = entity.getLessonEndTime();
+		ReservationStatus reservationStatus = entity.getReservationStatus();
+		String trainerName = null;
+		String applicantName = null;
+		String waitingByName = null;
 
 		if (!ObjectUtils.isEmpty(entity.getReservationStatus())) {
-			builder.reservationStatus(entity.getReservationStatus());
+			reservationStatus = entity.getReservationStatus();
 		}
 
 		if (!ObjectUtils.isEmpty(entity.getTrainer())) {
-			builder.trainerName(entity.getTrainer().getName() + " 트레이너");
+			trainerName = entity.getTrainer().getName() + " 트레이너";
 		}
 
 		if (!ObjectUtils.isEmpty(entity.getApplicant())) {
-			builder.applicantName(entity.getApplicant().getName());
+			applicantName = entity.getApplicant().getName();
 		}
 
 		if (!ObjectUtils.isEmpty(entity.getScheduleWaiting())) {
-			builder.waitingByName(entity.getScheduleWaiting().get(0).getMember().getName());
+			waitingByName = entity.getScheduleWaiting().get(0).getMember().getName();
 		}
 
-		return builder.build();
+		return new ScheduleCommandResult(scheduleId, lessonDt, lessonStartTime, lessonEndTime,
+			reservationStatus, trainerName, applicantName, waitingByName);
+	}
+
+	public ScheduleCommandResult withReservationStatus(ReservationStatus newStatus) {
+		return new ScheduleCommandResult(scheduleId, lessonDt, lessonStartTime, lessonEndTime,
+			newStatus, trainerName, applicantName, waitingByName);
 	}
 }

@@ -5,21 +5,18 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Schema(description = "조회 조건 DTO")
-public class RetrieveLessonHistoryByDateCond {
+public record RetrieveLessonHistoryByDateCond(
 
 	@Schema(description = "조회 날짜", example = "YYYY-MM", required = false)
-	@Builder.Default
-	private String searchDate = formatDate(LocalDate.now());
+	String searchDate
+) {
+	public RetrieveLessonHistoryByDateCond {
+		if (searchDate == null || searchDate.isBlank()) {
+			searchDate = formatDate(LocalDate.now());
+		}
+	}
 
 	private static String formatDate(LocalDate lessonDt) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM", Locale.KOREAN);

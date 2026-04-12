@@ -2,142 +2,115 @@ package com.tobe.healthy.member.presentation.dto.in;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.Data;
-import lombok.ToString;
-
-@Data
-@ToString
-public class OAuthInfo {
-
+public record OAuthInfo(
 	@JsonProperty("access_token")
-	private String accessToken;
+	String accessToken,
 
 	@JsonProperty("token_type")
-	private String tokenType;
+	String tokenType,
 
 	@JsonProperty("refresh_token")
-	private String refreshToken;
+	String refreshToken,
 
 	@JsonProperty("id_token")
-	private String idToken;
+	String idToken,
 
 	@JsonProperty("expires_in")
-	private int expiresIn;
+	int expiresIn,
 
-	private String scope;
+	String scope,
 
 	@JsonProperty("refresh_token_expires_in")
-	private int refreshTokenExpiresIn;
+	int refreshTokenExpiresIn
+) {
 
-	@Data
-	@ToString
-	public static class NaverUserInfo {
-
+	public record NaverUserInfo(
 		@JsonProperty("resultcode")
-		private String resultCode;
+		String resultCode,
 
-		private String message;
+		String message,
 
-		private NaverUserInfoDetail response;
+		NaverUserInfoDetail response
+	) {
 
-		@Data
-		@ToString
-		public static class NaverUserInfoDetail {
-
-			private String id;
+		public record NaverUserInfoDetail(
+			String id,
 
 			@JsonProperty("profile_image")
-			private String profileImage;
+			String profileImage,
 
-			private String email;
-
-			private String name;
-		}
+			String email,
+			String name
+		) {}
 	}
 
-	@Data
-	@ToString
-	public static class KakaoUserInfo {
-
-		private Long id;
+	public record KakaoUserInfo(
+		Long id,
 
 		@JsonProperty("connected_at")
-		private String connectedAt;
+		String connectedAt,
 
-		private Properties properties;
+		Properties properties,
 
 		@JsonProperty("kakao_account")
-		private KakaoAccount kakaoAccount;
+		KakaoAccount kakaoAccount
+	) {
 
-		@Data
-		@ToString
-		public static class Properties {
-
-			private String nickname;
+		public record Properties(
+			String nickname,
 
 			@JsonProperty("profile_image")
-			private String profileImage;
+			String profileImage,
 
 			@JsonProperty("thumbnail_image")
-			private String thumbnailImage;
-		}
+			String thumbnailImage
+		) {}
 
-		@Data
-		@ToString
-		public static class KakaoAccount {
-
+		public record KakaoAccount(
 			@JsonProperty("profile_nickname_needs_agreement")
-			private boolean profileNicknameNeedsAgreement;
+			boolean profileNicknameNeedsAgreement,
 
 			@JsonProperty("profile_image_needs_agreement")
-			private boolean profileImageNeedsAgreement;
+			boolean profileImageNeedsAgreement,
 
-			private Profile profile;
+			Profile profile,
 
 			@JsonProperty("has_email")
-			private boolean hasEmail;
+			boolean hasEmail,
 
 			@JsonProperty("email_needs_agreement")
-			private boolean emailNeedsAgreement;
+			boolean emailNeedsAgreement,
 
 			@JsonProperty("is_email_valid")
-			private boolean isEmailValid;
+			boolean isEmailValid,
 
 			@JsonProperty("is_email_verified")
-			private boolean isEmailVerified;
+			boolean isEmailVerified,
 
-			private String email;
-		}
+			String email
+		) {}
 
-		@Data
-		@ToString
-		public static class Profile {
-
-			private String nickname;
+		public record Profile(
+			String nickname,
 
 			@JsonProperty("thumbnail_image_url")
-			private String thumbnailImageUrl;
+			String thumbnailImageUrl,
 
 			@JsonProperty("profile_image_url")
-			private String profileImageUrl;
+			String profileImageUrl,
 
 			@JsonProperty("is_default_image")
-			private boolean isDefaultImage;
+			boolean isDefaultImage,
 
 			@JsonProperty("is_default_nickname")
-			private boolean isDefaultNickname;
-		}
+			boolean isDefaultNickname
+		) {}
 	}
-	// 카카오 끝
 
-	@Data
-	@ToString
-	public static class GoogleUserInfo {
-
-		private String id;
-		private String email;
-		private String name;
-		private String picture;
-
-	}
+	public record GoogleUserInfo(
+		String id,
+		String email,
+		String name,
+		String picture
+	) {}
 }

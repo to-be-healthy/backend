@@ -37,47 +37,37 @@ public class DietCommentController {
 	@Operation(summary = "식단기록의 댓글을 조회한다.")
 	@GetMapping("/{dietId}/comments")
 	public ApiResult<CustomPaging<DietCommentDto>> getCommentsByDietId(
-		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
+		@Parameter(description = "식단기록 ID") @PathVariable Long dietId,
 		Pageable pageable) {
-		return ApiResult.<CustomPaging<DietCommentDto>>builder()
-			.data(commentService.getCommentsByDietId(dietId, pageable))
-			.message("댓글이 조회되었습니다.")
-			.build();
+		return ApiResult.success("댓글이 조회되었습니다.", commentService.getCommentsByDietId(dietId, pageable));
 	}
 
 	@Operation(summary = "식단기록에 댓글(답글)을 등록한다")
 	@PostMapping("/{dietId}/comments")
 	public ApiResult<Void> addComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
+		@Parameter(description = "식단기록 ID") @PathVariable Long dietId,
 		@Valid @RequestBody DietCommentAddCommand command) {
 		commentService.addComment(dietId, command, customMemberDetails.getMember());
-		return ApiResult.<Void>builder()
-			.message("댓글이 등록되었습니다.")
-			.build();
+		return ApiResult.success("댓글이 등록되었습니다.");
 	}
 
 	@Operation(summary = "식단기록의 댓글을 수정한다.")
 	@PatchMapping("/{dietId}/comments/{commentId}")
 	public ApiResult<DietCommentDto> updateComment(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
-		@Parameter(description = "식단기록의 댓글 ID") @PathVariable("commentId") Long commentId,
+		@Parameter(description = "식단기록 ID") @PathVariable Long dietId,
+		@Parameter(description = "식단기록의 댓글 ID") @PathVariable Long commentId,
 		@Valid @RequestBody DietCommentAddCommand command) {
-		return ApiResult.<DietCommentDto>builder()
-			.data(commentService.updateComment(customMemberDetails.getMember(), dietId, commentId, command))
-			.message("댓글이 수정되었습니다.")
-			.build();
+		return ApiResult.success("댓글이 수정되었습니다.", commentService.updateComment(customMemberDetails.getMember(), dietId, commentId, command));
 	}
 
 	@Operation(summary = "식단기록의 댓글을 삭제한다.")
 	@DeleteMapping("/{dietId}/comments/{commentId}")
 	public ApiResult<Void> deleteComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
-		@Parameter(description = "식단기록의 댓글 ID") @PathVariable("commentId") Long commentId) {
+		@Parameter(description = "식단기록 ID") @PathVariable Long dietId,
+		@Parameter(description = "식단기록의 댓글 ID") @PathVariable Long commentId) {
 		commentService.deleteComment(customMemberDetails.getMember(), dietId, commentId);
-		return ApiResult.<Void>builder()
-			.message("댓글이 삭제되었습니다.")
-			.build();
+		return ApiResult.success("댓글이 삭제되었습니다.");
 	}
 
 }

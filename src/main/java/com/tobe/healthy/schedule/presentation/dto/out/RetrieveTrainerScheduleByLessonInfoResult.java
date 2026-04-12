@@ -14,22 +14,13 @@ import com.tobe.healthy.common.LessonTimeFormatter;
 import com.tobe.healthy.schedule.domain.ReservationStatus;
 import com.tobe.healthy.schedule.domain.Schedule;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class RetrieveTrainerScheduleByLessonInfoResult {
-
+public record RetrieveTrainerScheduleByLessonInfoResult(
+	String trainerName,
+	String earliestLessonStartTime,
+	String latestLessonEndTime,
+	Map<LocalDate, List<LessonDetailResult>> schedule
+) {
 	private static final double DEFAULT_DURATION = 60.0;
-	private String trainerName;
-	private String earliestLessonStartTime;
-	private String latestLessonEndTime;
-	private Map<LocalDate, List<LessonDetailResult>> schedule;
 
 	public static RetrieveTrainerScheduleByLessonInfoResult from(List<Schedule> schedules) {
 		LocalTime firstLessonStartTime = schedules.stream()
@@ -68,12 +59,12 @@ public class RetrieveTrainerScheduleByLessonInfoResult {
 			  ? schedules.get(0).getTrainer().getName() + " 트레이너"
 			  : null;
 
-		return RetrieveTrainerScheduleByLessonInfoResult.builder()
-			.trainerName(trainerName)
-			.schedule(groupingSchedules.isEmpty() ? null : groupingSchedules)
-			.earliestLessonStartTime(LessonTimeFormatter.formatLessonTime(firstLessonStartTime))
-			.latestLessonEndTime(LessonTimeFormatter.formatLessonTime(lastLessonEndTime))
-			.build();
+		return new RetrieveTrainerScheduleByLessonInfoResult(
+			trainerName,
+			LessonTimeFormatter.formatLessonTime(firstLessonStartTime),
+			LessonTimeFormatter.formatLessonTime(lastLessonEndTime),
+			groupingSchedules.isEmpty() ? null : groupingSchedules
+		);
 	}
 
 	private static double calculateDuration(Schedule schedule) {
@@ -85,21 +76,17 @@ public class RetrieveTrainerScheduleByLessonInfoResult {
 		return duration;
 	}
 
-	@Data
-	@Builder
-	@NoArgsConstructor
-	@AllArgsConstructor
 	@JsonSerialize(using = LessonDetailResultSerializer.class)
-	public static class LessonDetailResult {
-
-		private Long scheduleId;
-		private Double duration;
-		private LocalTime lessonStartTime;
-		private LocalTime lessonEndTime;
-		private ReservationStatus reservationStatus;
-		private Long applicantId;
-		private String applicantName;
-		private Long waitingStudentId;
-		private String waitingStudentName;
+	public record LessonDetailResult(
+		Long scheduleId,
+		Double duration,
+		LocalTime lessonStartTime,
+		LocalTime lessonEndTime,
+		ReservationStatus reservationStatus,
+		Long applicantId,
+		String applicantName,
+		Long waitingStudentId,
+		String waitingStudentName
+	) {
 	}
 }

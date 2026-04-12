@@ -137,43 +137,43 @@ public class MemberAuthCommandService {
 	}
 
 	public String sendEmailVerification(CommandValidateEmail request) {
-		memberRepository.findByEmail(request.getEmail()).ifPresent(e -> {
+		memberRepository.findByEmail(request.email()).ifPresent(e -> {
 			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
 		});
 
 		String authKey = Utils.getAuthCode(6);
 
-		redisService.setValuesWithTimeout(request.getEmail(), authKey, EMAIL_AUTH_TIMEOUT); // 3분
+		redisService.setValuesWithTimeout(request.email(), authKey, EMAIL_AUTH_TIMEOUT); // 3분
 
-		mailService.sendAuthMail(request.getEmail(), authKey);
+		mailService.sendAuthMail(request.email(), authKey);
 
-		return request.getEmail();
+		return request.email();
 	}
 
 	public Boolean verifyEmailAuthNumber(CommandVerification request) {
-		String value = redisService.getValues(request.getEmail());
+		String value = redisService.getValues(request.email());
 
-		if (isEmpty(value) || !value.equals(request.getEmailKey())) {
+		if (isEmpty(value) || !value.equals(request.emailKey())) {
 			throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
 		}
 
-		redisService.deleteValues(request.getEmail());
+		redisService.deleteValues(request.email());
 
 		return true;
 	}
 
 	public CommandJoinMemberResult joinMember(CommandJoinMember request) {
-		validateName(request.getName());
+		validateName(request.name());
 		validatePassword(request);
-		validateDuplicationUserId(request.getUserId());
-		validateDuplicationEmail(request.getEmail());
+		validateDuplicationUserId(request.userId());
+		validateDuplicationEmail(request.email());
 
-		String password = passwordEncoder.encode(request.getPassword());
-		Member member = Member.join(request.getUserId(), request.getEmail(), request.getName(), request.getMemberType(),
+		String password = passwordEncoder.encode(request.password());
+		Member member = Member.join(request.userId(), request.email(), request.name(), request.memberType(),
 			password);
 
 		log.info("[회원가입] member: {}", member);
-		if (StringUtils.isEmpty(request.getUuid())) {
+		if (StringUtils.isEmpty(request.uuid())) {
 			memberRepository.save(member);
 			return CommandJoinMemberResult.from(member);
 
@@ -183,14 +183,14 @@ public class MemberAuthCommandService {
 	}
 
 	public Tokens login(CommandLoginMember request) {
-		Member member = memberRepository.findByUserId(request.getUserId())
+		Member member = memberRepository.findByUserId(request.userId())
 			.orElseThrow(() -> new CustomException(MEMBER_LOGIN_FAILED));
 
-		if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+		if (!passwordEncoder.matches(request.password(), member.getPassword())) {
 			throw new CustomException(MEMBER_LOGIN_FAILED);
 		}
 
-		if (!request.getMemberType().equals(member.getMemberType())) {
+		if (!request.memberType().equals(member.getMemberType())) {
 			throw new IllegalArgumentException(String.format("%s로 가입한 사용자입니다.", member.getTransformedMemberType()));
 		}
 
@@ -200,7 +200,7 @@ public class MemberAuthCommandService {
 	}
 
 	private void saveComplimentaryLoginHistory(CommandLoginMember request, Member member) {
-		if (!request.isComplimentaryLogin() || !COMPLIMENTARY_ACCOUNT_USER_IDS.contains(member.getUserId())) {
+		if (!request.complimentaryLogin() || !COMPLIMENTARY_ACCOUNT_USER_IDS.contains(member.getUserId())) {
 			return;
 		}
 
@@ -208,29 +208,29 @@ public class MemberAuthCommandService {
 	}
 
 	public Tokens refreshToken(CommandRefreshToken request) {
-		String result = redisService.getValues(request.getUserId());
+		String result = redisService.getValues(request.userId());
 
 		if (isEmpty(result)) {
 			throw new CustomException(REFRESH_TOKEN_NOT_FOUND);
 		}
 
-		if (!result.equals(request.getRefreshToken())) {
+		if (!result.equals(request.refreshToken())) {
 			throw new CustomException(REFRESH_TOKEN_NOT_VALID);
 		}
 
-		Member member = memberRepository.findByUserId(request.getUserId())
+		Member member = memberRepository.findByUserId(request.userId())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 		return tokenGenerator.exchangeAccessToken(member.getId(),
 			member.getName(),
 			member.getUserId(),
 			member.getMemberType(),
-			request.getRefreshToken(),
+			request.refreshToken(),
 			member.getGym());
 	}
 
 	public CommandFindMemberPasswordResult findMemberPW(CommandFindMemberPassword request) {
-		Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
+		Member member = memberRepository.findByEmailAndName(request.email(), request.name())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 		if (member.getSocialType() != NONE) {
@@ -249,48 +249,48 @@ public class MemberAuthCommandService {
 	}
 
 	public CommandJoinMemberResult updateNonMemberInfo(CommandJoinMember request, String password) {
-		String invitationLink = "https://main.to-be-healthy.shop/invite?type=student&uuid=" + request.getUuid();
+		String invitationLink = "https://main.to-be-healthy.shop/invite?type=student&uuid=" + request.uuid();
 		NonMember nonMember = nonMemberRepository.findByInvitationLink(invitationLink)
 			.orElseThrow(() -> new CustomException(INVITE_LINK_NOT_FOUND));
 
 		Member member = memberRepository.findById(nonMember.getMember().getId())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		if (!member.getName().equals(request.getName()))
+		if (!member.getName().equals(request.name()))
 			throw new CustomException(INVITE_NAME_NOT_VALID);
 
-		member.updateNonMemberInfo(request.getUserId(), request.getEmail(), request.getName(), request.getMemberType(),
+		member.updateNonMemberInfo(request.userId(), request.email(), request.name(), request.memberType(),
 			password);
 		nonMemberRepository.delete(nonMember);
 		return CommandJoinMemberResult.from(member);
 	}
 
 	public Tokens getNaverAccessToken(CommandSocialLogin request) {
-		OAuthInfo response = getNaverOAuthAccessToken(request.getCode(), request.getState());
+		OAuthInfo response = getNaverOAuthAccessToken(request.code(), request.state());
 		NaverUserInfo authorization = getNaverUserInfo(response);
-		Optional<Member> findMember = memberRepository.findByEmail(authorization.getResponse().getEmail());
+		Optional<Member> findMember = memberRepository.findByEmail(authorization.response().email());
 
 		if (findMember.isPresent()) {
-			if (isJoinMember(findMember.get(), NAVER, request.getMemberType())) {
-				findMember.get().updateSocialRefreshToken(response.getRefreshToken());
+			if (isJoinMember(findMember.get(), NAVER, request.memberType())) {
+				findMember.get().updateSocialRefreshToken(response.refreshToken());
 				return tokenGenerator.create(findMember.get());
 			}
 		}
 
 		Member member = Member.join(
-			authorization.getResponse().getEmail(),
-			authorization.getResponse().getName(),
-			request.getMemberType(),
+			authorization.response().email(),
+			authorization.response().name(),
+			request.memberType(),
 			NAVER,
-			authorization.getResponse().getId(),
-			response.getRefreshToken()
+			authorization.response().id(),
+			response.refreshToken()
 		);
 
-		MemberProfile profile = getProfile(authorization.getResponse().getProfileImage(), member);
+		MemberProfile profile = getProfile(authorization.response().profileImage(), member);
 		member.setMemberProfile(profile);
 		memberRepository.save(member);
 
-		if (StringUtils.isNotEmpty(request.getUuid())) {
-			mappingTrainerAndStudent(member, request.getUuid(), authorization.getResponse().getName(), true);
+		if (StringUtils.isNotEmpty(request.uuid())) {
+			mappingTrainerAndStudent(member, request.uuid(), authorization.response().name(), true);
 		}
 
 		log.info("[네이버 회원가입 및 로그인] member: {}", member);
@@ -298,23 +298,23 @@ public class MemberAuthCommandService {
 	}
 
 	public Tokens getKakaoAccessToken(CommandSocialLogin request) {
-		IdToken response = getKakaoOAuthAccessToken(request.getCode(), request.getRedirectUrl());
-		Optional<Member> findMember = memberRepository.findByEmail(response.getEmail());
+		IdToken response = getKakaoOAuthAccessToken(request.code(), request.redirectUrl());
+		Optional<Member> findMember = memberRepository.findByEmail(response.email());
 
 		if (findMember.isPresent()) {
-			if (isJoinMember(findMember.get(), KAKAO, request.getMemberType())) {
+			if (isJoinMember(findMember.get(), KAKAO, request.memberType())) {
 				return tokenGenerator.create(findMember.get());
 			}
 		}
 
-		Member member = Member.join(response.getEmail(), response.getNickname(), request.getMemberType(), KAKAO,
-			String.valueOf(response.getId()));
-		MemberProfile profile = getProfile(response.getPicture(), member);
+		Member member = Member.join(response.email(), response.nickname(), request.memberType(), KAKAO,
+			String.valueOf(response.id()));
+		MemberProfile profile = getProfile(response.picture(), member);
 		member.setMemberProfile(profile);
 		memberRepository.save(member);
 
-		if (StringUtils.isNotEmpty(request.getUuid())) {
-			mappingTrainerAndStudent(member, request.getUuid(), response.getNickname(), true);
+		if (StringUtils.isNotEmpty(request.uuid())) {
+			mappingTrainerAndStudent(member, request.uuid(), response.nickname(), true);
 		}
 		log.info("[카카오 회원가입 및 로그인] member: {}", member);
 		return tokenGenerator.create(member);
@@ -322,8 +322,8 @@ public class MemberAuthCommandService {
 
 	@Transactional
 	public Tokens getGoogleOAuth(CommandSocialLogin request) {
-		OAuthInfo googleToken = getGoogleAccessToken(request.getCode(), request.getRedirectUrl());
-		String[] check = googleToken.getIdToken().split("\\.");
+		OAuthInfo googleToken = getGoogleAccessToken(request.code(), request.redirectUrl());
+		String[] check = googleToken.idToken().split("\\.");
 		Base64.Decoder decoder = Base64.getDecoder();
 		String payload = new String(decoder.decode(check[1]));
 		Map<String, String> idToken = new HashMap<>();
@@ -339,18 +339,18 @@ public class MemberAuthCommandService {
 		Optional<Member> findMember = memberRepository.findByEmail(email);
 
 		if (findMember.isPresent()) {
-			if (isJoinMember(findMember.get(), GOOGLE, request.getMemberType())) {
+			if (isJoinMember(findMember.get(), GOOGLE, request.memberType())) {
 				return tokenGenerator.create(findMember.get());
 			}
 		}
 
-		Member member = Member.join(email, name, request.getMemberType(), GOOGLE, null);
+		Member member = Member.join(email, name, request.memberType(), GOOGLE, null);
 		MemberProfile profile = getProfile(picture, member);
 		member.setMemberProfile(profile);
 		memberRepository.save(member);
 
-		if (StringUtils.isNotEmpty(request.getUuid())) {
-			mappingTrainerAndStudent(member, request.getUuid(), name, true);
+		if (StringUtils.isNotEmpty(request.uuid())) {
+			mappingTrainerAndStudent(member, request.uuid(), name, true);
 		}
 		log.info("[구글 회원가입 및 로그인] member: {}", member);
 		return tokenGenerator.create(member);
@@ -358,22 +358,22 @@ public class MemberAuthCommandService {
 
 	public Tokens getAppleOAuth(CommandSocialLogin request) {
 		try {
-			IdToken userInfo = new ObjectMapper().readValue(decordToken(request.getId_token()), IdToken.class);
-			Optional<Member> findMember = memberRepository.findByUserId(userInfo.getSub());
+			IdToken userInfo = new ObjectMapper().readValue(decordToken(request.id_token()), IdToken.class);
+			Optional<Member> findMember = memberRepository.findByUserId(userInfo.sub());
 			if (findMember.isPresent()) {
-				if (isJoinMember(findMember.get(), APPLE, request.getMemberType())) {
+				if (isJoinMember(findMember.get(), APPLE, request.memberType())) {
 					return tokenGenerator.create(findMember.get());
 				}
 			}
 
-			String name = request.getUser().getName().getLastName() + request.getUser().getName().getFirstName();
+			String name = request.user().name().lastName() + request.user().name().firstName();
 
 			String clientSecret = createClientSecret();
 
 			MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
 			form.add("client_id", "tobehealthy.apple.login");
 			form.add("client_secret", clientSecret);
-			form.add("code", request.getCode().split("&")[0]);
+			form.add("code", request.code().split("&")[0]);
 			form.add("grant_type", "authorization_code");
 			form.add("redirect_uri", "https://main.to-be-healthy.shop/api/callback/apple");
 
@@ -385,13 +385,13 @@ public class MemberAuthCommandService {
 				.bodyToMono(AppleToken.class)
 				.block();
 
-			Member member = Member.join(userInfo.getSub(), userInfo.getEmail(), name, request.getMemberType(), APPLE,
-				clientSecret, token.getRefresh_token());
+			Member member = Member.join(userInfo.sub(), userInfo.email(), name, request.memberType(), APPLE,
+				clientSecret, token.refresh_token());
 
 			memberRepository.save(member);
 
-			if (StringUtils.isNotEmpty(request.getUuid())) {
-				mappingTrainerAndStudent(member, request.getUuid(), name, true);
+			if (StringUtils.isNotEmpty(request.uuid())) {
+				mappingTrainerAndStudent(member, request.uuid(), name, true);
 			}
 
 			log.info("[애플 회원가입 및 로그인] member: {}", member);
@@ -458,8 +458,8 @@ public class MemberAuthCommandService {
 
 	public IdToken getKakaoOAuthAccessToken(String code, String redirectUrl) {
 		OAuthInfo tokenInfo = requestAccessToken(code, redirectUrl);
-		KakaoUserInfo kakaoUser = requestKakaoUserInfo(tokenInfo.getAccessToken());
-		return parseIdToken(tokenInfo.getIdToken(), kakaoUser.getId());
+		KakaoUserInfo kakaoUser = requestKakaoUserInfo(tokenInfo.accessToken());
+		return parseIdToken(tokenInfo.idToken(), kakaoUser.id());
 	}
 
 	private OAuthInfo requestAccessToken(String code, String redirectUrl) {
@@ -497,8 +497,7 @@ public class MemberAuthCommandService {
 		try {
 			String tokenPayload = decordToken(encodedIdToken);
 			IdToken idToken = objectMapper.readValue(tokenPayload, IdToken.class);
-			idToken.setId(kakaoUserId);
-			return idToken;
+			return idToken.withId(kakaoUserId);
 		} catch (JsonProcessingException e) {
 			log.error("ID token JSON parsing failed", e);
 			throw new CustomException(JSON_PARSING_ERROR);
@@ -566,10 +565,10 @@ public class MemberAuthCommandService {
 	}
 
 	private void validatePassword(CommandJoinMember request) {
-		if (!request.getPassword().equals(request.getPasswordConfirm())) {
+		if (!request.password().equals(request.passwordConfirm())) {
 			throw new CustomException(CONFIRM_PASSWORD_NOT_MATCHED);
 		}
-		if (Utils.validatePassword(request.getPassword())) {
+		if (Utils.validatePassword(request.password())) {
 			throw new CustomException(PASSWORD_POLICY_VIOLATION);
 		}
 	}
@@ -618,7 +617,7 @@ public class MemberAuthCommandService {
 	private NaverUserInfo getNaverUserInfo(OAuthInfo oAuthInfo) {
 		return webClient.get()
 			.uri(oAuthProperties.getNaver().getUserInfoUri())
-			.header("Authorization", "Bearer " + oAuthInfo.getAccessToken())
+			.header("Authorization", "Bearer " + oAuthInfo.accessToken())
 			.retrieve()
 			.onStatus(HttpStatusCode::isError, response ->
 				response.bodyToMono(NaverError.class).flatMap(e -> {

@@ -4,29 +4,17 @@ import java.util.List;
 
 import com.tobe.healthy.member.domain.AlarmStatus;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
-@Data
-@ToString
-@NoArgsConstructor
-@Builder
-@AllArgsConstructor
-public class ScheduleCommandResponse {
-
-	private AlarmStatus scheduleNoticeStatus;
-	private List<ScheduleCommandResult> morning;
-	private List<ScheduleCommandResult> afternoon;
-
+public record ScheduleCommandResponse(
+	AlarmStatus scheduleNoticeStatus,
+	List<ScheduleCommandResult> morning,
+	List<ScheduleCommandResult> afternoon
+) {
 	public static ScheduleCommandResponse create(AlarmStatus scheduleNoticeStatus, List<ScheduleCommandResult> morning,
 		List<ScheduleCommandResult> afternoon) {
-		return ScheduleCommandResponse.builder()
-			.scheduleNoticeStatus(scheduleNoticeStatus)
-			.morning(morning.isEmpty() ? null : morning)
-			.afternoon(afternoon.isEmpty() ? null : afternoon)
-			.build();
+		return new ScheduleCommandResponse(
+			scheduleNoticeStatus,
+			morning.isEmpty() ? null : morning,
+			afternoon.isEmpty() ? null : afternoon
+		);
 	}
 }

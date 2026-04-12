@@ -6,28 +6,21 @@ import com.tobe.healthy.course.domain.CourseHistory;
 import com.tobe.healthy.course.domain.CourseHistoryType;
 import com.tobe.healthy.point.domain.Calculation;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
-
-@Data
-@ToString
-@Builder
-public class CourseHistoryDto {
-
-	private Long courseHistoryId;
-	private int cnt;
-	private Calculation calculation;
-	private CourseHistoryType type;
-	private LocalDateTime createdAt;
+public record CourseHistoryDto(
+	Long courseHistoryId,
+	int cnt,
+	Calculation calculation,
+	CourseHistoryType type,
+	LocalDateTime createdAt
+) {
 
 	public static CourseHistoryDto from(CourseHistory courseHistory) {
-		return CourseHistoryDto.builder()
-			.courseHistoryId(courseHistory.getCourseHistoryId())
-			.cnt(courseHistory.getCnt())
-			.calculation(courseHistory.getCalculation())
-			.type(courseHistory.getType())
-			.createdAt(courseHistory.getCreatedAt())
-			.build();
+		return new CourseHistoryDto(
+			courseHistory.getCourseHistoryId(),
+			courseHistory.getCnt(),
+			courseHistory.getCalculation(),
+			courseHistory.getType(),
+			courseHistory.getCreatedAt()
+		);
 	}
 }

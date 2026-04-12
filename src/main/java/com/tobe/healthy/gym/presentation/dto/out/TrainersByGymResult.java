@@ -3,48 +3,35 @@ package com.tobe.healthy.gym.presentation.dto.out;
 import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.domain.MemberProfile;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class TrainersByGymResult {
-	private Long id;
-	private String userId;
-	private String email;
-	private String name;
-	private MemberProfileResult profile;
-
+public record TrainersByGymResult(
+	Long id,
+	String userId,
+	String email,
+	String name,
+	MemberProfileResult profile
+) {
 	public static TrainersByGymResult from(Member member) {
-		return TrainersByGymResult.builder()
-			.id(member.getId())
-			.userId(member.getUserId())
-			.email(member.getEmail())
-			.name(member.getName())
-			.profile(MemberProfileResult.from(member.getMemberProfile()))
-			.build();
+		return new TrainersByGymResult(
+			member.getId(),
+			member.getUserId(),
+			member.getEmail(),
+			member.getName(),
+			MemberProfileResult.from(member.getMemberProfile())
+		);
 	}
 
-	@Data
-	@Builder
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class MemberProfileResult {
-		private Long id;
-		private String fileUrl;
-
+	public record MemberProfileResult(
+		Long id,
+		String fileUrl
+	) {
 		public static MemberProfileResult from(MemberProfile memberProfile) {
 			if (memberProfile == null) {
-				return MemberProfileResult.builder().build();
+				return new MemberProfileResult(null, null);
 			}
-			return MemberProfileResult.builder()
-				.id(memberProfile.getId())
-				.fileUrl(memberProfile.getFileUrl())
-				.build();
+			return new MemberProfileResult(
+				memberProfile.getId(),
+				memberProfile.getFileUrl()
+			);
 		}
 	}
 }

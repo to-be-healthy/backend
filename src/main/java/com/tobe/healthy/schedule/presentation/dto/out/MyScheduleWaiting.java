@@ -5,28 +5,22 @@ import java.time.LocalTime;
 
 import com.tobe.healthy.schedule.domain.ScheduleWaiting;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
-
-@Data
-@ToString
-@Builder
-public class MyScheduleWaiting {
-	private Long scheduleId;
-	private String trainerName;
-	private LocalDate lessonDt;
-	private LocalTime lessonStartTime;
-	private LocalTime lessonEndTime;
-	private String reservationStatus;
-
+public record MyScheduleWaiting(
+	Long scheduleId,
+	String trainerName,
+	LocalDate lessonDt,
+	LocalTime lessonStartTime,
+	LocalTime lessonEndTime,
+	String reservationStatus
+) {
 	public static MyScheduleWaiting from(ScheduleWaiting scheduleWaiting) {
-		return MyScheduleWaiting.builder()
-			.scheduleId(scheduleWaiting.getSchedule().getId())
-			.trainerName(scheduleWaiting.getSchedule().getTrainer().getName() + " 트레이너")
-			.lessonDt(scheduleWaiting.getSchedule().getLessonDt())
-			.lessonStartTime(scheduleWaiting.getSchedule().getLessonStartTime())
-			.lessonEndTime(scheduleWaiting.getSchedule().getLessonEndTime())
-			.build();
+		return new MyScheduleWaiting(
+			scheduleWaiting.getSchedule().getId(),
+			scheduleWaiting.getSchedule().getTrainer().getName() + " 트레이너",
+			scheduleWaiting.getSchedule().getLessonDt(),
+			scheduleWaiting.getSchedule().getLessonStartTime(),
+			scheduleWaiting.getSchedule().getLessonEndTime(),
+			null
+		);
 	}
 }

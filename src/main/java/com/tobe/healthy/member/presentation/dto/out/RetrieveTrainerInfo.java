@@ -5,45 +5,34 @@ import com.tobe.healthy.member.presentation.dto.ProfileDto;
 import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.trainer.domain.TrainerMemberMapping;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
-
-@Data
-@Builder
-@ToString
-@AllArgsConstructor
-public class RetrieveTrainerInfo {
-
-	private Long mappingId;
-	private TrainerInfo trainer;
+public record RetrieveTrainerInfo(
+	Long mappingId,
+	TrainerInfo trainer
+) {
 
 	public static RetrieveTrainerInfo from(TrainerMemberMapping trainerMemberMapping) {
-		return RetrieveTrainerInfo.builder()
-			.mappingId(trainerMemberMapping.getMappingId())
-			.trainer(TrainerInfo.from(trainerMemberMapping.getTrainer()))
-			.build();
+		return new RetrieveTrainerInfo(
+			trainerMemberMapping.getMappingId(),
+			TrainerInfo.from(trainerMemberMapping.getTrainer())
+		);
 	}
 
-	@Builder
-	@AllArgsConstructor
-	@Data
-	static class TrainerInfo {
-		private Long id;
-		private String email;
-		private String name;
-		private ProfileDto profile;
-		private GymDto gym;
+	public record TrainerInfo(
+		Long id,
+		String email,
+		String name,
+		ProfileDto profile,
+		GymDto gym
+	) {
 
 		public static TrainerInfo from(Member trainer) {
-			return TrainerInfo.builder()
-				.id(trainer.getId())
-				.email(trainer.getEmail())
-				.name(trainer.getName())
-				.profile(ProfileDto.from(trainer.getMemberProfile()))
-				.gym(GymDto.from(trainer.getGym()))
-				.build();
+			return new TrainerInfo(
+				trainer.getId(),
+				trainer.getEmail(),
+				trainer.getName(),
+				ProfileDto.from(trainer.getMemberProfile()),
+				GymDto.from(trainer.getGym())
+			);
 		}
 	}
 }

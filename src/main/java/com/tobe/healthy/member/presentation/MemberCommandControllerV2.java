@@ -37,9 +37,6 @@ public class MemberCommandControllerV2 {
 	@PostMapping("/profile")
 	public ApiResult<RegisterMemberProfileResult> changeProfile(@RequestBody CommandRegisterMemberProfile request,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ApiResult.<RegisterMemberProfileResult>builder()
-			.data(memberCommandServiceV2.registerProfile(request, member.getMemberId()))
-			.message("프로필 사진이 등록되었습니다.")
-			.build();
+		return ApiResult.success("프로필 사진이 등록되었습니다.", memberCommandServiceV2.registerProfile(request, member.getMemberId()));
 	}
 }

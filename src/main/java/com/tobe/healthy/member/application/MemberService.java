@@ -44,7 +44,7 @@ public class MemberService {
 	public Boolean validateCurrentPassword(ValidateCurrentPassword request, Long memberId) {
 		memberRepository.findById(memberId).ifPresentOrElse(
 			m -> {
-				if (!passwordEncoder.matches(request.getPassword(), m.getPassword())) {
+				if (!passwordEncoder.matches(request.password(), m.getPassword())) {
 					throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
 				}
 			}, () -> {

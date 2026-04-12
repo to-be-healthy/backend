@@ -2,23 +2,14 @@ package com.tobe.healthy.gym.presentation.dto.out;
 
 import com.tobe.healthy.gym.domain.Gym;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CommandSelectMyGymResult {
-	private Long id;
-	private String name;
-
+public record CommandSelectMyGymResult(
+	Long id,
+	String name
+) {
 	public static CommandSelectMyGymResult from(Gym gym) {
-		return CommandSelectMyGymResult.builder()
-			.id(gym.getId())
-			.name(gym.getName())
-			.build();
+		return new CommandSelectMyGymResult(
+			gym.getId(),
+			gym.getName()
+		);
 	}
 }

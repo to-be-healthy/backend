@@ -1,7 +1,7 @@
 package com.tobe.healthy.course.application;
 
 import static com.tobe.healthy.common.error.ErrorCode.*;
-import static com.tobe.healthy.course.presentation.dto.CourseStatus.*;
+import static com.tobe.healthy.course.domain.CourseStatus.*;
 import static com.tobe.healthy.course.domain.CourseHistoryType.*;
 import static com.tobe.healthy.member.domain.MemberType.*;
 import static com.tobe.healthy.point.domain.Calculation.*;
@@ -18,7 +18,7 @@ import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.course.presentation.dto.CourseDto;
 import com.tobe.healthy.course.presentation.dto.CourseHistoryDto;
-import com.tobe.healthy.course.presentation.dto.CourseStatus;
+import com.tobe.healthy.course.domain.CourseStatus;
 import com.tobe.healthy.course.presentation.dto.in.CourseAddCommand;
 import com.tobe.healthy.course.presentation.dto.in.CourseUpdateCommand;
 import com.tobe.healthy.course.presentation.dto.out.CourseGetResult;
@@ -60,18 +60,18 @@ public class CourseService {
 	public void addCourse(Long trainerId, CourseAddCommand command) {
 		Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
 			.orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
-		Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(command.getMemberId(), STUDENT)
+		Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(command.memberId(), STUDENT)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
 
 		checkCourseAlreadyExists(member.getId());
-		if (command.getLessonCnt() < 1)
+		if (command.lessonCnt() < 1)
 			throw new CustomException(LESSON_CNT_NOT_VALID);
-		if (500 < command.getLessonCnt())
+		if (500 < command.lessonCnt())
 			throw new CustomException(LESSON_CNT_MAX);
 		Course course = courseRepository.save(
-			Course.create(member, trainer, command.getLessonCnt(), command.getLessonCnt()));
+			Course.create(member, trainer, command.lessonCnt(), command.lessonCnt()));
 		courseHistoryRepository.save(
 			CourseHistory.create(course, course.getTotalLessonCnt(), PLUS, COURSE_CREATE, trainer));
 		log.info("[수강권 등록] trainer: {}, course: {}, member:{}", trainer, course, course.getMember());
@@ -84,12 +84,12 @@ public class CourseService {
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
 
 		checkCourseAlreadyExists(nonmember.getId());
-		if (command.getLessonCnt() < 1)
+		if (command.lessonCnt() < 1)
 			throw new CustomException(LESSON_CNT_NOT_VALID);
-		if (500 < command.getLessonCnt())
+		if (500 < command.lessonCnt())
 			throw new CustomException(LESSON_CNT_MAX);
 		Course course = courseRepository.save(
-			Course.create(nonmember, trainer, command.getLessonCnt(), command.getLessonCnt()));
+			Course.create(nonmember, trainer, command.lessonCnt(), command.lessonCnt()));
 		courseHistoryRepository.save(
 			CourseHistory.create(course, course.getTotalLessonCnt(), PLUS, COURSE_CREATE, trainer));
 		log.info("[수강권 등록] trainer: {}, course: {}, member:{}", trainer, course, course.getMember());
@@ -135,7 +135,7 @@ public class CourseService {
 
 		//예약된 수업이 있으면 수업 취소
 		if (!result.isEmpty())
-			result.forEach(r -> commonScheduleService.cancelMemberScheduleForce(r.getScheduleId(), memberId));
+			result.forEach(r -> commonScheduleService.cancelMemberScheduleForce(r.scheduleId(), memberId));
 		//대기내역 삭제
 		scheduleWaitingRepository.deleteByMemberId(memberId);
 		deleteCourse(trainerId, course);
@@ -176,9 +176,8 @@ public class CourseService {
 			memberId, -1);
 		if (optCourse.isPresent()) {
 			CourseDto courseDto = CourseDto.from(optCourse.get());
-			Long completedLessonCnt = getCompletedLessonCnt(memberId, courseDto.getCourseId());
-			courseDto.setCompletedLessonCnt(completedLessonCnt.intValue());
-			return courseDto;
+			Long completedLessonCnt = getCompletedLessonCnt(memberId, courseDto.courseId());
+			return courseDto.withCompletedLessonCnt(completedLessonCnt.intValue());
 		}
 		return null;
 	}
@@ -190,7 +189,7 @@ public class CourseService {
 	public CourseStatus getCourseStatus(CourseDto courseDto) {
 		if (courseDto == null) {
 			return NONE;
-		} else if (courseDto.getRemainLessonCnt() == 0) {
+		} else if (courseDto.remainLessonCnt() == 0) {
 			return EXPIRED;
 		} else {
 			return USING;
@@ -200,7 +199,7 @@ public class CourseService {
 	public void updateCourseByTrainer(Long trainerId, Long courseId, CourseUpdateCommand command) {
 		Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
 			.orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
-		Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(command.getMemberId(), STUDENT)
+		Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(command.memberId(), STUDENT)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
@@ -212,14 +211,14 @@ public class CourseService {
 	public void updateCourseByMember(Long scheduleId, Long trainerId, CourseUpdateCommand command) {
 		Member trainer = memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainerId, TRAINER)
 			.orElseThrow(() -> new CustomException(TRAINER_NOT_FOUND));
-		Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(command.getMemberId(), STUDENT)
+		Member member = memberRepository.findByIdAndMemberTypeAndDelYnFalse(command.memberId(), STUDENT)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		mappingRepository.findByTrainerIdAndMemberId(trainerId, member.getId())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
 
 		CourseDto usingCourse = getNowUsingCourse(member.getId());
 		CourseStatus courseStatus = getCourseStatus(usingCourse);
-		Calculation calculation = command.getCalculation();
+		Calculation calculation = command.calculation();
 
 		switch (calculation) {
 			case PLUS:
@@ -232,7 +231,7 @@ public class CourseService {
 				break;
 		}
 
-		Course course = courseRepository.findById(usingCourse.getCourseId())
+		Course course = courseRepository.findById(usingCourse.courseId())
 			.orElseThrow(() -> new CustomException(LESSON_CNT_NOT_VALID));
 
 		updateCourse(command, trainer, course, scheduleId);
@@ -240,30 +239,30 @@ public class CourseService {
 	}
 
 	private void updateCourse(CourseUpdateCommand command, Member trainer, Course course, Long scheduleId) {
-		switch (command.getCalculation()) {
+		switch (command.calculation()) {
 			case PLUS:
-				if (command.getUpdateCnt() < 1)
+				if (command.updateCnt() < 1)
 					throw new CustomException(COURSE_ONLY_PLUS);
 				break;
 			case MINUS:
-				if (command.getUpdateCnt() < 1)
+				if (command.updateCnt() < 1)
 					throw new CustomException(COURSE_POSITIVE);
 				break;
 		}
 
-		int result = command.getCalculation().apply(course.getRemainLessonCnt(), command.getUpdateCnt());
+		int result = command.calculation().apply(course.getRemainLessonCnt(), command.updateCnt());
 		if (result < 0)
 			throw new CustomException(LESSON_CNT_NOT_VALID);
 		if (500 < result)
 			throw new CustomException(LESSON_CNT_MAX);
 
-		course.updateRemainLessonCnt(command.getCalculation(), command.getUpdateCnt());
+		course.updateRemainLessonCnt(command.calculation(), command.updateCnt());
 		//수강권 변경 주체가 트레이너인 경우 -> 총 횟수도 함께 업데이트
-		if (CourseHistoryType.getEnumByGroup(TRAINER).contains(command.getType())) {
-			course.updateTotalLessonCnt(command.getCalculation(), command.getUpdateCnt());
+		if (CourseHistoryType.getEnumByGroup(TRAINER).contains(command.type())) {
+			course.updateTotalLessonCnt(command.calculation(), command.updateCnt());
 		}
 		CourseHistory history = courseHistoryRepository.save(
-			CourseHistory.create(course, command.getUpdateCnt(), command.getCalculation(), command.getType(), trainer));
+			CourseHistory.create(course, command.updateCnt(), command.calculation(), command.type(), trainer));
 		log.info("[수강권 증감] trainer: {}, course: {}, history: {}, member: {}, scheduleId: {}", trainer, course, history,
 			course.getMember(), scheduleId);
 	}

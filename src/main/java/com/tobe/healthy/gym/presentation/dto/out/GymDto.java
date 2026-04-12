@@ -2,23 +2,14 @@ package com.tobe.healthy.gym.presentation.dto.out;
 
 import com.tobe.healthy.gym.domain.Gym;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class GymDto {
-	private Long id;
-	private String name;
-
+public record GymDto(
+	Long id,
+	String name
+) {
 	public static GymDto from(Gym gym) {
-		return GymDto.builder()
-			.id(gym.getId())
-			.name(gym.getName())
-			.build();
+		return new GymDto(
+			gym.getId(),
+			gym.getName()
+		);
 	}
 }

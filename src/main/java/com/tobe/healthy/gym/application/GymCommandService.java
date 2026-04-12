@@ -27,13 +27,13 @@ public class GymCommandService {
 	private final GymRepository gymRepository;
 
 	public CommandRegisterGymResult registerGym(CommandRegisterGym request) {
-		if (gymRepository.findByName(request.getName()) != null) {
+		if (gymRepository.findByName(request.name()) != null) {
 			throw new CustomException(ErrorCode.GYM_DUPLICATION);
 		}
 
 		String joinCode = Utils.getAuthCode(6);
 
-		Gym gym = Gym.registerGym(request.getName(), joinCode);
+		Gym gym = Gym.registerGym(request.name(), joinCode);
 
 		gymRepository.save(gym);
 
@@ -48,7 +48,7 @@ public class GymCommandService {
 			.orElseThrow(() -> new CustomException(ErrorCode.GYM_NOT_FOUND));
 
 		if (member.getMemberType() == MemberType.TRAINER) {
-			gym.validateJoinCode(request != null ? request.getJoinCode() : null);
+			gym.validateJoinCode(request != null ? request.joinCode() : null);
 		}
 
 		member.registerGym(gym);

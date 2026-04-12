@@ -35,10 +35,7 @@ public class CommonScheduleController {
 	public ApiResult<ScheduleIdInfo> reserveSchedule(@PathVariable Long scheduleId,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
 		ScheduleIdInfo result = commonScheduleService.reserveSchedule(scheduleId, customMemberDetails.getMemberId());
-		return ApiResult.<ScheduleIdInfo>builder()
-			.data(result)
-			.message(result.getScheduleTime() + " 수업이 예약되었습니다.")
-			.build();
+		return ApiResult.success(result.scheduleTime() + " 수업이 예약되었습니다.", result);
 	}
 
 	@Operation(summary = "트레이너 또는 학생이 수업을 취소한다.", description = "트레이너 또는 학생이 등록한 수업을 취소한다.")
@@ -51,9 +48,6 @@ public class CommonScheduleController {
 		} else {
 			result = commonScheduleService.cancelMemberSchedule(scheduleId, customMemberDetails.getMemberId());
 		}
-		return ApiResult.<ScheduleIdInfo>builder()
-			.data(result)
-			.message(result.getScheduleTime() + " 수업이 취소되었습니다.")
-			.build();
+		return ApiResult.success(result.scheduleTime() + " 수업이 취소되었습니다.", result);
 	}
 }

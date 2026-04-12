@@ -105,7 +105,7 @@ public class TrainerScheduleCommandController {
 		CommandCancelStudentReservationResult scheduleResult =
 			trainerScheduleCommandService.cancelStudentReservation(scheduleId, customMemberDetails.getMemberId());
 		return ApiResult.success(
-			scheduleResult.getLessonStartTime().format(DateTimeFormatter.ofPattern("a HH시 mm분")) + " 수업이 취소되었습니다.",
+			scheduleResult.lessonStartTime().format(DateTimeFormatter.ofPattern("a HH시 mm분")) + " 수업이 취소되었습니다.",
 			scheduleResult
 		);
 	}

@@ -68,19 +68,19 @@ public class TrainerScheduleCommandService {
 		if (existing != null) {
 			List<TrainerScheduleClosedDaysInfo> closedDays = createTrainerScheduleClosedDays(request, existing);
 			existing.changeDefaultLessonTime(
-				request.getLessonStartTime(),
-				request.getLessonEndTime(),
-				request.getLunchStartTime(),
-				request.getLunchEndTime(),
-				request.getLessonTime(),
+				request.lessonStartTime(),
+				request.lessonEndTime(),
+				request.lunchStartTime(),
+				request.lunchEndTime(),
+				request.lessonTime(),
 				closedDays
 			);
 		} else {
 			TrainerScheduleInfo trainerScheduleInfo = TrainerScheduleInfo.registerDefaultLessonTime(
-				request.getLessonStartTime(),
-				request.getLessonEndTime(),
-				request.getLunchStartTime(),
-				request.getLunchEndTime(),
+				request.lessonStartTime(),
+				request.lessonEndTime(),
+				request.lunchStartTime(),
+				request.lunchEndTime(),
 				findTrainer
 			);
 			List<TrainerScheduleClosedDaysInfo> closedDays = createTrainerScheduleClosedDays(request,
@@ -96,15 +96,15 @@ public class TrainerScheduleCommandService {
 		CommandRegisterDefaultLessonTime request,
 		TrainerScheduleInfo trainerScheduleInfo
 	) {
-		if (request.getClosedDays() != null && request.getClosedDays().size() == 7) {
+		if (request.closedDays() != null && request.closedDays().size() == 7) {
 			throw new IllegalArgumentException("모든 요일이 휴무일이 될 수 없습니다.");
 		}
 
-		if (request.getClosedDays() == null) {
+		if (request.closedDays() == null) {
 			return new ArrayList<>();
 		}
 
-		return request.getClosedDays().stream()
+		return request.closedDays().stream()
 			.map(closedDay -> TrainerScheduleClosedDaysInfo.registerClosedDay(closedDay, trainerScheduleInfo))
 			.collect(Collectors.toList());
 	}
@@ -122,8 +122,8 @@ public class TrainerScheduleCommandService {
 
 		isScheduleExisting(trainerScheduleInfo, request, trainerId);
 
-		LocalDate lessonDt = request.getLessonStartDt();
-		LocalDate lessonEndDt = request.getLessonEndDt();
+		LocalDate lessonDt = request.lessonStartDt();
+		LocalDate lessonEndDt = request.lessonEndDt();
 		long lessonTime = trainerScheduleInfo.getLessonTime().getDescription().longValue();
 
 		List<Schedule> schedules = new ArrayList<>();
@@ -176,7 +176,7 @@ public class TrainerScheduleCommandService {
 		switch (status) {
 			case AVAILABLE:
 				schedules = trainerScheduleRepository.findAllSchedule(
-					request.getScheduleIds(),
+					request.scheduleIds(),
 					List.of(ReservationStatus.DISABLED),
 					memberId
 				);
@@ -188,7 +188,7 @@ public class TrainerScheduleCommandService {
 
 			case DISABLED:
 				schedules = trainerScheduleRepository.findAllSchedule(
-					request.getScheduleIds(),
+					request.scheduleIds(),
 					List.of(ReservationStatus.AVAILABLE, ReservationStatus.COMPLETED),
 					memberId
 				);
@@ -228,20 +228,21 @@ public class TrainerScheduleCommandService {
 
 		schedule.registerSchedule(findStudent);
 
-		CommandSendNotification notification = CommandSendNotification.builder()
-			.title(NotificationType.RESERVE.getDescription())
-			.content(String.format(NotificationType.RESERVE.getContent(),
+		CommandSendNotification notification = new CommandSendNotification(
+			NotificationType.RESERVE.getDescription(),
+			String.format(NotificationType.RESERVE.getContent(),
 				schedule.getTrainer().getName(),
 				schedule.getApplicant().getName(),
 				LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime())
-					.format(LessonTimeFormatter.lessonStartDateTimeFormatter())))
-			.receiverIds(List.of(schedule.getApplicant().getId()))
-			.notificationType(NotificationType.RESERVE)
-			.notificationCategory(NotificationCategory.SCHEDULE)
-			.clickUrl("https://main.to-be-healthy.shop/student/schedule?tab=myReservation")
-			.studentId(schedule.getApplicant().getId())
-			.studentName(schedule.getApplicant().getName())
-			.build();
+					.format(LessonTimeFormatter.lessonStartDateTimeFormatter())),
+			List.of(schedule.getApplicant().getId()),
+			NotificationType.RESERVE,
+			NotificationCategory.SCHEDULE,
+			null,
+			"https://main.to-be-healthy.shop/student/schedule?tab=myReservation",
+			schedule.getApplicant().getId(),
+			schedule.getApplicant().getName()
+		);
 
 		notificationPublisher.publish(notification, EventType.NOTIFICATION);
 
@@ -263,18 +264,21 @@ public class TrainerScheduleCommandService {
 
 		schedule.cancelMemberSchedule();
 
-		CommandSendNotification notification = CommandSendNotification.builder()
-			.title(NotificationType.CANCEL.getDescription())
-			.content(String.format(NotificationType.CANCEL.getContent(),
+		CommandSendNotification notification = new CommandSendNotification(
+			NotificationType.CANCEL.getDescription(),
+			String.format(NotificationType.CANCEL.getContent(),
 				schedule.getTrainer().getName(),
 				applicantName,
 				LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonStartTime())
-					.format(LessonTimeFormatter.lessonStartDateTimeFormatter())))
-			.receiverIds(List.of(applicantId))
-			.notificationType(NotificationType.CANCEL)
-			.notificationCategory(NotificationCategory.SCHEDULE)
-			.clickUrl("https://main.to-be-healthy.shop/student/schedule?tab=myReservation")
-			.build();
+					.format(LessonTimeFormatter.lessonStartDateTimeFormatter())),
+			List.of(applicantId),
+			NotificationType.CANCEL,
+			NotificationCategory.SCHEDULE,
+			null,
+			"https://main.to-be-healthy.shop/student/schedule?tab=myReservation",
+			null,
+			null
+		);
 
 		notificationPublisher.publish(notification, EventType.NOTIFICATION);
 

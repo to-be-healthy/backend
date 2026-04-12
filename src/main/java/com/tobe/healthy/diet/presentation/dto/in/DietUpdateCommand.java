@@ -1,29 +1,13 @@
 package com.tobe.healthy.diet.presentation.dto.in;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.ToString;
 
-@Data
-@ToString
-public class DietUpdateCommand {
-
-	@Schema(description = "아침 파일")
-	private String breakfastFile;
-
-	@Schema(description = "점심 파일")
-	private String lunchFile;
-
-	@Schema(description = "저녁 파일")
-	private String dinnerFile;
-
-	@Schema(description = "아침 단식 여부", example = "false")
-	private boolean breakfastFast;
-
-	@Schema(description = "점심 단식 여부", example = "false")
-	private boolean lunchFast;
-
-	@Schema(description = "저녁 단식 여부", example = "false")
-	private boolean dinnerFast;
-
+public record DietUpdateCommand(
+	@Schema(description = "아침 파일") String breakfastFile,
+	@Schema(description = "점심 파일") String lunchFile,
+	@Schema(description = "저녁 파일") String dinnerFile,
+	@Schema(description = "아침 단식 여부", example = "false") boolean breakfastFast,
+	@Schema(description = "점심 단식 여부", example = "false") boolean lunchFast,
+	@Schema(description = "저녁 단식 여부", example = "false") boolean dinnerFast
+) {
 }

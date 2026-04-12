@@ -46,7 +46,7 @@ public class MemberAuthService {
 	}
 
 	public Boolean validateEmailDuplication(CommandValidateEmail request) {
-		memberRepository.findByEmail(request.getEmail()).ifPresent(m -> {
+		memberRepository.findByEmail(request.email()).ifPresent(m -> {
 			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
 		});
 		return true;
@@ -54,7 +54,7 @@ public class MemberAuthService {
 
 	public FindMemberUserIdResult findUserId(FindMemberUserId request) {
 
-		Member member = memberRepository.findByEmailAndName(request.getEmail(), request.getName())
+		Member member = memberRepository.findByEmailAndName(request.email(), request.name())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
 		if (member.getSocialType() != NONE) {

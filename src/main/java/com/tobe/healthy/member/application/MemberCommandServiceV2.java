@@ -33,7 +33,7 @@ public class MemberCommandServiceV2 {
 			throw new IllegalArgumentException("프로필 사진을 등록해 주세요.");
 		}
 
-		String tempFilePath = fileStorageService.extractFilePath(request.getUploadFile().getFileUrl());
+		String tempFilePath = fileStorageService.extractFilePath(request.uploadFile().fileUrl());
 		String fileName = tempFilePath.replaceFirst("temp/", "");
 		String originPath = "origin/profile/" + fileName;
 

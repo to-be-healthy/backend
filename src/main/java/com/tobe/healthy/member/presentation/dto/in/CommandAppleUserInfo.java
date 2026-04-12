@@ -1,15 +1,6 @@
 package com.tobe.healthy.member.presentation.dto.in;
 
-import lombok.Data;
+public record CommandAppleUserInfo(ApplerUserName name, String email) {
 
-@Data
-public class CommandAppleUserInfo {
-	private ApplerUserName name;
-	private String email;
-
-	@Data
-	public static class ApplerUserName {
-		private String firstName;
-		private String lastName;
-	}
+	public record ApplerUserName(String firstName, String lastName) {}
 }

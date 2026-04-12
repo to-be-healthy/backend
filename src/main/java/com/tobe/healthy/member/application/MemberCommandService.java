@@ -103,7 +103,7 @@ public class MemberCommandService {
 				MultiValueMap<String, String> deleteToken = new LinkedMultiValueMap<>();
 				deleteToken.add("client_id", oAuthProperties.getNaver().getClientId());
 				deleteToken.add("client_secret", oAuthProperties.getNaver().getClientSecret());
-				deleteToken.add("access_token", token.getAccessToken());
+				deleteToken.add("access_token", token.accessToken());
 				deleteToken.add("grant_type", "delete");
 
 				webClient.post()
@@ -163,22 +163,22 @@ public class MemberCommandService {
 	}
 
 	public boolean changePassword(CommandChangeMemberPassword request, Long memberId) {
-		if (!request.getChangePassword1().equals(request.getChangePassword2())) {
+		if (!request.changePassword1().equals(request.changePassword2())) {
 			throw new CustomException(NOT_MATCH_PASSWORD);
 		}
 
-		if (Utils.validatePassword(request.getChangePassword1())) {
+		if (Utils.validatePassword(request.changePassword1())) {
 			throw new CustomException(PASSWORD_POLICY_VIOLATION);
 		}
 
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		if (passwordEncoder.matches(request.getChangePassword1(), member.getPassword())) {
+		if (passwordEncoder.matches(request.changePassword1(), member.getPassword())) {
 			throw new IllegalArgumentException("이전 비밀번호와 동일합니다.");
 		}
 
-		String password = passwordEncoder.encode(request.getChangePassword1());
+		String password = passwordEncoder.encode(request.changePassword1());
 
 		member.changePassword(password);
 
@@ -228,8 +228,8 @@ public class MemberCommandService {
 	public CommandChangeNameResult changeName(CommandChangeName request, Long memberId) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		validateName(request.getName());
-		member.changeName(request.getName());
+		validateName(request.name());
+		member.changeName(request.name());
 		return CommandChangeNameResult.from(member);
 	}
 
@@ -245,32 +245,32 @@ public class MemberCommandService {
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 		TrainerMemberMapping mapping = mappingRepository.findByTrainerIdAndMemberId(trainerId, mmeberId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_MAPPED));
-		mapping.changeMemo(command.getMemo());
+		mapping.changeMemo(command.memo());
 	}
 
 	public CommandAssignNicknameResult assignNickname(CommandAssignNickname request, Long studentId) {
 		Member member = memberRepository.findById(studentId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		member.assignNickname(request.getNickname());
+		member.assignNickname(request.nickname());
 		return CommandAssignNicknameResult.from(member);
 	}
 
 	public Boolean changeEmail(CommandChangeEmail request, Long memberId) {
-		memberRepository.findByEmail(request.getEmail()).ifPresent(m -> {
+		memberRepository.findByEmail(request.email()).ifPresent(m -> {
 			throw new CustomException(MEMBER_EMAIL_DUPLICATION);
 		});
 
 		Member findMember = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		String value = redisService.getValues(request.getEmail());
+		String value = redisService.getValues(request.email());
 
-		if (isEmpty(value) || !value.equals(request.getEmailKey())) {
+		if (isEmpty(value) || !value.equals(request.emailKey())) {
 			throw new CustomException(MAIL_AUTH_CODE_NOT_VALID);
 		}
 
-		findMember.changeEmail(request.getEmail());
-		redisService.deleteValues(request.getEmail());
+		findMember.changeEmail(request.email());
+		redisService.deleteValues(request.email());
 
 		return true;
 	}

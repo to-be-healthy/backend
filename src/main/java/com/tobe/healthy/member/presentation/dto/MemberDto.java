@@ -8,79 +8,69 @@ import com.tobe.healthy.member.domain.MemberProfile;
 import com.tobe.healthy.member.domain.MemberType;
 import com.tobe.healthy.member.domain.SocialType;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
-
-@Data
-@ToString
-@Builder
-public class MemberDto {
-
-	private Long id;
-	private String userId;
-	private String email;
-	private String name;
-	private boolean delYn;
-
-	private ProfileDto profile;
-	private MemberType memberType;
-	private AlarmStatus pushAlarmStatus;
-	private AlarmStatus feedbackAlarmStatus;
-	private GymDto gym;
-	private SocialType socialType;
+public record MemberDto(
+	Long id,
+	String userId,
+	String email,
+	String name,
+	boolean delYn,
+	ProfileDto profile,
+	MemberType memberType,
+	AlarmStatus pushAlarmStatus,
+	AlarmStatus feedbackAlarmStatus,
+	GymDto gym,
+	SocialType socialType
+) {
 
 	public static MemberDto from(Member member) {
-		MemberDtoBuilder builder = MemberDto.builder()
-			.id(member.getId())
-			.userId(member.getUserId())
-			.email(member.getEmail())
-			.name(member.getName())
-			.delYn(member.isDelYn())
-			.memberType(member.getMemberType())
-			.pushAlarmStatus(member.getPushAlarmStatus())
-			.feedbackAlarmStatus(member.getFeedbackAlarmStatus())
-			.socialType(member.getSocialType());
-		return builder.build();
+		return new MemberDto(
+			member.getId(),
+			member.getUserId(),
+			member.getEmail(),
+			member.getName(),
+			member.isDelYn(),
+			null,
+			member.getMemberType(),
+			member.getPushAlarmStatus(),
+			member.getFeedbackAlarmStatus(),
+			null,
+			member.getSocialType()
+		);
 	}
 
 	public static MemberDto create(Member member, MemberProfile memberProfile) {
-		MemberDtoBuilder builder = MemberDto.builder()
-			.id(member.getId())
-			.userId(member.getUserId())
-			.email(member.getEmail())
-			.name(member.getName())
-			.delYn(member.isDelYn())
-			.memberType(member.getMemberType())
-			.pushAlarmStatus(member.getPushAlarmStatus())
-			.feedbackAlarmStatus(member.getFeedbackAlarmStatus())
-			.socialType(member.getSocialType());
-
-		if (memberProfile != null) {
-			builder.profile(ProfileDto.from(memberProfile));
-		}
-		return builder.build();
+		ProfileDto profileDto = memberProfile != null ? ProfileDto.from(memberProfile) : null;
+		return new MemberDto(
+			member.getId(),
+			member.getUserId(),
+			member.getEmail(),
+			member.getName(),
+			member.isDelYn(),
+			profileDto,
+			member.getMemberType(),
+			member.getPushAlarmStatus(),
+			member.getFeedbackAlarmStatus(),
+			null,
+			member.getSocialType()
+		);
 	}
 
 	public static MemberDto create(Member member, MemberProfile memberProfile, Gym gym) {
-		MemberDtoBuilder builder = MemberDto.builder()
-			.id(member.getId())
-			.userId(member.getUserId())
-			.email(member.getEmail())
-			.name(member.getName())
-			.delYn(member.isDelYn())
-			.memberType(member.getMemberType())
-			.pushAlarmStatus(member.getPushAlarmStatus())
-			.feedbackAlarmStatus(member.getFeedbackAlarmStatus())
-			.socialType(member.getSocialType());
-
-		if (memberProfile != null) {
-			builder.profile(ProfileDto.from(memberProfile));
-		}
-		if (member.getGym() != null) {
-			builder.gym(GymDto.from(gym));
-		}
-		return builder.build();
+		ProfileDto profileDto = memberProfile != null ? ProfileDto.from(memberProfile) : null;
+		GymDto gymDto = member.getGym() != null ? GymDto.from(gym) : null;
+		return new MemberDto(
+			member.getId(),
+			member.getUserId(),
+			member.getEmail(),
+			member.getName(),
+			member.isDelYn(),
+			profileDto,
+			member.getMemberType(),
+			member.getPushAlarmStatus(),
+			member.getFeedbackAlarmStatus(),
+			gymDto,
+			member.getSocialType()
+		);
 	}
 
 }

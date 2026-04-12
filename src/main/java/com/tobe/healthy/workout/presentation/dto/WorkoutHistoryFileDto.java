@@ -2,31 +2,19 @@ package com.tobe.healthy.workout.presentation.dto;
 
 import com.tobe.healthy.workout.domain.WorkoutHistoryFiles;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
-@Data
-@ToString
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class WorkoutHistoryFileDto {
-
-	private Long id;
-	private Long workoutHistoryId;
-	private String fileUrl;
-	private int fileOrder;
+public record WorkoutHistoryFileDto(
+	Long id,
+	Long workoutHistoryId,
+	String fileUrl,
+	int fileOrder
+) {
 
 	public static WorkoutHistoryFileDto from(WorkoutHistoryFiles file) {
-		return WorkoutHistoryFileDto.builder()
-			.id(file.getId())
-			.workoutHistoryId(file.getWorkoutHistory().getWorkoutHistoryId())
-			.fileUrl(file.getFileUrl())
-			.fileOrder(file.getFileOrder())
-			.build();
+		return new WorkoutHistoryFileDto(
+			file.getId(),
+			file.getWorkoutHistory().getWorkoutHistoryId(),
+			file.getFileUrl(),
+			file.getFileOrder()
+		);
 	}
-
 }

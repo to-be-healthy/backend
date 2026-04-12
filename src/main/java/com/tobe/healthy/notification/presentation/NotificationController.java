@@ -32,28 +32,19 @@ public class NotificationController {
 		@PathVariable NotificationCategory notificationCategory,
 		@AuthenticationPrincipal CustomMemberDetails member,
 		@ParameterObject @PageableDefault(size = 10) Pageable pageable) {
-		return ApiResult.<KotlinCustomPaging<RetrieveNotificationResult>>builder()
-			.message("전체 알림을 조회하였습니다.")
-			.data(notificationService.findAllNotification(notificationCategory, member.getMemberId(), pageable))
-			.build();
+		return ApiResult.success("전체 알림을 조회하였습니다.", notificationService.findAllNotification(notificationCategory, member.getMemberId(), pageable));
 	}
 
 	@PatchMapping("/{notificationId}")
 	public ApiResult<CommandNotificationStatusResult> updateNotificationStatus(
 		@PathVariable Long notificationId,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ApiResult.<CommandNotificationStatusResult>builder()
-			.message("해당 알림을 읽음 처리 하였습니다.")
-			.data(notificationService.updateNotificationStatus(notificationId, member.getMemberId()))
-			.build();
+		return ApiResult.success("해당 알림을 읽음 처리 하였습니다.", notificationService.updateNotificationStatus(notificationId, member.getMemberId()));
 	}
 
 	@GetMapping("/red-dot")
 	public ApiResult<Boolean> findNotificationWithRedDot(
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ApiResult.<Boolean>builder()
-			.message("red-dot 상태를 조회하였습니다.")
-			.data(notificationService.findRedDotStatus(member.getMemberId()))
-			.build();
+		return ApiResult.success("red-dot 상태를 조회하였습니다.", notificationService.findRedDotStatus(member.getMemberId()));
 	}
 }

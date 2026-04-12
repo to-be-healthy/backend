@@ -18,7 +18,7 @@ import com.tobe.healthy.diet.presentation.dto.DietDto;
 import com.tobe.healthy.gym.presentation.dto.out.GymDto;
 import com.tobe.healthy.lessonhistory.presentation.dto.out.RetrieveLessonHistoryByDateCondResult;
 import com.tobe.healthy.lessonhistory.repository.LessonHistoryRepository;
-import com.tobe.healthy.member.presentation.dto.out.MemberInTeamResult;
+import com.tobe.healthy.member.repository.dto.MemberInTeamResult;
 import com.tobe.healthy.member.presentation.dto.out.StudentHomeResult;
 import com.tobe.healthy.member.presentation.dto.out.TrainerHomeResult;
 import com.tobe.healthy.member.domain.Member;
@@ -116,10 +116,12 @@ public class HomeService {
 			bestStudents = memberRepository.getBestStudent(trainerId);
 
 			//수강권
-			for (MemberInTeamResult bestStudent : bestStudents) {
-				CourseDto usingCourse = courseService.getNowUsingCourse(bestStudent.getMemberId());
-				bestStudent.setCourseId(usingCourse == null ? null : usingCourse.getCourseId());
-			}
+			bestStudents = bestStudents.stream()
+				.map(bestStudent -> {
+					CourseDto usingCourse = courseService.getNowUsingCourse(bestStudent.memberId());
+					return bestStudent.withCourseId(usingCourse == null ? null : usingCourse.getCourseId());
+				})
+				.toList();
 		}
 
 		RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = trainerScheduleRepository.findOneTrainerTodaySchedule(
@@ -128,13 +130,7 @@ public class HomeService {
 		// 알림 레드닷 여부
 		boolean redDotStatus = notificationService.findRedDotStatus(trainerId);
 
-		return TrainerHomeResult.builder()
-			.studentCount(mappingStudentCount)
-			.bestStudents(bestStudents)
-			.todaySchedule(trainerTodaySchedule)
-			.gym(gym)
-			.redDotStatus(redDotStatus)
-			.build();
+		return new TrainerHomeResult(mappingStudentCount, bestStudents, trainerTodaySchedule, gym, redDotStatus);
 	}
 
 	private String getNowMonth() {

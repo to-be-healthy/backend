@@ -41,11 +41,11 @@ public class ExerciseService {
 	}
 
 	public void addExerciseCustom(Member member, CustomExerciseAddCommand command) {
-		exerciseRepository.findByMemberIdAndNames(member.getId(), command.getNames())
+		exerciseRepository.findByMemberIdAndNames(member.getId(), command.names())
 			.ifPresent(i -> {
 				throw new CustomException(EXERCISE_ALREADY_EXISTS);
 			});
-		exerciseRepository.save(Exercise.create(member, command.getNames(), command.getCategory(), command.getMuscles()));
+		exerciseRepository.save(Exercise.create(member, command.names(), command.category(), command.muscles()));
 	}
 
 	public void deleteExerciseCustom(Member member, Long exerciseId) {

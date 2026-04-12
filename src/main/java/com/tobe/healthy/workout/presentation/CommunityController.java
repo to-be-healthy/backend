@@ -35,11 +35,7 @@ public class CommunityController {
 		@Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 		@Parameter(description = "학생 ID") Long memberId,
 		Pageable pageable) {
-		return ApiResult.<CustomPaging<WorkoutHistoryDto>>builder()
-			.data(workoutService.getWorkoutHistoryOnCommunity(memberId, customMemberDetails.getMember(), pageable,
-				searchDate))
-			.message("운동기록이 조회되었습니다.")
-			.build();
+		return ApiResult.success("운동기록이 조회되었습니다.", workoutService.getWorkoutHistoryOnCommunity(memberId, customMemberDetails.getMember(), pageable, searchDate));
 	}
 
 }

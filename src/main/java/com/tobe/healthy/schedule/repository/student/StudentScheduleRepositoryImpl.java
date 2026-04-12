@@ -136,16 +136,16 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	}
 
 	private BooleanExpression lessonDtBetween(StudentScheduleCond searchCond) {
-		if (!ObjectUtils.isEmpty(searchCond.getLessonStartDt()) && !ObjectUtils.isEmpty(searchCond.getLessonEndDt())) {
-			return schedule.lessonDt.between(searchCond.getLessonStartDt(), searchCond.getLessonEndDt());
+		if (!ObjectUtils.isEmpty(searchCond.lessonStartDt()) && !ObjectUtils.isEmpty(searchCond.lessonEndDt())) {
+			return schedule.lessonDt.between(searchCond.lessonStartDt(), searchCond.lessonEndDt());
 		}
 		return null;
 	}
 
 	private BooleanExpression lessonDtEq(StudentScheduleCond searchCond) {
-		if (!ObjectUtils.isEmpty(searchCond.getLessonDt())) {
+		if (!ObjectUtils.isEmpty(searchCond.lessonDt())) {
 			StringExpression formattedDate = stringTemplate("DATE_FORMAT({0}, '%Y%m')", schedule.lessonDt);
-			return formattedDate.eq(searchCond.getLessonDt());
+			return formattedDate.eq(searchCond.lessonDt());
 		}
 		return null;
 	}
@@ -165,8 +165,8 @@ public class StudentScheduleRepositoryImpl implements StudentScheduleRepositoryC
 	}
 
 	private Predicate courseIdEq(StudentScheduleCond searchCond) {
-		if (!ObjectUtils.isEmpty(searchCond.getCourseId())) {
-			return schedule.course.courseId.eq(searchCond.getCourseId());
+		if (!ObjectUtils.isEmpty(searchCond.courseId())) {
+			return schedule.course.courseId.eq(searchCond.courseId());
 		}
 		return null;
 	}

@@ -28,8 +28,8 @@ import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.presentation.dto.DietDto;
 import com.tobe.healthy.gym.presentation.dto.out.GymDto;
 import com.tobe.healthy.member.presentation.dto.MemberDto;
-import com.tobe.healthy.member.presentation.dto.out.MemberDetailResult;
-import com.tobe.healthy.member.presentation.dto.out.MemberInTeamResult;
+import com.tobe.healthy.member.repository.dto.MemberDetailResult;
+import com.tobe.healthy.member.repository.dto.MemberInTeamResult;
 import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.domain.NonMember;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -65,7 +65,7 @@ public class TrainerService {
 
 	public TrainerMemberMappingDto addStudentOfTrainer(Long trainerId, Long memberId, MemberLessonCommand command) {
 		TrainerMemberMappingDto mappingDto = mappingMemberAndTrainer(trainerId, memberId);
-		courseService.addCourse(trainerId, CourseAddCommand.create(memberId, command.getLessonCnt()));
+		courseService.addCourse(trainerId, CourseAddCommand.create(memberId, command.lessonCnt()));
 		return mappingDto;
 	}
 
@@ -101,7 +101,7 @@ public class TrainerService {
 		nonmember.registerGym(trainer.getGym());
 
 		//수강권 등록
-		courseService.addCourseByNonmember(trainerId, CourseAddCommand.create(memberId, command.getLessonCnt()),
+		courseService.addCourseByNonmember(trainerId, CourseAddCommand.create(memberId, command.lessonCnt()),
 			nonmember);
 	}
 
@@ -109,9 +109,9 @@ public class TrainerService {
 		memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), TRAINER)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		String name = command.getName();
+		String name = command.name();
 		validateName(name);
-		int lessonCnt = command.getLessonCnt();
+		int lessonCnt = command.lessonCnt();
 		if (lessonCnt < 1)
 			throw new CustomException(LESSON_CNT_NOT_VALID);
 		if (500 < lessonCnt)
@@ -138,9 +138,9 @@ public class TrainerService {
 		memberRepository.findByIdAndMemberTypeAndDelYnFalse(trainer.getId(), TRAINER)
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
 
-		String name = command.getName();
+		String name = command.name();
 		validateName(name);
-		int lessonCnt = command.getLessonCnt();
+		int lessonCnt = command.lessonCnt();
 		if (lessonCnt < 1)
 			throw new CustomException(LESSON_CNT_NOT_VALID);
 		if (500 < lessonCnt)
@@ -159,7 +159,7 @@ public class TrainerService {
 		nonMemberRepository.save(nonMember);
 
 		//트레이너 매핑 & 수강권 등록
-		addStudentOfTrainerByNonmember(trainer.getId(), member, new MemberLessonCommand(command.getLessonCnt()));
+		addStudentOfTrainerByNonmember(trainer.getId(), member, new MemberLessonCommand(command.lessonCnt()));
 		MemberInviteResultCommand response = new MemberInviteResultCommand(uuid, invitationLink);
 		log.info("[미가입 학생 직접 등록] trainer: {}, request: {}, response{}", trainer, command, response);
 		return response;
@@ -199,17 +199,15 @@ public class TrainerService {
 		//식단
 		DietDto diet = dietService.getTodayDiet(memberId);
 		MemberDetailResult result = memberRepository.getMemberOfTrainer(memberId);
-		result.setDiet(diet);
 
 		//수강권
-		result.setCourse(courseService.getNowUsingCourse(memberId));
+		CourseDto course = courseService.getNowUsingCourse(memberId);
 
 		//포인트
 		String yyyyMM = getNowMonth();
 		int monthPoint = pointRepository.getPointOfSearchMonth(memberId, yyyyMM);
 		int totalPoint = pointRepository.getTotalPoint(memberId, yyyyMM);
 		PointDto point = PointDto.create(yyyyMM, monthPoint, totalPoint);
-		result.setPoint(point);
 
 		//트레이너 매핑 여부
 		TrainerMemberMapping mapping = mappingRepository.findTop1ByMemberIdOrderByCreatedAtDesc(memberId).orElse(null);
@@ -217,12 +215,10 @@ public class TrainerService {
 		//랭킹
 		long totalMemberCnt = mappingRepository.countByTrainerId(trainer.getId());
 		RankDto rank = RankDto.create(mapping.getRanking(), mapping.getLastMonthRanking(), (int)totalMemberCnt);
-		result.setRank(rank);
 
 		//헬스장 정보
 		GymDto gym = member.getGym() == null ? null : GymDto.from(member.getGym());
-		result.setGym(gym);
-		return result;
+		return result.withDetails(diet, course, point, rank, gym);
 	}
 
 	private String getNowMonth() {

@@ -8,65 +8,48 @@ import org.springframework.data.domain.Page;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tobe.healthy.notification.domain.Notification;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class RetrieveNotificationWithRedDotResult {
-
-	private List<RetrieveNotificationResult> content;
-	private List<NotificationRedDotStatusResult> redDotStatus;
-
+public record RetrieveNotificationWithRedDotResult(
+	List<RetrieveNotificationResult> content,
+	List<NotificationRedDotStatusResult> redDotStatus
+) {
 	public static RetrieveNotificationWithRedDotResult from(
 		Page<Notification> notifications,
 		List<NotificationRedDotStatusResult> redDotStatus) {
-		return RetrieveNotificationWithRedDotResult.builder()
-			.content(notifications.getContent().stream()
+		return new RetrieveNotificationWithRedDotResult(
+			notifications.getContent().stream()
 				.map(RetrieveNotificationResult::from)
-				.collect(Collectors.toList()))
-			.redDotStatus(redDotStatus)
-			.build();
+				.collect(Collectors.toList()),
+			redDotStatus
+		);
 	}
 
-	@Data
-	@Builder
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class RetrieveNotificationResult {
-
-		private Long notificationId;
-		private String notificationCategoryAndType;
-		private Long receiverId;
-		private String receiverName;
-		private String title;
-		private String content;
-		private String createdAt;
-		@JsonProperty("isRead")
-		private boolean isRead;
-		private Long targetId;
-		private Long studentId;
-		private String studentName;
-
+	public record RetrieveNotificationResult(
+		Long notificationId,
+		String notificationCategoryAndType,
+		Long receiverId,
+		String receiverName,
+		String title,
+		String content,
+		String createdAt,
+		@JsonProperty("isRead") boolean isRead,
+		Long targetId,
+		Long studentId,
+		String studentName
+	) {
 		public static RetrieveNotificationResult from(Notification notification) {
-			return RetrieveNotificationResult.builder()
-				.notificationId(notification.getId())
-				.notificationCategoryAndType(
-					notification.getNotificationCategory().name() + "-" + notification.getNotificationType().name())
-				.receiverId(notification.getReceiver() != null ? notification.getReceiver().getId() : null)
-				.receiverName(notification.getReceiver() != null ? notification.getReceiver().getName() : null)
-				.title(notification.getTitle())
-				.content(notification.getContent())
-				.createdAt(notification.getCreatedAt().toString())
-				.isRead(notification.isRead())
-				.targetId(notification.getTargetId())
-				.studentId(notification.getStudentId())
-				.studentName(notification.getStudentName())
-				.build();
+			return new RetrieveNotificationResult(
+				notification.getId(),
+				notification.getNotificationCategory().name() + "-" + notification.getNotificationType().name(),
+				notification.getReceiver() != null ? notification.getReceiver().getId() : null,
+				notification.getReceiver() != null ? notification.getReceiver().getName() : null,
+				notification.getTitle(),
+				notification.getContent(),
+				notification.getCreatedAt().toString(),
+				notification.isRead(),
+				notification.getTargetId(),
+				notification.getStudentId(),
+				notification.getStudentName()
+			);
 		}
 	}
 }

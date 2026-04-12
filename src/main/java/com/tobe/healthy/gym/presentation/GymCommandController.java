@@ -31,10 +31,7 @@ public class GymCommandController {
 	@PostMapping
 	public ApiResult<CommandRegisterGymResult> registerGym(
 		@RequestBody CommandRegisterGym request) {
-		return ApiResult.<CommandRegisterGymResult>builder()
-			.data(gymCommandService.registerGym(request))
-			.message("헬스장을 등록하였습니다.")
-			.build();
+		return ApiResult.success("헬스장을 등록하였습니다.", gymCommandService.registerGym(request));
 	}
 
 	@Operation(summary = "학생 또는 트레이너가 내가 다니는 헬스장으로 등록한다.")
@@ -43,9 +40,6 @@ public class GymCommandController {
 		@PathVariable Long gymId,
 		@RequestBody(required = false) CommandSelectMyGym request,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ApiResult.<CommandSelectMyGymResult>builder()
-			.data(gymCommandService.selectMyGym(gymId, request, member.getMemberId()))
-			.message("내 헬스장으로 등록되었습니다.")
-			.build();
+		return ApiResult.success("내 헬스장으로 등록되었습니다.", gymCommandService.selectMyGym(gymId, request, member.getMemberId()));
 	}
 }

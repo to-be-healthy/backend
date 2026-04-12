@@ -5,19 +5,12 @@ import java.util.List;
 
 import com.tobe.healthy.schedule.presentation.dto.out.RetrieveTrainerScheduleByLessonInfoResult.LessonDetailResult;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class RetrieveTrainerScheduleByLessonDtResult {
-
-	private String trainerName;
-	private Long scheduleTotalCount;
-	@Builder.Default
-	private List<LessonDetailResult> schedule = new ArrayList<>();
+public record RetrieveTrainerScheduleByLessonDtResult(
+	String trainerName,
+	Long scheduleTotalCount,
+	List<LessonDetailResult> schedule
+) {
+	public RetrieveTrainerScheduleByLessonDtResult(String trainerName, Long scheduleTotalCount) {
+		this(trainerName, scheduleTotalCount, new ArrayList<>());
+	}
 }

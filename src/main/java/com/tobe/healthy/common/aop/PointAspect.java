@@ -66,8 +66,8 @@ public class PointAspect {
 	@AfterReturning(value = "addDiet()", returning = "returnValue")
 	public void plusPointWhenPostDiet(JoinPoint joinPoint, Object returnValue) {
 		DietDto dietDto = (DietDto)returnValue;
-		Long memberId = dietDto.getMember().getId();
-		if (!dietDto.getEatDate().isEqual(LocalDate.now()))
+		Long memberId = dietDto.member().getId();
+		if (!dietDto.eatDate().isEqual(LocalDate.now()))
 			return;
 
 		PointService pointService = pointServiceProvider.getObject();
@@ -79,7 +79,7 @@ public class PointAspect {
 	 */
 	@AfterReturning(value = "updateReservationStatusToNoShow()", returning = "returnValue")
 	public void minusPointWhenNoShow(JoinPoint joinPoint, Object returnValue) {
-		Long memberId = ((ScheduleIdInfo)returnValue).getStudentId();
+		Long memberId = ((ScheduleIdInfo)returnValue).studentId();
 		PointService pointService = pointServiceProvider.getObject();
 		pointService.updatePoint(memberId, NO_SHOW, MINUS, THREE_POINT);
 	}
@@ -89,7 +89,7 @@ public class PointAspect {
 	 */
 	@AfterReturning(value = "revertReservationStatusToNoShow()", returning = "returnValue")
 	public void plusPointWhenRevertNoShow(JoinPoint joinPoint, Object returnValue) {
-		Long memberId = ((ScheduleIdInfo)returnValue).getStudentId();
+		Long memberId = ((ScheduleIdInfo)returnValue).studentId();
 		PointService pointService = pointServiceProvider.getObject();
 		pointService.updatePoint(memberId, NO_SHOW_CANCEL, PLUS, THREE_POINT);
 	}

@@ -42,10 +42,7 @@ public class ExerciseController {
 	@Operation(summary = "운동 카레고리 조회")
 	@GetMapping("/category")
 	public ApiResult<List<ExerciseCategoryDto>> getExerciseCategory() {
-		return ApiResult.<List<ExerciseCategoryDto>>builder()
-			.data(Arrays.stream(ExerciseCategory.values()).map(ExerciseCategoryDto::from).toList())
-			.message("운동 카테고리가 조회되었습니다.")
-			.build();
+		return ApiResult.success("운동 카테고리가 조회되었습니다.", Arrays.stream(ExerciseCategory.values()).map(ExerciseCategoryDto::from).toList());
 	}
 
 	@Operation(summary = "운동 종류 목록 조회")
@@ -55,10 +52,7 @@ public class ExerciseController {
 		@Parameter(description = "카테고리") @RequestParam(required = false) ExerciseCategory exerciseCategory,
 		@Parameter(description = "검색할 이름", example = "임채린") @RequestParam(required = false) String searchValue,
 		Pageable pageable) {
-		return ApiResult.<CustomPaging<ExerciseDto>>builder()
-			.data(exerciseService.getExercise(customMemberDetails.getMember(), exerciseCategory, pageable, searchValue))
-			.message("운동 종류가 조회되었습니다.")
-			.build();
+		return ApiResult.success("운동 종류가 조회되었습니다.", exerciseService.getExercise(customMemberDetails.getMember(), exerciseCategory, pageable, searchValue));
 	}
 
 	@Operation(summary = "운동 종류 추가")
@@ -66,19 +60,15 @@ public class ExerciseController {
 	public ApiResult<Void> addExerciseCustom(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Valid @RequestBody CustomExerciseAddCommand command) {
 		exerciseService.addExerciseCustom(customMemberDetails.getMember(), command);
-		return ApiResult.<Void>builder()
-			.message("운동 종류가 등록되었습니다.")
-			.build();
+		return ApiResult.success("운동 종류가 등록되었습니다.");
 	}
 
 	@Operation(summary = "운동 종류 삭제")
 	@DeleteMapping("/{exerciseId}")
 	public ApiResult<Void> deleteExerciseCustom(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "운동종류 ID") @PathVariable("exerciseId") Long exerciseId) {
+		@Parameter(description = "운동종류 ID") @PathVariable Long exerciseId) {
 		exerciseService.deleteExerciseCustom(customMemberDetails.getMember(), exerciseId);
-		return ApiResult.<Void>builder()
-			.message("운동 종류가 삭제되었습니다.")
-			.build();
+		return ApiResult.success("운동 종류가 삭제되었습니다.");
 	}
 
 }

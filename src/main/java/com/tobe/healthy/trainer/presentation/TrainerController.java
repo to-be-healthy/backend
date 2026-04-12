@@ -25,8 +25,8 @@ import com.tobe.healthy.diet.application.DietService;
 import com.tobe.healthy.diet.presentation.dto.DietDto;
 import com.tobe.healthy.member.application.MemberCommandService;
 import com.tobe.healthy.member.presentation.dto.MemberDto;
-import com.tobe.healthy.member.presentation.dto.out.MemberDetailResult;
-import com.tobe.healthy.member.presentation.dto.out.MemberInTeamResult;
+import com.tobe.healthy.member.repository.dto.MemberDetailResult;
+import com.tobe.healthy.member.repository.dto.MemberInTeamResult;
 import com.tobe.healthy.member.domain.AlarmStatus;
 import com.tobe.healthy.schedule.application.StudentScheduleService;
 import com.tobe.healthy.schedule.presentation.dto.in.StudentScheduleCond;
@@ -61,10 +61,7 @@ public class TrainerController {
 	public ApiResult<MemberInviteResultCommand> inviteMember(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@RequestBody MemberInviteCommand command) {
-		return ApiResult.<MemberInviteResultCommand>builder()
-			.data(trainerService.inviteMember(command, customMemberDetails.getMember()))
-			.message("회원초대가 완료 되었습니다.")
-			.build();
+		return ApiResult.success("회원초대가 완료 되었습니다.", trainerService.inviteMember(command, customMemberDetails.getMember()));
 	}
 
 	@Operation(summary = "트레이너가 미가입 학생 직접 등록하기")
@@ -73,10 +70,7 @@ public class TrainerController {
 	public ApiResult<MemberInviteResultCommand> inviteNonmember(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@RequestBody MemberInviteCommand command) {
-		return ApiResult.<MemberInviteResultCommand>builder()
-			.data(trainerService.inviteNonmember(command, customMemberDetails.getMember()))
-			.message("미가입 학생 등록이 완료 되었습니다.")
-			.build();
+		return ApiResult.success("미가입 학생 등록이 완료 되었습니다.", trainerService.inviteNonmember(command, customMemberDetails.getMember()));
 	}
 
 	@Operation(summary = "트레이너가 내 학생으로 등록하기")
@@ -86,22 +80,17 @@ public class TrainerController {
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@PathVariable @Parameter(description = "학생 ID") Long memberId,
 		@RequestBody MemberLessonCommand command) {
-		return ApiResult.<TrainerMemberMappingDto>builder()
-			.data(trainerService.addStudentOfTrainer(customMemberDetails.getMember().getId(), memberId, command))
-			.message("내 학생으로 등록되었습니다.")
-			.build();
+		return ApiResult.success("내 학생으로 등록되었습니다.", trainerService.addStudentOfTrainer(customMemberDetails.getMember().getId(), memberId, command));
 	}
 
 	@Operation(summary = "트레이너가 내 학생을 삭제한다.")
 	@DeleteMapping("/members/{memberId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ApiResult<TrainerMemberMappingDto> deleteStudentOfTrainer(
+	public ApiResult<Void> deleteStudentOfTrainer(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@PathVariable @Parameter(description = "학생 ID") Long memberId) {
 		trainerService.deleteStudentOfTrainer(customMemberDetails.getMember(), memberId);
-		return ApiResult.<TrainerMemberMappingDto>builder()
-			.message("내 학생에서 삭제되었습니다.")
-			.build();
+		return ApiResult.success("내 학생에서 삭제되었습니다.");
 	}
 
 	@Operation(summary = "트레이너가 학생 상세 조회")
@@ -110,10 +99,7 @@ public class TrainerController {
 	public ApiResult<MemberDetailResult> getMemberOfTrainer(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@PathVariable @Parameter(description = "학생 ID") Long memberId) {
-		return ApiResult.<MemberDetailResult>builder()
-			.data(trainerService.getMemberOfTrainer(customMemberDetails.getMember(), memberId))
-			.message("학생 상세가 조회되었습니다.")
-			.build();
+		return ApiResult.success("학생 상세가 조회되었습니다.", trainerService.getMemberOfTrainer(customMemberDetails.getMember(), memberId));
 	}
 
 	@Operation(summary = "트레이너가 관리하는 학생들을 조회한다.", description = "트레이너가 관리하는 학생 전체를 조회한다.")
@@ -126,10 +112,7 @@ public class TrainerController {
 		@Parameter(description = "정렬 조건", example = "ranking, memberId")
 		@RequestParam(required = false, defaultValue = "memberId") String sortValue,
 		@PageableDefault(size = 100) Pageable pageable) {
-		return ApiResult.<List<MemberInTeamResult>>builder()
-			.data(trainerService.findAllMyMemberInTeam(member.getMemberId(), searchValue, sortValue, pageable))
-			.message("트레이너가 관리하는 학생을 조회하였습니다.")
-			.build();
+		return ApiResult.success("트레이너가 관리하는 학생을 조회하였습니다.", trainerService.findAllMyMemberInTeam(member.getMemberId(), searchValue, sortValue, pageable));
 	}
 
 	@Operation(summary = "트레이너가 가입된(매핑 안 된) 학생들을 조회한다.", description = "트레이너가 가입된(매핑 안 된) 학생들을 조회한다.")
@@ -142,11 +125,7 @@ public class TrainerController {
 		@Parameter(description = "정렬 조건", example = "memberId")
 		@RequestParam(required = false, defaultValue = "memberId") String sortValue,
 		Pageable pageable) {
-		return ApiResult.<List<MemberDto>>builder()
-			.data(trainerService.findAllUnattachedMembers(customMemberDetails.getMember(), searchValue, sortValue,
-				pageable))
-			.message("트레이너가 가입된 학생을 조회하였습니다.")
-			.build();
+		return ApiResult.success("트레이너가 가입된 학생을 조회하였습니다.", trainerService.findAllUnattachedMembers(customMemberDetails.getMember(), searchValue, sortValue, pageable));
 	}
 
 	@Operation(summary = "수업 기록 여부를 변경한다.", description = "트레이너가 사용하는 수업기록여부를 변경한다.")
@@ -155,10 +134,7 @@ public class TrainerController {
 	public ApiResult<Boolean> changeTrainerFeedback(@Parameter(description = "변경할 수업 기록 상태", example = "ENABLED")
 		@RequestParam AlarmStatus alarmStatus,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ApiResult.<Boolean>builder()
-			.data(memberCommandService.changeTrainerFeedback(alarmStatus, member.getMemberId()))
-			.message("수업 기록 여부가 변경되었습니다.")
-			.build();
+		return ApiResult.success("수업 기록 여부가 변경되었습니다.", memberCommandService.changeTrainerFeedback(alarmStatus, member.getMemberId()));
 	}
 
 	@Operation(summary = "트레이너가 관리하는 학생들의 식단기록 목록 조회하기")
@@ -168,10 +144,7 @@ public class TrainerController {
 		@AuthenticationPrincipal CustomMemberDetails loginMember,
 		@Parameter(description = "조회할 날짜", example = "2024-12-01") @Param("searchDate") String searchDate,
 		Pageable pageable) {
-		return ApiResult.<CustomPaging<DietDto>>builder()
-			.data(dietService.getDietByTrainer(loginMember.getMemberId(), pageable, searchDate))
-			.message("식단기록이 조회되었습니다.")
-			.build();
+		return ApiResult.success("식단기록이 조회되었습니다.", dietService.getDietByTrainer(loginMember.getMemberId(), pageable, searchDate));
 	}
 
 	@Operation(summary = "트레이너가 학생의 다가오는 예약을 조회한다.", description = "트레이너가 학생의 다가오는 예약을 조회한다.")
@@ -181,11 +154,7 @@ public class TrainerController {
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@ParameterObject StudentScheduleCond searchCond,
 		@Param("memberId") Long memberId) {
-		return ApiResult.<MyReservationResponse>builder()
-			.data(studentScheduleService.findNewReservationByTrainer(customMemberDetails.getMemberId(), memberId,
-				searchCond))
-			.message("학생이 내 예약을 조회하였습니다.")
-			.build();
+		return ApiResult.success("학생이 내 예약을 조회하였습니다.", studentScheduleService.findNewReservationByTrainer(customMemberDetails.getMemberId(), memberId, searchCond));
 	}
 
 	@Operation(summary = "트레이너가 학생의 지난 예약을 조회한다.", description = "트레이너가 학생의 지난 예약을 조회한다.")
@@ -195,23 +164,17 @@ public class TrainerController {
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "조회할 날짜", example = "2024-12") @Param("searchDate") String searchDate,
 		@Param("memberId") Long memberId) {
-		return ApiResult.<MyReservationResponse>builder()
-			.data(studentScheduleService.findOldReservationByTrainer(customMemberDetails.getMemberId(), memberId,
-				searchDate))
-			.message("학생의 예약을 조회하였습니다.")
-			.build();
+		return ApiResult.success("학생의 예약을 조회하였습니다.", studentScheduleService.findOldReservationByTrainer(customMemberDetails.getMemberId(), memberId, searchDate));
 	}
 
 	@Operation(summary = "트레이너가 내 학생을 환불한다.")
 	@DeleteMapping("/members/{memberId}/refund")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
-	public ApiResult<TrainerMemberMappingDto> refundStudentOfTrainer(
+	public ApiResult<Void> refundStudentOfTrainer(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "학생 ID") @PathVariable("memberId") Long memberId) {
+		@Parameter(description = "학생 ID") @PathVariable Long memberId) {
 		trainerService.refundStudentOfTrainer(customMemberDetails.getMember(), memberId);
-		return ApiResult.<TrainerMemberMappingDto>builder()
-			.message("환불이 완료되었습니다.")
-			.build();
+		return ApiResult.success("환불이 완료되었습니다.");
 	}
 
 }

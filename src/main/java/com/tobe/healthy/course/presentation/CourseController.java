@@ -38,32 +38,26 @@ public class CourseController {
 	public ApiResult<Void> addCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@RequestBody @Valid CourseAddCommand command) {
 		courseService.addCourse(customMemberDetails.getMember().getId(), command);
-		return ApiResult.<Void>builder()
-			.message("수강권이 등록되었습니다.")
-			.build();
+		return ApiResult.success("수강권이 등록되었습니다.");
 	}
 
 	@Operation(summary = "수강권 삭제")
 	@DeleteMapping("/{courseId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<Void> deleteCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "수강권 ID") @PathVariable("courseId") Long courseId) {
+		@Parameter(description = "수강권 ID") @PathVariable Long courseId) {
 		courseService.deleteCourseByTrainer(customMemberDetails.getMember().getId(), courseId);
-		return ApiResult.<Void>builder()
-			.message("수강권이 삭제되었습니다.")
-			.build();
+		return ApiResult.success("수강권이 삭제되었습니다.");
 	}
 
 	@Operation(summary = "수강권 횟수 증가/차감")
 	@PatchMapping("/{courseId}")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<Void> updateCourse(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "수강권 ID") @PathVariable("courseId") Long courseId,
+		@Parameter(description = "수강권 ID") @PathVariable Long courseId,
 		@RequestBody @Valid CourseUpdateCommand command) {
 		courseService.updateCourseByTrainer(customMemberDetails.getMember().getId(), courseId, command);
-		return ApiResult.<Void>builder()
-			.message("수강권 횟수가 증가 및 차감 되었습니다.")
-			.build();
+		return ApiResult.success("수강권 횟수가 증가 및 차감 되었습니다.");
 	}
 
 }

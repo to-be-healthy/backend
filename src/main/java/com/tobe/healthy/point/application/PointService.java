@@ -1,7 +1,7 @@
 package com.tobe.healthy.point.application;
 
 import static com.tobe.healthy.common.error.ErrorCode.*;
-import static com.tobe.healthy.course.presentation.dto.CourseStatus.*;
+import static com.tobe.healthy.course.domain.CourseStatus.*;
 import static com.tobe.healthy.member.domain.MemberType.*;
 import static com.tobe.healthy.point.domain.Calculation.*;
 import static com.tobe.healthy.point.domain.PointType.*;
@@ -22,7 +22,7 @@ import com.tobe.healthy.common.CustomPaging;
 import com.tobe.healthy.common.error.CustomException;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.presentation.dto.CourseDto;
-import com.tobe.healthy.course.presentation.dto.CourseStatus;
+import com.tobe.healthy.course.domain.CourseStatus;
 import com.tobe.healthy.course.repository.CourseRepository;
 import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.repository.MemberRepository;
@@ -71,10 +71,10 @@ public class PointService {
 
 			for (TrainerMemberMapping thisMember : mappings) {
 				List<TempRankDto> thisRankDto = ranks.stream()
-					.filter(r -> r.getMemberId().equals(thisMember.getMember().getId()))
+					.filter(r -> r.memberId().equals(thisMember.getMember().getId()))
 					.toList();
 				thisMember.changeLastMonthRanking(thisMember.getRanking());
-				thisMember.changeRanking(thisRankDto.isEmpty() ? 999 : thisRankDto.get(0).getRanking());
+				thisMember.changeRanking(thisRankDto.isEmpty() ? 999 : thisRankDto.get(0).ranking());
 			}
 		}
 	}

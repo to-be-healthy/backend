@@ -5,24 +5,13 @@ import org.apache.commons.lang3.StringUtils;
 import com.tobe.healthy.workout.domain.Exercise;
 import com.tobe.healthy.workout.domain.ExerciseCategory;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
-@Data
-@ToString
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ExerciseDto {
-
-	private Long exerciseId;
-	private String names;
-	private ExerciseCategory category;
-	private String muscles;
-	private boolean custom;
+public record ExerciseDto(
+	Long exerciseId,
+	String names,
+	ExerciseCategory category,
+	String muscles,
+	boolean custom
+) {
 
 	public static ExerciseDto from(Exercise exercise) {
 		String muscles = "";
@@ -30,13 +19,12 @@ public class ExerciseDto {
 			muscles = exercise.getPrimaryMuscle() + ", ";
 		if (exercise.getSecondaryMuscle() != null)
 			muscles += exercise.getSecondaryMuscle() + ", ";
-		return ExerciseDto.builder()
-			.exerciseId(exercise.getExerciseId())
-			.names(exercise.getNames())
-			.category(exercise.getCategory())
-			.muscles(StringUtils.removeEnd(muscles, ", "))
-			.custom(exercise.getMember() != null)
-			.build();
+		return new ExerciseDto(
+			exercise.getExerciseId(),
+			exercise.getNames(),
+			exercise.getCategory(),
+			StringUtils.removeEnd(muscles, ", "),
+			exercise.getMember() != null
+		);
 	}
-
 }

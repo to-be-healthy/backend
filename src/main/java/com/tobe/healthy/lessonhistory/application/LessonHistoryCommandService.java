@@ -65,9 +65,9 @@ public class LessonHistoryCommandService {
 
 	public CommandRegisterLessonHistoryResult registerLessonHistory(CommandRegisterLessonHistory request,
 		Long trainerId) {
-		Member student = findMember(request.getStudentId());
+		Member student = findMember(request.studentId());
 		Member trainer = findMember(trainerId);
-		Schedule schedule = findSchedule(request.getScheduleId());
+		Schedule schedule = findSchedule(request.scheduleId());
 
 		if (LocalDateTime.now().isBefore(LocalDateTime.of(schedule.getLessonDt(), schedule.getLessonEndTime()))) {
 			throw new IllegalArgumentException("수업이 끝나기 전에 수업일지를 작성할 수 없습니다.");
@@ -77,11 +77,11 @@ public class LessonHistoryCommandService {
 			throw new IllegalArgumentException("이미 수업일지를 등록하였습니다.");
 		}
 
-		LessonHistory lessonHistory = LessonHistory.register(request.getTitle(), request.getContent(), student, trainer,
+		LessonHistory lessonHistory = LessonHistory.register(request.title(), request.content(), student, trainer,
 			schedule);
 		lessonHistoryRepository.save(lessonHistory);
 
-		List<LessonHistoryFiles> files = registerFiles(request.getUploadFiles(), trainer, lessonHistory);
+		List<LessonHistoryFiles> files = registerFiles(request.uploadFiles(), trainer, lessonHistory);
 
 		sendNotification(
 			NotificationType.WRITE,
@@ -142,30 +142,30 @@ public class LessonHistoryCommandService {
 			throw new CustomException(ErrorCode.LESSON_HISTORY_NOT_FOUND);
 		}
 
-		lessonHistory.updateLessonHistory(request.getTitle(), request.getContent());
+		lessonHistory.updateLessonHistory(request.title(), request.content());
 
 		lessonHistory.getFiles().clear();
 
 		List<LessonHistoryFiles> savedFiles = new ArrayList<>();
 
-		if (!request.getUploadFiles().isEmpty()) {
-			List<CommandUploadFileResult> requestFiles = request.getUploadFiles();
+		if (!request.uploadFiles().isEmpty()) {
+			List<CommandUploadFileResult> requestFiles = request.uploadFiles();
 			for (int idx = 0; idx < requestFiles.size(); idx++) {
 				CommandUploadFileResult file = requestFiles.get(idx);
-				int existingIdx = findFileIndex(lessonHistory.getFiles(), file.getFileUrl());
+				int existingIdx = findFileIndex(lessonHistory.getFiles(), file.fileUrl());
 				if (existingIdx != -1) {
 					lessonHistory.getFiles().get(existingIdx).updateFileOrder(idx + 1);
 					savedFiles.add(lessonHistory.getFiles().get(existingIdx));
 				} else {
-					if (isTempFile(file.getFileUrl())) {
-						String tempPath = fileStorageService.extractFilePath(file.getFileUrl());
+					if (isTempFile(file.fileUrl())) {
+						String tempPath = fileStorageService.extractFilePath(file.fileUrl());
 						CommandUploadFileResult result = moveDirTempToOrigin("origin/lesson-history/", tempPath,
 							idx + 1);
-						LessonHistoryFiles newFile = new LessonHistoryFiles(result.getFileUrl(), idx + 1,
+						LessonHistoryFiles newFile = new LessonHistoryFiles(result.fileUrl(), idx + 1,
 							lessonHistory.getTrainer(), lessonHistory);
 						savedFiles.add(newFile);
 					} else {
-						LessonHistoryFiles newFile = new LessonHistoryFiles(file.getFileUrl(), idx + 1,
+						LessonHistoryFiles newFile = new LessonHistoryFiles(file.fileUrl(), idx + 1,
 							lessonHistory.getTrainer(), lessonHistory);
 						savedFiles.add(newFile);
 					}
@@ -207,7 +207,7 @@ public class LessonHistoryCommandService {
 
 		int order = lessonHistoryCommentRepository.findTopComment(lessonHistory.getId(), null);
 		LessonHistoryComment lessonHistoryComment = registerComment(order, request, findMember, lessonHistory);
-		List<LessonHistoryFiles> files = registerFile(request.getUploadFiles(), findMember, lessonHistory,
+		List<LessonHistoryFiles> files = registerFile(request.uploadFiles(), findMember, lessonHistory,
 			lessonHistoryComment);
 
 		if (!member.getMemberId().equals(lessonHistory.getTrainer().getId())) {
@@ -241,7 +241,7 @@ public class LessonHistoryCommandService {
 		LessonHistoryComment parentComment = lessonHistoryCommentRepository.findById(lessonHistoryCommentId)
 			.orElseThrow(() -> new CustomException(ErrorCode.LESSON_HISTORY_COMMENT_NOT_FOUND));
 
-		LessonHistoryComment entity = new LessonHistoryComment(order, request.getContent(), findMember, lessonHistory,
+		LessonHistoryComment entity = new LessonHistoryComment(order, request.content(), findMember, lessonHistory,
 			parentComment);
 
 		if (!parentComment.getWriter().getId().equals(member.getMemberId())) {
@@ -271,7 +271,7 @@ public class LessonHistoryCommandService {
 
 		lessonHistoryCommentRepository.save(entity);
 
-		List<LessonHistoryFiles> files = registerFile(request.getUploadFiles(), findMember, lessonHistory, entity);
+		List<LessonHistoryFiles> files = registerFile(request.uploadFiles(), findMember, lessonHistory, entity);
 
 		return CommandRegisterReplyResult.from(entity, files);
 	}
@@ -286,24 +286,24 @@ public class LessonHistoryCommandService {
 
 		List<LessonHistoryFiles> savedFiles = new ArrayList<>();
 
-		if (!request.getUploadFiles().isEmpty()) {
-			List<CommandUploadFileResult> requestFiles = request.getUploadFiles();
+		if (!request.uploadFiles().isEmpty()) {
+			List<CommandUploadFileResult> requestFiles = request.uploadFiles();
 			for (int idx = 0; idx < requestFiles.size(); idx++) {
 				CommandUploadFileResult file = requestFiles.get(idx);
-				int existingIdx = findFileIndex(comment.getFiles(), file.getFileUrl());
+				int existingIdx = findFileIndex(comment.getFiles(), file.fileUrl());
 				if (existingIdx != -1) {
 					comment.getFiles().get(existingIdx).updateFileOrder(idx + 1);
 					savedFiles.add(comment.getFiles().get(existingIdx));
 				} else {
-					if (isTempFile(file.getFileUrl())) {
-						String tempPath = fileStorageService.extractFilePath(file.getFileUrl());
+					if (isTempFile(file.fileUrl())) {
+						String tempPath = fileStorageService.extractFilePath(file.fileUrl());
 						CommandUploadFileResult result = moveDirTempToOrigin("origin/lesson-history/", tempPath,
 							idx + 1);
-						LessonHistoryFiles newFile = new LessonHistoryFiles(result.getFileUrl(), idx + 1,
+						LessonHistoryFiles newFile = new LessonHistoryFiles(result.fileUrl(), idx + 1,
 							comment.getWriter(), comment.getLessonHistory(), comment);
 						savedFiles.add(newFile);
 					} else {
-						LessonHistoryFiles newFile = new LessonHistoryFiles(file.getFileUrl(), idx + 1,
+						LessonHistoryFiles newFile = new LessonHistoryFiles(file.fileUrl(), idx + 1,
 							comment.getWriter(), comment.getLessonHistory(), comment);
 						savedFiles.add(newFile);
 					}
@@ -317,7 +317,7 @@ public class LessonHistoryCommandService {
 			comment.getFiles().clear();
 		}
 
-		comment.updateLessonHistoryComment(request.getContent());
+		comment.updateLessonHistoryComment(request.content());
 
 		return CommandUpdateCommentResult.from(comment);
 	}
@@ -348,10 +348,10 @@ public class LessonHistoryCommandService {
 
 		for (int idx = 0; idx < uploadFiles.size(); idx++) {
 			CommandUploadFileResult uploadFile = uploadFiles.get(idx);
-			if (isTempFile(uploadFile.getFileUrl())) {
-				String tempPath = fileStorageService.extractFilePath(uploadFile.getFileUrl());
+			if (isTempFile(uploadFile.fileUrl())) {
+				String tempPath = fileStorageService.extractFilePath(uploadFile.fileUrl());
 				CommandUploadFileResult result = moveDirTempToOrigin("origin/lesson-history/", tempPath, idx + 1);
-				LessonHistoryFiles file = new LessonHistoryFiles(result.getFileUrl(), result.getFileOrder(), member,
+				LessonHistoryFiles file = new LessonHistoryFiles(result.fileUrl(), result.fileOrder(), member,
 					lessonHistory, lessonHistoryComment);
 				files.add(file);
 			}
@@ -364,7 +364,7 @@ public class LessonHistoryCommandService {
 
 	private LessonHistoryComment registerComment(int order, CommandRegisterComment request, Member findMember,
 		LessonHistory lessonHistory) {
-		LessonHistoryComment entity = new LessonHistoryComment(order, request.getContent(), findMember, lessonHistory);
+		LessonHistoryComment entity = new LessonHistoryComment(order, request.content(), findMember, lessonHistory);
 		lessonHistoryCommentRepository.save(entity);
 		return entity;
 	}
@@ -397,10 +397,10 @@ public class LessonHistoryCommandService {
 
 		for (int idx = 0; idx < uploadFiles.size(); idx++) {
 			CommandUploadFileResult uploadFile = uploadFiles.get(idx);
-			if (isTempFile(uploadFile.getFileUrl())) {
-				String tempPath = fileStorageService.extractFilePath(uploadFile.getFileUrl());
+			if (isTempFile(uploadFile.fileUrl())) {
+				String tempPath = fileStorageService.extractFilePath(uploadFile.fileUrl());
 				CommandUploadFileResult result = moveDirTempToOrigin("origin/lesson-history/", tempPath, idx + 1);
-				LessonHistoryFiles file = new LessonHistoryFiles(result.getFileUrl(), result.getFileOrder(), member,
+				LessonHistoryFiles file = new LessonHistoryFiles(result.fileUrl(), result.fileOrder(), member,
 					lessonHistory);
 				files.add(file);
 			}

@@ -1,11 +1,9 @@
 package com.tobe.healthy.member.presentation.dto.in;
 
-import lombok.Data;
-
-@Data
-public class AppleToken {
-	private String access_token;
-	private String token_type;
-	private int expires_in;
-	private String refresh_token;
+public record AppleToken(
+	String access_token,
+	String token_type,
+	int expires_in,
+	String refresh_token
+) {
 }

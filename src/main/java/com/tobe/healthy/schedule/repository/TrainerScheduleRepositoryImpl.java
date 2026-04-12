@@ -96,16 +96,16 @@ public class TrainerScheduleRepositoryImpl implements TrainerScheduleRepositoryC
 
 		RetrieveTrainerScheduleByLessonInfoResult response = RetrieveTrainerScheduleByLessonInfoResult.from(results);
 
-		RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = RetrieveTrainerScheduleByLessonDtResult.builder()
-			.trainerName(response.getTrainerName())
-			.scheduleTotalCount(scheduleCount != null ? scheduleCount : 0L)
-			.build();
+		RetrieveTrainerScheduleByLessonDtResult trainerTodaySchedule = new RetrieveTrainerScheduleByLessonDtResult(
+			response.trainerName(),
+			scheduleCount != null ? scheduleCount : 0L
+		);
 
-		if (response.getSchedule() != null) {
-			response.getSchedule().forEach((key, value) -> {
+		if (response.schedule() != null) {
+			response.schedule().forEach((key, value) -> {
 				value.stream()
-					.filter(it -> it.getLessonStartTime() != null && it.getLessonStartTime().isAfter(LocalTime.now()))
-					.forEach(it -> trainerTodaySchedule.getSchedule().add(it));
+					.filter(it -> it.lessonStartTime() != null && it.lessonStartTime().isAfter(LocalTime.now()))
+					.forEach(it -> trainerTodaySchedule.schedule().add(it));
 			});
 		}
 
@@ -126,7 +126,7 @@ public class TrainerScheduleRepositoryImpl implements TrainerScheduleRepositoryC
 			.select(schedule.count())
 			.from(schedule)
 			.where(
-				lessonDtBetween(request.getLessonStartDt(), request.getLessonEndDt()),
+				lessonDtBetween(request.lessonStartDt(), request.lessonEndDt()),
 				trainerIdEq(trainerId),
 				notDayOfWeek(schedule.lessonDt, closedDayValues),
 				schedule.lessonStartTime.between(
@@ -217,9 +217,9 @@ public class TrainerScheduleRepositoryImpl implements TrainerScheduleRepositoryC
 				trainerIdEq(memberId),
 				schedule.applicant.isNotNull(),
 				reservationStatusEq(ReservationStatus.COMPLETED),
-				lessonDateTimeEq(request.getLessonDate()),
-				applicantIdEq(request.getStudentId()),
-				writtenStatusEq(request.getWritingStatus())
+				lessonDateTimeEq(request.lessonDate()),
+				applicantIdEq(request.studentId()),
+				writtenStatusEq(request.writingStatus())
 			)
 			.orderBy(schedule.lessonDt.asc(), schedule.lessonStartTime.asc())
 			.fetch();

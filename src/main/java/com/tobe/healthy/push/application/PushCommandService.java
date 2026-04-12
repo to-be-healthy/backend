@@ -48,32 +48,29 @@ public class PushCommandService {
 
 		MemberToken findMemberToken = memberTokenRepository.findByMemberId(findMember.getId())
 			.orElseGet(() -> memberTokenRepository.save(
-				MemberToken.register(findMember, request.getToken(), DeviceType.WEB)
+				MemberToken.register(findMember, request.token(), DeviceType.WEB)
 			));
 
-		findMemberToken.changeToken(request.getToken(), DeviceType.WEB);
+		findMemberToken.changeToken(request.token(), DeviceType.WEB);
 
-		return CommandRegisterTokenResult.builder()
-			.name(findMember.getName())
-			.token(request.getToken())
-			.build();
+		return new CommandRegisterTokenResult(findMember.getName(), request.token());
 	}
 
 	public void registerFcmTokenWithWebView(CommandRegisterTokenWithWebView request) {
-		Member findMember = memberRepository.findById(request.getMemberId())
+		Member findMember = memberRepository.findById(request.memberId())
 			.orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
 		MemberToken findMemberToken = memberTokenRepository.findByMemberId(findMember.getId())
 			.orElseGet(() -> memberTokenRepository.save(
-				MemberToken.register(findMember, request.getToken(), request.getDeviceType())
+				MemberToken.register(findMember, request.token(), request.deviceType())
 			));
 
-		findMemberToken.changeToken(request.getToken(), request.getDeviceType());
+		findMemberToken.changeToken(request.token(), request.deviceType());
 	}
 
 	public CommandSendPushAlarmResult sendPushAlarm(CommandSendPushAlarm request) {
-		Message message = createMessage(request.getToken(), request.getTitle(), request.getMessage(),
-			request.getClickUrl());
+		Message message = createMessage(request.token(), request.title(), request.message(),
+			request.clickUrl());
 
 		try {
 			String response = FirebaseMessaging
@@ -87,14 +84,14 @@ public class PushCommandService {
 			throw new RuntimeException("Failed to send push alarm", e);
 		}
 
-		return CommandSendPushAlarmResult.from(request.getTitle(), request.getMessage());
+		return CommandSendPushAlarmResult.from(request.title(), request.message());
 	}
 
 	public CommandSendPushAlarmResult sendPushAlarm(Long memberId, CommandSendPushAlarmToMember request) {
 		MemberToken findMemberToken = memberTokenRepository.findByMemberId(memberId)
 			.orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-		Message message = createMessage(findMemberToken.getToken(), request.getTitle(), request.getMessage(), null);
+		Message message = createMessage(findMemberToken.getToken(), request.title(), request.message(), null);
 
 		try {
 			String response = FirebaseMessaging
@@ -108,7 +105,7 @@ public class PushCommandService {
 			throw new RuntimeException("Failed to send push alarm", e);
 		}
 
-		return CommandSendPushAlarmResult.from(request.getTitle(), request.getMessage());
+		return CommandSendPushAlarmResult.from(request.title(), request.message());
 	}
 
 	private Message createMessage(String token, String title, String message, String clickUrl) {

@@ -48,90 +48,66 @@ public class DietController {
 	public ApiResult<List<RegisterFile>> addDietFile(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Valid List<MultipartFile> uploadFiles) {
-		return ApiResult.<List<RegisterFile>>builder()
-			.data(fileService.uploadFiles("diet", uploadFiles, customMemberDetails.getMember()))
-			.message("첨부파일이 등록되었습니다.")
-			.build();
+		return ApiResult.success("첨부파일이 등록되었습니다.", fileService.uploadFiles("diet", uploadFiles, customMemberDetails.getMember()));
 	}
 
 	@Operation(summary = "홈에서 식단기록 등록")
 	@PostMapping("/home")
 	public ApiResult<DietDto> addDietAtHome(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Valid @RequestBody DietAddCommandAtHome command) {
-		return ApiResult.<DietDto>builder()
-			.data(dietService.addDietAtHome(customMemberDetails.getMember(), command))
-			.message("식단기록이 등록되었습니다.")
-			.build();
+		return ApiResult.success("식단기록이 등록되었습니다.", dietService.addDietAtHome(customMemberDetails.getMember(), command));
 	}
 
 	@Operation(summary = "식단기록 등록")
 	@PostMapping
 	public ApiResult<DietDto> addDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@RequestBody @Valid DietAddCommand command) {
-		return ApiResult.<DietDto>builder()
-			.data(dietService.addDiet(customMemberDetails.getMember(), command))
-			.message("식단기록이 등록되었습니다.")
-			.build();
+		return ApiResult.success("식단기록이 등록되었습니다.", dietService.addDiet(customMemberDetails.getMember(), command));
 	}
 
 	@Operation(summary = "오늘 식단 조회")
 	@GetMapping("/today")
 	public ApiResult<DietDto> getTodayDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ApiResult.<DietDto>builder()
-			.data(dietService.getTodayDiet(customMemberDetails.getMember().getId()))
-			.message("식단기록이 조회되었습니다.")
-			.build();
+		return ApiResult.success("식단기록이 조회되었습니다.", dietService.getTodayDiet(customMemberDetails.getMember().getId()));
 	}
 
 	@Operation(summary = "식단기록 상세 조회")
 	@GetMapping("/{dietId}")
 	public ApiResult<DietDto> getDietDetail(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
-		return ApiResult.<DietDto>builder()
-			.data(dietService.getDietDetail(customMemberDetails.getMemberId(), dietId))
-			.message("식단기록이 조회되었습니다.")
-			.build();
+		@Parameter(description = "식단기록 ID") @PathVariable Long dietId) {
+		return ApiResult.success("식단기록이 조회되었습니다.", dietService.getDietDetail(customMemberDetails.getMemberId(), dietId));
 	}
 
 	@Operation(summary = "식단기록 좋아요")
 	@PostMapping("/{dietId}/like")
 	public ApiResult<Void> likeDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
+		@Parameter(description = "식단기록 ID") @PathVariable Long dietId) {
 		dietService.likeDiet(customMemberDetails.getMember(), dietId);
-		return ApiResult.<Void>builder()
-			.message("식단기록 좋아요에 성공하였습니다.")
-			.build();
+		return ApiResult.success("식단기록 좋아요에 성공하였습니다.");
 	}
 
 	@Operation(summary = "식단기록 좋아요 취소")
 	@DeleteMapping("/{dietId}/like")
 	public ApiResult<Void> deleteLikeDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
+		@Parameter(description = "식단기록 ID") @PathVariable Long dietId) {
 		dietService.deleteLikeDiet(customMemberDetails.getMember(), dietId);
-		return ApiResult.<Void>builder()
-			.message("식단기록 좋아요가 취소되었습니다.")
-			.build();
+		return ApiResult.success("식단기록 좋아요가 취소되었습니다.");
 	}
 
 	@Operation(summary = "식단기록 삭제")
 	@DeleteMapping("/{dietId}")
 	public ApiResult<Void> deleteDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId) {
+		@Parameter(description = "식단기록 ID") @PathVariable Long dietId) {
 		dietService.deleteDiet(customMemberDetails.getMember(), dietId);
-		return ApiResult.<Void>builder()
-			.message("식단기록이 삭제되었습니다.")
-			.build();
+		return ApiResult.success("식단기록이 삭제되었습니다.");
 	}
 
 	@Operation(summary = "식단기록 수정")
 	@PatchMapping("/{dietId}")
 	public ApiResult<DietDto> updateDiet(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "식단기록 ID") @PathVariable("dietId") Long dietId,
+		@Parameter(description = "식단기록 ID") @PathVariable Long dietId,
 		@RequestBody @Valid DietUpdateCommand command) {
-		return ApiResult.<DietDto>builder()
-			.data(dietService.updateDiet(customMemberDetails.getMember(), dietId, command))
-			.message("식단기록이 수정되었습니다.")
-			.build();
+		return ApiResult.success("식단기록이 수정되었습니다.", dietService.updateDiet(customMemberDetails.getMember(), dietId, command));
 	}
 
 	@Operation(summary = "식단 등록한 날짜 조회")
@@ -140,10 +116,7 @@ public class DietController {
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Parameter(description = "시작 날짜", example = "2024-03-01") @Param("startDate") LocalDate startDate,
 		@Parameter(description = "종료 날짜", example = "2024-05-31") @Param("endDate") LocalDate endDate) {
-		return ApiResult.<DietUploadDaysResult>builder()
-			.data(dietService.getDietUploadDays(customMemberDetails.getMember().getId(), startDate, endDate))
-			.message("업로드 날짜가 조회되었습니다.")
-			.build();
+		return ApiResult.success("업로드 날짜가 조회되었습니다.", dietService.getDietUploadDays(customMemberDetails.getMember().getId(), startDate, endDate));
 	}
 
 }

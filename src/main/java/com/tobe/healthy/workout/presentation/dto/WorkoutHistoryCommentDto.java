@@ -6,54 +6,47 @@ import java.util.List;
 import com.tobe.healthy.member.domain.MemberProfile;
 import com.tobe.healthy.workout.domain.WorkoutHistoryComment;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+public record WorkoutHistoryCommentDto(
+	Long id,
+	CommentMemberDto member,
+	String content,
+	LocalDateTime createdAt,
+	LocalDateTime updatedAt,
+	Long parentId,
+	Long orderNum,
+	boolean delYn,
+	List<WorkoutHistoryCommentDto> replies
+) {
 
-@Data
-@ToString
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class WorkoutHistoryCommentDto {
-
-	private Long id;
-	private CommentMemberDto member;
-	private String content;
-	private LocalDateTime createdAt;
-	private LocalDateTime updatedAt;
-	private Long parentId;
-	private Long orderNum;
-	private boolean delYn;
-
-	@Builder.Default
-	private List<WorkoutHistoryCommentDto> replies = null;
+	public WorkoutHistoryCommentDto withReplies(List<WorkoutHistoryCommentDto> replies) {
+		return new WorkoutHistoryCommentDto(id, member, content, createdAt, updatedAt, parentId, orderNum, delYn, replies);
+	}
 
 	public static WorkoutHistoryCommentDto from(WorkoutHistoryComment comment) {
-		return WorkoutHistoryCommentDto.builder()
-			.id(comment.getCommentId())
-			.member(CommentMemberDto.from(comment.getMember()))
-			.content(comment.getDelYn() ? "삭제된 댓글입니다." : comment.getContent())
-			.createdAt(comment.getCreatedAt())
-			.updatedAt(comment.getUpdatedAt())
-			.parentId(comment.getParentCommentId())
-			.orderNum(comment.getOrderNum())
-			.delYn(comment.getDelYn())
-			.build();
+		return new WorkoutHistoryCommentDto(
+			comment.getCommentId(),
+			CommentMemberDto.from(comment.getMember()),
+			comment.getDelYn() ? "삭제된 댓글입니다." : comment.getContent(),
+			comment.getCreatedAt(),
+			comment.getUpdatedAt(),
+			comment.getParentCommentId(),
+			comment.getOrderNum(),
+			comment.getDelYn(),
+			null
+		);
 	}
 
 	public static WorkoutHistoryCommentDto create(WorkoutHistoryComment comment, MemberProfile memberProfile) {
-		return WorkoutHistoryCommentDto.builder()
-			.id(comment.getCommentId())
-			.member(CommentMemberDto.create(comment.getMember(), memberProfile))
-			.content(comment.getDelYn() ? "삭제된 댓글입니다." : comment.getContent())
-			.createdAt(comment.getCreatedAt())
-			.updatedAt(comment.getUpdatedAt())
-			.parentId(comment.getParentCommentId())
-			.orderNum(comment.getOrderNum())
-			.delYn(comment.getDelYn())
-			.build();
+		return new WorkoutHistoryCommentDto(
+			comment.getCommentId(),
+			CommentMemberDto.create(comment.getMember(), memberProfile),
+			comment.getDelYn() ? "삭제된 댓글입니다." : comment.getContent(),
+			comment.getCreatedAt(),
+			comment.getUpdatedAt(),
+			comment.getParentCommentId(),
+			comment.getOrderNum(),
+			comment.getDelYn(),
+			null
+		);
 	}
 }

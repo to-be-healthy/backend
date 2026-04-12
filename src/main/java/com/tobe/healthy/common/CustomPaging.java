@@ -22,7 +22,7 @@ public class CustomPaging<T> {
 
 	public CustomPaging(List<T> content, int pageNumber, int pageSize, int totalPages, Long totalElements,
 		Boolean isLast) {
-		this.content = content.isEmpty() ? null : content;
+		this.content = content;
 		this.pageNumber = pageNumber;
 		this.pageSize = pageSize;
 		this.totalPages = totalPages;

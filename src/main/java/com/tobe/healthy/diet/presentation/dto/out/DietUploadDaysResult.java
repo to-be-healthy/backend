@@ -6,21 +6,12 @@ import org.springframework.util.ObjectUtils;
 
 import com.tobe.healthy.member.domain.AlarmStatus;
 
-import lombok.Builder;
-import lombok.Data;
-
-@Data
-@Builder
-public class DietUploadDaysResult {
-
-	private AlarmStatus dietNoticeStatus;
-	@Builder.Default
-	private List<String> uploadDays = null;
+public record DietUploadDaysResult(AlarmStatus dietNoticeStatus, List<String> uploadDays) {
 
 	public static DietUploadDaysResult create(AlarmStatus dietNoticeStatus, List<String> days) {
-		return DietUploadDaysResult.builder()
-			.dietNoticeStatus(dietNoticeStatus)
-			.uploadDays(ObjectUtils.isEmpty(days) ? null : days)
-			.build();
+		return new DietUploadDaysResult(
+			dietNoticeStatus,
+			ObjectUtils.isEmpty(days) ? null : days
+		);
 	}
 }

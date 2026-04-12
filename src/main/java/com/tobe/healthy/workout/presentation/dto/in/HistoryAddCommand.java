@@ -1,32 +1,22 @@
 package com.tobe.healthy.workout.presentation.dto.in;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.tobe.healthy.workout.presentation.dto.CompletedExerciseDto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
-@Data
-@ToString
-@AllArgsConstructor
-@NoArgsConstructor
-public class HistoryAddCommand {
-
+public record HistoryAddCommand(
 	@Schema(description = "게시글 내용", example = "오운완~!!")
-	private String content;
+	String content,
 
 	@Schema(description = "완료한 운동 목록")
 	@NotEmpty(message = "운동을 추가해 주세요.")
-	private List<CompletedExerciseDto> completedExercises = new ArrayList<>();
+	List<CompletedExerciseDto> completedExercises,
 
-	private List<RegisterFile> files = new ArrayList<>();
+	List<RegisterFile> files,
 
-	private boolean viewMySelf;
-
+	boolean viewMySelf
+) {
 }

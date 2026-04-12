@@ -86,8 +86,8 @@ class ApiContractSerializationTest {
 	void scheduleSearchRequestKeepsDefaultMonthWhenEmpty() {
 		RetrieveTrainerScheduleByLessonInfo request = new RetrieveTrainerScheduleByLessonInfo();
 
-		assertEquals(LocalDate.now().withDayOfMonth(1).toString().substring(0, 7), request.getLessonDt());
-		assertNull(request.getLessonStartDt());
-		assertNull(request.getLessonEndDt());
+		assertEquals(LocalDate.now().withDayOfMonth(1).toString().substring(0, 7), request.lessonDt());
+		assertNull(request.lessonStartDt());
+		assertNull(request.lessonEndDt());
 	}
 }

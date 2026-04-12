@@ -3,25 +3,11 @@ package com.tobe.healthy.notification.presentation.dto.out;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tobe.healthy.notification.domain.Notification;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CommandNotificationStatusResult {
-
-	private Long notificationId;
-	@JsonProperty("isRead")
-	private boolean isRead;
-
+public record CommandNotificationStatusResult(
+	Long notificationId,
+	@JsonProperty("isRead") boolean isRead
+) {
 	public static CommandNotificationStatusResult from(Notification notification) {
-		return CommandNotificationStatusResult.builder()
-			.notificationId(notification.getId())
-			.isRead(notification.isRead())
-			.build();
+		return new CommandNotificationStatusResult(notification.getId(), notification.isRead());
 	}
 }

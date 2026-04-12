@@ -4,25 +4,18 @@ import org.springframework.util.ObjectUtils;
 
 import com.tobe.healthy.member.domain.MemberProfile;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
-
-@Data
-@ToString
-@Builder
-public class ProfileDto {
-
-	private Long id;
-	private String fileUrl;
+public record ProfileDto(
+	Long id,
+	String fileUrl
+) {
 
 	public static ProfileDto from(MemberProfile memberProfile) {
 		if (ObjectUtils.isEmpty(memberProfile)) {
 			return null;
 		}
-		return ProfileDto.builder()
-			.id(memberProfile.getId())
-			.fileUrl(memberProfile.getFileUrl())
-			.build();
+		return new ProfileDto(
+			memberProfile.getId(),
+			memberProfile.getFileUrl()
+		);
 	}
 }

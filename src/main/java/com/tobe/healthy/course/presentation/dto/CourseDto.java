@@ -4,31 +4,25 @@ import java.time.LocalDateTime;
 
 import com.tobe.healthy.course.domain.Course;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
-@Data
-@ToString
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CourseDto {
-
-	private Long courseId;
-	private int totalLessonCnt;
-	private int remainLessonCnt;
-	private int completedLessonCnt;
-	private LocalDateTime createdAt;
+public record CourseDto(
+	Long courseId,
+	int totalLessonCnt,
+	int remainLessonCnt,
+	int completedLessonCnt,
+	LocalDateTime createdAt
+) {
 
 	public static CourseDto from(Course course) {
-		return CourseDto.builder()
-			.courseId(course.getCourseId())
-			.totalLessonCnt(course.getTotalLessonCnt())
-			.remainLessonCnt(course.getRemainLessonCnt())
-			.createdAt(course.getCreatedAt())
-			.build();
+		return new CourseDto(
+			course.getCourseId(),
+			course.getTotalLessonCnt(),
+			course.getRemainLessonCnt(),
+			course.getTotalLessonCnt() - course.getRemainLessonCnt(),
+			course.getCreatedAt()
+		);
+	}
+
+	public CourseDto withCompletedLessonCnt(int completedLessonCnt) {
+		return new CourseDto(courseId, totalLessonCnt, remainLessonCnt, completedLessonCnt, createdAt);
 	}
 }

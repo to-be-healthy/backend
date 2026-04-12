@@ -15,22 +15,22 @@ public class LessonDetailResultSerializer extends JsonSerializer<LessonDetailRes
 		IOException {
 		gen.writeStartObject();
 
-		if (value.getScheduleId() != null) {
-			gen.writeNumberField("scheduleId", value.getScheduleId());
+		if (value.scheduleId() != null) {
+			gen.writeNumberField("scheduleId", value.scheduleId());
 		}
-		if (value.getDuration() != null) {
-			gen.writeNumberField("duration", value.getDuration());
+		if (value.duration() != null) {
+			gen.writeNumberField("duration", value.duration());
 		}
-		gen.writeStringField("lessonStartTime", String.valueOf(value.getLessonStartTime()));
-		gen.writeStringField("lessonEndTime", String.valueOf(value.getLessonEndTime()));
+		gen.writeStringField("lessonStartTime", String.valueOf(value.lessonStartTime()));
+		gen.writeStringField("lessonEndTime", String.valueOf(value.lessonEndTime()));
 		gen.writeStringField("reservationStatus",
-			value.getReservationStatus() != null ? value.getReservationStatus().name() : null);
+			value.reservationStatus() != null ? value.reservationStatus().name() : null);
 
-		if (value.getReservationStatus() != ReservationStatus.DISABLED) {
-			gen.writeObjectField("applicantId", value.getApplicantId());
-			gen.writeStringField("applicantName", value.getApplicantName());
-			gen.writeObjectField("waitingStudentId", value.getWaitingStudentId());
-			gen.writeStringField("waitingStudentName", value.getWaitingStudentName());
+		if (value.reservationStatus() != ReservationStatus.DISABLED) {
+			gen.writeObjectField("applicantId", value.applicantId());
+			gen.writeStringField("applicantName", value.applicantName());
+			gen.writeObjectField("waitingStudentId", value.waitingStudentId());
+			gen.writeStringField("waitingStudentName", value.waitingStudentName());
 		}
 
 		gen.writeEndObject();

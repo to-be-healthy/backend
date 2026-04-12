@@ -47,19 +47,13 @@ public class MemberController {
 	@Operation(summary = "내 정보 조회")
 	@GetMapping("/me")
 	public ApiResult<MemberInfoResult> getMemberInfo(@AuthenticationPrincipal CustomMemberDetails member) {
-		return ApiResult.<MemberInfoResult>builder()
-			.data(memberService.getMemberInfo(member.getMemberId()))
-			.message("회원정보가 조회 되었습니다.")
-			.build();
+		return ApiResult.success("회원정보가 조회 되었습니다.", memberService.getMemberInfo(member.getMemberId()));
 	}
 
 	@Operation(summary = "회원 정보조회")
 	@GetMapping("/{memberId}")
 	public ApiResult<MemberInfoResult> getMemberInfo(@PathVariable Long memberId) {
-		return ApiResult.<MemberInfoResult>builder()
-			.data(memberService.getMemberInfo(memberId))
-			.message("회원정보가 조회 되었습니다.")
-			.build();
+		return ApiResult.success("회원정보가 조회 되었습니다.", memberService.getMemberInfo(memberId));
 	}
 
 	/**
@@ -70,11 +64,7 @@ public class MemberController {
 	public ApiResult<CustomPaging> getWorkoutHistory(String searchDate,
 		Pageable pageable,
 		@AuthenticationPrincipal CustomMemberDetails loginMember) {
-		return ApiResult.<CustomPaging>builder()
-			.data(workoutService.getWorkoutHistory(loginMember.getMember(), loginMember.getMemberId(), pageable,
-				searchDate))
-			.message("운동기록이 조회되었습니다.")
-			.build();
+		return ApiResult.success("운동기록이 조회되었습니다.", workoutService.getWorkoutHistory(loginMember.getMember(), loginMember.getMemberId(), pageable, searchDate));
 	}
 
 	@Operation(summary = "학생의 운동기록 목록 조회")
@@ -82,10 +72,7 @@ public class MemberController {
 	public ApiResult<CustomPaging> getWorkoutHistory(@PathVariable Long memberId, String searchDate,
 		@AuthenticationPrincipal CustomMemberDetails loginMember,
 		Pageable pageable) {
-		return ApiResult.<CustomPaging>builder()
-			.data(workoutService.getWorkoutHistory(loginMember.getMember(), memberId, pageable, searchDate))
-			.message("운동기록이 조회되었습니다.")
-			.build();
+		return ApiResult.success("운동기록이 조회되었습니다.", workoutService.getWorkoutHistory(loginMember.getMember(), memberId, pageable, searchDate));
 	}
 
 	/**
@@ -100,10 +87,7 @@ public class MemberController {
 	public ApiResult<CustomPaging<DietDto>> getDiet(String searchDate,
 		Pageable pageable,
 		@AuthenticationPrincipal CustomMemberDetails loginMember) {
-		return ApiResult.<CustomPaging<DietDto>>builder()
-			.data(dietService.getDiet(loginMember.getMemberId(), loginMember.getMemberId(), pageable, searchDate))
-			.message("식단기록 조회되었습니다.")
-			.build();
+		return ApiResult.success("식단기록 조회되었습니다.", dietService.getDiet(loginMember.getMemberId(), loginMember.getMemberId(), pageable, searchDate));
 	}
 
 	@Operation(summary = "다른 학생의 식단기록 목록 조회")
@@ -112,10 +96,7 @@ public class MemberController {
 		@PathVariable Long memberId,
 		String searchDate,
 		Pageable pageable) {
-		return ApiResult.<CustomPaging<DietDto>>builder()
-			.data(dietService.getDiet(loginMember.getMemberId(), memberId, pageable, searchDate))
-			.message("식단기록 조회되었습니다.")
-			.build();
+		return ApiResult.success("식단기록 조회되었습니다.", dietService.getDiet(loginMember.getMemberId(), memberId, pageable, searchDate));
 	}
 
 	@Operation(summary = "내 트레이너가 관리하는 학생들의 식단기록 목록 조회하기")
@@ -123,10 +104,7 @@ public class MemberController {
 	public ApiResult<CustomPaging<DietDto>> getDietMyTrainer(String searchDate,
 		Pageable pageable,
 		@AuthenticationPrincipal CustomMemberDetails loginMember) {
-		return ApiResult.<CustomPaging<DietDto>>builder()
-			.data(dietService.getDietMyTrainer(loginMember.getMemberId(), pageable, searchDate))
-			.message("식단기록 조회되었습니다.")
-			.build();
+		return ApiResult.success("식단기록 조회되었습니다.", dietService.getDietMyTrainer(loginMember.getMemberId(), pageable, searchDate));
 	}
 
 	/**
@@ -138,11 +116,7 @@ public class MemberController {
 	public ApiResult<CustomPaging> getMyCourse(String searchDate,
 		Pageable pageable,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ApiResult.<CustomPaging>builder()
-			.data(courseService.getCourse(customMemberDetails.getMember(), pageable, customMemberDetails.getMemberId(),
-				searchDate))
-			.message("수강권이 조회되었습니다.")
-			.build();
+		return ApiResult.success("수강권이 조회되었습니다.", courseService.getCourse(customMemberDetails.getMember(), pageable, customMemberDetails.getMemberId(), searchDate));
 	}
 
 	@Operation(summary = "트레이너가 학생의 수강권 조회")
@@ -152,59 +126,41 @@ public class MemberController {
 		String searchDate,
 		Pageable pageable,
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ApiResult.<CustomPaging>builder()
-			.data(courseService.getCourse(customMemberDetails.getMember(), pageable, memberId, searchDate))
-			.message("수강권이 조회되었습니다.")
-			.build();
+		return ApiResult.success("수강권이 조회되었습니다.", courseService.getCourse(customMemberDetails.getMember(), pageable, memberId, searchDate));
 	}
 
 	@Operation(summary = "학생이 본인의 포인트 조회")
 	@GetMapping("/point")
 	public ApiResult<CustomPaging> getMyPoint(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		String searchDate, Pageable pageable) {
-		return ApiResult.<CustomPaging>builder()
-			.data(pointService.getPoint(customMemberDetails.getMember().getId(), searchDate, pageable))
-			.message("포인트가 조회되었습니다.")
-			.build();
+		return ApiResult.success("포인트가 조회되었습니다.", pointService.getPoint(customMemberDetails.getMember().getId(), searchDate, pageable));
 	}
 
 	@Operation(summary = "트레이너가 학생의 포인트 조회")
 	@GetMapping("/{memberId}/point")
 	@PreAuthorize("hasAuthority('ROLE_TRAINER')")
 	public ApiResult<CustomPaging> getPoint(@PathVariable Long memberId, String searchDate, Pageable pageable) {
-		return ApiResult.<CustomPaging>builder()
-			.data(pointService.getPoint(memberId, searchDate, pageable))
-			.message("포인트가 조회되었습니다.")
-			.build();
+		return ApiResult.success("포인트가 조회되었습니다.", pointService.getPoint(memberId, searchDate, pageable));
 	}
 
 	@Operation(summary = "학생이 트레이너와 매핑 여부 조회")
 	@GetMapping("/trainer-mapping")
 	public ApiResult<TrainerMappingResult> getTrainerMapping(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails) {
-		return ApiResult.<TrainerMappingResult>builder()
-			.data(memberService.getTrainerMapping(customMemberDetails.getMember()))
-			.message("매핑 여부가 조회되었습니다.")
-			.build();
+		return ApiResult.success("매핑 여부가 조회되었습니다.", memberService.getTrainerMapping(customMemberDetails.getMember()));
 	}
 
 	@Operation(summary = "학생이 내 트레이너 정보 조회")
 	@PreAuthorize("hasAuthority('ROLE_STUDENT')")
 	@GetMapping("/trainer-mapping/info")
 	public ApiResult<RetrieveTrainerInfo> findMyTrainerInfo(@AuthenticationPrincipal CustomMemberDetails member) {
-		return ApiResult.<RetrieveTrainerInfo>builder()
-			.data(memberService.findMyTrainerInfo(member.getMemberId()))
-			.message("내 트레이너 정보를 조회하였습니다.")
-			.build();
+		return ApiResult.success("내 트레이너 정보를 조회하였습니다.", memberService.findMyTrainerInfo(member.getMemberId()));
 	}
 
 	@Operation(summary = "회원이 현재 비밀번호를 검증한다.")
 	@PostMapping("/password")
 	public ApiResult<Boolean> validateCurrentPassword(@RequestBody @Valid ValidateCurrentPassword request,
 		@AuthenticationPrincipal CustomMemberDetails member) {
-		return ApiResult.<Boolean>builder()
-			.data(memberService.validateCurrentPassword(request, member.getMemberId()))
-			.message("비밀번호가 확인되었습니다.")
-			.build();
+		return ApiResult.success("비밀번호가 확인되었습니다.", memberService.validateCurrentPassword(request, member.getMemberId()));
 	}
 }

@@ -1,21 +1,12 @@
 package com.tobe.healthy.trainer.presentation.dto.out;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.ToString;
 
-@Data
-@ToString
-public class MemberInviteResultCommand {
-
+public record MemberInviteResultCommand(
 	@Schema(description = "트레이너/회원정보 매핑 uuid")
-	private String uuid;
+	String uuid,
 
 	@Schema(description = "초대링크")
-	private String invitationLink;
-
-	public MemberInviteResultCommand(String uuid, String invitationLink) {
-		this.uuid = uuid;
-		this.invitationLink = invitationLink;
-	}
+	String invitationLink
+) {
 }

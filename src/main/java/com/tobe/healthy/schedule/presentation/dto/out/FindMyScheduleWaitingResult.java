@@ -6,22 +6,14 @@ import org.springframework.util.ObjectUtils;
 
 import com.tobe.healthy.course.presentation.dto.CourseDto;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
-
-@Data
-@ToString
-@Builder
-public class FindMyScheduleWaitingResult {
-
-	private CourseDto course;
-	private List<MyScheduleWaiting> myScheduleWaitings;
-
+public record FindMyScheduleWaitingResult(
+	CourseDto course,
+	List<MyScheduleWaiting> myScheduleWaitings
+) {
 	public static FindMyScheduleWaitingResult create(CourseDto course, List<MyScheduleWaiting> myScheduleWaitings) {
-		return FindMyScheduleWaitingResult.builder()
-			.course(course)
-			.myScheduleWaitings(ObjectUtils.isEmpty(myScheduleWaitings) ? null : myScheduleWaitings)
-			.build();
+		return new FindMyScheduleWaitingResult(
+			course,
+			ObjectUtils.isEmpty(myScheduleWaitings) ? null : myScheduleWaitings
+		);
 	}
 }

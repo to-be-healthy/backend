@@ -1,20 +1,15 @@
 package com.tobe.healthy.workout.presentation.dto.in;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
-@Data
-@ToString
-@AllArgsConstructor
-@NoArgsConstructor
-public class RegisterFile {
-
-	private String fileUrl;
-	private int fileOrder;
+public record RegisterFile(
+	String fileUrl,
+	int fileOrder
+) {
 
 	public RegisterFile(String fileUrl) {
-		this.fileUrl = fileUrl;
+		this(fileUrl, 0);
+	}
+
+	public RegisterFile withFileOrder(int fileOrder) {
+		return new RegisterFile(fileUrl, fileOrder);
 	}
 }

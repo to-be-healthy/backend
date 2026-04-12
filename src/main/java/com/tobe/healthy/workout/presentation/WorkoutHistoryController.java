@@ -43,10 +43,7 @@ public class WorkoutHistoryController {
 	public ApiResult<List<RegisterFile>> addWorkoutHistoryFile(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@Valid List<MultipartFile> uploadFiles) {
-		return ApiResult.<List<RegisterFile>>builder()
-			.data(fileService.uploadFiles("workout-history", uploadFiles, customMemberDetails.getMember()))
-			.message("첨부파일이 등록되었습니다.")
-			.build();
+		return ApiResult.success("첨부파일이 등록되었습니다.", fileService.uploadFiles("workout-history", uploadFiles, customMemberDetails.getMember()));
 	}
 
 	@Operation(summary = "운동기록 등록")
@@ -54,64 +51,49 @@ public class WorkoutHistoryController {
 	public ApiResult<WorkoutHistoryDto> addWorkoutHistory(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
 		@RequestBody @Valid HistoryAddCommand request) {
-		return ApiResult.<WorkoutHistoryDto>builder()
-			.data(workoutService.addWorkoutHistory(customMemberDetails.getMember(), request))
-			.message("운동기록이 등록되었습니다.")
-			.build();
+		return ApiResult.success("운동기록이 등록되었습니다.", workoutService.addWorkoutHistory(customMemberDetails.getMember(), request));
 	}
 
 	@Operation(summary = "운동기록 상세 조회")
 	@GetMapping("/{workoutHistoryId}")
 	public ApiResult<WorkoutHistoryDto> getWorkoutHistoryDetail(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId) {
-		return ApiResult.<WorkoutHistoryDto>builder()
-			.data(workoutService.getWorkoutHistoryDetail(customMemberDetails.getMember(), workoutHistoryId))
-			.message("운동기록이 조회되었습니다.")
-			.build();
+		@Parameter(description = "운동기록 ID") @PathVariable Long workoutHistoryId) {
+		return ApiResult.success("운동기록이 조회되었습니다.", workoutService.getWorkoutHistoryDetail(customMemberDetails.getMember(), workoutHistoryId));
 	}
 
 	@Operation(summary = "운동기록 삭제")
 	@DeleteMapping("/{workoutHistoryId}")
 	public ApiResult<Void> deleteWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId) {
+		@Parameter(description = "운동기록 ID") @PathVariable Long workoutHistoryId) {
 		workoutService.deleteWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
-		return ApiResult.<Void>builder()
-			.message("운동기록이 삭제되었습니다.")
-			.build();
+		return ApiResult.success("운동기록이 삭제되었습니다.");
 	}
 
 	@Operation(summary = "운동기록 수정")
 	@PatchMapping("/{workoutHistoryId}")
 	public ApiResult<WorkoutHistoryDto> updateWorkoutHistory(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId,
+		@Parameter(description = "운동기록 ID") @PathVariable Long workoutHistoryId,
 		@RequestBody @Valid HistoryAddCommand command) {
-		return ApiResult.<WorkoutHistoryDto>builder()
-			.data(workoutService.updateWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId, command))
-			.message("운동기록이 수정되었습니다.")
-			.build();
+		return ApiResult.success("운동기록이 수정되었습니다.", workoutService.updateWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId, command));
 	}
 
 	@Operation(summary = "운동기록 좋아요")
 	@PostMapping("/{workoutHistoryId}/like")
 	public ApiResult<Void> likeWorkoutHistory(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId) {
+		@Parameter(description = "운동기록 ID") @PathVariable Long workoutHistoryId) {
 		workoutService.likeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
-		return ApiResult.<Void>builder()
-			.message("운동기록 좋아요에 성공하였습니다.")
-			.build();
+		return ApiResult.success("운동기록 좋아요에 성공하였습니다.");
 	}
 
 	@Operation(summary = "운동기록 좋아요 취소")
 	@DeleteMapping("/{workoutHistoryId}/like")
 	public ApiResult<Void> deleteLikeWorkoutHistory(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId) {
+		@Parameter(description = "운동기록 ID") @PathVariable Long workoutHistoryId) {
 		workoutService.deleteLikeWorkoutHistory(customMemberDetails.getMember(), workoutHistoryId);
-		return ApiResult.<Void>builder()
-			.message("운동기록 좋아요가 취소되었습니다.")
-			.build();
+		return ApiResult.success("운동기록 좋아요가 취소되었습니다.");
 	}
 
 }

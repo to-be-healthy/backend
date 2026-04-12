@@ -5,24 +5,15 @@ import java.util.List;
 import com.tobe.healthy.notification.domain.NotificationCategory;
 import com.tobe.healthy.notification.domain.NotificationType;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CommandSendNotification {
-
-	private String title;
-	private String content;
-	private List<Long> receiverIds;
-	private NotificationType notificationType;
-	private NotificationCategory notificationCategory;
-	private Long targetId;
-	private String clickUrl;
-	private Long studentId;
-	private String studentName;
+public record CommandSendNotification(
+	String title,
+	String content,
+	List<Long> receiverIds,
+	NotificationType notificationType,
+	NotificationCategory notificationCategory,
+	Long targetId,
+	String clickUrl,
+	Long studentId,
+	String studentName
+) {
 }

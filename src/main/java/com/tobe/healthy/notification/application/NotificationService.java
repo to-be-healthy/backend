@@ -43,7 +43,7 @@ public class NotificationService {
 
 	public CommandSendNotificationResult sendNotificationFromSystem(CommandSendNotification request) {
 
-		List<Member> receivers = memberRepository.findMemberTokenById(request.getReceiverIds());
+		List<Member> receivers = memberRepository.findMemberTokenById(request.receiverIds());
 
 		if (receivers.isEmpty()) {
 			throw new IllegalArgumentException("수신자의 ID가 존재하지 않습니다.");
@@ -53,7 +53,7 @@ public class NotificationService {
 
 		for (Member receiver : receivers) {
 
-			if (request.getNotificationCategory() == NotificationCategory.COMMUNITY
+			if (request.notificationCategory() == NotificationCategory.COMMUNITY
 				&& receiver.getCommunityAlarmStatus() == AlarmStatus.DISABLE) {
 				throw new IllegalArgumentException("커뮤니티 알림을 거부한 수신자입니다.");
 			}
@@ -63,24 +63,24 @@ public class NotificationService {
 				MemberToken memberToken = memberTokens.get(0);
 				pushCommandService.sendPushAlarm(
 					new CommandSendPushAlarm(
-						request.getTitle(),
-						request.getContent(),
+						request.title(),
+						request.content(),
 						memberToken.getToken(),
-						request.getClickUrl(),
+						request.clickUrl(),
 						memberToken.getDeviceType()
 					)
 				);
 
 				Notification notification = Notification.create(
-					request.getTitle(),
-					request.getContent(),
-					request.getNotificationCategory(),
-					request.getNotificationType(),
+					request.title(),
+					request.content(),
+					request.notificationCategory(),
+					request.notificationType(),
 					receiver,
-					request.getTargetId(),
-					request.getClickUrl(),
-					request.getStudentId(),
-					request.getStudentName()
+					request.targetId(),
+					request.clickUrl(),
+					request.studentId(),
+					request.studentName()
 				);
 				log.info("notification: {}", notification);
 				notifications.add(notification);
@@ -105,7 +105,7 @@ public class NotificationService {
 		RetrieveNotificationWithRedDotResult results = RetrieveNotificationWithRedDotResult.from(notification,
 			redDotStatus);
 
-		List<RetrieveNotificationResult> content = results.getContent();
+		List<RetrieveNotificationResult> content = results.content();
 
 		return KotlinCustomPaging.<RetrieveNotificationResult>builder()
 			.content(content.isEmpty() ? null : content)
@@ -114,7 +114,7 @@ public class NotificationService {
 			.totalPages(notification.getTotalPages())
 			.totalElements(notification.getTotalElements())
 			.isLast(notification.isLast())
-			.redDotStatus(results.getRedDotStatus())
+			.redDotStatus(results.redDotStatus())
 			.sender(NotificationSenderInfo.getSenderInfo())
 			.build();
 	}
@@ -139,14 +139,17 @@ public class NotificationService {
 	public void sendFeedbackNotificationToTrainer() {
 		trainerScheduleRepository.findAllFeedbackNotificationToTrainer().forEach(it ->
 			sendNotificationFromSystem(
-				CommandSendNotification.builder()
-					.title(NotificationType.FEEDBACK.getDescription())
-					.content(String.format(NotificationType.FEEDBACK.getContent(), it.getCount()))
-					.receiverIds(List.of(it.getTrainerId()))
-					.notificationType(NotificationType.FEEDBACK)
-					.notificationCategory(NotificationCategory.SCHEDULE)
-					.clickUrl("https://main.to-be-healthy.shop/trainer/manage/feedback")
-					.build()
+				new CommandSendNotification(
+					NotificationType.FEEDBACK.getDescription(),
+					String.format(NotificationType.FEEDBACK.getContent(), it.count()),
+					List.of(it.trainerId()),
+					NotificationType.FEEDBACK,
+					NotificationCategory.SCHEDULE,
+					null,
+					"https://main.to-be-healthy.shop/trainer/manage/feedback",
+					null,
+					null
+				)
 			)
 		);
 	}

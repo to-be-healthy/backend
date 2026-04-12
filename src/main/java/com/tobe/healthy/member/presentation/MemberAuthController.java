@@ -33,37 +33,25 @@ public class MemberAuthController {
 	@Operation(summary = "아이디 중복 확인하기")
 	@GetMapping("/validation/user-id")
 	public ApiResult<Boolean> validateUsernameDuplication(@RequestParam String userId) {
-		return ApiResult.<Boolean>builder()
-			.data(memberAuthService.validateUserIdDuplication(userId))
-			.message("사용할 수 있는 아이디입니다.")
-			.build();
+		return ApiResult.success("사용할 수 있는 아이디입니다.", memberAuthService.validateUserIdDuplication(userId));
 	}
 
 	@Operation(summary = "이메일 중복을 확인한다.")
 	@GetMapping("/validation/email")
 	public ApiResult<Boolean> validateEmailDuplication(@RequestParam @Valid CommandValidateEmail request) {
-		return ApiResult.<Boolean>builder()
-			.data(memberAuthService.validateEmailDuplication(request))
-			.message("사용 가능한 이메일입니다.")
-			.build();
+		return ApiResult.success("사용 가능한 이메일입니다.", memberAuthService.validateEmailDuplication(request));
 	}
 
 	@Operation(summary = "아이디를 찾는다.", description = "이메일과 이름을 기준으로 일치하는 아이디를 찾는다.(소셜은 찾을 수 없음)")
 	@PostMapping("/find/user-id")
 	public ApiResult<FindMemberUserIdResult> findUserId(@RequestBody @Valid FindMemberUserId request) {
 		FindMemberUserIdResult userIdResult = memberAuthService.findUserId(request);
-		return ApiResult.<FindMemberUserIdResult>builder()
-			.data(userIdResult)
-			.message(userIdResult.getMessage())
-			.build();
+		return ApiResult.success(userIdResult.message(), userIdResult);
 	}
 
 	@Operation(summary = "초대링크 uuid 데이터 조회")
 	@GetMapping("/invitation/uuid")
 	public ApiResult<InvitationMappingResult> getInvitationMapping(@RequestParam String uuid) {
-		return ApiResult.<InvitationMappingResult>builder()
-			.data(memberAuthService.getInvitationMapping(uuid))
-			.message("조회가 완료되었습니다.")
-			.build();
+		return ApiResult.success("조회가 완료되었습니다.", memberAuthService.getInvitationMapping(uuid));
 	}
 }

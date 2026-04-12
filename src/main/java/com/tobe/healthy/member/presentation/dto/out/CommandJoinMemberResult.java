@@ -4,35 +4,23 @@ import com.tobe.healthy.member.domain.Member;
 import com.tobe.healthy.member.domain.MemberType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
 
-@Data
-@ToString
-@AllArgsConstructor
-@Builder
 @Schema(description = "회원가입 성공 응답")
-public class CommandJoinMemberResult {
-	@Schema(description = "회원 ID")
-	private Long id;
-	@Schema(description = "이메일")
-	private String email;
-	@Schema(description = "아이디")
-	private String userId;
-	@Schema(description = "이름")
-	private String name;
-	@Schema(description = "회원구분")
-	private MemberType memberType;
+public record CommandJoinMemberResult(
+	@Schema(description = "회원 ID") Long id,
+	@Schema(description = "이메일") String email,
+	@Schema(description = "아이디") String userId,
+	@Schema(description = "이름") String name,
+	@Schema(description = "회원구분") MemberType memberType
+) {
 
 	public static CommandJoinMemberResult from(Member member) {
-		return CommandJoinMemberResult.builder()
-			.id(member.getId())
-			.email(member.getEmail())
-			.userId(member.getUserId())
-			.name(member.getName())
-			.memberType(member.getMemberType())
-			.build();
+		return new CommandJoinMemberResult(
+			member.getId(),
+			member.getEmail(),
+			member.getUserId(),
+			member.getName(),
+			member.getMemberType()
+		);
 	}
 }

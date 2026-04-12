@@ -1,4 +1,4 @@
-package com.tobe.healthy.course.presentation.dto;
+package com.tobe.healthy.course.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

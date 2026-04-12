@@ -39,45 +39,35 @@ public class WorkoutCommentController {
 	public ApiResult<CustomPaging<WorkoutHistoryCommentDto>> getCommentsByHistoryId(
 		@PathVariable @Parameter(description = "운동기록 ID") Long workoutHistoryId,
 		Pageable pageable) {
-		return ApiResult.<CustomPaging<WorkoutHistoryCommentDto>>builder()
-			.data(commentService.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable))
-			.message("댓글이 조회되었습니다.")
-			.build();
+		return ApiResult.success("댓글이 조회되었습니다.", commentService.getCommentsByWorkoutHistoryId(workoutHistoryId, pageable));
 	}
 
 	@Operation(summary = "운동기록에 댓글(답글)을 등록한다")
 	@PostMapping("/{workoutHistoryId}/comments")
 	public ApiResult<Void> addComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId,
+		@Parameter(description = "운동기록 ID") @PathVariable Long workoutHistoryId,
 		@Valid @RequestBody HistoryCommentAddCommand command) {
 		commentService.addComment(workoutHistoryId, command, customMemberDetails.getMember());
-		return ApiResult.<Void>builder()
-			.message("댓글이 등록되었습니다.")
-			.build();
+		return ApiResult.success("댓글이 등록되었습니다.");
 	}
 
 	@Operation(summary = "운동기록의 댓글을 수정한다.")
 	@PatchMapping("/{workoutHistoryId}/comments/{commentId}")
 	public ApiResult<WorkoutHistoryCommentDto> updateComment(
 		@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId,
-		@Parameter(description = "운동기록의 댓글 ID") @PathVariable("commentId") Long commentId,
+		@Parameter(description = "운동기록 ID") @PathVariable Long workoutHistoryId,
+		@Parameter(description = "운동기록의 댓글 ID") @PathVariable Long commentId,
 		@Valid @RequestBody HistoryCommentAddCommand command) {
-		return ApiResult.<WorkoutHistoryCommentDto>builder()
-			.data(commentService.updateComment(customMemberDetails.getMember(), workoutHistoryId, commentId, command))
-			.message("댓글이 수정되었습니다.")
-			.build();
+		return ApiResult.success("댓글이 수정되었습니다.", commentService.updateComment(customMemberDetails.getMember(), workoutHistoryId, commentId, command));
 	}
 
 	@Operation(summary = "운동기록의 댓글을 삭제한다.")
 	@DeleteMapping("/{workoutHistoryId}/comments/{commentId}")
 	public ApiResult<Void> deleteComment(@AuthenticationPrincipal CustomMemberDetails customMemberDetails,
-		@Parameter(description = "운동기록 ID") @PathVariable("workoutHistoryId") Long workoutHistoryId,
-		@Parameter(description = "운동기록의 댓글 ID") @PathVariable("commentId") Long commentId) {
+		@Parameter(description = "운동기록 ID") @PathVariable Long workoutHistoryId,
+		@Parameter(description = "운동기록의 댓글 ID") @PathVariable Long commentId) {
 		commentService.deleteComment(customMemberDetails.getMember(), workoutHistoryId, commentId);
-		return ApiResult.<Void>builder()
-			.message("댓글이 삭제되었습니다.")
-			.build();
+		return ApiResult.success("댓글이 삭제되었습니다.");
 	}
 
 }

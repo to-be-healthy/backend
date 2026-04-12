@@ -2,22 +2,15 @@ package com.tobe.healthy.workout.presentation.dto.out;
 
 import com.tobe.healthy.workout.domain.ExerciseCategory;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
-
-@Data
-@ToString
-@Builder
-public class ExerciseCategoryDto {
-
-	private String category;
-	private String name;
+public record ExerciseCategoryDto(
+	String category,
+	String name
+) {
 
 	public static ExerciseCategoryDto from(ExerciseCategory exerciseCategory) {
-		return ExerciseCategoryDto.builder()
-			.category(exerciseCategory.getCode())
-			.name(exerciseCategory.getDescription())
-			.build();
+		return new ExerciseCategoryDto(
+			exerciseCategory.getCode(),
+			exerciseCategory.getDescription()
+		);
 	}
 }

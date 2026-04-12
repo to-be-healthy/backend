@@ -53,20 +53,20 @@ public class WorkoutHistoryService {
 	public WorkoutHistoryDto addWorkoutHistory(Member member, HistoryAddCommand command) {
 		Member result = memberRepository.findByIdAndDelYnFalse(member.getId())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		WorkoutHistory history = WorkoutHistory.create(command.getContent(), command.isViewMySelf(), member,
+		WorkoutHistory history = WorkoutHistory.create(command.content(), command.viewMySelf(), member,
 			result.getGym());
 		workoutHistoryRepository.save(history);
 		saveCompletedExercises(history, command);
-		uploadNewFiles(history, command.getFiles());
+		uploadNewFiles(history, command.files());
 		return WorkoutHistoryDto.from(history);
 	}
 
 	private void saveCompletedExercises(WorkoutHistory history, HistoryAddCommand command) {
-		List<CompletedExercise> completedExercises = command.getCompletedExercises().stream()
+		List<CompletedExercise> completedExercises = command.completedExercises().stream()
 			.map(c -> {
-				String name = c.getNames() != null ? c.getNames() : c.getName();
-				return CompletedExercise.create(c.getExerciseId(), history, name, c.getSetNum(), c.getWeight(),
-					c.getNumberOfCycles());
+				String name = c.names() != null ? c.names() : c.name();
+				return CompletedExercise.create(c.exerciseId(), history, name, c.setNum(), c.weight(),
+					c.numberOfCycles());
 				}).collect(Collectors.toList());
 		completedExerciseRepository.saveAll(completedExercises);
 	}
@@ -78,7 +78,7 @@ public class WorkoutHistoryService {
 		Page<WorkoutHistoryDto> pageDtos = workoutHistoryRepository.getWorkoutHistoryOfMonth(loginMember.getId(),
 			memberId, pageable, searchDate);
 		List<WorkoutHistoryDto> historiesDto = pageDtos.stream().toList();
-		List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
+		List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::workoutHistoryId).collect(Collectors.toList());
 		historiesDto = setHistoryListFile(historiesDto, ids);
 		List<WorkoutHistoryDto> content = setHistoryListExercise(historiesDto, ids);
 		CustomPaging customPaging = new CustomPaging<>(content, pageDtos.getPageable().getPageNumber(),
@@ -92,8 +92,8 @@ public class WorkoutHistoryService {
 		WorkoutHistoryDto historyDto = workoutHistoryRepository.findByWorkoutHistoryId(loginMember.getId(),
 			workoutHistoryId);
 		List<Long> ids = List.of(workoutHistoryId);
-		setHistoryFile(historyDto, ids);
-		setHistoryExercise(historyDto, ids);
+		historyDto = setHistoryFile(historyDto, ids);
+		historyDto = setHistoryExercise(historyDto, ids);
 		return historyDto;
 	}
 
@@ -112,22 +112,22 @@ public class WorkoutHistoryService {
 				workoutHistoryId, member.getId())
 			.orElseThrow(() -> new CustomException(WORKOUT_HISTORY_NOT_FOUND));
 
-		history.changeViewMySelf(command.isViewMySelf());
-		history.changeContent(command.getContent());
+		history.changeViewMySelf(command.viewMySelf());
+		history.changeContent(command.content());
 		updateCompletedExercise(command, history);
 		deleteOldFiles(history, command);
-		uploadNewFiles(history, command.getFiles());
+		uploadNewFiles(history, command.files());
 
 		WorkoutHistoryDto historyDto = WorkoutHistoryDto.from(history);
-		setHistoryFile(historyDto, List.of(history.getWorkoutHistoryId()));
+		historyDto = setHistoryFile(historyDto, List.of(history.getWorkoutHistoryId()));
 		return historyDto;
 	}
 
 	private void deleteOldFiles(WorkoutHistory history, HistoryAddCommand command) {
 		Set<String> oldFileNames = history.getHistoryFiles().stream()
 			.map(WorkoutHistoryFiles::getFileName).collect(Collectors.toSet());
-		Set<String> requestFileNames = command.getFiles().stream()
-			.map(f -> getFileName(f.getFileUrl())).collect(Collectors.toSet());
+		Set<String> requestFileNames = command.files().stream()
+			.map(f -> getFileName(f.fileUrl())).collect(Collectors.toSet());
 		oldFileNames.removeAll(requestFileNames);
 		Set<String> deleteFileNames = history.getHistoryFiles().stream()
 			.map(WorkoutHistoryFiles::getFileName)
@@ -166,39 +166,37 @@ public class WorkoutHistoryService {
 		history.changeLikeCnt(workoutHistoryLikeRepository.getLikeCnt(history.getWorkoutHistoryId()));
 	}
 
-	private void setHistoryFile(WorkoutHistoryDto historyDto, List<Long> ids) {
+	private WorkoutHistoryDto setHistoryFile(WorkoutHistoryDto historyDto, List<Long> ids) {
 		List<WorkoutHistoryFiles> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
 		List<WorkoutHistoryFileDto> filesDto = files.stream()
 			.map(WorkoutHistoryFileDto::from)
 			.collect(Collectors.toList());
-		historyDto.setFiles(filesDto);
+		return historyDto.withFiles(filesDto);
 	}
 
 	private List<WorkoutHistoryDto> setHistoryListFile(List<WorkoutHistoryDto> historiesDto, List<Long> ids) {
 		List<WorkoutHistoryFiles> files = workoutHistoryRepository.getWorkoutHistoryFile(ids);
 		return historiesDto.stream().map(h -> {
 			List<WorkoutHistoryFileDto> thisFiles = files.stream().map(WorkoutHistoryFileDto::from)
-				.filter(f -> f.getWorkoutHistoryId().equals(h.getWorkoutHistoryId())).collect(Collectors.toList());
-			h.setFiles(thisFiles);
-			return h;
+				.filter(f -> f.workoutHistoryId().equals(h.workoutHistoryId())).collect(Collectors.toList());
+			return h.withFiles(thisFiles);
 		}).collect(Collectors.toList());
 	}
 
-	private void setHistoryExercise(WorkoutHistoryDto historyDto, List<Long> ids) {
+	private WorkoutHistoryDto setHistoryExercise(WorkoutHistoryDto historyDto, List<Long> ids) {
 		List<CompletedExercise> exercises = completedExerciseRepository.getCompletedExercise(ids);
 		List<CompletedExerciseDto> exerciseDtos = exercises.stream()
 			.map(CompletedExerciseDto::from)
 			.collect(Collectors.toList());
-		historyDto.setCompletedExercises(exerciseDtos);
+		return historyDto.withCompletedExercises(exerciseDtos);
 	}
 
 	private List<WorkoutHistoryDto> setHistoryListExercise(List<WorkoutHistoryDto> historiesDto, List<Long> ids) {
 		List<CompletedExercise> exercises = completedExerciseRepository.getCompletedExercise(ids);
 		return historiesDto.stream().map(h -> {
 			List<CompletedExerciseDto> exerciseDtos = exercises.stream().map(CompletedExerciseDto::from)
-				.filter(e -> e.getWorkoutHistoryId().equals(h.getWorkoutHistoryId())).collect(Collectors.toList());
-			h.setCompletedExercises(exerciseDtos);
-			return h;
+				.filter(e -> e.workoutHistoryId().equals(h.workoutHistoryId())).collect(Collectors.toList());
+			return h.withCompletedExercises(exerciseDtos);
 		}).collect(Collectors.toList());
 	}
 
@@ -210,12 +208,12 @@ public class WorkoutHistoryService {
 	private void uploadNewFiles(WorkoutHistory history, List<RegisterFile> files) {
 		for (int i = 0; i < files.size(); i++) {
 			RegisterFile fileInfo = files.get(i);
-			String filePath = fileStorageService.extractFilePath(fileInfo.getFileUrl());
+			String filePath = fileStorageService.extractFilePath(fileInfo.fileUrl());
 			if (filePath.startsWith("temp/")) {
-				fileInfo.setFileOrder(i + 1);
-				RegisterFile result = fileService.moveDirTempToOrigin("workout-history/", fileInfo.getFileUrl());
+				fileInfo = fileInfo.withFileOrder(i + 1);
+				RegisterFile result = fileService.moveDirTempToOrigin("workout-history/", fileInfo.fileUrl());
 				workoutFileRepository.save(
-					WorkoutHistoryFiles.create(history, result.getFileUrl(), fileInfo.getFileOrder()));
+					WorkoutHistoryFiles.create(history, result.fileUrl(), fileInfo.fileOrder()));
 			}
 		}
 	}
@@ -235,7 +233,7 @@ public class WorkoutHistoryService {
 		Page<WorkoutHistoryDto> pageDtos = workoutHistoryRepository.getWorkoutHistoryOnCommunity(loginMember.getId(),
 			member.getGym().getId(), pageable, searchDate);
 		List<WorkoutHistoryDto> historiesDto = pageDtos.stream().toList();
-		List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
+		List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::workoutHistoryId).collect(Collectors.toList());
 		historiesDto = setHistoryListFile(historiesDto, ids);
 		List<WorkoutHistoryDto> content = setHistoryListExercise(historiesDto, ids);
 		return new CustomPaging<>(content, pageDtos.getPageable().getPageNumber(),
@@ -250,7 +248,7 @@ public class WorkoutHistoryService {
 		Page<WorkoutHistoryDto> pageDtos = workoutHistoryRepository.getWorkoutHistoryOnCommunityByMember(
 			loginMember.getId(), loginMember.getGym().getId(), memberId, pageable, searchDate);
 		List<WorkoutHistoryDto> historiesDto = pageDtos.stream().toList();
-		List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::getWorkoutHistoryId).collect(Collectors.toList());
+		List<Long> ids = historiesDto.stream().map(WorkoutHistoryDto::workoutHistoryId).collect(Collectors.toList());
 		historiesDto = setHistoryListFile(historiesDto, ids);
 		List<WorkoutHistoryDto> content = setHistoryListExercise(historiesDto, ids);
 

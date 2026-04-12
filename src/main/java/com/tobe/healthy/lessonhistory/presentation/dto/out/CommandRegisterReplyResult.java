@@ -1,44 +1,30 @@
 package com.tobe.healthy.lessonhistory.presentation.dto.out;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.tobe.healthy.lessonhistory.domain.LessonHistoryComment;
 import com.tobe.healthy.lessonhistory.domain.LessonHistoryFiles;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CommandRegisterReplyResult {
-
-	private Long lessonHistoryId;
-	private Long commentId;
-	private String content;
-	@Builder.Default
-	private List<CommandUploadFileResult> files = new ArrayList<>();
-	private int order;
-	private boolean delYn;
-	private Long parentId;
-
+public record CommandRegisterReplyResult(
+	Long lessonHistoryId,
+	Long commentId,
+	String content,
+	List<CommandUploadFileResult> files,
+	int order,
+	boolean delYn,
+	Long parentId
+) {
 	public static CommandRegisterReplyResult from(LessonHistoryComment lessonHistoryComment,
 		List<LessonHistoryFiles> files) {
-		return CommandRegisterReplyResult.builder()
-			.lessonHistoryId(
-				lessonHistoryComment.getLessonHistory() != null ? lessonHistoryComment.getLessonHistory().getId() :
-					null)
-			.commentId(lessonHistoryComment.getId())
-			.content(lessonHistoryComment.getContent())
-			.files(files.stream().map(CommandUploadFileResult::from).collect(Collectors.toList()))
-			.order(lessonHistoryComment.getOrder())
-			.delYn(lessonHistoryComment.isDelYn())
-			.parentId(lessonHistoryComment.getParent() != null ? lessonHistoryComment.getParent().getId() : null)
-			.build();
+		return new CommandRegisterReplyResult(
+			lessonHistoryComment.getLessonHistory() != null ? lessonHistoryComment.getLessonHistory().getId() : null,
+			lessonHistoryComment.getId(),
+			lessonHistoryComment.getContent(),
+			files.stream().map(CommandUploadFileResult::from).collect(Collectors.toList()),
+			lessonHistoryComment.getOrder(),
+			lessonHistoryComment.isDelYn(),
+			lessonHistoryComment.getParent() != null ? lessonHistoryComment.getParent().getId() : null
+		);
 	}
 }
