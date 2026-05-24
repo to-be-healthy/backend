@@ -2,8 +2,15 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
+  labels:
+    app: backend
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: backend
@@ -12,37 +19,55 @@ spec:
       labels:
         app: backend
     spec:
+      terminationGracePeriodSeconds: 40
       imagePullSecrets:
         - name: ghcr-pull
       containers:
         - name: backend
           image: ghcr.io/to-be-healthy/backend:placeholder
-          imagePullPolicy: Always
-          envFrom:
-            - secretRef:
-                name: backend-env
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
               name: http
             - containerPort: 7070
               name: actuator
+          resources:
+            requests:
+              cpu: "250m"
+              memory: 768Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: actuator
+            periodSeconds: 5
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: actuator
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: actuator
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+          envFrom:
+            - secretRef:
+                name: backend-env
           volumeMounts:
             - name: files
               mountPath: /data/files
-          readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 7070
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 12
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 7070
-            initialDelaySeconds: 120
-            periodSeconds: 30
       volumes:
         - name: files
           persistentVolumeClaim:
