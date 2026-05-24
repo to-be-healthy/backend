@@ -19,8 +19,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DEPLOY_PATH: /home/ubuntu/tobehealthy/workspace/backend
-  COMPOSE_PATH: /home/ubuntu/tobehealthy/workspace
+  DEPLOY_PATH: /home/ubuntu/workspace/tobehealthy/backend
+  COMPOSE_PATH: /home/ubuntu/workspace/tobehealthy
 
 jobs:
   ci:
