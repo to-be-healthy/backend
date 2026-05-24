@@ -5,7 +5,7 @@
     <p align="center">피트니스 센터, 트레이너와 회원을 위한 일정 관리 앱의 백엔드 API 서버</p>
     <br />
     <p align="center">
-      <a href="https://main.to-be-healthy.shop/">웹 사이트</a>
+      <a href="https://geonganghaejim.site/">웹 사이트</a>
       ·
       <a href="https://geonganghaejim.site/swagger-ui/index.html">API 문서</a>
 <!--       ·
@@ -43,11 +43,11 @@
 
 ### Production
 
-[운영 환경](https://main.to-be-healthy.shop/) · [API 서버](https://geonganghaejim.site/) · [API 문서](https://geonganghaejim.site/swagger-ui/index.html)
+[운영 환경](https://geonganghaejim.site/) · [API 문서](https://geonganghaejim.site/swagger-ui/index.html)
 
 ### Development
 
-[개발 환경 데모](https://www.dev.to-be-healthy.shop/)
+<!-- TODO: dev 운영 도메인 확정되면 채우기 -->
 
 ### 테스트계정
 
