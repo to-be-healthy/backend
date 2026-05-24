@@ -42,3 +42,14 @@ out/
 /config/
 /logs
 .env
+/data/
+/docs/
+gradlew.bat
+
+### macOS ###
+.DS_Store
+**/.DS_Store
+
+### Claude Code ###
+.mcp.json
+.claude/
