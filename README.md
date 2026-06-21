@@ -70,7 +70,7 @@ docker compose up -d
 
 > 실행에는 Java 17 이상이 필요해요. JWT 시크릿, MySQL/Redis 접속 정보, OAuth2 클라이언트 키, Firebase 서비스 계정 키 등은 `application-{profile}.yml` 또는 환경변수로 주입합니다.
 
-로컬 실행 후 API 문서는 [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html) 에서 확인할 수 있어요.
+API 문서는 [https://geonganghaejim.site/swagger-ui/index.html](https://geonganghaejim.site/swagger-ui/index.html) 에서 확인할 수 있어요.
 
 <br />
 
