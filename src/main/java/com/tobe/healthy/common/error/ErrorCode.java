@@ -78,6 +78,7 @@ public enum ErrorCode {
 	START_TIME_AFTER_END_TIME(BAD_REQUEST, "C_073", "수업 시작 시간은 종료 시간보다 빨라야 합니다."),
 	RESERVATION_STATUS_NOT_FOUND(BAD_REQUEST, "C_074", "올바른 예약 상태를 입력해 주세요."),
 	DEFAULT_LESSONTIME_NOT_VALID(BAD_REQUEST, "C_075", "근무 시간은 오전 6시부터 밤 12시까지 설정이 가능해요."),
+	SOCIAL_EMAIL_NOT_PROVIDED(BAD_REQUEST, "C_076", "이메일 제공에 동의해야 소셜 로그인을 완료할 수 있어요."),
 
 	SERVER_ERROR(INTERNAL_SERVER_ERROR, "S_001", "서버에서 오류가 발생하였습니다."),
 	FILE_UPLOAD_ERROR(INTERNAL_SERVER_ERROR, "S_002", "파일 업로드중 에러가 발생하였습니다."),
@@ -87,7 +88,9 @@ public enum ErrorCode {
 	NAVER_CONNECTION_ERROR(INTERNAL_SERVER_ERROR, "S_006", "네이버 소셜 서버와 연동중 에러가 발생하였습니다."),
 	KAKAO_CONNECTION_ERROR(INTERNAL_SERVER_ERROR, "S_007", "카카오 소셜 서버와 연동중 에러가 발생하였습니다."),
 	JSON_PARSING_ERROR(INTERNAL_SERVER_ERROR, "S_008", "JSON 토큰을 파싱중 에러가 발생하였습니다."),
-	PROFILE_ACCESS_FAILED(INTERNAL_SERVER_ERROR, "S_009", "소셜 프로필을 가져오던 중 에러가 발생하였습니다.");
+	PROFILE_ACCESS_FAILED(INTERNAL_SERVER_ERROR, "S_009", "소셜 프로필을 가져오던 중 에러가 발생하였습니다."),
+	GOOGLE_CONNECTION_ERROR(INTERNAL_SERVER_ERROR, "S_010", "구글 소셜 서버와 연동중 에러가 발생하였습니다."),
+	APPLE_CONNECTION_ERROR(INTERNAL_SERVER_ERROR, "S_011", "애플 소셜 서버와 연동중 에러가 발생하였습니다.");
 
 	private final HttpStatus status;
 	private final String code;

@@ -18,7 +18,6 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +29,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -59,11 +57,20 @@ import com.tobe.healthy.common.redis.RedisKeyPrefix;
 import com.tobe.healthy.common.redis.RedisService;
 import com.tobe.healthy.config.KeyUtil;
 import com.tobe.healthy.config.OAuthProperties;
+import com.tobe.healthy.config.OAuthProperties.AppleProperties;
 import com.tobe.healthy.config.jwt.JwtTokenGenerator;
 import com.tobe.healthy.course.application.CourseService;
 import com.tobe.healthy.course.presentation.dto.in.CourseAddCommand;
 import com.tobe.healthy.file.application.LocalFileStorageService;
+import com.tobe.healthy.member.domain.ComplimentaryLoginHistory;
+import com.tobe.healthy.member.domain.Member;
+import com.tobe.healthy.member.domain.MemberProfile;
+import com.tobe.healthy.member.domain.MemberType;
+import com.tobe.healthy.member.domain.NonMember;
+import com.tobe.healthy.member.domain.SocialType;
+import com.tobe.healthy.member.domain.Tokens;
 import com.tobe.healthy.member.presentation.dto.in.AppleToken;
+import com.tobe.healthy.member.presentation.dto.in.CommandAppleUserInfo;
 import com.tobe.healthy.member.presentation.dto.in.CommandFindMemberPassword;
 import com.tobe.healthy.member.presentation.dto.in.CommandJoinMember;
 import com.tobe.healthy.member.presentation.dto.in.CommandLoginMember;
@@ -73,17 +80,11 @@ import com.tobe.healthy.member.presentation.dto.in.CommandValidateEmail;
 import com.tobe.healthy.member.presentation.dto.in.CommandVerification;
 import com.tobe.healthy.member.presentation.dto.in.IdToken;
 import com.tobe.healthy.member.presentation.dto.in.OAuthInfo;
+import com.tobe.healthy.member.presentation.dto.in.OAuthInfo.GoogleUserInfo;
 import com.tobe.healthy.member.presentation.dto.in.OAuthInfo.KakaoUserInfo;
 import com.tobe.healthy.member.presentation.dto.in.OAuthInfo.NaverUserInfo;
 import com.tobe.healthy.member.presentation.dto.out.CommandFindMemberPasswordResult;
 import com.tobe.healthy.member.presentation.dto.out.CommandJoinMemberResult;
-import com.tobe.healthy.member.domain.Member;
-import com.tobe.healthy.member.domain.ComplimentaryLoginHistory;
-import com.tobe.healthy.member.domain.MemberProfile;
-import com.tobe.healthy.member.domain.MemberType;
-import com.tobe.healthy.member.domain.NonMember;
-import com.tobe.healthy.member.domain.SocialType;
-import com.tobe.healthy.member.domain.Tokens;
 import com.tobe.healthy.member.repository.ComplimentaryLoginHistoryRepository;
 import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.member.repository.NonMemberRepository;
@@ -114,17 +115,7 @@ public class MemberAuthCommandService {
 	private final NonMemberRepository nonMemberRepository;
 	private final ComplimentaryLoginHistoryRepository complimentaryLoginHistoryRepository;
 
-	@Value("${oauth.apple.team-id}")
-	private String appleTeamId;
-
-	@Value("${oauth.apple.client-id}")
-	private String appleClientId;
-
-	@Value("${oauth.apple.key-path}")
-	private String appleKeyPath;
-
-	@Value("${oauth.apple.login-key}")
-	private String appleLoginKey;
+	private static final String APPLE_TOKEN_URI = "https://appleid.apple.com/auth/token";
 
 	private static final Set<String> COMPLIMENTARY_ACCOUNT_USER_IDS = Set.of(
 		"healthy-trainer0",
@@ -255,8 +246,9 @@ public class MemberAuthCommandService {
 
 		Member member = memberRepository.findById(nonMember.getMember().getId())
 			.orElseThrow(() -> new CustomException(MEMBER_NOT_FOUND));
-		if (!member.getName().equals(request.name()))
+		if (!member.getName().equals(request.name())) {
 			throw new CustomException(INVITE_NAME_NOT_VALID);
+		}
 
 		member.updateNonMemberInfo(request.userId(), request.email(), request.name(), request.memberType(),
 			password);
@@ -298,8 +290,14 @@ public class MemberAuthCommandService {
 	}
 
 	public Tokens getKakaoAccessToken(CommandSocialLogin request) {
-		IdToken response = getKakaoOAuthAccessToken(request.code(), request.redirectUrl());
-		Optional<Member> findMember = memberRepository.findByEmail(response.email());
+		KakaoUserInfo response = getKakaoOAuthAccessToken(request.code(), request.redirectUrl());
+		String email = getKakaoEmail(response);
+
+		if (isEmpty(email)) {
+			throw new CustomException(SOCIAL_EMAIL_NOT_PROVIDED);
+		}
+
+		Optional<Member> findMember = memberRepository.findByEmail(email);
 
 		if (findMember.isPresent()) {
 			if (isJoinMember(findMember.get(), KAKAO, request.memberType())) {
@@ -307,14 +305,14 @@ public class MemberAuthCommandService {
 			}
 		}
 
-		Member member = Member.join(response.email(), response.nickname(), request.memberType(), KAKAO,
-			String.valueOf(response.id()));
-		MemberProfile profile = getProfile(response.picture(), member);
+		String name = defaultNameFrom(getKakaoNickname(response), email);
+		Member member = Member.join(email, name, request.memberType(), KAKAO, String.valueOf(response.id()));
+		MemberProfile profile = getProfile(getKakaoProfileImage(response), member);
 		member.setMemberProfile(profile);
 		memberRepository.save(member);
 
 		if (StringUtils.isNotEmpty(request.uuid())) {
-			mappingTrainerAndStudent(member, request.uuid(), response.nickname(), true);
+			mappingTrainerAndStudent(member, request.uuid(), name, true);
 		}
 		log.info("[카카오 회원가입 및 로그인] member: {}", member);
 		return tokenGenerator.create(member);
@@ -323,20 +321,13 @@ public class MemberAuthCommandService {
 	@Transactional
 	public Tokens getGoogleOAuth(CommandSocialLogin request) {
 		OAuthInfo googleToken = getGoogleAccessToken(request.code(), request.redirectUrl());
-		String[] check = googleToken.idToken().split("\\.");
-		Base64.Decoder decoder = Base64.getDecoder();
-		String payload = new String(decoder.decode(check[1]));
-		Map<String, String> idToken = new HashMap<>();
-		try {
-			idToken = objectMapper.readValue(payload, Map.class);
-		} catch (Exception e) {
-			log.error("error", e);
-		}
-		String email = idToken.get("email");
-		String name = idToken.get("name");
-		String picture = idToken.get("picture");
+		GoogleUserInfo userInfo = getGoogleUserInfo(googleToken.accessToken());
 
-		Optional<Member> findMember = memberRepository.findByEmail(email);
+		if (isEmpty(userInfo.email())) {
+			throw new CustomException(SOCIAL_EMAIL_NOT_PROVIDED);
+		}
+
+		Optional<Member> findMember = memberRepository.findByEmail(userInfo.email());
 
 		if (findMember.isPresent()) {
 			if (isJoinMember(findMember.get(), GOOGLE, request.memberType())) {
@@ -344,8 +335,9 @@ public class MemberAuthCommandService {
 			}
 		}
 
-		Member member = Member.join(email, name, request.memberType(), GOOGLE, null);
-		MemberProfile profile = getProfile(picture, member);
+		String name = defaultNameFrom(userInfo.name(), userInfo.email());
+		Member member = Member.join(userInfo.email(), name, request.memberType(), GOOGLE, userInfo.id());
+		MemberProfile profile = getProfile(userInfo.picture(), member);
 		member.setMemberProfile(profile);
 		memberRepository.save(member);
 
@@ -357,76 +349,132 @@ public class MemberAuthCommandService {
 	}
 
 	public Tokens getAppleOAuth(CommandSocialLogin request) {
+		IdToken userInfo = parseAppleIdToken(request.id_token());
+
+		Optional<Member> findMember = memberRepository.findByUserId(userInfo.sub());
+		if (findMember.isPresent()) {
+			if (isJoinMember(findMember.get(), APPLE, request.memberType())) {
+				return tokenGenerator.create(findMember.get());
+			}
+		}
+
+		// 이메일은 unique 제약이 있어 비어 있으면 두 번째 회원부터 제약 위반으로 터진다.
+		if (isEmpty(userInfo.email())) {
+			throw new CustomException(SOCIAL_EMAIL_NOT_PROVIDED);
+		}
+
+		String name = extractAppleName(request.user(), userInfo.email());
+		AppleToken token = requestAppleToken(request.code());
+
+		Member member = Member.join(userInfo.sub(), userInfo.email(), name, request.memberType(), APPLE,
+			userInfo.sub(), token.refresh_token());
+
+		memberRepository.save(member);
+
+		if (StringUtils.isNotEmpty(request.uuid())) {
+			mappingTrainerAndStudent(member, request.uuid(), name, true);
+		}
+
+		log.info("[애플 회원가입 및 로그인] member: {}", member);
+
+		return tokenGenerator.create(member);
+	}
+
+	private IdToken parseAppleIdToken(String idToken) {
+		if (isEmpty(idToken)) {
+			throw new CustomException(ACCESS_TOKEN_NOT_FOUND);
+		}
+
 		try {
-			IdToken userInfo = new ObjectMapper().readValue(decordToken(request.id_token()), IdToken.class);
-			Optional<Member> findMember = memberRepository.findByUserId(userInfo.sub());
-			if (findMember.isPresent()) {
-				if (isJoinMember(findMember.get(), APPLE, request.memberType())) {
-					return tokenGenerator.create(findMember.get());
-				}
-			}
-
-			String name = request.user().name().lastName() + request.user().name().firstName();
-
-			String clientSecret = createClientSecret();
-
-			MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-			form.add("client_id", "tobehealthy.apple.login");
-			form.add("client_secret", clientSecret);
-			form.add("code", request.code().split("&")[0]);
-			form.add("grant_type", "authorization_code");
-			form.add("redirect_uri", "https://main.to-be-healthy.shop/api/callback/apple");
-
-			AppleToken token = webClient.post()
-				.uri("https://appleid.apple.com/auth/token")
-				.contentType(APPLICATION_FORM_URLENCODED)
-				.bodyValue(form)
-				.retrieve()
-				.bodyToMono(AppleToken.class)
-				.block();
-
-			Member member = Member.join(userInfo.sub(), userInfo.email(), name, request.memberType(), APPLE,
-				clientSecret, token.refresh_token());
-
-			memberRepository.save(member);
-
-			if (StringUtils.isNotEmpty(request.uuid())) {
-				mappingTrainerAndStudent(member, request.uuid(), name, true);
-			}
-
-			log.info("[애플 회원가입 및 로그인] member: {}", member);
-
-			return tokenGenerator.create(member);
-
+			return objectMapper.readValue(decordToken(idToken), IdToken.class);
 		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
+			log.error("Apple id token JSON parsing failed", e);
+			throw new CustomException(JSON_PARSING_ERROR);
 		}
 	}
 
+	/**
+	 * 애플은 최초 인가 시에만 user(이름) 정보를 함께 내려준다.
+	 * 재로그인이나 최초 가입 실패 후 재시도에는 없으므로 이메일에서 이름을 만들어 사용한다.
+	 */
+	private static String extractAppleName(CommandAppleUserInfo user, String email) {
+		if (user != null && user.name() != null) {
+			String fullName = StringUtils.defaultString(user.name().lastName())
+				+ StringUtils.defaultString(user.name().firstName());
+			if (StringUtils.isNotBlank(fullName)) {
+				return fullName;
+			}
+		}
+
+		return defaultNameFrom(null, email);
+	}
+
+	private AppleToken requestAppleToken(String code) {
+		if (isEmpty(code)) {
+			throw new CustomException(ACCESS_TOKEN_NOT_FOUND);
+		}
+
+		AppleProperties apple = oAuthProperties.getApple();
+
+		if (isEmpty(apple.getRedirectUri()) || isEmpty(apple.getClientId())) {
+			log.error("애플 로그인 설정이 비어 있습니다. clientId: {}, redirectUri: {}",
+				apple.getClientId(), apple.getRedirectUri());
+			throw new CustomException(APPLE_CONNECTION_ERROR);
+		}
+
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+		form.add("client_id", apple.getClientId());
+		form.add("client_secret", createClientSecret());
+		form.add("code", code.split("&")[0]);
+		form.add("grant_type", "authorization_code");
+		form.add("redirect_uri", apple.getRedirectUri());
+
+		AppleToken token = webClient.post()
+			.uri(APPLE_TOKEN_URI)
+			.contentType(APPLICATION_FORM_URLENCODED)
+			.bodyValue(form)
+			.retrieve()
+			.onStatus(HttpStatusCode::isError, response ->
+				response.bodyToMono(String.class).flatMap(error -> {
+					log.error("Apple token error => {}", error);
+					return Mono.error(new OAuthException("애플 로그인에 실패했어요. 잠시 후 다시 시도해 주세요."));
+				}))
+			.bodyToMono(AppleToken.class)
+			.block();
+
+		if (token == null) {
+			throw new CustomException(APPLE_CONNECTION_ERROR);
+		}
+
+		return token;
+	}
+
 	public String createClientSecret() {
+		AppleProperties apple = oAuthProperties.getApple();
 		Date now = new Date();
 
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-			.issuer(appleTeamId)
+			.issuer(apple.getTeamId())
 			.issueTime(now)
 			.expirationTime(new Date(now.getTime() + 3600000))
 			.audience("https://appleid.apple.com")
-			.subject(appleClientId)
+			.subject(apple.getClientId())
 			.build();
 
-		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES256).keyID(appleLoginKey).build();
+		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES256).keyID(apple.getLoginKey()).build();
 
-		SignedJWT signedJWT = new SignedJWT(header, claimsSet);
+		SignedJWT signedJwt = new SignedJWT(header, claimsSet);
 
 		try {
-			ECPrivateKey ecPrivateKey = loadPrivateKey(appleKeyPath);
+			ECPrivateKey ecPrivateKey = loadPrivateKey(apple.getKeyPath());
 			JWSSigner signer = new ECDSASigner(ecPrivateKey);
-			signedJWT.sign(signer);
+			signedJwt.sign(signer);
 		} catch (InvalidKeySpecException | IOException | JOSEException e) {
-			throw new RuntimeException(e);
+			log.error("Apple client secret 생성 실패. keyPath: {}", apple.getKeyPath(), e);
+			throw new CustomException(APPLE_CONNECTION_ERROR);
 		}
 
-		return signedJWT.serialize();
+		return signedJwt.serialize();
 	}
 
 	private ECPrivateKey loadPrivateKey(String keyPath) throws IOException, InvalidKeySpecException {
@@ -456,10 +504,56 @@ public class MemberAuthCommandService {
 		throw new CustomException(MEMBER_NOT_FOUND);
 	}
 
-	public IdToken getKakaoOAuthAccessToken(String code, String redirectUrl) {
+	/**
+	 * 카카오는 앱에 OIDC를 켜고 인가 요청에 openid scope가 있을 때만 id_token을 내려준다.
+	 * 회원 정보는 사용자 정보 API로도 모두 얻을 수 있으므로 id_token에 의존하지 않는다.
+	 */
+	public KakaoUserInfo getKakaoOAuthAccessToken(String code, String redirectUrl) {
 		OAuthInfo tokenInfo = requestAccessToken(code, redirectUrl);
-		KakaoUserInfo kakaoUser = requestKakaoUserInfo(tokenInfo.accessToken());
-		return parseIdToken(tokenInfo.idToken(), kakaoUser.id());
+		return requestKakaoUserInfo(tokenInfo.accessToken());
+	}
+
+	private static String getKakaoEmail(KakaoUserInfo userInfo) {
+		return userInfo.kakaoAccount() == null ? null : userInfo.kakaoAccount().email();
+	}
+
+	private static String getKakaoNickname(KakaoUserInfo userInfo) {
+		if (userInfo.properties() != null && StringUtils.isNotBlank(userInfo.properties().nickname())) {
+			return userInfo.properties().nickname();
+		}
+
+		if (userInfo.kakaoAccount() != null && userInfo.kakaoAccount().profile() != null) {
+			return userInfo.kakaoAccount().profile().nickname();
+		}
+
+		return null;
+	}
+
+	private static String getKakaoProfileImage(KakaoUserInfo userInfo) {
+		if (userInfo.properties() != null && StringUtils.isNotBlank(userInfo.properties().profileImage())) {
+			return userInfo.properties().profileImage();
+		}
+
+		if (userInfo.kakaoAccount() != null && userInfo.kakaoAccount().profile() != null) {
+			return userInfo.kakaoAccount().profile().profileImageUrl();
+		}
+
+		return null;
+	}
+
+	/**
+	 * 소셜에서 닉네임 제공에 동의하지 않으면 이름이 비어서 오기 때문에 이메일 앞부분으로 대체한다.
+	 */
+	private static String defaultNameFrom(String name, String email) {
+		if (StringUtils.isNotBlank(name)) {
+			return name;
+		}
+
+		if (StringUtils.isNotBlank(email) && email.contains("@")) {
+			return email.substring(0, email.indexOf("@"));
+		}
+
+		return "회원";
 	}
 
 	private OAuthInfo requestAccessToken(String code, String redirectUrl) {
@@ -485,23 +579,23 @@ public class MemberAuthCommandService {
 	}
 
 	private KakaoUserInfo requestKakaoUserInfo(String accessToken) {
-		return webClient.get()
+		KakaoUserInfo userInfo = webClient.get()
 			.uri(oAuthProperties.getKakao().getUserInfoUri())
 			.header("Authorization", "Bearer " + accessToken)
 			.retrieve()
+			.onStatus(HttpStatusCode::isError, response ->
+				response.bodyToMono(String.class).flatMap(error -> {
+					log.error("Kakao user info error => {}", error);
+					return Mono.error(new CustomException(KAKAO_CONNECTION_ERROR));
+				}))
 			.bodyToMono(OAuthInfo.KakaoUserInfo.class)
 			.block();
-	}
 
-	private IdToken parseIdToken(String encodedIdToken, Long kakaoUserId) {
-		try {
-			String tokenPayload = decordToken(encodedIdToken);
-			IdToken idToken = objectMapper.readValue(tokenPayload, IdToken.class);
-			return idToken.withId(kakaoUserId);
-		} catch (JsonProcessingException e) {
-			log.error("ID token JSON parsing failed", e);
-			throw new CustomException(JSON_PARSING_ERROR);
+		if (userInfo == null) {
+			throw new CustomException(KAKAO_CONNECTION_ERROR);
 		}
+
+		return userInfo;
 	}
 
 	private OAuthInfo getGoogleAccessToken(String code, String redirectUri) {
@@ -512,31 +606,60 @@ public class MemberAuthCommandService {
 		requestBody.add("grant_type", oAuthProperties.getGoogle().getGrantType());
 		requestBody.add("redirect_uri", redirectUri);
 		requestBody.add("code", decode);
-		Mono<OAuthInfo> responseMono = null;
-		try {
-			responseMono = webClient.post()
-				.uri(oAuthProperties.getGoogle().getTokenUri())
-				.contentType(APPLICATION_FORM_URLENCODED)
-				.accept(MediaType.APPLICATION_JSON)
-				.bodyValue(requestBody)
-				.retrieve()
-				.onStatus(HttpStatusCode::isError, response ->
-					response.bodyToMono(GoogleError.class).flatMap(e -> {
-						log.error("error => {}", e);
-						return Mono.error(new OAuthException(e.getErrorDescription()));
-					}))
-				.bodyToMono(OAuthInfo.class);
-		} catch (Exception e) {
-			log.error("error", e);
+
+		OAuthInfo tokenInfo = webClient.post()
+			.uri(oAuthProperties.getGoogle().getTokenUri())
+			.contentType(APPLICATION_FORM_URLENCODED)
+			.accept(MediaType.APPLICATION_JSON)
+			.bodyValue(requestBody)
+			.retrieve()
+			.onStatus(HttpStatusCode::isError, response ->
+				response.bodyToMono(GoogleError.class).flatMap(e -> {
+					log.error("Google token error => {}", e);
+					return Mono.error(new OAuthException(e.getErrorDescription()));
+				}))
+			.bodyToMono(OAuthInfo.class)
+			.block();
+
+		if (tokenInfo == null || isEmpty(tokenInfo.accessToken())) {
+			throw new CustomException(GOOGLE_CONNECTION_ERROR);
 		}
-		return responseMono.share().block();
+
+		return tokenInfo;
+	}
+
+	/**
+	 * 프론트엔드 authorize 요청 scope가 `email profile`(openid 없음)이므로 v2 엔드포인트여야 한다.
+	 * v3·OIDC userinfo는 access token에 openid scope를 요구해 401이 된다.
+	 */
+	private GoogleUserInfo getGoogleUserInfo(String accessToken) {
+		String userInfoUri = oAuthProperties.getGoogle().getUserInfoUri();
+
+		GoogleUserInfo userInfo = webClient.get()
+			.uri(userInfoUri)
+			.header("Authorization", "Bearer " + accessToken)
+			.retrieve()
+			.onStatus(HttpStatusCode::isError, response ->
+				response.bodyToMono(String.class).flatMap(error -> {
+					log.error("Google user info error. uri: {}, response: {}", userInfoUri, error);
+					return Mono.error(new CustomException(GOOGLE_CONNECTION_ERROR));
+				}))
+			.bodyToMono(GoogleUserInfo.class)
+			.block();
+
+		if (userInfo == null) {
+			throw new CustomException(GOOGLE_CONNECTION_ERROR);
+		}
+
+		return userInfo;
 	}
 
 	public void mappingTrainerAndStudent(Member member, String uuid, String reqName, boolean isSocial) {
 		Map<String, String> map = getInviteMappingData(uuid);
 		String name = map.get("name");
-		if (!isSocial && !name.equals(reqName))
+		if (!isSocial && !name.equals(reqName)) {
 			throw new CustomException(INVITE_NAME_NOT_VALID);
+		}
 		member.changeName(name);
 
 		Long trainerId = Long.valueOf(map.get("trainerId"));
@@ -602,15 +725,25 @@ public class MemberAuthCommandService {
 		}
 	}
 
+	/**
+	 * 프로필 이미지 제공에 동의하지 않으면 소셜에서 내려주지 않는다.
+	 * 가입에 필수인 정보가 아니므로 값이 없거나 내려받기에 실패해도 가입은 계속 진행한다.
+	 */
 	private MemberProfile getProfile(String profileImage, Member member) {
-		byte[] image = getProfileImage(profileImage);
-		String savedFileName = createProfileName("origin/profile/");
-		try (InputStream inputStream = new ByteArrayInputStream(image)) {
-			String fileUrl = fileStorageService.store(savedFileName, inputStream);
-			return MemberProfile.create(savedFileName, fileUrl, member);
-		} catch (IOException e) {
-			log.error("error", e);
-			throw new CustomException(FILE_UPLOAD_ERROR);
+		if (isEmpty(profileImage)) {
+			return null;
+		}
+
+		try {
+			byte[] image = getProfileImage(profileImage);
+			String savedFileName = createProfileName("origin/profile/");
+			try (InputStream inputStream = new ByteArrayInputStream(image)) {
+				String fileUrl = fileStorageService.store(savedFileName, inputStream);
+				return MemberProfile.create(savedFileName, fileUrl, member);
+			}
+		} catch (Exception e) {
+			log.warn("소셜 프로필 이미지 저장에 실패했습니다. url: {}", profileImage, e);
+			return null;
 		}
 	}
 

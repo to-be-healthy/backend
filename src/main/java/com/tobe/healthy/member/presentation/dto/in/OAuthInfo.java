@@ -1,5 +1,6 @@
 package com.tobe.healthy.member.presentation.dto.in;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record OAuthInfo(
@@ -41,7 +42,7 @@ public record OAuthInfo(
 
 			String email,
 			String name
-		) {}
+		) { }
 	}
 
 	public record KakaoUserInfo(
@@ -64,7 +65,7 @@ public record OAuthInfo(
 
 			@JsonProperty("thumbnail_image")
 			String thumbnailImage
-		) {}
+		) { }
 
 		public record KakaoAccount(
 			@JsonProperty("profile_nickname_needs_agreement")
@@ -88,7 +89,7 @@ public record OAuthInfo(
 			boolean isEmailVerified,
 
 			String email
-		) {}
+		) { }
 
 		public record Profile(
 			String nickname,
@@ -104,13 +105,19 @@ public record OAuthInfo(
 
 			@JsonProperty("is_default_nickname")
 			boolean isDefaultNickname
-		) {}
+		) { }
 	}
 
+	/**
+	 * 구글 사용자 정보는 엔드포인트 버전에 따라 식별자 키가 다르다.
+	 * v2(/oauth2/v2/userinfo)는 id, v3·OIDC(/oauth2/v3/userinfo)는 sub로 내려주므로 둘 다 받는다.
+	 */
 	public record GoogleUserInfo(
+		@JsonAlias("sub")
 		String id,
+
 		String email,
 		String name,
 		String picture
-	) {}
+	) { }
 }

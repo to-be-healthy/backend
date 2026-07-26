@@ -83,6 +83,9 @@ oauth:
     login-key: ${OAUTH_APPLE_LOGIN_KEY}
     client-id: ${OAUTH_APPLE_CLIENT_ID}
     key-path: ${OAUTH_APPLE_KEY_PATH}
+    # Apple Developer에 등록된 Return URL과 문자열이 정확히 일치해야 한다.
+    # 기본값은 운영 프론트엔드가 실제로 authorize에 사용하는 콜백 주소다.
+    redirect-uri: ${OAUTH_APPLE_REDIRECT_URI:https://geonganghaejim.site/api/callback/apple}
 
 file:
   upload-dir: ${FILE_UPLOAD_DIR:./build/local-files}
