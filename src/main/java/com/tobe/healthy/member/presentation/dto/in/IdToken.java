@@ -31,8 +31,12 @@ public record IdToken(
 	boolean isPrivateEmail
 ) {
 
-	public IdToken withId(Long newId) {
-		return new IdToken(newId, aud, sub, authTime, iss, nickname, exp, iat, picture, email, name, cHash,
-			emailVerified, nonceSupported, isPrivateEmail);
+	/**
+	 * 애플 id_token 은 서명 검증을 거친 클레임에서만 만든다.
+	 * 애플이 내려주지 않는 항목(nickname, picture 등)은 비워 둔다.
+	 */
+	public static IdToken ofApple(String sub, String email, String aud, String iss, boolean emailVerified) {
+		return new IdToken(null, aud, sub, 0, iss, null, 0, 0, null, email, null, null,
+			emailVerified, false, false);
 	}
 }

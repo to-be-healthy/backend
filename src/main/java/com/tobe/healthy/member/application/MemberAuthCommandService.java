@@ -32,6 +32,9 @@ import org.bouncycastle.util.io.pem.PemReader;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
@@ -90,7 +93,6 @@ import com.tobe.healthy.member.repository.MemberRepository;
 import com.tobe.healthy.member.repository.NonMemberRepository;
 import com.tobe.healthy.trainer.application.TrainerService;
 
-import io.jsonwebtoken.impl.Base64UrlCodec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -114,6 +116,7 @@ public class MemberAuthCommandService {
 	private final CourseService courseService;
 	private final NonMemberRepository nonMemberRepository;
 	private final ComplimentaryLoginHistoryRepository complimentaryLoginHistoryRepository;
+	private final JwtDecoder appleJwtDecoder;
 
 	private static final String APPLE_TOKEN_URI = "https://appleid.apple.com/auth/token";
 
@@ -121,11 +124,6 @@ public class MemberAuthCommandService {
 		"healthy-trainer0",
 		"healthy-student0"
 	);
-
-	private static String decordToken(String idToken) {
-		byte[] decode = new Base64UrlCodec().decode(idToken.split("\\.")[1]);
-		return new String(decode, StandardCharsets.UTF_8);
-	}
 
 	public String sendEmailVerification(CommandValidateEmail request) {
 		memberRepository.findByEmail(request.email()).ifPresent(e -> {
@@ -380,17 +378,43 @@ public class MemberAuthCommandService {
 		return tokenGenerator.create(member);
 	}
 
+	/**
+	 * id_token 은 클라이언트가 보내오는 값이므로 애플 공개키로 서명을 검증한다.
+	 * 검증 없이 payload 의 sub 를 신뢰하면 임의로 서명한 토큰으로 타인의 세션을 발급받을 수 있다.
+	 * 서명 외에 iss/aud/만료도 appleJwtDecoder 에서 함께 검증한다.
+	 */
 	private IdToken parseAppleIdToken(String idToken) {
 		if (isEmpty(idToken)) {
 			throw new CustomException(ACCESS_TOKEN_NOT_FOUND);
 		}
 
 		try {
-			return objectMapper.readValue(decordToken(idToken), IdToken.class);
-		} catch (JsonProcessingException e) {
-			log.error("Apple id token JSON parsing failed", e);
-			throw new CustomException(JSON_PARSING_ERROR);
+			Jwt jwt = appleJwtDecoder.decode(idToken);
+
+			return IdToken.ofApple(
+				jwt.getSubject(),
+				jwt.getClaimAsString("email"),
+				jwt.getAudience() == null || jwt.getAudience().isEmpty() ? null : jwt.getAudience().get(0),
+				jwt.getIssuer() == null ? null : jwt.getIssuer().toString(),
+				isAppleEmailVerified(jwt)
+			);
+		} catch (JwtException e) {
+			log.error("애플 id_token 검증에 실패했습니다.", e);
+			throw new CustomException(APPLE_ID_TOKEN_NOT_VALID);
 		}
+	}
+
+	/**
+	 * 애플은 email_verified 를 boolean 또는 문자열("true")로 내려준다.
+	 */
+	private static boolean isAppleEmailVerified(Jwt jwt) {
+		Object emailVerified = jwt.getClaim("email_verified");
+
+		if (emailVerified instanceof Boolean verified) {
+			return verified;
+		}
+
+		return Boolean.parseBoolean(String.valueOf(emailVerified));
 	}
 
 	/**

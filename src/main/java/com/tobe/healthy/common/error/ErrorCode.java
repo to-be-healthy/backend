@@ -79,6 +79,7 @@ public enum ErrorCode {
 	RESERVATION_STATUS_NOT_FOUND(BAD_REQUEST, "C_074", "올바른 예약 상태를 입력해 주세요."),
 	DEFAULT_LESSONTIME_NOT_VALID(BAD_REQUEST, "C_075", "근무 시간은 오전 6시부터 밤 12시까지 설정이 가능해요."),
 	SOCIAL_EMAIL_NOT_PROVIDED(BAD_REQUEST, "C_076", "이메일 제공에 동의해야 소셜 로그인을 완료할 수 있어요."),
+	APPLE_ID_TOKEN_NOT_VALID(BAD_REQUEST, "C_077", "애플 로그인 정보가 유효하지 않습니다. 다시 시도해 주세요."),
 
 	SERVER_ERROR(INTERNAL_SERVER_ERROR, "S_001", "서버에서 오류가 발생하였습니다."),
 	FILE_UPLOAD_ERROR(INTERNAL_SERVER_ERROR, "S_002", "파일 업로드중 에러가 발생하였습니다."),

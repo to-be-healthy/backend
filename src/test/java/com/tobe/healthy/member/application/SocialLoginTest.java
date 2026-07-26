@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,6 +20,9 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.BadJwtException;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -113,6 +118,8 @@ class SocialLoginTest {
 	private NonMemberRepository nonMemberRepository;
 	@Mock
 	private ComplimentaryLoginHistoryRepository complimentaryLoginHistoryRepository;
+	@Mock
+	private JwtDecoder appleJwtDecoder;
 
 	private OAuthProperties oAuthProperties;
 
@@ -224,6 +231,56 @@ class SocialLoginTest {
 		verify(memberRepository, never()).save(any(Member.class));
 	}
 
+	@Test
+	@DisplayName("애플 id_token 서명 검증에 실패하면 회원을 만들지 않고 에러를 던진다")
+	void rejectsAppleIdTokenWithInvalidSignature() {
+		MemberAuthCommandService service = service(Map.of());
+		when(appleJwtDecoder.decode(any())).thenThrow(new BadJwtException("Signed JWT rejected: Invalid signature"));
+
+		CommandSocialLogin request = appleLogin("forged.id.token");
+		CustomException exception = assertThrows(CustomException.class, () -> service.getAppleOAuth(request));
+
+		assertEquals("애플 로그인 정보가 유효하지 않습니다. 다시 시도해 주세요.", exception.getMessage());
+		verify(memberRepository, never()).save(any(Member.class));
+		verify(memberRepository, never()).findByUserId(any());
+	}
+
+	@Test
+	@DisplayName("검증된 애플 id_token 이면 클레임의 sub 로 기존 회원을 찾아 로그인한다")
+	void appleLoginUsesVerifiedClaims() {
+		MemberAuthCommandService service = service(Map.of());
+		when(appleJwtDecoder.decode(any())).thenReturn(appleJwt("000298.abc.1747", "tester@privaterelay.appleid.com"));
+
+		Member existing = Member.join("000298.abc.1747", "tester@privaterelay.appleid.com", "정선우",
+			MemberType.STUDENT, SocialType.APPLE, "000298.abc.1747", "refresh");
+		when(memberRepository.findByUserId("000298.abc.1747")).thenReturn(Optional.of(existing));
+
+		Tokens tokens = service.getAppleOAuth(appleLogin("valid.id.token"));
+
+		assertEquals("정선우", tokens.getName());
+		// 기존 회원이므로 애플 토큰 엔드포인트를 호출하지 않는다(스텁이 비어 있어도 통과).
+		verify(memberRepository, never()).save(any(Member.class));
+	}
+
+	private static Jwt appleJwt(String sub, String email) {
+		return Jwt.withTokenValue("token")
+			.header("alg", "RS256")
+			.header("kid", "test-kid")
+			.subject(sub)
+			.issuer("https://appleid.apple.com")
+			.audience(List.of("com.geonganghaejim.signin"))
+			.claim("email", email)
+			.claim("email_verified", "true")
+			.issuedAt(Instant.now())
+			.expiresAt(Instant.now().plusSeconds(600))
+			.build();
+	}
+
+	private static CommandSocialLogin appleLogin(String idToken) {
+		return new CommandSocialLogin("apple-authorization-code", null, MemberType.STUDENT,
+			"https://geonganghaejim.site/api/callback/apple", null, idToken, null);
+	}
+
 	private MemberAuthCommandService service(Map<String, String> responseByUrlKeyword) {
 		return new MemberAuthCommandService(
 			stubWebClient(responseByUrlKeyword),
@@ -238,7 +295,8 @@ class SocialLoginTest {
 			mailService,
 			courseService,
 			nonMemberRepository,
-			complimentaryLoginHistoryRepository
+			complimentaryLoginHistoryRepository,
+			appleJwtDecoder
 		);
 	}
 
